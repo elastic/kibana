@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
+import { htmlIdGenerator, EuiText } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
+import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
 
 import {
   DARK_THEME,
@@ -20,6 +23,10 @@ import {
 
 import './editor.scss';
 
+enum keyCodes {
+  ENTER = 13,
+  ESCAPE = 9,
+}
 export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
@@ -120,6 +127,17 @@ export const CodeEditor: React.FC<Props> = ({
   languageConfiguration,
 }) => {
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const isSuggestionMenuOpen = useRef(false);
+  const monacoEditorRef = useRef<MonacoEditor>(null);
+  const editorHint = useRef<HTMLDivElement>(null);
+
+  const [isHintActive, setIsHintActive] = useState(true);
+
+  /* eslint-disable @typescript-eslint/naming-convention */
+  const promptClasses = classNames('kibanaCodeEditor__keyboardHint', {
+    'kibanaCodeEditor__keyboardHint--isInactive': !isHintActive,
+  });
+  /* eslint-enable  @typescript-eslint/naming-convention */
 
   const _editorWillMount = useCallback(
     (__monaco: unknown) => {
@@ -194,9 +212,111 @@ export const CodeEditor: React.FC<Props> = ({
     }
   }, []);
 
+  const startEditing = useCallback(() => {
+    setIsHintActive(false);
+    monacoEditorRef.current?.editor?.focus();
+  }, []);
+
+  const stopEditing = useCallback(() => {
+    setIsHintActive(true);
+  }, []);
+
+  const onKeyDownHint = useCallback(
+    (ev) => {
+      if (ev.keyCode === keyCodes.ENTER) {
+        ev.preventDefault();
+        startEditing();
+      }
+    },
+    [startEditing]
+  );
+
+  const onKeydownMonaco = useCallback(
+    (ev) => {
+      // Make sure the textarea is not directly accesible with TAB
+      const textbox = ev.target;
+      textbox.tabIndex = -1;
+
+      if (ev.keyCode === keyCodes.ESCAPE) {
+        // If the autocompletion context menu is open then we want to let ESCAPE close it but
+        // **not** exit out of editing mode.
+        if (!isSuggestionMenuOpen.current) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          stopEditing();
+          editorHint.current?.focus();
+        }
+      }
+    },
+    [stopEditing]
+  );
+
+  const renderPrompt = useCallback(() => {
+    return (
+      <div
+        className={promptClasses}
+        id={htmlIdGenerator('codeEditor')()}
+        ref={editorHint}
+        tabIndex={0}
+        role="button"
+        onClick={startEditing}
+        onKeyDown={onKeyDownHint}
+        data-test-subj="codeEditorHint"
+      >
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="kibana-react.kibanaCodeEditor.startEditing"
+              defaultMessage="Press Enter to start editing."
+            />
+          </p>
+        </EuiText>
+
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="kibana-react.kibanaCodeEditor.stopEditing"
+              defaultMessage="When you're done, press Escape to stop editing."
+            />
+          </p>
+        </EuiText>
+      </div>
+    );
+  }, [onKeyDownHint, promptClasses, startEditing]);
+
+  useEffect(() => {
+    if (monacoEditorRef.current) {
+      const {
+        current: { editor },
+      } = monacoEditorRef;
+
+      if (editor === undefined) {
+        return;
+      }
+
+      editor.onKeyDown(onKeydownMonaco);
+
+      // "widget" is not part of the TS interface but does exist
+      // @ts-expect-errors
+      const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget;
+
+      if (suggestionWidget) {
+        suggestionWidget.value.onDidShow(() => {
+          isSuggestionMenuOpen.current = true;
+        });
+        suggestionWidget.value.onDidHide(() => {
+          isSuggestionMenuOpen.current = false;
+        });
+      }
+    }
+  }, [onKeydownMonaco]);
+
   return (
-    <>
+    <div className="kibanaCodeEditor">
+      {renderPrompt()}
+
       <MonacoEditor
+        ref={monacoEditorRef}
         theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
         language={languageId}
         value={value}
@@ -227,7 +347,7 @@ export const CodeEditor: React.FC<Props> = ({
         onResize={_updateDimensions}
         refreshMode="debounce"
       />
-    </>
+    </div>
   );
 };
 

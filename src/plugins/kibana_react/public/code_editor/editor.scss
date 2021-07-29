@@ -1,3 +1,34 @@
 .react-monaco-editor-container .monaco-editor .inputarea:focus {
   animation: none !important; // Removes textarea EUI blue underline animation from EUI
 }
+
+.kibanaCodeEditor {
+  position: relative;
+
+  &__keyboardHint {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: $euiColorGhost;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    opacity: 0;
+    cursor: pointer;
+    backdrop-filter: blur(2px);
+    padding: $euiSize;
+
+    &:focus {
+      opacity: .7;
+      z-index: $euiZLevel1;
+    }
+
+    &--isInactive {
+      display: none;
+    }
+  }
+}
