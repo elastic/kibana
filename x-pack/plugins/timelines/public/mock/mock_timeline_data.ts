@@ -6,8 +6,8 @@
  */
 
 import type { Ecs } from '../../common/ecs';
-import { Direction, TimelineItem } from '../../common/search_strategy';
-import { TGridModel } from '../types';
+import { TimelineItem, Direction } from '../../common/search_strategy';
+import type { TGridModel } from '../store/t_grid/model';
 
 export const mockTimelineData: TimelineItem[] = [
   {

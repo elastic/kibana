@@ -15,7 +15,6 @@ import type {
   SortColumnTimeline,
   SerializedFilterQuery,
 } from '../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import { RowRendererId } from '../../../common/types/timeline';
 
 export interface TGridModelSettings {
