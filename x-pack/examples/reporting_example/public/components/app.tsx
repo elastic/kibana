@@ -29,7 +29,6 @@ import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
-import { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types'; // FIXME: https://github.com/elastic/kibana/issues/107085
 
 interface ReportingExampleAppProps {
   basename: string;
@@ -67,7 +66,7 @@ export const ReportingExampleApp = ({
       });
   });
 
-  const getPDFJobParamsDefault = (): JobParamsPDF => {
+  const getPDFJobParamsDefault = () => {
     return {
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
