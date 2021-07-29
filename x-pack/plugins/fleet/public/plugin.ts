@@ -104,6 +104,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     core.application.register({
       id: INTEGRATIONS_PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
+      appRoute: '/app/integrations',
       title: i18n.translate('xpack.fleet.integrationsAppTitle', {
         defaultMessage: 'Integrations',
       }),
@@ -137,6 +138,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       title: i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' }),
       order: 9020,
       euiIconType: 'logoElastic',
+      appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
           CoreStart,

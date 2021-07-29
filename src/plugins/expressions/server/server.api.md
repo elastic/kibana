@@ -48,7 +48,7 @@ export function buildExpression(initialState?: ExpressionAstFunctionBuilder[] | 
 // @public
 export function buildExpressionFunction<FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition>(fnName: InferFunctionDefinition<FnDef>['name'],
 initialArgs: {
-    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[];
+    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[] | ExpressionAstExpression | ExpressionAstExpression[];
 }): ExpressionAstFunctionBuilder<FnDef>;
 
 // Warning: (ae-missing-release-tag) "Datatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -195,6 +195,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     fork(): Executor<Context>;
     // @deprecated (undocumented)
     readonly functions: FunctionsRegistry;
+    // Warning: (ae-forgotten-export) The symbol "MigrateFunctionsObject" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getAllMigrations(): MigrateFunctionsObject;
     // (undocumented)
     getFunction(name: string): ExpressionFunction | undefined;
     // (undocumented)
@@ -207,10 +211,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     //
     // (undocumented)
     inject(ast: ExpressionAstExpression, references: SavedObjectReference[]): ExpressionAstExpression;
-    // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "VersionedState" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    migrate(ast: SerializableState, version: string): ExpressionAstExpression;
+    migrateToLatest(state: VersionedState): ExpressionAstExpression;
     // (undocumented)
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
@@ -943,6 +947,7 @@ export type UnmappedTypeStrings = 'date' | 'filter';
 // Warnings were encountered during analysis:
 //
 // src/plugins/expressions/common/ast/types.ts:29:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/expression_functions/expression_function.ts:68:5 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 // src/plugins/expressions/common/expression_types/specs/error.ts:20:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

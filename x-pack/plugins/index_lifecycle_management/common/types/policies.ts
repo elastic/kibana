@@ -29,11 +29,13 @@ export interface Phases {
 }
 
 export interface PolicyFromES {
-  modified_date: string;
+  modifiedDate: string;
   name: string;
   policy: SerializedPolicy;
   version: number;
-  linkedIndices?: string[];
+  indices?: string[];
+  dataStreams?: string[];
+  indexTemplates?: string[];
 }
 
 export interface SerializedPhase {
