@@ -79,7 +79,7 @@ describe('timeline flyout button', () => {
     closeTimelineUsingCloseButton();
   });
 
-  it('sets correct classes when the user starts dragging a host, but is not hovering over the data providers', () => {
+  it.skip('sets correct classes when the user starts dragging a host, but is not hovering over the data providers', () => {
     dragFirstHostToTimeline();
 
     cy.get(IS_DRAGGING_DATA_PROVIDERS)
