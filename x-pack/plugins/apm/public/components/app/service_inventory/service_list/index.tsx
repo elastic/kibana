@@ -41,11 +41,6 @@ type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
 type ServicesDetailedStatisticsAPIResponse = APIReturnType<'GET /api/apm/services/detailed_statistics'>;
 
-interface Props {
-  items: Items;
-  comparisonData?: ServicesDetailedStatisticsAPIResponse;
-  noItemsMessage?: React.ReactNode;
-}
 type ServiceListItem = ValuesType<Items>;
 
 function formatString(value?: string | null) {
@@ -226,7 +221,19 @@ export function getServiceColumns({
   ];
 }
 
-export function ServiceList({ items, noItemsMessage, comparisonData }: Props) {
+interface Props {
+  items: Items;
+  comparisonData?: ServicesDetailedStatisticsAPIResponse;
+  noItemsMessage?: React.ReactNode;
+  isLoading: boolean;
+}
+
+export function ServiceList({
+  items,
+  noItemsMessage,
+  comparisonData,
+  isLoading,
+}: Props) {
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
   const showTransactionTypeColumn = items.some(
@@ -282,6 +289,7 @@ export function ServiceList({ items, noItemsMessage, comparisonData }: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <ManagedTable
+          isLoading={isLoading}
           columns={columns}
           items={items}
           noItemsMessage={noItemsMessage}

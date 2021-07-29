@@ -84,7 +84,7 @@ function useServicesFetcher() {
 
   const { mainStatistics, requestId } = data;
 
-  const { data: comparisonData } = useFetcher(
+  const { data: comparisonData, status: comparisonStatus } = useFetcher(
     (callApmApi) => {
       if (start && end && mainStatistics.items.length) {
         return callApmApi({
@@ -150,12 +150,20 @@ function useServicesFetcher() {
     servicesData: mainStatistics,
     servicesStatus: status,
     comparisonData,
+    isLoading:
+      status === FETCH_STATUS.LOADING ||
+      comparisonStatus === FETCH_STATUS.LOADING,
   };
 }
 
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
-  const { servicesData, servicesStatus, comparisonData } = useServicesFetcher();
+  const {
+    servicesData,
+    servicesStatus,
+    comparisonData,
+    isLoading,
+  } = useServicesFetcher();
 
   const {
     anomalyDetectionJobsData,
@@ -186,13 +194,16 @@ export function ServiceInventory() {
         )}
         <EuiFlexItem>
           <ServiceList
+            isLoading={isLoading}
             items={servicesData.items}
             comparisonData={comparisonData}
             noItemsMessage={
-              <NoServicesMessage
-                historicalDataFound={servicesData.hasHistoricalData}
-                status={servicesStatus}
-              />
+              !isLoading && (
+                <NoServicesMessage
+                  historicalDataFound={servicesData.hasHistoricalData}
+                  status={servicesStatus}
+                />
+              )
             }
           />
         </EuiFlexItem>

@@ -8,11 +8,10 @@
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
-import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ErrorStatePrompt } from '../../shared/ErrorStatePrompt';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
+import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 
 interface Props {
   // any data submitted from APM agents found (not just in the given time range)
@@ -22,10 +21,6 @@ interface Props {
 
 export function NoServicesMessage({ historicalDataFound, status }: Props) {
   const upgradeAssistantHref = useUpgradeAssistantHref();
-
-  if (status === 'loading') {
-    return <LoadingStatePrompt />;
-  }
 
   if (status === 'failure') {
     return <ErrorStatePrompt />;
