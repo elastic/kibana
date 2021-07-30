@@ -16,7 +16,11 @@ interface LoginOptions {
   expectForbidden?: boolean;
 }
 
-type LoginExpectedResult = 'spaceSelector' | 'error' | 'chrome';
+type LoginExpectedResult =
+  | 'spaceSelector'
+  | 'error'
+  | 'chrome'
+  | (() => unknown | Promise<unknown>);
 
 export class SecurityPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
@@ -77,7 +81,13 @@ export class SecurityPageObject extends FtrService {
   });
 
   public loginSelector = Object.freeze({
-    login: async (providerType: string, providerName: string, options?: Record<string, any>) => {
+    login: async (
+      providerType: string,
+      providerName: string,
+      options?: Omit<Record<string, any>, 'expectedLoginResult'> & {
+        expectedLoginResult?: LoginExpectedResult;
+      }
+    ) => {
       this.log.debug(`Starting login flow for ${providerType}/${providerName}`);
 
       await this.loginSelector.verifyLoginSelectorIsVisible();
@@ -97,7 +107,7 @@ export class SecurityPageObject extends FtrService {
         await this.testSubjects.click('loginSubmit');
       }
 
-      await this.waitForLoginResult('chrome');
+      await this.waitForLoginResult(options?.expectedLoginResult ?? 'chrome');
 
       this.log.debug(`Finished login process currentUrl = ${await this.browser.getCurrentUrl()}`);
     },
@@ -208,8 +218,15 @@ export class SecurityPageObject extends FtrService {
     }
 
     if (expectedResult === 'chrome') {
-      await this.find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
+      await this.find.byCssSelector('[data-test-subj="userMenuAvatar"]', 20000);
       this.log.debug(`Finished login process currentUrl = ${await this.browser.getCurrentUrl()}`);
+    }
+
+    if (expectedResult instanceof Function) {
+      await expectedResult();
+      this.log.debug(
+        `Finished login process, await for custom condition. currentUrl = ${await this.browser.getCurrentUrl()}`
+      );
     }
   }
 

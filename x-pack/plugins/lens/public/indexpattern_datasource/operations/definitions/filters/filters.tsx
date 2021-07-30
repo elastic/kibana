@@ -22,6 +22,7 @@ import {
   esKuery,
   esQuery,
 } from '../../../../../../../../src/plugins/data/public';
+import { queryFilterToAst } from '../../../../../../../../src/plugins/data/common';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
@@ -127,7 +128,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       id: columnId,
       enabled: true,
       schema: 'segment',
-      filters: JSON.stringify(validFilters?.length > 0 ? validFilters : [defaultFilter]),
+      filters: (validFilters?.length > 0 ? validFilters : [defaultFilter]).map(queryFilterToAst),
     }).toAst();
   },
 
