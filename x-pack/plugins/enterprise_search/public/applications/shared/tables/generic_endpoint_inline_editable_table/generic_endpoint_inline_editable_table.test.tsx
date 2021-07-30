@@ -41,10 +41,10 @@ describe('GenericEndpointInlineEditableTable', () => {
     reorderRoute: 'route/to/reorder/items',
     deleteRoute: (item: any) => `route/to/delete/item/${item.id}`,
     updateRoute: (item: any) => `route/to/update/item/${item.id}`,
-    onReorder: jest.fn(),
-    onAdd: jest.fn(),
-    onDelete: jest.fn(),
-    onUpdate: jest.fn(),
+    onReorder: mockActions.reorderItems,
+    onAdd: mockActions.addItem,
+    onDelete: mockActions.deleteItem,
+    onUpdate: mockActions.updateItem,
     columns: [],
     items,
     title: 'Some Title',
@@ -53,5 +53,7 @@ describe('GenericEndpointInlineEditableTable', () => {
   it('renders', () => {
     const wrapper = shallow(<GenericEndpointInlineEditableTable {...props} />);
     expect(wrapper.find(InlineEditableTable).exists()).toBe(true);
+    expect(wrapper.find(InlineEditableTable).prop('isLoading')).toEqual(false);
+    expect(wrapper.find(InlineEditableTable).prop('title')).toEqual('Some Title');
   });
 });
