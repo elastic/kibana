@@ -351,7 +351,7 @@ class AgentPolicyService {
         // fall back to simple search if the kuery is just a search term i.e not KQL
         agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
           ...baseFindParams,
-          search: kuery + '*',
+          search: kuery,
         });
       } else {
         throw e;
