@@ -128,21 +128,10 @@ describe('AddDomainForm', () => {
       expect(wrapper.find(AddDomainValidation)).toHaveLength(0);
     });
 
-    it('is visible when validation is loading', () => {
+    it('can be shown to the user', () => {
       setMockValues({
         ...MOCK_VALUES,
-        isValidationLoading: true,
-      });
-
-      rerender(wrapper);
-
-      expect(wrapper.find(AddDomainValidation)).toHaveLength(1);
-    });
-
-    it('is visible when validation is complete', () => {
-      setMockValues({
-        ...MOCK_VALUES,
-        hasValidationCompleted: true,
+        displayValidation: true,
       });
 
       rerender(wrapper);

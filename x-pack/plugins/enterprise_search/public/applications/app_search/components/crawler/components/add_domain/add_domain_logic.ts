@@ -42,6 +42,7 @@ export interface AddDomainLogicValues {
   hasBlockingFailure: boolean;
   hasValidationCompleted: boolean;
   isValidationLoading: boolean;
+  displayValidation: boolean;
 }
 
 export interface AddDomainLogicActions {
@@ -175,6 +176,11 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
     allowSubmit: [
       () => [selectors.hasValidationCompleted, selectors.hasBlockingFailure],
       (hasValidationCompleted, hasBlockingFailure) => hasValidationCompleted && !hasBlockingFailure,
+    ],
+    displayValidation: [
+      () => [selectors.isValidationLoading, selectors.hasValidationCompleted],
+      (isValidationLoading, hasValidationCompleted) =>
+        isValidationLoading || hasValidationCompleted,
     ],
   }),
   listeners: ({ actions, values }) => ({

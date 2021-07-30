@@ -37,6 +37,7 @@ import { getDomainWithProtocol } from './utils';
 const DEFAULT_VALUES: AddDomainLogicValues = {
   addDomainFormInputValue: 'https://',
   entryPointValue: '/',
+  displayValidation: false,
   domainValidationResult: {
     steps: {
       contentVerification: { state: '' },
@@ -445,7 +446,6 @@ describe('AddDomainLogic', () => {
 
     describe('performDomainValidationStep', () => {
       beforeEach(() => {
-        // jest.clearAllMocks();
         mount({
           addDomainFormInputValue: 'https://elastic.co',
         });
@@ -689,6 +689,43 @@ describe('AddDomainLogic', () => {
         });
 
         expect(AddDomainLogic.values.allowSubmit).toEqual(true);
+      });
+    });
+
+    describe('displayValidation', () => {
+      it('is false by default', () => {
+        mount();
+        expect(AddDomainLogic.values.displayValidation).toEqual(false);
+      });
+
+      it('is true when a user is loading validation', () => {
+        mount({
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'loading' },
+              indexingRestrictions: { state: 'loading' },
+              initialValidation: { state: 'loading' },
+              networkConnectivity: { state: 'loading' },
+            },
+          },
+        });
+
+        expect(AddDomainLogic.values.displayValidation).toEqual(true);
+      });
+
+      it('is true when a user has completed validation', () => {
+        mount({
+          domainValidationResult: {
+            steps: {
+              contentVerification: { state: 'valid' },
+              indexingRestrictions: { state: 'valid' },
+              initialValidation: { state: 'valid' },
+              networkConnectivity: { state: 'invalid' },
+            },
+          },
+        });
+
+        expect(AddDomainLogic.values.displayValidation).toEqual(true);
       });
     });
   });

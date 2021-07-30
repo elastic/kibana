@@ -30,14 +30,7 @@ import { AddDomainValidation } from './add_domain_validation';
 export const AddDomainForm: React.FC = () => {
   const { setAddDomainFormInputValue, startDomainValidation } = useActions(AddDomainLogic);
 
-  const {
-    addDomainFormInputValue,
-    entryPointValue,
-    hasValidationCompleted,
-    isValidationLoading,
-  } = useValues(AddDomainLogic);
-
-  const displayValidation = hasValidationCompleted || isValidationLoading;
+  const { addDomainFormInputValue, displayValidation, entryPointValue } = useValues(AddDomainLogic);
 
   return (
     <>
