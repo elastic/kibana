@@ -77,7 +77,12 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
     <EuiCard
       data-test-subj="esStatsPanel"
       layout="horizontal"
-      title={i18nTexts.statsTitle}
+      title={
+        <>
+          {i18nTexts.statsTitle}
+          {error && <EsStatsErrors error={error} />}
+        </>
+      }
       {...reactRouterNavigate(history, '/es_deprecations/cluster')}
       description={
         <>
@@ -101,8 +106,6 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
                     </p>
                   </EuiScreenReaderOnly>
                 )}
-
-                {error && <EsStatsErrors error={error} />}
               </EuiStat>
             </EuiFlexItem>
 

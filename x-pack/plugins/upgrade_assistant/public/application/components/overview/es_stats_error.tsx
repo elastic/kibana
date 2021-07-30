@@ -26,7 +26,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         <EuiIconTip
           type="alert"
           color="danger"
-          size="l"
+          size="m"
           content={message}
           iconProps={{
             'data-test-subj': 'unauthorizedErrorIconTip',
@@ -39,7 +39,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         <EuiIconTip
           type="alert"
           color="warning"
-          size="l"
+          size="m"
           content={message}
           iconProps={{
             'data-test-subj': 'partiallyUpgradedErrorIconTip',
@@ -52,7 +52,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         <EuiIconTip
           type="alert"
           color="warning"
-          size="l"
+          size="m"
           content={message}
           iconProps={{
             'data-test-subj': 'upgradedErrorIconTip',
@@ -66,7 +66,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         <EuiIconTip
           type="alert"
           color="danger"
-          size="l"
+          size="m"
           content={message}
           iconProps={{
             'data-test-subj': 'requestErrorIconTip',
@@ -75,10 +75,5 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
       );
   }
 
-  return (
-    <>
-      <EuiSpacer size="s" />
-      {iconContent}
-    </>
-  );
+  return <span style={{ marginLeft: 8 }}>{iconContent}</span>;
 };
