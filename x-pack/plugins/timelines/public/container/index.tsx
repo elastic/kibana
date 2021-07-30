@@ -108,7 +108,7 @@ export const initSortDefault = [
   },
 ];
 
-const EMPTY_ARRAY: unknown[] = [];
+const EMPTY_ARRAY: ALERTS_CONSUMERS[] = [];
 export const useTimelineEvents = ({
   alertConsumers = EMPTY_ARRAY,
   docValueFields,

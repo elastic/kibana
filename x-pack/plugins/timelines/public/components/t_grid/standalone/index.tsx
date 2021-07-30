@@ -102,7 +102,7 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
 `;
 
 export interface TGridStandaloneProps {
-  alertConsumers: ALERTS_CONSUMERS;
+  alertConsumers: ALERTS_CONSUMERS[];
   columns: ColumnHeaderOptions[];
   deletedEventIds: Readonly<string[]>;
   end: string;
