@@ -128,10 +128,10 @@ describe('use composite image', () => {
       expect(shouldCompose(imageData, imgRef, curRef, blocks)).toBe(false);
     });
 
-    it('returns false if imageData is defined and the refs have matching step index/name', () => {
+    it('returns false if imageData is defined and the refs have matching step index/check_group', () => {
       imageData = 'blob';
       curRef.ref.screenshotRef.synthetics.step.index = 0;
-      curRef.ref.screenshotRef.synthetics.step.name = 'first';
+      curRef.ref.screenshotRef.monitor.check_group = 'check-group';
       expect(shouldCompose(imageData, imgRef, curRef, blocks)).toBe(false);
     });
 

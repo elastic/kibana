@@ -29,12 +29,32 @@ function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes
 /**
  * Checks if two refs are the same. If the ref is unchanged, there's no need
  * to run the expensive draw procedure.
+ *
+ * The key fields here are `step.index` and `check_group`, as there's a 1:1 between
+ * journey and check group, and each step has a unique index within a journey.
  */
-function isNewRef(a: ScreenshotRefImageData, b: ScreenshotRefImageData): boolean {
-  const stepA = a.ref.screenshotRef.synthetics.step;
-  const stepB = b.ref.screenshotRef.synthetics.step;
-  return stepA.index !== stepB.index || stepA.name !== stepB.name;
-}
+const isNewRef = (
+  {
+    ref: {
+      screenshotRef: {
+        synthetics: {
+          step: { index: indexA },
+        },
+        monitor: { check_group: checkGroupA },
+      },
+    },
+  }: ScreenshotRefImageData,
+  {
+    ref: {
+      screenshotRef: {
+        synthetics: {
+          step: { index: indexB },
+        },
+        monitor: { check_group: checkGroupB },
+      },
+    },
+  }: ScreenshotRefImageData
+): boolean => indexA !== indexB || checkGroupA !== checkGroupB;
 
 export function shouldCompose(
   imageData: string | undefined,

@@ -7,7 +7,6 @@
 
 import { createSelector } from 'reselect';
 import { AppState } from '../../state';
-import { ScreenshotBlockCache } from '../reducers/synthetics';
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
