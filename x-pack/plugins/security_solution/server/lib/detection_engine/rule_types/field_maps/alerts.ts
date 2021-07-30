@@ -28,6 +28,11 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'kibana.alert.ancestors.rule': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'kibana.alert.ancestors.type': {
     type: 'keyword',
     array: false,

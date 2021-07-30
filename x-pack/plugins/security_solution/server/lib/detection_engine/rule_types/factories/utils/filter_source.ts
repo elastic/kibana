@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { SignalSource } from '../../../signals/types';
+import { buildEventTypeSignal } from '../../../signals/build_event_type_signal';
+import { SignalSourceHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
 
-export const filterSource = (docSource: SignalSource): Partial<RACAlert> => {
+export const filterSource = (doc: SignalSourceHit): Partial<RACAlert> => {
+  const event = buildEventTypeSignal(doc);
+
+  const docSource = doc._source ?? {};
   const { threshold_result: thresholdResult, ...filteredSource } = docSource || {
     threshold_result: null,
   };
+
   return {
-    message: filteredSource.message ?? '',
-    tags: (filteredSource.tags ?? []) as string[],
+    ...filteredSource,
+    event,
   };
 };

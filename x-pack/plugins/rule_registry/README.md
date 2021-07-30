@@ -58,7 +58,7 @@ await plugins.ruleRegistry.createOrUpdateComponentTemplate({
         [PROCESSOR_EVENT]: {
           type: 'keyword',
         },
-      }),
+      }, 'strict'),
     },
   },
 });

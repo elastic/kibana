@@ -7,7 +7,6 @@
 
 import { SavedObject } from 'src/core/types';
 import type { ConfigType } from '../../../../../config';
-import { buildEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { buildRuleWithOverrides } from '../../../signals/build_rule';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
 import { AlertAttributes, SignalSourceHit } from '../../../signals/types';
@@ -31,13 +30,11 @@ export const buildBulkBody = (
 ): RACAlert => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
-  const filteredSource = filterSource(mergedDoc._source ?? {});
-  const event = buildEventTypeSignal(mergedDoc);
+  const filteredSource = filterSource(mergedDoc);
   return {
     ...filteredSource,
     ...buildAlert(mergedDoc, rule),
     ...additionalAlertFields(mergedDoc),
-    event,
     '@timestamp': new Date().toISOString(),
   };
 };

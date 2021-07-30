@@ -212,7 +212,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }),
+              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
             },
           },
         });
