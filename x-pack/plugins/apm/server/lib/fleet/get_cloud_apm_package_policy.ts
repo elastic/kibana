@@ -9,8 +9,8 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { Maybe } from '../../../typings/common';
 import { AgentPolicy, PackagePolicy } from '../../../../fleet/common';
 import { APMPluginStartDependencies } from '../../types';
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 
-export const POLICY_ELASTIC_AGENT_ON_CLOUD = 'policy-elastic-agent-on-cloud';
 export const APM_PACKAGE_NAME = 'apm';
 
 export async function getCloudAgentPolicy({
