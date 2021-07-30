@@ -57,12 +57,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    // flaky https://github.com/elastic/kibana/issues/94889
-    it.skip('should show popover with expanded cell content by click on expand button', async () => {
+    it('should show popover with expanded cell content by click on expand button', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       const documentCell = await dataGrid.getCellElement(1, 3);
       await documentCell.click();
       const expandCellContentButton = await documentCell.findByClassName(
@@ -70,11 +70,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await expandCellContentButton.click();
       const popoverJson = await monacoEditor.getCodeEditorValue();
+      expect(JSON.parse(popoverJson)._id).to.be('AU_x3_g4GFA8no6QjkPi');
 
       log.debug('open expanded document flyout to get json');
       await dataGrid.clickRowToggle();
       await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
       const flyoutJson = await monacoEditor.getCodeEditorValue();
+      expect(JSON.parse(flyoutJson)._id).to.be('AU_x3_g4GFA8no6QjkPi');
 
       expect(popoverJson).to.be(flyoutJson);
     });
