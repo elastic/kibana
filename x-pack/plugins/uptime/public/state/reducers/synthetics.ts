@@ -71,108 +71,110 @@ export const syntheticsReducer = handleActions<
      * blocks, ordered by the least-requested. We continue dropping blocks until
      * the newly-pruned size will be less than the ceiling supplied by the action.
      */
-    [String(pruneCacheAction)]: (state, action: Action<number>) => {
-      const { blocks, hitCount } = state;
-      const hashesToPrune: string[] = [];
-      let sizeToRemove = 0;
-      let removeIndex = hitCount.length - 1;
-      while (sizeToRemove < action.payload && removeIndex >= 0) {
-        const { hash } = hitCount[removeIndex];
-        removeIndex--;
-        if (!blocks[hash]) continue;
-        const block = blocks[hash];
-        if (isScreenshotBlockDoc(block)) {
-          sizeToRemove += block.synthetics.blob.length;
-          hashesToPrune.push(hash);
-        }
-      }
-      for (const hash of hashesToPrune) {
-        delete blocks[hash];
-      }
-      return {
-        cacheSize: state.cacheSize - sizeToRemove,
-        blocks: { ...blocks },
-        hitCount: hitCount.slice(0, removeIndex + 1),
-      };
-    },
+    [String(pruneCacheAction)]: (state, action: Action<number>) => handlePruneAction(state, action),
+
     /**
      * Keep track of the least- and most-requested blocks, so when it is time to
      * prune we keep the most commonly-used ones.
      */
-    [String(updateHitCountsAction)]: (state, action: Action<string[]>) => {
-      const newHitCount = [...state.hitCount];
-      const hitTime = Date.now();
-      action.payload.forEach((hash) => {
-        const countItem = newHitCount.find((item) => item.hash === hash);
-        if (!countItem) {
-          newHitCount.push({ hash, hitTime });
-        } else {
-          countItem.hitTime = hitTime;
-        }
-      });
-      // sorts in descending order
-      newHitCount.sort((a, b) => b.hitTime - a.hitTime);
-      return {
-        ...state,
-        hitCount: newHitCount,
-      };
-    },
-    [String(putCacheSize)]: (state, action: Action<number>) => {
-      return {
-        ...state,
-        cacheSize: state.cacheSize + action.payload,
-      };
-    },
-    [String(fetchBlocksAction)]: (state, action: Action<string[]>) => {
+    [String(updateHitCountsAction)]: (state, action: Action<string[]>) =>
+      handleUpdateHitCountsAction(state, action),
+
+    [String(putCacheSize)]: (state, action: Action<number>) => ({
+      ...state,
+      cacheSize: state.cacheSize + action.payload,
+    }),
+
+    [String(fetchBlocksAction)]: (state, action: Action<string[]>) => ({
       // increment hit counts
-      return {
-        ...state,
-        blocks: {
-          ...state.blocks,
-          ...action.payload
-            // there's no need to overwrite existing blocks because the key
-            // is either storing a pending req or a cached result
-            .filter((b) => !state.blocks[b])
-            // convert the list of new hashes in the payload to an object that
-            // will combine with with the existing blocks cache
-            .reduce(
-              (acc, cur) => ({
-                ...acc,
-                [cur]: { status: 'pending' },
-              }),
-              {}
-            ),
-        },
-      };
-    },
+      ...state,
+      blocks: {
+        ...state.blocks,
+        ...action.payload
+          // there's no need to overwrite existing blocks because the key
+          // is either storing a pending req or a cached result
+          .filter((b) => !state.blocks[b])
+          // convert the list of new hashes in the payload to an object that
+          // will combine with with the existing blocks cache
+          .reduce(
+            (acc, cur) => ({
+              ...acc,
+              [cur]: { status: 'pending' },
+            }),
+            {}
+          ),
+      },
+    }),
+
     /**
      * All hashes contained in the action payload have been requested, so we can
      * indicate that they're loading. Subsequent requests will skip them.
      */
-    [String(setBlockLoadingAction)]: (state, action: Action<string[]>) => {
-      return {
-        ...state,
-        blocks: {
-          ...state.blocks,
-          ...action.payload.reduce(
-            (acc, cur) => ({
-              ...acc,
-              [cur]: { status: 'loading' },
-            }),
-            {}
-          ),
-        },
-      };
-    },
-    [String(putBlocksAction)]: (state, action: Action<PutBlocksPayload>) => {
-      return {
-        ...state,
-        blocks: {
-          ...state.blocks,
-          ...action.payload.blocks.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
-        },
-      };
-    },
+    [String(setBlockLoadingAction)]: (state, action: Action<string[]>) => ({
+      ...state,
+      blocks: {
+        ...state.blocks,
+        ...action.payload.reduce(
+          (acc, cur) => ({
+            ...acc,
+            [cur]: { status: 'loading' },
+          }),
+          {}
+        ),
+      },
+    }),
+
+    [String(putBlocksAction)]: (state, action: Action<PutBlocksPayload>) => ({
+      ...state,
+      blocks: {
+        ...state.blocks,
+        ...action.payload.blocks.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
+      },
+    }),
   },
   initialState
 );
+
+function handlePruneAction(state: SyntheticsReducerState, action: Action<number>) {
+  const { blocks, hitCount } = state;
+  const hashesToPrune: string[] = [];
+  let sizeToRemove = 0;
+  let removeIndex = hitCount.length - 1;
+  while (sizeToRemove < action.payload && removeIndex >= 0) {
+    const { hash } = hitCount[removeIndex];
+    removeIndex--;
+    if (!blocks[hash]) continue;
+    const block = blocks[hash];
+    if (isScreenshotBlockDoc(block)) {
+      sizeToRemove += block.synthetics.blob.length;
+      hashesToPrune.push(hash);
+    }
+  }
+  for (const hash of hashesToPrune) {
+    delete blocks[hash];
+  }
+  return {
+    cacheSize: state.cacheSize - sizeToRemove,
+    blocks: { ...blocks },
+    hitCount: hitCount.slice(0, removeIndex + 1),
+  };
+}
+
+function handleUpdateHitCountsAction(state: SyntheticsReducerState, action: Action<string[]>) {
+  const newHitCount = [...state.hitCount];
+  const hitTime = Date.now();
+  action.payload.forEach((hash) => {
+    const countItem = newHitCount.find((item) => item.hash === hash);
+    if (!countItem) {
+      newHitCount.push({ hash, hitTime });
+    } else {
+      countItem.hitTime = hitTime;
+    }
+  });
+  // sorts in descending order
+  newHitCount.sort((a, b) => b.hitTime - a.hitTime);
+  return {
+    ...state,
+    hitCount: newHitCount,
+  };
+}
