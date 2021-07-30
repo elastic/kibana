@@ -13,8 +13,6 @@ import { HttpLogic } from '../../http';
 
 import { ItemWithAnID } from '../types';
 
-import { EndpointRoute } from './types';
-
 interface GenericEndpointInlineEditableTableValues {
   isLoading: boolean;
 }
@@ -35,8 +33,8 @@ interface GenericEndpointInlineEditableTablePropsWithoutReordering<Item extends 
   dataProperty: string;
   addRoute: string;
   instanceId: string;
-  deleteRoute: EndpointRoute<Item>;
-  updateRoute: EndpointRoute<Item>;
+  deleteRoute(item: Item): string;
+  updateRoute(item: Item): string;
   onAdd(item: Item, items: Item[]): void;
   onDelete(item: Item, items: Item[]): void;
   onUpdate(item: Item, items: Item[]): void;
@@ -85,7 +83,6 @@ const saveAndCallback = async <Item extends ItemWithAnID>(
   onFinally: () => void
 ) => {
   try {
-    // @ts-ignore The response should have responseDataProperty
     const { [responseDataProperty]: itemsFromResponse } = await httpCall(route, requestData);
     callback(item, itemsFromResponse);
     onSuccess();

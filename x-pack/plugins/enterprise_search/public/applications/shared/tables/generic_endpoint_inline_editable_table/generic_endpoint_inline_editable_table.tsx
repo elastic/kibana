@@ -16,7 +16,6 @@ import {
 import { ItemWithAnID } from '../types';
 
 import { GenericEndpointInlineEditableTableLogic } from './generic_endpoint_inline_editable_table_logic';
-import { EndpointRoute } from './types';
 
 export interface GenericEndpointInlineEditableTableProps
   extends Omit<
@@ -26,9 +25,9 @@ export interface GenericEndpointInlineEditableTableProps
   addRoute: string;
   instanceId: string;
   dataProperty: string;
-  deleteRoute: EndpointRoute<ItemWithAnID>;
+  deleteRoute(item: ItemWithAnID): string;
   reorderRoute?: string;
-  updateRoute: EndpointRoute<ItemWithAnID>;
+  updateRoute(item: ItemWithAnID): string;
   onAdd(item: ItemWithAnID, items: ItemWithAnID[]): void;
   onDelete(item: ItemWithAnID, items: ItemWithAnID[]): void;
   onUpdate(item: ItemWithAnID, items: ItemWithAnID[]): void;
