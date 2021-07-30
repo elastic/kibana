@@ -59,12 +59,12 @@ const config: TagCloudVisRenderValue = {
 };
 
 const containerSize = {
-  width: '500px',
-  height: '500px',
+  width: '700px',
+  height: '700px',
 };
 
 storiesOf('renderers/tag_cloud_vis', module)
-  .add('default', () => {
+  .add('Default', () => {
     return (
       <Render
         renderer={() => getTagCloudVisRenderer({ palettes })}
@@ -73,7 +73,52 @@ storiesOf('renderers/tag_cloud_vis', module)
       />
     );
   })
-  .add('With empty result', () => {
+  .add('With log scale', () => {
+    return (
+      <Render
+        renderer={() => getTagCloudVisRenderer({ palettes })}
+        config={{ ...config, visParams: { ...config.visParams, scale: 'log' } }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With square root scale', () => {
+    return (
+      <Render
+        renderer={() => getTagCloudVisRenderer({ palettes })}
+        config={{ ...config, visParams: { ...config.visParams, scale: 'square root' } }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With right angled orientation', () => {
+    return (
+      <Render
+        renderer={() => getTagCloudVisRenderer({ palettes })}
+        config={{ ...config, visParams: { ...config.visParams, orientation: 'right angled' } }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With multiple orientations', () => {
+    return (
+      <Render
+        renderer={() => getTagCloudVisRenderer({ palettes })}
+        config={{ ...config, visParams: { ...config.visParams, orientation: 'multiple' } }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With hidden label', () => {
+    return (
+      <Render
+        renderer={() => getTagCloudVisRenderer({ palettes })}
+        config={{ ...config, visParams: { ...config.visParams, showLabel: false } }}
+        {...containerSize}
+      />
+    );
+  })
+  .add('With empty results', () => {
     return (
       <Render
         renderer={() => getTagCloudVisRenderer({ palettes })}
