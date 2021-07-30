@@ -48,7 +48,11 @@ export const OutputsListPage = () => {
 
   return (
     <DefaultLayout section="outputs" rightColumn={undefined}>
-      <EuiPortal>{isAddOutputFlyoutOpen && <AddOutputFlyout />}</EuiPortal>
+      <EuiPortal>
+        {isAddOutputFlyoutOpen && (
+          <AddOutputFlyout onClose={() => setIsAddOutputFlyoutOpen(false)} />
+        )}
+      </EuiPortal>
       <EuiFlexGroup alignItems={'center'} gutterSize="m">
         <EuiFlexItem grow={4}>
           <SearchBar

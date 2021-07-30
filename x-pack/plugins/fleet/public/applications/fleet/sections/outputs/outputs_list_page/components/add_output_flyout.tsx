@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlyout,
   EuiTitle,
@@ -17,37 +17,86 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiForm,
+  EuiPanel,
+  EuiFormRow,
+  EuiCodeEditor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export const AddOutputFlyout = () => {
-  const closeFlyout = () => {};
+import { HostsInput } from './hosts_input';
+
+interface Props {
+  onClose: () => void;
+}
+export const AddOutputFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
+  const [hosts, setHosts] = useState<string[]>([]);
 
   return (
-    <EuiFlyout
-      ownFocus
-      onClose={closeFlyout}
-      hideCloseButton
-      aria-labelledby="flyoutComplicatedTitle"
-    >
+    <EuiFlyout ownFocus onClose={onClose} hideCloseButton aria-labelledby="flyoutComplicatedTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutComplicatedTitle">Flyout header</h2>
+          <h2 id="flyoutComplicatedTitle">Add an output</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiSpacer size="m" />
         <EuiSpacer />
-        CONTENT
+        <EuiForm>
+          <EuiPanel hasShadow={false} hasBorder={true}>
+            <HostsInput
+              helpText=""
+              id="fleet-outputs-hosts-input"
+              label="Elasticsearch hosts"
+              onChange={setHosts}
+              value={hosts}
+            />
+          </EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder={true}>
+            <HostsInput
+              helpText=""
+              id="fleet-outputs-hosts-input"
+              label="Elasticsearch hosts"
+              onChange={setHosts}
+              value={hosts}
+            />
+          </EuiPanel>
+          <EuiSpacer />
+          <EuiPanel hasShadow={false} hasBorder={true}>
+            <EuiFormRow
+              label={i18n.translate('xpack.fleet.settings.additionalYamlConfig', {
+                defaultMessage: 'Elasticsearch output configuration (YAML)',
+              })}
+              fullWidth
+            >
+              <EuiCodeEditor
+                width="100%"
+                mode="yaml"
+                theme="textmate"
+                placeholder="# YAML settings here will be added to the Elasticsearch output section of each policy"
+                setOptions={{
+                  minLines: 10,
+                  maxLines: 30,
+                  tabSize: 2,
+                  showGutter: false,
+                  showPrintMargin: false,
+                }}
+                // {...inputs.additionalYamlConfig.props}
+                onChange={() => {}}
+              />
+            </EuiFormRow>
+          </EuiPanel>
+        </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
               Close
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={closeFlyout} fill>
+            <EuiButton onClick={onClose} fill>
               Save
             </EuiButton>
           </EuiFlexItem>
