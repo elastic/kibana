@@ -30,7 +30,7 @@ interface GenericEndpointInlineEditableTableActions<Item extends ItemWithAnID> {
   updateItem(item: Item, onSuccess: () => void): { item: Item; onSuccess: () => void };
 }
 
-interface GenericEndpointInlineEditableTablePropsWithoutReordering<Item extends ItemWithAnID> {
+interface GenericEndpointInlineEditableTableProps<Item extends ItemWithAnID> {
   dataProperty: string;
   addRoute: string;
   instanceId: string;
@@ -39,18 +39,10 @@ interface GenericEndpointInlineEditableTablePropsWithoutReordering<Item extends 
   onAdd(item: Item, items: Item[]): void;
   onDelete(item: Item, items: Item[]): void;
   onUpdate(item: Item, items: Item[]): void;
-}
-
-type GenericEndpointInlineEditableTablePropsWithReordering<
-  Item extends ItemWithAnID
-> = GenericEndpointInlineEditableTablePropsWithoutReordering<Item> & {
+  // With reordering
   reorderRoute?: string;
   onReorder?(items: Item[]): void;
-};
-
-type GenericEndpointInlineEditableTableProps<Item extends ItemWithAnID> =
-  | GenericEndpointInlineEditableTablePropsWithReordering<Item>
-  | GenericEndpointInlineEditableTablePropsWithReordering<Item>;
+}
 
 type GenericEndpointInlineEditableTableLogicType<Item extends ItemWithAnID> = MakeLogicType<
   GenericEndpointInlineEditableTableValues,
