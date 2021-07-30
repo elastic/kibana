@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { HttpLogic } from '../../../../../shared/http';
 
 import {
@@ -74,17 +76,32 @@ export const domainValidationStateToPanelColor = (
 const allFailureResultChanges: CrawlerDomainValidationResultChange = {
   networkConnectivity: {
     state: 'invalid',
-    message:
-      'Unable to establish a network connection because the "Initial Validation" check failed.',
+    message: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.networkConnectivityFalureMessage',
+      {
+        defaultMessage:
+          'Unable to establish a network connection because the "Initial Validation" check failed.',
+      }
+    ),
   },
   indexingRestrictions: {
     state: 'invalid',
-    message:
-      'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+    message: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.indexingRestrictionsFalureMessage',
+      {
+        defaultMessage:
+          'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+      }
+    ),
   },
   contentVerification: {
     state: 'invalid',
-    message: 'Unable to verify content because the "Network Connectivity" check failed.',
+    message: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationFalureMessage',
+      {
+        defaultMessage: 'Unable to verify content because the "Network Connectivity" check failed.',
+      }
+    ),
   },
 };
 

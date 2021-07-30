@@ -11,6 +11,8 @@ import { useValues } from 'kea';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { AddDomainLogic } from './add_domain_logic';
 import { ValidationStepPanel } from './validation_step_panel';
 
@@ -24,16 +26,31 @@ export const AddDomainValidation: React.FC = () => {
         <EuiFlexItem>
           <ValidationStepPanel
             step={domainValidationResult.steps.initialValidation}
-            label="Initial Validation"
+            label={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.initialVaidationLabel',
+              {
+                defaultMessage: 'Initial validation',
+              }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <ValidationStepPanel
             step={domainValidationResult.steps.networkConnectivity}
-            label="Network Connectivity"
+            label={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.networkConnectivityLabel',
+              {
+                defaultMessage: 'Network connectivity',
+              }
+            )}
             action={
               <EuiButton size="s" href={addDomainFormInputValue} target="_blank">
-                Test URL in the browser
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.testUrlButtonLabel',
+                  {
+                    defaultMessage: 'Test URL in the browser',
+                  }
+                )}
               </EuiButton>
             }
           />
@@ -41,13 +58,23 @@ export const AddDomainValidation: React.FC = () => {
         <EuiFlexItem>
           <ValidationStepPanel
             step={domainValidationResult.steps.indexingRestrictions}
-            label="Indexing Restrictions"
+            label={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.indexingRestrictionsLabel',
+              {
+                defaultMessage: 'Indexing restrictions',
+              }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <ValidationStepPanel
             step={domainValidationResult.steps.contentVerification}
-            label="Content Verification"
+            label={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationLabel',
+              {
+                defaultMessage: 'Content Verification',
+              }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

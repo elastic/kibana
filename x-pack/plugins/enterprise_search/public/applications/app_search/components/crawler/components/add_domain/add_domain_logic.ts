@@ -226,7 +226,14 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         }
       } catch (e) {
         actions.setDomainValidationResult({
-          [stepName]: { state: 'invalid', blockingFailure: true, message: 'Unexpected error' },
+          [stepName]: {
+            state: 'invalid',
+            blockingFailure: true,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.unexpectedValidationErrorMessage',
+              { defaultMessage: 'Unexpected error' }
+            ),
+          },
           ...failureResultChange,
         });
       }
