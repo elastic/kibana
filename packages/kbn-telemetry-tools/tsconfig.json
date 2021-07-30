@@ -8,7 +8,11 @@
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-telemetry-tools/src",
-    "isolatedModules": true
+    "isolatedModules": true,
+    "types": [
+      "jest",
+      "node"
+    ],
   },
   "include": [
     "src/**/*",

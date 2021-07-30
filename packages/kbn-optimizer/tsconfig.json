@@ -7,7 +7,11 @@
     "declarationMap": true,
     "rootDir": "./src",
     "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-optimizer/src"
+    "sourceRoot": "../../../../packages/kbn-optimizer/src",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
     "src/**/*"

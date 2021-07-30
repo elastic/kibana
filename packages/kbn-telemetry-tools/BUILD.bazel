@@ -32,7 +32,6 @@ SRC_DEPS = [
   "//packages/kbn-dev-utils",
   "//packages/kbn-utility-types",
   "@npm//glob",
-  "@npm//jest-styled-components",
   "@npm//listr",
   "@npm//normalize-path",
   "@npm//tslib",

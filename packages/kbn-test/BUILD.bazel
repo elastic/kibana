@@ -53,6 +53,7 @@ SRC_DEPS = [
     "@npm//jest",
     "@npm//jest-cli",
     "@npm//jest-snapshot",
+    "@npm//jest-styled-components",
     "@npm//@jest/reporters",
     "@npm//joi",
     "@npm//mustache",
