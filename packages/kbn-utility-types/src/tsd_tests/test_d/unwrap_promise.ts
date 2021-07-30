@@ -8,21 +8,10 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { Values } from '../../index';
+import { UnwrapPromise } from '../..';
 
-// Arrays
-type STRING = Values<string[]>;
-type ASDF_FOO = Values<Array<'asdf' | 'foo'>>;
+type STRING = UnwrapPromise<Promise<string>>;
+type TUPLE = UnwrapPromise<Promise<[number, number]>>;
 
 expectAssignable<STRING>('adf');
-expectAssignable<ASDF_FOO>('asdf');
-expectAssignable<ASDF_FOO>('foo');
-
-// Objects
-type STRING2 = Values<Record<number, string>>;
-type FOO = Values<Record<number, 'foo'>>;
-type BAR = Values<{ foo: 'bar' }>;
-
-expectAssignable<STRING2>('adf');
-expectAssignable<FOO>('foo');
-expectAssignable<BAR>('bar');
+expectAssignable<TUPLE>([1, 2]);

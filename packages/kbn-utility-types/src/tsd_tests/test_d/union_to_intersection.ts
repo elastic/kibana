@@ -8,8 +8,11 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { UnwrapObservable, ObservableLike } from '../../index';
+import { UnionToIntersection } from '../..';
 
-type STRING = UnwrapObservable<ObservableLike<string>>;
+type INTERSECTED = UnionToIntersection<{ foo: 'bar' } | { baz: 'qux' }>;
 
-expectAssignable<STRING>('adf');
+expectAssignable<INTERSECTED>({
+  foo: 'bar',
+  baz: 'qux',
+});
