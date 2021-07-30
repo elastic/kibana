@@ -70,7 +70,9 @@ export const TimeSeries = ({
   const { theme: themeService, activeCursor: activeCursorService } = getCharts();
 
   const chartRef = useRef();
-  const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef);
+  const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
+    isDateHistogram: true,
+  });
 
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
   if (!isLastBucketDropped) {

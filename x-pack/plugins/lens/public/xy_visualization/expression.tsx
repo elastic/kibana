@@ -246,13 +246,15 @@ export function XYChart({
     yRightExtent,
     valuesInLegend,
   } = args;
+  const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
 
-  const chartRef = useRef<Chart>(null);
-  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef);
+  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+    datatables: Object.values(data.tables),
+  });
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';

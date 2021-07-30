@@ -87,12 +87,14 @@ export function PieComponent(
     hideLabels,
     palette,
   } = props.args;
+  const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const isDarkMode = chartsThemeService.useDarkMode();
 
-  const chartRef = useRef<Chart>(null);
-  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef);
+  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+    datatables: Object.values(props.data.tables),
+  });
 
   if (!hideLabels) {
     firstTable.columns.forEach((column) => {

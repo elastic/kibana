@@ -78,7 +78,10 @@ const VisComponent = (props: VisComponentProps) => {
   });
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
   const chartRef = useRef<Chart>(null);
-  const handleCursorUpdate = useActiveCursor(getActiveCursor(), chartRef);
+
+  const handleCursorUpdate = useActiveCursor(getActiveCursor(), chartRef, {
+    datatables: [props.visData],
+  });
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
