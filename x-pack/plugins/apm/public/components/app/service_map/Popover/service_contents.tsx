@@ -7,36 +7,72 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { EuiButton, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ContentsProps } from '.';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { ServiceNodeStats } from '../../../../../common/service_map';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { ServiceStatsFetcher } from './service_stats_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { AnomalyDetection } from './anomaly_detection';
+import { StatsList } from './stats_list';
 
 export function ServiceContents({ onFocusClick, nodeData }: ContentsProps) {
-  const { query } = useApmParams('/service-map');
   const apmRouter = useApmRouter();
+
+  const {
+    urlParams: { environment, start, end },
+  } = useUrlParams();
 
   const serviceName = nodeData.id!;
 
+  const {
+    data = { transactionStats: {} } as ServiceNodeStats,
+    status,
+  } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/service-map/service/{serviceName}',
+          params: {
+            path: { serviceName },
+            query: { environment, start, end },
+          },
+        });
+      }
+    },
+    [environment, serviceName, start, end],
+    {
+      preservePreviousData: false,
+    }
+  );
+
+  const isLoading = status === FETCH_STATUS.LOADING;
+
   const detailsUrl = apmRouter.link('/services/:serviceName', {
     path: { serviceName },
-    query,
   });
+
   const focusUrl = apmRouter.link('/services/:serviceName/service-map', {
     path: { serviceName },
-    query,
   });
+
+  const { serviceAnomalyStats } = nodeData;
 
   return (
     <>
       <EuiFlexItem>
-        <ServiceStatsFetcher
-          serviceName={serviceName}
-          serviceAnomalyStats={nodeData.serviceAnomalyStats}
-        />
+        {serviceAnomalyStats && (
+          <>
+            <AnomalyDetection
+              serviceName={serviceName}
+              serviceAnomalyStats={serviceAnomalyStats}
+            />
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
+        <StatsList data={data} isLoading={isLoading} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButton href={detailsUrl} fill={true}>

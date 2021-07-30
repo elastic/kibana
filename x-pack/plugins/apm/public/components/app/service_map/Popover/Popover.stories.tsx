@@ -135,5 +135,16 @@ export const Service: Story<Args> = () => {
   return <Popover />;
 };
 Service.args = {
-  nodeData: { id: 'example service', 'service.name': 'example service' },
+  nodeData: {
+    id: 'example service',
+    'service.name': 'example service',
+    serviceAnomalyStats: {
+      serviceName: 'opbeans-java',
+      jobId: 'apm-production-802c-high_mean_transaction_duration',
+      transactionType: 'request',
+      actualValue: 16258.496000000017,
+      anomalyScore: 0,
+      healthStatus: 'healthy',
+    },
+  },
 };
