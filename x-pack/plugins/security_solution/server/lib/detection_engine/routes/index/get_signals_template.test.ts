@@ -114,4 +114,13 @@ describe('get_signals_template', () => {
       'template.mappings.properties.kibana.alert.rule.rule_type_id',
     ]);
   });
+
+  test('it should match snapshot', () => {
+    const template = getSignalsTemplate(
+      'test-index',
+      'space-id',
+      '.alerts-security.alerts-space-id'
+    );
+    expect(template).toMatchSnapshot();
+  });
 });
