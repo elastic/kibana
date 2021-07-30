@@ -3,7 +3,7 @@ pageLoadAssetSize:
   alerting: 106936
   apm: 64385
   apmOss: 18996
-  bfetch: 51874
+  bfetch: 20000
   canvas: 1066647
   charts: 95000
   cloud: 21076
@@ -13,7 +13,7 @@ pageLoadAssetSize:
   dashboard: 374194
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 900000
+  data: 830000
   dataEnhanced: 50420
   devTools: 38637
   discover: 99999
