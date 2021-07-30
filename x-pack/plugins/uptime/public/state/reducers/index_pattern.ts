@@ -7,10 +7,10 @@
 
 import { handleActions, Action } from 'redux-actions';
 import { getIndexPattern, getIndexPatternSuccess, getIndexPatternFail } from '../actions';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import type { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
 export interface IndexPatternState {
-  index_pattern: IIndexPattern | null;
+  index_pattern: IndexPattern | null;
   errors: any[];
   loading: boolean;
 }
