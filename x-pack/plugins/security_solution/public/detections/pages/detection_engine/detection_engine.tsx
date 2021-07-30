@@ -226,7 +226,10 @@ const DetectionEnginePageComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper
+            noPadding={globalFullScreen}
+            data-test-subj="detectionsAlertsPage"
+          >
             <Display show={!globalFullScreen}>
               <DetectionEngineHeaderPage
                 subtitle={

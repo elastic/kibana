@@ -12,6 +12,7 @@ import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { EndpointPageUtils } from './page_utils';
 import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
 import { FleetIntegrations } from './fleet_integrations_page';
+import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -21,4 +22,5 @@ export const pageObjects = {
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
   fleetIntegrations: FleetIntegrations,
+  detections: DetectionsPageObject,
 };
