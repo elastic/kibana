@@ -24,6 +24,7 @@
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../kibana_legacy/tsconfig.json" },
-    { "path": "../index_pattern_field_editor/tsconfig.json"}
+    { "path": "../index_pattern_field_editor/tsconfig.json"},
+    { "path": "../field_formats/tsconfig.json" }
   ]
 }
