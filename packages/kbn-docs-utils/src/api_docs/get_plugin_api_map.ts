@@ -9,7 +9,7 @@
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
-import { MissingApiItemMap, PluginApi, ReferencedDeprecations } from './types';
+import { MissingApiItemMap, PluginApi, ReferencedDeprecationsByPlugin } from './types';
 import { removeBrokenLinks } from './utils';
 
 export function getPluginApiMap(
@@ -20,7 +20,7 @@ export function getPluginApiMap(
 ): {
   pluginApiMap: { [key: string]: PluginApi };
   missingApiItems: MissingApiItemMap;
-  referencedDeprecations: ReferencedDeprecations;
+  referencedDeprecations: ReferencedDeprecationsByPlugin;
 } {
   log.debug('Building plugin API map, getting missing comments, and collecting deprecations...');
   const pluginApiMap: { [key: string]: PluginApi } = {};
@@ -38,7 +38,7 @@ export function getPluginApiMap(
 
   // Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
   const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};
-  const referencedDeprecations: ReferencedDeprecations = {};
+  const referencedDeprecations: ReferencedDeprecationsByPlugin = {};
 
   plugins.forEach((plugin) => {
     const id = plugin.manifest.id;
@@ -49,7 +49,10 @@ export function getPluginApiMap(
   return { pluginApiMap, missingApiItems, referencedDeprecations };
 }
 
-function collectDeprecations(pluginApi: PluginApi, referencedDeprecations: ReferencedDeprecations) {
+function collectDeprecations(
+  pluginApi: PluginApi,
+  referencedDeprecations: ReferencedDeprecationsByPlugin
+) {
   (['client', 'common', 'server'] as Array<'client' | 'server' | 'common'>).forEach((scope) => {
     pluginApi[scope].forEach((api) => {
       if ((api.tags || []).find((tag) => tag === 'deprecated')) {

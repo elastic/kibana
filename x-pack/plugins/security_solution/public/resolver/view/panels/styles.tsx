@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { EuiCode } from '@elastic/eui';
-
-/* eslint-disable no-duplicate-imports */
-
-import { EuiBreadcrumbs } from '@elastic/eui';
+import { EuiCode, EuiBreadcrumbs, EuiDescriptionList } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { EuiDescriptionList } from '@elastic/eui';
 
 /**
  * Used by the nodeDetail view to show attributes of the related events.

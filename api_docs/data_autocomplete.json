@@ -13,7 +13,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 36
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -35,7 +35,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 37
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -51,7 +51,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 38
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -64,7 +64,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 39
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -77,7 +77,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -90,7 +90,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -106,7 +106,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 42
+              "lineNumber": 44
             },
             "deprecated": false
           }
@@ -139,7 +139,7 @@
         ],
         "source": {
           "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 46
+          "lineNumber": 48
         },
         "deprecated": false,
         "children": [
@@ -162,7 +162,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 47
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -184,7 +184,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 48
+              "lineNumber": 50
             },
             "deprecated": false
           }
@@ -200,7 +200,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "deprecated": false,
         "children": [
@@ -213,7 +213,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -236,7 +236,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -249,7 +249,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -262,7 +262,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 28
+              "lineNumber": 29
             },
             "deprecated": false
           },
@@ -275,7 +275,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 29
+              "lineNumber": 30
             },
             "deprecated": false
           },
@@ -291,7 +291,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -307,7 +307,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             },
             "deprecated": false
           },
@@ -323,7 +323,23 @@
             ],
             "source": {
               "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-              "lineNumber": 32
+              "lineNumber": 33
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.QuerySuggestionGetFnArgs.method",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              "\"terms_enum\" | \"terms_agg\" | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 34
             },
             "deprecated": false
           }
@@ -341,7 +357,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 11
+          "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -401,7 +417,7 @@
         ],
         "source": {
           "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 52
+          "lineNumber": 54
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -434,7 +450,7 @@
         ],
         "source": {
           "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
-          "lineNumber": 19
+          "lineNumber": 20
         },
         "deprecated": false,
         "initialIsOpen": false
