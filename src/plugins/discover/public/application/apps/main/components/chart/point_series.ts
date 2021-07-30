@@ -31,7 +31,7 @@ export interface HistogramParamsBounds {
 }
 
 interface HistogramParams {
-  date: boolean; // always true
+  date: true;
   interval: Duration;
   intervalESValue: number;
   intervalESUnit: Unit;
@@ -39,7 +39,7 @@ interface HistogramParams {
   bounds: HistogramParamsBounds;
 }
 export interface Dimension {
-  accessor: number; // should be 0 or 1
+  accessor: 0 | 1;
   format: SerializedFieldFormat<{ pattern: string }>;
   label: string;
 }

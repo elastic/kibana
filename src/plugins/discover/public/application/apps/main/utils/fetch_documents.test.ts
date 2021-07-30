@@ -10,6 +10,7 @@ import { FetchStatus } from '../../../types';
 import { BehaviorSubject, throwError as throwErrorRx } from 'rxjs';
 import { RequestAdapter } from '../../../../../../inspector';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../../__mocks__/services';
 
 function getDataSubjects() {
   return {
@@ -29,6 +30,7 @@ describe('test fetchDocuments', () => {
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       searchSessionId: '123',
+      services: discoverServiceMock,
     };
 
     const stateArr: FetchStatus[] = [];
@@ -54,6 +56,7 @@ describe('test fetchDocuments', () => {
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       searchSessionId: '123',
+      services: discoverServiceMock,
     };
 
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });

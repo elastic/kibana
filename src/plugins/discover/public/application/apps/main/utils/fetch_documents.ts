@@ -12,6 +12,8 @@ import { isCompleteResponse, SearchSource } from '../../../../../../data/common'
 import { FetchStatus } from '../../../types';
 import { SavedSearchData } from '../services/use_saved_search';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
+import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { DiscoverServices } from '../../../../build_services';
 
 export const fetchDocuments = (
   data$: SavedSearchData,
@@ -21,14 +23,18 @@ export const fetchDocuments = (
     inspectorAdapters,
     onResults,
     searchSessionId,
+    services,
   }: {
     abortController: AbortController;
     inspectorAdapters: Adapters;
     onResults: (foundDocuments: boolean) => void;
     searchSessionId: string;
+    services: DiscoverServices;
   }
 ) => {
   const { documents$, totalHits$ } = data$;
+
+  searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', false);

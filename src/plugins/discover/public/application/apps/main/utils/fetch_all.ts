@@ -66,7 +66,6 @@ export function fetchAll(
     onResults: (foundDocuments: boolean) => {
       if (!foundDocuments) {
         sendCompleteMsg(dataSubjects.main$, foundDocuments);
-        // abortController!.abort();
       } else {
         sendPartialMsg(dataSubjects.main$);
       }

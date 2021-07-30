@@ -83,7 +83,7 @@ describe('buildPointSeriesData', () => {
         },
       },
       y: { accessor: 1, format: { id: 'number' }, label: 'Count' },
-    };
+    } as const;
     expect(buildPointSeriesData(table, dimensions)).toMatchInlineSnapshot(`
       Object {
         "ordered": Object {

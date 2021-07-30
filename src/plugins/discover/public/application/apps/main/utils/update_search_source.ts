@@ -7,7 +7,7 @@
  */
 
 import { getSortForSearchSource } from '../../../angular/doc_table';
-import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { IndexPattern, ISearchSource } from '../../../../../../data/common';
 import { SortOrder } from '../../../../saved_searches/types';
 import { DiscoverServices } from '../../../../build_services';
@@ -45,10 +45,8 @@ export function updateSearchSource(
       indexPattern,
       uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
     );
-    const size = uiSettings.get(SAMPLE_SIZE_SETTING);
     searchSource
       .setField('trackTotalHits', true)
-      .setField('size', size)
       .setField('sort', usedSort)
       // Even when searching rollups, we want to use the default strategy so that we get back a
       // document-like response.

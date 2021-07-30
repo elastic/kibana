@@ -7,7 +7,7 @@
  */
 import './histogram.scss';
 import moment, { unitOfTime } from 'moment-timezone';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -25,7 +25,6 @@ import {
 } from '@elastic/charts';
 
 import { IUiSettingsClient } from 'kibana/public';
-import { combineLatest } from 'rxjs';
 import {
   CurrentTime,
   Endzones,
@@ -58,28 +57,8 @@ export function DiscoverHistogram({
   timefilterUpdateHandler,
   services,
 }: DiscoverHistogramProps) {
-  const [theme, setTheme] = useState({
-    chartsTheme: services.theme.chartsDefaultTheme,
-    chartsBaseTheme: services.theme.chartsDefaultBaseTheme,
-  });
-
-  useEffect(() => {
-    const themeSubscription = combineLatest([
-      services.theme.chartsTheme$,
-      services.theme.chartsBaseTheme$,
-    ]).subscribe(([chartsTheme, chartsBaseTheme]) => {
-      if (chartsTheme !== theme.chartsTheme || chartsBaseTheme !== theme.chartsBaseTheme)
-        setTheme({ chartsTheme, chartsBaseTheme });
-    });
-    return () => {
-      return themeSubscription.unsubscribe();
-    };
-  }, [
-    services.theme.chartsBaseTheme$,
-    services.theme.chartsTheme$,
-    theme.chartsBaseTheme,
-    theme.chartsTheme,
-  ]);
+  const chartTheme = services.theme.useChartsTheme();
+  const chartBaseTheme = services.theme.useChartsBaseTheme();
 
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
@@ -133,7 +112,7 @@ export function DiscoverHistogram({
     return moment(val).format(xAxisFormat);
   };
 
-  const data = chartData!.values;
+  const data = chartData.values;
   const isDarkMode = uiSettings.get('theme:darkMode');
 
   /*
@@ -144,10 +123,10 @@ export function DiscoverHistogram({
   const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
   const xInterval = interval.asMilliseconds();
 
-  const xValues = chartData!.xAxisOrderedValues;
+  const xValues = chartData.xAxisOrderedValues;
   const lastXValue = xValues[xValues.length - 1];
 
-  const domain = chartData!.ordered;
+  const domain = chartData.ordered;
   const domainStart = domain.min.valueOf();
   const domainEnd = domain.max.valueOf();
 
@@ -169,7 +148,7 @@ export function DiscoverHistogram({
     type: TooltipType.VerticalCursor,
   };
 
-  const xAxisFormatter = services.data.fieldFormats.deserialize(chartData!.yAxisFormat);
+  const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
 
   return (
     <Chart size="100%">
@@ -178,21 +157,21 @@ export function DiscoverHistogram({
         onBrushEnd={onBrushEnd}
         onElementClick={onElementClick(xInterval)}
         tooltip={tooltipProps}
-        theme={theme.chartsTheme}
-        baseTheme={theme.chartsBaseTheme}
+        theme={chartTheme}
+        baseTheme={chartBaseTheme}
       />
       <Axis
         id="discover-histogram-left-axis"
         position={Position.Left}
         ticks={5}
-        title={chartData!.yAxisLabel}
+        title={chartData.yAxisLabel}
         integersOnly
         tickFormat={(value) => xAxisFormatter.convert(value)}
       />
       <Axis
         id="discover-histogram-bottom-axis"
         position={Position.Bottom}
-        title={chartData!.xAxisLabel}
+        title={chartData.xAxisLabel}
         tickFormat={formatXValue}
         ticks={10}
       />
@@ -214,7 +193,7 @@ export function DiscoverHistogram({
         yAccessors={['y']}
         data={data}
         timeZone={timeZone}
-        name={chartData!.yAxisLabel}
+        name={chartData.yAxisLabel}
       />
     </Chart>
   );
