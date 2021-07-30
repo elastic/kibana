@@ -67,6 +67,7 @@ import {
   transformBulkResponseToExternalModel,
   transformFindResponseToExternalModel,
 } from './transform';
+import { mergeReferences } from '../transform';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
   alertId: string;
@@ -137,6 +138,7 @@ interface CreateSubCaseArgs extends ClientArgs {
 interface PatchCase {
   caseId: string;
   updatedAttributes: Partial<CaseAttributes & PushedArgs>;
+  originalCase: SavedObject<CaseAttributes>;
   version?: string;
 }
 type PatchCaseArgs = PatchCase & ClientArgs;
@@ -1093,7 +1095,7 @@ export class CasesService {
       const createdCase = await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
-        { id, references: transformedAttributes.references }
+        { id, references: mergeReferences({ newReferences: transformedAttributes.references }) }
       );
       return transformSavedObjectToExternalModel(createdCase);
     } catch (error) {
@@ -1106,16 +1108,21 @@ export class CasesService {
     unsecuredSavedObjectsClient,
     caseId,
     updatedAttributes,
+    originalCase,
     version,
   }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
       const transformedAttributes = transformAttributesToESModel(updatedAttributes);
+      const references = mergeReferences({
+        originalReferences: originalCase.references,
+        newReferences: transformedAttributes.references,
+      });
       const updatedCase = await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId,
         transformedAttributes.attributes,
-        { version, references: transformedAttributes.references }
+        { version, references }
       );
       return transformUpdateResponseToExternalModel(updatedCase);
     } catch (error) {

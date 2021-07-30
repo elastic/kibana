@@ -17,7 +17,11 @@ import {
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from '.';
-import { connectorIdReferenceName, pushConnectorIdReferenceName } from '..';
+import {
+  CaseSavedObjectReference,
+  connectorIdReferenceName,
+  pushConnectorIdReferenceName,
+} from '..';
 import { CaseAttributes, CaseFullExternalService, noneConnectorId } from '../../../common';
 import {
   findConnectorIdReference,
@@ -73,19 +77,19 @@ export function transformAttributesToESModel(
   caseAttributes: CaseAttributes
 ): {
   attributes: ESCaseAttributes;
-  references?: SavedObjectReference[];
+  references?: CaseSavedObjectReference[];
 };
 export function transformAttributesToESModel(
   caseAttributes: Partial<CaseAttributes>
 ): {
   attributes: Partial<ESCaseAttributes>;
-  references?: SavedObjectReference[];
+  references?: CaseSavedObjectReference[];
 };
 export function transformAttributesToESModel(
   caseAttributes: Partial<CaseAttributes>
 ): {
   attributes: Partial<ESCaseAttributes>;
-  references?: SavedObjectReference[];
+  references?: CaseSavedObjectReference[];
 } {
   const { connector, external_service, ...restAttributes } = caseAttributes;
 
@@ -123,23 +127,34 @@ export function transformAttributesToESModel(
 function buildReferences(
   connectorId?: string,
   pushConnectorId?: string | null
-): SavedObjectReference[] | undefined {
-  const connectorRef =
-    connectorId && connectorId !== noneConnectorId
-      ? [{ id: connectorId, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE }]
-      : [];
+): CaseSavedObjectReference[] | undefined {
+  const connectorRef: CaseSavedObjectReference[] = [];
 
-  // I doubt the push connector will ever be `none` but we'll check just in case
-  const pushConnectorRef =
-    pushConnectorId && pushConnectorId !== noneConnectorId
-      ? [
-          {
-            id: pushConnectorId,
-            name: pushConnectorIdReferenceName,
-            type: ACTION_SAVED_OBJECT_TYPE,
-          },
-        ]
-      : [];
+  // this means the reference should be removed
+  if (connectorId === noneConnectorId) {
+    connectorRef.push({ name: connectorIdReferenceName });
+  } else if (connectorId) {
+    connectorRef.push({
+      name: connectorIdReferenceName,
+      ref: { id: connectorId, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+    });
+  }
+
+  const pushConnectorRef: CaseSavedObjectReference[] = [];
+
+  // this means the reference should be removed
+  if (pushConnectorId === noneConnectorId) {
+    pushConnectorRef.push({ name: pushConnectorIdReferenceName });
+  } else if (pushConnectorId) {
+    pushConnectorRef.push({
+      name: pushConnectorIdReferenceName,
+      ref: {
+        id: pushConnectorId,
+        name: pushConnectorIdReferenceName,
+        type: ACTION_SAVED_OBJECT_TYPE,
+      },
+    });
+  }
 
   const references = [...connectorRef, ...pushConnectorRef];
 

@@ -10,12 +10,145 @@ import { ConnectorTypes } from '../../common';
 import { createESJiraConnector, createJiraConnector } from './test_utils';
 import {
   findConnectorIdReference,
+  mergeReferences,
   transformESConnectorOrUseDefault,
   transformESConnectorToExternalModel,
   transformFieldsToESModel,
 } from './transform';
 
 describe('service transform helpers', () => {
+  describe('mergeReferences', () => {
+    it('overwrites the original reference with the new one', () => {
+      expect(
+        mergeReferences({
+          originalReferences: [{ id: 'hello', type: '1', name: 'a' }],
+          newReferences: [{ name: 'a', ref: { id: 'hello2', type: '1', name: 'a' } }],
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "hello2",
+            "name": "a",
+            "type": "1",
+          },
+        ]
+      `);
+    });
+
+    it('returns the original references if the new references are undefined', () => {
+      expect(
+        mergeReferences({
+          originalReferences: [{ id: 'hello', type: '1', name: 'a' }],
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "hello",
+            "name": "a",
+            "type": "1",
+          },
+        ]
+      `);
+    });
+
+    it('returns the original references if the new references is an empty array', () => {
+      expect(
+        mergeReferences({
+          originalReferences: [{ id: 'hello', type: '1', name: 'a' }],
+          newReferences: [],
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "hello",
+            "name": "a",
+            "type": "1",
+          },
+        ]
+      `);
+    });
+
+    it('removes a reference when the ref field is undefined', () => {
+      expect(
+        mergeReferences({
+          originalReferences: [{ id: 'hello', type: '1', name: 'a' }],
+          newReferences: [{ name: 'a' }],
+        })
+      ).toMatchInlineSnapshot(`Array []`);
+    });
+
+    it('adds a new reference to existing ones', () => {
+      expect(
+        mergeReferences({
+          originalReferences: [{ id: 'hello', type: '1', name: 'a' }],
+          newReferences: [{ name: 'b', ref: { id: 'awesome', type: '2', name: 'b' } }],
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "hello",
+            "name": "a",
+            "type": "1",
+          },
+          Object {
+            "id": "awesome",
+            "name": "b",
+            "type": "2",
+          },
+        ]
+      `);
+    });
+
+    it('adds new references to an undefined original reference array', () => {
+      expect(
+        mergeReferences({
+          newReferences: [
+            { name: 'a', ref: { id: 'awesome', type: '2', name: 'a' } },
+            { name: 'b', ref: { id: 'awesome', type: '2', name: 'b' } },
+          ],
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "awesome",
+            "name": "a",
+            "type": "2",
+          },
+          Object {
+            "id": "awesome",
+            "name": "b",
+            "type": "2",
+          },
+        ]
+      `);
+    });
+
+    it('adds new references to an empty original reference array', () => {
+      expect(
+        mergeReferences({
+          originalReferences: [],
+          newReferences: [
+            { name: 'a', ref: { id: 'awesome', type: '2', name: 'a' } },
+            { name: 'b', ref: { id: 'awesome', type: '2', name: 'b' } },
+          ],
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "awesome",
+            "name": "a",
+            "type": "2",
+          },
+          Object {
+            "id": "awesome",
+            "name": "b",
+            "type": "2",
+          },
+        ]
+      `);
+    });
+  });
+
   describe('findConnectorIdReference', () => {
     it('finds the reference when it exists', () => {
       expect(
