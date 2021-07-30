@@ -102,6 +102,7 @@
 |  [AggGroupLabels](./kibana-plugin-plugins-data-public.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
 |  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-data-public.apply_filter_trigger.md) |  |
+|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) |  |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
 |  [createSavedQueryService](./kibana-plugin-plugins-data-public.createsavedqueryservice.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.es_search_strategy.md) |  |
@@ -113,6 +114,7 @@
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
 |  [FilterItem](./kibana-plugin-plugins-data-public.filteritem.md) |  |
 |  [FilterLabel](./kibana-plugin-plugins-data-public.filterlabel.md) |  |
+|  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) |  |
 |  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-public.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |

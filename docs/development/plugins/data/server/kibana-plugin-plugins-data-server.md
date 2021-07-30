@@ -71,6 +71,7 @@
 |  [AggGroupLabels](./kibana-plugin-plugins-data-server.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-server.agggroupnames.md) |  |
 |  [buildQueryFromFilters](./kibana-plugin-plugins-data-server.buildqueryfromfilters.md) |  |
+|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) |  |
 |  [config](./kibana-plugin-plugins-data-server.config.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-server.es_search_strategy.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |
