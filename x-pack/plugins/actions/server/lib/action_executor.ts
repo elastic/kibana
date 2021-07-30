@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, KibanaRequest } from 'src/core/server';
+import { Logger, KibanaRequest, SavedObjectsResolveResponse } from 'src/core/server';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
@@ -288,7 +288,7 @@ async function getActionInfo(
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
   namespace: string | undefined
-): Promise<ActionInfo> {
+): Promise<ActionInfo & { resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'> }> {
   // check to see if it's a pre-configured action first
   const pcAction = preconfiguredActions.find(
     (preconfiguredAction) => preconfiguredAction.id === actionId
@@ -308,6 +308,7 @@ async function getActionInfo(
 
   const {
     attributes: { secrets },
+    resolveResponse,
   } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace: namespace === 'default' ? undefined : namespace,
   });
@@ -317,5 +318,6 @@ async function getActionInfo(
     name,
     config,
     secrets,
+    resolveResponse,
   };
 }
