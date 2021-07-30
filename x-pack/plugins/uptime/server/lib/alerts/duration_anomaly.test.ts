@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ALERT_REASON } from '@kbn/rule-data-utils/target/technical_field_names';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { AnomaliesTableRecord, AnomalyRecordDoc } from '../../../../ml/common/types/anomalies';
@@ -173,7 +173,7 @@ describe('duration anomaly alert', () => {
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_SEVERITY_LEVEL]: getSeverityType(anomaly.severity),
             [ALERT_SEVERITY_VALUE]: anomaly.severity,
-            reason: `Abnormal (${getSeverityType(
+            [ALERT_REASON]: `Abnormal (${getSeverityType(
               anomaly.severity
             )} level) response time detected on uptime-monitor with url ${
               mockPing.url?.full

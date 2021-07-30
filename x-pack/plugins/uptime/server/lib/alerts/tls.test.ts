@@ -5,7 +5,6 @@
  * 2.0.
  */
 import moment from 'moment';
-
 import { tlsAlertFactory, getCertSummary, DEFAULT_SIZE } from './tls';
 import { TLS } from '../../../common/constants/alerts';
 import { CertResult, DynamicSettings } from '../../../common/runtime_types';

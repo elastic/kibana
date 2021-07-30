@@ -7,7 +7,11 @@
 
 import React from 'react';
 import moment from 'moment';
-
+import {
+  ALERT_END,
+  ALERT_REASON,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
@@ -36,11 +40,10 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   requiresAppContext: true,
   format: ({ fields }) => ({
-    reason: fields.reason,
+    reason: fields[ALERT_REASON],
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
-      dateRangeEnd:
-        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end']!,
+      dateRangeEnd: fields[ALERT_STATUS] === 'open' ? 'now' : fields[ALERT_END]!,
       dateRangeStart: moment(new Date(fields['anomaly.start']!)).subtract('5', 'm').toISOString(),
     }),
   }),
