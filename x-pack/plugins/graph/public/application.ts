@@ -45,6 +45,7 @@ import {
 
 import './index.scss';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import { GraphSavePolicy } from './types';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -70,7 +71,7 @@ export interface GraphDependencies {
   getBasePath: () => string;
   storage: Storage;
   canEditDrillDownUrls: boolean;
-  graphSavePolicy: string;
+  graphSavePolicy: GraphSavePolicy;
   overlays: OverlayStart;
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;

@@ -1,0 +1,204 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
+import { Workspace, WorkspaceField } from '../../types';
+import { Detail } from './control_panel';
+
+interface ControlPanelToolBarProps {
+  workspace: Workspace;
+  liveResponseFields: WorkspaceField[];
+  setDetail: (data?: Partial<Detail>) => void;
+}
+
+export const ControlPanelToolBar = ({
+  workspace,
+  setDetail,
+  liveResponseFields,
+}: ControlPanelToolBarProps) => {
+  const haveNodes = workspace.nodes.length === 0;
+
+  const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
+    defaultMessage: 'Undo',
+  });
+  const redoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.redoButtonTooltip', {
+    defaultMessage: 'Redo',
+  });
+  const expandButtonMsg = i18n.translate(
+    'xpack.graph.sidebar.topMenu.expandSelectionButtonTooltip',
+    {
+      defaultMessage: 'Expand selection',
+    }
+  );
+  const addLinksButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.addLinksButtonTooltip', {
+    defaultMessage: 'Add links between existing terms',
+  });
+  const removeVerticesButtonMsg = i18n.translate(
+    'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip',
+    {
+      defaultMessage: 'Remove vertices from workspace',
+    }
+  );
+  const blocklistButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.blocklistButtonTooltip', {
+    defaultMessage: 'Block selection from appearing in workspace',
+  });
+  const customStyleButtonMsg = i18n.translate(
+    'xpack.graph.sidebar.topMenu.customStyleButtonTooltip',
+    {
+      defaultMessage: 'Custom style selected vertices',
+    }
+  );
+  const drillDownButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.drillDownButtonTooltip', {
+    defaultMessage: 'Drill down',
+  });
+  const runLayoutButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.runLayoutButtonTooltip', {
+    defaultMessage: 'Run layout',
+  });
+  const pauseLayoutButtonMsg = i18n.translate(
+    'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip',
+    {
+      defaultMessage: 'Pause layout',
+    }
+  );
+
+  const onUndoClick = () => workspace.undo();
+  const onRedoClick = () => workspace.redo();
+  const onExpandButtonClick = () => {
+    setDetail(undefined);
+    workspace.expandSelecteds({ toFields: liveResponseFields });
+  };
+  const onAddLinksClick = () => workspace.fillInGraph();
+  const onRemoveVerticesClick = () => {
+    setDetail(undefined);
+    workspace.deleteSelection();
+  };
+  const onBlockListClick = () => workspace.blocklistSelection();
+  const onCustomStyleClick = () => setDetail({ showStyle: true });
+  const onDrillDownClick = () => setDetail({ showDrillDowns: true });
+  const onRunLayoutClick = () => {
+    workspace.runLayout();
+  };
+  const onPauseLayoutClick = () => {
+    workspace.stopLayout();
+    workspace.changeHandler();
+  };
+
+  return (
+    <div>
+      <EuiToolTip content={undoButtonMsg}>
+        <button
+          className="kuiButton kuiButton--basic kuiButton--small"
+          aria-label={undoButtonMsg}
+          type="button"
+          onClick={onUndoClick}
+          disabled={workspace.undoLog.length < 1}
+        >
+          <span className="kuiIcon fa-history" />
+        </button>
+      </EuiToolTip>
+      <EuiToolTip content={redoButtonMsg}>
+        <button
+          className="kuiButton kuiButton--basic kuiButton--small"
+          aria-label={redoButtonMsg}
+          type="button"
+          onClick={onRedoClick}
+          disabled={workspace.redoLog.length === 0}
+        >
+          <span className="kuiIcon fa-repeat" />
+        </button>
+      </EuiToolTip>
+      <EuiToolTip content={expandButtonMsg}>
+        <button
+          className="kuiButton kuiButton--basic kuiButton--small"
+          aria-label={expandButtonMsg}
+          disabled={liveResponseFields.length === 0 || workspace.nodes.length === 0}
+          onClick={onExpandButtonClick}
+        >
+          <span className="kuiIcon fa-plus" />
+        </button>
+      </EuiToolTip>
+      <EuiToolTip content={addLinksButtonMsg}>
+        <button
+          className="kuiButton kuiButton--basic kuiButton--small"
+          aria-label={addLinksButtonMsg}
+          disabled={haveNodes}
+          onClick={onAddLinksClick}
+        >
+          <span className="kuiIcon fa-link" />
+        </button>
+      </EuiToolTip>
+      <EuiToolTip content={removeVerticesButtonMsg}>
+        <button
+          data-test-subj="graphRemoveSelection"
+          className="kuiButton kuiButton--basic kuiButton--small"
+          disabled={haveNodes}
+          aria-label={removeVerticesButtonMsg}
+          onClick={onRemoveVerticesClick}
+        >
+          <span className="kuiIcon fa-trash" />
+        </button>
+      </EuiToolTip>
+      <EuiToolTip content={blocklistButtonMsg}>
+        <button
+          className="kuiButton kuiButton--basic kuiButton--small"
+          disabled={workspace.selectedNodes.length === 0}
+          aria-label={blocklistButtonMsg}
+          onClick={onBlockListClick}
+        >
+          <span className="kuiIcon fa-ban" />
+        </button>
+      </EuiToolTip>
+      <EuiToolTip content={customStyleButtonMsg}>
+        <button
+          className="kuiButton kuiButton--basic kuiButton--small"
+          disabled={workspace.selectedNodes.length === 0}
+          aria-label={customStyleButtonMsg}
+          onClick={onCustomStyleClick}
+        >
+          <span className="kuiIcon fa-paint-brush" />
+        </button>
+      </EuiToolTip>
+      <EuiToolTip content={drillDownButtonMsg}>
+        <button
+          className="kuiButton kuiButton--basic kuiButton--small"
+          disabled={haveNodes}
+          aria-label={drillDownButtonMsg}
+          onClick={onDrillDownClick}
+        >
+          <span className="kuiIcon fa-info" />
+        </button>
+      </EuiToolTip>
+      {(workspace.nodes.length === 0 || workspace.force === null) && (
+        <EuiToolTip content={runLayoutButtonMsg}>
+          <button
+            data-test-subj="graphResumeLayout"
+            className="kuiButton kuiButton--basic kuiButton--small"
+            disabled={workspace.nodes.length === 0}
+            aria-label={runLayoutButtonMsg}
+            onClick={onRunLayoutClick}
+          >
+            <span className="kuiIcon fa-play" />
+          </button>
+        </EuiToolTip>
+      )}
+      {workspace.force !== null && workspace.nodes.length > 0 && (
+        <EuiToolTip content={pauseLayoutButtonMsg}>
+          <button
+            data-test-subj="graphPauseLayout"
+            className="kuiButton kuiButton--basic kuiButton--small"
+            aria-label={pauseLayoutButtonMsg}
+            onClick={onPauseLayoutClick}
+          >
+            <span className="kuiIcon fa-pause" />
+          </button>
+        </EuiToolTip>
+      )}
+    </div>
+  );
+};

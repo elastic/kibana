@@ -9,28 +9,12 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
-import { WorkspaceNode, WorkspaceEdge } from '../../types';
+import { GroupAwareWorkspaceNode, GroupAwareWorkspaceEdge, Workspace } from '../../types';
 import { makeNodeId } from '../../services/persistence';
 
-/*
- * The layouting algorithm sets a few extra properties on
- * node objects to handle grouping. This will be moved to
- * a separate data structure when the layouting is migrated
- */
-
-export interface GroupAwareWorkspaceNode extends WorkspaceNode {
-  kx: number;
-  ky: number;
-}
-
-export interface GroupAwareWorkspaceEdge extends WorkspaceEdge {
-  topTarget: GroupAwareWorkspaceNode;
-  topSrc: GroupAwareWorkspaceNode;
-}
-
 export interface GraphVisualizationProps {
-  nodes?: GroupAwareWorkspaceNode[];
-  edges?: GroupAwareWorkspaceEdge[];
+  nodes: GroupAwareWorkspaceNode[];
+  edges: GroupAwareWorkspaceEdge[];
   edgeClick: (edge: GroupAwareWorkspaceEdge) => void;
   nodeClick: (node: GroupAwareWorkspaceNode, e: React.MouseEvent<Element, MouseEvent>) => void;
 }

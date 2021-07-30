@@ -23,8 +23,8 @@ export interface WorkspaceNode {
   scaledSize: number;
   parent: WorkspaceNode | null;
   color: string;
-  isSelected?: boolean;
   numChildren: number;
+  isSelected?: boolean;
 }
 
 export interface WorkspaceEdge {
@@ -61,6 +61,15 @@ export interface GraphData {
   nodes: ServerResultNode[];
   edges: ServerResultEdge[];
 }
+export interface TermIntersect {
+  id1: string;
+  id2: string;
+  term1: string;
+  term2: string;
+  v1: number;
+  v2: number;
+  overlap: number;
+}
 
 export interface Workspace {
   options: WorkspaceOptions;
@@ -72,6 +81,8 @@ export interface Workspace {
   undoLog: string;
   redoLog: string;
   force: ReturnType<typeof d3.layout.force>;
+  lastRequest: string;
+  lastResponse: string;
 
   undo: () => void;
   redo: () => void;
@@ -85,6 +96,21 @@ export interface Workspace {
   deselectNode: (node: WorkspaceNode) => void;
   colorSelected: (color: string) => void;
   groupSelections: (node: WorkspaceNode | undefined) => void;
+  ungroup: (node: WorkspaceNode | undefined) => void;
+  callElasticsearch: (request: any) => void;
+  search: (qeury: any, fieldsChoice: WorkspaceField[] | undefined, numHops: number) => void;
+  simpleSearch: (
+    searchTerm: string,
+    fieldsChoice: WorkspaceField[] | undefined,
+    numHops: number
+  ) => void;
+  getAllIntersections: (
+    callback: (termIntersects: TermIntersect[]) => void,
+    nodes: WorkspaceNode[]
+  ) => void;
+  toggleNodeSelection: (node: WorkspaceNode) => boolean;
+  mergeIds: (term1: string, term2: string) => void;
+  changeHandler: () => void;
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];
@@ -116,6 +142,8 @@ export type ExploreRequest = any;
 export type SearchRequest = any;
 export type ExploreResults = any;
 export type SearchResults = any;
+export type GraphExploreCallback = (data: ExploreResults) => void;
+export type GraphSearchCallback = (data: SearchResults) => void;
 
 export type WorkspaceOptions = Partial<{
   indexName: string;
@@ -125,12 +153,28 @@ export type WorkspaceOptions = Partial<{
   graphExploreProxy: (
     indexPattern: string,
     request: ExploreRequest,
-    callback: (data: ExploreResults) => void
+    callback: GraphExploreCallback
   ) => void;
   searchProxy: (
     indexPattern: string,
     request: SearchRequest,
-    callback: (data: SearchResults) => void
+    callback: GraphSearchCallback
   ) => void;
   exploreControls: AdvancedSettings;
 }>;
+
+/*
+ * The layouting algorithm sets a few extra properties on
+ * node objects to handle grouping. GroupAwareWorkspaceNode and GroupAwareWorkspaceEdge
+ * will be moved to a separate data structure when the layouting is migrated
+ */
+
+export interface GroupAwareWorkspaceNode extends WorkspaceNode {
+  kx: number;
+  ky: number;
+}
+
+export interface GroupAwareWorkspaceEdge extends WorkspaceEdge {
+  topTarget: GroupAwareWorkspaceNode;
+  topSrc: GroupAwareWorkspaceNode;
+}

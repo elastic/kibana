@@ -28,11 +28,12 @@ import {
   esKuery,
 } from '../../../../../src/plugins/data/public';
 
-export interface OuterSearchBarProps {
+export interface SearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
+  currentIndexPattern?: IndexPattern;
+  onIndexPatternChange: (indexPattern?: IndexPattern) => void;
   onQuerySubmit: (query: string) => void;
-
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -41,7 +42,7 @@ export interface OuterSearchBarProps {
   indexPatternProvider: IndexPatternProvider;
 }
 
-export interface SearchBarProps extends OuterSearchBarProps {
+export interface StatefulSearchBarProps extends SearchBarProps {
   currentDatasource?: IndexpatternDatasource;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
 }
@@ -65,31 +66,30 @@ function queryToString(query: Query, indexPattern: IndexPattern) {
   return JSON.stringify(query.query);
 }
 
-export function SearchBarComponent(props: SearchBarProps) {
+export function SearchBarComponent(props: StatefulSearchBarProps) {
   const {
-    currentDatasource,
-    onQuerySubmit,
     isLoading,
-    onIndexPatternSelected,
     initialQuery,
+    currentIndexPattern,
+    currentDatasource,
     indexPatternProvider,
+    onQuerySubmit,
+    onIndexPatternSelected,
     confirmWipeWorkspace,
+    onIndexPatternChange,
   } = props;
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
-    undefined
-  );
 
   useEffect(() => {
     async function fetchPattern() {
       if (currentDatasource) {
-        setCurrentIndexPattern(await indexPatternProvider.get(currentDatasource.id));
+        onIndexPatternChange(await indexPatternProvider.get(currentDatasource.id));
       } else {
-        setCurrentIndexPattern(undefined);
+        onIndexPatternChange(undefined);
       }
     }
     fetchPattern();
-  }, [currentDatasource, indexPatternProvider]);
+  }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
   const kibana = useKibana<IDataPluginServices>();
   const { services, overlays } = kibana;

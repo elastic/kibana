@@ -39,7 +39,6 @@ export const saveWorkspace = actionCreator<void>('SAVE_WORKSPACE');
  */
 export const loadingSaga = ({
   createWorkspace,
-  getWorkspace,
   indexPatterns,
   notifications,
   indexPatternProvider,
@@ -63,13 +62,12 @@ export const loadingSaga = ({
     const indexPattern = yield call(indexPatternProvider.get, selectedIndexPatternId);
     const initialSettings = settingsSelector(yield select());
 
-    createWorkspace(indexPattern.title, initialSettings);
+    const createdWorkspace = createWorkspace(indexPattern.title, initialSettings);
 
     const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
       workspacePayload,
       indexPattern,
-      // workspace won't be null because it's created in the same call stack
-      getWorkspace()!
+      createdWorkspace
     );
 
     // put everything in the store
@@ -91,7 +89,7 @@ export const loadingSaga = ({
     yield put(updateSettings(advancedSettings));
     yield put(loadTemplates(urlTemplates));
 
-    getWorkspace()!.runLayout();
+    createdWorkspace.runLayout();
   }
 
   return function* () {
