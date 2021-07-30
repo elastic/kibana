@@ -19,6 +19,7 @@ import { useTransactionDistributionFetcher } from '../../../hooks/use_transactio
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { MlLatencyCorrelations } from '../correlations/ml_latency_correlations_page';
 import { TransactionDistribution } from './Distribution';
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { WaterfallWithSummary } from './waterfall_with_summary';
@@ -104,6 +105,8 @@ export function TransactionDetails() {
       </ChartPointerEventContextProvider>
 
       <EuiHorizontalRule size="full" margin="l" />
+
+      <MlLatencyCorrelations />
 
       <EuiPanel hasBorder={true}>
         <TransactionDistribution

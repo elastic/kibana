@@ -162,7 +162,7 @@ export function CorrelationsChart({
     >
       <Chart
         size={{
-          height: '250px',
+          height: '300px',
         }}
       >
         <Settings
