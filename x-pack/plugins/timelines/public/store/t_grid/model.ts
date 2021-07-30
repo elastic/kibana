@@ -10,11 +10,11 @@ import type { Filter, FilterManager } from '../../../../../../src/plugins/data/p
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
+  DataProvider,
   TimelineExpandedDetail,
   SortColumnTimeline,
   SerializedFilterQuery,
 } from '../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import { RowRendererId } from '../../../common/types/timeline';
 
 export interface TGridModelSettings {
@@ -40,6 +40,8 @@ export interface TGridModel extends TGridModelSettings {
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
       ColumnHeaderOptions
   >;
+  /** The sources of the event data shown in the timeline */
+  dataProviders: DataProvider[];
   /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
   dateRange: {
     start: string;
@@ -82,6 +84,7 @@ export interface TGridModel extends TGridModelSettings {
 export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
+  | 'dataProviders'
   | 'dateRange'
   | 'deletedEventIds'
   | 'excludedRowRendererIds'

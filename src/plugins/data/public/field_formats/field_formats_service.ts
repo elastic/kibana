@@ -8,7 +8,6 @@
 
 import { CoreSetup } from 'src/core/public';
 import { FieldFormatsRegistry, UI_SETTINGS } from '../../common';
-import { deserializeFieldFormat } from './utils/deserialize';
 import { FormatFactory } from '../../common/field_formats/utils';
 import { baseFormattersPublic } from './constants';
 
@@ -40,10 +39,6 @@ export class FieldFormatsService {
   }
 
   public start() {
-    this.fieldFormatsRegistry.deserialize = deserializeFieldFormat.bind(
-      this.fieldFormatsRegistry as FieldFormatsStart
-    );
-
     return this.fieldFormatsRegistry as FieldFormatsStart;
   }
 }

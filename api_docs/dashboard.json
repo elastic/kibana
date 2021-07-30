@@ -1059,8 +1059,8 @@
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 40
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 150
                 },
                 "deprecated": false
               },
@@ -1076,8 +1076,8 @@
                   "[]"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 40
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 150
                 },
                 "deprecated": false
               }
@@ -1129,8 +1129,8 @@
                   "P"
                 ],
                 "source": {
-                  "path": "src/plugins/kibana_utils/common/persistable_state/index.ts",
-                  "lineNumber": 46
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 161
                 },
                 "deprecated": false
               }
@@ -1378,13 +1378,7 @@
               "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "source": {
@@ -1403,13 +1397,7 @@
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "source": {
@@ -1759,13 +1747,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "source": {
@@ -2250,13 +2232,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              }
+              "Query"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
@@ -2275,13 +2251,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "source": {
@@ -2424,13 +2394,7 @@
               "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "source": {
@@ -2449,13 +2413,7 @@
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "source": {

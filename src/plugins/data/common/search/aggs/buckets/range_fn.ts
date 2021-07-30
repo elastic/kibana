@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { NumericalRangeOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggRangeFnName = 'aggRange';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.RANGE>;
 
-type Arguments = Assign<AggArgs, { ranges?: string }>;
+type Arguments = Assign<AggArgs, { ranges?: NumericalRangeOutput[] }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -61,7 +62,8 @@ export const aggRange = (): FunctionDefinition => ({
       }),
     },
     ranges: {
-      types: ['string'],
+      types: ['numerical_range'],
+      multi: true,
       help: i18n.translate('data.search.aggs.buckets.range.ranges.help', {
         defaultMessage: 'Serialized ranges to use for this aggregation.',
       }),
@@ -79,20 +81,18 @@ export const aggRange = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
-
+  fn: (input, { id, enabled, schema, ranges, ...params }) => {
     return {
       type: 'agg_type',
       value: {
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.RANGE,
         params: {
-          ...rest,
-          ranges: getParsedValue(args, 'ranges'),
+          ...params,
+          ranges: ranges?.map((range) => omit(range, 'type')),
         },
+        type: BUCKET_TYPES.RANGE,
       },
     };
   },
