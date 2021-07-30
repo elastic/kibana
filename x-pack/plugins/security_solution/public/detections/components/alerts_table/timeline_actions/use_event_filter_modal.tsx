@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import { ACTION_ADD_EVENT_FILTER } from '../translations';
+import { useCallback, useState } from 'react';
 
 export const useEventFilterModal = () => {
   const [isAddEventFilterModalOpen, setIsAddEventFilterModalOpen] = useState<boolean>(false);
@@ -19,19 +18,4 @@ export const useEventFilterModal = () => {
   }, []);
 
   return { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick };
-};
-
-export const useEventFilterAction = ({
-  onAddEventFilterClick,
-}: {
-  onAddEventFilterClick: () => void;
-}) => {
-  const eventFilterActions = useMemo(
-    () => ({
-      name: ACTION_ADD_EVENT_FILTER,
-      onClick: onAddEventFilterClick,
-    }),
-    [onAddEventFilterClick]
-  );
-  return eventFilterActions;
 };

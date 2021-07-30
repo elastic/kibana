@@ -14,16 +14,17 @@ import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
 import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
 import { Ecs } from '../../../../common/ecs';
-import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_modal';
+import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
-/* import {
+/* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
+import {
     ACTION_ADD_TO_CASE
 } from '../alerts_table/translations';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
 import { addToCaseActionItem } from './helpers'; */
-import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_modal';
+import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { CHANGE_ALERT_STATUS } from './translations';
 
@@ -53,7 +54,7 @@ export const TakeActionDropdown = React.memo(
     onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
     timelineId: string;
   }) => {
-    /* Add to case status
+    /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
     const casePermissions = useGetUserCasesPermissions();
     const { timelines: timelinesUi } = useKibana().services;
     const insertTimelineHook = useInsertTimeline;
@@ -151,7 +152,8 @@ export const TakeActionDropdown = React.memo(
           id: 0,
           items: [
             ...alertsActionItems,
-            /* ...addToCaseActionItem(timelineId),*/
+            /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
+            ...addToCaseActionItem(timelineId),*/
             ...hostIsolationAction,
             ...investigateInTimelineAction,
           ],
@@ -161,7 +163,8 @@ export const TakeActionDropdown = React.memo(
           title: CHANGE_ALERT_STATUS,
           items: statusActions,
         },
-        /* {
+        /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
+        {
           id: 2,
           title: ACTION_ADD_TO_CASE,
           content: (

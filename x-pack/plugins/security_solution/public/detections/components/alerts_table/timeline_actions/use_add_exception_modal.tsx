@@ -8,7 +8,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import { getOr } from 'lodash/fp';
 import { Ecs } from '../../../../../common/ecs';
 import {
   DEFAULT_INDEX_PATTERN,
@@ -18,8 +17,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { inputsModel } from '../../../../common/store';
-import { useUserData } from '../../user_info';
-import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 
 interface UseExceptionModalProps {
   ecsData: Ecs | null | undefined;
@@ -104,67 +101,4 @@ export const useExceptionModal = ({
     onAddExceptionCancel,
     onAddExceptionConfirm,
   };
-};
-
-interface UseExceptionAction {
-  name: string;
-  onClick: () => void;
-  disabled: boolean;
-}
-
-interface UseExceptionActionProps {
-  ecsData?: Ecs;
-  onAddExceptionTypeClick: (type: ExceptionListType) => void;
-}
-
-export const useExceptionActions = ({
-  ecsData,
-  onAddExceptionTypeClick,
-}: UseExceptionActionProps): UseExceptionAction[] => {
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
-
-  const handleDetectionExceptionModal = useCallback(() => {
-    onAddExceptionTypeClick('detection');
-  }, [onAddExceptionTypeClick]);
-
-  const handleEndpointExceptionModal = useCallback(() => {
-    onAddExceptionTypeClick('endpoint');
-  }, [onAddExceptionTypeClick]);
-
-  const isEndpointAlert = useMemo((): boolean => {
-    if (ecsData == null) {
-      return false;
-    }
-
-    const eventModules = getOr([], 'signal.original_event.module', ecsData);
-    const kinds = getOr([], 'signal.original_event.kind', ecsData);
-
-    return eventModules.includes('endpoint') && kinds.includes('alert');
-  }, [ecsData]);
-
-  const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
-  const disabledAddException = !canUserCRUD || !hasIndexWrite;
-
-  const exceptionActions = useMemo(
-    () => [
-      {
-        name: ACTION_ADD_ENDPOINT_EXCEPTION,
-        onClick: handleEndpointExceptionModal,
-        disabled: disabledAddEndpointException,
-      },
-      {
-        name: ACTION_ADD_EXCEPTION,
-        onClick: handleDetectionExceptionModal,
-        disabled: disabledAddException,
-      },
-    ],
-    [
-      disabledAddEndpointException,
-      disabledAddException,
-      handleDetectionExceptionModal,
-      handleEndpointExceptionModal,
-    ]
-  );
-
-  return exceptionActions;
 };

@@ -10,10 +10,11 @@ import { isIsolationSupported } from '../../../../common/endpoint/service/host_i
 import { HostStatus } from '../../../../common/endpoint/types';
 import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
-import { getFieldValue } from '../../../timelines/components/side_panel/event_details';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
-interface UseHostIsolationProps {
+import { getFieldValue } from './helpers';
+
+interface UseHostIsolationActionProps {
   closePopover: () => void;
   detailsData: TimelineEventsDetailsItem[] | null;
   isHostIsolationPanelOpen: boolean;
@@ -25,7 +26,7 @@ export const useHostIsolationAction = ({
   detailsData,
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
-}: UseHostIsolationProps) => {
+}: UseHostIsolationActionProps) => {
   const isEndpointAlert = useMemo(() => {
     return endpointAlertCheck({ data: detailsData || [] });
   }, [detailsData]);

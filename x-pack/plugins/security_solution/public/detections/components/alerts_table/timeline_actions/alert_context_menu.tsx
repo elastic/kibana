@@ -27,8 +27,10 @@ import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
 import { useAlertsActions } from './use_alerts_actions';
-import { useExceptionActions, useExceptionModal } from './use_add_exception_modal';
-import { useEventFilterAction, useEventFilterModal } from './use_event_filter_modal';
+import { useExceptionModal } from './use_add_exception_modal';
+import { useExceptionActions } from './use_add_exception_actions';
+import { useEventFilterModal } from './use_event_filter_modal';
+import { useEventFilterAction } from './use_event_filter_action';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;

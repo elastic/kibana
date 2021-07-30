@@ -30,6 +30,7 @@ import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
 } from '../../../../detections/components/host_isolation/translations';
+import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { ALERT_DETAILS } from './translations';
 import { isIsolationSupported } from '../../../../../common/endpoint/service/host_isolation/utils';
 import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_check';
@@ -51,20 +52,6 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     }
   }
 `;
-
-export const getFieldValue = (
-  {
-    category,
-    field,
-  }: {
-    category: string;
-    field: string;
-  },
-  data: TimelineEventsDetailsItem[] | null
-) => {
-  const currentField = find({ category, field }, data)?.values;
-  return currentField && currentField.length > 0 ? currentField[0] : '';
-};
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;

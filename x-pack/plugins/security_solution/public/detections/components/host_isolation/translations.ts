@@ -8,27 +8,30 @@
 import { i18n } from '@kbn/i18n';
 
 export const ISOLATE_HOST = i18n.translate(
-  'xpack.securitySolution.endpoint.isolateHost.isolateHost',
+  'xpack.securitySolution.endpoint.hostIsolation.isolateHost',
   {
     defaultMessage: 'Isolate host',
   }
 );
 
 export const UNISOLATE_HOST = i18n.translate(
-  'xpack.securitySolution.endpoint.isolateHost.unisolateHost',
+  'xpack.securitySolution.endpoint.hostIsolation.unisolateHost',
   {
     defaultMessage: 'Release host',
   }
 );
 
 export const CASES_ASSOCIATED_WITH_ALERT = (caseCount: number): string =>
-  i18n.translate('xpack.securitySolution.endpoint.isolateHost.casesAssociatedWithAlert', {
-    defaultMessage:
-      '{caseCount} {caseCount, plural, one {case} other {cases}} associated with this host',
-    values: { caseCount },
-  });
+  i18n.translate(
+    'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWithAlert',
+    {
+      defaultMessage:
+        '{caseCount} {caseCount, plural, one {case} other {cases}} associated with this host',
+      values: { caseCount },
+    }
+  );
 
 export const RETURN_TO_ALERT_DETAILS = i18n.translate(
-  'xpack.securitySolution.endpoint.isolateHost.returnToAlertDetails',
+  'xpack.securitySolution.endpoint.hostIsolation.returnToAlertDetails',
   { defaultMessage: 'Return to alert details' }
 );
