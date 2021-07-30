@@ -17,7 +17,7 @@ import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
 import { getAgentMarks } from '../Marks/get_agent_marks';
 import { getErrorMarks } from '../Marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
-import { WaterfallFlyout } from './WaterfallFlyout';
+import { WaterfallFlyout } from './waterfall_flyout';
 import {
   IWaterfall,
   IWaterfallItem,

@@ -93,49 +93,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
     })
   );
 
-  // return the raw output from a job
-  router.get(
-    {
-      path: `${MAIN_ENTRY}/output/{docId}`,
-      validate: {
-        params: schema.object({
-          docId: schema.string({ minLength: 2 }),
-        }),
-      },
-    },
-    userHandler(async (user, context, req, res) => {
-      // ensure the async dependencies are loaded
-      if (!context.reporting) {
-        return handleUnavailable(res);
-      }
-
-      const { docId } = req.params;
-      const {
-        management: { jobTypes = [] },
-      } = await reporting.getLicenseInfo();
-
-      const jobsQuery = jobsQueryFactory(reporting);
-      const result = await jobsQuery.getContent(user, docId);
-
-      if (!result) {
-        throw Boom.notFound();
-      }
-
-      const { jobtype: jobType, output } = result;
-
-      if (!jobTypes.includes(jobType)) {
-        throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
-      }
-
-      return res.ok({
-        body: output?.content ?? {},
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
-    })
-  );
-
   // return some info about the job
   router.get(
     {
