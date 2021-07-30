@@ -205,13 +205,7 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "source": {
@@ -230,13 +224,7 @@
               "\nOptionally set a query."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "source": {
@@ -473,13 +461,7 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "source": {
@@ -498,13 +480,7 @@
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "source": {
@@ -1079,13 +1055,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "source": {
@@ -1102,13 +1072,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "source": {
@@ -1249,7 +1213,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 78
+        "lineNumber": 77
       },
       "deprecated": false,
       "children": [
@@ -1269,7 +1233,7 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 79
+            "lineNumber": 78
           },
           "deprecated": false
         },
@@ -1294,7 +1258,7 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 118
+            "lineNumber": 117
           },
           "deprecated": false
         }
@@ -1311,7 +1275,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 121
+        "lineNumber": 120
       },
       "deprecated": false,
       "children": [
@@ -1333,7 +1297,7 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 122
+            "lineNumber": 121
           },
           "deprecated": false
         },
@@ -1358,10 +1322,17 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 127
+            "lineNumber": 126
           },
           "deprecated": true,
           "references": [
+            {
+              "plugin": "observability",
+              "link": {
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx",
+                "lineNumber": 29
+              }
+            },
             {
               "plugin": "osquery",
               "link": {
@@ -1399,7 +1370,7 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 159
+            "lineNumber": 158
           },
           "deprecated": false
         }
