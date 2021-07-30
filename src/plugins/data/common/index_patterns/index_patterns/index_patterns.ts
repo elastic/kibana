@@ -29,7 +29,10 @@ import {
   FieldSpec,
   IndexPatternFieldMap,
 } from '../types';
-import { FieldFormatsStartCommon } from '../../../../field_formats/common/';
+import {
+  FieldFormatsStartCommon,
+  UI_SETTINGS as FORMATS_UI_SETTINGS,
+} from '../../../../field_formats/common/';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
@@ -500,7 +503,7 @@ export class IndexPatternsService {
    * @returns IndexPattern
    */
   async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
-    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
     const indexPattern = new IndexPattern({

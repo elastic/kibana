@@ -9,7 +9,7 @@
 import { TableHeader } from './table_header/table_header';
 import { getServices } from '../../../../kibana_services';
 import { SORT_DEFAULT_ORDER_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
-import { UI_SETTINGS } from '../../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../../field_formats/common';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createTableHeaderDirective(reactDirective: any) {

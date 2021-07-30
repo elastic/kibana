@@ -17,6 +17,7 @@ import {
 import { FieldFormatsStart, FieldFormatsSetup } from './types';
 import { DateFormat, DateNanosFormat } from './lib/converters';
 import { baseFormatters, FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
+import { getUiSettings } from './ui_settings';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {
   private readonly fieldFormats: FieldFormatInstanceType[] = [
@@ -28,6 +29,8 @@ export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormat
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
+    core.uiSettings.register(getUiSettings());
+
     return {
       register: (customFieldFormat: FieldFormatInstanceType) =>
         this.fieldFormats.push(customFieldFormat),
