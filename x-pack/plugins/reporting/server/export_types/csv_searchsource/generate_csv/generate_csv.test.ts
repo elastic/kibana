@@ -13,7 +13,8 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'src/core/server/mocks';
-import { FieldFormatsRegistry, ISearchStartSearchSource } from 'src/plugins/data/common';
+import { ISearchStartSearchSource } from 'src/plugins/data/common';
+import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';

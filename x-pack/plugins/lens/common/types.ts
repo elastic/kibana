@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FilterMeta, Filter, IFieldFormat } from '../../../../src/plugins/data/common';
+import type { FilterMeta, Filter } from '../../../../src/plugins/data/common';
+import type { IFieldFormat } from '../../../../src/plugins/field_formats/common';
 import type { Datatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

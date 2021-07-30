@@ -18,7 +18,7 @@ import {
   EuiRange,
   EuiToolTip,
 } from '@elastic/eui';
-import type { IFieldFormat } from 'src/plugins/data/public';
+import type { IFieldFormat } from 'src/plugins/field_formats/common';
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
@@ -59,7 +59,7 @@ const GranularityHelpPopover = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.ranges.granularityPopoverExplanation"
-          defaultMessage='The size of the interval is a "nice" value. When the granularity of the slider changes, the interval stays the same when the “nice” interval is the same. The minimum granularity is 1, and the maximum value is 
+          defaultMessage='The size of the interval is a "nice" value. When the granularity of the slider changes, the interval stays the same when the “nice” interval is the same. The minimum granularity is 1, and the maximum value is
             {setting}. To change the maximum granularity, go to Advanced settings.'
           values={{
             setting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,

@@ -6,7 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { fieldFormats, FieldFormatsGetConfigFn, UI_SETTINGS } from 'src/plugins/data/server';
+import { UI_SETTINGS } from 'src/plugins/data/server';
+import {
+  FieldFormatsGetConfigFn,
+  FieldFormatsRegistry,
+  BytesFormat,
+  NumberFormat,
+} from 'src/plugins/field_formats/common';
 import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 import { fieldFormatMapFactory } from './field_format_map';
 
@@ -30,8 +36,8 @@ describe('field format map', function () {
   const testValue = '4000';
   const mockTimezone = 'Browser';
 
-  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
-  fieldFormatsRegistry.init(getConfig, {}, [fieldFormats.BytesFormat, fieldFormats.NumberFormat]);
+  const fieldFormatsRegistry = new FieldFormatsRegistry();
+  fieldFormatsRegistry.init(getConfig, {}, [BytesFormat, NumberFormat]);
 
   const formatMap = fieldFormatMapFactory(
     indexPatternSavedObject,

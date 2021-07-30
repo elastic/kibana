@@ -13,9 +13,6 @@ import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
   ES_SEARCH_STRATEGY,
-  FieldFormat,
-  FieldFormatConfig,
-  IFieldFormatsRegistry,
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
@@ -24,6 +21,11 @@ import {
   tabifyDocs,
   cellHasFormulas,
 } from '../../../../../../../src/plugins/data/common';
+import {
+  FieldFormat,
+  FieldFormatConfig,
+  IFieldFormatsRegistry,
+} from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';

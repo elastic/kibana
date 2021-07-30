@@ -36,7 +36,8 @@
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",
-    "embeddable"
+    "embeddable",
+    "fieldFormats"
   ],
   "owner": {
     "name": "Kibana App",

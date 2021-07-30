@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldFormat } from 'src/plugins/data/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 import type { Datatable } from 'src/plugins/expressions';
 import { DatatableArgs } from './datatable';
 
