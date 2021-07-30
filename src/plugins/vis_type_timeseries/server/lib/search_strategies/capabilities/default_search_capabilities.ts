@@ -19,17 +19,18 @@ import {
   METRIC_AGGREGATIONS,
   SIBLING_PIPELINE_AGGREGATIONS,
 } from '../../../../common/enums';
+import type { Panel } from '../../../../common/types';
 
 export interface SearchCapabilitiesOptions {
   timezone?: string;
   maxBucketsLimit: number;
-  panel: any;
+  panel: Panel;
 }
 
 export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];
   public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
-  public panel: any;
+  public panel: Panel;
 
   constructor(options: SearchCapabilitiesOptions) {
     this.timezone = options.timezone;
@@ -48,7 +49,7 @@ export class DefaultSearchCapabilities {
     ) {
       const metricAggs = Object.values<string>(METRIC_AGGREGATIONS);
       const siblingPipelineAggs = Object.values<string>(SIBLING_PIPELINE_AGGREGATIONS);
-      const availableAggs = [...metricAggs, ...siblingPipelineAggs, 'math'].reduce(
+      const allAvailableAggs = [...metricAggs, ...siblingPipelineAggs, 'math'].reduce(
         (availableAggs, aggType) => ({
           ...availableAggs,
           [aggType]: {
@@ -57,7 +58,7 @@ export class DefaultSearchCapabilities {
         }),
         {}
       );
-      return this.createUiRestriction(availableAggs);
+      return this.createUiRestriction(allAvailableAggs);
     }
     return this.createUiRestriction();
   }

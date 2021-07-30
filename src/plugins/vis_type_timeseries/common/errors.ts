@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-
 export class UIError extends Error {
   constructor(message: string) {
     super(message);

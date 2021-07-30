@@ -7,6 +7,7 @@
  */
 
 import { Unit } from '@elastic/datemath';
+import type { Panel } from '../../../../common/types';
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
 
 describe('Rollup Search Capabilities', () => {
@@ -32,7 +33,7 @@ describe('Rollup Search Capabilities', () => {
     };
 
     rollupSearchCaps = new RollupSearchCapabilities(
-      { maxBucketsLimit: 2000, timezone: 'UTC' },
+      { maxBucketsLimit: 2000, timezone: 'UTC', panel: {} as Panel },
       fieldsCapabilities,
       rollupIndex
     );

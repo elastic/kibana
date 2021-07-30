@@ -21,7 +21,7 @@ interface InvalidAggProps {
   onDelete: () => void;
 }
 
-export const getInvalidAggComponent = (message: JSX.Element) => (props: InvalidAggProps)=> {
+export const getInvalidAggComponent = (message: JSX.Element) => (props: InvalidAggProps) => {
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -36,4 +36,4 @@ export const getInvalidAggComponent = (message: JSX.Element) => (props: InvalidA
       </EuiTitle>
     </AggRow>
   );
-}
+};

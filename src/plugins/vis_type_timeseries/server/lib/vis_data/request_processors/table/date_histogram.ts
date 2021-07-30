@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { overwrite, getBucketSize, isLastValueTimerangeMode, getTimerange, isAggSupported } from '../../helpers';
+import {
+  overwrite,
+  getBucketSize,
+  isLastValueTimerangeMode,
+  getTimerange,
+  isAggSupported,
+} from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 import { METRIC_AGGREGATIONS } from '../../../../../common/enums';
-import { AggNotSupportedInMode } from '../../../../../common/errors';
 
 import type { TableRequestProcessorsFunction, TableSearchRequestMeta } from './types';
 
@@ -68,9 +73,7 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
 
       const aggRoot = calculateAggRoot(doc, column);
 
-      if (
-        column.metrics.every((metric) => metricAggs.includes(metric.type))
-      ) {
+      if (column.metrics.every((metric) => metricAggs.includes(metric.type))) {
         overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
           field: timeField,
           buckets: 1,

@@ -7,12 +7,14 @@
  */
 
 import { DefaultSearchCapabilities } from './default_search_capabilities';
+import type { Panel } from '../../../../common/types';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities: DefaultSearchCapabilities;
 
   beforeEach(() => {
     defaultSearchCapabilities = new DefaultSearchCapabilities({
+      panel: {} as Panel,
       timezone: 'UTC',
       maxBucketsLimit: 2000,
     });

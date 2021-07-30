@@ -27,9 +27,11 @@ describe('DefaultSearchStrategy', () => {
   let req: VisTypeTimeseriesVisDataRequest;
 
   beforeEach(() => {
-    req = {
-      body: {},
-    } as VisTypeTimeseriesVisDataRequest;
+    req = ({
+      body: {
+        panels: [],
+      },
+    } as unknown) as VisTypeTimeseriesVisDataRequest;
     defaultSearchStrategy = new DefaultSearchStrategy();
   });
 

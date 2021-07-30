@@ -58,7 +58,7 @@ export enum PARENT_PIPELINE_AGGREGATIONS {
   DERIVATIVE = 'derivative',
   MOVING_AVERAGE = 'moving_average',
   POSITIVE_ONLY = 'positive_only',
-  SERIAL_DIFF = 'serial_diff'
+  SERIAL_DIFF = 'serial_diff',
 }
 
 // We should probably use BUCKET_TYPES from data plugin in future.
