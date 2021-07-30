@@ -26,7 +26,7 @@ import { initialTrustedAppsPageState } from './builders';
 import { trustedAppsPageReducer } from './reducer';
 import { createTrustedAppsPageMiddleware } from './middleware';
 import { Immutable } from '../../../../../common/endpoint/types';
-import { getPolicyResponse } from './mocks';
+import { getGeneratedPolicyResponse } from './mocks';
 
 const initialNow = 111111;
 const dateNowMock = jest.fn();
@@ -74,18 +74,11 @@ const createStoreSetup = (trustedAppsService: TrustedAppsService) => {
 describe('middleware', () => {
   type TrustedAppsEntriesExistState = Pick<TrustedAppsListPageState, 'entriesExist'>;
   type TrustedAppsPoliciestate = Pick<TrustedAppsListPageState, 'policies'>;
+  let policiesLoadedState: () => TrustedAppsPoliciestate;
   const entriesExistLoadedState = (): TrustedAppsEntriesExistState => {
     return {
       entriesExist: {
         data: true,
-        type: 'LoadedResourceState',
-      },
-    };
-  };
-  const policiesLoadedState = (): TrustedAppsPoliciestate => {
-    return {
-      policies: {
-        data: getPolicyResponse(),
         type: 'LoadedResourceState',
       },
     };
@@ -112,6 +105,14 @@ describe('middleware', () => {
 
   beforeEach(() => {
     dateNowMock.mockReturnValue(initialNow);
+    policiesLoadedState = () => {
+      return {
+        policies: {
+          data: getGeneratedPolicyResponse(),
+          type: 'LoadedResourceState',
+        },
+      };
+    };
   });
 
   describe('initial state', () => {
@@ -199,9 +200,10 @@ describe('middleware', () => {
       const location = createLocationState();
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
+      const policiesResponse = getGeneratedPolicyResponse();
 
       service.getTrustedAppsList.mockResolvedValue(createGetTrustedListAppsResponse(pagination));
-      service.getPolicyList.mockResolvedValue(getPolicyResponse());
+      service.getPolicyList.mockResolvedValue(policiesResponse);
 
       store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
@@ -231,7 +233,10 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         ...initialState,
         ...entriesExistLoadedState(),
-        ...policiesLoadedState(),
+        policies: {
+          data: policiesResponse,
+          type: 'LoadedResourceState',
+        },
         listView: createLoadedListViewWithPagination(newNow, pagination),
         active: true,
         location,
@@ -317,10 +322,11 @@ describe('middleware', () => {
     it('submits successfully when entry is defined', async () => {
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
+      const policiesResponse = getGeneratedPolicyResponse();
 
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockResolvedValue();
-      service.getPolicyList.mockResolvedValue(getPolicyResponse());
+      service.getPolicyList.mockResolvedValue(policiesResponse);
 
       store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
@@ -349,7 +355,10 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         ...testStartState,
         ...entriesExistLoadedState(),
-        ...policiesLoadedState(),
+        policies: {
+          data: policiesResponse,
+          type: 'LoadedResourceState',
+        },
         listView: listViewNew,
       });
       expect(service.deleteTrustedApp).toBeCalledWith({ id: '3' });
@@ -359,10 +368,11 @@ describe('middleware', () => {
     it('does not submit twice', async () => {
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
+      const policiesResponse = getGeneratedPolicyResponse();
 
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockResolvedValue();
-      service.getPolicyList.mockResolvedValue(getPolicyResponse());
+      service.getPolicyList.mockResolvedValue(policiesResponse);
 
       store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
@@ -392,7 +402,10 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         ...testStartState,
         ...entriesExistLoadedState(),
-        ...policiesLoadedState(),
+        policies: {
+          data: policiesResponse,
+          type: 'LoadedResourceState',
+        },
         listView: listViewNew,
       });
       expect(service.deleteTrustedApp).toBeCalledWith({ id: '3' });
@@ -402,10 +415,11 @@ describe('middleware', () => {
     it('does not submit when server response with failure', async () => {
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
+      const policiesResponse = getGeneratedPolicyResponse();
 
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockRejectedValue({ body: notFoundError });
-      service.getPolicyList.mockResolvedValue(getPolicyResponse());
+      service.getPolicyList.mockResolvedValue(policiesResponse);
 
       store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
@@ -432,7 +446,10 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         ...testStartState,
         ...entriesExistLoadedState(),
-        ...policiesLoadedState(),
+        policies: {
+          data: policiesResponse,
+          type: 'LoadedResourceState',
+        },
         deletionDialog: {
           entry,
           confirmed: true,

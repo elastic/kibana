@@ -22,10 +22,10 @@ export const parseQueryFilterToKQL = (filter: string, fields: Readonly<string[]>
   return `(${kuery})`;
 };
 
-const getPolicyQuery = (policy: string): string => {
-  if (policy === 'global') return 'exception-list-agnostic.attributes.tags:"policy:all"';
-  if (policy === 'unassigned') return '(not exception-list-agnostic.attributes.tags:*)';
-  return `exception-list-agnostic.attributes.tags:"policy:${policy}"`;
+const getPolicyQuery = (policyId: string): string => {
+  if (policyId === 'global') return 'exception-list-agnostic.attributes.tags:"policy:all"';
+  if (policyId === 'unassigned') return '(not exception-list-agnostic.attributes.tags:*)';
+  return `exception-list-agnostic.attributes.tags:"policy:${policyId}"`;
 };
 
 export const parsePoliciesToKQL = (includedPolicies: string, excludedPolicies: string): string => {
@@ -39,7 +39,7 @@ export const parsePoliciesToKQL = (includedPolicies: string, excludedPolicies: s
     : '';
 
   const excludedPoliciesKuery = parsedExcludedPolicies
-    ? parsedExcludedPolicies.map((policy) => `not ${getPolicyQuery(policy)}`).join(' AND ')
+    ? parsedExcludedPolicies.map((policyId) => `not ${getPolicyQuery(policyId)}`).join(' AND ')
     : '';
 
   const kuery = [];

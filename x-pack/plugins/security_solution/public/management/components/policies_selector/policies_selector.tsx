@@ -27,10 +27,10 @@ export interface PoliciesSelectorProps {
   policies: ImmutableArray<PolicyData>;
   defaultIncludedPolicies?: string;
   defaultExcludedPolicies?: string;
-  onChangeSelection: (items: Item[]) => void;
+  onChangeSelection: (items: PolicySelectionItem[]) => void;
 }
 
-export interface Item {
+export interface PolicySelectionItem {
   name: string;
   id?: string;
   checked?: FilterChecked;
@@ -57,7 +57,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
   ({ policies, onChangeSelection, defaultExcludedPolicies, defaultIncludedPolicies }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [query, setQuery] = useState<string>('');
-    const [itemsList, setItemsList] = useState<Item[]>([]);
+    const [itemsList, setItemsList] = useState<PolicySelectionItem[]>([]);
 
     useEffect(() => {
       const defaultIncludedPoliciesByKey: DefaultPoliciesByKey = defaultIncludedPolicies

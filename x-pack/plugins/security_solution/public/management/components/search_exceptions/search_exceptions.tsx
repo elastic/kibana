@@ -35,21 +35,24 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     const [includedPolicies, setIncludedPolicies] = useState<string>(defaultIncludedPolicies || '');
     const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');
 
-    const onChangeSelection = (items: Item[]) => {
-      const includePoliciesNew = items
-        .filter((item) => item.checked === 'on')
-        .map((item) => item.id)
-        .join(',');
-      const excludePoliciesNew = items
-        .filter((item) => item.checked === 'off')
-        .map((item) => item.id)
-        .join(',');
+    const onChangeSelection = useCallback(
+      (items: Item[]) => {
+        const includePoliciesNew = items
+          .filter((item) => item.checked === 'on')
+          .map((item) => item.id)
+          .join(',');
+        const excludePoliciesNew = items
+          .filter((item) => item.checked === 'off')
+          .map((item) => item.id)
+          .join(',');
 
-      setIncludedPolicies(includePoliciesNew);
-      setExcludedPolicies(excludePoliciesNew);
+        setIncludedPolicies(includePoliciesNew);
+        setExcludedPolicies(excludePoliciesNew);
 
-      onSearch(query, includePoliciesNew, excludePoliciesNew);
-    };
+        onSearch(query, includePoliciesNew, excludePoliciesNew);
+      },
+      [onSearch, query]
+    );
 
     const handleOnChangeSearchField = useCallback(
       (ev: React.ChangeEvent<HTMLInputElement>) => setQuery(ev.target.value),

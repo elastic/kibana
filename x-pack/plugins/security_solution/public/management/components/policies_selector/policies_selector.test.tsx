@@ -6,7 +6,7 @@
  */
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { render, act, fireEvent } from '@testing-library/react';
+import { render, act, fireEvent, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
@@ -15,24 +15,25 @@ import { PoliciesSelector, PoliciesSelectorProps } from '.';
 let onChangeSelectionMock: jest.Mock;
 
 describe('Policies selector', () => {
+  let getElement: (params: Partial<PoliciesSelectorProps>) => RenderResult;
   beforeEach(() => {
     onChangeSelectionMock = jest.fn();
+    getElement = (params: Partial<PoliciesSelectorProps>) => {
+      return render(
+        <I18nProvider>
+          <PoliciesSelector
+            policies={[policy]}
+            onChangeSelection={onChangeSelectionMock}
+            {...params}
+          />
+        </I18nProvider>
+      );
+    };
   });
   const generator = new EndpointDocGenerator('policy-list');
   const policy = generator.generatePolicyPackagePolicy();
   policy.name = 'test policy A';
   policy.id = 'abc123';
-  const getElement = (params: Partial<PoliciesSelectorProps>) => {
-    return render(
-      <I18nProvider>
-        <PoliciesSelector
-          policies={[policy]}
-          onChangeSelection={onChangeSelectionMock}
-          {...params}
-        />
-      </I18nProvider>
-    );
-  };
 
   describe('When click on policy', () => {
     it('should have a default value', () => {

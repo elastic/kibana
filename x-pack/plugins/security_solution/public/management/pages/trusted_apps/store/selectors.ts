@@ -204,10 +204,7 @@ export const prevEntriesExist: (
   state: Immutable<TrustedAppsListPageState>
 ) => boolean = createSelector(entriesExistState, (doEntriesExists) => {
   return (
-    isLoadingResourceState(doEntriesExists) &&
-    doEntriesExists.previousState &&
-    // @ts-ignore Data exists in prevState
-    doEntriesExists.previousState.data
+    isLoadingResourceState(doEntriesExists) && !!getLastLoadedResourceState(doEntriesExists)?.data
   );
 });
 
