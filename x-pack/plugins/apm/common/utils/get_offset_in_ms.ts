@@ -7,9 +7,21 @@
 import moment from 'moment';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 
-export function getOffsetInMs(start: number, offset?: string) {
+export function getOffsetInMs({
+  start,
+  end,
+  offset,
+}: {
+  start: number;
+  end: number;
+  offset?: string;
+}) {
   if (!offset) {
-    return 0;
+    return {
+      startWithOffset: start,
+      endWithOffset: end,
+      offsetInMs: 0,
+    };
   }
 
   const interval = parseInterval(offset);
@@ -20,5 +32,9 @@ export function getOffsetInMs(start: number, offset?: string) {
 
   const calculatedOffset = start - moment(start).subtract(interval).valueOf();
 
-  return calculatedOffset;
+  return {
+    startWithOffset: start - calculatedOffset,
+    endWithOffset: end - calculatedOffset,
+    offsetInMs: calculatedOffset,
+  };
 }
