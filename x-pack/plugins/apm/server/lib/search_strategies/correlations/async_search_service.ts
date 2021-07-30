@@ -20,7 +20,7 @@ import type {
   SearchServiceFetchParams,
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
-import { computeExpectationsAndRanges } from './utils/aggregation_utils';
+import { computeExpectationsAndRanges } from './utils/compute_expectations_and_ranges';
 import { fetchTransactionDurationFractions } from './query_fractions';
 
 const CORRELATION_THRESHOLD = 0.3;

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './math_utils';
-export * from './aggregation_utils';
+export { computeExpectationsAndRanges } from './compute_expectations_and_ranges';
