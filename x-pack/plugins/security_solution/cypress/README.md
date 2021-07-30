@@ -7,7 +7,7 @@ Currently with Cypress you can develop `functional` tests and coming soon `CCS` 
 If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
 
 - Functional Tests:
-  - Frank Hassanabad, Gloria Hornero and Patryk Kopycinsky 
+  - Gloria Hornero, Frank Hassanabad and Patryk Kopycinsky 
   
 - CCS Tests:
   - Technical questions around the https://github.com/elastic/integration-test repo:
@@ -35,12 +35,10 @@ If you are still having doubts, questions or queries, please feel free to ping o
 
 ## How to add a new Cypress test
 
-Before adding a new test please ask yourself the following question: `Can I test this behaviour with the unit or API tests?` if the answer is `Yes I can`, 
-then, please add the test there since Cypress is not the best place for it :) 
+Before considering adding a new Cypress tests, please make sure you have added unit and API tests first. Note that, the aim of Cypress
+ is to test that the user interface operates as expected, hence, you should not be using this tool to test REST API or data contracts.
 
-If the answer is `No, I can't` then this is the best place to start.
-
-First of all please take a look to the [**Development Best Practices**](#development-best-practices) seection.
+First take a look to the [**Development Best Practices**](#development-best-practices) section.
 Then check check [**Folder structure**](#folder-structure) section to know where is the best place to put your test, [**Test data**](#test-data) section if you need to create any type
 of data for your test, [**Running the tests**](#running-the-tests) to know how to execute the tests and [**Debugging your test**](#debugging-your-test) to debug your test if needed.
 
@@ -264,6 +262,8 @@ Appending `--browser firefox` to the `yarn cypress:run:ccs` command above will r
 In order to be able to debug any Cypress test you need to open Cypress on visual mode. [Here](https://docs.cypress.io/guides/guides/debugging)
 you can find an extended guide about how to proceed.
 
+If you are debugging a flaky test, a good tip is to insert a `cy.wait(<some long milliseconds>)` around async parts of the tes code base, such as network calls which can make an indeterministic test, deterministically fail locally. 
+
 ## Folder Structure
 
 Below you can find the folder structure used on our Cypress tests.
@@ -402,6 +402,7 @@ export const unmappedCCSRule: CustomRule = {
 Similar approach should be used in defining all index patterns, rules, and queries to be applied on remote data.
 
 ## Development Best Practices
+Below you will a set of best practices that should be followed when writing Cypress tests.
 
 ### Make sure your test fail
 
@@ -426,10 +427,13 @@ taken into consideration until another solution is implemented:
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
+### Cypress-pipe
+It is very common in the code to don't have click handlers regitered. In this specific case, please use [Cypress pipe](https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/). 
+
 ### CCS test specific
 When testing CCS we want to put our focus in making sure that our `Source` instance is receiving properly the data that comes from the `Remote` instances, as well as the data is displayed as we expect on the `Source`.
 
-For that reason and in order to make our test more stable, use the API to execute all the actions needed before the assertions.
+For that reason and in order to make our test more stable, use the API to execute all the actions needed before the assertions, and use Cypress to assert that the UI is displaying all the expected things.
 
 ## Test Artifacts
 
