@@ -77,7 +77,6 @@ export class VisTypeXyPlugin
       expressions.registerFunction(expressionFunctions.thresholdLine);
       expressions.registerFunction(expressionFunctions.label);
       expressions.registerFunction(expressionFunctions.visScale);
-      expressions.registerFunction(expressionFunctions.xyDimension);
 
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);
     }

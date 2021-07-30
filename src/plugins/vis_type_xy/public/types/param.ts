@@ -8,7 +8,7 @@
 
 import type { Fit, Position } from '@elastic/charts';
 import type { Style, Labels, PaletteOutput } from '../../../charts/public';
-import type { SchemaConfig } from '../../../visualizations/public';
+import type { SchemaConfig, ExpressionValueXYDimension } from '../../../visualizations/public';
 import type { ChartType, XyVisType } from '../../common';
 import type {
   ExpressionValueCategoryAxis,
@@ -17,7 +17,6 @@ import type {
   ExpressionValueLabel,
   ExpressionValueThresholdLine,
   ExpressionValueTimeMarker,
-  ExpressionValueXYDimension,
 } from '../expression_functions';
 
 import type {

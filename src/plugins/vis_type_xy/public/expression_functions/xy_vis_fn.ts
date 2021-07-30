@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ExpressionFunctionDefinition, Datatable, Render } from '../../../expressions/public';
+import type { ExpressionFunctionDefinition, Datatable, Render } from '../../../expressions/common';
+import { prepareLogTable, Dimension } from '../../../visualizations/public';
 import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
 
@@ -262,7 +263,44 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
     } as VisParams;
 
     if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.logDatatable('default', context);
+      const argsTable: Dimension[] = [
+        [
+          args.yDimension,
+          i18n.translate('visTypeXY.function.dimension.metric', {
+            defaultMessage: 'Metric',
+          }),
+        ],
+        [
+          args.zDimension,
+          i18n.translate('visTypeXY.function.adimension.dotSize', {
+            defaultMessage: 'Dot size',
+          }),
+        ],
+        [
+          args.splitColumnDimension,
+          i18n.translate('visTypeXY.function.dimension.splitcolumn', {
+            defaultMessage: 'Column split',
+          }),
+        ],
+        [
+          args.splitRowDimension,
+          i18n.translate('visTypeXY.function.dimension.splitrow', {
+            defaultMessage: 'Row split',
+          }),
+        ],
+      ];
+
+      if (args.xDimension) {
+        argsTable.push([
+          [args.xDimension],
+          i18n.translate('visTypeXY.function.adimension.bucket', {
+            defaultMessage: 'Bucket',
+          }),
+        ]);
+      }
+
+      const logTable = prepareLogTable(context, argsTable);
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
     return {
