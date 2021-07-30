@@ -354,6 +354,16 @@ export class DiscoverPageObject extends FtrService {
     // a filter check may make sense here, but it should be properly handled to make
     // it work with the _score and _source fields as well
     await this.clickFieldListItemToggle(field);
+    const isLegacyDefault = await this.useLegacyTable();
+    if (isLegacyDefault) {
+      await this.retry.waitFor(`field ${field} to be added to classic table`, async () => {
+        return await this.testSubjects.exists(`docTableRemoveHeader-${field}`);
+      });
+    } else {
+      await this.retry.waitFor(`field ${field} to be added to new table`, async () => {
+        return await this.testSubjects.exists(`dataGridHeaderCell-${field}`);
+      });
+    }
   }
 
   public async clickFieldListItemRemove(field: string) {
