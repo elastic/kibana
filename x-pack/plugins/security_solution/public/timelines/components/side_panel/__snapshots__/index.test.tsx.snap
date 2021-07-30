@@ -43,8 +43,11 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     docValueFields={Array []}
     expandedEvent={
       Object {
+        "ecsData": Object {},
         "eventId": "my-id",
         "indexName": "my-index",
+        "nonEcsData": Array [],
+        "refetch": [MockFunction],
       }
     }
     handleOnEventClosed={[Function]}
@@ -132,8 +135,11 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       detailsData={null}
       event={
         Object {
+          "ecsData": Object {},
           "eventId": "my-id",
           "indexName": "my-index",
+          "nonEcsData": Array [],
+          "refetch": [MockFunction],
         }
       }
       isAlert={false}
@@ -285,8 +291,11 @@ Array [
         docValueFields={Array []}
         expandedEvent={
           Object {
+            "ecsData": Object {},
             "eventId": "my-id",
             "indexName": "my-index",
+            "nonEcsData": Array [],
+            "refetch": [MockFunction],
           }
         }
         handleOnEventClosed={[Function]}
@@ -351,8 +360,11 @@ Array [
                     detailsData={null}
                     event={
                       Object {
+                        "ecsData": Object {},
                         "eventId": "my-id",
                         "indexName": "my-index",
+                        "nonEcsData": Array [],
+                        "refetch": [MockFunction],
                       }
                     }
                     isAlert={false}
@@ -454,6 +466,60 @@ Array [
             </div>
           </EuiFlyoutBody>
         </Styled(EuiFlyoutBody)>
+        <Memo()
+          detailsData={null}
+          expandedEvent={
+            Object {
+              "ecsData": Object {},
+              "eventId": "my-id",
+              "indexName": "my-index",
+              "nonEcsData": Array [],
+              "refetch": [MockFunction],
+            }
+          }
+          handleOnEventClosed={[Function]}
+          isAlert={false}
+          isHostIsolationPanelOpen={false}
+          loadingEventDetails={true}
+          onAddIsolationStatusClick={[Function]}
+          timelineId="test"
+        >
+          <EuiFlyoutFooter>
+            <div
+              className="euiFlyoutFooter"
+            >
+              <EuiFlexGroup
+                justifyContent="flexEnd"
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <Memo()
+                        detailsData={null}
+                        ecsData={Object {}}
+                        handleOnEventClosed={[Function]}
+                        isHostIsolationPanelOpen={false}
+                        loadingEventDetails={true}
+                        nonEcsData={Array []}
+                        onAddEventFilterClick={[Function]}
+                        onAddExceptionTypeClick={[Function]}
+                        onAddIsolationStatusClick={[Function]}
+                        refetch={[MockFunction]}
+                        timelineId="test"
+                      />
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </EuiFlyoutFooter>
+        </Memo()>
       </EventDetailsPanelComponent>
     </div>
   </EuiFlyout>,
@@ -498,8 +564,11 @@ Array [
       docValueFields={Array []}
       expandedEvent={
         Object {
+          "ecsData": Object {},
           "eventId": "my-id",
           "indexName": "my-index",
+          "nonEcsData": Array [],
+          "refetch": [MockFunction],
         }
       }
       handleOnEventClosed={[Function]}
@@ -564,8 +633,11 @@ Array [
                   detailsData={null}
                   event={
                     Object {
+                      "ecsData": Object {},
                       "eventId": "my-id",
                       "indexName": "my-index",
+                      "nonEcsData": Array [],
+                      "refetch": [MockFunction],
                     }
                   }
                   isAlert={false}
@@ -667,6 +739,60 @@ Array [
           </div>
         </EuiFlyoutBody>
       </Styled(EuiFlyoutBody)>
+      <Memo()
+        detailsData={null}
+        expandedEvent={
+          Object {
+            "ecsData": Object {},
+            "eventId": "my-id",
+            "indexName": "my-index",
+            "nonEcsData": Array [],
+            "refetch": [MockFunction],
+          }
+        }
+        handleOnEventClosed={[Function]}
+        isAlert={false}
+        isHostIsolationPanelOpen={false}
+        loadingEventDetails={true}
+        onAddIsolationStatusClick={[Function]}
+        timelineId="test"
+      >
+        <EuiFlyoutFooter>
+          <div
+            className="euiFlyoutFooter"
+          >
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <Memo()
+                      detailsData={null}
+                      ecsData={Object {}}
+                      handleOnEventClosed={[Function]}
+                      isHostIsolationPanelOpen={false}
+                      loadingEventDetails={true}
+                      nonEcsData={Array []}
+                      onAddEventFilterClick={[Function]}
+                      onAddExceptionTypeClick={[Function]}
+                      onAddIsolationStatusClick={[Function]}
+                      refetch={[MockFunction]}
+                      timelineId="test"
+                    />
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlyoutFooter>
+      </Memo()>
     </EventDetailsPanelComponent>
   </div>,
 ]

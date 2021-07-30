@@ -470,9 +470,9 @@ export type TimelineExpandedEventType =
       params?: {
         eventId: string;
         indexName: string;
-        ecsData: Ecs;
-        nonEcsData: TimelineNonEcsData[];
-        refetch: () => void;
+        ecsData?: Ecs;
+        nonEcsData?: TimelineNonEcsData[];
+        refetch?: () => void;
       };
     }
   | EmptyObject;

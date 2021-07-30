@@ -17,7 +17,7 @@ import {
 import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 
 interface InvestigateInTimelineActionProps {
-  ecsRowData: Ecs | Ecs[] | null;
+  ecsRowData: Ecs | null;
   nonEcsRowData: TimelineNonEcsData[];
   ariaLabel?: string;
   alertIds?: string[];
@@ -35,7 +35,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   buttonType,
   onInvestigateInTimelineAlertClick,
 }) => {
-  const { handleInvestigateInTimelineAlertClick } = useInvestigateInTimeline({
+  const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
     ecsRowData,
     nonEcsRowData,
     alertIds,
@@ -49,7 +49,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
       content={ACTION_INVESTIGATE_IN_TIMELINE}
       dataTestSubj="send-alert-to-timeline"
       iconType="timeline"
-      onClick={handleInvestigateInTimelineAlertClick}
+      onClick={investigateInTimelineAlertClick}
       isDisabled={false}
       buttonType={buttonType}
     />

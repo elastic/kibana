@@ -20,6 +20,8 @@ import { createStore, State } from '../../../common/store';
 import { DetailsPanel } from './index';
 import { TimelineExpandedDetail, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import { TimelineNonEcsData } from '../../../../common';
+import { Ecs } from '../../../../common/ecs';
 
 describe('Details Panel Component', () => {
   const state: State = { ...mockGlobalState };
@@ -59,8 +61,9 @@ describe('Details Panel Component', () => {
       params: {
         eventId: 'my-id',
         indexName: 'my-index',
-        ecsData: {},
-        nonEcsData: [],
+        ecsData: {} as Ecs,
+        nonEcsData: [] as TimelineNonEcsData[],
+        refetch: jest.fn(),
       },
     },
   };
@@ -103,7 +106,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:EventDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = (eventExpandedDetail as unknown) as TimelineExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = eventExpandedDetail as TimelineExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 

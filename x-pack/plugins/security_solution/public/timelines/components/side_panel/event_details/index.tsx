@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { find, some } from 'lodash/fp';
+import { some } from 'lodash/fp';
 import {
   EuiButtonEmpty,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   EuiTitle,
   EuiText,
@@ -32,10 +29,8 @@ import {
 } from '../../../../detections/components/host_isolation/translations';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { ALERT_DETAILS } from './translations';
-import { isIsolationSupported } from '../../../../../common/endpoint/service/host_isolation/utils';
-import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_check';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
-import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../../common';
+import { TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 
