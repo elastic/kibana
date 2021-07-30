@@ -93,15 +93,8 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
-import signalExtraFields from './lib/detection_engine/routes/index/signal_extra_fields.json';
-import {
-  createSignalsFieldAliases,
-  getSignalsTemplate,
-  getRbacRequiredFields,
-} from './lib/detection_engine/routes/index/get_signals_template';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
-import { addAliasesToIndices } from './lib/detection_engine/routes/index/create_index_route';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -339,7 +332,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    core.getStartServices().then(([coreStart, depsStart]) => {
+    core.getStartServices().then(([_, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext
@@ -348,58 +341,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
       );
-      /* if (isRuleRegistryEnabled) {
-        const clusterClient = coreStart.elasticsearch.client.asInternalUser;
-        const updateExistingSignalsIndices = async () => {
-          const existingTemplateResponse = await clusterClient.indices
-            .getTemplate({
-              name: `${config.signalsIndex}-*`,
-            })
-            .catch((err) => {
-              // If the siem signals templates have already been converted, we expect a 404 here
-              if (err.meta?.statusCode !== 404) {
-                this.logger.error(
-                  `Failed to get existing legacy siem signals templates: ${err.message}`
-                );
-              }
-            });
-          if (existingTemplateResponse == null) {
-            return;
-          }
-          const existingSignalsTemplates = existingTemplateResponse.body;
-          const existingTemplateNames = Object.keys(existingSignalsTemplates);
-          for (const existingTemplateName of existingTemplateNames) {
-            const spaceId = existingTemplateName.substr(config.signalsIndex.length + 1);
-            const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts');
-            const aadIndexAliasName = `${alertsIndexPattern}-${spaceId}`;
-
-            const signalsTemplate = getSignalsTemplate(
-              existingTemplateName,
-              spaceId,
-              aadIndexAliasName
-            );
-
-            try {
-              await clusterClient.indices.putIndexTemplate({
-                name: existingTemplateName,
-                body: signalsTemplate as Record<string, unknown>,
-              });
-              await addAliasesToIndices({
-                esClient: clusterClient,
-                index: `${existingTemplateName}-*`,
-                aadIndexAliasName,
-                spaceId,
-              });
-              await clusterClient.indices.deleteTemplate({ name: existingTemplateName });
-            } catch (err) {
-              this.logger.error(
-                `Failed to install new siem signals template for space ${spaceId}: ${err.message}`
-              );
-            }
-          }
-        };
-        updateExistingSignalsIndices();
-      }*/
     });
 
     this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
