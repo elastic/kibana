@@ -37,7 +37,7 @@ export const fetchDocuments = (
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
-  searchSource.setField('version', false);
+  searchSource.setField('version', true);
 
   sendLoadingMsg(documents$);
 
