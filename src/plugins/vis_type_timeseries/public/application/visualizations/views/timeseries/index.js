@@ -70,6 +70,8 @@ export const TimeSeries = ({
   const { theme: themeService, activeCursor: activeCursorService } = getCharts();
 
   const chartRef = useRef();
+  const chartTheme = themeService.useChartsTheme();
+
   const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
     isDateHistogram: true,
   });
@@ -135,6 +137,7 @@ export const TimeSeries = ({
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
+          chartTheme,
           hasBarChart
             ? {}
             : {
