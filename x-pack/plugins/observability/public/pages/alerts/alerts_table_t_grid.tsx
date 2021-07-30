@@ -110,7 +110,11 @@ const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
 
-const O11Y_ALERT_CONSUMER = [ALERTS_CONSUMERS.APM, ALERTS_CONSUMERS.LOGS];
+const O11Y_ALERT_CONSUMER = [
+  ALERTS_CONSUMERS.APM,
+  ALERTS_CONSUMERS.LOGS,
+  ALERTS_CONSUMERS.SYNTHETICS,
+];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
