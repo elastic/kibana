@@ -37,7 +37,7 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckName', {
       defaultMessage: 'Model memory limit reached',
     }),
-    description: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckName', {
+    description: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckDescription', {
       defaultMessage: 'Get alerted when job reaches soft or hard model memory limit.',
     }),
   },
