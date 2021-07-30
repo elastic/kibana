@@ -266,25 +266,25 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       const argsTable: Dimension[] = [
         [
           args.yDimension,
-          i18n.translate('visTypeXY.function.dimension.metric', {
+          i18n.translate('visTypeXy.function.dimension.metric', {
             defaultMessage: 'Metric',
           }),
         ],
         [
           args.zDimension,
-          i18n.translate('visTypeXY.function.adimension.dotSize', {
+          i18n.translate('visTypeXy.function.adimension.dotSize', {
             defaultMessage: 'Dot size',
           }),
         ],
         [
           args.splitColumnDimension,
-          i18n.translate('visTypeXY.function.dimension.splitcolumn', {
+          i18n.translate('visTypeXy.function.dimension.splitcolumn', {
             defaultMessage: 'Column split',
           }),
         ],
         [
           args.splitRowDimension,
-          i18n.translate('visTypeXY.function.dimension.splitrow', {
+          i18n.translate('visTypeXy.function.dimension.splitrow', {
             defaultMessage: 'Row split',
           }),
         ],
@@ -293,7 +293,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       if (args.xDimension) {
         argsTable.push([
           [args.xDimension],
-          i18n.translate('visTypeXY.function.adimension.bucket', {
+          i18n.translate('visTypeXy.function.adimension.bucket', {
             defaultMessage: 'Bucket',
           }),
         ]);
