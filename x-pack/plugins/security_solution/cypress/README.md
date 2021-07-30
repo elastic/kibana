@@ -401,7 +401,8 @@ Similar approach should be used in defining all index patterns, rules, and queri
 
 ## Development Best Practices
 
-### Make sure your test fails
+### Make sure your test fail
+
 Before open a PR with the new test, please make sure that the test fail. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
 ### Clean up the state 
