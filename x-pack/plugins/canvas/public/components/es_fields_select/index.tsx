@@ -20,9 +20,9 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (pro
 
   useEffect(() => {
     if (index !== prevIndex) {
-      getFields(index).then((newFields = []) => {
+      getFields(index).then((newFields) => {
         setFields(newFields || []);
-        onChange(selected.filter((option) => newFields?.includes(option)));
+        onChange(selected.filter((option) => (newFields ?? []).includes(option)));
       });
     }
   }, [index, prevIndex, onChange, selected]);
