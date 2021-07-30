@@ -48,11 +48,7 @@ export const createSearchSourceMock = (fields?: SearchSourceFields, response?: a
     search: jest
       .fn()
       .mockReturnValue(
-        of(
-          response
-            ? response
-            : { rawResponse: { hits: { hits: [], total: 0 } }, isPartial: false, isRunning: false }
-        )
+        of(response ?? { rawResponse: { hits: { hits: [], total: 0 } }, isPartial: false, isRunning: false })
       ),
     onResponse: jest.fn().mockImplementation((req, res) => res),
   });
