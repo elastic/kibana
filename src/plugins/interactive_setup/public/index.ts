@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
 import { InteractiveSetupPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new InteractiveSetupPlugin(initializerContext);
+export const plugin = () => new InteractiveSetupPlugin();

@@ -14,7 +14,11 @@ import useTimeout from 'react-use/lib/useTimeout';
 import { i18n } from '@kbn/i18n';
 import { useHttp } from './use_http';
 
-export const ProgressIndicator: FunctionComponent = () => {
+export interface ProgressIndicatorProps {
+  onSuccess?(): void;
+}
+
+export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ onSuccess }) => {
   const http = useHttp();
   const [status, checkStatus] = useAsyncFn(async () => {
     let isAvailable: boolean | undefined = false;
@@ -36,14 +40,14 @@ export const ProgressIndicator: FunctionComponent = () => {
       : 'unknown';
   });
 
-  const [_, cancel, reset] = useTimeoutFn(checkStatus, 1000);
+  const [, cancelPolling, resetPolling] = useTimeoutFn(checkStatus, 1000);
 
   useEffect(() => {
     if (status.value === 'complete') {
-      cancel();
-      window.location.replace('/');
+      cancelPolling();
+      onSuccess?.();
     } else if (status.loading === false) {
-      reset();
+      resetPolling();
     }
   }, [status.loading, status.value]); // eslint-disable-line react-hooks/exhaustive-deps
 

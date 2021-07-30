@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiFormRow,
   EuiTextArea,
+  EuiCallOut,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +20,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
+import { errors as elasticsearchErrors } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -93,6 +95,16 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
       noValidate
       style={{ width: euiThemeVars.euiFormMaxWidth }}
     >
+      {form.submitError && (
+        <EuiCallOut
+          color="danger"
+          title={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
+            defaultMessage: "Couldn't enroll to cluster",
+          })}
+        >
+          {(form.submitError as elasticsearchErrors.ResponseError).body?.message}
+        </EuiCallOut>
+      )}
       <EuiFormRow
         label={i18n.translate('interactiveSetup.enrollmentTokenForm.tokenLabel', {
           defaultMessage: 'Enrollment token',

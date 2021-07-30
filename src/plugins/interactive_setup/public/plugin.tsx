@@ -6,27 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-  Plugin,
-  PluginInitializerContext,
-} from 'src/core/public';
+import type { CoreSetup, CoreStart, HttpSetup, Plugin } from 'src/core/public';
 import React, { FunctionComponent } from 'react';
 import ReactDOM from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { ConfigType } from './config';
 import { App } from './app';
 import { HttpProvider } from './use_http';
 
 export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
-  #config: ConfigType;
-  constructor(initializerContext: PluginInitializerContext<ConfigType>) {
-    this.#config = initializerContext.config.get<ConfigType>();
-  }
-
   public setup(core: CoreSetup) {
     core.application.register({
       id: 'interactiveSetup',

@@ -39,7 +39,11 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
         : isManuallyConfigured;
 
     if (skipInteractiveSetup) {
-      logger.info('Skipping interactive setup');
+      if (isManuallyConfigured) {
+        logger.debug(
+          'Skipping interactive setup since Elasticsearch connection has been configured'
+        );
+      }
       return;
     }
 
@@ -73,7 +77,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
           }
 
           const client = core.elasticsearch
-            .createClient('data', {
+            .createClient('enrollment', {
               hosts: request.body.hosts.map((host) => `https://${host}`),
               ssl: { verificationMode: 'none' },
               // caFingerprint: request.body.caFingerprint,
@@ -94,15 +98,16 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
             : this.#initializerContext.env.configs[0];
 
           if (!configPath) {
-            logger.error('Failed to setup Kibana due to missing config file');
+            logger.error('Cannot find config file');
             return response.customError({ statusCode: 500, body: 'Cannot find config file.' });
           }
+          // TODO: Use fingerprint/timestamp as file name
           const caPath = path.join(path.dirname(configPath), 'ca.crt');
 
           try {
             await Promise.all([
               fs.access(configPath, constants.W_OK),
-              fs.access(caPath, constants.W_OK),
+              fs.access(path.dirname(caPath), constants.W_OK),
             ]);
 
             const { body } = await client.asCurrentUser.transport.request({
@@ -110,18 +115,28 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
               path: '/_security/enroll/kibana',
             });
 
+            const certificateAuthority = generateCertificate(body.http_ca);
+
+            // Ensure we can connect using CA before writing config
+            const verifyConnectionClient = core.elasticsearch.createClient('verifyConnection', {
+              hosts: request.body.hosts.map((host) => `https://${host}`),
+              username: 'kibana_system',
+              password: body.password,
+              ssl: { certificateAuthorities: [certificateAuthority] },
+            });
+
+            await verifyConnectionClient.asInternalUser.security.authenticate();
+
             await Promise.all([
               fs.appendFile(configPath, generateConfig(request.body.hosts, body.password, caPath)),
-              fs.writeFile(caPath, generateCertificate(body.http_ca)),
+              fs.writeFile(caPath, certificateAuthority),
             ]);
 
             completeSetup({ shouldReloadConfig: true });
 
             return response.noContent();
           } catch (error) {
-            logger.error('Failed to setup Kibana', {
-              error,
-            });
+            logger.error(error);
             return response.customError({ statusCode: 500, body: getDetailedErrorMessage(error) });
           }
         }

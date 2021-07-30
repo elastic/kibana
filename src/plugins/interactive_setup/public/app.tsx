@@ -37,7 +37,7 @@ export const App: FunctionComponent = () => {
           onSuccess={() => setPage('success')}
         />
       </div>
-      {page === 'success' && <ProgressIndicator />}
+      {page === 'success' && <ProgressIndicator onSuccess={() => window.location.replace('/')} />}
     </EuiPageTemplate>
   );
 };
