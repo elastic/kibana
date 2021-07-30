@@ -138,7 +138,10 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
 
     this.savedObjectProviderRegistry.registerDefaultProvider((request) => {
       const client = core.savedObjects.getScopedClient(request);
-      return client.bulkGet.bind(client);
+      return {
+        bulkGetter: client.bulkGet.bind(client),
+        resolver: client.resolve.bind(client),
+      };
     });
 
     this.eventLogClientService = new EventLogClientService({

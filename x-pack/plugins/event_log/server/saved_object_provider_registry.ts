@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import {
+  KibanaRequest,
+  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 
 import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -19,9 +23,23 @@ export type SavedObjectBulkGetter = (
   ...params: Parameters<SavedObjectsClientContract['bulkGet']>
 ) => Promise<unknown>;
 
-export type SavedObjectBulkGetterResult = (type: string, ids: string[]) => Promise<unknown>;
+export type SavedObjectResolver = (
+  ...params: Parameters<SavedObjectsClientContract['resolve']>
+) => Promise<unknown>;
 
-export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectBulkGetter;
+export type SavedObjectBulkGetterResult = (type: string, ids: string[]) => Promise<unknown>;
+export type SavedObjectIdResolverResult = (
+  type: string,
+  id: string,
+  options?: SavedObjectsBaseOptions | undefined
+) => Promise<unknown> | undefined;
+
+interface SavedObjectCombinedApi {
+  bulkGetter: SavedObjectBulkGetter;
+  resolver: SavedObjectResolver;
+}
+
+export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectCombinedApi;
 
 export class SavedObjectProviderRegistry {
   private providers = new Map<string, SavedObjectProvider>();
@@ -42,7 +60,9 @@ export class SavedObjectProviderRegistry {
     this.providers.set(type, provider);
   }
 
-  public getProvidersClient(request: KibanaRequest): SavedObjectBulkGetterResult {
+  public getProvidersClient(
+    request: KibanaRequest
+  ): { bulkGetter: SavedObjectBulkGetterResult; resolver: SavedObjectIdResolverResult } {
     if (!this.defaultProvider) {
       throw new Error(
         i18n.translate(
@@ -60,21 +80,36 @@ export class SavedObjectProviderRegistry {
 
     // would be nice to have a simple version support in API:
     // curl -X GET "localhost:9200/my-index-000001/_mget?pretty" -H 'Content-Type: application/json' -d' { "ids" : ["1", "2"] } '
-    const scopedProviders = new Map<string, SavedObjectBulkGetter>();
+    const scopedProviders = new Map<string, SavedObjectCombinedApi>();
     const defaultGetter = this.defaultProvider(request);
-    return (type: string, ids: string[]) => {
-      const objects = ids.map((id: string) => ({ type, id }));
-      const getter = pipe(
-        fromNullable(scopedProviders.get(type)),
-        getOrElse(() => {
-          const client = this.providers.has(type)
-            ? this.providers.get(type)!(request)
-            : defaultGetter;
-          scopedProviders.set(type, client);
-          return client;
-        })
-      );
-      return getter(objects);
+    return {
+      bulkGetter: (type: string, ids: string[]) => {
+        const objects = ids.map((id: string) => ({ type, id }));
+        const getter = pipe(
+          fromNullable(scopedProviders.get(type)),
+          getOrElse(() => {
+            const client = this.providers.has(type)
+              ? this.providers.get(type)!(request)
+              : defaultGetter;
+            scopedProviders.set(type, client);
+            return client;
+          })
+        );
+        return getter.bulkGetter(objects);
+      },
+      resolver: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
+        const getter = pipe(
+          fromNullable(scopedProviders.get(type)),
+          getOrElse(() => {
+            const client = this.providers.has(type)
+              ? this.providers.get(type)!(request)
+              : defaultGetter;
+            scopedProviders.set(type, client);
+            return client;
+          })
+        );
+        return getter.resolver(type, id, options);
+      },
     };
   }
 }

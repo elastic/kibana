@@ -18,6 +18,7 @@ import {
   ElasticsearchServiceStart,
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
+  SavedObjectsBaseOptions,
 } from '../../../../src/core/server';
 
 import {
@@ -356,19 +357,23 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     // as authorizationContext which would then set a Legacy AuthorizationMode
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
+    const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
+      core.savedObjects.getScopedClient(request);
 
     this.eventLogService!.registerSavedObjectProvider('action', (request) => {
       const client = secureGetActionsClientWithRequest(request);
-      return (objects?: SavedObjectsBulkGetObject[]) =>
-        objects
-          ? Promise.all(
-              objects.map(async (objectItem) => await (await client).get({ id: objectItem.id }))
-            )
-          : Promise.resolve([]);
+      const soClient = getScopedSavedObjectsClientWithoutAccessToActions(request);
+      return {
+        bulkGetter: (objects?: SavedObjectsBulkGetObject[]) =>
+          objects
+            ? Promise.all(
+                objects.map(async (objectItem) => await (await client).get({ id: objectItem.id }))
+              )
+            : Promise.resolve([]),
+        resolver: (type: string, id: string, options?: SavedObjectsBaseOptions) =>
+          soClient.resolve(type, id, options),
+      };
     });
-
-    const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
-      core.savedObjects.getScopedClient(request);
 
     actionExecutor!.initialize({
       logger,

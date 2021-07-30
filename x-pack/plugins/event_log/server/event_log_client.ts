@@ -13,7 +13,10 @@ import { SpacesServiceStart } from '../../spaces/server';
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
+import {
+  SavedObjectBulkGetterResult,
+  SavedObjectIdResolverResult,
+} from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -61,7 +64,10 @@ export type FindOptionsType = Pick<
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
-  savedObjectGetter: SavedObjectBulkGetterResult;
+  savedObjectGetter: {
+    bulkGetter: SavedObjectBulkGetterResult;
+    resolver: SavedObjectIdResolverResult;
+  };
   spacesService?: SpacesServiceStart;
   request: KibanaRequest;
 }
@@ -69,7 +75,10 @@ interface EventLogServiceCtorParams {
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClient implements IEventLogClient {
   private esContext: EsContext;
-  private savedObjectGetter: SavedObjectBulkGetterResult;
+  private savedObjectGetter: {
+    bulkGetter: SavedObjectBulkGetterResult;
+    resolver: SavedObjectIdResolverResult;
+  };
   private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
 
@@ -90,8 +99,18 @@ export class EventLogClient implements IEventLogClient {
     const space = await this.spacesService?.getActiveSpace(this.request);
     const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
 
+    // Pass ids through the SO resolve API to ensure they point to the right SO
+    let resolvedIds = ids;
+    try {
+      resolvedIds = (await Promise.all(
+        ids.map((id) => this.savedObjectGetter.resolver(type, id, { namespace }))
+      )) as string[];
+    } catch (err) {
+      throw err;
+    }
+
     // verify the user has the required permissions to view this saved objects
-    await this.savedObjectGetter(type, ids);
+    await this.savedObjectGetter.bulkGetter(type, resolvedIds);
 
     return await this.esContext.esAdapter.queryEventsBySavedObjects(
       this.esContext.esNames.indexPattern,

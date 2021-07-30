@@ -35,6 +35,7 @@ import {
   ServiceStatus,
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
+  SavedObjectsBaseOptions,
 } from '../../../../src/core/server';
 import type { AlertingRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
@@ -368,6 +369,7 @@ export class AlertingPlugin {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
+    const internalSavedObjectsRepository = core.savedObjects.createInternalRepository(['alert']);
     taskRunnerFactory.initialize({
       logger,
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
@@ -377,7 +379,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      internalSavedObjectsRepository,
       alertTypeRegistry: this.alertTypeRegistry!,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
@@ -386,10 +388,16 @@ export class AlertingPlugin {
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getRulesClientWithRequest(request);
-      return (objects?: SavedObjectsBulkGetObject[]) =>
-        objects
-          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
-          : Promise.resolve([]);
+      return {
+        bulkGetter: (objects?: SavedObjectsBulkGetObject[]) =>
+          objects
+            ? Promise.all(
+                objects.map(async (objectItem) => await client.get({ id: objectItem.id }))
+              )
+            : Promise.resolve([]),
+        resolver: (type: string, id: string, options?: SavedObjectsBaseOptions) =>
+          internalSavedObjectsRepository.resolve(type, id, options),
+      };
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
