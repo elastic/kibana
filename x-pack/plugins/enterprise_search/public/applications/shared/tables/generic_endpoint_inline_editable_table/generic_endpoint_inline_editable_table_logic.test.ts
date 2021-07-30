@@ -84,7 +84,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
       const item = { id: 1 };
       const onSuccess = jest.fn();
 
-      it('makes and API call', async () => {
+      it('makes an API call', async () => {
         const mockResponse = {
           foo: { some: 'data' },
         };
@@ -134,7 +134,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
       const item = { id: 1 };
       const onSuccess = jest.fn();
 
-      it('makes and API call', async () => {
+      it('makes an API call', async () => {
         const mockResponse = {
           foo: { some: 'data' },
         };
@@ -154,7 +154,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         await nextTick();
 
         // It deletes the 'item' using the configured 'deleteRoute'
-        expect(http.delete).toHaveBeenCalledWith('route/to/delete/item/1', {});
+        expect(http.delete).toHaveBeenCalledWith('route/to/delete/item/1');
 
         // It retrieves data from the response based on the configured 'dataProperty'
         // Then calls back to the configured 'onAdd' function
@@ -182,7 +182,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
       const item = { id: 1, other: 'other', created_at: '5/17/1984' };
       const onSuccess = jest.fn();
 
-      it('makes and API call', async () => {
+      it('makes an API call', async () => {
         const mockResponse = {
           foo: { some: 'data' },
         };
@@ -237,7 +237,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
       const oldItems = [{ id: 1 }, { id: 2 }];
       const onSuccess = jest.fn();
 
-      it('makes and API call', async () => {
+      it('makes an API call', async () => {
         const mockResponse = {
           foo: [{ id: 2 }, { id: 1 }],
         };

@@ -52,28 +52,6 @@ type GenericEndpointInlineEditableTableLogicType<Item extends ItemWithAnID> = Ma
   GenericEndpointInlineEditableTableProps<Item>
 >;
 
-const saveAndCallback = async <Item extends ItemWithAnID>(
-  httpCall: (path: string, data: object) => Promise<object>,
-  route: string,
-  item: Item,
-  requestData: object,
-  responseDataProperty: string,
-  callback: (item: Item, items: Item[]) => void,
-  onSuccess: () => void,
-  onFinally: () => void
-) => {
-  try {
-    const response = (await httpCall(route, requestData)) as Record<string, Item[]>;
-    const itemsFromResponse = response[responseDataProperty];
-    callback(item, itemsFromResponse);
-    onSuccess();
-  } catch (e) {
-    flashAPIErrors(e);
-  }
-
-  onFinally();
-};
-
 export const GenericEndpointInlineEditableTableLogic = kea<
   GenericEndpointInlineEditableTableLogicType<ItemWithAnID>
 >({
@@ -100,50 +78,56 @@ export const GenericEndpointInlineEditableTableLogic = kea<
     ],
   }),
   listeners: ({ actions, props }) => ({
-    addItem: ({ item, onSuccess }) => {
+    addItem: async ({ item, onSuccess }) => {
       const { http } = HttpLogic.values;
+      const { addRoute, onAdd, dataProperty } = props;
 
-      saveAndCallback(
-        http.post,
-        props.addRoute,
-        item,
-        {
-          body: JSON.stringify(item),
-        },
-        props.dataProperty,
-        props.onAdd,
-        onSuccess,
-        actions.clearLoading
-      );
-    },
-    deleteItem: ({ item, onSuccess }) => {
-      const { http } = HttpLogic.values;
+      try {
+        const response = await http.post(addRoute, { body: JSON.stringify(item) });
+        const itemsFromResponse = response[dataProperty];
 
-      saveAndCallback(
-        http.delete,
-        props.deleteRoute(item),
-        item,
-        {}, // We don't need to submit any data for the delete request
-        props.dataProperty,
-        props.onDelete,
-        onSuccess,
-        actions.clearLoading
-      );
+        onAdd(item, itemsFromResponse);
+        onSuccess();
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.clearLoading();
+      }
     },
-    updateItem: ({ item, onSuccess }) => {
+    deleteItem: async ({ item, onSuccess }) => {
       const { http } = HttpLogic.values;
+      const { deleteRoute, onDelete, dataProperty } = props;
+
+      try {
+        const response = await http.delete(deleteRoute(item));
+        const itemsFromResponse = response[dataProperty];
+
+        onDelete(item, itemsFromResponse);
+        onSuccess();
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.clearLoading();
+      }
+    },
+    updateItem: async ({ item, onSuccess }) => {
+      const { http } = HttpLogic.values;
+      const { updateRoute, onUpdate, dataProperty } = props;
 
       const dataToSubmit = stripIdAndCreatedAtFromItem(item);
-      saveAndCallback(
-        http.put,
-        props.updateRoute(item),
-        item,
-        { body: JSON.stringify(dataToSubmit) },
-        props.dataProperty,
-        props.onUpdate,
-        onSuccess,
-        actions.clearLoading
-      );
+      try {
+        const response = await http.put(updateRoute(item), {
+          body: JSON.stringify(dataToSubmit),
+        });
+        const itemsFromResponse = response[dataProperty];
+
+        onUpdate(item, itemsFromResponse);
+        onSuccess();
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.clearLoading();
+      }
     },
     reorderItems: async ({ items, oldItems, onSuccess }) => {
       const { reorderRoute, onReorder, dataProperty } = props;
