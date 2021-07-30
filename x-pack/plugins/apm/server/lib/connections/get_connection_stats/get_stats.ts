@@ -29,8 +29,9 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { Setup } from '../../helpers/setup_request';
 import { NodeType } from '../../../../common/connections';
+import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 
-export const getMetrics = async ({
+export const getStats = async ({
   setup,
   start,
   end,
@@ -47,114 +48,109 @@ export const getMetrics = async ({
 }) => {
   const { apmEventClient } = setup;
 
-  const offsetInMs = getOffsetInMs(start, offset);
-  const startWithOffset = start - offsetInMs;
-  const endWithOffset = end - offsetInMs;
+  const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
-  const response = await apmEventClient.search(
-    'get_service_destination_metrics',
-    {
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
-      body: {
-        track_total_hits: true,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...filter,
-              {
-                exists: {
-                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                },
+  const response = await apmEventClient.search('get_connection_stats', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      track_total_hits: true,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...filter,
+            {
+              exists: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
               },
-              ...rangeQuery(startWithOffset, endWithOffset),
-              {
-                bool: {
-                  must_not: [{ term: { [AGENT_NAME]: 'rum-js' } }],
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          connections: {
-            composite: {
-              size: 10000,
-              sources: asMutableArray([
-                {
-                  serviceName: {
-                    terms: {
-                      field: SERVICE_NAME,
-                    },
-                  },
-                },
-                {
-                  backendName: {
-                    terms: {
-                      field: SPAN_DESTINATION_SERVICE_RESOURCE,
-                    },
-                  },
-                },
-              ] as const),
             },
-            aggs: {
-              sample: {
-                top_metrics: {
-                  size: 1,
-                  metrics: asMutableArray([
-                    {
-                      field: SERVICE_ENVIRONMENT,
-                    },
-                    {
-                      field: AGENT_NAME,
-                    },
-                    {
-                      field: SPAN_TYPE,
-                    },
-                    {
-                      field: SPAN_SUBTYPE,
-                    },
-                  ] as const),
-                  sort: {
-                    '@timestamp': 'desc',
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...excludeRumExitSpansQuery(),
+          ],
+        },
+      },
+      aggs: {
+        connections: {
+          composite: {
+            size: 10000,
+            sources: asMutableArray([
+              {
+                serviceName: {
+                  terms: {
+                    field: SERVICE_NAME,
                   },
                 },
               },
-              timeseries: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: getBucketSize({
-                    start: startWithOffset,
-                    end: endWithOffset,
-                    numBuckets,
-                  }).intervalString,
-                  extended_bounds: {
-                    min: startWithOffset,
-                    max: endWithOffset,
+              {
+                backendName: {
+                  terms: {
+                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
                   },
                 },
-                aggs: {
-                  latency_sum: {
-                    sum: {
-                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-                    },
+              },
+            ] as const),
+          },
+          aggs: {
+            sample: {
+              top_metrics: {
+                size: 1,
+                metrics: asMutableArray([
+                  {
+                    field: SERVICE_ENVIRONMENT,
                   },
-                  count: {
-                    sum: {
-                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                    },
+                  {
+                    field: AGENT_NAME,
                   },
-                  [EVENT_OUTCOME]: {
-                    terms: {
-                      field: EVENT_OUTCOME,
-                    },
-                    aggs: {
-                      count: {
-                        sum: {
-                          field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                        },
+                  {
+                    field: SPAN_TYPE,
+                  },
+                  {
+                    field: SPAN_SUBTYPE,
+                  },
+                ] as const),
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: getBucketSize({
+                  start: startWithOffset,
+                  end: endWithOffset,
+                  numBuckets,
+                }).intervalString,
+                extended_bounds: {
+                  min: startWithOffset,
+                  max: endWithOffset,
+                },
+              },
+              aggs: {
+                latency_sum: {
+                  sum: {
+                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+                  },
+                },
+                count: {
+                  sum: {
+                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                  },
+                },
+                [EVENT_OUTCOME]: {
+                  terms: {
+                    field: EVENT_OUTCOME,
+                  },
+                  aggs: {
+                    count: {
+                      sum: {
+                        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
                       },
                     },
                   },
@@ -164,8 +160,8 @@ export const getMetrics = async ({
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return (
     response.aggregations?.connections.buckets.map((bucket) => {

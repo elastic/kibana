@@ -27,6 +27,7 @@ import { rangeQuery } from '../../../../../observability/server';
 import { Setup } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Node, NodeType } from '../../../../common/connections';
+import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 
 type Destination = {
   backendName: string;
@@ -62,9 +63,11 @@ export const getDestinationMap = ({
   return withApmSpan('get_destination_map', async () => {
     const { apmEventClient } = setup;
 
-    const offsetInMs = getOffsetInMs(start, offset);
-    const startWithOffset = start - offsetInMs;
-    const endWithOffset = end - offsetInMs;
+    const { startWithOffset, endWithOffset } = getOffsetInMs({
+      start,
+      end,
+      offset,
+    });
 
     const response = await apmEventClient.search('get_exit_span_samples', {
       apm: {
@@ -78,11 +81,7 @@ export const getDestinationMap = ({
               { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
               ...rangeQuery(startWithOffset, endWithOffset),
               ...filter,
-              {
-                bool: {
-                  must_not: [{ term: { [AGENT_NAME]: 'rum-js' } }],
-                },
-              },
+              ...excludeRumExitSpansQuery(),
             ],
           },
         },

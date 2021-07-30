@@ -44,14 +44,14 @@ const topBackendsRoute = createApmServerRoute({
 
     return {
       backends: currentBackends.map((backend) => {
-        const { metrics, ...rest } = backend;
+        const { stats, ...rest } = backend;
         const prev = previousBackends.find(
           (item) => item.location.id === backend.location.id
         );
         return {
           ...rest,
-          currentMetrics: metrics,
-          previousMetrics: prev?.metrics ?? null,
+          currentStats: stats,
+          previousStats: prev?.stats ?? null,
         };
       }),
     };
@@ -94,14 +94,14 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
 
     return {
       services: currentServices.map((service) => {
-        const { metrics, ...rest } = service;
+        const { stats, ...rest } = service;
         const prev = previousServices.find(
           (item) => item.location.id === service.location.id
         );
         return {
           ...rest,
-          currentMetrics: metrics,
-          previousMetrics: prev?.metrics ?? null,
+          currentStats: stats,
+          previousStats: prev?.stats ?? null,
         };
       }),
     };

@@ -10,13 +10,12 @@ import { merge } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup } from '../../helpers/setup_request';
-import { getMetrics } from './get_metrics';
+import { getStats } from './get_stats';
 import { getDestinationMap } from './get_destination_map';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Node } from '../../../../common/connections';
 
-export function getConnectionMetrics({
+export function getConnectionStats({
   setup,
   start,
   end,
@@ -33,9 +32,9 @@ export function getConnectionMetrics({
   collapseBy: 'upstream' | 'downstream';
   offset?: string;
 }) {
-  return withApmSpan('get_connection_metrics', async () => {
+  return withApmSpan('get_connection_stats_and_map', async () => {
     const [allMetrics, destinationMap] = await Promise.all([
-      getMetrics({
+      getStats({
         setup,
         start,
         end,
@@ -52,36 +51,28 @@ export function getConnectionMetrics({
       }),
     ]);
 
-    const metricsWithLocationIds = allMetrics.map((metricItem) => {
-      const { from, timeseries, value } = metricItem;
-      let to: Node = metricItem.to;
-
-      to = destinationMap.get(to.backendName) ?? to;
+    const statsWithLocationIds = allMetrics.map((statsItem) => {
+      const { from, timeseries, value } = statsItem;
+      const to = destinationMap.get(statsItem.to.backendName) ?? statsItem.to;
 
       const location = collapseBy === 'upstream' ? from : to;
 
       return {
         location,
-        metrics: [{ timeseries, value }],
+        stats: [{ timeseries, value }],
         id: location.id,
       };
     }, []);
 
-    const metricsJoinedById = joinByKey(
-      metricsWithLocationIds,
-      'id',
-      (a, b) => {
-        const { metrics: metricsA, ...itemA } = a;
-        const { metrics: metricsB, ...itemB } = b;
+    const statsJoinedById = joinByKey(statsWithLocationIds, 'id', (a, b) => {
+      const { stats: statsA, ...itemA } = a;
+      const { stats: statsB, ...itemB } = b;
 
-        return merge({}, itemA, itemB, { metrics: metricsA.concat(metricsB) });
-      }
-    );
+      return merge({}, itemA, itemB, { stats: statsA.concat(statsB) });
+    });
 
-    const metricItems = metricsJoinedById.map((item) => {
-      const mergedMetrics = item.metrics.reduce<
-        ValuesType<typeof item.metrics>
-      >(
+    const statsItems = statsJoinedById.map((item) => {
+      const mergedStats = item.stats.reduce<ValuesType<typeof item.stats>>(
         (prev, current) => {
           return {
             value: {
@@ -111,27 +102,27 @@ export function getConnectionMetrics({
         }
       );
 
-      const destMetrics = {
+      const destStats = {
         latency: {
           value:
-            mergedMetrics.value.count > 0
-              ? mergedMetrics.value.latency_sum / mergedMetrics.value.count
+            mergedStats.value.count > 0
+              ? mergedStats.value.latency_sum / mergedStats.value.count
               : null,
-          timeseries: mergedMetrics.timeseries.map((point) => ({
+          timeseries: mergedStats.timeseries.map((point) => ({
             x: point.x,
             y: point.count > 0 ? point.latency_sum / point.count : null,
           })),
         },
         throughput: {
           value:
-            mergedMetrics.value.count > 0
+            mergedStats.value.count > 0
               ? calculateThroughput({
                   start,
                   end,
-                  value: mergedMetrics.value.count,
+                  value: mergedStats.value.count,
                 })
               : null,
-          timeseries: mergedMetrics.timeseries.map((point) => ({
+          timeseries: mergedStats.timeseries.map((point) => ({
             x: point.x,
             y:
               point.count > 0
@@ -141,11 +132,10 @@ export function getConnectionMetrics({
         },
         errorRate: {
           value:
-            mergedMetrics.value.count > 0
-              ? (mergedMetrics.value.error_count ?? 0) /
-                mergedMetrics.value.count
+            mergedStats.value.count > 0
+              ? (mergedStats.value.error_count ?? 0) / mergedStats.value.count
               : null,
-          timeseries: mergedMetrics.timeseries.map((point) => ({
+          timeseries: mergedStats.timeseries.map((point) => ({
             x: point.x,
             y: point.count > 0 ? (point.error_count ?? 0) / point.count : null,
           })),
@@ -154,10 +144,10 @@ export function getConnectionMetrics({
 
       return {
         ...item,
-        metrics: destMetrics,
+        stats: destStats,
       };
     });
 
-    return metricItems;
+    return statsItems;
   });
 }

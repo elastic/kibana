@@ -242,10 +242,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(opbeansNode !== undefined).to.be(true);
 
         const values = {
-          latency: roundNumber(opbeansNode?.currentMetrics.latency.value),
-          throughput: roundNumber(opbeansNode?.currentMetrics.throughput.value),
-          errorRate: roundNumber(opbeansNode?.currentMetrics.errorRate.value),
-          impact: opbeansNode?.currentMetrics.impact,
+          latency: roundNumber(opbeansNode?.currentStats.latency.value),
+          throughput: roundNumber(opbeansNode?.currentStats.throughput.value),
+          errorRate: roundNumber(opbeansNode?.currentStats.errorRate.value),
+          impact: opbeansNode?.currentStats.impact,
           ...pick(opbeansNode?.location, 'serviceName', 'type', 'agentName', 'environment'),
         };
 
@@ -264,8 +264,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           impact: 100,
         });
 
-        const firstValue = roundNumber(opbeansNode?.currentMetrics.latency.timeseries[0].y);
-        const lastValue = roundNumber(last(opbeansNode?.currentMetrics.latency.timeseries)?.y);
+        const firstValue = roundNumber(opbeansNode?.currentStats.latency.timeseries[0].y);
+        const lastValue = roundNumber(last(opbeansNode?.currentStats.latency.timeseries)?.y);
 
         expect(firstValue).to.be(roundNumber(20 / 3));
         expect(lastValue).to.be('1.000');
@@ -279,10 +279,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(postgres !== undefined).to.be(true);
 
         const values = {
-          latency: roundNumber(postgres?.currentMetrics.latency.value),
-          throughput: roundNumber(postgres?.currentMetrics.throughput.value),
-          errorRate: roundNumber(postgres?.currentMetrics.errorRate.value),
-          impact: postgres?.currentMetrics.impact,
+          latency: roundNumber(postgres?.currentStats.latency.value),
+          throughput: roundNumber(postgres?.currentStats.throughput.value),
+          errorRate: roundNumber(postgres?.currentStats.errorRate.value),
+          impact: postgres?.currentStats.impact,
           ...pick(postgres?.location, 'spanType', 'spanSubtype', 'backendName', 'type'),
         };
 
@@ -337,9 +337,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(response.body.serviceDependencies.length).toMatchInline(`4`);
 
-        const { currentMetrics, ...firstItem } = sortBy(
+        const { currentStats, ...firstItem } = sortBy(
           response.body.serviceDependencies,
-          'currentMetrics.impact'
+          'currentStats.impact'
         ).reverse()[0];
 
         expectSnapshot(firstItem.location).toMatchInline(`
@@ -353,7 +353,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `);
 
         expectSnapshot(
-          omit(currentMetrics, [
+          omit(currentStats, [
             'errorRate.timeseries',
             'throughput.timeseries',
             'latency.timeseries',
@@ -404,7 +404,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const latencyValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
             name: getName(item.location),
-            latency: item.currentMetrics.latency.value,
+            latency: item.currentStats.latency.value,
           })),
           'name'
         );
@@ -435,7 +435,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const throughputValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
             name: getName(item.location),
-            throughput: item.currentMetrics.throughput.value,
+            throughput: item.currentStats.throughput.value,
           })),
           'name'
         );
@@ -466,9 +466,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const impactValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
             name: getName(item.location),
-            impact: item.currentMetrics.impact,
-            latency: item.currentMetrics.latency.value,
-            throughput: item.currentMetrics.throughput.value,
+            impact: item.currentStats.impact,
+            latency: item.currentStats.latency.value,
+            throughput: item.currentStats.throughput.value,
           })),
           'name'
         );

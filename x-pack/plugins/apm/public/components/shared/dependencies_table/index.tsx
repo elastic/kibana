@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ConnectionMetricItemWithComparisonData } from '../../../../common/connections';
+import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
 import {
   asMillisecondDuration,
   asPercent,
@@ -30,7 +30,7 @@ import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { OverviewTableContainer } from '../overview_table_container';
 
 export type DependenciesItem = Omit<
-  ConnectionMetricItemWithComparisonData,
+  ConnectionStatsItemWithComparisonData,
   'location'
 > & {
   name: string;
@@ -80,13 +80,13 @@ export function DependenciesTable(props: Props) {
         defaultMessage: 'Latency (avg.)',
       }),
       width: `${unit * 10}px`,
-      render: (_, { currentMetrics, previousMetrics }) => {
+      render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
             color="euiColorVis1"
-            series={currentMetrics.latency.timeseries}
-            comparisonSeries={previousMetrics?.latency.timeseries}
-            valueLabel={asMillisecondDuration(currentMetrics.latency.value)}
+            series={currentStats.latency.timeseries}
+            comparisonSeries={previousStats?.latency.timeseries}
+            valueLabel={asMillisecondDuration(currentStats.latency.value)}
           />
         );
       },
@@ -98,14 +98,14 @@ export function DependenciesTable(props: Props) {
         defaultMessage: 'Throughput',
       }),
       width: `${unit * 10}px`,
-      render: (_, { currentMetrics, previousMetrics }) => {
+      render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
             compact
             color="euiColorVis0"
-            series={currentMetrics.throughput.timeseries}
-            comparisonSeries={previousMetrics?.throughput.timeseries}
-            valueLabel={asTransactionRate(currentMetrics.throughput.value)}
+            series={currentStats.throughput.timeseries}
+            comparisonSeries={previousStats?.throughput.timeseries}
+            valueLabel={asTransactionRate(currentStats.throughput.value)}
           />
         );
       },
@@ -117,14 +117,14 @@ export function DependenciesTable(props: Props) {
         defaultMessage: 'Error rate',
       }),
       width: `${unit * 10}px`,
-      render: (_, { currentMetrics, previousMetrics }) => {
+      render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
             compact
             color="euiColorVis7"
-            series={currentMetrics.errorRate.timeseries}
-            comparisonSeries={previousMetrics?.errorRate.timeseries}
-            valueLabel={asPercent(currentMetrics.errorRate.value, 1)}
+            series={currentStats.errorRate.timeseries}
+            comparisonSeries={previousStats?.errorRate.timeseries}
+            valueLabel={asPercent(currentStats.errorRate.value, 1)}
           />
         );
       },
@@ -136,16 +136,16 @@ export function DependenciesTable(props: Props) {
         defaultMessage: 'Impact',
       }),
       width: `${unit * 5}px`,
-      render: (_, { currentMetrics, previousMetrics }) => {
+      render: (_, { currentStats, previousStats }) => {
         return (
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem>
-              <ImpactBar value={currentMetrics.impact} size="m" />
+              <ImpactBar value={currentStats.impact} size="m" />
             </EuiFlexItem>
-            {previousMetrics?.impact !== undefined && (
+            {previousStats?.impact !== undefined && (
               <EuiFlexItem>
                 <ImpactBar
-                  value={previousMetrics?.impact}
+                  value={previousStats?.impact}
                   size="s"
                   color="subdued"
                 />
@@ -162,10 +162,10 @@ export function DependenciesTable(props: Props) {
   const items =
     dependencies.map((item) => ({
       ...item,
-      errorRateValue: item.currentMetrics.errorRate.value,
-      latencyValue: item.currentMetrics.latency.value,
-      throughputValue: item.currentMetrics.throughput.value,
-      impactValue: item.currentMetrics.impact,
+      errorRateValue: item.currentStats.errorRate.value,
+      latencyValue: item.currentStats.latency.value,
+      throughputValue: item.currentStats.throughput.value,
+      impactValue: item.currentStats.impact,
     })) ?? [];
 
   return (

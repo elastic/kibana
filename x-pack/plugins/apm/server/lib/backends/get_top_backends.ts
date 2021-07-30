@@ -6,8 +6,8 @@
  */
 
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getConnectionMetrics } from '../connections/get_connection_metrics';
-import { getConnectionMetricItemsWithRelativeImpact } from '../connections/get_connection_metrics/get_connection_metric_items_with_relative_impact';
+import { getConnectionStats } from '../connections/get_connection_stats';
+import { getConnectionStatsItemsWithRelativeImpact } from '../connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
 import { NodeType } from '../../../common/connections';
 import { Setup } from '../helpers/setup_request';
 
@@ -26,7 +26,7 @@ export async function getTopBackends({
   environment?: string;
   offset?: string;
 }) {
-  const metricItems = await getConnectionMetrics({
+  const statsItems = await getConnectionStats({
     setup,
     start,
     end,
@@ -36,7 +36,7 @@ export async function getTopBackends({
     collapseBy: 'downstream',
   });
 
-  return getConnectionMetricItemsWithRelativeImpact(
-    metricItems.filter((item) => item.location.type !== NodeType.service)
+  return getConnectionStatsItemsWithRelativeImpact(
+    statsItems.filter((item) => item.location.type !== NodeType.service)
   );
 }

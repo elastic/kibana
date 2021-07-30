@@ -73,8 +73,8 @@ export function BackendInventoryDependenciesTable() {
 
       return {
         name,
-        currentMetrics: dependency.currentMetrics,
-        previousMetrics: dependency.previousMetrics,
+        currentStats: dependency.currentStats,
+        previousStats: dependency.previousStats,
         link,
       };
     }) ?? [];

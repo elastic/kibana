@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import { Coordinate } from '../typings/timeseries';
 
 export enum NodeType {
   service = 'service',
@@ -31,34 +32,34 @@ export interface BackendNode extends NodeBase {
 
 export type Node = ServiceNode | BackendNode;
 
-export interface ConnectionMetricItem {
+export interface ConnectionStatsItem {
   location: Node;
-  metrics: {
+  stats: {
     latency: {
       value: number | null;
-      timeseries: Array<{ x: number; y: number | null }>;
+      timeseries: Coordinate[];
     };
     throughput: {
       value: number | null;
-      timeseries: Array<{ x: number; y: number | null }>;
+      timeseries: Coordinate[];
     };
     errorRate: {
       value: number | null;
-      timeseries: Array<{ x: number; y: number | null }>;
+      timeseries: Coordinate[];
     };
   };
 }
 
-export interface ConnectionMetricItemWithImpact extends ConnectionMetricItem {
-  metrics: ConnectionMetricItem['metrics'] & {
+export interface ConnectionStatsItemWithImpact extends ConnectionStatsItem {
+  stats: ConnectionStatsItem['stats'] & {
     impact: number;
   };
 }
 
-export interface ConnectionMetricItemWithComparisonData {
+export interface ConnectionStatsItemWithComparisonData {
   location: Node;
-  currentMetrics: ConnectionMetricItemWithImpact['metrics'];
-  previousMetrics: ConnectionMetricItemWithImpact['metrics'] | null;
+  currentStats: ConnectionStatsItemWithImpact['stats'];
+  previousStats: ConnectionStatsItemWithImpact['stats'] | null;
 }
 
 export function getNodeName(node: Node) {

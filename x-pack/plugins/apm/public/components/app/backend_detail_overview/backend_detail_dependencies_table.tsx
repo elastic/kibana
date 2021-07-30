@@ -64,8 +64,8 @@ export function BackendDetailDependenciesTable() {
 
       return {
         name,
-        currentMetrics: dependency.currentMetrics,
-        previousMetrics: dependency.previousMetrics,
+        currentStats: dependency.currentStats,
+        previousStats: dependency.previousStats,
         link: (
           <ServiceLink
             serviceName={location.serviceName}

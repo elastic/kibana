@@ -640,15 +640,15 @@ export const serviceDependenciesRoute = createApmServerRoute({
 
     return {
       serviceDependencies: currentPeriod.map((item) => {
-        const { metrics, ...rest } = item;
+        const { stats, ...rest } = item;
         const previousPeriodItem = previousPeriod.find(
           (prevItem) => item.location.id === prevItem.location.id
         );
 
         return {
           ...rest,
-          currentMetrics: metrics,
-          previousMetrics: previousPeriodItem?.metrics || null,
+          currentStats: stats,
+          previousStats: previousPeriodItem?.stats || null,
         };
       }),
     };
