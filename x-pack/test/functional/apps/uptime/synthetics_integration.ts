@@ -103,9 +103,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('prevent saving when integration name, url/host, or schedule is missing', async () => {
-        const saveButton = await uptimePage.syntheticsIntegration.findSaveButton();
-        await saveButton.click();
-
+        await uptimePage.syntheticsIntegration.clickSaveButton();
         await testSubjects.missingOrFail('packagePolicyCreateSuccessToast');
       });
     });

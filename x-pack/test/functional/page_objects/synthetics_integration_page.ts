@@ -42,11 +42,15 @@ export function SyntheticsIntegrationPageProvider({
     /**
      * Finds and returns the Policy Details Page Save button
      */
-    async findSaveButton(isEditPage?: boolean) {
+    async clickSaveButton(isEditPage?: boolean, onlyIfEnabled: boolean = false) {
+      const buttonTestSubject = isEditPage ? 'saveIntegration' : 'createPackagePolicySaveButton';
       await this.ensureIsOnPackagePage();
-      return await testSubjects.find(
-        isEditPage ? 'saveIntegration' : 'createPackagePolicySaveButton'
-      );
+
+      if (onlyIfEnabled) {
+        await testSubjects.clickWhenNotDisabled(buttonTestSubject);
+      } else {
+        await testSubjects.click(buttonTestSubject);
+      }
     },
 
     /**
@@ -135,8 +139,7 @@ export function SyntheticsIntegrationPageProvider({
      */
     async confirmAndSave(isEditPage?: boolean) {
       await this.ensureIsOnPackagePage();
-      const saveButton = await this.findSaveButton(isEditPage);
-      saveButton.click();
+      await this.clickSaveButton(isEditPage, true);
     },
 
     /**
