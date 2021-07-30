@@ -8,7 +8,8 @@
 
 import { AccessorFn, Accessor } from '@elastic/charts';
 import { BUCKET_TYPES } from '../../../data/public';
-import { FakeParams, Aspect } from '../types';
+import { FakeParams } from '../../../visualizations/public';
+import { Aspect } from '../types';
 
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';
 export const COMPLEX_SPLIT_ACCESSOR = '__complexSplitAccessor__';
