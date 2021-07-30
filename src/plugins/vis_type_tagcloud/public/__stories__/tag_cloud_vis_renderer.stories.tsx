@@ -8,41 +8,10 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { PaletteDefinition, SeriesLayer } from '../../../charts/public';
 import { getTagCloudVisRenderer } from '../tag_cloud_vis_renderer';
 import { Render } from '../../../presentation_util/public/__stories__';
 import { TagCloudVisRenderValue } from '../tag_cloud_fn';
-
-export const getPaletteRegistry = () => {
-  const mockPalette1: PaletteDefinition = {
-    id: 'default',
-    title: 'My Palette',
-    getCategoricalColor: (_: SeriesLayer[]) => 'black',
-    getCategoricalColors: (num: number) => ['red', 'black'],
-    toExpression: () => ({
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'system_palette',
-          arguments: {
-            name: ['default'],
-          },
-        },
-      ],
-    }),
-  };
-
-  return {
-    get: (name: string) =>
-      name === 'custom' ? mockPalette1 : name !== 'default' ? mockPalette1 : mockPalette1,
-    getAll: () => [mockPalette1],
-  };
-};
-
-const palettes = {
-  getPalettes: async () => getPaletteRegistry(),
-};
+import { palettes } from '../__mocks__/palettes';
 
 const config: TagCloudVisRenderValue = {
   visType: 'tagcloud',
@@ -89,15 +58,27 @@ const config: TagCloudVisRenderValue = {
   syncColors: false,
 };
 
+const containerSize = {
+  width: '500px',
+  height: '500px',
+};
+
 storiesOf('renderers/tag_cloud_vis', module)
   .add('default', () => {
-    return <Render renderer={() => getTagCloudVisRenderer({ palettes })} config={config} />;
+    return (
+      <Render
+        renderer={() => getTagCloudVisRenderer({ palettes })}
+        config={config}
+        {...containerSize}
+      />
+    );
   })
   .add('With empty result', () => {
     return (
       <Render
         renderer={() => getTagCloudVisRenderer({ palettes })}
         config={{ ...config, visData: { ...config.visData, rows: [] } }}
+        {...containerSize}
       />
     );
   });

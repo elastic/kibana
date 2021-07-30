@@ -5,6 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { defaultConfig } from '@kbn/storybook';
+import webpackMerge from 'webpack-merge';
+import { resolve } from 'path';
 
-// eslint-disable-next-line import/no-commonjs
-module.exports = require('@kbn/storybook').defaultConfig;
+const mockConfig = {
+  resolve: {
+    alias: {
+      '../services': resolve(__dirname, '../public/__mocks__/services.ts'),
+    },
+  },
+};
+
+module.exports = {
+  ...defaultConfig,
+  webpackFinal: (config) => webpackMerge(config, mockConfig),
+};
