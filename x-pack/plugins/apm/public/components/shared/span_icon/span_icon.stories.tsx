@@ -28,9 +28,9 @@ export const List: Story = () => {
   return (
     <EuiFlexGroup gutterSize="l" wrap={true}>
       {spanTypes.map((type) => {
-        const subTypes = Object.keys(spanTypeIcons[type]);
-        return subTypes.map((subType) => {
-          const id = `${type}.${subType}`;
+        const subtypes = Object.keys(spanTypeIcons[type]);
+        return subtypes.map((subtype) => {
+          const id = `${type}.${subtype}`;
 
           return (
             <EuiFlexItem key={id}>
@@ -45,7 +45,7 @@ export const List: Story = () => {
                         size="s"
                         hasShadow
                         alt={id}
-                        src={getSpanIcon(type, subType)}
+                        src={getSpanIcon(type, subtype)}
                       />
                     </EuiToolTip>
                   </p>
@@ -58,7 +58,7 @@ export const List: Story = () => {
                         position="bottom"
                         content="Icon rendered with `SpanIcon`"
                       >
-                        <SpanIcon type={type} subType={subType} />
+                        <SpanIcon type={type} subtype={subtype} />
                       </EuiToolTip>
                     </div>
 
@@ -69,7 +69,7 @@ export const List: Story = () => {
                       }}
                     >
                       <div>span.type: {type}</div>
-                      <div>span.subtype: {subType}</div>
+                      <div>span.subtype: {subtype}</div>
                     </code>
                   </>
                 }

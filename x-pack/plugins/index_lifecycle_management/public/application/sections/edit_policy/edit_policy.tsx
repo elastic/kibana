@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
 
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -50,13 +50,9 @@ import {
 import { useEditPolicyContext } from './edit_policy_context';
 import { FormInternal } from './types';
 
-export interface Props {
-  history: RouteComponentProps['history'];
-}
-
 const policyNamePath = 'name';
 
-export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
+export const EditPolicy: React.FunctionComponent = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -119,6 +115,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     [originalPolicyName, existingPolicies, saveAsNew]
   );
 
+  const history = useHistory();
   const backToPolicyList = () => {
     history.push('/policies');
   };
