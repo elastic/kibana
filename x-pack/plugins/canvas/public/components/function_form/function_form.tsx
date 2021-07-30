@@ -6,31 +6,36 @@
  */
 
 import React from 'react';
+import {
+  ExpressionAstExpression,
+  ExpressionValue,
+} from '../../../../../../src/plugins/expressions/common';
 import { FunctionFormComponent } from './function_form_component';
 import { FunctionUnknown } from './function_unknown';
 import { FunctionFormContextPending } from './function_form_context_pending';
 import { FunctionFormContextError } from './function_form_context_error';
-import { View, Model, Transform } from '../../expression_types';
-
-type State = 'ready' | 'error' | 'pending';
-interface Context {
-  error: string;
-  state: State;
-  value: unknown;
-}
-
-type ExpressionType = typeof View | typeof Model | typeof Transform;
+import { State, Context, ExpressionType, ArgDefType } from './types';
+import { ArgType, Arg } from '../../expression_types';
 
 interface FunctionFormProps {
-  state: State;
-  context: Context;
+  argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
+  args: Array<typeof Arg>;
+  argType: typeof ArgType;
+  argTypeDef: ArgDefType;
+  filterGroups: string[];
+  context?: Context;
+  expressionIndex: number;
   expressionType: ExpressionType;
-  argType: string;
-  nextArgType?: string;
+  nextArgType?: typeof ArgType;
+  nextExpressionType?: ExpressionType;
+  onValueAdd: (argName: string, argValue: unknown) => () => void;
+  onAssetAdd: (type: string, content: string) => string;
+  onValueChange: (argName: string, argIndex: number) => (value: unknown) => void;
+  onValueRemove: (argName: string, argIndex: number) => () => void;
 }
 
 // helper to check the state of the passed in expression type
-function is(state: State, expressionType: ExpressionType, context: Context) {
+function is(state: State, expressionType: ExpressionType, context?: Context) {
   const matchState = !context || context.state === state;
   return expressionType && expressionType.requiresContext && matchState;
 }
@@ -47,7 +52,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
   }
 
   if (is('error', expressionType, context)) {
-    return <FunctionFormContextError {...props} />;
+    return <FunctionFormContextError {...props} context={context ?? { error: '' }} />;
   }
 
   return <FunctionFormComponent {...props} />;
