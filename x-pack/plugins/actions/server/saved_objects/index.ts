@@ -39,7 +39,6 @@ export function setupSavedObjects(
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType,
-    convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
     management: {
@@ -80,7 +79,6 @@ export function setupSavedObjects(
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType,
-    convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
       const oldestIdleActionTask = await getOldestIdleActionTask(
