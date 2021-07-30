@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { IFieldFormat, SerializedFieldFormat } from '../index';
-
 export { asPrettyString } from './as_pretty_string';
 export { getHighlightHtml, getHighlightRequest } from './highlight';
 export { shortenDottedString } from './shorten_dotted_string';
-
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

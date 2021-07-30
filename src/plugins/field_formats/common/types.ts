@@ -117,3 +117,5 @@ export interface SerializedFieldFormat<TParams = Record<string, any>> {
   id?: string;
   params?: TParams;
 }
+
+export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

@@ -43,6 +43,7 @@ export {
   FieldFormatConfig,
   FieldFormatId,
   SerializedFieldFormat,
+  FormatFactory,
   // Used in field format plugin only
   FieldFormatInstanceType,
   IFieldFormat,
