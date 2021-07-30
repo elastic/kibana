@@ -15,6 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -24,13 +27,21 @@ import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
+import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
-const INITIAL_STATE = {
-  transactionGroups: [] as ApiResponse['transactionGroups'],
+
+type InitialState = ApiResponse & {
+  requestId: string;
+  transactionGroupsTotalItems: number;
+};
+
+const INITIAL_STATE: InitialState = {
+  transactionGroups: [],
   isAggregationAccurate: true,
   requestId: '',
   transactionGroupsTotalItems: 0,
+  bucketSize: 0,
 };
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
@@ -43,11 +54,13 @@ const DEFAULT_SORT = {
 interface Props {
   hideViewTransactionsLink?: boolean;
   numberOfTransactionsPerPage?: number;
+  showAggregationAccurateCallout?: boolean;
 }
 
 export function ServiceOverviewTransactionsTable({
   hideViewTransactionsLink = false,
   numberOfTransactionsPerPage = 5,
+  showAggregationAccurateCallout = false,
 }: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
@@ -140,7 +153,13 @@ export function ServiceOverviewTransactionsTable({
     ]
   );
 
-  const { transactionGroups, requestId, transactionGroupsTotalItems } = data;
+  const {
+    transactionGroups,
+    requestId,
+    transactionGroupsTotalItems,
+    isAggregationAccurate,
+    bucketSize,
+  } = data;
 
   const {
     data: transactionGroupDetailedStatistics,
@@ -235,6 +254,44 @@ export function ServiceOverviewTransactionsTable({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
+      {showAggregationAccurateCallout && !isAggregationAccurate && (
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.transactionCardinalityWarning.title',
+              {
+                defaultMessage:
+                  'This view shows a subset of reported transactions.',
+              }
+            )}
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.apm.transactionCardinalityWarning.body"
+                defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
+                values={{
+                  bucketSize,
+                  codeBlock: (
+                    <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
+                  ),
+                }}
+              />
+
+              <ElasticDocsLink
+                section="/kibana"
+                path="/troubleshooting.html#troubleshooting-too-many-transactions"
+              >
+                {i18n.translate(
+                  'xpack.apm.transactionCardinalityWarning.docsLink',
+                  { defaultMessage: 'Learn more in the docs' }
+                )}
+              </ElasticDocsLink>
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiFlexItem>
           <TableFetchWrapper status={status}>

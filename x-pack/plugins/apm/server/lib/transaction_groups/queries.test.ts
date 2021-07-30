@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transactionGroupsFetcher } from './fetcher';
+import { topTransactionGroupsFetcher } from './fetcher';
 import {
   SearchParamsMock,
   inspectSearchParams,
@@ -18,36 +18,13 @@ describe('transaction group queries', () => {
     mock.teardown();
   });
 
-  it('fetches top transactions', async () => {
-    const bucketSize = 100;
-    mock = await inspectSearchParams((setup) =>
-      transactionGroupsFetcher(
-        {
-          type: 'top_transactions',
-          serviceName: 'foo',
-          transactionType: 'bar',
-          searchAggregatedTransactions: false,
-        },
-        setup,
-        bucketSize
-      )
-    );
-
-    const allParams = mock.spy.mock.calls.map((call) => call[1]);
-
-    expect(allParams).toMatchSnapshot();
-  });
-
   it('fetches top traces', async () => {
-    const bucketSize = 100;
     mock = await inspectSearchParams((setup) =>
-      transactionGroupsFetcher(
+      topTransactionGroupsFetcher(
         {
-          type: 'top_traces',
           searchAggregatedTransactions: false,
         },
-        setup,
-        bucketSize
+        setup
       )
     );
 

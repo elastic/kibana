@@ -166,10 +166,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./transactions/latency'));
     });
 
-    describe('transactions/top_transaction_groups', function () {
-      loadTestFile(require.resolve('./transactions/top_transaction_groups'));
-    });
-
     describe('transactions/transactions_groups_main_statistics', function () {
       loadTestFile(require.resolve('./transactions/transactions_groups_main_statistics'));
     });

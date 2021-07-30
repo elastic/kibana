@@ -19,7 +19,6 @@ import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
 import { getLatencyPeriods } from '../lib/transactions/get_latency_charts';
-import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRatePeriods } from '../lib/transaction_groups/get_error_rate';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -29,49 +28,6 @@ import {
   kueryRt,
   rangeRt,
 } from './default_api_types';
-
-/**
- * Returns a list of transactions grouped by name
- * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/main_statistics/
- */
-const transactionGroupsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-    const { serviceName } = params.path;
-    const { environment, kuery, transactionType } = params.query;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-    });
-
-    return getTransactionGroupList(
-      {
-        environment,
-        kuery,
-        type: 'top_transactions',
-        serviceName,
-        transactionType,
-        searchAggregatedTransactions,
-      },
-      setup
-    );
-  },
-});
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -388,7 +344,6 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
 });
 
 export const transactionRouteRepository = createApmServerRouteRepository()
-  .add(transactionGroupsRoute)
   .add(transactionGroupsMainStatisticsRoute)
   .add(transactionGroupsDetailedStatisticsRoute)
   .add(transactionLatencyChartsRoute)

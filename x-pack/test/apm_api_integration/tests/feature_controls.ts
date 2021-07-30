@@ -102,13 +102,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/api/apm/services/foo/transactions/groups?start=${start}&end=${end}&transactionType=bar`,
-      },
-      expectForbidden: expect403,
-      expectResponse: expect200,
-    },
-    {
-      req: {
         url: `/api/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg`,
       },
       expectForbidden: expect403,
