@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { DateFormatEditor } from './date';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { DateFormatEditor } from './date';
+export const dateFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./date').then((m) => m.DateFormatEditor);
+dateFormatEditorFactory.formatId = formatId;

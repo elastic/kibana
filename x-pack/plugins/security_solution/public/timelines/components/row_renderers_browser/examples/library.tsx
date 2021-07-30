@@ -23,6 +23,7 @@ const LibraryExampleComponent: React.FC = () => {
       {libraryRowRenderer.renderRow({
         browserFields: {},
         data: mockEndpointLibraryLoadEvent,
+        isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

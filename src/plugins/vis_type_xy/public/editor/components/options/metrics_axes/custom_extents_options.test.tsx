@@ -120,6 +120,12 @@ describe('CustomExtentsOptions component', () => {
       expect(comp.find(YExtents).exists()).toBeFalsy();
     });
 
+    it('should hide YExtents when the switch is disabled', () => {
+      const comp = shallow(<CustomExtentsOptions {...defaultProps} disableAxisExtents={true} />);
+
+      expect(comp.find(YExtents).exists()).toBeFalsy();
+    });
+
     it('should call setValueAxis when value is true', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
       comp.find({ paramName: SET_Y_EXTENTS }).prop('setValue')(SET_Y_EXTENTS, true);
