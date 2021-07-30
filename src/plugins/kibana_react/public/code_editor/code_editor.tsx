@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
-import MonacoEditor from 'react-monaco-editor';
+import ReactMonacoEditor from 'react-monaco-editor';
 import { htmlIdGenerator, EuiText } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,10 +23,11 @@ import {
 
 import './editor.scss';
 
-enum keyCodes {
+export enum keyCodes {
   ENTER = 13,
   ESCAPE = 9,
 }
+
 export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
@@ -126,9 +127,17 @@ export const CodeEditor: React.FC<Props> = ({
   hoverProvider,
   languageConfiguration,
 }) => {
+  // We need to be able to mock the MonacoEditor in our test in order to not test implementation
+  // detail and having to call methods on the CodeEditor component instance.
+  const MonacoEditor: typeof ReactMonacoEditor = useMemo(() => {
+    const isMockedComponent =
+      typeof ReactMonacoEditor === 'function' && ReactMonacoEditor.name === 'JestMockEditor';
+    return isMockedComponent ? (ReactMonacoEditor as any)() : ReactMonacoEditor;
+  }, []);
+
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
-  const monacoEditorRef = useRef<MonacoEditor>(null);
+  const monacoEditorRef = useRef<ReactMonacoEditor>(null);
   const editorHint = useRef<HTMLDivElement>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
