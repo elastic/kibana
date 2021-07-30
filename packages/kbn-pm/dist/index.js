@@ -9003,7 +9003,7 @@ const BootstrapCommand = {
 
     await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_2__["linkProjectExecutables"])(projects, projectGraph); // Build typescript references
 
-    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_1__["spawnStreaming"])('node', ['scripts/build_ts_refs', '--ignore-type-failures'], {
+    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_1__["spawnStreaming"])('node', ['scripts/build_ts_refs', '--ignore-type-failures', '--info'], {
       cwd: kbn.getAbsolute(),
       env: process.env
     }, {

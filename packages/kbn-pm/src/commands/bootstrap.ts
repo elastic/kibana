@@ -105,7 +105,7 @@ export const BootstrapCommand: ICommand = {
     // Build typescript references
     await spawnStreaming(
       'node',
-      ['scripts/build_ts_refs', '--ignore-type-failures'],
+      ['scripts/build_ts_refs', '--ignore-type-failures', '--info'],
       {
         cwd: kbn.getAbsolute(),
         env: process.env,
