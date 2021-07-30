@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
-import { CommonProps } from '@elastic/eui';
+import React, { FC, memo, useMemo } from 'react';
+import { CommonProps, EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { HeaderPage } from '../../common/components/header_page';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { BETA_BADGE_LABEL } from '../common/translations';
 
@@ -25,21 +23,33 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
   ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
+    const header = useMemo(() => {
+      return (
+        <>
+          {headerBackComponent && <>{headerBackComponent}</>}
+          <EuiTitle size="l">
+            <h1 data-test-subj="header-page-title">
+              <>{title}</>
+            </h1>
+          </EuiTitle>
+        </>
+      );
+    }, [headerBackComponent, title]);
+
     return (
-      <SecuritySolutionPageWrapper noTimeline {...otherProps}>
-        <HeaderPage
-          hideSourcerer={true}
-          title={title}
-          subtitle={subtitle}
-          backComponent={headerBackComponent}
-          badgeOptions={badgeOptions}
-        >
-          {actions}
-        </HeaderPage>
+      <EuiPageTemplate
+        pageHeader={{
+          pageTitle: header,
+          description: subtitle,
+          children: actions,
+          bottomBorder: true,
+        }}
+        restrictWidth={false}
+      >
         {children}
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </SecuritySolutionPageWrapper>
+      </EuiPageTemplate>
     );
   }
 );

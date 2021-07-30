@@ -526,10 +526,6 @@ export const EndpointList = () => {
         />
       }
     >
-      <EuiHorizontalRule
-        margin="none"
-        style={{ margin: `0 0 ${theme.eui.ruleMargins.marginLarge} 0` }}
-      />
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
