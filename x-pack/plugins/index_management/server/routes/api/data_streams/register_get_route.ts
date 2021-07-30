@@ -69,24 +69,17 @@ const enhanceDataStreams = ({
 };
 
 const getDataStreams = (client: IScopedClusterClient, name = '*') => {
-  // TODO update when elasticsearch client has update requestParams for 'indices.getDataStream'
-  return client.asCurrentUser.transport.request({
-    path: `/_data_stream/${encodeURIComponent(name)}`,
-    method: 'GET',
-    querystring: {
-      expand_wildcards: 'all',
-    },
+  return client.asCurrentUser.indices.getDataStream({
+    name,
+    expand_wildcards: 'all',
   });
 };
 
 const getDataStreamsStats = (client: IScopedClusterClient, name = '*') => {
-  return client.asCurrentUser.transport.request({
-    path: `/_data_stream/${encodeURIComponent(name)}/_stats`,
-    method: 'GET',
-    querystring: {
-      human: true,
-      expand_wildcards: 'all',
-    },
+  return client.asCurrentUser.indices.dataStreamsStats({
+    name,
+    expand_wildcards: 'all',
+    human: true,
   });
 };
 
@@ -115,7 +108,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
       const includeStats = (request.query as TypeOf<typeof querySchema>).includeStats === 'true';
 
       try {
-        let {
+        const {
           body: { data_streams: dataStreams },
         } = await getDataStreams(client);
 
@@ -131,18 +124,20 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         if (config.isSecurityEnabled() && dataStreams.length > 0) {
           ({ body: dataStreamsPrivileges } = await getDataStreamsPrivileges(
             client,
-            dataStreams.map((dataStream: DataStreamFromEs) => dataStream.name)
+            dataStreams.map((dataStream) => dataStream.name)
           ));
         }
 
-        dataStreams = enhanceDataStreams({
+        const enhancedDataStreams = enhanceDataStreams({
+          // @ts-expect-error DataStreamFromEs incompatible with IndicesGetDataStreamIndicesGetDataStreamItem
           dataStreams,
+          // @ts-expect-error StatsFromEs incompatible with IndicesDataStreamsStatsDataStreamsStatsItem
           dataStreamsStats,
           // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
           dataStreamsPrivileges,
         });
 
-        return response.ok({ body: deserializeDataStreamList(dataStreams) });
+        return response.ok({ body: deserializeDataStreamList(enhancedDataStreams) });
       } catch (error) {
         return handleEsError({ error, response });
       }
@@ -181,7 +176,9 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           }
 
           const enhancedDataStreams = enhanceDataStreams({
+            // @ts-expect-error DataStreamFromEs incompatible with IndicesGetDataStreamIndicesGetDataStreamItem
             dataStreams,
+            // @ts-expect-error StatsFromEs incompatible with IndicesDataStreamsStatsDataStreamsStatsItem
             dataStreamsStats,
             // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
             dataStreamsPrivileges,
