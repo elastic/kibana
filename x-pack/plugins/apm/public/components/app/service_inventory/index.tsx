@@ -71,15 +71,7 @@ function useServicesFetcher() {
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      environment,
-      kuery,
-      start,
-      end,
-      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
-      offset,
-    ]
+    [environment, kuery, start, end]
   );
 
   const { mainStatistics, requestId } = data;
@@ -106,9 +98,9 @@ function useServicesFetcher() {
         });
       }
     },
-    // only fetches detailed statistics when requestId is invalidated by main statistics api call
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId],
+    [requestId, offset],
     { preservePreviousData: false }
   );
 
