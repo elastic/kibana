@@ -176,7 +176,7 @@ Array [
               className="euiTitle euiTitle--medium"
               id="flyoutTitle"
             >
-              Job Info
+              Report info
             </h2>
           </EuiTitle>
         </div>
@@ -226,7 +226,7 @@ Array [
             className="euiTitle euiTitle--medium"
             id="flyoutTitle"
           >
-            Job Info
+            Report info
           </h2>
         </EuiTitle>
       </div>

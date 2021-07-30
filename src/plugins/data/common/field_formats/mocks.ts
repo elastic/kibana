@@ -25,6 +25,7 @@ export const fieldFormatsMock: IFieldFormatsRegistry = {
   getTypeNameByEsTypes: jest.fn(),
   init: jest.fn(),
   register: jest.fn(),
+  has: jest.fn(),
   parseDefaultTypeMap: jest.fn(),
   deserialize: jest.fn().mockImplementation(() => {
     const DefaultFieldFormat = FieldFormat.from(identity);

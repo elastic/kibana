@@ -4,6 +4,13 @@
 
 ## esFilters variable
 
+> Warning: This API is now obsolete.
+> 
+> Please import helpers from the package kbn/es-query directly. This import will be removed in v8.0.0.
+> 
+
+Filter helpers namespace:
+
 <b>Signature:</b>
 
 ```typescript
@@ -16,7 +23,7 @@ esFilters: {
     buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: any[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
     buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
     buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: any, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
-    buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query").QueryStringFilter;
+    buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;
     buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter;
     isPhraseFilter: (filter: any) => filter is import("@kbn/es-query").PhraseFilter;
     isExistsFilter: (filter: any) => filter is import("@kbn/es-query").ExistsFilter;
@@ -24,7 +31,7 @@ esFilters: {
     isRangeFilter: (filter: any) => filter is import("@kbn/es-query").RangeFilter;
     isMatchAllFilter: (filter: any) => filter is import("@kbn/es-query").MatchAllFilter;
     isMissingFilter: (filter: any) => filter is import("@kbn/es-query").MissingFilter;
-    isQueryStringFilter: (filter: any) => filter is import("@kbn/es-query").QueryStringFilter;
+    isQueryStringFilter: (filter: any) => filter is import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;
     isFilterPinned: (filter: import("@kbn/es-query").Filter) => boolean | undefined;
     toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
         meta: {
@@ -39,21 +46,21 @@ esFilters: {
             params?: any;
             value?: string | undefined;
         };
-        $state?: import("@kbn/es-query/target_types/filters/types").FilterState | undefined;
+        $state?: import("@kbn/es-query").FilterState | undefined;
         query?: any;
     };
     disableFilter: (filter: import("@kbn/es-query").Filter) => import("@kbn/es-query").Filter;
     getPhraseFilterField: (filter: import("@kbn/es-query").PhraseFilter) => string;
     getPhraseFilterValue: (filter: import("@kbn/es-query").PhraseFilter) => string | number | boolean;
     getDisplayValueFromFilter: typeof getDisplayValueFromFilter;
-    compareFilters: (first: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], second: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
-    COMPARE_ALL_OPTIONS: import("../common").FilterCompareOptions;
+    compareFilters: (first: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], second: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], comparatorOptions?: import("@kbn/es-query").FilterCompareOptions | undefined) => boolean;
+    COMPARE_ALL_OPTIONS: import("@kbn/es-query").FilterCompareOptions;
     generateFilters: typeof generateFilters;
     onlyDisabledFiltersChanged: (newFilters?: import("@kbn/es-query").Filter[] | undefined, oldFilters?: import("@kbn/es-query").Filter[] | undefined) => boolean;
-    changeTimeFilter: typeof changeTimeFilter;
-    convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
+    changeTimeFilter: typeof oldChangeTimeFilter;
+    convertRangeFilterToTimeRangeString: typeof oldConvertRangeFilterToTimeRangeString;
     mapAndFlattenFilters: (filters: import("@kbn/es-query").Filter[]) => import("@kbn/es-query").Filter[];
-    extractTimeFilter: typeof extractTimeFilter;
+    extractTimeFilter: typeof oldExtractTimeFilter;
     extractTimeRange: typeof extractTimeRange;
 }
 ```

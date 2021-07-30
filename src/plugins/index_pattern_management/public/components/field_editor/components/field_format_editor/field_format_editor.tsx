@@ -6,30 +6,36 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent, Fragment } from 'react';
-import type { DefaultFormatEditor } from 'src/plugins/index_pattern_field_editor/public';
+import React, { LazyExoticComponent, PureComponent } from 'react';
+import { memoize } from 'lodash';
+import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import type {
+  FieldFormatEditorFactory,
+  FieldFormatEditor as InnerFieldFormatEditor,
+} from 'src/plugins/index_pattern_field_editor/public';
+import type { FieldFormat } from 'src/plugins/data/public';
 
 export interface FieldFormatEditorProps {
   fieldType: string;
-  fieldFormat: DefaultFormatEditor;
+  fieldFormat: FieldFormat;
   fieldFormatId: string;
   fieldFormatParams: { [key: string]: unknown };
   fieldFormatEditors: any;
-  onChange: (change: { fieldType: string; [key: string]: any }) => void;
+  onChange: (change: { [key: string]: any }) => void;
   onError: (error?: string) => void;
 }
 
-interface EditorComponentProps {
-  fieldType: FieldFormatEditorProps['fieldType'];
-  format: FieldFormatEditorProps['fieldFormat'];
-  formatParams: FieldFormatEditorProps['fieldFormatParams'];
-  onChange: FieldFormatEditorProps['onChange'];
-  onError: FieldFormatEditorProps['onError'];
+interface FieldFormatEditorState {
+  EditorComponent: LazyExoticComponent<InnerFieldFormatEditor> | null;
 }
 
-interface FieldFormatEditorState {
-  EditorComponent: React.FC<EditorComponentProps>;
-}
+// use memoize to get stable reference
+const unwrapEditor = memoize(
+  (editorFactory: FieldFormatEditorFactory | null): FieldFormatEditorState['EditorComponent'] => {
+    if (!editorFactory) return null;
+    return React.lazy(() => editorFactory().then((editor) => ({ default: editor })));
+  }
+);
 
 export class FieldFormatEditor extends PureComponent<
   FieldFormatEditorProps,
@@ -38,13 +44,13 @@ export class FieldFormatEditor extends PureComponent<
   constructor(props: FieldFormatEditorProps) {
     super(props);
     this.state = {
-      EditorComponent: props.fieldFormatEditors.getById(props.fieldFormatId),
+      EditorComponent: unwrapEditor(props.fieldFormatEditors.getById(props.fieldFormatId)),
     };
   }
 
   static getDerivedStateFromProps(nextProps: FieldFormatEditorProps) {
     return {
-      EditorComponent: nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId) || null,
+      EditorComponent: unwrapEditor(nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId)),
     };
   }
 
@@ -53,17 +59,29 @@ export class FieldFormatEditor extends PureComponent<
     const { fieldType, fieldFormat, fieldFormatParams, onChange, onError } = this.props;
 
     return (
-      <Fragment>
+      <>
         {EditorComponent ? (
-          <EditorComponent
-            fieldType={fieldType}
-            format={fieldFormat}
-            formatParams={fieldFormatParams}
-            onChange={onChange}
-            onError={onError}
-          />
+          <React.Suspense
+            fallback={
+              // We specify minHeight to avoid too mitigate layout shifts while loading an editor
+              // ~430 corresponds to "4 lines" of EuiLoadingContent
+              <div style={{ minHeight: 430, marginTop: 8 }}>
+                <EuiDelayRender>
+                  <EuiLoadingContent lines={4} />
+                </EuiDelayRender>
+              </div>
+            }
+          >
+            <EditorComponent
+              fieldType={fieldType}
+              format={fieldFormat}
+              formatParams={fieldFormatParams}
+              onChange={onChange}
+              onError={onError}
+            />
+          </React.Suspense>
         ) : null}
-      </Fragment>
+      </>
     );
   }
 }
