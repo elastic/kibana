@@ -7,6 +7,7 @@
 
 import { APMPlugin, APMRouteHandlerResources } from '../..';
 import { ExternalCallback } from '../../../../fleet/server';
+import type { DeletePackagePoliciesResponse } from '../../../../fleet/common';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { APMPluginStartDependencies } from '../../types';
@@ -50,6 +51,16 @@ export async function registerFleetPolicyCallbacks({
     config,
     logger,
   });
+
+  // Registers a callback invoked when a policy is removed to unlink it from TA
+  registerPackagePolicyExternalCallback({
+    fleetPluginStart,
+    callbackName: 'postPackagePolicyDelete',
+    plugins,
+    ruleDataClient,
+    config,
+    logger,
+  });
 }
 
 type ExternalCallbackParams = Parameters<ExternalCallback[1]>;
@@ -77,6 +88,9 @@ function registerPackagePolicyExternalCallback({
     context: Context,
     request: Request
   ) => {
+    if (packagePolicy instanceof Array) {
+      return undefined;
+    }
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }

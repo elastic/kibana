@@ -36,7 +36,7 @@ export type ExternalCallback =
   | [
       'packagePolicyUpdate',
       (
-        newPackagePolicy: UpdatePackagePolicy,
+        updatePackagePolicy: UpdatePackagePolicy,
         context: RequestHandlerContext,
         request: KibanaRequest
       ) => Promise<UpdatePackagePolicy>
