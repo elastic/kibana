@@ -51,12 +51,17 @@ export const alertsFieldMap: FieldMap = {
   'kibana.alert.original_event.agent_id_status': {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   'kibana.alert.original_event.category': {
     type: 'keyword',
     array: true,
     required: true,
+  },
+  'kibana.alert.original_event.code': {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   'kibana.alert.original_event.created': {
     type: 'date',
@@ -69,6 +74,16 @@ export const alertsFieldMap: FieldMap = {
     required: true,
   },
   'kibana.alert.original_event.duration': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.original_event.end': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.original_event.hash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -94,7 +109,7 @@ export const alertsFieldMap: FieldMap = {
     required: true,
   },
   'kibana.alert.original_event.original': {
-    type: 'text',
+    type: 'keyword',
     array: false,
     required: true,
   },
@@ -103,15 +118,55 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'kibana.alert.original_event.provider': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.original_event.reason': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.original_event.reference': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.original_event.risk_score': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.original_event.risk_score_norm': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
   'kibana.alert.original_event.sequence': {
     type: 'long',
     array: false,
     required: true,
   },
+  'kibana.alert.original_event.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.original_event.timezone': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'kibana.alert.original_event.type': {
     type: 'keyword',
     array: true,
     required: true,
+  },
+  'kibana.alert.original_event.url': {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   'kibana.alert.original_time': {
     type: 'date',
