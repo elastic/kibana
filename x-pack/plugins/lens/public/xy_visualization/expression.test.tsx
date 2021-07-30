@@ -2489,6 +2489,81 @@ describe('xy_expression', () => {
         visible: true,
       });
     });
+
+    test('it should format the boolean values correctly', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'datatable',
+            columns: [
+              {
+                id: 'a',
+                name: 'a',
+                meta: { type: 'number', params: { id: 'number', params: { pattern: '0,0.000' } } },
+              },
+              {
+                id: 'b',
+                name: 'b',
+                meta: { type: 'number', params: { id: 'number', params: { pattern: '000,0' } } },
+              },
+              {
+                id: 'c',
+                name: 'c',
+                meta: {
+                  type: 'boolean',
+                  params: { id: 'boolean' },
+                },
+              },
+            ],
+            rows: [
+              { a: 5, b: 2, c: 0 },
+              { a: 19, b: 5, c: 1 },
+            ],
+          },
+        },
+        dateRange: {
+          fromDate: new Date('2019-01-02T05:00:00.000Z'),
+          toDate: new Date('2019-01-03T05:00:00.000Z'),
+        },
+      };
+      const timeSampleLayer: LayerArgs = {
+        layerId: 'first',
+        seriesType: 'line',
+        xAccessor: 'c',
+        accessors: ['a', 'b'],
+        xScaleType: 'ordinal',
+        yScaleType: 'linear',
+        isHistogram: false,
+        palette: mockPaletteOutput,
+      };
+      const args = createArgsWithLayers([timeSampleLayer]);
+
+      const getCustomFormatSpy = jest.fn();
+      getCustomFormatSpy.mockReturnValue({ convert: jest.fn((x) => Boolean(x)) });
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          formatFactory={getCustomFormatSpy}
+          data={{ ...data }}
+          args={{ ...args }}
+        />
+      );
+
+      expect(component.find(LineSeries).at(1).prop('data')).toEqual([
+        {
+          a: 5,
+          b: 2,
+          c: false,
+        },
+        {
+          a: 19,
+          b: 5,
+          c: true,
+        },
+      ]);
+    });
   });
 
   describe('calculateMinInterval', () => {

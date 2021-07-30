@@ -40,9 +40,8 @@ import {
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
-  IndexPatternField,
   IndexPattern,
-  IFieldType,
+  IndexPatternField,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
@@ -145,7 +144,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.getAll().map((f: IFieldType) => f.name),
+      existingFieldNames: indexPattern.fields.getAll().map((f: IndexPatternField) => f.name),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,

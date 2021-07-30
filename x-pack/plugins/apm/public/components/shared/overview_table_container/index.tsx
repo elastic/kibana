@@ -10,7 +10,7 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { useBreakPoints } from '../../../hooks/use_break_points';
 
 /**
- * The height for a table on the overview page. Is the height of a 5-row basic
+ * The height for a table on a overview page. Is the height of a 5-row basic
  * table.
  */
 const tableHeight = 282;
@@ -24,7 +24,7 @@ const tableHeight = 282;
  *
  * Hide the empty message when we don't yet have any items and are still loading.
  */
-const ServiceOverviewTableContainerDiv = euiStyled.div<{
+const OverviewTableContainerDiv = euiStyled.div<{
   isEmptyAndLoading: boolean;
   shouldUseMobileLayout: boolean;
 }>`
@@ -52,7 +52,7 @@ const ServiceOverviewTableContainerDiv = euiStyled.div<{
   }
 `;
 
-export function ServiceOverviewTableContainer({
+export function OverviewTableContainer({
   children,
   isEmptyAndLoading,
 }: {
@@ -62,11 +62,11 @@ export function ServiceOverviewTableContainer({
   const { isMedium } = useBreakPoints();
 
   return (
-    <ServiceOverviewTableContainerDiv
+    <OverviewTableContainerDiv
       isEmptyAndLoading={isEmptyAndLoading}
       shouldUseMobileLayout={isMedium}
     >
       {children}
-    </ServiceOverviewTableContainerDiv>
+    </OverviewTableContainerDiv>
   );
 }
