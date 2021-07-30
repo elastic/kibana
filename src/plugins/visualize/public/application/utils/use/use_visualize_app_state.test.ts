@@ -47,6 +47,7 @@ describe('useVisualizeAppState', () => {
   const savedVisInstance = ({
     vis: {
       setState: jest.fn().mockResolvedValue({}),
+      data: {},
     },
     savedVis: {},
     embeddableHandler: {},
@@ -167,7 +168,31 @@ describe('useVisualizeAppState', () => {
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {
         ...visState,
-        data: { aggs: state.vis.aggs },
+        data: { aggs: state.vis.aggs, searchSource: { query: state.query, filter: state.filters } },
+      };
+
+      expect(savedVisInstance.vis.setState).toHaveBeenCalledWith(expectedNewVisState);
+      expect(result.current).toEqual({
+        appState: stateContainer,
+        hasUnappliedChanges: false,
+      });
+    });
+
+    it('should successfully updated vis state and set up app state container if query from app state is different', async () => {
+      stateContainerGetStateMock.mockImplementation(() => ({
+        ...visualizeAppStateStub,
+        query: { query: 'test', language: 'kuery' },
+      }));
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
+      );
+
+      await waitForNextUpdate();
+
+      const { aggs, ...visState } = stateContainer.getState().vis;
+      const expectedNewVisState = {
+        ...visState,
+        data: { aggs: state.vis.aggs, searchSource: { query: state.query, filter: state.filters } },
       };
 
       expect(savedVisInstance.vis.setState).toHaveBeenCalledWith(expectedNewVisState);
