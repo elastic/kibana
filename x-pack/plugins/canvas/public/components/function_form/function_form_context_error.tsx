@@ -6,8 +6,8 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
+import { Context } from './types';
 
 const strings = {
   getContextErrorMessage: (errorMessage: string) =>
@@ -18,18 +18,14 @@ const strings = {
       },
     }),
 };
-interface Props {
-  context: {
-    error: string;
-  };
+interface FunctionFormContextErrorProps {
+  context: Context;
 }
 
-export const FunctionFormContextError: FunctionComponent<Props> = ({ context }) => (
+export const FunctionFormContextError: FunctionComponent<FunctionFormContextErrorProps> = ({
+  context,
+}) => (
   <div className="canvasFunctionForm canvasFunctionForm--error">
     {strings.getContextErrorMessage(context.error)}
   </div>
 );
-
-FunctionFormContextError.propTypes = {
-  context: PropTypes.shape({ error: PropTypes.string }).isRequired,
-};

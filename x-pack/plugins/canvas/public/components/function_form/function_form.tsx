@@ -15,23 +15,25 @@ import { FunctionUnknown } from './function_unknown';
 import { FunctionFormContextPending } from './function_form_context_pending';
 import { FunctionFormContextError } from './function_form_context_error';
 import { State, Context, ExpressionType, ArgDefType } from './types';
-import { ArgType, Arg } from '../../expression_types';
+import { ArgType, Arg } from '../../expression_types/types';
+import { ElementSpec } from '../../../types';
 
 interface FunctionFormProps {
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Array<typeof Arg>;
-  argType: typeof ArgType;
+  args: Arg[];
+  argType: ArgType;
   argTypeDef: ArgDefType;
   filterGroups: string[];
   context?: Context;
   expressionIndex: number;
   expressionType: ExpressionType;
-  nextArgType?: typeof ArgType;
+  nextArgType?: ArgType;
   nextExpressionType?: ExpressionType;
   onValueAdd: (argName: string, argValue: unknown) => () => void;
   onAssetAdd: (type: string, content: string) => string;
   onValueChange: (argName: string, argIndex: number) => (value: unknown) => void;
   onValueRemove: (argName: string, argIndex: number) => () => void;
+  updateContext: (element?: ElementSpec) => void;
 }
 
 // helper to check the state of the passed in expression type
