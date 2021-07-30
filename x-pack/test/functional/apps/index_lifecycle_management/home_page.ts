@@ -52,13 +52,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.indexLifecycleManagement.increasePolicyListPageSize();
 
-      const allPolicies = await pageObjects.indexLifecycleManagement.getPolicyList();
+      const createdPolicy = await pageObjects.indexLifecycleManagement.getPolicyRow(policyName);
 
-      const filteredPolicies = allPolicies.filter(function (policy) {
-        return policy.name === policyName;
-      });
-
-      expect(filteredPolicies.length).to.be(1);
+      expect(createdPolicy.length).to.be(1);
     });
   });
 };

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
-import { IFieldType } from '../../../../../../../plugins/data/public';
+import { IndexPatternField } from '../../../../../../../plugins/data/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { createComponentWithContext } from '../../../test_utils';
 
@@ -20,7 +20,7 @@ jest.mock('./components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOp
 jest.mock('./components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
 jest.mock('./../../lib', () => ({
   extractTimeFields: jest.requireActual('./../../lib').extractTimeFields,
-  ensureMinimumTime: async (fields: IFieldType) => Promise.resolve(fields),
+  ensureMinimumTime: async (fields: IndexPatternField) => Promise.resolve(fields),
 }));
 
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({

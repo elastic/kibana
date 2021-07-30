@@ -7,13 +7,14 @@
  */
 
 import { extractTimeFields } from './extract_time_fields';
+import type { IndexPatternField } from 'src/plugins/data/public';
 
 describe('extractTimeFields', () => {
   it('should handle no date fields', () => {
     const fields = [
       { type: 'text', name: 'name' },
       { type: 'text', name: 'name' },
-    ];
+    ] as IndexPatternField[];
 
     expect(extractTimeFields(fields)).toEqual([
       { display: `The indices which match this index pattern don't contain any time fields.` },
@@ -21,7 +22,7 @@ describe('extractTimeFields', () => {
   });
 
   it('should add extra options', () => {
-    const fields = [{ type: 'date', name: '@timestamp' }];
+    const fields = [{ type: 'date', name: '@timestamp' }] as IndexPatternField[];
 
     expect(extractTimeFields(fields)).toEqual([
       { display: '@timestamp', fieldName: '@timestamp' },
