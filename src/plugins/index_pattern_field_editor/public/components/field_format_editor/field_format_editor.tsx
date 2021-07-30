@@ -12,12 +12,12 @@ import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
-  FieldFormatInstanceType,
   IndexPattern,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
+import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import { CoreStart } from 'src/core/public';
 import { castEsToKbnFieldTypeName } from '../../../../data/public';
 import { FormatEditor } from './format_editor';
