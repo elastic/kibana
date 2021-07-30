@@ -974,11 +974,6 @@ export class SavedObjectsRepository {
         )
       : undefined;
 
-    // // initial header check to ensure the response is from Elasticsearch
-    // if (bulkGetResponse && !isSupportedEsServer(bulkGetResponse.headers)) {
-    //   throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    // }
-
     return {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
