@@ -5,11 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FocusEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiComboBox } from '@elastic/eui';
 
-export const ESFieldsSelect = ({ selected, fields, onChange, onFocus, onBlur }) => {
+export interface ESFieldsSelectProps {
+  index: string;
+  value: string;
+  onChange: (field: string | null) => void;
+  onBlur: FocusEventHandler<HTMLDivElement> | undefined;
+  onFocus: FocusEventHandler<HTMLDivElement> | undefined;
+  fields: string[];
+}
+
+export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = ({
+  selected = [],
+  fields = [],
+  onChange,
+  onFocus,
+  onBlur,
+}) => {
   const options = fields.map((value) => ({
     label: value,
   }));
