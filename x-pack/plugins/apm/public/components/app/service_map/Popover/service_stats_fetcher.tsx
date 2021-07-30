@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
-import { ServiceNodeStats } from '../../../../../common/service_map';
-import { ServiceStatsList } from './ServiceStatsList';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { AnomalyDetection } from './anomaly_detection';
+import React from 'react';
 import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
+import { ServiceNodeStats } from '../../../../../common/service_map';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { AnomalyDetection } from './anomaly_detection';
+import { ServiceStatsList } from './service_stats_list';
 
 interface ServiceStatsFetcherProps {
   environment?: string;

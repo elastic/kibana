@@ -6,31 +6,27 @@
  */
 
 import {
-  EuiFlexItem,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiFlexItem,
 } from '@elastic/eui';
-import React, { Fragment, MouseEvent } from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { ExternalConnectionNode } from '../../../../../../common/service_map';
+import React, { Fragment } from 'react';
+import { ContentsProps } from '.';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { ExternalConnectionNode } from '../../../../../common/service_map';
 
 const ExternalResourcesList = euiStyled.section`
   max-height: 360px;
   overflow: auto;
 `;
 
-interface ExternalsProps {
-  onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
-  selectedNodeData: cytoscape.NodeDataDefinition;
-}
-
-export function Externals({ selectedNodeData }: ExternalsProps) {
+export function ExternalsListContents({ nodeData }: ContentsProps) {
   return (
     <EuiFlexItem>
       <ExternalResourcesList>
         <EuiDescriptionList>
-          {selectedNodeData.groupedConnections.map(
+          {nodeData.groupedConnections.map(
             (resource: ExternalConnectionNode) => {
               const title =
                 resource.label || resource['span.destination.service.resource'];

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
+import { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import { CoreStart } from 'kibana/public';
-import React, { ComponentType } from 'react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { Popover } from '.';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -21,11 +22,11 @@ interface Args {
   nodeData: cytoscape.NodeDataDefinition;
 }
 
-export default {
+const stories: Meta<Args> = {
   title: 'app/ServiceMap/Popover',
   component: Popover,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent) => {
       const coreMock = ({
         http: {
           get: () => {
@@ -49,20 +50,22 @@ export default {
       createCallApmApi(coreMock);
 
       return (
-        <KibanaReactContext.Provider>
-          <MockUrlParamsContextProvider>
-            <MockApmPluginContextWrapper>
-              <div style={{ height: 325 }}>
-                <StoryComponent />
-              </div>
-            </MockApmPluginContextWrapper>
-          </MockUrlParamsContextProvider>
-        </KibanaReactContext.Provider>
+        <MemoryRouter initialEntries={['/service-map']}>
+          <KibanaReactContext.Provider>
+            <MockUrlParamsContextProvider>
+              <MockApmPluginContextWrapper>
+                <div style={{ height: 325 }}>
+                  <StoryComponent />
+                </div>
+              </MockApmPluginContextWrapper>
+            </MockUrlParamsContextProvider>
+          </KibanaReactContext.Provider>
+        </MemoryRouter>
       );
     },
-    (StoryComponent: ComponentType, { args: { nodeData } }: { args: Args }) => {
+    (StoryComponent, { args }) => {
       const node = {
-        data: nodeData,
+        data: args?.nodeData!,
       };
 
       const cy = cytoscape({ elements: [node] });
@@ -79,13 +82,7 @@ export default {
     },
   ],
 };
-
-export const Service: Story<Args> = () => {
-  return <Popover />;
-};
-Service.args = {
-  nodeData: { id: 'example service', 'service.name': 'example service' },
-};
+export default stories;
 
 export const Backend: Story<Args> = () => {
   return <Popover />;
@@ -100,9 +97,43 @@ Backend.args = {
   },
 };
 
-export const Externals: Story<Args> = () => {
+export const BackendWithLongTitle: Story<Args> = () => {
   return <Popover />;
 };
-Externals.args = {
+Backend.args = {
+  nodeData: {
+    'span.subtype': 'http',
+    'span.destination.service.resource':
+      '8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
+    'span.type': 'external',
+    id: '>8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
+    label: '8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
+  },
+};
+
+export const ExternalsList: Story<Args> = () => {
+  return <Popover />;
+};
+ExternalsList.args = {
   nodeData: exampleGroupedConnectionsData,
+};
+
+export const Resource: Story<Args> = () => {
+  return <Popover />;
+};
+Resource.args = {
+  nodeData: {
+    id: '>cdn.loom.com:443',
+    label: 'cdn.loom.com:443',
+    'span.destination.service.resource': 'cdn.loom.com:443',
+    'span.subtype': 'css',
+    'span.type': 'resource',
+  },
+};
+
+export const Service: Story<Args> = () => {
+  return <Popover />;
+};
+Service.args = {
+  nodeData: { id: 'example service', 'service.name': 'example service' },
 };

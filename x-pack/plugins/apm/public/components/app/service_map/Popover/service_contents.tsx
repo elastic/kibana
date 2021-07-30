@@ -9,22 +9,17 @@
 
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import cytoscape from 'cytoscape';
-import React, { MouseEvent } from 'react';
-import { useApmParams } from '../../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { ServiceStatsFetcher } from '../ServiceStatsFetcher';
+import React from 'react';
+import type { ContentsProps } from '.';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { ServiceStatsFetcher } from './service_stats_fetcher';
 
-interface ServiceProps {
-  onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
-  selectedNodeData: cytoscape.NodeDataDefinition;
-}
-
-export function Service({ onFocusClick, selectedNodeData }: ServiceProps) {
+export function ServiceContents({ onFocusClick, nodeData }: ContentsProps) {
   const { query } = useApmParams('/service-map');
   const apmRouter = useApmRouter();
 
-  const serviceName = selectedNodeData.id!;
+  const serviceName = nodeData.id!;
 
   const detailsUrl = apmRouter.link('/services/:serviceName', {
     path: { serviceName },
@@ -40,7 +35,7 @@ export function Service({ onFocusClick, selectedNodeData }: ServiceProps) {
       <EuiFlexItem>
         <ServiceStatsFetcher
           serviceName={serviceName}
-          serviceAnomalyStats={selectedNodeData.serviceAnomalyStats}
+          serviceAnomalyStats={nodeData.serviceAnomalyStats}
         />
       </EuiFlexItem>
       <EuiFlexItem>
