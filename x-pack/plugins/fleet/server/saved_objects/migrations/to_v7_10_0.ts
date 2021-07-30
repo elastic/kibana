@@ -15,7 +15,6 @@ import type {
   EnrollmentAPIKey,
   Settings,
   AgentAction,
-  Installation,
 } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
