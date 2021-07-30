@@ -87,10 +87,6 @@ const CaseBasicRt = rt.type({
   owner: rt.string,
 });
 
-/**
- * The external service fields. Exporting here for use in the service transformation code so I can define
- * a type without the connector_id field.
- */
 export const CaseExternalServiceBasicRt = rt.type({
   connector_id: rt.union([rt.string, rt.null]),
   connector_name: rt.string,

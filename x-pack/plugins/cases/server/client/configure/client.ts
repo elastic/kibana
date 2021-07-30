@@ -284,7 +284,7 @@ async function update(
     let error = null;
     const updateDate = new Date().toISOString();
     let mappings: ConnectorMappingsAttributes[] = [];
-    const { connector } = queryWithoutVersion;
+    const { connector, ...queryWithoutVersionAndConnector } = queryWithoutVersion;
 
     try {
       const resMappings = await casesClientInternal.configuration.getMappings({
@@ -318,7 +318,8 @@ async function update(
       unsecuredSavedObjectsClient,
       configurationId: configuration.id,
       updatedAttributes: {
-        ...queryWithoutVersion,
+        ...queryWithoutVersionAndConnector,
+        ...(connector && { connector }),
         updated_at: updateDate,
         updated_by: user,
       },

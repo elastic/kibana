@@ -9,14 +9,12 @@ import { SavedObjectSanitizedDoc } from 'kibana/server';
 import {
   CaseAttributes,
   CaseFullExternalService,
-  CaseStatuses,
-  CaseType,
   CASE_SAVED_OBJECT,
   ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
+  noneConnectorId,
 } from '../../../common';
 import { getNoneCaseConnector } from '../../common';
-import { ESCaseConnectorWithId } from '../../services/test_utils';
+import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
 import { caseConnectorIdMigration } from './cases';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -29,29 +27,6 @@ const create_7_14_0_case = ({
   attributes: {
     connector,
     external_service: externalService,
-    closed_at: null,
-    closed_by: null,
-    created_at: '2019-11-25T21:54:48.952Z',
-    created_by: {
-      full_name: 'elastic',
-      email: 'testemail@elastic.co',
-      username: 'elastic',
-    },
-    description: 'This is a brand new case of a bad meanie defacing data',
-    title: 'Super Bad Security Issue',
-    status: CaseStatuses.open,
-    tags: ['defacement'],
-    type: CaseType.individual,
-    updated_at: '2019-11-25T21:54:48.952Z',
-    updated_by: {
-      full_name: 'elastic',
-      email: 'testemail@elastic.co',
-      username: 'elastic',
-    },
-    settings: {
-      syncAlerts: true,
-    },
-    owner: SECURITY_SOLUTION_OWNER,
   },
 });
 
@@ -136,6 +111,32 @@ describe('7.15.0 connector ID migration', () => {
 
     expect(migratedConnector.references.length).toBe(0);
     expect(migratedConnector.attributes).not.toHaveProperty('external_service');
+  });
+
+  it('does not create a reference when the external_service.connector_id is none', () => {
+    const caseSavedObject = create_7_14_0_case({
+      externalService: createExternalService({ connector_id: noneConnectorId }),
+    });
+
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
+
+    expect(migratedConnector.references.length).toBe(0);
+    expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
+      Object {
+        "connector_name": ".jira",
+        "external_id": "100",
+        "external_title": "awesome",
+        "external_url": "http://www.google.com",
+        "pushed_at": "2019-11-25T21:54:48.952Z",
+        "pushed_by": Object {
+          "email": "testemail@elastic.co",
+          "full_name": "elastic",
+          "username": "elastic",
+        },
+      }
+    `);
   });
 
   it('preserves the existing references when migrating', () => {
@@ -278,6 +279,73 @@ describe('7.15.0 connector ID migration', () => {
           "username": "elastic",
         },
       }
+    `);
+  });
+
+  it('migrates both connector and external_service when provided', () => {
+    const caseSavedObject = create_7_14_0_case({
+      externalService: {
+        connector_id: '100',
+        connector_name: '.jira',
+        external_id: '100',
+        external_title: 'awesome',
+        external_url: 'http://www.google.com',
+        pushed_at: '2019-11-25T21:54:48.952Z',
+        pushed_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+      },
+      connector: {
+        id: '123',
+        fields: null,
+        name: 'connector',
+        type: ConnectorTypes.jira,
+      },
+    });
+
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
+
+    expect(migratedConnector.references.length).toBe(2);
+    expect(migratedConnector.attributes.external_service).not.toHaveProperty('connector_id');
+    expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
+      Object {
+        "connector_name": ".jira",
+        "external_id": "100",
+        "external_title": "awesome",
+        "external_url": "http://www.google.com",
+        "pushed_at": "2019-11-25T21:54:48.952Z",
+        "pushed_by": Object {
+          "email": "testemail@elastic.co",
+          "full_name": "elastic",
+          "username": "elastic",
+        },
+      }
+    `);
+    expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
+    expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
+      Object {
+        "fields": null,
+        "name": "connector",
+        "type": ".jira",
+      }
+    `);
+    expect(migratedConnector.references).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "123",
+          "name": "connectorId",
+          "type": "action",
+        },
+        Object {
+          "id": "100",
+          "name": "pushConnectorId",
+          "type": "action",
+        },
+      ]
     `);
   });
 });

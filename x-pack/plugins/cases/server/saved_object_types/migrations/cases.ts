@@ -15,7 +15,7 @@ import {
 } from '../../../../../../src/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { ESConnectorFields, pushConnectorIdReferenceName } from '../../services';
-import { ConnectorTypes, CaseType } from '../../../common';
+import { ConnectorTypes, CaseType, noneConnectorId } from '../../../common';
 import { transformConnectorIdToReference } from './utils';
 
 interface UnsanitizedCaseConnector {
@@ -52,7 +52,7 @@ const transformPushConnectorIdToReference = (
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
   const references =
-    pushConnectorId && pushConnectorId !== 'none'
+    pushConnectorId && pushConnectorId !== noneConnectorId
       ? [
           {
             id: pushConnectorId,

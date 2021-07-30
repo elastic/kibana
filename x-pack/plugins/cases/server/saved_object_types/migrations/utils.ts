@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { noneConnectorId } from '../../../common';
 import { SavedObjectReference } from '../../../../../../src/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { getNoneCaseConnector } from '../../common';
@@ -16,7 +17,7 @@ export const transformConnectorIdToReference = (connector?: {
   const { id: connectorId, ...restConnector } = connector ?? {};
 
   const references =
-    connectorId && connectorId !== 'none'
+    connectorId && connectorId !== noneConnectorId
       ? [
           {
             id: connectorId,
@@ -29,7 +30,7 @@ export const transformConnectorIdToReference = (connector?: {
 
   const { id: ignoreNoneId, ...restNoneConnector } = getNoneCaseConnector();
   let transformedConnector: object = { connector: restNoneConnector };
-  if (connector && connectorId) {
+  if (connector && connectorId && references.length > 0) {
     transformedConnector = { connector: { ...restConnector } };
   }
 
