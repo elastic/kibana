@@ -7,8 +7,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-// @ts-expect-error no ts
-import { esKuery } from '../../es_query';
+import * as esKuery from '@kbn/es-query';
 
 import {
   validateFilterKueryNode,
