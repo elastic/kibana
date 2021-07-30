@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        await ml.api.indexAnnotation(annotation, annotationId);
+        await ml.api.indexAnnotation(annotation as Partial<Annotation>, annotationId);
       });
 
       it('displays the original annotation correctly', async () => {
@@ -189,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
       const annotationId = `delete-annotation-id-${Date.now()}`;
 
       before(async () => {
-        await ml.api.indexAnnotation(annotation, annotationId);
+        await ml.api.indexAnnotation(annotation as Partial<Annotation>, annotationId);
       });
 
       it('displays the original annotation', async () => {
