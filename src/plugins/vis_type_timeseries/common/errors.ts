@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { i18n } from '@kbn/i18n';
 
 export class UIError extends Error {

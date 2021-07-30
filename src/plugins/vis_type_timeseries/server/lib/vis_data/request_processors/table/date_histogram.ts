@@ -66,7 +66,7 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
 
   const overwriteDateHistogramForEntireTimerangeMode = () => {
     const metricAggs = Object.values<string>(METRIC_AGGREGATIONS);
-    let interval;
+    let intervalForEntireTimerangeMode;
 
     panel.series.forEach((column) => {
       isAggSupported(column.metrics);
@@ -79,7 +79,7 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
           buckets: 1,
         });
 
-        interval = `${to.valueOf() - from.valueOf()}ms`;
+        intervalForEntireTimerangeMode = `${to.valueOf() - from.valueOf()}ms`;
       } else {
         overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
           field: timeField,
@@ -91,12 +91,12 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
           },
           ...dateHistogramInterval(intervalString),
         });
-        interval = intervalString;
+        intervalForEntireTimerangeMode = intervalString;
       }
 
       overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
         ...meta,
-        interval,
+        intervalForEntireTimerangeMode,
       });
     });
   };
