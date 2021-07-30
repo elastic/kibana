@@ -532,4 +532,10 @@ export class VisualizeEditorPageObject extends FtrService {
   public async setSeriesType(seriesNth: number, type: string) {
     await this.find.selectValue(`select#seriesType${seriesNth}`, type);
   }
+
+  public async setTimelionInterval(interval: string) {
+    const timelionIntervalComboBoxSelector = 'timelionIntervalComboBox';
+    await this.comboBox.clearInputField(timelionIntervalComboBoxSelector);
+    await this.comboBox.setCustom(timelionIntervalComboBoxSelector, interval);
+  }
 }

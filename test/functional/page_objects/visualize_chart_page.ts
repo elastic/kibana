@@ -576,6 +576,16 @@ export class VisualizeChartPageObject extends FtrService {
     await gauge.clickMouseButton({ xOffset: 0, yOffset });
   }
 
+  public async getAreaSeriesCount() {
+    if (await this.isNewLibraryChart(xyChartSelector)) {
+      const areas = (await this.getEsChartDebugState(xyChartSelector))?.areas ?? [];
+      return areas.filter((area) => area.lines.y1.visible).length;
+    }
+
+    const series = await this.find.allByCssSelector('.points.area');
+    return series.length;
+  }
+
   public async getHistogramSeriesCount() {
     if (await this.isNewLibraryChart(xyChartSelector)) {
       const bars = (await this.getEsChartDebugState(xyChartSelector))?.bars ?? [];

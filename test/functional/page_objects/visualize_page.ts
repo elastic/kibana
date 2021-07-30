@@ -197,6 +197,10 @@ export class VisualizePageObject extends FtrService {
     return await this.hasVisType('tile_map');
   }
 
+  public async clickTimelion() {
+    await this.clickVisType('timelion');
+  }
+
   public async clickTagCloud() {
     await this.clickVisType('tagcloud');
   }
