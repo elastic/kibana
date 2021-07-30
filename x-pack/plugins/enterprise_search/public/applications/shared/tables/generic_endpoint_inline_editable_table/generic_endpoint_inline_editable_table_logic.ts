@@ -65,13 +65,6 @@ const stripIdAndCreatedAtFromItem = (item: object) => {
   return itemToClean;
 };
 
-function hasReorderProps<Item extends ItemWithAnID>(
-  props: GenericEndpointInlineEditableTableProps<Item>
-): props is GenericEndpointInlineEditableTablePropsWithReordering<Item> {
-  const castedProps = props as GenericEndpointInlineEditableTablePropsWithReordering<Item>;
-  return castedProps.reorderRoute !== undefined && castedProps.onReorder !== undefined;
-}
-
 const saveAndCallback = async <Item extends ItemWithAnID>(
   httpCall: (path: string, data: object) => Promise<object>,
   route: string,
@@ -163,32 +156,30 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       );
     },
     reorderItems: async ({ items, oldItems, onSuccess }) => {
+      const { reorderRoute, onReorder, dataProperty } = props;
+      if (!reorderRoute || !onReorder) return;
+
       const { http } = HttpLogic.values;
 
-      if (hasReorderProps(props)) {
-        const reorderedItemIds = items.map(({ id }, itemIndex) => ({ id, order: itemIndex }));
-        // @ts-ignore We know reorderRoute exists because we checked for it
-        props.onReorder(items);
+      const reorderedItemIds = items.map(({ id }, itemIndex) => ({ id, order: itemIndex }));
+      onReorder(items);
 
-        try {
-          // TODO it clears loading later but it never sets the loading state to true
+      try {
+        // TODO it clears loading later but it never sets the loading state to true
 
-          // @ts-ignore We know reorderRoute exists because we checked for it
-          const { [props.dataProperty]: itemsFromResponse } = await http.put(props.reorderRoute, {
-            body: JSON.stringify({ [props.dataProperty]: reorderedItemIds }),
-          });
+        const response = await http.put(reorderRoute, {
+          body: JSON.stringify({ [dataProperty]: reorderedItemIds }),
+        });
+        const itemsFromResponse = response[dataProperty];
 
-          // @ts-ignore We know reorderRoute exists because we checked for it
-          props.onReorder(itemsFromResponse);
-          onSuccess();
-        } catch (e) {
-          // @ts-ignore We know reorderRoute exists because we checked for it
-          props.onReorder(oldItems);
-          flashAPIErrors(e);
-        }
-
-        actions.clearLoading();
+        onReorder(itemsFromResponse);
+        onSuccess();
+      } catch (e) {
+        onReorder(oldItems);
+        flashAPIErrors(e);
       }
+
+      actions.clearLoading();
     },
   }),
 });
