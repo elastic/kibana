@@ -684,7 +684,7 @@
             "label": "migrations",
             "description": [],
             "signature": [
-              "{ [key: string]: ",
+              "{ [semver: string]: ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
@@ -692,23 +692,7 @@
                 "section": "def-common.MigrateFunction",
                 "text": "MigrateFunction"
               },
-              "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
-              ", ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
-              },
-              ">; }"
+              "<any, any>; }"
             ],
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",

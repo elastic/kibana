@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { EuiButtonIconPropsForButton } from '@elastic/eui';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export interface FilterValueFnArgs {
@@ -14,8 +16,10 @@ export interface FilterValueFnArgs {
 }
 
 export interface HoverActionComponentProps {
+  closePopOver?: () => void;
+  defaultFocusedButtonRef?: EuiButtonIconPropsForButton['buttonRef'];
   field: string;
-  onClick?: () => void;
+  keyboardEvent?: React.KeyboardEvent;
   ownFocus: boolean;
   showTooltip?: boolean;
   value?: string[] | string | null;
