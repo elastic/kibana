@@ -8,17 +8,14 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { MethodKeysOf } from '../../index';
+import { ShallowPromise } from '../..';
 
-class Test {
-  public name: string = '';
-  getName() {
-    return this.name;
-  }
-  // @ts-ignore
-  private getDoubleName() {
-    return this.name.repeat(2);
-  }
-}
+type P1 = ShallowPromise<string>;
+type P2 = ShallowPromise<ShallowPromise<string>>;
+type P3 = ShallowPromise<ShallowPromise<ShallowPromise<string>>>;
+type P4 = ShallowPromise<ShallowPromise<ShallowPromise<number>>>;
 
-expectType<MethodKeysOf<Test>>('getName');
+expectType<P1>(Promise.resolve<string>('a'));
+expectType<P2>(Promise.resolve<string>('a'));
+expectType<P3>(Promise.resolve<string>('a'));
+expectType<P4>(Promise.resolve<number>(123));

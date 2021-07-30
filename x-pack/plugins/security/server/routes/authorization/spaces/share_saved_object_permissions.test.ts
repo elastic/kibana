@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { RequestHandler, RouteConfig } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
