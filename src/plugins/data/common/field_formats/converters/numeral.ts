@@ -10,7 +10,7 @@
 import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
 import { UI_SETTINGS } from '../../constants';

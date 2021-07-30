@@ -6,7 +6,6 @@
  */
 
 import React, { createContext, ReactChild, useContext } from 'react';
-import { ApplicationStart } from 'kibana/public';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
@@ -14,7 +13,6 @@ export interface EditPolicyContextValue {
   isNewPolicy: boolean;
   policy: SerializedPolicy;
   existingPolicies: PolicyFromES[];
-  getUrlForApp: ApplicationStart['getUrlForApp'];
   license: {
     canUseSearchableSnapshot: () => boolean;
   };
