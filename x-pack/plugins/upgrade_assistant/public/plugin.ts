@@ -11,15 +11,17 @@ import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 
+import { CloudSetup } from '../../cloud/public';
 import { Config } from '../common/config';
 
 interface Dependencies {
   management: ManagementSetup;
+  cloud: CloudSetup;
 }
 
 export class UpgradeAssistantUIPlugin implements Plugin {
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup, { management }: Dependencies) {
+  setup(coreSetup: CoreSetup, { management, cloud }: Dependencies) {
     const { enabled, readonly } = this.ctx.config.get<Config>();
 
     if (!enabled) {
@@ -40,6 +42,8 @@ export class UpgradeAssistantUIPlugin implements Plugin {
       values: { version: `${kibanaVersionInfo.nextMajor}.0` },
     });
 
+    const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
+
     appRegistrar.registerApp({
       id: 'upgrade_assistant',
       title: pluginName,
@@ -58,7 +62,8 @@ export class UpgradeAssistantUIPlugin implements Plugin {
           coreSetup,
           params,
           kibanaVersionInfo,
-          readonly
+          readonly,
+          isCloudEnabled
         );
 
         return () => {

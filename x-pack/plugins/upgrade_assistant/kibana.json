@@ -5,6 +5,6 @@
   "ui": true,
   "configPath": ["xpack", "upgrade_assistant"],
   "requiredPlugins": ["infra", "management", "licensing", "features", "data"],
-  "optionalPlugins": ["usageCollection"],
+  "optionalPlugins": ["usageCollection", "cloud"],
   "requiredBundles": ["esUiShared", "kibanaReact"]
 }

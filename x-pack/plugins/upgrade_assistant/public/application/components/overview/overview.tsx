@@ -116,6 +116,13 @@ const i18nTexts = {
     defaultMessage:
       'After you have resolved your deprecations issues and are satisfied with the deprecation logs, it is time to upgrade. Follow the instructions in our documentation to complete your update.',
   }),
+  upgradeStepDescriptionForCloud: i18n.translate(
+    'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
+    {
+      defaultMessage:
+        'After you have resolved your deprecations issues and are satisfied with the deprecation logs, it is time to upgrade. Upgrade your deployment on Elasic Cloud.',
+    }
+  ),
   upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
     defaultMessage: 'Follow the upgrade guide',
   }),
@@ -204,29 +211,69 @@ const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps
   };
 };
 
-const getUpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps => {
+const getUpgradeStep = ({
+  docLinks,
+  isCloudEnabled,
+}: {
+  docLinks: DocLinksStart;
+  isCloudEnabled: boolean;
+}): EuiStepProps => {
+  let callToAction;
+
+  if (isCloudEnabled) {
+    callToAction = (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton href={docLinks.links.elasticsearch.migrating8}>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.upgradeStepCloudLink"
+              defaultMessage="Upgrade on Cloud"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiLink href={docLinks.links.elasticsearch.migrating8} target="_blank">
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.pageDescriptionLink"
+              defaultMessage="View upgrade guide"
+            />
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  } else {
+    callToAction = (
+      <EuiButton href={docLinks.links.elasticsearch.migrating8}>
+        {i18nTexts.upgradeStepLink}
+        <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
+      </EuiButton>
+    );
+  }
+
   return {
     title: i18nTexts.upgradeStepTitle,
     status: 'incomplete',
     children: (
       <>
         <EuiText>
-          <p>{i18nTexts.upgradeStepDescription}</p>
+          <p>
+            {isCloudEnabled
+              ? i18nTexts.upgradeStepDescriptionForCloud
+              : i18nTexts.upgradeStepDescription}
+          </p>
         </EuiText>
 
         <EuiSpacer size="m" />
 
-        <EuiButton href={docLinks.links.elasticsearch.migrating8}>
-          {i18nTexts.upgradeStepLink}
-          <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
-        </EuiButton>
+        {callToAction}
       </>
     ),
   };
 };
 
 export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
-  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
+  const { kibanaVersionInfo, breadcrumbs, docLinks, api, isCloudEnabled } = useAppContext();
   const { currentMajor } = kibanaVersionInfo;
 
   useEffect(() => {
@@ -275,7 +322,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
             steps={[
               getResolveStep({ history }),
               getObserveStep({ docLinks }),
-              getUpgradeStep({ docLinks }),
+              getUpgradeStep({ docLinks, isCloudEnabled }),
             ]}
           />
         </>

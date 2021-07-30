@@ -16,7 +16,8 @@ export async function mountManagementSection(
   coreSetup: CoreSetup,
   params: ManagementAppMountParams,
   kibanaVersionInfo: KibanaVersionContext,
-  readonly: boolean
+  readonly: boolean,
+  isCloudEnabled: boolean
 ) {
   const [startServices, startPluginDeps] = await coreSetup.getStartServices();
 
@@ -43,6 +44,7 @@ export async function mountManagementSection(
     breadcrumbs: breadcrumbService,
     getUrlForApp: application.getUrlForApp,
     deprecations,
+    isCloudEnabled,
     startServices,
     startPluginDeps,
   });

@@ -23,5 +23,6 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../infra/tsconfig.json" },
+    { "path": "../cloud/tsconfig.json" },
   ]
 }
