@@ -8,6 +8,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiPanel } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { ApmBackendContextProvider } from '../../../context/apm_backend/apm_backend_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -17,6 +18,7 @@ import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { SearchBar } from '../../shared/search_bar';
 import { BackendLatencyChart } from './backend_latency_chart';
 import { BackendInventoryTitle } from '../../routing/home';
+import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
 
 export function BackendDetailOverview() {
   const {
@@ -53,6 +55,8 @@ export function BackendDetailOverview() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </ChartPointerEventContextProvider>
+        <EuiSpacer size="m" />
+        <BackendDetailDependenciesTable />
       </ApmBackendContextProvider>
     </ApmMainTemplate>
   );
