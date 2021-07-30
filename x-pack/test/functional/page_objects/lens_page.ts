@@ -489,6 +489,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
+    async cancelAndReturn() {
+      await testSubjects.click('lnsApp_cancelButton');
+      await retry.waitForWithTimeout(
+        'Cancel modal to disappear',
+        1000,
+        () =>
+          testSubjects.click('confirmModalCancelButton').then(
+            () => true,
+            () => false
+          ),
+        () => Promise.resolve()
+      );
+    },
+
     async saveAndReturn() {
       await testSubjects.click('lnsApp_saveAndReturnButton');
     },

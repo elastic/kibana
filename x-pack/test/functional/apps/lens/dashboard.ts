@@ -109,8 +109,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to add filters by clicking in pie chart', async () => {
-      // await PageObjects.common.navigateToApp('dashboard');
-      // await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
       await find.clickByButtonText('lnsPieVis');
@@ -127,6 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasGeoDestFilter).to.be(true);
       await filterBar.addFilter('geo.src', 'is', 'US');
       await filterBar.toggleFilterPinned('geo.src');
+      await PageObjects.lens.cancelAndReturn();
     });
 
     it('should not carry over filters if creating a new lens visualization from within dashboard', async () => {
@@ -142,6 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasGeoDestFilter).to.be(false);
       const hasGeoSrcFilter = await filterBar.hasFilter('geo.src', 'US', true, true);
       expect(hasGeoSrcFilter).to.be(true);
+      await PageObjects.lens.cancelAndReturn();
     });
 
     it('CSV export action exists in panel context menu', async () => {
@@ -241,6 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
       await find.existsByLinkText('lnsPieVis');
+      await dashboardAddPanel.closeAddPanel();
     });
 
     it('should show validation messages if any error appears', async () => {
