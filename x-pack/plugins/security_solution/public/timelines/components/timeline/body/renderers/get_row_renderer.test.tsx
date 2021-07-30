@@ -54,6 +54,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
+      isDraggable: true,
       timelineId: 'test',
     });
 
@@ -66,6 +67,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -81,6 +83,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -99,6 +102,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -117,6 +121,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: zeek,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -135,6 +140,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: system,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -153,6 +159,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: auditd,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
