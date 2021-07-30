@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactElement, ReactNode, useState } from 'react';
+import React, { Fragment, ReactElement, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -25,16 +25,17 @@ import { PolicyFromES } from '../../../../common/types';
 import { filterItems } from '../../services';
 import { TableContent } from './components/table_content';
 import { getPolicyCreatePath } from '../../services/navigation';
+import { usePolicyListContext } from './policy_list_context';
 
 interface Props {
   policies: PolicyFromES[];
-  updatePolicies: () => void;
 }
 
-export const PolicyTable: React.FunctionComponent<Props> = ({ policies, updatePolicies }) => {
-  const [confirmModal, setConfirmModal] = useState<ReactNode | null>();
+export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const [filter, setFilter] = useState<string>('');
   const history = useHistory();
+
+  const { policyAction } = usePolicyListContext();
 
   const createPolicyButton = (
     <EuiButton
@@ -56,17 +57,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, updatePo
     const filteredPolicies = filterItems('name', filter, policies);
     let tableContent: ReactElement;
     if (filteredPolicies.length > 0) {
-      tableContent = (
-        <TableContent
-          policies={filteredPolicies}
-          totalNumber={policies.length}
-          setConfirmModal={setConfirmModal}
-          handleDelete={() => {
-            updatePolicies();
-            setConfirmModal(null);
-          }}
-        />
-      );
+      tableContent = <TableContent policies={filteredPolicies} totalNumber={policies.length} />;
     } else {
       tableContent = (
         <FormattedMessage
@@ -139,7 +130,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, updatePo
 
   return (
     <>
-      {confirmModal}
+      {policyAction}
 
       <EuiPageHeader
         pageTitle={

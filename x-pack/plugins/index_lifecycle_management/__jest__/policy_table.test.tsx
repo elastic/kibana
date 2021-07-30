@@ -23,6 +23,7 @@ import { PolicyTable } from '../public/application/sections/policy_table/policy_
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { KibanaContextProvider } from '../public/shared_imports';
+import { PolicyListContextProvider } from '../public/application/sections/policy_table/policy_list_context';
 
 initHttp(
   new HttpService().setup({
@@ -105,17 +106,22 @@ const openContextMenu = (buttonIndex: number) => {
   return rendered;
 };
 
+const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
+  return (
+    <KibanaContextProvider services={{ getUrlForApp: () => '' }}>
+      <PolicyListContextProvider updatePolicies={jest.fn()}>
+        <PolicyTable policies={testPolicies} />
+      </PolicyListContextProvider>
+    </KibanaContextProvider>
+  );
+};
 describe('policy table', () => {
   beforeEach(() => {
-    component = (
-      <KibanaContextProvider services={{ getUrlForApp: () => '' }}>
-        <PolicyTable policies={policies} updatePolicies={jest.fn()} />
-      </KibanaContextProvider>
-    );
+    component = <TestComponent testPolicies={policies} />;
   });
 
   test('should show empty state when there are not any policies', () => {
-    component = <PolicyTable policies={[]} updatePolicies={jest.fn()} />;
+    component = <TestComponent testPolicies={[]} />;
     const rendered = mountWithIntl(component);
     mountedSnapshot(rendered);
   });

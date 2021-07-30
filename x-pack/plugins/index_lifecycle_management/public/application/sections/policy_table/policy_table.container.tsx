@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { PolicyTable as PresentationComponent } from './policy_table';
 import { useKibana } from '../../../shared_imports';
 import { useLoadPoliciesList } from '../../services/api';
+import { PolicyListContextProvider } from './policy_list_context';
 
 export const PolicyTable: React.FunctionComponent = () => {
   const {
@@ -68,5 +69,9 @@ export const PolicyTable: React.FunctionComponent = () => {
     );
   }
 
-  return <PresentationComponent policies={policies || []} updatePolicies={resendRequest} />;
+  return (
+    <PolicyListContextProvider updatePolicies={resendRequest}>
+      <PresentationComponent policies={policies || []} />
+    </PolicyListContextProvider>
+  );
 };

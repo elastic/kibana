@@ -44,6 +44,7 @@ import { TableColumn } from '../index';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
 import { ConfirmDelete } from './confirm_delete';
 import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
+import { usePolicyListContext } from '../policy_list_context';
 
 const COLUMNS: Array<[TableColumn, { label: string; width: number }]> = [
   [
@@ -99,15 +100,8 @@ const COLUMNS: Array<[TableColumn, { label: string; width: number }]> = [
 interface Props {
   policies: PolicyFromES[];
   totalNumber: number;
-  setConfirmModal: (modal: ReactElement | null) => void;
-  handleDelete: () => void;
 }
-export const TableContent: React.FunctionComponent<Props> = ({
-  policies,
-  totalNumber,
-  setConfirmModal,
-  handleDelete,
-}) => {
+export const TableContent: React.FunctionComponent<Props> = ({ policies, totalNumber }) => {
   const [popoverPolicy, setPopoverPolicy] = useState<string>();
   const [sort, setSort] = useState<{ sortField: TableColumn; isSortAscending: boolean }>({
     sortField: 'name',
@@ -119,6 +113,8 @@ export const TableContent: React.FunctionComponent<Props> = ({
   const {
     services: { navigateToApp },
   } = useKibana();
+
+  const { setPolicyAction, updatePolicies } = usePolicyListContext();
 
   let sortedPolicies = sortTable(policies, sort.sortField, sort.isSortAscending);
   const pager = new Pager(totalNumber, pageSize, currentPage);
@@ -212,7 +208,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       name: addPolicyToTemplateLabel,
       icon: 'plusInCircle',
       onClick: () => {
-        setConfirmModal(renderAddPolicyToTemplateConfirmModal(policy));
+        setPolicyAction(renderAddPolicyToTemplateConfirmModal(policy));
       },
       'data-test-subj': 'addPolicyToTemplate',
     });
@@ -222,7 +218,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       icon: 'trash',
       toolTipContent: deletePolicyTooltip,
       onClick: () => {
-        setConfirmModal(renderDeleteConfirmModal(policy));
+        setPolicyAction(renderDeleteConfirmModal(policy));
       },
       'data-test-subj': 'deletePolicy',
     });
@@ -259,7 +255,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
         <EuiButtonEmpty
           flush="left"
           data-test-subj="viewIndexTemplates"
-          onClick={() => setConfirmModal(renderIndexTemplatesFlyout(policy))}
+          onClick={() => setPolicyAction(renderIndexTemplatesFlyout(policy))}
         >
           {(value as string[]).length}
         </EuiButtonEmpty>
@@ -351,7 +347,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
 
   const renderAddPolicyToTemplateConfirmModal = (policy: PolicyFromES): ReactElement => {
     return (
-      <AddPolicyToTemplateConfirmModal policy={policy} onCancel={() => setConfirmModal(null)} />
+      <AddPolicyToTemplateConfirmModal policy={policy} onCancel={() => setPolicyAction(null)} />
     );
   };
 
@@ -359,9 +355,12 @@ export const TableContent: React.FunctionComponent<Props> = ({
     return (
       <ConfirmDelete
         policyToDelete={policy}
-        callback={handleDelete}
+        callback={() => {
+          updatePolicies();
+          setPolicyAction(null);
+        }}
         onCancel={() => {
-          setConfirmModal(null);
+          setPolicyAction(null);
         }}
       />
     );
@@ -372,7 +371,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       <IndexTemplatesFlyout
         policy={policy}
         close={() => {
-          setConfirmModal(null);
+          setPolicyAction(null);
         }}
       />
     );
