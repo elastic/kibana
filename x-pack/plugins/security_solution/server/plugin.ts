@@ -96,7 +96,7 @@ import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_m
 import signalExtraFields from './lib/detection_engine/routes/index/signal_extra_fields.json';
 import {
   createSignalsFieldAliases,
-  getNewSignalsTemplate,
+  getSignalsTemplate,
   getRbacRequiredFields,
 } from './lib/detection_engine/routes/index/get_signals_template';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
@@ -203,9 +203,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
 
     let ruleDataClient: RuleDataClient | null = null;
+    const { ruleDataService } = plugins.ruleRegistry;
     if (isRuleRegistryEnabled) {
-      const { ruleDataService } = plugins.ruleRegistry;
-
       const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
 
       const initializeRuleDataTemplates = once(async () => {
@@ -277,6 +276,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
       plugins.ml,
+      ruleDataService,
       ruleDataClient
     );
     registerEndpointRoutes(router, endpointContext);
@@ -369,11 +369,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           const existingTemplateNames = Object.keys(existingSignalsTemplates);
           for (const existingTemplateName of existingTemplateNames) {
             const spaceId = existingTemplateName.substr(config.signalsIndex.length + 1);
-            const { ruleDataService } = plugins.ruleRegistry;
             const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts');
             const aadIndexAliasName = `${alertsIndexPattern}-${spaceId}`;
 
-            const signalsTemplate = getNewSignalsTemplate(
+            const signalsTemplate = getSignalsTemplate(
               existingTemplateName,
               spaceId,
               aadIndexAliasName

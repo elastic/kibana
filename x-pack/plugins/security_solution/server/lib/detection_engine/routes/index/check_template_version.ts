@@ -9,6 +9,7 @@ import { ElasticsearchClient } from 'src/core/server';
 import { isOutdated } from '../../migrations/helpers';
 import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 
+// TODO: update this to check both legacy and component templates
 export const getTemplateVersion = async ({
   alias,
   esClient,
@@ -17,10 +18,8 @@ export const getTemplateVersion = async ({
   alias: string;
 }): Promise<number> => {
   try {
-    const response = await esClient.indices.getTemplate<{
-      [templateName: string]: { version: number };
-    }>({ name: alias });
-    return response.body[alias].version ?? 0;
+    const response = await esClient.indices.getIndexTemplate({ name: alias });
+    return response.body.index_templates[0].index_template.version ?? 0;
   } catch (e) {
     return 0;
   }
