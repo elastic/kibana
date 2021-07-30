@@ -210,8 +210,8 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             },
           });
 
-          const createdSignals = runResult.createdSignals.concat(runResult.createdSignals);
-          const warningMessages = runResult.warningMessages.concat(runResult.warningMessages);
+          const createdSignals = result.createdSignals.concat(runResult.createdSignals);
+          const warningMessages = result.warningMessages.concat(runResult.warningMessages);
           result = {
             bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
             createdSignals,
@@ -284,7 +284,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           // adding this log line so we can get some information from cloud
           logger.info(
             buildRuleMessage(
-              `[+] Finished indexing ${createdSignalsCount}  ${
+              `[+] Finished indexing ${createdSignalsCount} ${
                 !isEmpty(tuples)
                   ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
                   : ''
