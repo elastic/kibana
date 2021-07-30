@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, SimpleSavedObject } from 'src/core/public';
+import type { CoreStart, ResolvedSimpleSavedObject, SimpleSavedObject } from 'src/core/public';
 
 import type { NoteAttributes } from '../common';
 import { NOTE_OBJ_TYPE } from '../common';
@@ -13,7 +13,7 @@ import { NOTE_OBJ_TYPE } from '../common';
 export interface Services {
   createNote: (subject: string, text: string) => Promise<void>;
   findAllNotes: () => Promise<Array<SimpleSavedObject<NoteAttributes>>>;
-  getNoteById: (id: string) => Promise<SimpleSavedObject<NoteAttributes>>;
+  getNoteById: (id: string) => Promise<ResolvedSimpleSavedObject<NoteAttributes>>;
   addSuccessToast: (message: string) => void;
 }
 
@@ -33,8 +33,8 @@ export function getServices(core: CoreStart): Services {
       return findResult.savedObjects;
     },
     getNoteById: async (id: string) => {
-      const savedObject = await savedObjectsClient.get<NoteAttributes>(NOTE_OBJ_TYPE, id);
-      return savedObject;
+      const resolveResult = await savedObjectsClient.resolve<NoteAttributes>(NOTE_OBJ_TYPE, id);
+      return resolveResult;
     },
     addSuccessToast: (message: string) => core.notifications.toasts.addSuccess(message),
   };

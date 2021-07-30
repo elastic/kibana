@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 
-import type { SimpleSavedObject } from 'src/core/public';
+import type { ResolvedSimpleSavedObject } from 'src/core/public';
 import type { NoteAttributes } from '../common';
 import type { Services } from './services';
 
@@ -28,16 +28,17 @@ interface Props {
   services: Services;
 }
 
-type NoteObject = SimpleSavedObject<NoteAttributes>;
+type ResolvedNote = ResolvedSimpleSavedObject<NoteAttributes>;
 
 export function ViewNote({ services }: Props) {
   const { noteId } = useParams<Params>();
-  const [note, setNote] = useState<NoteObject | null>(null);
+  const [resolvedNote, setResolvedNote] = useState<ResolvedNote | null>(null);
+  const note = resolvedNote?.saved_object;
 
   const fetchNote = async () => {
-    const savedObject = await services.getNoteById(noteId);
+    const resolveResult = await services.getNoteById(noteId);
 
-    setNote(savedObject);
+    setResolvedNote(resolveResult);
   };
 
   useEffect(() => {
