@@ -5,4 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from '@kbn/field-types';
+
+import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+
+export { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES };

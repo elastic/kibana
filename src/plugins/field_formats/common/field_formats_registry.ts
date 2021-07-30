@@ -8,8 +8,8 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { forOwn, isFunction, memoize, identity } from 'lodash';
-
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+
 import {
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
