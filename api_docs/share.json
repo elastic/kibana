@@ -409,6 +409,89 @@
       },
       {
         "parentPluginId": "share",
+        "id": "def-public.formatSearchParams",
+        "type": "Function",
+        "tags": [],
+        "label": "formatSearchParams",
+        "description": [],
+        "signature": [
+          "(opts: ",
+          "RedirectOptions",
+          ") => URLSearchParams"
+        ],
+        "source": {
+          "path": "src/plugins/share/public/url_service/redirect/util/format_search_params.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.formatSearchParams.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "RedirectOptions"
+            ],
+            "source": {
+              "path": "src/plugins/share/public/url_service/redirect/util/format_search_params.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.parseSearchParams",
+        "type": "Function",
+        "tags": [],
+        "label": "parseSearchParams",
+        "description": [
+          "\nParses redirect endpoint URL path search parameters. Expects them in the\nfollowing form:\n\n```\n/r?l=<locator_id>&v=<version>&p=<params>\n```\n"
+        ],
+        "signature": [
+          "(urlSearch: string) => ",
+          "RedirectOptions"
+        ],
+        "source": {
+          "path": "src/plugins/share/public/url_service/redirect/util/parse_search_params.ts",
+          "lineNumber": 24
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.parseSearchParams.$1",
+            "type": "string",
+            "tags": [],
+            "label": "urlSearch",
+            "description": [
+              "Search part of URL path."
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/share/public/url_service/redirect/util/parse_search_params.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Parsed out locator ID, version, and locator params."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
         "id": "def-public.useLocatorUrl",
         "type": "Function",
         "tags": [],
@@ -1873,7 +1956,7 @@
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 32
+        "lineNumber": 33
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -1903,7 +1986,7 @@
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 47
+        "lineNumber": 48
       },
       "deprecated": false,
       "lifecycle": "start",

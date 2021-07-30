@@ -23,16 +23,33 @@ import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeli
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-
 jest.mock('../../../../../common/hooks/use_selector');
-
-jest.mock('../../../../../cases/components/timeline_actions/add_to_case_action', () => {
-  return {
-    AddToCaseAction: () => {
-      return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      timelines: {
+        getAddToCaseAction: () => <div data-test-subj="add-to-case-action">{'Add to case'}</div>,
+      },
     },
-  };
-});
+  }),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
+  useGetUserCasesPermissions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../../../../timelines/public/components/actions/timeline/cases/add_to_case_action',
+  () => {
+    return {
+      AddToCaseAction: () => {
+        return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
+      },
+    };
+  }
+);
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
