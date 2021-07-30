@@ -8591,7 +8591,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.pickLevelFromFlags = pickLevelFromFlags;
+exports.getLogLevelFlagsHelp = getLogLevelFlagsHelp;
 exports.parseLogLevel = parseLogLevel;
+exports.LOG_LEVEL_FLAGS = exports.DEFAULT_LOG_LEVEL = void 0;
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -8601,13 +8603,42 @@ exports.parseLogLevel = parseLogLevel;
  * Side Public License, v 1.
  */
 const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'];
+const DEFAULT_LOG_LEVEL = 'info';
+exports.DEFAULT_LOG_LEVEL = DEFAULT_LOG_LEVEL;
 
 function pickLevelFromFlags(flags, options = {}) {
   if (flags.verbose) return 'verbose';
   if (flags.debug) return 'debug';
+  if (flags.info) return 'info';
   if (flags.quiet) return 'error';
   if (flags.silent) return 'silent';
-  return options.default || 'info';
+  return options.default || DEFAULT_LOG_LEVEL;
+}
+
+const LOG_LEVEL_FLAGS = [{
+  name: 'verbose',
+  help: '--verbose, -v      Log verbosely'
+}, {
+  name: 'info',
+  help: "--info             Don't log debug messages"
+}, {
+  name: 'debug',
+  help: '--debug            Log debug messages (less than verbose)'
+}, {
+  name: 'quiet',
+  help: '--quiet            Only log errors'
+}, {
+  name: 'silent',
+  help: "--silent           Don't log anything"
+}];
+exports.LOG_LEVEL_FLAGS = LOG_LEVEL_FLAGS;
+
+function getLogLevelFlagsHelp(defaultLogLevel = DEFAULT_LOG_LEVEL) {
+  return LOG_LEVEL_FLAGS.filter(({
+    name
+  }) => name !== defaultLogLevel).map(({
+    help
+  }) => help).join('\n');
 }
 
 function parseLogLevel(name) {
