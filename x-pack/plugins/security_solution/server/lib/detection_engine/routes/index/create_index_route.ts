@@ -94,13 +94,13 @@ export const createDetectionIndex = async (
   if (!policyExists) {
     await setPolicy(esClient, index, signalsPolicy);
   }
+  const templateVersion = await getTemplateVersion({ alias: index, esClient });
   if (await templateNeedsUpdate({ alias: index, esClient })) {
     const aadIndexAliasName = `${ruleDataService.getFullAssetName('security.alerts')}-${spaceId}`;
     await esClient.indices.putIndexTemplate({
       name: index,
       body: getSignalsTemplate(index, spaceId, aadIndexAliasName) as Record<string, unknown>,
     });
-    const templateVersion = await getTemplateVersion({ alias: index, esClient });
     // 45 is the last version that did not include alerts-as-data field and index aliases in the template
     // Update existing indices with these field and index aliases if upgrading from <= v45
     if (templateVersion <= 45) {
