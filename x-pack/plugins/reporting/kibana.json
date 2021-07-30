@@ -24,5 +24,5 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaReact", "discover", "fieldFormats"]
+  "requiredBundles": ["kibanaReact", "discover"]
 }
