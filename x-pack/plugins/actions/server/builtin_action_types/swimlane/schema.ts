@@ -31,7 +31,11 @@ export const ConfigMappingSchema = schema.object(ConfigMapping);
 export const SwimlaneServiceConfiguration = {
   apiUrl: schema.string(),
   appId: schema.string(),
-  connectorType: schema.string(),
+  connectorType: schema.oneOf([
+    schema.literal('all'),
+    schema.literal('alerts'),
+    schema.literal('cases'),
+  ]),
   mappings: ConfigMappingSchema,
 };
 

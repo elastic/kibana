@@ -51,12 +51,20 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
+  cidrFunction,
+  dateRangeFunction,
+  extendedBoundsFunction,
+  geoBoundingBoxFunction,
+  geoPointFunction,
+  ipRangeFunction,
   kibana,
   kibanaContext,
   kibanaTimerangeFunction,
   kibanaFilterFunction,
   kqlFunction,
   luceneFunction,
+  numericalRangeFunction,
+  queryFilterFunction,
   rangeFilterFunction,
   rangeFunction,
   SearchSourceDependencies,
@@ -109,6 +117,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: StrategyMap = {};
   private sessionService: ISearchSessionService;
   private asScoped!: ISearchStart['asScoped'];
+  private searchAsInternalUser!: ISearchStrategy;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -156,6 +165,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
+    // We don't want to register this because we don't want the client to be able to access this
+    // strategy, but we do want to expose it to other server-side plugins
+    // see x-pack/plugins/security_solution/server/search_strategy/timeline/index.ts
+    // for example use case
+    this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
+      this.initializerContext.config.legacy.globalConfig$,
+      this.logger,
+      usage,
+      true
+    );
+
     this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
 
     registerBsearchRoute(
@@ -171,15 +191,23 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(cidrFunction);
+    expressions.registerFunction(dateRangeFunction);
+    expressions.registerFunction(extendedBoundsFunction);
+    expressions.registerFunction(geoBoundingBoxFunction);
+    expressions.registerFunction(geoPointFunction);
+    expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
     expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(numericalRangeFunction);
     expressions.registerFunction(rangeFunction);
     expressions.registerFunction(kibanaFilterFunction);
     expressions.registerFunction(existsFilterFunction);
+    expressions.registerFunction(queryFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
@@ -220,6 +248,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         uiSettings,
         indexPatterns,
       }),
+      searchAsInternalUser: this.searchAsInternalUser,
       getSearchStrategy: this.getSearchStrategy,
       asScoped: this.asScoped,
       searchSource: {

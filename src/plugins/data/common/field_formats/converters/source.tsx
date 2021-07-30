@@ -9,8 +9,8 @@
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom/server';
 import { escape, keys } from 'lodash';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { shortenDottedString } from '../../utils';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { UI_SETTINGS } from '../../constants';

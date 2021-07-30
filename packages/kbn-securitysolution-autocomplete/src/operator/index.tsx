@@ -9,10 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { OperatorOption } from '@kbn/securitysolution-list-utils';
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType } from '../../../../../../../src/plugins/data/common';
-type IFieldType = any;
+import { IndexPatternFieldBase } from '@kbn/es-query';
 
 import { getOperators } from '../get_operators';
 import {
@@ -31,7 +28,7 @@ interface OperatorState {
   operatorInputWidth?: number;
   operatorOptions?: OperatorOption[];
   placeholder: string;
-  selectedField: IFieldType | undefined;
+  selectedField: IndexPatternFieldBase | undefined;
 }
 
 export const OperatorComponent: React.FC<OperatorState> = ({

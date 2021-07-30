@@ -35,9 +35,6 @@ export const getRegistryUrl = (): string => {
   const isEnterprise = licenseService.isEnterprise();
 
   if (customUrl && isEnterprise) {
-    appContextService
-      .getLogger()
-      .info('Custom registry url is an experimental feature and is unsupported.');
     return customUrl;
   }
 
