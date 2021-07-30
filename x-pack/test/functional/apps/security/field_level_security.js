@@ -19,7 +19,9 @@ export default function ({ getService, getPageObjects }) {
   describe('field_level_security', () => {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/flstest/data'); //( data)
-      await esArchiver.load('x-pack/test/functional/es_archives/security/flstest/kibana'); //(savedobject)
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+      );
       await browser.setWindowSize(1600, 1000);
       await kibanaServer.uiSettings.update({
         'discover:searchFieldsFromSource': false,
@@ -129,6 +131,9 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await PageObjects.security.forceLogout();
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+      );
     });
   });
 }
