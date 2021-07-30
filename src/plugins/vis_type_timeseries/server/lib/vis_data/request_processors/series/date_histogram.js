@@ -9,9 +9,11 @@
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
+import { isAggSupported } from '../../helpers/check_aggs';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
-import { METRIC_AGGREGATIONS } from '../../../../../common/enums';
+import { AggNotSupportedInMode } from '../../../../../common/errors';
+import { METRIC_AGGREGATIONS, PARENT_PIPELINE_AGGREGATIONS } from '../../../../../common/enums';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -57,8 +59,11 @@ export function dateHistogram(
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
+      const metricAggs = Object.values(METRIC_AGGREGATIONS);
+      isAggSupported(series.metrics);
+
       if (
-        series.metrics.every((metric) => Object.values(METRIC_AGGREGATIONS).includes(metric.type))
+        series.metrics.every((metric) => metricAggs.includes(metric.type))
       ) {
         overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
           field: timeField,

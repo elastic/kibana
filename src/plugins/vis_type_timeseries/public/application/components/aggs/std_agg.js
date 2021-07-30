@@ -49,6 +49,7 @@ export function StandardAgg(props) {
           <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
+            timeRangeMode={props.panel.time_range_mode}
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}

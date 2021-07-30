@@ -13,19 +13,28 @@ import {
   getSuitableUnit,
 } from '../../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
+import {
+  TIME_RANGE_DATA_MODES,
+  PANEL_TYPES,
+  METRIC_AGGREGATIONS,
+  SIBLING_PIPELINE_AGGREGATIONS,
+} from '../../../../common/enums';
 
 export interface SearchCapabilitiesOptions {
   timezone?: string;
   maxBucketsLimit: number;
+  panel: any;
 }
 
 export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];
   public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
+  public panel: any;
 
   constructor(options: SearchCapabilitiesOptions) {
     this.timezone = options.timezone;
     this.maxBucketsLimit = options.maxBucketsLimit;
+    this.panel = options.panel;
   }
 
   public get defaultTimeInterval() {
@@ -33,6 +42,23 @@ export class DefaultSearchCapabilities {
   }
 
   public get whiteListedMetrics() {
+    if (
+      this.panel.type !== PANEL_TYPES.TIMESERIES &&
+      this.panel.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+    ) {
+      const metricAggs = Object.values<string>(METRIC_AGGREGATIONS);
+      const siblingPipelineAggs = Object.values<string>(SIBLING_PIPELINE_AGGREGATIONS);
+      const availableAggs = [...metricAggs, ...siblingPipelineAggs, 'math'].reduce(
+        (availableAggs, aggType) => ({
+          ...availableAggs,
+          [aggType]: {
+            '*': true,
+          },
+        }),
+        {}
+      );
+      return this.createUiRestriction(availableAggs);
+    }
     return this.createUiRestriction();
   }
 

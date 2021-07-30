@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 import type { Metric } from '../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 
 type AggSelectOption = EuiComboBoxOptionOption;
 
@@ -236,17 +237,29 @@ function filterByPanelType(panelType: string) {
   };
 }
 
+export function isMetricAviableForPanel(aggId: string, panelType: string, timeRangeMode?: string) {
+  if (
+    panelType !== PANEL_TYPES.TIMESERIES &&
+    timeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+  ) {
+    return !pipelineAggs.some((agg) => agg.value === aggId) || aggId !== 'series_agg';
+  }
+
+  return true;
+}
+
 interface AggSelectUiProps {
   id: string;
   panelType: string;
   siblings: Metric[];
   value: string;
   uiRestrictions?: TimeseriesUIRestrictions;
+  timeRangeMode?: string;
   onChange: (currentlySelectedOptions: AggSelectOption[]) => void;
 }
 
 export function AggSelect(props: AggSelectUiProps) {
-  const { siblings, panelType, value, onChange, uiRestrictions, ...rest } = props;
+  const { siblings, panelType, value, onChange, uiRestrictions, timeRangeMode, ...rest } = props;
 
   const selectedOptions = allAggOptions.filter((option) => {
     return value === option.value && isMetricEnabled(option.value, uiRestrictions);
@@ -266,7 +279,10 @@ export function AggSelect(props: AggSelectUiProps) {
   } else {
     const disableSiblingAggs = (agg: AggSelectOption) => ({
       ...agg,
-      disabled: !enablePipelines || !isMetricEnabled(agg.value, uiRestrictions),
+      disabled:
+        !enablePipelines ||
+        !isMetricEnabled(agg.value, uiRestrictions) ||
+        !isMetricAviableForPanel(agg.value as string, panelType, timeRangeMode),
     });
 
     options = [

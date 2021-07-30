@@ -15,6 +15,7 @@ export { getBucketsPath } from './get_buckets_path';
 export { isEntireTimeRangeMode, isLastValueTimerangeMode } from './get_timerange_mode';
 export { getLastMetric } from './get_last_metric';
 export { getSplits } from './get_splits';
+export { isAggSupported } from './check_aggs';
 
 // @ts-expect-error no typed yet
 export { bucketTransform } from './bucket_transform';

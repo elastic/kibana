@@ -6,28 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { GTE_INTERVAL_RE } from './interval_regexp';
 import { parseInterval, TimeRangeBounds } from '../../data/common';
-
-export class ValidateIntervalError extends Error {
-  constructor() {
-    super(
-      i18n.translate('visTypeTimeseries.validateInterval.notifier.maxBucketsExceededErrorMessage', {
-        defaultMessage:
-          'Your query attempted to fetch too much data. Reducing the time range or changing the interval used usually fixes the issue.',
-      })
-    );
-  }
-
-  public get name() {
-    return this.constructor.name;
-  }
-
-  public get errBody() {
-    return this.message;
-  }
-}
+import { ValidateIntervalError } from './errors';
 
 export function validateInterval(bounds: TimeRangeBounds, interval: string, maxBuckets: number) {
   const { min, max } = bounds;

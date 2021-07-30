@@ -101,6 +101,7 @@ const StandardDeviationAggUi = (props) => {
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
+            timeRangeMode={props.panel.time_range_mode}
             siblings={props.siblings}
             value={model.type}
             onChange={handleSelectChange('type')}

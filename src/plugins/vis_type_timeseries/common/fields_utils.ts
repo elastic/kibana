@@ -6,29 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FieldSpec } from '../../data/common';
 import { isNestedField } from '../../data/common';
 import { FetchedIndexPattern, SanitizedFieldType } from './types';
-
-export class FieldNotFoundError extends Error {
-  constructor(name: string) {
-    super(
-      i18n.translate('visTypeTimeseries.fields.fieldNotFound', {
-        defaultMessage: `Field "{field}" not found`,
-        values: { field: name },
-      })
-    );
-  }
-
-  public get name() {
-    return this.constructor.name;
-  }
-
-  public get errBody() {
-    return this.message;
-  }
-}
+import { FieldNotFoundError } from './errors';
 
 export const extractFieldLabel = (
   fields: SanitizedFieldType[],

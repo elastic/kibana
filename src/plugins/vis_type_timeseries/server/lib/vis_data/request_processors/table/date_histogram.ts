@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { overwrite, getBucketSize, isLastValueTimerangeMode, getTimerange } from '../../helpers';
+import { overwrite, getBucketSize, isLastValueTimerangeMode, getTimerange, isAggSupported } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+import { METRIC_AGGREGATIONS } from '../../../../../common/enums';
+import { AggNotSupportedInMode } from '../../../../../common/errors';
 
 import type { TableRequestProcessorsFunction, TableSearchRequestMeta } from './types';
 
@@ -32,10 +34,10 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
     panelId: panel.id,
   };
 
-  const overwriteDateHistogramForLastBucketMode = () => {
-    const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
-    const { timezone } = capabilities;
+  const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
+  const { timezone } = capabilities;
 
+  const overwriteDateHistogramForLastBucketMode = () => {
     panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
 
@@ -58,19 +60,40 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
   };
 
   const overwriteDateHistogramForEntireTimerangeMode = () => {
-    const intervalString = `${to.valueOf() - from.valueOf()}ms`;
+    const metricAggs = Object.values<string>(METRIC_AGGREGATIONS);
+    let interval;
 
     panel.series.forEach((column) => {
+      isAggSupported(column.metrics);
+
       const aggRoot = calculateAggRoot(doc, column);
 
-      overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
-        field: timeField,
-        buckets: 1,
-      });
+      if (
+        column.metrics.every((metric) => metricAggs.includes(metric.type))
+      ) {
+        overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
+          field: timeField,
+          buckets: 1,
+        });
+
+        interval = `${to.valueOf() - from.valueOf()}ms`;
+      } else {
+        overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
+          field: timeField,
+          min_doc_count: 0,
+          time_zone: timezone,
+          extended_bounds: {
+            min: from.valueOf(),
+            max: to.valueOf(),
+          },
+          ...dateHistogramInterval(intervalString),
+        });
+        interval = intervalString;
+      }
 
       overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
         ...meta,
-        intervalString,
+        interval,
       });
     });
   };

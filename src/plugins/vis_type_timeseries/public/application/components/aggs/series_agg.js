@@ -151,6 +151,7 @@ function SeriesAggUi(props) {
           <AggSelect
             id={htmlId('aggregation')}
             panelType={panel.type}
+            timeRangeMode={props.panel.time_range_mode}
             siblings={props.siblings}
             value={model.type}
             onChange={handleSelectChange('type')}
