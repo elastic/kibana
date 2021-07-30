@@ -11,13 +11,7 @@ import { debounceTime, tap } from 'rxjs/operators';
 import useMount from 'react-use/lib/useMount';
 import classNames from 'classnames';
 import { Subject } from 'rxjs';
-import {
-  EuiIcon,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiSelectableOption,
-  EuiNotificationBadge,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiSelectableOption } from '@elastic/eui';
 
 import {
   OptionsListDataFetcher,
@@ -121,67 +115,51 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
   const selectedOptionsLength = Array.from(selectedOptions.current).length;
 
   const { twoLineLayout } = input;
+
   const button = (
-    <EuiButtonEmpty
-      color="text"
-      className={classNames('optionsList--buttonOverride', {
-        'optionsList--buttonOverrideTwoLine': twoLineLayout,
-        'optionsList--buttonOverrideSingle': !twoLineLayout,
+    <EuiFilterButton
+      iconType="arrowDown"
+      className={classNames('optionsList--filterBtn', {
+        'optionsList--filterBtnSingle': !twoLineLayout,
+        'optionsList--filterBtnPlaceholder': !selectedOptionsLength,
       })}
-      textProps={{
-        className: 'optionsList--control',
-      }}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
-      contentProps={{ className: 'optionsList--buttonContentOverride' }}
+      isSelected={isPopoverOpen}
+      numFilters={availableOptions.length}
+      hasActiveFilters={selectedOptionsLength > 0}
+      numActiveFilters={selectedOptionsLength}
     >
-      <span
-        className={classNames('optionsList--selections', {
-          'optionsList--selectionsEmpty': !selectedOptionsLength,
-        })}
-      >
-        {!selectedOptionsLength
-          ? OptionsListStrings.summary.getPlaceholder()
-          : selectedOptionsString}
-      </span>
-
-      <span
-        className="optionsList--notification"
-        style={{
-          visibility: selectedOptionsLength > 1 ? 'visible' : 'hidden',
-        }}
-      >
-        <EuiNotificationBadge size={'m'} color="subdued">
-          {selectedOptionsLength}
-        </EuiNotificationBadge>
-      </span>
-
-      <span className="optionsList--notification">
-        <EuiIcon type={'arrowDown'} />
-      </span>
-    </EuiButtonEmpty>
+      {!selectedOptionsLength ? OptionsListStrings.summary.getPlaceholder() : selectedOptionsString}
+    </EuiFilterButton>
   );
 
   return (
-    <EuiPopover
-      id="popoverExampleMultiSelect"
-      button={button}
-      isOpen={isPopoverOpen}
-      className="optionsList--popoverOverride"
-      anchorClassName="optionsList--anchorOverride"
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="upLeft"
-      ownFocus
-      repositionOnScroll
+    <EuiFilterGroup
+      className={classNames('optionsList--filterGroup', {
+        'optionsList--filterGroupSingle': !twoLineLayout,
+      })}
     >
-      <OptionsListPopover
-        loading={loading}
-        updateItem={updateItem}
-        searchString={searchString}
-        typeaheadSubject={typeaheadSubject}
-        availableOptions={availableOptions}
-      />
-    </EuiPopover>
+      <EuiPopover
+        id="popoverExampleMultiSelect"
+        button={button}
+        isOpen={isPopoverOpen}
+        className="optionsList--popoverOverride"
+        anchorClassName="optionsList--anchorOverride"
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="upLeft"
+        ownFocus
+        repositionOnScroll
+      >
+        <OptionsListPopover
+          loading={loading}
+          updateItem={updateItem}
+          searchString={searchString}
+          typeaheadSubject={typeaheadSubject}
+          availableOptions={availableOptions}
+        />
+      </EuiPopover>
+    </EuiFilterGroup>
   );
 };
 

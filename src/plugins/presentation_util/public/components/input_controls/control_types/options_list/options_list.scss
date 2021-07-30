@@ -7,31 +7,6 @@
   height: 100%;
 }
 
-.optionsList--buttonContentOverride {
-  padding: 0 !important;
-}
-
-.optionsList--buttonOverride {
-  &:hover:not(:disabled),
-  &:focus:not(:disabled) {
-    // Remove underline from whole button so notifications don't get the underline
-    text-decoration: none;
-  }
-}
-
-.optionsList--buttonOverrideTwoLine {
-  height: auto !important;
-  width: 100%;
-}
-
-.optionsList--buttonOverrideSingle {
-  height: 100%;
-  width: 100%;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  overflow: hidden;
-}
-
 .optionsList--items {
   @include euiScrollBar;
 
@@ -41,31 +16,32 @@
   max-width: 100%;
 }
 
-.optionsList--control {
-  height: $euiFormControlHeight;
-  flex-direction: row;
-  background-color: $euiFormBackgroundColor;
-  width: 100%;
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-
-  .optionsList--selections {
-    flex: 1;
+.optionsList--filterBtn {
+  .euiFilterButton__text-hasNotification {
+    flex-grow: 1;
+    justify-content: space-between;
     width: 0;
-    margin: $euiSizeXS $euiSizeXS 0 $euiSizeS;
-    text-align: left;
-    min-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
+  &.optionsList--filterBtnSingle {
+    width: 100%;
+  }
+  &.optionsList--filterBtnPlaceholder {
+    .euiFilterButton__textShift {
+      color: $euiTextSubduedColor;
+    }
+  }
+}
 
-  .optionsList--selectionsEmpty {
-    color: $euiButtonColorDisabledText
-  }
 
-  .optionsList--notification {
-    padding: $euiSizeXS;
-  }
+.optionsList--filterGroupSingle {
+  box-shadow: none;
+  height: 100%;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: $euiBorderRadius - 1px;
+  border-bottom-right-radius: $euiBorderRadius - 1px;
+}
+
+.optionsList--filterGroup {
+  width: 100%;
 }

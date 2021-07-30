@@ -8,6 +8,7 @@
 
 import React, { useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
+import classNames from 'classnames';
 import { EuiFormControlLayout, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 
 import { InputControlEmbeddable } from '../embeddable/types';
@@ -29,14 +30,21 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
   const form = (
     <EuiFormControlLayout
       className="controlFrame--formControlLayout"
-      fullWidth={true}
+      fullWidth
       prepend={
         twoLine ? undefined : (
           <EuiFormLabel htmlFor={embeddable.id}>{embeddable.getInput().title}</EuiFormLabel>
         )
       }
     >
-      <div className="controlFrame--control" id={embeddable.id} ref={embeddableRoot} />
+      <div
+        className={classNames('controlFrame--control', {
+          'optionsList--filterBtnTwoLine': twoLine,
+          'optionsList--filterBtnSingle': !twoLine,
+        })}
+        id={embeddable.id}
+        ref={embeddableRoot}
+      />
     </EuiFormControlLayout>
   );
 
