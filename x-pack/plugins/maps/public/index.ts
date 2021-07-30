@@ -27,7 +27,8 @@ export { MapsSetupApi } from './api';
 // ML - required additions
 export { IVectorSource, GeoJsonWithMeta } from './classes/sources/vector_source/vector_source';
 export { LICENSED_FEATURES } from './licensed_features';
-export { Attribution, ImmutableSourceProperty, PreIndexedShape } from './classes/sources/source';
+export { ImmutableSourceProperty, PreIndexedShape } from './classes/sources/source';
+export { Attribution } from '../common/descriptor_types';
 export { BoundsFilters, SourceTooltipConfig } from './classes/sources/vector_source/vector_source';
 export { IField } from './classes/fields/field';
 export { VectorStyle } from './classes/styles/vector/vector_style';

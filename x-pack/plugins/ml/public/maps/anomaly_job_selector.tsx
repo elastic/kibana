@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { getAnomalyJobList } from './util';
+import { ml } from '../application/services/ml_api_service';
 
 interface Props {
   onJobChange: (jobId: string) => void;
@@ -27,9 +27,9 @@ export class AnomalyJobSelector extends Component<Props, State> {
   state: State = {};
 
   private async _loadJobs() {
-    const jobList = await getAnomalyJobList();
-    const options = jobList.map((j) => {
-      return { label: j.jobId, value: j.jobId };
+    const jobIdList = await ml.jobs.jobsWithGeo();
+    const options = jobIdList.map((jobId) => {
+      return { label: jobId, value: jobId };
     });
     if (this._isMounted && !isEqual(options, this.state.jobIdList)) {
       this.setState({

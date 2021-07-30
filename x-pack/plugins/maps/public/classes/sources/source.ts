@@ -21,6 +21,7 @@ import {
 } from '../../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { PreIndexedShape } from '../../../common/elasticsearch_util';
+export { PreIndexedShape } from '../../../common/elasticsearch_util';
 
 export type OnSourceChangeArgs = {
   propName: string;

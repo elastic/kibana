@@ -319,16 +319,20 @@ export class AnomalySource implements IVectorSource {
     return true;
   }
 
-  addFeature() {
+  async addFeature() {
     // TODO
   }
 
-  deleteFeature() {
+  async deleteFeature() {
     // TODO
   }
 
   getUpdateDueToTimeslice() {
     // TODO
     return true;
+  }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    return {};
   }
 }

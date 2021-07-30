@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-// import { ml } from '../../../../services/ml_api_service';
-
 import { FeatureCollection, Feature } from 'geojson';
+import { ml } from '../application/services/ml_api_service';
 
 const DUMMY_JOB_LIST = [
   {
@@ -50,11 +49,61 @@ export async function getResultsForJobId(
   jobId: string,
   locationType: 'typical' | 'actual'
 ): Promise<FeatureCollection> {
-  const job = DUMMY_JOB_LIST.find((j) => {
-    return j.jobId === jobId;
-  });
+  // Query to look for the highest scoring anomaly.
+  const body: any = {
+    query: {
+      bool: {
+        must: [{ term: { job_id: jobId } }, { term: { result_type: 'record' } }],
+      },
+    },
+    size: 1000,
+    _source: {
+      excludes: [],
+    },
+  };
 
-  const features: Feature[] = job!.results.map((result) => {
+  // @ts-ignore
+  let resp;
+  try {
+    resp = await ml.results.anomalySearch(
+      {
+        body,
+      },
+      [jobId]
+    );
+  } catch (error) {
+    // search may fail if the job doesn't already exist
+    // ignore this error as the outer function call will raise a toast
+  }
+  if (resp && resp.hits.total.value > 0) {
+    resp = resp.hits.hits.map(({ _source }) => {
+      const geoResults = _source.geo_results;
+      const actualCoordStr = geoResults && geoResults.actual_point;
+      const typicalCoordStr = geoResults && geoResults.typical_point;
+      let typical;
+      let actual;
+      // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
+      if (actualCoordStr !== undefined) {
+        actual = actualCoordStr
+          .split(',')
+          .map((point: string) => Number(point))
+          .reverse();
+      }
+      if (typicalCoordStr !== undefined) {
+        typical = typicalCoordStr
+          .split(',')
+          .map((point: string) => Number(point))
+          .reverse();
+      }
+      return {
+        typical,
+        actual,
+        record_score: Math.floor(_source.record_score),
+      };
+    });
+  }
+
+  const features: Feature[] = resp!.map((result) => {
     return {
       type: 'Feature',
       geometry: {
