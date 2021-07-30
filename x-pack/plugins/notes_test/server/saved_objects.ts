@@ -22,5 +22,6 @@ const noteSavedObjectType: SavedObjectsType<NoteAttributes> = {
     getTitle: ({ attributes }) => attributes.subject,
   },
   mappings: { dynamic: false, properties: {} },
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
 };
