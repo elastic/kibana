@@ -170,7 +170,7 @@ export const useSavedSearch = ({
       }
       inspectorAdapters.requests.reset();
 
-      if (refs.current.abortController) refs.current.abortController.abort();
+      refs.current.abortController?.abort();
       refs.current.abortController = new AbortController();
       try {
         fetchAll(dataSubjects, searchSource, val === 'reset', {
