@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './filter_manager';
 export * from './timefilter';
 export * from './types';
 export * from './is_query';

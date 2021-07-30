@@ -35,7 +35,7 @@ export class IndexPatternDatasource {
 
   setup(
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
-    { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
+    { expressions, editorFrame, charts, data: dataSetup }: IndexPatternDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
       const {
@@ -48,8 +48,11 @@ export class IndexPatternDatasource {
       } = await import('../async_services');
       return core
         .getStartServices()
-        .then(([coreStart, { data, indexPatternFieldEditor, uiActions }]) => {
-          data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
+        .then(([coreStart, { indexPatternFieldEditor, uiActions, data }]) => {
+          const suffixFormatter = getSuffixFormatter(data.fieldFormats.deserialize);
+          if (!dataSetup.fieldFormats.has(suffixFormatter.id)) {
+            dataSetup.fieldFormats.register([suffixFormatter]);
+          }
           expressions.registerFunction(timeScale);
           expressions.registerFunction(counterRate);
           expressions.registerFunction(renameColumns);
