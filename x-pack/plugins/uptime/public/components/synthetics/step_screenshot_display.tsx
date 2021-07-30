@@ -134,7 +134,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     if (isScreenshotRef) {
       return getJourneyScreenshot(imgSrc);
     }
-  }, [basePath, checkGroup, stepIndex, isScreenshotRef]);
+  }, [basePath, checkGroup, imgSrc, stepIndex, isScreenshotRef]);
 
   const refDimensions = useMemo(() => {
     if (isAScreenshotRef(screenshotRef)) {
