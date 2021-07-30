@@ -26,7 +26,6 @@ import {
   IBulkInstallPackageHTTPError,
   PostFleetSetupResponse,
 } from '../../../fleet/common/types/rest_spec';
-import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
 
 main();
 
@@ -255,14 +254,14 @@ async function main() {
     },
   }).argv;
   let ca: Buffer;
-  let kbnClient: KbnClientWithApiKeySupport;
+  let kbnClient: KbnClient;
   let clientOptions: ClientOptions;
 
   if (argv.ssl) {
     ca = fs.readFileSync(CA_CERT_PATH);
     const url = argv.kibana.replace('http:', 'https:');
     const node = argv.node.replace('http:', 'https:');
-    kbnClient = new KbnClientWithApiKeySupport({
+    kbnClient = new KbnClient({
       log: new ToolingLog({
         level: 'info',
         writeTo: process.stdout,
@@ -272,7 +271,7 @@ async function main() {
     });
     clientOptions = { node, ssl: { ca: [ca] } };
   } else {
-    kbnClient = new KbnClientWithApiKeySupport({
+    kbnClient = new KbnClient({
       log: new ToolingLog({
         level: 'info',
         writeTo: process.stdout,

@@ -28,7 +28,6 @@ import {
 } from '../../../fleet/common';
 import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { EndpointAction, HostMetadata } from './types';
-import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 import { FleetAgentGenerator } from './data_generators/fleet_agent_generator';
 import { FleetActionGenerator } from './data_generators/fleet_action_generator';
 
@@ -37,7 +36,7 @@ const fleetActionGenerator = new FleetActionGenerator();
 
 export async function indexHostsAndAlerts(
   client: Client,
-  kbnClient: KbnClientWithApiKeySupport,
+  kbnClient: KbnClient,
   seed: string,
   numHosts: number,
   numDocs: number,
@@ -110,7 +109,7 @@ async function indexHostDocs({
 }: {
   numDocs: number;
   client: Client;
-  kbnClient: KbnClientWithApiKeySupport;
+  kbnClient: KbnClient;
   realPolicies: Record<string, CreatePackagePolicyResponse['item']>;
   epmEndpointPackage: GetPackagesResponse['response'][0];
   metadataIndex: string;
@@ -314,7 +313,7 @@ const getEndpointPackageInfo = async (
   return endpointPackage;
 };
 
-const fetchKibanaVersion = async (kbnClient: KbnClientWithApiKeySupport) => {
+const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   const version = ((await kbnClient.request({
     path: '/api/status',
     method: 'GET',
