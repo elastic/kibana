@@ -60,16 +60,16 @@ describe('AddDomainLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mount();
   });
 
   it('has default values', () => {
-    mount();
     expect(AddDomainLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
     describe('clearDomainFormInputValue', () => {
-      beforeAll(() => {
+      beforeEach(() => {
         mount({
           addDomainFormInputValue: 'http://elastic.co',
           entryPointValue: '/foo',
@@ -127,7 +127,7 @@ describe('AddDomainLogic', () => {
     });
 
     describe('setAddDomainFormInputValue', () => {
-      beforeAll(() => {
+      beforeEach(() => {
         mount({
           addDomainFormInputValue: 'https://elastic.co',
           entryPointValue: '/customers',
@@ -178,8 +178,6 @@ describe('AddDomainLogic', () => {
 
     describe('setDomainValidationResult', () => {
       it('should update the validation result', () => {
-        mount();
-
         AddDomainLogic.actions.setDomainValidationResult({
           contentVerification: { state: 'invalid' },
         });
@@ -208,7 +206,7 @@ describe('AddDomainLogic', () => {
     });
 
     describe('validateDomainInitialVerification', () => {
-      beforeAll(() => {
+      beforeEach(() => {
         mount({
           addDomainFormInputValue: 'https://elastic.co',
           entryPointValue: '/customers',
@@ -266,7 +264,6 @@ describe('AddDomainLogic', () => {
     describe('onSubmitNewDomainSuccess', () => {
       it('should flash a success toast', () => {
         const { navigateToUrl } = mockKibanaValues;
-        mount();
 
         AddDomainLogic.actions.onSubmitNewDomainSuccess({ id: 'test-domain' } as CrawlerDomain);
 
@@ -303,10 +300,6 @@ describe('AddDomainLogic', () => {
       });
 
       describe('on success', () => {
-        beforeEach(() => {
-          mount();
-        });
-
         it('sets crawler data', async () => {
           http.post.mockReturnValueOnce(
             Promise.resolve({
@@ -349,12 +342,9 @@ describe('AddDomainLogic', () => {
       });
 
       describe('on error', () => {
-        beforeEach(() => {
-          mount();
-          jest.spyOn(AddDomainLogic.actions, 'onSubmitNewDomainError');
-        });
-
         it('passes error messages to the error callback', async () => {
+          jest.spyOn(AddDomainLogic.actions, 'onSubmitNewDomainError');
+
           http.post.mockReturnValueOnce(
             Promise.reject({
               body: {
@@ -615,10 +605,6 @@ describe('AddDomainLogic', () => {
     });
 
     describe('hasValidationCompleted', () => {
-      it('is false by default', () => {
-        expect(AddDomainLogic.values.hasValidationCompleted).toEqual(false);
-      });
-
       it('is false when steps are loading', () => {
         mount({
           domainValidationResult: {
@@ -651,10 +637,6 @@ describe('AddDomainLogic', () => {
     });
 
     describe('hasBlockingFailure', () => {
-      it('is false by defult', () => {
-        expect(AddDomainLogic.values.hasBlockingFailure).toEqual(false);
-      });
-
       it('is true when any steps have blocking failures', () => {
         mount({
           domainValidationResult: {
@@ -672,10 +654,6 @@ describe('AddDomainLogic', () => {
     });
 
     describe('allowSubmit', () => {
-      it('is false by default', () => {
-        expect(AddDomainLogic.values.allowSubmit).toEqual(false);
-      });
-
       it('is true when a user has validated all steps and has no failures', () => {
         mount({
           domainValidationResult: {
@@ -693,11 +671,6 @@ describe('AddDomainLogic', () => {
     });
 
     describe('displayValidation', () => {
-      it('is false by default', () => {
-        mount();
-        expect(AddDomainLogic.values.displayValidation).toEqual(false);
-      });
-
       it('is true when a user is loading validation', () => {
         mount({
           domainValidationResult: {
