@@ -7,13 +7,13 @@ Currently with Cypress you can develop `functional` tests and coming soon `CCS` 
 If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
 
 - Functional Tests:
-  - Gloria Hornero (@Glo) and Patryk Kopycinsky (@patryk.kopycinski) 
+  - Frank Hassanabad, Gloria Hornero and Patryk Kopycinsky 
   
 - CCS Tests:
   - Technical questions around the https://github.com/elastic/integration-test repo:
-     - Domenico Andreoli (@dom)
+     - Domenico Andreoli
   - Doubts regarding testing CCS and Cypress best practices:
-     - Gloria Hornero (@Glo)       
+     - Gloria Hornero   
 
 ## Table of Contents
 
