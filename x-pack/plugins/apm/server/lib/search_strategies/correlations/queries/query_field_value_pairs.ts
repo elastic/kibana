@@ -20,7 +20,7 @@ interface FieldValuePair {
   field: string;
   value: string;
 }
-type FieldValuePairs = FieldValuePair[];
+export type FieldValuePairs = FieldValuePair[];
 
 export type Field = string;
 
