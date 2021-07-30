@@ -1,3 +1,3 @@
 {
-  "main": "../target/stdio"
+  "main": "../target_node/stdio"
 }

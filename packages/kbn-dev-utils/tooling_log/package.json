@@ -1,3 +1,3 @@
 {
-  "main": "../target/tooling_log"
+  "main": "../target_node/tooling_log"
 }
