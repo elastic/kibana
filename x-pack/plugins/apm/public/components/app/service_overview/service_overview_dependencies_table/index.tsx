@@ -7,23 +7,30 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getNodeName, NodeType } from '../../../../../common/connections';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { NodeIcon } from '../../../shared/node_icon';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 export function ServiceOverviewDependenciesTable() {
   const {
-    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
+    urlParams: {
+      start,
+      end,
+      environment,
+      comparisonEnabled,
+      comparisonType,
+      latencyAggregationType,
+    },
   } = useUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, kuery, latencyAggregationType },
+    query: { kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/overview');
 
   const { offset } = getTimeRangeComparison({

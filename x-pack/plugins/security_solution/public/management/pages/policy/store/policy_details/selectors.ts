@@ -186,6 +186,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         malware: windows.malware,
         ransomware: windows.ransomware,
         memory_protection: windows.memory_protection,
+        behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
       },
