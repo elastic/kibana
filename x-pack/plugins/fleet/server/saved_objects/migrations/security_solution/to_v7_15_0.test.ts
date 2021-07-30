@@ -14,6 +14,7 @@ import { migratePackagePolicyToV7150 as migration } from './to_v7_15_0';
 describe('7.15.0 Endpoint Package Policy migration', () => {
   const policyDoc = ({
     windowsMemory = {},
+    windowsBehavior = {},
     windowsPopup = {},
     windowsMalware = {},
     windowsRansomware = {},
@@ -49,6 +50,7 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
                     ...windowsMalware,
                     ...windowsRansomware,
                     ...windowsMemory,
+                    ...windowsBehavior,
                     ...windowsPopup,
                   },
                 },
@@ -61,7 +63,7 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
     };
   };
 
-  it('adds windows memory protection alongside malware and ramsomware', () => {
+  it('adds windows memory and behavior protection alongside malware and ramsomware', () => {
     const initialDoc = policyDoc({
       windowsMalware: { malware: { mode: 'off' } },
       windowsRansomware: { ransomware: { mode: 'off', supported: true } },
@@ -84,6 +86,7 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
       windowsRansomware: { ransomware: { mode: 'off', supported: true } },
       // new memory protection
       windowsMemory: { memory_protection: { mode: 'off', supported: true } },
+      windowsBehavior: { behavior_protection: { mode: 'off', supported: true } },
       windowsPopup: {
         popup: {
           malware: {
@@ -96,6 +99,11 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
           },
           // new memory popup setup
           memory_protection: {
+            message: '',
+            enabled: false,
+          },
+          // new behavior popup setup
+          behavior_protection: {
             message: '',
             enabled: false,
           },

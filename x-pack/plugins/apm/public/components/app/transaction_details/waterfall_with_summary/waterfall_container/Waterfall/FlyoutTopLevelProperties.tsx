@@ -7,15 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useUrlParams } from '../../../../../../context/url_params_context/use_url_params';
-import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../../../../../common/elasticsearch_fieldnames';
+import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview_link';
+import { useUrlParams } from '../../../../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
+import { ServiceLink } from '../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../shared/sticky_properties';
 
 interface Props {
@@ -24,8 +25,9 @@ interface Props {
 
 export function FlyoutTopLevelProperties({ transaction }: Props) {
   const {
-    urlParams: { environment, latencyAggregationType },
+    urlParams: { latencyAggregationType },
   } = useUrlParams();
+  const { query } = useApmParams('/services/:serviceName/transactions/view');
 
   if (!transaction) {
     return null;
@@ -33,7 +35,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
 
   const nextEnvironment = getNextEnvironmentUrlParam({
     requestedEnvironment: transaction.service.environment,
-    currentEnvironmentUrlParam: environment,
+    currentEnvironmentUrlParam: query.environment,
   });
 
   const stickyProperties = [
@@ -43,12 +45,11 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <ServiceOrTransactionsOverviewLink
+        <ServiceLink
+          agentName={transaction.agent.name}
+          query={{ ...query, environment: nextEnvironment }}
           serviceName={transaction.service.name}
-          environment={nextEnvironment}
-        >
-          {transaction.service.name}
-        </ServiceOrTransactionsOverviewLink>
+        />
       ),
       width: '25%',
     },

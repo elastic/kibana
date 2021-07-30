@@ -16,7 +16,7 @@ import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context
 import { ClientConfigType } from '../plugin';
 import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
 import { KibanaContextProvider } from '../shared_imports';
-import { ReportListing } from './report_listing';
+import { ReportListing } from '.';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,

@@ -43,10 +43,39 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-          "lineNumber": 64
+          "lineNumber": 68
         },
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+              "lineNumber": 69
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.experimentalFeatures",
+            "type": "Object",
+            "tags": [],
+            "label": "experimentalFeatures",
+            "description": [],
+            "signature": [
+              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly trustedAppsByPolicyEnabled: boolean; readonly uebaEnabled: boolean; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+              "lineNumber": 71
+            },
+            "deprecated": false
+          },
           {
             "parentPluginId": "securitySolution",
             "id": "def-public.Plugin.Unnamed",
@@ -59,7 +88,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 68
+              "lineNumber": 73
             },
             "deprecated": false,
             "children": [
@@ -82,7 +111,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 68
+                  "lineNumber": 73
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -123,7 +152,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 89
+              "lineNumber": 95
             },
             "deprecated": false,
             "children": [
@@ -150,7 +179,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 89
+                  "lineNumber": 95
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -167,7 +196,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 89
+                  "lineNumber": 95
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -197,7 +226,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 194
+              "lineNumber": 200
             },
             "deprecated": false,
             "children": [
@@ -219,7 +248,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 194
+                  "lineNumber": 200
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -236,7 +265,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 194
+                  "lineNumber": 200
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -256,7 +285,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 241
+              "lineNumber": 258
             },
             "deprecated": false,
             "children": [],
@@ -346,7 +375,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security_solution/public/types.ts",
-        "lineNumber": 75
+        "lineNumber": 76
       },
       "deprecated": false,
       "children": [
@@ -364,7 +393,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/security_solution/public/types.ts",
-            "lineNumber": 76
+            "lineNumber": 77
           },
           "deprecated": false,
           "returnComment": [],
@@ -431,7 +460,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; enableExperimental: string[]; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; packagerTaskInterval: string; validateArtifactDownloads: boolean; }>"
+                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; enableExperimental: string[]; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }>"
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/client/client.ts",
@@ -511,7 +540,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/plugin.ts",
-          "lineNumber": 127
+          "lineNumber": 125
         },
         "deprecated": false,
         "children": [
@@ -527,7 +556,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 143
+              "lineNumber": 141
             },
             "deprecated": false,
             "children": [
@@ -550,7 +579,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 143
+                  "lineNumber": 141
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -590,7 +619,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 155
+              "lineNumber": 153
             },
             "deprecated": false,
             "children": [
@@ -623,7 +652,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 155
+                  "lineNumber": 153
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -640,7 +669,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 155
+                  "lineNumber": 153
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -670,7 +699,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 439
+              "lineNumber": 336
             },
             "deprecated": false,
             "children": [
@@ -692,7 +721,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 439
+                  "lineNumber": 336
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -709,7 +738,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 439
+                  "lineNumber": 336
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -729,7 +758,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 514
+              "lineNumber": 416
             },
             "deprecated": false,
             "children": [],
@@ -793,11 +822,11 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly enableExperimental: string[]; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; readonly packagerTaskInterval: string; readonly validateArtifactDownloads: boolean; }"
+          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; readonly enableExperimental: string[]; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly packagerTaskInterval: string; readonly prebuiltRulesFromFileSystem: boolean; readonly prebuiltRulesFromSavedObjects: boolean; }"
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/config.ts",
-          "lineNumber": 75
+          "lineNumber": 78
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -813,7 +842,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 123
+        "lineNumber": 121
       },
       "deprecated": false,
       "children": [],
@@ -829,7 +858,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 126
+        "lineNumber": 124
       },
       "deprecated": false,
       "children": [],
@@ -2469,7 +2498,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 63
+          "lineNumber": 58
         },
         "deprecated": false,
         "children": [
@@ -2482,7 +2511,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 64
+              "lineNumber": 59
             },
             "deprecated": false
           },
@@ -2495,7 +2524,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 65
+              "lineNumber": 60
             },
             "deprecated": false
           },
@@ -2511,7 +2540,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 66
+              "lineNumber": 61
             },
             "deprecated": false
           },
@@ -2527,7 +2556,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 67
+              "lineNumber": 62
             },
             "deprecated": false
           },
@@ -2551,7 +2580,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 68
+              "lineNumber": 63
             },
             "deprecated": false
           },
@@ -2564,7 +2593,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 69
+              "lineNumber": 64
             },
             "deprecated": false
           },
@@ -2580,7 +2609,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 70
+              "lineNumber": 65
             },
             "deprecated": false
           },
@@ -2593,7 +2622,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 71
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -2606,7 +2635,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 72
+              "lineNumber": 67
             },
             "deprecated": false
           },
@@ -2619,7 +2648,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 73
+              "lineNumber": 68
             },
             "deprecated": false
           },
@@ -2635,7 +2664,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 74
+              "lineNumber": 69
             },
             "deprecated": false
           }
@@ -2651,7 +2680,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 429
+          "lineNumber": 431
         },
         "deprecated": false,
         "children": [
@@ -2664,7 +2693,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 430
+              "lineNumber": 432
             },
             "deprecated": false
           },
@@ -2677,7 +2706,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 431
+              "lineNumber": 433
             },
             "deprecated": false
           }
@@ -2885,7 +2914,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 594
+          "lineNumber": 596
         },
         "deprecated": false,
         "children": [
@@ -2901,7 +2930,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 595
+              "lineNumber": 597
             },
             "deprecated": false
           },
@@ -2917,7 +2946,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 596
+              "lineNumber": 598
             },
             "deprecated": false
           },
@@ -2933,7 +2962,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 597
+              "lineNumber": 599
             },
             "deprecated": false
           },
@@ -2949,7 +2978,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 598
+              "lineNumber": 600
             },
             "deprecated": false
           },
@@ -2965,7 +2994,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 599
+              "lineNumber": 601
             },
             "deprecated": false
           },
@@ -2981,7 +3010,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 600
+              "lineNumber": 602
             },
             "deprecated": false
           },
@@ -2997,7 +3026,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 601
+              "lineNumber": 603
             },
             "deprecated": false
           },
@@ -3013,7 +3042,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 602
+              "lineNumber": 604
             },
             "deprecated": false
           },
@@ -3029,7 +3058,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 603
+              "lineNumber": 605
             },
             "deprecated": false
           },
@@ -3045,7 +3074,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 604
+              "lineNumber": 606
             },
             "deprecated": false
           },
@@ -3061,7 +3090,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 605
+              "lineNumber": 607
             },
             "deprecated": false
           }
@@ -3077,7 +3106,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-          "lineNumber": 35
+          "lineNumber": 34
         },
         "deprecated": false,
         "children": [
@@ -3101,7 +3130,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-              "lineNumber": 36
+              "lineNumber": 35
             },
             "deprecated": false,
             "returnComment": [],
@@ -3115,7 +3144,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-                  "lineNumber": 36
+                  "lineNumber": 35
                 },
                 "deprecated": false
               },
@@ -3138,7 +3167,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-                  "lineNumber": 36
+                  "lineNumber": 35
                 },
                 "deprecated": false
               }
@@ -3164,7 +3193,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-              "lineNumber": 37
+              "lineNumber": 36
             },
             "deprecated": false,
             "returnComment": [],
@@ -3189,7 +3218,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-                  "lineNumber": 37
+                  "lineNumber": 36
                 },
                 "deprecated": false
               }
@@ -3586,7 +3615,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 608
+          "lineNumber": 610
         },
         "deprecated": false,
         "children": [
@@ -3602,7 +3631,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 609
+              "lineNumber": 611
             },
             "deprecated": false
           },
@@ -3618,7 +3647,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 610
+              "lineNumber": 612
             },
             "deprecated": false
           },
@@ -3634,7 +3663,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 611
+              "lineNumber": 613
             },
             "deprecated": false
           },
@@ -3650,7 +3679,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 612
+              "lineNumber": 614
             },
             "deprecated": false
           },
@@ -3666,7 +3695,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 613
+              "lineNumber": 615
             },
             "deprecated": false
           },
@@ -3689,7 +3718,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 614
+              "lineNumber": 616
             },
             "deprecated": false
           },
@@ -3712,7 +3741,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 615
+              "lineNumber": 617
             },
             "deprecated": false
           },
@@ -3735,7 +3764,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 616
+              "lineNumber": 618
             },
             "deprecated": false
           }
@@ -3799,7 +3828,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 627
+          "lineNumber": 629
         },
         "deprecated": false,
         "children": [
@@ -3815,7 +3844,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 629
+              "lineNumber": 631
             },
             "deprecated": false
           },
@@ -3831,7 +3860,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 631
+              "lineNumber": 633
             },
             "deprecated": false
           }
@@ -4024,7 +4053,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-          "lineNumber": 208
+          "lineNumber": 237
         },
         "deprecated": false,
         "children": [
@@ -4037,7 +4066,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 209
+              "lineNumber": 238
             },
             "deprecated": false
           },
@@ -4050,7 +4079,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 211
+              "lineNumber": 240
             },
             "deprecated": false
           }
@@ -4066,7 +4095,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "deprecated": false,
         "children": [
@@ -4082,7 +4111,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -4098,7 +4127,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -4121,7 +4150,60 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 27
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.EndpointFields.isolation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isolation",
+            "description": [
+              "if the host is currently isolated"
+            ],
+            "signature": [
+              "boolean | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.EndpointFields.pendingActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pendingActions",
+            "description": [
+              "A count of pending endpoint actions against the host"
+            ],
+            "signature": [
+              "{ [key: string]: number; } | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.EndpointFields.elasticAgentStatus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "elasticAgentStatus",
+            "description": [],
+            "signature": [
+              "HostStatus",
+              " | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
+              "lineNumber": 33
             },
             "deprecated": false
           },
@@ -4137,7 +4219,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 28
+              "lineNumber": 34
             },
             "deprecated": false
           }
@@ -4316,7 +4398,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 634
+          "lineNumber": 636
         },
         "deprecated": false,
         "children": [
@@ -4332,7 +4414,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 635
+              "lineNumber": 637
             },
             "deprecated": false
           },
@@ -4348,7 +4430,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 636
+              "lineNumber": 638
             },
             "deprecated": false
           },
@@ -4364,7 +4446,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 637
+              "lineNumber": 639
             },
             "deprecated": false
           },
@@ -4380,7 +4462,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 638
+              "lineNumber": 640
             },
             "deprecated": false
           },
@@ -4396,7 +4478,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 640
+              "lineNumber": 642
             },
             "deprecated": false
           }
@@ -4768,7 +4850,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 414
+          "lineNumber": 416
         },
         "deprecated": false,
         "children": [
@@ -4785,7 +4867,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 415
+              "lineNumber": 417
             },
             "deprecated": false
           },
@@ -4802,7 +4884,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 416
+              "lineNumber": 418
             },
             "deprecated": false
           }
@@ -4818,7 +4900,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 424
+          "lineNumber": 426
         },
         "deprecated": false,
         "children": [
@@ -4831,7 +4913,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 425
+              "lineNumber": 427
             },
             "deprecated": false
           },
@@ -4844,7 +4926,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 426
+              "lineNumber": 428
             },
             "deprecated": false
           }
@@ -5094,7 +5176,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 653
+          "lineNumber": 655
         },
         "deprecated": false,
         "children": [
@@ -5110,7 +5192,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 654
+              "lineNumber": 656
             },
             "deprecated": false
           },
@@ -5126,7 +5208,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 655
+              "lineNumber": 657
             },
             "deprecated": false
           },
@@ -5142,7 +5224,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 656
+              "lineNumber": 658
             },
             "deprecated": false
           },
@@ -5158,7 +5240,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 657
+              "lineNumber": 659
             },
             "deprecated": false
           },
@@ -5174,7 +5256,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 658
+              "lineNumber": 660
             },
             "deprecated": false
           },
@@ -5190,7 +5272,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 659
+              "lineNumber": 661
             },
             "deprecated": false
           },
@@ -5206,7 +5288,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 660
+              "lineNumber": 662
             },
             "deprecated": false
           },
@@ -5222,7 +5304,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 661
+              "lineNumber": 663
             },
             "deprecated": false
           },
@@ -5238,7 +5320,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 662
+              "lineNumber": 664
             },
             "deprecated": false
           },
@@ -5254,7 +5336,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 663
+              "lineNumber": 665
             },
             "deprecated": false
           },
@@ -5270,7 +5352,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 664
+              "lineNumber": 666
             },
             "deprecated": false
           }
@@ -5421,7 +5503,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 643
+          "lineNumber": 645
         },
         "deprecated": false,
         "children": [
@@ -5437,7 +5519,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 644
+              "lineNumber": 646
             },
             "deprecated": false
           },
@@ -5460,7 +5542,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 645
+              "lineNumber": 647
             },
             "deprecated": false
           },
@@ -5476,7 +5558,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 646
+              "lineNumber": 648
             },
             "deprecated": false
           },
@@ -5492,7 +5574,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 647
+              "lineNumber": 649
             },
             "deprecated": false
           },
@@ -5508,7 +5590,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 648
+              "lineNumber": 650
             },
             "deprecated": false
           },
@@ -5524,7 +5606,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 649
+              "lineNumber": 651
             },
             "deprecated": false
           },
@@ -5540,7 +5622,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 650
+              "lineNumber": 652
             },
             "deprecated": false
           }
@@ -5654,7 +5736,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 724
+          "lineNumber": 726
         },
         "deprecated": false,
         "children": [
@@ -5676,7 +5758,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 725
+              "lineNumber": 727
             },
             "deprecated": false
           },
@@ -5692,7 +5774,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 726
+              "lineNumber": 728
             },
             "deprecated": false
           },
@@ -5715,7 +5797,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 727
+              "lineNumber": 729
             },
             "deprecated": false
           },
@@ -5731,7 +5813,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 728
+              "lineNumber": 730
             },
             "deprecated": false
           },
@@ -5754,7 +5836,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 729
+              "lineNumber": 731
             },
             "deprecated": false
           },
@@ -5777,7 +5859,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 730
+              "lineNumber": 732
             },
             "deprecated": false
           }
@@ -6184,7 +6266,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 106
+          "lineNumber": 112
         },
         "deprecated": false,
         "children": [
@@ -6200,7 +6282,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 107
+              "lineNumber": 113
             },
             "deprecated": false
           },
@@ -6222,7 +6304,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 108
+              "lineNumber": 114
             },
             "deprecated": false
           }
@@ -6238,7 +6320,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 74
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -6261,7 +6343,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 75
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -6284,7 +6366,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 76
+              "lineNumber": 82
             },
             "deprecated": false
           },
@@ -6307,7 +6389,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 77
+              "lineNumber": 83
             },
             "deprecated": false
           },
@@ -6330,7 +6412,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 78
+              "lineNumber": 84
             },
             "deprecated": false
           },
@@ -6354,7 +6436,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 79
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -6377,7 +6459,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 82
+              "lineNumber": 88
             },
             "deprecated": false
           },
@@ -6400,7 +6482,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 83
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -6423,7 +6505,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 84
+              "lineNumber": 90
             },
             "deprecated": false
           },
@@ -6446,7 +6528,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 85
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -6469,7 +6551,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 86
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -6492,7 +6574,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 87
+              "lineNumber": 93
             },
             "deprecated": false
           },
@@ -6515,7 +6597,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 88
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -6538,7 +6620,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 89
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -6554,7 +6636,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 90
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -6577,7 +6659,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 91
+              "lineNumber": 97
             },
             "deprecated": false
           }
@@ -6758,7 +6840,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 49
+          "lineNumber": 55
         },
         "deprecated": false,
         "children": [
@@ -6771,7 +6853,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 50
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -6784,7 +6866,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 51
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -6806,7 +6888,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 52
+              "lineNumber": 58
             },
             "deprecated": false
           }
@@ -6822,7 +6904,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 55
+          "lineNumber": 61
         },
         "deprecated": false,
         "children": [
@@ -6845,7 +6927,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 56
+              "lineNumber": 62
             },
             "deprecated": false
           }
@@ -7068,7 +7150,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 94
+          "lineNumber": 100
         },
         "deprecated": false,
         "children": [
@@ -7084,7 +7166,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 95
+              "lineNumber": 101
             },
             "deprecated": false
           },
@@ -7108,7 +7190,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 96
+              "lineNumber": 102
             },
             "deprecated": false
           }
@@ -7307,7 +7389,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 111
+          "lineNumber": 117
         },
         "deprecated": false,
         "children": [
@@ -7325,7 +7407,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 112
+              "lineNumber": 118
             },
             "deprecated": false
           },
@@ -7341,7 +7423,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 116
+              "lineNumber": 122
             },
             "deprecated": false
           },
@@ -7357,7 +7439,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 117
+              "lineNumber": 123
             },
             "deprecated": false
           },
@@ -7373,7 +7455,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 118
+              "lineNumber": 124
             },
             "deprecated": false
           }
@@ -7389,7 +7471,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 35
+          "lineNumber": 41
         },
         "deprecated": false,
         "children": [
@@ -7405,7 +7487,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 36
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -7421,7 +7503,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 37
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -7438,7 +7520,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 38
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -7461,7 +7543,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 39
+              "lineNumber": 45
             },
             "deprecated": false
           },
@@ -7478,7 +7560,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 40
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -7494,7 +7576,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 41
+              "lineNumber": 47
             },
             "deprecated": false
           }
@@ -7510,7 +7592,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 59
+          "lineNumber": 65
         },
         "deprecated": false,
         "children": [
@@ -7544,7 +7626,456 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 60
+              "lineNumber": 66
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostRulesEdges",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostRulesEdges",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+          "lineNumber": 31
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesEdges.node",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostRulesItem",
+                "text": "HostRulesItem"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesEdges.cursor",
+            "type": "Object",
+            "tags": [],
+            "label": "cursor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.CursorType",
+                "text": "CursorType"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 33
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostRulesHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostRulesHit",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesHit",
+            "text": "HostRulesHit"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.Hit",
+            "text": "Hit"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesHit.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesHit.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesHit.risk_score",
+            "type": "Object",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "signature": [
+              "{ value?: number | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesHit.rule_type",
+            "type": "Object",
+            "tags": [],
+            "label": "rule_type",
+            "description": [],
+            "signature": [
+              "{ buckets?: { key: string; doc_count: number; }[] | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesHit.rule_count",
+            "type": "Object",
+            "tags": [],
+            "label": "rule_count",
+            "description": [],
+            "signature": [
+              "{ value: number; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostRulesItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostRulesItem",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+          "lineNumber": 27
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesItem._id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesItem.HostRulesFields.hits",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[HostRulesFields.hits]",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesItem.HostRulesFields.riskScore",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[HostRulesFields.riskScore]",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesItem.HostRulesFields.ruleName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[HostRulesFields.ruleName]",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesItem.HostRulesFields.ruleType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[HostRulesFields.ruleType]",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostRulesRequestOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostRulesRequestOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesRequestOptions",
+            "text": "HostRulesRequestOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RequestOptionsPaginated",
+            "text": "RequestOptionsPaginated"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesFields",
+            "text": "HostRulesFields"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+          "lineNumber": 43
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesRequestOptions.defaultIndex",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultIndex",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesRequestOptions.hostName",
+            "type": "string",
+            "tags": [],
+            "label": "hostName",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 45
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostRulesStrategyResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostRulesStrategyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesStrategyResponse",
+            "text": "HostRulesStrategyResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsSearchResponse",
+            "text": "IEsSearchResponse"
+          },
+          "<any>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+          "lineNumber": 36
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesStrategyResponse.edges",
+            "type": "Array",
+            "tags": [],
+            "label": "edges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostRulesEdges",
+                "text": "HostRulesEdges"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesStrategyResponse.totalCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalCount",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 38
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesStrategyResponse.pageInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "pageInfo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.PageInfoPaginated",
+                "text": "PageInfoPaginated"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostRulesStrategyResponse.inspect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.Inspect",
+                "text": "Inspect"
+              },
+              " | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+              "lineNumber": 40
             },
             "deprecated": false
           }
@@ -8946,6 +9477,534 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.HostTacticsEdges",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostTacticsEdges",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsEdges.node",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostTacticsItem",
+                "text": "HostTacticsItem"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsEdges.cursor",
+            "type": "Object",
+            "tags": [],
+            "label": "cursor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.CursorType",
+                "text": "CursorType"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 36
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostTacticsHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostTacticsHit",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostTacticsHit",
+            "text": "HostTacticsHit"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.Hit",
+            "text": "Hit"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsHit.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsHit.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsHit.risk_score",
+            "type": "Object",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "signature": [
+              "{ value?: number | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsHit.technique",
+            "type": "Object",
+            "tags": [],
+            "label": "technique",
+            "description": [],
+            "signature": [
+              "{ buckets?: ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostTechniqueHit",
+                "text": "HostTechniqueHit"
+              },
+              "[] | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsHit.tactic_count",
+            "type": "Object",
+            "tags": [],
+            "label": "tactic_count",
+            "description": [],
+            "signature": [
+              "{ value: number; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostTacticsItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostTacticsItem",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+          "lineNumber": 46
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsItem._id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 47
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsItem.HostTacticsFields.hits",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[HostTacticsFields.hits]",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 48
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsItem.HostTacticsFields.riskScore",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[HostTacticsFields.riskScore]",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsItem.HostTacticsFields.tactic",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[HostTacticsFields.tactic]",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 50
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsItem.HostTacticsFields.technique",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[HostTacticsFields.technique]",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 51
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostTacticsRequestOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostTacticsRequestOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostTacticsRequestOptions",
+            "text": "HostTacticsRequestOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RequestOptionsPaginated",
+            "text": "RequestOptionsPaginated"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostTacticsFields",
+            "text": "HostTacticsFields"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsRequestOptions.defaultIndex",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultIndex",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 48
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsRequestOptions.hostName",
+            "type": "string",
+            "tags": [],
+            "label": "hostName",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostTacticsStrategyResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostTacticsStrategyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostTacticsStrategyResponse",
+            "text": "HostTacticsStrategyResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsSearchResponse",
+            "text": "IEsSearchResponse"
+          },
+          "<any>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+          "lineNumber": 39
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsStrategyResponse.edges",
+            "type": "Array",
+            "tags": [],
+            "label": "edges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostTacticsEdges",
+                "text": "HostTacticsEdges"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 40
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsStrategyResponse.techniqueCount",
+            "type": "number",
+            "tags": [],
+            "label": "techniqueCount",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsStrategyResponse.totalCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalCount",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 42
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsStrategyResponse.pageInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "pageInfo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.PageInfoPaginated",
+                "text": "PageInfoPaginated"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTacticsStrategyResponse.inspect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.Inspect",
+                "text": "Inspect"
+              },
+              " | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostTechniqueHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostTechniqueHit",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTechniqueHit.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTechniqueHit.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HostTechniqueHit.risk_score",
+            "type": "Object",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "signature": [
+              "{ value?: number | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.HostValue",
         "type": "Interface",
         "tags": [],
@@ -8953,7 +10012,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 44
+          "lineNumber": 50
         },
         "deprecated": false,
         "children": [
@@ -8966,7 +10025,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 45
+              "lineNumber": 51
             },
             "deprecated": false
           },
@@ -8979,7 +10038,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-              "lineNumber": 46
+              "lineNumber": 52
             },
             "deprecated": false
           }
@@ -8995,7 +10054,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 27
+          "lineNumber": 22
         },
         "deprecated": false,
         "children": [
@@ -9010,7 +10069,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 29
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -9028,7 +10087,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 31
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -9046,7 +10105,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 33
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -9061,7 +10120,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 35
+              "lineNumber": 30
             },
             "deprecated": false
           },
@@ -9076,7 +10135,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 37
+              "lineNumber": 32
             },
             "deprecated": false
           },
@@ -9091,7 +10150,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 39
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -9106,7 +10165,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 41
+              "lineNumber": 36
             },
             "deprecated": false
           },
@@ -9124,7 +10183,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 43
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -9140,7 +10199,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 44
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -9158,7 +10217,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 46
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -9170,18 +10229,12 @@
             "label": "subType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
+              "IFieldSubType",
               " | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 47
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -9194,7 +10247,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 48
+              "lineNumber": 43
             },
             "deprecated": false
           }
@@ -9227,7 +10280,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 53
+          "lineNumber": 48
         },
         "deprecated": false,
         "children": [
@@ -9243,7 +10296,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 54
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -9256,7 +10309,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 55
+              "lineNumber": 50
             },
             "deprecated": false
           }
@@ -9290,7 +10343,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 58
+          "lineNumber": 53
         },
         "deprecated": false,
         "children": [
@@ -9313,7 +10366,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 59
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -9329,7 +10382,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 60
+              "lineNumber": 55
             },
             "deprecated": false
           }
@@ -9470,7 +10523,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 676
+          "lineNumber": 678
         },
         "deprecated": false,
         "children": [
@@ -9486,7 +10539,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 677
+              "lineNumber": 679
             },
             "deprecated": false
           },
@@ -9502,7 +10555,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 678
+              "lineNumber": 680
             },
             "deprecated": false
           }
@@ -9584,7 +10637,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-          "lineNumber": 19
+          "lineNumber": 20
         },
         "deprecated": false,
         "children": [
@@ -9600,7 +10653,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 20
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -9616,7 +10669,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 21
+              "lineNumber": 22
             },
             "deprecated": false
           }
@@ -14641,7 +15694,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 588
+          "lineNumber": 590
         },
         "deprecated": false,
         "children": [
@@ -14654,7 +15707,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 589
+              "lineNumber": 591
             },
             "deprecated": false
           },
@@ -14667,7 +15720,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 591
+              "lineNumber": 593
             },
             "deprecated": false
           }
@@ -15015,7 +16068,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 619
+          "lineNumber": 621
         },
         "deprecated": false,
         "children": [
@@ -15031,7 +16084,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 620
+              "lineNumber": 622
             },
             "deprecated": false
           },
@@ -15047,7 +16100,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 621
+              "lineNumber": 623
             },
             "deprecated": false
           },
@@ -15063,7 +16116,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 622
+              "lineNumber": 624
             },
             "deprecated": false
           },
@@ -15079,7 +16132,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 623
+              "lineNumber": 625
             },
             "deprecated": false
           },
@@ -15095,7 +16148,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 624
+              "lineNumber": 626
             },
             "deprecated": false
           }
@@ -15128,7 +16181,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-          "lineNumber": 88
+          "lineNumber": 101
         },
         "deprecated": false,
         "children": [
@@ -15150,7 +16203,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 89
+              "lineNumber": 102
             },
             "deprecated": false
           },
@@ -15178,7 +16231,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 90
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -15194,7 +16247,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 91
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -15211,7 +16264,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 92
+              "lineNumber": 105
             },
             "deprecated": false
           },
@@ -15243,6 +16296,14 @@
                 "pluginId": "securitySolution",
                 "scope": "common",
                 "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.UebaQueries",
+                "text": "UebaQueries"
+              },
+              " | ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
                 "section": "def-common.NetworkQueries",
                 "text": "NetworkQueries"
               },
@@ -15260,7 +16321,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 93
+              "lineNumber": 106
             },
             "deprecated": false
           }
@@ -15295,7 +16356,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-          "lineNumber": 98
+          "lineNumber": 111
         },
         "deprecated": false,
         "children": [
@@ -15317,7 +16378,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 99
+              "lineNumber": 112
             },
             "deprecated": false
           },
@@ -15340,7 +16401,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 100
+              "lineNumber": 113
             },
             "deprecated": false
           }
@@ -15373,7 +16434,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-          "lineNumber": 103
+          "lineNumber": 116
         },
         "deprecated": false,
         "children": [
@@ -15395,7 +16456,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 104
+              "lineNumber": 117
             },
             "deprecated": false
           },
@@ -15418,7 +16479,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-              "lineNumber": 105
+              "lineNumber": 118
             },
             "deprecated": false
           }
@@ -15434,7 +16495,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 714
+          "lineNumber": 716
         },
         "deprecated": false,
         "children": [
@@ -15450,7 +16511,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 715
+              "lineNumber": 717
             },
             "deprecated": false
           },
@@ -15466,7 +16527,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 716
+              "lineNumber": 718
             },
             "deprecated": false
           },
@@ -15488,7 +16549,427 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 717
+              "lineNumber": 719
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.RiskScoreEdges",
+        "type": "Interface",
+        "tags": [],
+        "label": "RiskScoreEdges",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+          "lineNumber": 31
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreEdges.node",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.RiskScoreItem",
+                "text": "RiskScoreItem"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreEdges.cursor",
+            "type": "Object",
+            "tags": [],
+            "label": "cursor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.CursorType",
+                "text": "CursorType"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 33
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.RiskScoreHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "RiskScoreHit",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RiskScoreHit",
+            "text": "RiskScoreHit"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.Hit",
+            "text": "Hit"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreHit._source",
+            "type": "Object",
+            "tags": [],
+            "label": "_source",
+            "description": [],
+            "signature": [
+              "{ '@timestamp': string; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreHit.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreHit.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreHit.risk_score",
+            "type": "Object",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "signature": [
+              "{ value?: number | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreHit.risk_keyword",
+            "type": "Object",
+            "tags": [],
+            "label": "risk_keyword",
+            "description": [],
+            "signature": [
+              "{ buckets?: { key: string; doc_count: number; }[] | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.RiskScoreItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "RiskScoreItem",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+          "lineNumber": 15
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreItem._id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreItem.RiskScoreFields.hostName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[RiskScoreFields.hostName]",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreItem.RiskScoreFields.riskKeyword",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[RiskScoreFields.riskKeyword]",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreItem.RiskScoreFields.riskScore",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[RiskScoreFields.riskScore]",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.RiskScoreRequestOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "RiskScoreRequestOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RiskScoreRequestOptions",
+            "text": "RiskScoreRequestOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RequestOptionsPaginated",
+            "text": "RequestOptionsPaginated"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RiskScoreFields",
+            "text": "RiskScoreFields"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+          "lineNumber": 43
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreRequestOptions.defaultIndex",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultIndex",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.RiskScoreStrategyResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RiskScoreStrategyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RiskScoreStrategyResponse",
+            "text": "RiskScoreStrategyResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsSearchResponse",
+            "text": "IEsSearchResponse"
+          },
+          "<any>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+          "lineNumber": 36
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreStrategyResponse.edges",
+            "type": "Array",
+            "tags": [],
+            "label": "edges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.RiskScoreEdges",
+                "text": "RiskScoreEdges"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreStrategyResponse.totalCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalCount",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 38
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreStrategyResponse.pageInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "pageInfo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.PageInfoPaginated",
+                "text": "PageInfoPaginated"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RiskScoreStrategyResponse.inspect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.Inspect",
+                "text": "Inspect"
+              },
+              " | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+              "lineNumber": 40
             },
             "deprecated": false
           }
@@ -15627,6 +17108,97 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.RuleNameHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleNameHit",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RuleNameHit",
+            "text": "RuleNameHit"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.Hit",
+            "text": "Hit"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RuleNameHit.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RuleNameHit.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RuleNameHit.risk_score",
+            "type": "Object",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "signature": [
+              "{ value: number; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.RuleNameHit.rule_type",
+            "type": "Object",
+            "tags": [],
+            "label": "rule_type",
+            "description": [],
+            "signature": [
+              "{ buckets?: { key: string; doc_count: number; }[] | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.SerializedFilterQuery",
         "type": "Interface",
         "tags": [],
@@ -15725,7 +17297,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 667
+          "lineNumber": 669
         },
         "deprecated": false,
         "children": [
@@ -15748,7 +17320,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 668
+              "lineNumber": 670
             },
             "deprecated": false
           }
@@ -15819,7 +17391,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 671
+          "lineNumber": 673
         },
         "deprecated": false,
         "children": [
@@ -15842,7 +17414,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 672
+              "lineNumber": 674
             },
             "deprecated": false
           },
@@ -15858,7 +17430,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 673
+              "lineNumber": 675
             },
             "deprecated": false
           }
@@ -16071,7 +17643,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 719
+          "lineNumber": 721
         },
         "deprecated": false,
         "children": [
@@ -16093,7 +17665,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 720
+              "lineNumber": 722
             },
             "deprecated": false
           },
@@ -16115,7 +17687,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 721
+              "lineNumber": 723
             },
             "deprecated": false
           }
@@ -16933,7 +18505,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-          "lineNumber": 38
+          "lineNumber": 39
         },
         "deprecated": false,
         "children": [
@@ -16955,7 +18527,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -16977,7 +18549,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             },
             "deprecated": false
           }
@@ -17011,7 +18583,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "deprecated": false,
         "children": [
@@ -17027,7 +18599,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -17050,7 +18622,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "deprecated": false
           }
@@ -17542,7 +19114,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-          "lineNumber": 29
+          "lineNumber": 30
         },
         "deprecated": false,
         "children": [
@@ -17555,7 +19127,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -17578,7 +19150,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             },
             "deprecated": false
           },
@@ -17591,7 +19163,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             },
             "deprecated": false
           },
@@ -17604,7 +19176,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -17617,7 +19189,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             },
             "deprecated": false
           },
@@ -17630,7 +19202,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "deprecated": false
           }
@@ -17801,13 +19373,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "source": {
@@ -18275,7 +19841,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 681
+          "lineNumber": 683
         },
         "deprecated": false,
         "children": [
@@ -18298,7 +19864,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 682
+              "lineNumber": 684
             },
             "deprecated": false
           },
@@ -18314,7 +19880,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 683
+              "lineNumber": 685
             },
             "deprecated": false
           },
@@ -18330,7 +19896,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 684
+              "lineNumber": 686
             },
             "deprecated": false
           },
@@ -18353,7 +19919,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 685
+              "lineNumber": 687
             },
             "deprecated": false
           },
@@ -18376,7 +19942,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 686
+              "lineNumber": 688
             },
             "deprecated": false
           },
@@ -18392,7 +19958,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 687
+              "lineNumber": 689
             },
             "deprecated": false
           },
@@ -18415,7 +19981,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 688
+              "lineNumber": 690
             },
             "deprecated": false
           },
@@ -18432,7 +19998,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 689
+              "lineNumber": 691
             },
             "deprecated": false
           },
@@ -18448,7 +20014,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 690
+              "lineNumber": 692
             },
             "deprecated": false
           },
@@ -18471,7 +20037,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 691
+              "lineNumber": 693
             },
             "deprecated": false
           },
@@ -18487,7 +20053,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 692
+              "lineNumber": 694
             },
             "deprecated": false
           },
@@ -18510,7 +20076,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 693
+              "lineNumber": 695
             },
             "deprecated": false
           },
@@ -18526,7 +20092,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 694
+              "lineNumber": 696
             },
             "deprecated": false
           },
@@ -18549,7 +20115,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 695
+              "lineNumber": 697
             },
             "deprecated": false
           },
@@ -18565,7 +20131,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 696
+              "lineNumber": 698
             },
             "deprecated": false
           },
@@ -18582,7 +20148,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 697
+              "lineNumber": 699
             },
             "deprecated": false
           },
@@ -18598,7 +20164,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 698
+              "lineNumber": 700
             },
             "deprecated": false
           },
@@ -18614,7 +20180,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 699
+              "lineNumber": 701
             },
             "deprecated": false
           },
@@ -18631,7 +20197,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 700
+              "lineNumber": 702
             },
             "deprecated": false
           },
@@ -18647,7 +20213,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 701
+              "lineNumber": 703
             },
             "deprecated": false
           },
@@ -18660,7 +20226,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 702
+              "lineNumber": 704
             },
             "deprecated": false
           },
@@ -18676,7 +20242,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 703
+              "lineNumber": 705
             },
             "deprecated": false
           },
@@ -18699,7 +20265,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 704
+              "lineNumber": 706
             },
             "deprecated": false
           },
@@ -18715,7 +20281,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 705
+              "lineNumber": 707
             },
             "deprecated": false
           },
@@ -18731,7 +20297,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 706
+              "lineNumber": 708
             },
             "deprecated": false
           },
@@ -18747,7 +20313,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 707
+              "lineNumber": 709
             },
             "deprecated": false
           },
@@ -18770,7 +20336,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 708
+              "lineNumber": 710
             },
             "deprecated": false
           },
@@ -18786,7 +20352,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 709
+              "lineNumber": 711
             },
             "deprecated": false
           },
@@ -18802,7 +20368,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 710
+              "lineNumber": 712
             },
             "deprecated": false
           },
@@ -18815,7 +20381,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-              "lineNumber": 711
+              "lineNumber": 713
             },
             "deprecated": false
           }
@@ -19472,6 +21038,534 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UserRulesByUser",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserRulesByUser",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+          "lineNumber": 44
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesByUser._id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 45
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesByUser.UserRulesFields.userName",
+            "type": "string",
+            "tags": [],
+            "label": "[UserRulesFields.userName]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 46
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesByUser.UserRulesFields.riskScore",
+            "type": "number",
+            "tags": [],
+            "label": "[UserRulesFields.riskScore]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 47
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesByUser.UserRulesFields.ruleCount",
+            "type": "number",
+            "tags": [],
+            "label": "[UserRulesFields.ruleCount]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 48
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesByUser.UserRulesFields.rules",
+            "type": "Array",
+            "tags": [],
+            "label": "[UserRulesFields.rules]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostRulesEdges",
+                "text": "HostRulesEdges"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UserRulesHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserRulesHit",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UserRulesHit",
+            "text": "UserRulesHit"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.Hit",
+            "text": "Hit"
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+          "lineNumber": 27
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesHit._source",
+            "type": "Object",
+            "tags": [],
+            "label": "_source",
+            "description": [],
+            "signature": [
+              "{ '@timestamp': string; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesHit.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesHit.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesHit.risk_score",
+            "type": "Object",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "signature": [
+              "{ value: number; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 33
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesHit.rule_count",
+            "type": "Object",
+            "tags": [],
+            "label": "rule_count",
+            "description": [],
+            "signature": [
+              "{ value: number; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 36
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesHit.rule_name",
+            "type": "Object",
+            "tags": [],
+            "label": "rule_name",
+            "description": [],
+            "signature": [
+              "{ buckets?: ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.RuleNameHit",
+                "text": "RuleNameHit"
+              },
+              "[] | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UserRulesRequestOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserRulesRequestOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UserRulesRequestOptions",
+            "text": "UserRulesRequestOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RequestOptionsPaginated",
+            "text": "RequestOptionsPaginated"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesFields",
+            "text": "HostRulesFields"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+          "lineNumber": 65
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesRequestOptions.defaultIndex",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultIndex",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 66
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesRequestOptions.hostName",
+            "type": "string",
+            "tags": [],
+            "label": "hostName",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 67
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UserRulesStrategyResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserRulesStrategyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UserRulesStrategyResponse",
+            "text": "UserRulesStrategyResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsSearchResponse",
+            "text": "IEsSearchResponse"
+          },
+          "<any>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+          "lineNumber": 60
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesStrategyResponse.inspect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.Inspect",
+                "text": "Inspect"
+              },
+              " | null | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 61
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesStrategyResponse.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.UserRulesStrategyUserResponse",
+                "text": "UserRulesStrategyUserResponse"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 62
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UserRulesStrategyUserResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserRulesStrategyUserResponse",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+          "lineNumber": 52
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesStrategyUserResponse.UserRulesFields.userName",
+            "type": "string",
+            "tags": [],
+            "label": "[UserRulesFields.userName]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 53
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesStrategyUserResponse.UserRulesFields.riskScore",
+            "type": "number",
+            "tags": [],
+            "label": "[UserRulesFields.riskScore]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesStrategyUserResponse.edges",
+            "type": "Array",
+            "tags": [],
+            "label": "edges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.HostRulesEdges",
+                "text": "HostRulesEdges"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 55
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesStrategyUserResponse.totalCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalCount",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 56
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UserRulesStrategyUserResponse.pageInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "pageInfo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.PageInfoPaginated",
+                "text": "PageInfoPaginated"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 57
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UsersRulesHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "UsersRulesHit",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UsersRulesHit",
+            "text": "UsersRulesHit"
+          },
+          " extends ",
+          "SearchHit",
+          "<object>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+          "lineNumber": 72
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.UsersRulesHit.aggregations",
+            "type": "Object",
+            "tags": [],
+            "label": "aggregations",
+            "description": [],
+            "signature": [
+              "{ user_data: { buckets: ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.UserRulesHit",
+                "text": "UserRulesHit"
+              },
+              "[]; }; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+              "lineNumber": 73
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -19554,7 +21648,21 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 12
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostRulesFields",
+        "type": "Enum",
+        "tags": [],
+        "label": "HostRulesFields",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+          "lineNumber": 21
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19568,7 +21676,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 19
+          "lineNumber": 20
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19597,6 +21705,20 @@
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/index.ts",
           "lineNumber": 17
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostTacticsFields",
+        "type": "Enum",
+        "tags": [],
+        "label": "HostTacticsFields",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+          "lineNumber": 40
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19729,6 +21851,20 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.RiskScoreFields",
+        "type": "Enum",
+        "tags": [],
+        "label": "RiskScoreFields",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.RowRendererId",
         "type": "Enum",
         "tags": [],
@@ -19750,7 +21886,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 512
+          "lineNumber": 514
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19822,7 +21958,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 453
+          "lineNumber": 455
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19837,6 +21973,34 @@
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
           "lineNumber": 256
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UebaQueries",
+        "type": "Enum",
+        "tags": [],
+        "label": "UebaQueries",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/index.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UserRulesFields",
+        "type": "Enum",
+        "tags": [],
+        "label": "UserRulesFields",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/common/index.ts",
+          "lineNumber": 34
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19887,7 +22051,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 405
+          "lineNumber": 407
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19936,7 +22100,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 586
+          "lineNumber": 588
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19953,24 +22117,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 51
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.BeatFieldsFactoryQueryType",
-        "type": "Type",
-        "tags": [],
-        "label": "BeatFieldsFactoryQueryType",
-        "description": [],
-        "signature": [
-          "\"beatFields\""
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 16
+          "lineNumber": 46
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -19995,7 +22142,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 82
+          "lineNumber": 77
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20027,7 +22174,7 @@
             "section": "def-common.ColumnHeaderOptions",
             "text": "ColumnHeaderOptions"
           },
-          "; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; }"
+          "; isDraggable: boolean; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; }"
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
@@ -20057,18 +22204,12 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataIndexPatternsPluginApi",
-            "section": "def-common.IFieldSubType",
-            "text": "IFieldSubType"
-          },
+          "IFieldSubType",
           " | undefined; type?: string | undefined; }"
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20085,7 +22226,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20104,7 +22245,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-          "lineNumber": 16
+          "lineNumber": 15
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20191,7 +22332,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 85
+          "lineNumber": 80
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20228,7 +22369,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 412
+          "lineNumber": 414
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20248,7 +22389,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 411
+          "lineNumber": 413
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20305,7 +22446,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 419
+          "lineNumber": 421
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20338,6 +22479,14 @@
             "pluginId": "securitySolution",
             "scope": "common",
             "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          " | ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
             "section": "def-common.NetworkQueries",
             "text": "NetworkQueries"
           },
@@ -20355,7 +22504,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-          "lineNumber": 79
+          "lineNumber": 91
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20372,7 +22521,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 542
+          "lineNumber": 544
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20455,7 +22604,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 566
+          "lineNumber": 568
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20520,7 +22669,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
-          "lineNumber": 121
+          "lineNumber": 127
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20544,6 +22693,38 @@
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/overview/index.ts",
           "lineNumber": 12
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.HostRulesSortField",
+        "type": "Type",
+        "tags": [],
+        "label": "HostRulesSortField",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.SortField",
+            "text": "SortField"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesFields",
+            "text": "HostRulesFields"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_rules/index.ts",
+          "lineNumber": 48
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -20660,6 +22841,38 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.HostTacticsSortField",
+        "type": "Type",
+        "tags": [],
+        "label": "HostTacticsSortField",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.SortField",
+            "text": "SortField"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostTacticsFields",
+            "text": "HostTacticsFields"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/host_tactics/index.ts",
+          "lineNumber": 52
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.ImportTimelineResultSchema",
         "type": "Type",
         "tags": [],
@@ -20670,7 +22883,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 449
+          "lineNumber": 451
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -21311,7 +23524,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 434
+          "lineNumber": 436
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -21603,7 +23816,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 555
+          "lineNumber": 557
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -21652,7 +23865,39 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 573
+          "lineNumber": 575
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.RiskScoreSortField",
+        "type": "Type",
+        "tags": [],
+        "label": "RiskScoreSortField",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.SortField",
+            "text": "SortField"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RiskScoreFields",
+            "text": "RiskScoreFields"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/risk_score/index.ts",
+          "lineNumber": 47
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -21874,7 +24119,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 369
+          "lineNumber": 371
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22280,6 +24525,70 @@
             "section": "def-common.RequestBasicOptions",
             "text": "RequestBasicOptions"
           },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          ".riskScore ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RiskScoreRequestOptions",
+            "text": "RiskScoreRequestOptions"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          ".hostRules ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesRequestOptions",
+            "text": "HostRulesRequestOptions"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          ".userRules ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UserRulesRequestOptions",
+            "text": "UserRulesRequestOptions"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          ".hostTactics ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostTacticsRequestOptions",
+            "text": "HostTacticsRequestOptions"
+          },
           " : T extends \"matrixHistogram\" ? ",
           {
             "pluginId": "securitySolution",
@@ -22296,7 +24605,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-          "lineNumber": 158
+          "lineNumber": 179
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22340,6 +24649,70 @@
             "docId": "kibSecuritySolutionPluginApi",
             "section": "def-common.HostDetailsStrategyResponse",
             "text": "HostDetailsStrategyResponse"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          ".riskScore ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.RiskScoreStrategyResponse",
+            "text": "RiskScoreStrategyResponse"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          ".hostRules ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesStrategyResponse",
+            "text": "HostRulesStrategyResponse"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          ".userRules ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UserRulesStrategyResponse",
+            "text": "UserRulesStrategyResponse"
+          },
+          " : T extends ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.UebaQueries",
+            "text": "UebaQueries"
+          },
+          ".hostTactics ? ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostTacticsStrategyResponse",
+            "text": "HostTacticsStrategyResponse"
           },
           " : T extends ",
           {
@@ -22677,7 +25050,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/index.ts",
-          "lineNumber": 108
+          "lineNumber": 121
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22758,7 +25131,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 393
+          "lineNumber": 395
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22775,7 +25148,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 451
+          "lineNumber": 453
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22832,7 +25205,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 498
+          "lineNumber": 500
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22857,7 +25230,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 493
+          "lineNumber": 495
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22874,7 +25247,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 464
+          "lineNumber": 466
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22891,7 +25264,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 474
+          "lineNumber": 476
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22916,7 +25289,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 483
+          "lineNumber": 485
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22999,6 +25372,14 @@
             "section": "def-common.TimelineId",
             "text": "TimelineId"
           },
+          ".uebaPageExternalAlerts | ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.TimelineId",
+            "text": "TimelineId"
+          },
           ".active | ",
           {
             "pluginId": "securitySolution",
@@ -23011,7 +25392,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 327
+          "lineNumber": 329
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23060,7 +25441,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 394
+          "lineNumber": 396
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23109,7 +25490,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 359
+          "lineNumber": 361
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23422,7 +25803,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 502
+          "lineNumber": 504
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23440,6 +25821,38 @@
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/network/kpi/unique_private_ips/index.ts",
           "lineNumber": 27
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.UserRulesSortField",
+        "type": "Type",
+        "tags": [],
+        "label": "UserRulesSortField",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.SortField",
+            "text": "SortField"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.HostRulesFields",
+            "text": "HostRulesFields"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/ueba/user_rules/index.ts",
+          "lineNumber": 70
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24367,7 +26780,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 400
+          "lineNumber": 402
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -25307,7 +27720,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 575
+          "lineNumber": 577
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -25383,7 +27796,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 526
+          "lineNumber": 528
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -25397,7 +27810,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 84
+          "lineNumber": 79
         },
         "deprecated": false,
         "children": [],
@@ -25412,7 +27825,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-          "lineNumber": 86
+          "lineNumber": 81
         },
         "deprecated": false,
         "children": [
@@ -25428,7 +27841,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 87
+              "lineNumber": 82
             },
             "deprecated": false
           },
@@ -25441,7 +27854,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 88
+              "lineNumber": 83
             },
             "deprecated": false
           }
@@ -25615,7 +28028,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 557
+          "lineNumber": 559
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -25665,7 +28078,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 439
+          "lineNumber": 441
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -25687,7 +28100,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 507
+          "lineNumber": 509
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -25785,7 +28198,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 544
+          "lineNumber": 546
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -27453,7 +29866,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 363
+          "lineNumber": 365
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -27511,7 +29924,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 519
+          "lineNumber": 521
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -27593,7 +30006,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 531
+          "lineNumber": 533
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -27695,7 +30108,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 388
+          "lineNumber": 390
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -27769,6 +30182,16 @@
             "section": "def-common.TimelineId",
             "text": "TimelineId"
           },
+          ".uebaPageExternalAlerts>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.TimelineId",
+            "text": "TimelineId"
+          },
           ".active>, ",
           "LiteralC",
           "<",
@@ -27783,7 +30206,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 317
+          "lineNumber": 318
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -28727,7 +31150,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 374
+          "lineNumber": 376
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -29459,7 +31882,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 333
+          "lineNumber": 335
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -30379,7 +32802,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
-          "lineNumber": 344
+          "lineNumber": 346
         },
         "deprecated": false,
         "initialIsOpen": false
