@@ -6,13 +6,23 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ROLES } from '../../../common/services/security_solution';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+  ROLES,
+} from '../../../common/services/security_solution';
 
-export default (ftrContext: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const PageObjects = getPageObjects(['security', 'endpoint']);
+  const testSubjects = getService('testSubjects');
+
   describe('Endpoint permissions:', () => {
     before(async () => {
       // load data into the system
       // should we use the data_indexer? or esArchive?
+
+      // Force a logout so that we start from the login page
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
@@ -20,25 +30,32 @@ export default (ftrContext: FtrProviderContext) => {
     });
 
     // Run the same set of tests against all of the Security Solution roles
-    for (const role of Object.keys(ROLES)) {
+    for (const role of Object.keys(ROLES) as Array<keyof typeof ROLES>) {
       describe(`when running with user/role [${role}]`, () => {
         beforeEach(async () => {
           // create role/user
-          //
-          // logout of kibana
-          //
+          await createUserAndRole(getService, ROLES[role]);
+
           // log back in with new uer
+          await PageObjects.security.login(role, 'changeme');
         });
 
         afterEach(async () => {
+          // Log the user back out
+          await PageObjects.security.forceLogout();
+
           // delete role/user
+          await deleteUserAndRole(getService, ROLES[role]);
         });
 
-        it('should NOT allow access to endpoint management pages', () => {});
+        it('should NOT allow access to endpoint management pages', async () => {
+          await PageObjects.endpoint.navigateToEndpointList();
+          await testSubjects.existOrFail('noIngestPermissions');
+        });
 
-        it('should display endpoint data on Host Details', () => {});
+        it('should display endpoint data on Host Details', async () => {});
 
-        it('should display endpoint data on Alert Details', () => {});
+        it('should display endpoint data on Alert Details', async () => {});
       });
     }
   });
