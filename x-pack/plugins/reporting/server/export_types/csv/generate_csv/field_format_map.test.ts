@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { UI_SETTINGS } from 'src/plugins/data/server';
 import {
   FieldFormatsGetConfigFn,
   FieldFormatsRegistry,
   BytesFormat,
   NumberFormat,
+  UI_SETTINGS,
 } from 'src/plugins/field_formats/common';
 import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 import { fieldFormatMapFactory } from './field_format_map';

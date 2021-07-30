@@ -13,10 +13,10 @@ import moment from 'moment';
 import Puid from 'puid';
 import sinon from 'sinon';
 import { ReportingConfig, ReportingCore } from '../../';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/server';
 import {
   FieldFormatsRegistry,
   StringFormat,
+  UI_SETTINGS,
 } from '../../../../../../src/plugins/field_formats/common';
 import {
   CSV_QUOTE_VALUES_SETTING,

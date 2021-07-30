@@ -7,7 +7,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../src/plugins/field_formats/common';
 
 export default function ({ getPageObjects, getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
