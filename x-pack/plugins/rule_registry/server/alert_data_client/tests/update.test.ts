@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_OWNER, ALERT_STATUS, SPACE_IDS } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

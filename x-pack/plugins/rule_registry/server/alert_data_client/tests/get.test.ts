@@ -75,10 +75,10 @@ describe('get()', () => {
       Object {
         "_version": "WzM2MiwyXQ==",
         "${ALERT_OWNER}": "apm",
+        "${ALERT_STATUS}": "open",
         "${SPACE_IDS}": Array [
           "test_default_space_id",
         ],
-        "${ALERT_STATUS}": "open",
         "message": "hello world 1",
         "rule.id": "apm.error_rate",
       }
@@ -229,10 +229,10 @@ describe('get()', () => {
         Object {
           "_version": "WzM2MiwyXQ==",
           "${ALERT_OWNER}": "apm",
+          "${ALERT_STATUS}": "open",
           "${SPACE_IDS}": Array [
             "test_default_space_id",
           ],
-          "${ALERT_STATUS}": "open",
           "message": "hello world 1",
           "rule.id": "apm.error_rate",
         }
