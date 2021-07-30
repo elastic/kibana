@@ -204,7 +204,7 @@ const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps
   };
 };
 
-const getUpgradeStep = (): EuiStepProps => {
+const getUpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps => {
   return {
     title: i18nTexts.upgradeStepTitle,
     status: 'incomplete',
@@ -216,7 +216,7 @@ const getUpgradeStep = (): EuiStepProps => {
 
         <EuiSpacer size="m" />
 
-        <EuiButton href="/#/navigation/button">
+        <EuiButton href={docLinks.links.elasticsearch.migrating8}>
           {i18nTexts.upgradeStepLink}
           <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
         </EuiButton>
@@ -250,8 +250,8 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
         pageTitle={i18nTexts.pageTitle}
         description={i18nTexts.pageDescription({
           version: currentMajor,
-          upgradeGuideLink: '',
-          whatsNewLink: '',
+          upgradeGuideLink: docLinks.links.elasticsearch.setupUpgrade,
+          whatsNewLink: docLinks.links.elasticsearch.migrating8,
         })}
         rightSideItems={[
           <EuiButtonEmpty
@@ -267,12 +267,16 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
       <EuiSpacer size="l" />
 
-      <EuiPageContentBody>
+      <EuiPageContentBody style={{ maxWidth: 900 }}>
         <>
           <EuiSpacer size="m" />
 
           <EuiSteps
-            steps={[getResolveStep({ history }), getObserveStep({ docLinks }), getUpgradeStep()]}
+            steps={[
+              getResolveStep({ history }),
+              getObserveStep({ docLinks }),
+              getUpgradeStep({ docLinks }),
+            ]}
           />
         </>
       </EuiPageContentBody>
