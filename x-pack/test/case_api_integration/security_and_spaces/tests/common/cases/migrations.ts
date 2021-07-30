@@ -151,20 +151,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           expect(theCase.connector).to.eql({
-            fields: [
-              {
-                key: 'issueType',
-                value: '10002',
-              },
-              {
-                key: 'parent',
-                value: null,
-              },
-              {
-                key: 'priority',
-                value: null,
-              },
-            ],
+            fields: {
+              issueType: '10002',
+              parent: null,
+              priority: null,
+            },
             id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
             name: 'Test Jira',
             type: '.jira',
@@ -193,7 +184,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
           });
 
-          expect(theCase.external_service).to.be({
+          expect(theCase.external_service).to.eql({
             connector_id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
             connector_name: 'Test Jira',
             external_id: '10106',
@@ -202,7 +193,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             pushed_at: '2021-06-17T18:57:45.524Z',
             pushed_by: {
               email: null,
-              full_name: 'jonathan.buttner@elastic.co',
+              full_name: 'j@j.com',
               username: '711621466',
             },
           });

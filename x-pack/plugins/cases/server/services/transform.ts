@@ -24,10 +24,10 @@ export function transformESConnector(
   referenceName: string
 ): CaseConnector | undefined {
   const connectorIdRef = findConnectorIdReference(referenceName, references);
-  return formatStoredConnectorFields(connector, connectorIdRef?.id);
+  return transformConnectorFieldsToExternalModel(connector, connectorIdRef?.id);
 }
 
-function formatStoredConnectorFields(
+function transformConnectorFieldsToExternalModel(
   connector?: ESCaseConnector,
   connectorId?: string
 ): CaseConnector | undefined {

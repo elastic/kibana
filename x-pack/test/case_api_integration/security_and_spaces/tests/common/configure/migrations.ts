@@ -92,6 +92,20 @@ export default function ({ getService }: FtrProviderContext) {
           expect(configuration[0].connector.id).to.be('d68508f0-cf9d-11eb-a603-13e7747d215c');
         });
 
+        it('preserves the connector fields after migration in the API response', async () => {
+          const configuration = await getConfiguration({
+            supertest,
+            query: { owner: SECURITY_SOLUTION_OWNER },
+          });
+
+          expect(configuration[0].connector).to.eql({
+            fields: null,
+            id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+            name: 'Test Jira',
+            type: '.jira',
+          });
+        });
+
         it('removes the connector id field in the saved object', async () => {
           const configurationFromES = await getConfigureSavedObjectsFromES({ es });
           expect(
