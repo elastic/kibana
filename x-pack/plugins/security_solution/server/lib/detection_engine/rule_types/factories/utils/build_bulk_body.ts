@@ -13,6 +13,7 @@ import { getMergeStrategy } from '../../../signals/source_fields_merging/strateg
 import { AlertAttributes, SignalSourceHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
+import { filterSource } from './filter_source';
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
@@ -30,9 +31,7 @@ export const buildBulkBody = (
 ): RACAlert => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
-  const { threshold_result: thresholdResult, ...filteredSource } = mergedDoc._source || {
-    threshold_result: null,
-  };
+  const filteredSource = filterSource(mergedDoc._source ?? {});
   const event = buildEventTypeSignal(mergedDoc);
   return {
     ...filteredSource,

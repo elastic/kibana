@@ -48,13 +48,38 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'kibana.alert.original_event.agent_id_status': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
   'kibana.alert.original_event.category': {
     type: 'keyword',
+    array: true,
+    required: true,
+  },
+  'kibana.alert.original_event.created': {
+    type: 'date',
     array: false,
     required: true,
   },
   'kibana.alert.original_event.dataset': {
     type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.original_event.duration': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.original_event.id': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.original_event.ingested': {
+    type: 'date',
     array: false,
     required: true,
   },
@@ -68,9 +93,24 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.type': {
+  'kibana.alert.original_event.original': {
+    type: 'text',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.original_event.outcome': {
     type: 'keyword',
     array: false,
+    required: true,
+  },
+  'kibana.alert.original_event.sequence': {
+    type: 'long',
+    array: false,
+    required: true,
+  },
+  'kibana.alert.original_event.type': {
+    type: 'keyword',
+    array: true,
     required: true,
   },
   'kibana.alert.original_time': {

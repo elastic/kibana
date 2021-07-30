@@ -28,8 +28,8 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                 body: alerts.flatMap((event) => [
                   { index: {} },
                   {
-                    ...event.fields,
                     [ALERT_ID]: event.id,
+                    ...event.fields,
                   },
                 ]),
                 refresh,
