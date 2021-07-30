@@ -7,21 +7,24 @@
 
 import { shuffle, range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
-import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-import { fetchTransactionDurationFieldCandidates } from './query_field_candidates';
-import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
-import { fetchTransactionDurationPercentiles } from './query_percentiles';
-import { fetchTransactionDurationCorrelation } from './query_correlation';
-import { fetchTransactionDurationHistogramRangeSteps } from './query_histogram_range_steps';
-import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
 import type {
   AsyncSearchProviderProgress,
   SearchServiceParams,
   SearchServiceFetchParams,
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import {
+  fetchTransactionDurationFieldCandidates,
+  fetchTransactionDurationFieldValuePairs,
+  fetchTransactionDurationFractions,
+  fetchTransactionDurationPercentiles,
+  fetchTransactionDurationCorrelation,
+  fetchTransactionDurationHistogramRangeSteps,
+  fetchTransactionDurationRanges,
+  HistogramItem,
+} from './queries';
 import { computeExpectationsAndRanges } from './utils/compute_expectations_and_ranges';
-import { fetchTransactionDurationFractions } from './query_fractions';
 
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;

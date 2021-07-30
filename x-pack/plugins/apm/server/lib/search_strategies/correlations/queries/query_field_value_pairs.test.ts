@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { AsyncSearchProviderProgress } from '../../../../common/search_strategies/correlations/types';
+import type { AsyncSearchProviderProgress } from '../../../../../common/search_strategies/correlations/types';
 
 import {
   fetchTransactionDurationFieldValuePairs,

@@ -12,10 +12,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   AsyncSearchProviderProgress,
   SearchServiceFetchParams,
-} from '../../../../common/search_strategies/correlations/types';
+} from '../../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
-import { TERMS_SIZE } from './constants';
+import { TERMS_SIZE } from '../constants';
 
 interface FieldValuePair {
   field: string;

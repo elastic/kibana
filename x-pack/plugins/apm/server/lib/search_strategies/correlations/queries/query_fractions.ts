@@ -7,9 +7,9 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
-import { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
+import { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 import { getQueryWithParams } from './get_query_with_params';
-import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 
 export const getTransactionDurationRangesRequest = (
   params: SearchServiceFetchParams,

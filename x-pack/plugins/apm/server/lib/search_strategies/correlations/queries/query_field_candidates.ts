@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { Field } from './query_field_value_pairs';
@@ -19,7 +19,7 @@ import {
   FIELDS_TO_ADD_AS_CANDIDATE,
   FIELDS_TO_EXCLUDE_AS_CANDIDATE,
   POPULATED_DOC_COUNT_SAMPLE_SIZE,
-} from './constants';
+} from '../constants';
 
 export const shouldBeExcluded = (fieldName: string) => {
   return (
