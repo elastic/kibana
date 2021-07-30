@@ -62,34 +62,34 @@ export const xyDimension = (): ExpressionFunctionDefinition<
   ExpressionValueXYDimension
 > => ({
   name: 'xydimension',
-  help: i18n.translate('visTypeXy.function.xydimension.help', {
+  help: i18n.translate('visualizations.function.xydimension.help', {
     defaultMessage: 'Generates xy dimension object',
   }),
   type: 'xy_dimension',
   args: {
     visDimension: {
       types: ['vis_dimension'],
-      help: i18n.translate('visTypeXy.function.xyDimension.visDimension.help', {
+      help: i18n.translate('visualizations.function.xyDimension.visDimension.help', {
         defaultMessage: 'Dimension object config',
       }),
       required: true,
     },
     label: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.xyDimension.label.help', {
+      help: i18n.translate('visualizations.function.xyDimension.label.help', {
         defaultMessage: 'Label',
       }),
     },
     aggType: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.xyDimension.aggType.help', {
+      help: i18n.translate('visualizations.function.xyDimension.aggType.help', {
         defaultMessage: 'Aggregation type',
       }),
     },
     params: {
       types: ['string'],
       default: '"{}"',
-      help: i18n.translate('visTypeXy.function.xyDimension.params.help', {
+      help: i18n.translate('visualizations.function.xyDimension.params.help', {
         defaultMessage: 'Params',
       }),
     },
