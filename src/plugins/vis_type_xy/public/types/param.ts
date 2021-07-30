@@ -8,7 +8,13 @@
 
 import type { Fit, Position } from '@elastic/charts';
 import type { Style, Labels, PaletteOutput } from '../../../charts/public';
-import type { SchemaConfig, ExpressionValueXYDimension } from '../../../visualizations/public';
+import type {
+  SchemaConfig,
+  ExpressionValueXYDimension,
+  FakeParams,
+  HistogramParams,
+  DateHistogramParams,
+} from '../../../visualizations/public';
 import type { ChartType, XyVisType } from '../../common';
 import type {
   ExpressionValueCategoryAxis,
@@ -93,26 +99,6 @@ export interface TimeMarker {
   color?: string;
   opacity?: number;
   width?: number;
-}
-
-export interface DateHistogramParams {
-  date: boolean;
-  interval: number;
-  intervalESValue: number;
-  intervalESUnit: string;
-  format: string;
-  bounds?: {
-    min: string | number;
-    max: string | number;
-  };
-}
-
-export interface HistogramParams {
-  interval: number;
-}
-
-export interface FakeParams {
-  defaultValue: string;
 }
 
 export type Dimension = Omit<SchemaConfig, 'params'> & {

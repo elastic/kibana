@@ -43,4 +43,9 @@ export { VisualizationListItem, VisualizationStage } from './vis_types/vis_type_
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 export { SavedVisState, VisParams, prepareLogTable, Dimension } from '../common';
 export { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
-export { ExpressionValueXYDimension } from '../common/expression_functions/xy_dimension';
+export {
+  ExpressionValueXYDimension,
+  DateHistogramParams,
+  FakeParams,
+  HistogramParams,
+} from '../common/expression_functions/xy_dimension';

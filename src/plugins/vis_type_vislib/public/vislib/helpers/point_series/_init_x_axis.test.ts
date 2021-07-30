@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 
-import type { DateHistogramParams, HistogramParams } from '../../../../../vis_type_xy/public';
+import type { DateHistogramParams, HistogramParams } from '../../../../../visualizations/public';
 
 import { initXAxis } from './_init_x_axis';
 import { makeFakeXAspect } from './_fake_x_aspect';

@@ -8,12 +8,8 @@
 
 import { Duration } from 'moment';
 
-import type {
-  Dimension,
-  Dimensions,
-  DateHistogramParams,
-  HistogramParams,
-} from '../../../../../vis_type_xy/public';
+import type { Dimension, Dimensions } from '../../../../../vis_type_xy/public';
+import type { DateHistogramParams, HistogramParams } from '../../../../../visualizations/public';
 
 import { getSeries } from './_get_series';
 import { getAspects } from './_get_aspects';

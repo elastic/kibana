@@ -10,11 +10,11 @@ import { ScaleContinuousType } from '@elastic/charts';
 
 import { Datatable } from '../../../expressions/public';
 import { BUCKET_TYPES } from '../../../data/public';
+import { DateHistogramParams } from '../../../visualizations/public';
 
 import {
   Aspect,
   AxisConfig,
-  DateHistogramParams,
   SeriesParam,
   VisConfig,
   VisParams,

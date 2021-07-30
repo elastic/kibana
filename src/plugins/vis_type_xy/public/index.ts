@@ -22,8 +22,6 @@ export {
   Dimensions,
   ScaleType,
   AxisType,
-  HistogramParams,
-  DateHistogramParams,
 } from './types';
 export type { ValidationVisOptionsProps } from './editor/components/common/validation_wrapper';
 export { TruncateLabelsOption } from './editor/components/common/truncate_labels';
