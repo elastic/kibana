@@ -10,6 +10,7 @@ import { format as formatUrl } from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
 import { FtrService } from '../ftr_provider_context';
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../../plugins/reporting/common/constants';
 
 export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
@@ -156,5 +157,22 @@ export class ReportingPageObject extends FtrService {
     const fromTime = 'Sep 19, 1999 @ 06:31:44.000';
     const toTime = 'Sep 23, 1999 @ 18:31:44.000';
     await this.timePicker.setAbsoluteRange(fromTime, toTime);
+  }
+
+  async getManagementList() {
+    const table = await this.testSubjects.find(REPORT_TABLE_ID);
+    const allRows = await table.findAllByTestSubject(REPORT_TABLE_ROW_ID);
+
+    return await Promise.all(
+      allRows.map(async (row) => {
+        const $ = await row.parseDomContent();
+        return {
+          report: $.findTestSubject('reportingListItemObjectTitle').text().trim(),
+          createdAt: $.findTestSubject('reportJobCreatedAt').text().trim(),
+          status: $.findTestSubject('reportJobStatus').text().trim(),
+          actions: $.findTestSubject('reportJobActions').text().trim(),
+        };
+      })
+    );
   }
 }

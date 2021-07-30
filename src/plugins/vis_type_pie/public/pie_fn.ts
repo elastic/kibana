@@ -7,8 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/common';
 import { PieVisParams, PieVisConfig } from './types';
+import { prepareLogTable } from '../../visualizations/public';
 
 export const vislibPieName = 'pie_vis';
 
@@ -133,7 +134,33 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
     } as PieVisParams;
 
     if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.logDatatable('default', context);
+      const logTable = prepareLogTable(context, [
+        [
+          [args.metric],
+          i18n.translate('visTypePie.function.dimension.metric', {
+            defaultMessage: 'Slice size',
+          }),
+        ],
+        [
+          args.buckets,
+          i18n.translate('visTypePie.function.adimension.buckets', {
+            defaultMessage: 'Slice',
+          }),
+        ],
+        [
+          args.splitColumn,
+          i18n.translate('visTypePie.function.dimension.splitcolumn', {
+            defaultMessage: 'Column split',
+          }),
+        ],
+        [
+          args.splitRow,
+          i18n.translate('visTypePie.function.dimension.splitrow', {
+            defaultMessage: 'Row split',
+          }),
+        ],
+      ]);
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
     return {
