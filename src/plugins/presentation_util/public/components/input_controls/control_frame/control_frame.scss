@@ -1,5 +1,6 @@
 .controlFrame--formControlLayout {
   width: 100%;
+  min-width: $euiSize * 12.5;
 }
 
 .controlFrame--control {

@@ -30,6 +30,7 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
   const form = (
     <EuiFormControlLayout
       className="controlFrame--formControlLayout"
+      fullWidth
       prepend={
         twoLine ? undefined : (
           <EuiFormLabel htmlFor={embeddable.id}>{embeddable.getInput().title}</EuiFormLabel>
