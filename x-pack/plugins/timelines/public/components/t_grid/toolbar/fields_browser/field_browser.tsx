@@ -20,7 +20,6 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
-// eslint-disable-next-line no-duplicate-imports
 import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';

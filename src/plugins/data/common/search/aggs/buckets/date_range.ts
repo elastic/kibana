@@ -10,11 +10,11 @@ import { get } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
+import { DateRange, dateRangeToAst } from '../../expressions';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { aggDateRangeFnName } from './date_range_fn';
-import { DateRangeKey } from './lib/date_range';
 
 import { KBN_FIELD_TYPES } from '../../../../common/kbn_field_types/types';
 import { BaseAggParams } from '../types';
@@ -30,7 +30,7 @@ export interface DateRangeBucketAggDependencies {
 
 export interface AggParamsDateRange extends BaseAggParams {
   field?: string;
-  ranges?: DateRangeKey[];
+  ranges?: DateRange[];
   time_zone?: string;
 }
 
@@ -43,7 +43,7 @@ export const getDateRangeBucketAgg = ({
     expressionName: aggDateRangeFnName,
     title: dateRangeTitle,
     createFilter: createFilterDateRange,
-    getKey({ from, to }): DateRangeKey {
+    getKey({ from, to }): DateRange {
       return { from, to };
     },
     getSerializedFormat(agg) {
@@ -74,6 +74,7 @@ export const getDateRangeBucketAgg = ({
             to: 'now',
           },
         ],
+        toExpressionAst: (ranges) => ranges?.map(dateRangeToAst),
       },
       {
         name: 'time_zone',

@@ -19,6 +19,6 @@ export const filtersToAst = (filters: Filter[] | Filter) => {
         negate: filter.meta.negate,
         disabled: filter.meta.disabled,
       }),
-    ]);
+    ]).toAst();
   });
 };
