@@ -19,9 +19,9 @@ export function escapeSearchQueryPhrase(val: string): string {
   return `"${val.replace(/["]/g, '"')}"`;
 }
 
-// Adds `.attribute` to any kuery strings that are missing it, this comes from
-// internal SO structure. Kuery strings that come from UI will typicall have
-// `.attribute` hidden to simplify UX, so this normalizes any kuery string for
+// Adds `.attributes` to any kuery strings that are missing it, this comes from
+// internal SO structure. Kuery strings that come from UI will typically have
+// `.attributes` hidden to simplify UX, so this normalizes any kuery string for
 // filtering SOs
 export const normalizeKuery = (savedObjectType: string, kuery: string): string => {
   return kuery.replace(
