@@ -13,14 +13,11 @@ import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  DefaultFormatEditor,
-  defaultState,
-  FormatEditorProps,
-  FormatEditorState,
-} from '../default';
+import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
+import { formatId } from './constants';
+import { FormatEditorProps } from '../types';
 
 interface DurationFormatEditorState {
   hasDecimalError: boolean;
@@ -49,7 +46,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
   DurationFormatEditorFormatParams,
   DurationFormatEditorState
 > {
-  static formatId = 'duration';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [-123, 1, 12, 123, 658, 1988, 3857, 123292, 923528271],
