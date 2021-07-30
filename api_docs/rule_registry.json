@@ -638,7 +638,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-          "lineNumber": 35
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -655,7 +655,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             },
             "deprecated": false,
             "children": [
@@ -668,7 +668,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-                  "lineNumber": 36
+                  "lineNumber": 37
                 },
                 "deprecated": false,
                 "children": [
@@ -684,7 +684,7 @@
                     ],
                     "source": {
                       "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-                      "lineNumber": 36
+                      "lineNumber": 37
                     },
                     "deprecated": false
                   }
@@ -706,7 +706,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             },
             "deprecated": false,
             "children": [
@@ -719,7 +719,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-                  "lineNumber": 37
+                  "lineNumber": 38
                 },
                 "deprecated": false,
                 "children": [
@@ -735,7 +735,7 @@
                     ],
                     "source": {
                       "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-                      "lineNumber": 37
+                      "lineNumber": 38
                     },
                     "deprecated": false
                   }
@@ -756,7 +756,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [],
@@ -774,7 +774,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false,
             "children": [
@@ -787,7 +787,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-                  "lineNumber": 39
+                  "lineNumber": 40
                 },
                 "deprecated": false,
                 "children": [
@@ -803,7 +803,7 @@
                     ],
                     "source": {
                       "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
-                      "lineNumber": 39
+                      "lineNumber": 40
                     },
                     "deprecated": false
                   }

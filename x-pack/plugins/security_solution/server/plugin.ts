@@ -392,6 +392,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher.start(licenseService);
     }
 
+    const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
+
     this.endpointAppContextService.start({
       agentService: plugins.fleet?.agentService,
       packageService: plugins.fleet?.packageService,
@@ -412,14 +414,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       manifestManager,
       registerIngestCallback,
       licenseService,
-      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
+      exceptionListsClient: exceptionListClient,
     });
 
     this.telemetryEventsSender.start(
       core,
       plugins.telemetry,
       plugins.taskManager,
-      this.endpointAppContextService
+      this.endpointAppContextService,
+      exceptionListClient
     );
     return {};
   }
