@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { AsyncSearchProviderProgress } from '../../../../../common/search_strategies/correlations/types';
+import { asyncSearchServiceStateProvider } from '../async_search_service_state';
 
 import {
   fetchTransactionDurationFieldValuePairs,
@@ -34,9 +34,6 @@ describe('query_field_value_pairs', () => {
         'myFieldCandidate2',
         'myFieldCandidate3',
       ];
-      const progress = {
-        loadedFieldValuePairs: 0,
-      } as AsyncSearchProviderProgress;
 
       const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
         body: estypes.SearchResponse;
@@ -56,12 +53,16 @@ describe('query_field_value_pairs', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
+      const state = asyncSearchServiceStateProvider();
+
       const resp = await fetchTransactionDurationFieldValuePairs(
         esClientMock,
         params,
         fieldCandidates,
-        progress
+        state
       );
+
+      const { progress } = state.getState();
 
       expect(progress.loadedFieldValuePairs).toBe(1);
       expect(resp).toEqual([

@@ -8,10 +8,8 @@
 import { shuffle, range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
 import type {
-  AsyncSearchProviderProgress,
   SearchServiceParams,
   SearchServiceFetchParams,
-  SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import {
@@ -22,14 +20,10 @@ import {
   fetchTransactionDurationCorrelation,
   fetchTransactionDurationHistogramRangeSteps,
   fetchTransactionDurationRanges,
-  HistogramItem,
 } from './queries';
-import { computeExpectationsAndRanges } from './utils/compute_expectations_and_ranges';
-
-const CORRELATION_THRESHOLD = 0.3;
-const KS_TEST_THRESHOLD = 0.1;
-
-const currentTimeAsString = () => new Date().toISOString();
+import { computeExpectationsAndRanges, currentTimeAsString } from './utils';
+import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from './constants';
+import { asyncSearchServiceStateProvider } from './async_search_service_state';
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -37,40 +31,17 @@ export const asyncSearchServiceProvider = (
   searchServiceParams: SearchServiceParams,
   includeFrozen: boolean
 ) => {
-  let isCancelled = false;
-  let isRunning = true;
-  let error: Error;
-  let ccsWarning = false;
+  const state = asyncSearchServiceStateProvider();
   const log: string[] = [];
   const logMessage = (message: string) =>
     log.push(`${currentTimeAsString()}: ${message}`);
 
-  const progress: AsyncSearchProviderProgress = {
-    started: Date.now(),
-    loadedHistogramStepsize: 0,
-    loadedOverallHistogram: 0,
-    loadedFieldCanditates: 0,
-    loadedFieldValuePairs: 0,
-    loadedHistograms: 0,
-    getOverallProgress: () =>
-      progress.loadedHistogramStepsize * 0.025 +
-      progress.loadedOverallHistogram * 0.025 +
-      progress.loadedFieldCanditates * 0.025 +
-      progress.loadedFieldValuePairs * 0.025 +
-      progress.loadedHistograms * 0.9,
-  };
-
-  const values: SearchServiceValue[] = [];
-  let overallHistogram: HistogramItem[] | undefined;
-
-  let percentileThresholdValue: number;
-
-  const cancel = () => {
+  function cancel() {
     logMessage(`Service cancelled.`);
-    isCancelled = true;
-  };
+    state.setIsCancelled(true);
+  }
 
-  const fetchCorrelations = async () => {
+  async function fetchCorrelations() {
     let params: SearchServiceFetchParams | undefined;
 
     try {
@@ -89,8 +60,9 @@ export const asyncSearchServiceProvider = (
         params,
         params.percentileThreshold ? [params.percentileThreshold] : undefined
       );
-      percentileThresholdValue =
+      const percentileThresholdValue =
         percentileThreshold[`${params.percentileThreshold}.0`];
+      state.setPercentileThresholdValue(percentileThresholdValue);
 
       logMessage(
         `Fetched ${params.percentileThreshold}th percentile value of ${percentileThresholdValue} based on ${totalDocs} documents.`
@@ -101,12 +73,14 @@ export const asyncSearchServiceProvider = (
         logMessage(
           `Abort service since percentileThresholdValue could not be determined.`
         );
-        progress.loadedHistogramStepsize = 1;
-        progress.loadedOverallHistogram = 1;
-        progress.loadedFieldCanditates = 1;
-        progress.loadedFieldValuePairs = 1;
-        progress.loadedHistograms = 1;
-        isRunning = false;
+        state.setProgress({
+          loadedHistogramStepsize: 1,
+          loadedOverallHistogram: 1,
+          loadedFieldCanditates: 1,
+          loadedFieldValuePairs: 1,
+          loadedHistograms: 1,
+        });
+        state.setIsRunning(false);
         return;
       }
 
@@ -114,12 +88,12 @@ export const asyncSearchServiceProvider = (
         esClient,
         params
       );
-      progress.loadedHistogramStepsize = 1;
+      state.setProgress({ loadedHistogramStepsize: 1 });
 
       logMessage(`Loaded histogram range steps.`);
 
-      if (isCancelled) {
-        isRunning = false;
+      if (state.getState().isCancelled) {
+        state.setIsRunning(false);
         return;
       }
 
@@ -128,13 +102,13 @@ export const asyncSearchServiceProvider = (
         params,
         histogramRangeSteps
       );
-      progress.loadedOverallHistogram = 1;
-      overallHistogram = overallLogHistogramChartData;
+      state.setProgress({ loadedOverallHistogram: 1 });
+      state.setOverallHistogram(overallLogHistogramChartData);
 
       logMessage(`Loaded overall histogram chart data.`);
 
-      if (isCancelled) {
-        isRunning = false;
+      if (state.getState().isCancelled) {
+        state.setIsRunning(false);
         return;
       }
 
@@ -147,8 +121,8 @@ export const asyncSearchServiceProvider = (
 
       logMessage(`Loaded percentiles.`);
 
-      if (isCancelled) {
-        isRunning = false;
+      if (state.getState().isCancelled) {
+        state.setIsRunning(false);
         return;
       }
 
@@ -159,19 +133,19 @@ export const asyncSearchServiceProvider = (
 
       logMessage(`Identified ${fieldCandidates.length} fieldCandidates.`);
 
-      progress.loadedFieldCanditates = 1;
+      state.setProgress({ loadedFieldCanditates: 1 });
 
       const fieldValuePairs = await fetchTransactionDurationFieldValuePairs(
         esClient,
         params,
         fieldCandidates,
-        progress
+        state
       );
 
       logMessage(`Identified ${fieldValuePairs.length} fieldValuePairs.`);
 
-      if (isCancelled) {
-        isRunning = false;
+      if (state.getState().isCancelled) {
+        state.setIsRunning(false);
         return;
       }
 
@@ -188,8 +162,12 @@ export const asyncSearchServiceProvider = (
 
       async function* fetchTransactionDurationHistograms() {
         for (const item of shuffle(fieldValuePairs)) {
-          if (params === undefined || item === undefined || isCancelled) {
-            isRunning = false;
+          if (
+            params === undefined ||
+            item === undefined ||
+            state.getState().isCancelled
+          ) {
+            state.setIsRunning(false);
             return;
           }
 
@@ -210,8 +188,8 @@ export const asyncSearchServiceProvider = (
               item.value
             );
 
-            if (isCancelled) {
-              isRunning = false;
+            if (state.getState().isCancelled) {
+              state.setIsRunning(false);
               return;
             }
 
@@ -245,7 +223,7 @@ export const asyncSearchServiceProvider = (
               `Failed to fetch correlation/kstest for '${item.field}/${item.value}'`
             );
             if (params?.index.includes(':')) {
-              ccsWarning = true;
+              state.setCcsWarning(true);
             }
             yield undefined;
           }
@@ -255,41 +233,54 @@ export const asyncSearchServiceProvider = (
       let loadedHistograms = 0;
       for await (const item of fetchTransactionDurationHistograms()) {
         if (item !== undefined) {
-          values.push(item);
+          state.addValue(item);
         }
         loadedHistograms++;
-        progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
+        state.setProgress({
+          loadedHistograms: loadedHistograms / fieldValuePairs.length,
+        });
       }
 
       logMessage(
-        `Identified ${values.length} significant correlations out of ${fieldValuePairs.length} field/value pairs.`
+        `Identified ${
+          state.getState().values.length
+        } significant correlations out of ${
+          fieldValuePairs.length
+        } field/value pairs.`
       );
     } catch (e) {
-      error = e;
+      state.setError(e);
     }
 
-    if (error !== undefined && params?.index.includes(':')) {
-      ccsWarning = true;
+    if (state.getState().error !== undefined && params?.index.includes(':')) {
+      state.setCcsWarning(true);
     }
 
-    isRunning = false;
-  };
+    state.setIsRunning(false);
+  }
 
   fetchCorrelations();
 
   return () => {
-    const sortedValues = values.sort((a, b) => b.correlation - a.correlation);
+    const {
+      ccsWarning,
+      error,
+      isRunning,
+      overallHistogram,
+      percentileThresholdValue,
+      progress,
+    } = state.getState();
 
     return {
       ccsWarning,
       error,
       log,
       isRunning,
-      loaded: Math.round(progress.getOverallProgress() * 100),
+      loaded: Math.round(state.getOverallProgress() * 100),
       overallHistogram,
       started: progress.started,
       total: 100,
-      values: sortedValues,
+      values: state.getValuesSortedByCorrelation(),
       percentileThresholdValue,
       cancel,
     };

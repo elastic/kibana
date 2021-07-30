@@ -9,13 +9,12 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type {
-  AsyncSearchProviderProgress,
-  SearchServiceFetchParams,
-} from '../../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
+
+import type { AsyncSearchServiceState } from '../async_search_service_state';
+import { TERMS_SIZE } from '../constants';
 
 import { getQueryWithParams } from './get_query_with_params';
-import { TERMS_SIZE } from '../constants';
 
 interface FieldValuePair {
   field: string;
@@ -48,7 +47,7 @@ export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams,
   fieldCandidates: Field[],
-  progress: AsyncSearchProviderProgress
+  state: AsyncSearchServiceState
 ): Promise<FieldValuePairs> => {
   const fieldValuePairs: FieldValuePairs = [];
 
@@ -56,9 +55,9 @@ export const fetchTransactionDurationFieldValuePairs = async (
 
   for (let i = 0; i < fieldCandidates.length; i++) {
     const fieldName = fieldCandidates[i];
-    // mutate progress
-    progress.loadedFieldValuePairs =
-      fieldValuePairsProgress / fieldCandidates.length;
+    state.setProgress({
+      loadedFieldValuePairs: fieldValuePairsProgress / fieldCandidates.length,
+    });
 
     try {
       const resp = await esClient.search(getTermsAggRequest(params, fieldName));

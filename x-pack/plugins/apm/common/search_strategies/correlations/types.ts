@@ -50,5 +50,4 @@ export interface AsyncSearchProviderProgress {
   loadedFieldCanditates: number;
   loadedFieldValuePairs: number;
   loadedHistograms: number;
-  getOverallProgress: () => number;
 }
