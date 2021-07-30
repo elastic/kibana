@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Boom, { notFound } from '@hapi/boom';
+import Boom from '@hapi/boom';
 
 // 400 - badRequest
 const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
