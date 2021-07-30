@@ -74,7 +74,6 @@ const createStoreSetup = (trustedAppsService: TrustedAppsService) => {
 describe('middleware', () => {
   type TrustedAppsEntriesExistState = Pick<TrustedAppsListPageState, 'entriesExist'>;
   type TrustedAppsPoliciestate = Pick<TrustedAppsListPageState, 'policies'>;
-  let policiesLoadedState: () => TrustedAppsPoliciestate;
   const entriesExistLoadedState = (): TrustedAppsEntriesExistState => {
     return {
       entriesExist: {
@@ -105,14 +104,6 @@ describe('middleware', () => {
 
   beforeEach(() => {
     dateNowMock.mockReturnValue(initialNow);
-    policiesLoadedState = () => {
-      return {
-        policies: {
-          data: getGeneratedPolicyResponse(),
-          type: 'LoadedResourceState',
-        },
-      };
-    };
   });
 
   describe('initial state', () => {
