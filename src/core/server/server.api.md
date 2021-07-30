@@ -2523,6 +2523,8 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
+    static createGenericNotFoundEsUnavailableError(type?: string | null, id?: string | null): DecoratedError;
+    // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -2568,6 +2570,8 @@ export class SavedObjectsErrorHelpers {
     static isNotAuthorizedError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isNotFoundError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isNotFoundEsUnavailableError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isRequestEntityTooLargeError(error: Error | DecoratedError): boolean;
     // Warning: (ae-forgotten-export) The symbol "DecoratedError" needs to be exported by the entry point index.d.ts
