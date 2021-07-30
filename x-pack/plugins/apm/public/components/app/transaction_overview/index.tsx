@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiCode,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCallOut, EuiCode, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
@@ -24,7 +18,6 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { ServiceOverviewTransactionsTable } from '../service_overview/service_overview_transactions_table';
-import { TransactionList } from './transaction_list';
 import { useRedirect } from './useRedirect';
 import { useTransactionListFetcher } from './use_transaction_list';
 
@@ -58,10 +51,7 @@ export function TransactionOverview() {
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
 
-  const {
-    transactionListData,
-    transactionListStatus,
-  } = useTransactionListFetcher();
+  const { transactionListData } = useTransactionListFetcher();
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
@@ -74,6 +64,7 @@ export function TransactionOverview() {
       <TransactionCharts />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
+        {/* TODO: check if it should be calculated in the new table */}
         {!transactionListData.isAggregationAccurate && (
           <EuiCallOut
             title={i18n.translate(
@@ -111,10 +102,10 @@ export function TransactionOverview() {
           </EuiCallOut>
         )}
         <EuiSpacer size="s" />
-        <TransactionList
+        {/* <TransactionList
           isLoading={transactionListStatus === 'loading'}
           items={transactionListData.items || []}
-        />
+        /> */}
         <ServiceOverviewTransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}

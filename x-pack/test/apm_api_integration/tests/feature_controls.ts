@@ -123,20 +123,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/api/apm/services/foo/transactions/charts/throughput?environment=testing&start=${start}&end=${end}&transactionType=bar`,
-      },
-      expectForbidden: expect403,
-      expectResponse: expect200,
-    },
-    {
-      req: {
-        url: `/api/apm/services/foo/transactions/charts/throughput?environment=testing&start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
-      },
-      expectForbidden: expect403,
-      expectResponse: expect200,
-    },
-    {
-      req: {
         url: `/api/apm/services/foo/transactions/charts/distribution?start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
       },
       expectForbidden: expect403,
