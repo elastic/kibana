@@ -221,11 +221,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         filterStatus: status as AlertStatus,
         leadingControlColumns,
         trailingControlColumns,
-        // batchActions: true,
-        // batchActions: {
-        //   defaultActions: false,
-        //   additionalActions: <>Additional actions</>,
-        // },
         unit: (totalAlerts: number) =>
           i18n.translate('xpack.observability.alertsTable.showingAlertsTitle', {
             values: { totalAlerts },

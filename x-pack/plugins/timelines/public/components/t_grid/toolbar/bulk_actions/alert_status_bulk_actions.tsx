@@ -73,7 +73,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
 
     // Callback for clearing entire selection from toolbar
     const onClearSelection = useCallback(() => {
-      clearSelected!({ id });
+      clearSelected({ id });
       dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
       setShowClearSelection(false);
     }, [clearSelected, dispatch, id]);
@@ -186,7 +186,6 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = {
   clearSelected: tGridActions.clearSelected,
-  setSelected: tGridActions.setSelected,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
