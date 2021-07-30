@@ -47,12 +47,14 @@ export function ContextAppRoute(props: ContextMainProps) {
     ]);
   }, [chrome, id]);
 
-  async function getIndexPattern() {
-    const ip = await services.indexPatterns.get(indexPatternId);
-    setIndexPattern(ip);
-  }
+  useEffect(() => {
+    async function getIndexPattern() {
+      const ip = await services.indexPatterns.get(indexPatternId);
+      setIndexPattern(ip);
+    }
 
-  getIndexPattern();
+    getIndexPattern();
+  }, [indexPatternId, services.indexPatterns]);
 
   if (!indexPattern) {
     return null;
