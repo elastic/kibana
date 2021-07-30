@@ -84,6 +84,12 @@ export const home = {
     {
       path: '/backends',
       element: <Outlet />,
+      params: t.partial({
+        query: t.partial({
+          comparisonEnabled: t.string,
+          comparisonType: t.string,
+        }),
+      }),
       children: [
         {
           path: '/:backendName/overview',

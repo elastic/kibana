@@ -34,6 +34,8 @@ const POLICY_ALL_PHASES = {
   },
 };
 
+const indexTemplateName = 'ilm-a11y-test-template';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, indexLifecycleManagement } = getPageObjects([
     'common',
@@ -65,11 +67,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Index Lifecycle Management', async () => {
     before(async () => {
       await esClient.ilm.putLifecycle({ policy: POLICY_NAME, body: POLICY_ALL_PHASES });
+      await esClient.indices.putIndexTemplate({
+        name: indexTemplateName,
+        body: {
+          template: {
+            settings: {
+              lifecycle: {
+                name: POLICY_NAME,
+              },
+            },
+          },
+          index_patterns: ['test*'],
+        },
+      });
     });
 
     after(async () => {
       // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
       await esClient.ilm.deleteLifecycle({ policy: POLICY_NAME });
+      await esClient.indices.deleteIndexTemplate({ name: indexTemplateName });
     });
 
     beforeEach(async () => {
@@ -161,6 +177,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('ILM delete policy modal to be present', async () => {
         return testSubjects.isDisplayed('confirmModalTitleText');
+      });
+
+      await a11y.testAppSnapshot();
+    });
+
+    it('Index templates flyout', async () => {
+      const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+      const actionsButton = await policyRow.findByTestSubject('viewIndexTemplates');
+
+      await actionsButton.click();
+
+      const flyoutTitleSelector = 'indexTemplatesFlyoutHeader';
+      await retry.waitFor('Index templates flyout', async () => {
+        return testSubjects.isDisplayed(flyoutTitleSelector);
       });
 
       await a11y.testAppSnapshot();
