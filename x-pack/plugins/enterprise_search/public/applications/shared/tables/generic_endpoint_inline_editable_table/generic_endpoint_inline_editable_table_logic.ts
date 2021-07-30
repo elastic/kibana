@@ -19,6 +19,7 @@ interface GenericEndpointInlineEditableTableValues {
 
 interface GenericEndpointInlineEditableTableActions<Item extends ItemWithAnID> {
   addItem(item: Item, onSuccess: () => void): { item: Item; onSuccess: () => void };
+  setLoading(): void;
   clearLoading(): void;
   deleteItem(item: Item, onSuccess: () => void): { item: Item; onSuccess: () => void };
   reorderItems(
@@ -93,6 +94,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
   key: (props) => props.instanceId,
   actions: () => ({
     addItem: (item, onSuccess) => ({ item, onSuccess }),
+    setLoading: true,
     clearLoading: true,
     deleteItem: (item, onSuccess) => ({ item, onSuccess }),
     reorderItems: (items, oldItems, onSuccess) => ({ items, oldItems, onSuccess }),
@@ -103,6 +105,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       false,
       {
         addItem: () => true,
+        setLoading: () => true,
         clearLoading: () => false,
         deleteItem: () => true,
         updateItem: () => true,
@@ -162,17 +165,17 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       const { http } = HttpLogic.values;
 
       const reorderedItemIds = items.map(({ id }, itemIndex) => ({ id, order: itemIndex }));
-      onReorder(items);
+      onReorder(items); // We optimistically reorder this so that the client-side UI doesn't snap back while waiting for the http response
 
       try {
-        // TODO it clears loading later but it never sets the loading state to true
+        actions.setLoading();
 
         const response = await http.put(reorderRoute, {
           body: JSON.stringify({ [dataProperty]: reorderedItemIds }),
         });
         const itemsFromResponse = response[dataProperty];
 
-        onReorder(itemsFromResponse);
+        onReorder(itemsFromResponse); // Final reorder based on server response
         onSuccess();
       } catch (e) {
         onReorder(oldItems);

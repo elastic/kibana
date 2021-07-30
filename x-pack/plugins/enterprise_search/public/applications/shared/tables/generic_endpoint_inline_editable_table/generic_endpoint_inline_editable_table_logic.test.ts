@@ -52,6 +52,19 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
   });
 
   describe('actions', () => {
+    describe('setLoading', () => {
+      it('sets isLoading to true', () => {
+        const logic = mountLogic({
+          isLoading: false,
+        });
+        logic.actions.setLoading();
+        expect(logic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: true,
+        });
+      });
+    });
+
     describe('clearLoading', () => {
       it('sets isLoading to false', () => {
         const logic = mountLogic({
@@ -65,6 +78,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
       });
     });
   });
+
   describe('listeners', () => {
     describe('addItem', () => {
       const item = { id: 1 };
@@ -230,12 +244,16 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         http.put.mockReturnValueOnce(Promise.resolve(mockResponse));
 
         const logic = mountLogic();
+        jest.spyOn(logic.actions, 'setLoading');
         jest.spyOn(logic.actions, 'clearLoading');
 
         logic.actions.reorderItems(items, oldItems, onSuccess);
 
         // It calls back to the configured 'onReorder' function
         expect(DEFAULT_LOGIC_PARAMS.onReorder).toHaveBeenCalledWith(items);
+
+        // Sets loading state
+        expect(logic.actions.setLoading).toHaveBeenCalled();
 
         await nextTick();
 
