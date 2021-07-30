@@ -9,7 +9,7 @@
 import { formatRow, formatTopLevelObject } from './row_formatter';
 import { stubbedSavedObjectIndexPattern } from '../../../__mocks__/stubbed_saved_object_index_pattern';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
-import { fieldFormatsMock } from '../../../../../data/common/field_formats/mocks';
+import { fieldFormatsMock } from '../../../../../field_formats/common/mocks';
 import { setServices } from '../../../kibana_services';
 import { DiscoverServices } from '../../../build_services';
 

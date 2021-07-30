@@ -33,6 +33,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -40,7 +41,6 @@ import {
 } from '../../scripting_languages';
 import {
   IndexPatternField,
-  FieldFormatInstanceType,
   IndexPattern,
   IFieldType,
   KBN_FIELD_TYPES,
