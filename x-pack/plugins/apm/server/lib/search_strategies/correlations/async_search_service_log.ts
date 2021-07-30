@@ -19,7 +19,7 @@ export const asyncSearchServiceLogProvider = () => {
   function addLogMessage(message: string, error?: string) {
     log.push({
       timestamp: currentTimeAsString(),
-      message: `${currentTimeAsString()}: ${message}`,
+      message,
       ...(error !== undefined ? { error } : {}),
     });
   }

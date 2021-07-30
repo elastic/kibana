@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { shuffle } from 'lodash';
-
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
@@ -17,6 +15,7 @@ import type { AsyncSearchServiceLog } from '../async_search_service_log';
 import type { AsyncSearchServiceState } from '../async_search_service_state';
 import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from '../constants';
 
+import { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationRanges } from './query_ranges';
 
@@ -34,7 +33,7 @@ export async function* fetchTransactionDurationHistograms(
   totalDocCount: number,
   fieldValuePairs: FieldValuePairs
 ) {
-  for (const item of shuffle(fieldValuePairs)) {
+  for (const item of getPrioritizedFieldValuePairs(fieldValuePairs)) {
     if (
       params === undefined ||
       item === undefined ||
