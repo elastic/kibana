@@ -207,6 +207,7 @@ exports[`it renders without crashing 1`] = `
           component="div"
           grow={true}
         >
+          // @ts-ignore
           <EuiSwitch
             checked={false}
             compressed={true}

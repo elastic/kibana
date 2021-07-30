@@ -82,8 +82,8 @@ it('types return values to prevent mutations in typescript', async () => {
   ).rejects.toThrowErrorMatchingInlineSnapshot(`
 "Command failed: tsc --noEmit
 
-index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a constant or a read-only property.
-index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a constant or a read-only property.
+index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a read-only property.
+index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a read-only property.
 "
 `);
 });
