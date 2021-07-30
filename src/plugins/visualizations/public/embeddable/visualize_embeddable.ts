@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
-  IIndexPattern,
+  IndexPattern,
   TimeRange,
   Query,
   esFilters,
@@ -47,7 +47,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean };
@@ -69,7 +69,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editPath: string;
   editApp: string;
   editUrl: string;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   visTypeName: string;
 }
 
