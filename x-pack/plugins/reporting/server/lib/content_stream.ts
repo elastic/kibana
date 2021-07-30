@@ -7,12 +7,13 @@
 
 import { Duplex } from 'stream';
 import type { ElasticsearchClient } from 'src/core/server';
+import { ReportingCore } from '..';
 import { ReportDocument } from '../../common/types';
 
 type Callback = (error?: Error) => void;
 type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
 
-export interface ContentStreamDocument {
+interface ContentStreamDocument {
   id: string;
   index: string;
   if_primary_term?: number;
@@ -102,4 +103,10 @@ export class ContentStream extends Duplex {
   getPrimaryTerm(): number | undefined {
     return this.primaryTerm;
   }
+}
+
+export async function getContentStream(reporting: ReportingCore, document: ContentStreamDocument) {
+  const { asInternalUser: client } = await reporting.getEsClient();
+
+  return new ContentStream(client, document);
 }

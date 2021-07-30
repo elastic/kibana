@@ -11,7 +11,7 @@ import { UpdateResponse } from '@elastic/elasticsearch/api/types';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { LevelLogger, getContentStreamFactory } from '../';
+import { LevelLogger, getContentStream } from '../';
 import { ReportingCore } from '../../';
 import {
   RunContext,
@@ -57,7 +57,6 @@ export class ExecuteReportTask implements ReportingTask {
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
-  private getContentStream: ReturnType<typeof getContentStreamFactory>;
 
   constructor(
     private reporting: ReportingCore,
@@ -65,7 +64,6 @@ export class ExecuteReportTask implements ReportingTask {
     logger: LevelLogger
   ) {
     this.logger = logger.clone(['runTask']);
-    this.getContentStream = getContentStreamFactory(reporting);
   }
 
   /*
@@ -256,7 +254,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     const completedTime = moment().toISOString();
     const { content, ...docOutput } = this._formatOutput(output);
-    const stream = await this.getContentStream({
+    const stream = await getContentStream(this.reporting, {
       id: report._id,
       index: report._index!,
       if_primary_term: report._primary_term,

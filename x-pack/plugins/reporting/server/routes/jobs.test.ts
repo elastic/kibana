@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-jest.mock('../lib/content_stream_factory', () => ({
-  getContentStreamFactory: jest.fn(),
+jest.mock('../lib/content_stream', () => ({
+  getContentStream: jest.fn(),
 }));
 
 import { UnwrapPromise } from '@kbn/utility-types';
@@ -17,7 +17,7 @@ import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
-import { ContentStream, ExportTypesRegistry, getContentStreamFactory } from '../lib';
+import { ContentStream, ExportTypesRegistry, getContentStream } from '../lib';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
@@ -100,9 +100,7 @@ describe('GET /api/reporting/jobs/download', () => {
     mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
     stream = ({ toString: jest.fn(() => 'test') } as unknown) as typeof stream;
 
-    (getContentStreamFactory as jest.MockedFunction<
-      typeof getContentStreamFactory
-    >).mockReturnValue(async () => stream);
+    (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
   });
 
   afterEach(async () => {

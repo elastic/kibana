@@ -10,7 +10,7 @@ import contentDisposition from 'content-disposition';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
 import { ReportingCore } from '../../';
-import { getContentStreamFactory, statuses } from '../../lib';
+import { getContentStream, statuses } from '../../lib';
 import { ExportTypeDefinition } from '../../types';
 
 export interface ErrorFromPayload {
@@ -48,7 +48,6 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefini
 
 export function getDocumentPayloadFactory(reporting: ReportingCore) {
   const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const getContentStream = getContentStreamFactory(reporting);
 
   function encodeContent(
     content: string | null,
@@ -116,7 +115,7 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     payload: { title },
   }: ReportApiJSON): Promise<Payload> {
     if (output) {
-      const stream = await getContentStream({ id, index });
+      const stream = await getContentStream(reporting, { id, index });
       const content = await stream.toString();
 
       if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
