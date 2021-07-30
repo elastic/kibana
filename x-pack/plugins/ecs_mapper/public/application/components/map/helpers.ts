@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function formatActionsToComboBox(actions?: FieldCopyAction[]) {
+export function formatActionsForSelector(actions?: FieldCopyAction[]) {
   if (!actions) return [];
   return actions?.map((action) => {
     return {

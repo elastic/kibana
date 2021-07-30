@@ -18,16 +18,17 @@ import {
   EuiHorizontalRule,
   EuiFilePicker,
   EuiButton,
-  EuiComboBox,
+  EuiSelect,
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiFieldText,
 } from '@elastic/eui';
 import { FieldCopyAction } from '../../../../common';
 import { Instructions } from './instructions';
-import { formatActionsToComboBox } from './helpers';
+import { formatActionsForSelector } from './helpers';
 
 import './mapper_upload.scss';
+import { ResultsPanel } from './results_panel';
 
 interface Props {
   actionOptions: FieldCopyAction[];
@@ -76,10 +77,9 @@ export const UploadPanel: FC<Props> = ({
                 }
               >
                 <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
-                  <EuiComboBox
-                    options={formatActionsToComboBox(actionOptions)}
-                    selectedOptions={selectedAction}
-                    singleSelection={true}
+                  <EuiSelect
+                    options={formatActionsForSelector(actionOptions)}
+                    valueOfSelected={selectedAction}
                     onChange={(option) => setAction(option[0] ? option[0].label as FieldCopyAction : null)}
                     data-test-subj="copyAction"
                   />
