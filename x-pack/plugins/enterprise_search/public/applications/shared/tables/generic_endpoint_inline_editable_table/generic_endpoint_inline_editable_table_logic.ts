@@ -77,7 +77,8 @@ const saveAndCallback = async <Item extends ItemWithAnID>(
   onFinally: () => void
 ) => {
   try {
-    const { [responseDataProperty]: itemsFromResponse } = await httpCall(route, requestData);
+    const response = (await httpCall(route, requestData)) as Record<string, Item[]>;
+    const itemsFromResponse = response[responseDataProperty];
     callback(item, itemsFromResponse);
     onSuccess();
   } catch (e) {
