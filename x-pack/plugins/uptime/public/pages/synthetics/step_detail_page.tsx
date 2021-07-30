@@ -22,11 +22,16 @@ import { getJourneySteps } from '../../state/actions/journey';
 export const useStepDetailPage = (): {
   activeStep?: JourneyStep;
   checkGroup: string;
+  handleNextStep: () => void;
+  handlePreviousStep: () => void;
+  handleNextRun: () => void;
+  handlePreviousRun: () => void;
   hasNextStep: boolean;
   hasPreviousStep: boolean;
   journey?: JourneyState;
   stepIndex: number;
 } => {
+  const history = useHistory();
   const dispatch = useDispatch();
 
   const { checkGroupId: checkGroup, stepIndex: stepIndexString } = useParams<{
@@ -34,7 +39,6 @@ export const useStepDetailPage = (): {
     stepIndex: string;
   }>();
 
-  console.log('check group', checkGroup, 'step index', stepIndexString, useParams());
   useEffect(() => {
     if (checkGroup) {
       dispatch(getJourneySteps({ checkGroup, syntheticEventTypes: ['step/end'] }));
@@ -54,26 +58,13 @@ export const useStepDetailPage = (): {
     [journey, stepIndex]
   );
 
-  return {
-    checkGroup,
-    journey,
-    stepIndex,
-    ...memoized,
-  };
-};
+  const handleNextStep = useCallback(() => {
+    history.push(`/journey/${checkGroup}/step/${stepIndex + 1}`);
+  }, [history, checkGroup, stepIndex]);
 
-export const StepDetailPageHeader = () => {
-  const { activeStep, journey } = useStepDetailPage();
-  console.log('active step', activeStep);
-  return <>{journey && activeStep && activeStep.synthetics?.step?.name}</>;
-};
-
-export const StepDetailPageRightSideItem = () => {
-  const history = useHistory();
-
-  const [dateFormat] = useUiSetting$<string>('dateFormat');
-
-  const { journey } = useStepDetailPage();
+  const handlePreviousStep = useCallback(() => {
+    history.push(`/journey/${checkGroup}/step/${stepIndex - 1}`);
+  }, [history, checkGroup, stepIndex]);
 
   const handleNextRun = useCallback(() => {
     history.push(`/journey/${journey?.details?.next?.checkGroup}/step/1`);
@@ -82,6 +73,28 @@ export const StepDetailPageRightSideItem = () => {
   const handlePreviousRun = useCallback(() => {
     history.push(`/journey/${journey?.details?.previous?.checkGroup}/step/1`);
   }, [history, journey?.details?.previous?.checkGroup]);
+
+  return {
+    checkGroup,
+    journey,
+    stepIndex,
+    ...memoized,
+    handleNextStep,
+    handlePreviousStep,
+    handleNextRun,
+    handlePreviousRun,
+  };
+};
+
+export const StepDetailPageHeader = () => {
+  const { activeStep, journey } = useStepDetailPage();
+  return <>{journey && activeStep && activeStep.synthetics?.step?.name}</>;
+};
+
+export const StepDetailPageRightSideItem = () => {
+  const [dateFormat] = useUiSetting$<string>('dateFormat');
+
+  const { journey, handleNextRun, handlePreviousRun } = useStepDetailPage();
 
   if (!journey) return null;
 
@@ -98,24 +111,15 @@ export const StepDetailPageRightSideItem = () => {
 };
 
 export const StepDetailPageChildren = () => {
-  const history = useHistory();
-
   const {
     activeStep,
-    checkGroup,
     hasPreviousStep,
     hasNextStep,
+    handleNextStep,
+    handlePreviousStep,
     journey,
     stepIndex,
   } = useStepDetailPage();
-
-  const handleNextStep = useCallback(() => {
-    history.push(`/journey/${checkGroup}/step/${stepIndex + 1}`);
-  }, [history, checkGroup, stepIndex]);
-
-  const handlePreviousStep = useCallback(() => {
-    history.push(`/journey/${checkGroup}/step/${stepIndex - 1}`);
-  }, [history, checkGroup, stepIndex]);
 
   if (!journey || !activeStep) return null;
 
