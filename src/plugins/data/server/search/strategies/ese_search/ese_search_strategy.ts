@@ -9,7 +9,7 @@
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
 import { catchError, first, tap } from 'rxjs/operators';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { from } from 'rxjs';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -121,7 +121,7 @@ export const enhancedEsSearchStrategyProvider = (
       });
 
       const esResponse = await shimAbortSignal(promise, options?.abortSignal);
-      const response = esResponse.body as SearchResponse<any>;
+      const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),
         ...getTotalLoaded(response),

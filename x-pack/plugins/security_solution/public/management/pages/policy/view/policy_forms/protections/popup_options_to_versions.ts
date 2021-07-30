@@ -9,6 +9,7 @@ const popupVersions: Array<[string, string]> = [
   ['malware', '7.11+'],
   ['ransomware', '7.12+'],
   ['memory_protection', '7.15+'],
+  ['behavior_protection', '7.15+'],
 ];
 
 export const popupVersionsMap: ReadonlyMap<string, string> = new Map<string, string>(popupVersions);
