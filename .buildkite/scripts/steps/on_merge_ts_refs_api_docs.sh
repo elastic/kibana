@@ -10,4 +10,4 @@ export BUILD_TS_REFS_DISABLE=false
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Build API Docs"
-node scripts/build_api_docs
+node --max-old-space-size=12000 scripts/build_api_docs
