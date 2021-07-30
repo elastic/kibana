@@ -101,6 +101,7 @@ import {
 } from './lib/detection_engine/routes/index/get_signals_template';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
+import { addAliasesToIndices } from './lib/detection_engine/routes/index/create_index_route';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -347,7 +348,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
       );
-      if (isRuleRegistryEnabled) {
+      /* if (isRuleRegistryEnabled) {
         const clusterClient = coreStart.elasticsearch.client.asInternalUser;
         const updateExistingSignalsIndices = async () => {
           const existingTemplateResponse = await clusterClient.indices
@@ -366,7 +367,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             return;
           }
           const existingSignalsTemplates = existingTemplateResponse.body;
-          const fieldAliases = createSignalsFieldAliases();
           const existingTemplateNames = Object.keys(existingSignalsTemplates);
           for (const existingTemplateName of existingTemplateNames) {
             const spaceId = existingTemplateName.substr(config.signalsIndex.length + 1);
@@ -384,30 +384,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                 name: existingTemplateName,
                 body: signalsTemplate as Record<string, unknown>,
               });
-              await clusterClient.indices.putAlias({
+              await addAliasesToIndices({
+                esClient: clusterClient,
                 index: `${existingTemplateName}-*`,
-                name: aadIndexAliasName,
-                body: {
-                  is_write_index: false,
-                },
+                aadIndexAliasName,
+                spaceId,
               });
-
-              // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
-              // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
-              // mapping) or else this call will fail and not update ANY signals indices
-              const newMapping = {
-                properties: {
-                  ...signalExtraFields,
-                  ...fieldAliases,
-                  ...getRbacRequiredFields(spaceId),
-                },
-              };
-              await clusterClient.indices.putMapping({
-                index: `${existingTemplateName}-*`,
-                body: newMapping,
-                allow_no_indices: true,
-              } as estypes.IndicesPutMappingRequest);
-
               await clusterClient.indices.deleteTemplate({ name: existingTemplateName });
             } catch (err) {
               this.logger.error(
@@ -417,7 +399,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           }
         };
         updateExistingSignalsIndices();
-      }
+      }*/
     });
 
     this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);

@@ -29,7 +29,7 @@ import {
 } from './get_signals_template';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
-import { getTemplateVersion, templateNeedsUpdate } from './check_template_version';
+import { fieldAliasesOutdated, templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 import { RuleDataPluginService } from '../../../../../../rule_registry/server';
@@ -94,19 +94,18 @@ export const createDetectionIndex = async (
   if (!policyExists) {
     await setPolicy(esClient, index, signalsPolicy);
   }
-  const templateVersion = await getTemplateVersion({ alias: index, esClient });
+  const aadIndexAliasName = `${ruleDataService.getFullAssetName('security.alerts')}-${spaceId}`;
   if (await templateNeedsUpdate({ alias: index, esClient })) {
-    const aadIndexAliasName = `${ruleDataService.getFullAssetName('security.alerts')}-${spaceId}`;
     await esClient.indices.putIndexTemplate({
       name: index,
       body: getSignalsTemplate(index, spaceId, aadIndexAliasName) as Record<string, unknown>,
     });
-    // 45 is the last version that did not include alerts-as-data field and index aliases in the template
-    // Update existing indices with these field and index aliases if upgrading from <= v45
-    if (templateVersion <= 45) {
-      await addAliasesToIndices({ esClient, index, aadIndexAliasName, spaceId });
+    if (await esClient.indices.existsTemplate({ name: index })) {
       await esClient.indices.deleteTemplate({ name: index });
     }
+  }
+  if (await fieldAliasesOutdated(esClient, index)) {
+    await addAliasesToIndices({ esClient, index, aadIndexAliasName, spaceId });
   }
   const indexExists = await getIndexExists(esClient, index);
   if (indexExists) {
@@ -119,7 +118,7 @@ export const createDetectionIndex = async (
   }
 };
 
-const addAliasesToIndices = async ({
+export const addAliasesToIndices = async ({
   esClient,
   index,
   aadIndexAliasName,
