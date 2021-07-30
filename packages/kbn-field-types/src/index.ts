@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+export { KbnFieldType } from './kbn_field_type';
 
-export { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES };
+export {
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
+  getFilterableKbnTypeNames,
+} from './kbn_field_types';
+
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES, KbnFieldTypeOptions } from './types';

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-
-export { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES };
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-field-types'],
+};

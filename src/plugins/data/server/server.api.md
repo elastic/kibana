@@ -23,6 +23,7 @@ import { ElasticsearchClient as ElasticsearchClient_2 } from 'kibana/server';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { EsQueryConfig as EsQueryConfig_2 } from '@kbn/es-query';
 import { estypes } from '@elastic/elasticsearch';
 import { EventEmitter } from 'events';
@@ -43,6 +44,7 @@ import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'src/core/server';
 import { IUiSettingsClient as IUiSettingsClient_3 } from 'kibana/server';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { KibanaExecutionContext } from 'src/core/public';
 import { KibanaRequest } from 'src/core/server';
 import { KibanaRequest as KibanaRequest_2 } from 'kibana/server';
@@ -353,8 +355,8 @@ export const buildQueryFromFilters: (filters: Filter_2[] | undefined, indexPatte
 
 // Warning: (ae-missing-release-tag) "castEsToKbnFieldTypeName" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public
-export const castEsToKbnFieldTypeName: (esType: ES_FIELD_TYPES | string) => KBN_FIELD_TYPES;
+// @public @deprecated (undocumented)
+export const castEsToKbnFieldTypeName: (esType: string) => import("@kbn/field-types").KBN_FIELD_TYPES;
 
 // Warning: (ae-forgotten-export) The symbol "PluginConfigDescriptor" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ConfigSchema" needs to be exported by the entry point index.d.ts
@@ -369,79 +371,7 @@ export interface DataRequestHandlerContext extends RequestHandlerContext {
     search: SearchRequestHandlerContext;
 }
 
-// @public (undocumented)
-export enum ES_FIELD_TYPES {
-    // (undocumented)
-    ATTACHMENT = "attachment",
-    // (undocumented)
-    BOOLEAN = "boolean",
-    // (undocumented)
-    BYTE = "byte",
-    // (undocumented)
-    DATE = "date",
-    // (undocumented)
-    DATE_NANOS = "date_nanos",
-    // (undocumented)
-    DATE_RANGE = "date_range",
-    // (undocumented)
-    DOUBLE = "double",
-    // (undocumented)
-    DOUBLE_RANGE = "double_range",
-    // (undocumented)
-    FLOAT = "float",
-    // (undocumented)
-    FLOAT_RANGE = "float_range",
-    // (undocumented)
-    GEO_POINT = "geo_point",
-    // (undocumented)
-    GEO_SHAPE = "geo_shape",
-    // (undocumented)
-    HALF_FLOAT = "half_float",
-    // (undocumented)
-    HISTOGRAM = "histogram",
-    // (undocumented)
-    _ID = "_id",
-    // (undocumented)
-    _INDEX = "_index",
-    // (undocumented)
-    INTEGER = "integer",
-    // (undocumented)
-    INTEGER_RANGE = "integer_range",
-    // (undocumented)
-    IP = "ip",
-    // (undocumented)
-    IP_RANGE = "ip_range",
-    // (undocumented)
-    KEYWORD = "keyword",
-    // (undocumented)
-    LONG = "long",
-    // (undocumented)
-    LONG_RANGE = "long_range",
-    // (undocumented)
-    MURMUR3 = "murmur3",
-    // (undocumented)
-    NESTED = "nested",
-    // (undocumented)
-    OBJECT = "object",
-    // (undocumented)
-    SCALED_FLOAT = "scaled_float",
-    // (undocumented)
-    SHORT = "short",
-    // (undocumented)
-    _SOURCE = "_source",
-    // (undocumented)
-    STRING = "string",
-    // (undocumented)
-    TEXT = "text",
-    // (undocumented)
-    TOKEN_COUNT = "token_count",
-    // (undocumented)
-    _TYPE = "_type",
-    // (undocumented)
-    UNSIGNED_LONG = "unsigned_long",
-    // (undocumented)
-    VERSION = "version"
-}
+export { ES_FIELD_TYPES }
 
 // Warning: (ae-missing-release-tag) "ES_SEARCH_STRATEGY" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1081,47 +1011,7 @@ export interface ISearchStrategy<SearchStrategyRequest extends IKibanaSearchRequ
     search: (request: SearchStrategyRequest, options: ISearchOptions, deps: SearchStrategyDependencies) => Observable<SearchStrategyResponse>;
 }
 
-// @public (undocumented)
-export enum KBN_FIELD_TYPES {
-    // (undocumented)
-    ATTACHMENT = "attachment",
-    // (undocumented)
-    BOOLEAN = "boolean",
-    // (undocumented)
-    CONFLICT = "conflict",
-    // (undocumented)
-    DATE = "date",
-    // (undocumented)
-    DATE_RANGE = "date_range",
-    // (undocumented)
-    GEO_POINT = "geo_point",
-    // (undocumented)
-    GEO_SHAPE = "geo_shape",
-    // (undocumented)
-    HISTOGRAM = "histogram",
-    // (undocumented)
-    IP = "ip",
-    // (undocumented)
-    IP_RANGE = "ip_range",
-    // (undocumented)
-    MISSING = "missing",
-    // (undocumented)
-    MURMUR3 = "murmur3",
-    // (undocumented)
-    NESTED = "nested",
-    // (undocumented)
-    NUMBER = "number",
-    // (undocumented)
-    NUMBER_RANGE = "number_range",
-    // (undocumented)
-    OBJECT = "object",
-    // (undocumented)
-    _SOURCE = "_source",
-    // (undocumented)
-    STRING = "string",
-    // (undocumented)
-    UNKNOWN = "unknown"
-}
+export { KBN_FIELD_TYPES }
 
 // Warning: (ae-missing-release-tag) "KibanaContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
