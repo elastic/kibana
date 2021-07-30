@@ -7,7 +7,9 @@
 
 import React, { Component } from 'react';
 
-import { AboutPanel, LoadingPanel, ResultsPanel } from './uploader_panel';
+import { UploadPanel } from './upload_panel';
+import { LoadingPanel } from './loading_panel';
+import { ResultsPanel } from './results_panel';
 import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
 
@@ -16,14 +18,14 @@ export class EcsMapperUploadView extends Component {
     super(props);
 
     this.state = {
+      loading: false,
+      loaded: false,
       files: {},
       fileName: '',
-      fileContents: '',
-      data: [],
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
-      results: [],
+      pipelineName: ''
     };
 
     this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
@@ -43,52 +45,51 @@ export class EcsMapperUploadView extends Component {
   onManageIngestPipeline = () => {
     console.log("routing");
     this.props.navigateToApp('management', {
-      path: `/ingest/ingest_pipelines/edit/test-pipeline`,
+      path: `/ingest/ingest_pipelines/edit/${this.state.pipelineName}`,
     });
   }
 
-  onFilePickerChange = (files) => {
+  onFileUpload = (action, files, pipelineName) => {
     this.setState(
       {
         loading: files.length > 0,
-        bottomBarVisible: files.length > 0,
         loaded: false,
         fileName: '',
-        fileContents: '',
-        data: [],
         fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
         fileCouldNotBeReadPermissionError: false,
+        pipelineName: pipelineName
       },
       () => {
         if (files.length) {
-          this.loadFile(files[0]);
+          this.loadFile(files[0], action);
         }
       }
     );
   };
 
-  async loadFile(file) {
+  async loadFile(file, action) {
     if (file.size <= this.maxFileUploadBytes) {
       try {
-        const { data, fileContents } = await readFile(file, this.maxFileUploadBytes);
+        const { fileContents } = await readFile(file, this.maxFileUploadBytes);
         this.setState({
-          data,
           fileContents,
           fileName: file.name,
           fileSize: file.size,
           loading: true,
         });
-        const results = this.props.mapper.fetchPipelineFromMapping(
+        const processors = await this.props.mapper.fetchPipelineFromMapping(
           fileContents,
-          FieldCopyAction.Copy
+          action
         );
-        console.log(results);
+        await this.props.mapper.createIngestNodePipeline(
+          this.state.pipelineName,
+          processors
+        );
         this.setState({
           loading: false,
-          loaded: true,
-          results: results,
+          loaded: true
         });
       } catch (error) {
         this.setState({
@@ -119,8 +120,9 @@ export class EcsMapperUploadView extends Component {
       <div>
         <>
           {!loading && !loaded && (
-            <AboutPanel
-              onFilePickerChange={this.onFilePickerChange}
+            <UploadPanel
+              onFileUpload={this.onFileUpload}
+              actionOptions={Object.values(FieldCopyAction)}
               disabled={!fileCouldNotBeReadPermissionError}
             />
           )}
@@ -129,6 +131,7 @@ export class EcsMapperUploadView extends Component {
 
           {loaded && (
             <ResultsPanel
+              pipelineName={this.state.pipelineName}
               onManageIngestPipeline={this.onManageIngestPipeline}
             />
           )}

@@ -9,16 +9,16 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { FieldCopyAction } from '../../../common';
 
-interface MapperClientConstructor {
+interface MapperProxyConstructor {
   http: CoreStart['http'];
   notifications: CoreStart['notifications'];
 }
 
-export class MapperClient {
+export class MapperProxy {
   private readonly http: CoreStart['http'];
   private readonly notifications: CoreStart['notifications'];
 
-  constructor({ http, notifications }: MapperClientConstructor) {
+  constructor({ http, notifications }: MapperProxyConstructor) {
     this.http = http;
     this.notifications = notifications;
   }
@@ -41,5 +41,29 @@ export class MapperClient {
         }),
       });
     }
-  };
+  }
+
+  public createIngestNodePipeline = async (
+    name: string,
+    processors: object[]
+  ): Promise<void> => {
+    
+    try {
+      return this.http.post('/api/ingest_pipelines', {
+        body: JSON.stringify({
+          name,
+          processors,
+        }),
+      });
+    } catch (error) {
+      console.log(error);
+      this.notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.ecsMapper.mapToIngestPipelineError', {
+          defaultMessage: 'Error',
+        }),
+      });
+    }
+  }
 }
+
+

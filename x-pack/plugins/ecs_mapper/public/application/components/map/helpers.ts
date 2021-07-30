@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { MapperProxy } from './mapper_proxy';
+export function formatActionsToComboBox(actions?: FieldCopyAction[]) {
+  if (!actions) return [];
+  return actions?.map((action) => {
+    return {
+      label: action.toString(),
+    };
+  });
+}

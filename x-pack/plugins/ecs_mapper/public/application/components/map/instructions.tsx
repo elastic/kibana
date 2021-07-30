@@ -14,7 +14,7 @@ import { getPluginsStart } from '../../../kibana_services';
 
 import './mapper_upload.scss';
 
-export const MapperInformational: FC = () => {
+export const Instructions: FC = () => {
   const { fileUpload } = getPluginsStart();
 
   if (fileUpload === undefined) {

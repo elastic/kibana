@@ -14,7 +14,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { registerDevTool, registerHomeFeatureCatalogue } from './registration';
 import { setStartServices } from './kibana_services';
 import { FieldCopyAction } from '../common';
-import { MapperClient } from './application/mapper_api';
+import { MapperProxy } from './application/mapper_api';
 
 /**
  * Publicly exposed APIs from the Mapper Service
@@ -31,7 +31,7 @@ export interface EcsMapperSetupDependencies {
 }
 export interface EcsMapperStartDependencies {
   fileUpload: FileUploadPluginStart;
-  mapper: MapperClient;
+  mapper: MapperProxy;
   application: ApplicationStart;
 }
 
@@ -46,12 +46,12 @@ export class EcsMapperPlugin
       EcsMapperSetupDependencies,
       EcsMapperStartDependencies
     > {
-  private mapper?: MapperClient;
+  private mapper?: MapperProxy;
 
   public setup(core: CoreSetup, plugins: EcsMapperSetupDependencies) {
     const http = core.http;
     const notifications = core.notifications;
-    this.mapper = new MapperClient({ http, notifications });
+    this.mapper = new MapperProxy({ http, notifications });
 
     if (plugins.home) {
       registerHomeFeatureCatalogue(plugins.home);
