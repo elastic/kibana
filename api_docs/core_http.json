@@ -3973,7 +3973,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ") => string; set: (request: ",
+              ") => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3989,7 +3989,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
@@ -5002,7 +5002,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ") => string; set: (request: ",
+              ") => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -5018,7 +5018,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
@@ -5448,7 +5448,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ") => string; set: (request: ",
+              ") => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -5464,7 +5464,7 @@
                 "section": "def-server.LegacyRequest",
                 "text": "LegacyRequest"
               },
-              ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
             "source": {
               "path": "src/core/server/http/types.ts",
@@ -10658,7 +10658,7 @@
             "section": "def-server.LegacyRequest",
             "text": "LegacyRequest"
           },
-          ") => string; set: (request: ",
+          ") => string; prepend: (path: string) => string; set: (request: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -10674,7 +10674,7 @@
             "section": "def-server.LegacyRequest",
             "text": "LegacyRequest"
           },
-          ", requestSpecificBasePath: string) => void; prepend: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+          ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
         ],
         "source": {
           "path": "src/core/server/http/base_path_service.ts",
