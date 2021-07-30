@@ -248,7 +248,9 @@ export const getXyVisualization = ({
       const { bottom, left, right } = groupBy(layer.yConfig || [], ({ axisMode }) => {
         return axisMode;
       });
-      const dataLayers = state.layers.filter(({ layerType }) => layerType === layerTypes.DATA);
+      const dataLayers = state.layers.filter(
+        ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
+      );
       const groupsAvailable = getGroupsAvailableInData(dataLayers, frame.datasourceLayers);
       const groupsToShow: Array<{
         config: XYLayerConfig['yConfig'];
@@ -376,7 +378,12 @@ export const getXyVisualization = ({
           // add a default config if none is available
           {
             forAccessor: columnId,
-            axisMode: groupId === 'xThreshold' ? 'bottom' : 'left',
+            axisMode:
+              groupId === 'xThreshold'
+                ? 'bottom'
+                : groupId === 'yThresholdRight'
+                ? 'right'
+                : 'left',
             icon: undefined,
             lineStyle: 'solid',
             lineWidth: 1,
@@ -763,7 +770,7 @@ function checkScaleOperation(
 
 function getLayerIdsByType(state: State, byType?: string) {
   return state.layers
-    .filter(({ layerType }) => (byType ? layerType === byType : true))
+    .filter(({ layerType = layerTypes.DATA }) => (byType ? layerType === byType : true))
     .map((l) => l.layerId);
 }
 

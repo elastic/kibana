@@ -875,6 +875,7 @@ const ThresholdPanel = (
             // TODO proper number input handling
             setYConfig({ lineWidth: Number(e.currentTarget.value) });
           }}
+          showInput
           min={1}
           max={50}
         />

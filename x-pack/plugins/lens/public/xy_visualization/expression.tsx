@@ -834,7 +834,7 @@ export function XYChart({
 
         const groupedByDirection = groupBy(yConfigByValue, 'fill');
 
-        return yConfigByValue.map((yConfig, i) => {
+        return yConfigByValue.flatMap((yConfig, i) => {
           const formatter = formatFactory(
             table?.columns.find((column) => column.id === yConfig.forAccessor)?.meta?.params || {
               id: 'number',
@@ -864,8 +864,6 @@ export function XYChart({
           );
 
           const props = {
-            id: `${layerId}-${yConfig.forAccessor}`,
-            key: `${layerId}-${yConfig.forAccessor}`,
             groupId:
               yConfig.axisMode === 'bottom'
                 ? undefined
@@ -874,6 +872,39 @@ export function XYChart({
                 : 'left',
             marker: yConfig.icon ? <EuiIcon type={yConfig.icon} /> : undefined,
           };
+          const annotations = [];
+
+          annotations.push(
+            <LineAnnotation
+              {...props}
+              id={`${layerId}-${yConfig.forAccessor}-line`}
+              key={`${layerId}-${yConfig.forAccessor}-line`}
+              dataValues={table.rows.map(() => ({
+                dataValue: row[yConfig.forAccessor],
+                header: columnToLabelMap[yConfig.forAccessor],
+                details: formatter.convert(row[yConfig.forAccessor]),
+              }))}
+              domainType={
+                yConfig.axisMode === 'bottom'
+                  ? AnnotationDomainType.XDomain
+                  : AnnotationDomainType.YDomain
+              }
+              style={{
+                line: {
+                  strokeWidth: yConfig.lineWidth || 1,
+                  stroke: (yConfig.color || defaultColor) ?? '#f00',
+                  dash:
+                    yConfig.lineStyle === 'dashed'
+                      ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
+                      : yConfig.lineStyle === 'dotted'
+                      ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
+                      : undefined,
+                  opacity: 1,
+                },
+              }}
+            />
+          );
+
           if (yConfig.fill && yConfig.fill !== 'none') {
             const isFillAbove = yConfig.fill === 'above';
             const indexFromSameType = groupedByDirection[yConfig.fill].findIndex(
@@ -881,9 +912,11 @@ export function XYChart({
             );
             const shouldCheckNextThreshold =
               indexFromSameType < groupedByDirection[yConfig.fill].length - 1;
-            return (
+            annotations.push(
               <RectAnnotation
                 {...props}
+                id={`${layerId}-${yConfig.forAccessor}-rect`}
+                key={`${layerId}-${yConfig.forAccessor}-rect`}
                 dataValues={table.rows.map(() => {
                   if (yConfig.axisMode === 'bottom') {
                     return {
@@ -936,35 +969,7 @@ export function XYChart({
               />
             );
           }
-          return (
-            <LineAnnotation
-              {...props}
-              dataValues={table.rows.map(() => ({
-                dataValue: row[yConfig.forAccessor],
-                header: columnToLabelMap[yConfig.forAccessor],
-                details: formatter.convert(row[yConfig.forAccessor]),
-              }))}
-              domainType={
-                yConfig.axisMode === 'bottom'
-                  ? AnnotationDomainType.XDomain
-                  : AnnotationDomainType.YDomain
-              }
-              style={{
-                line: {
-                  // TODO add line mode here
-                  strokeWidth: yConfig.lineWidth || 1,
-                  stroke: (yConfig.color || defaultColor) ?? '#f00',
-                  dash:
-                    yConfig.lineStyle === 'dashed'
-                      ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
-                      : yConfig.lineStyle === 'dotted'
-                      ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
-                      : undefined,
-                  opacity: 1,
-                },
-              }}
-            />
-          );
+          return annotations;
         });
       })}
     </Chart>
