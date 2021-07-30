@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     use_output: 'default',
   });
 
-  describe.only('When on the Synthetics Integration Policy Create Page', function () {
+  describe('When on the Synthetics Integration Policy Create Page', function () {
     this.tags(['ciGroup6']);
     const basicConfig = {
       name: monitorName,
