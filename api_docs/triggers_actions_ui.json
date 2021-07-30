@@ -1599,7 +1599,7 @@
             "label": "setAlertProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
+              "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1607,7 +1607,7 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
+              "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -1648,7 +1648,7 @@
                     "section": "def-common.Alert",
                     "text": "Alert"
                   },
-                  "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
+                  "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
                 ],
                 "source": {
                   "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -2491,7 +2491,7 @@
             "section": "def-common.AlertAction",
             "text": "AlertAction"
           },
-          "[]; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
+          "[]; throttle: string | null; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2499,7 +2499,7 @@
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
-          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2529,6 +2529,40 @@
         "source": {
           "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 12
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.DEFAULT_HIDDEN_ACTION_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_HIDDEN_ACTION_TYPES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2570,40 +2604,6 @@
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
           "lineNumber": 69
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.DEFAULT_HIDDEN_ACTION_TYPES",
-        "type": "Array",
-        "tags": [],
-        "label": "DEFAULT_HIDDEN_ACTION_TYPES",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
-          "lineNumber": 14
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES",
-        "type": "Array",
-        "tags": [],
-        "label": "DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
-          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3872,7 +3872,7 @@
                   "section": "def-common.Alert",
                   "text": "Alert"
                 },
-                "<Record<string, unknown>>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">> | undefined; reloadAlerts?: (() => Promise<void>) | undefined; }"
+                "<Record<string, unknown>>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">> | undefined; reloadAlerts?: (() => Promise<void>) | undefined; }"
               ],
               "source": {
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -3927,7 +3927,7 @@
                   "section": "def-common.Alert",
                   "text": "Alert"
                 },
-                "<Record<string, unknown>>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">; }"
+                "<Record<string, unknown>>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">; }"
               ],
               "source": {
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",

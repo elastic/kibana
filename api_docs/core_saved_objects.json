@@ -8895,7 +8895,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1834
+              "lineNumber": 1846
             },
             "deprecated": false,
             "children": [
@@ -8911,7 +8911,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1835
+                  "lineNumber": 1847
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8934,7 +8934,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1836
+                  "lineNumber": 1848
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8974,7 +8974,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1903
+              "lineNumber": 1915
             },
             "deprecated": false,
             "children": [
@@ -8990,7 +8990,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1904
+                  "lineNumber": 1916
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9016,7 +9016,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1905
+                  "lineNumber": 1917
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -9064,7 +9064,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1959
+              "lineNumber": 1971
             },
             "deprecated": false,
             "children": [
@@ -9088,7 +9088,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1960
+                  "lineNumber": 1972
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9112,7 +9112,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1961
+                  "lineNumber": 1973
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -15113,7 +15113,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/saved_objects_service.ts",
-          "lineNumber": 226
+          "lineNumber": 228
         },
         "deprecated": false,
         "children": [
@@ -15147,7 +15147,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 234
+              "lineNumber": 236
             },
             "deprecated": false,
             "returnComment": [],
@@ -15171,7 +15171,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 235
+                  "lineNumber": 237
                 },
                 "deprecated": false
               },
@@ -15189,7 +15189,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 236
+                  "lineNumber": 238
                 },
                 "deprecated": false
               }
@@ -15217,7 +15217,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 244
+              "lineNumber": 246
             },
             "deprecated": false,
             "returnComment": [],
@@ -15236,7 +15236,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 244
+                  "lineNumber": 246
                 },
                 "deprecated": false
               }
@@ -15650,7 +15650,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/saved_objects_service.ts",
-          "lineNumber": 162
+          "lineNumber": 164
         },
         "deprecated": false,
         "children": [
@@ -15692,7 +15692,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 172
+              "lineNumber": 174
             },
             "deprecated": false,
             "returnComment": [],
@@ -15716,7 +15716,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 173
+                  "lineNumber": 175
                 },
                 "deprecated": false
               },
@@ -15739,7 +15739,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 174
+                  "lineNumber": 176
                 },
                 "deprecated": false
               }
@@ -15775,7 +15775,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 188
+              "lineNumber": 190
             },
             "deprecated": false,
             "returnComment": [],
@@ -15801,7 +15801,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 189
+                  "lineNumber": 191
                 },
                 "deprecated": false
               },
@@ -15819,7 +15819,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 190
+                  "lineNumber": 192
                 },
                 "deprecated": false
               }
@@ -15847,7 +15847,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 198
+              "lineNumber": 200
             },
             "deprecated": false,
             "returnComment": [],
@@ -15866,7 +15866,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 198
+                  "lineNumber": 200
                 },
                 "deprecated": false
               }
@@ -15893,7 +15893,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 202
+              "lineNumber": 204
             },
             "deprecated": false,
             "returnComment": [],
@@ -15929,7 +15929,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 206
+              "lineNumber": 208
             },
             "deprecated": false,
             "returnComment": [],
@@ -16246,7 +16246,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 206
+                  "lineNumber": 208
                 },
                 "deprecated": false
               }
@@ -16282,7 +16282,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 210
+              "lineNumber": 212
             },
             "deprecated": false,
             "returnComment": [],
@@ -16599,7 +16599,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/saved_objects_service.ts",
-                  "lineNumber": 210
+                  "lineNumber": 212
                 },
                 "deprecated": false
               }
@@ -16627,7 +16627,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/saved_objects_service.ts",
-              "lineNumber": 215
+              "lineNumber": 217
             },
             "deprecated": false,
             "returnComment": [],

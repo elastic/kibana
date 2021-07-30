@@ -15,7 +15,7 @@ export const sortTable = (
   isSortAscending: boolean
 ): PolicyFromES[] => {
   let sorter;
-  if (sortField === 'indices') {
+  if (sortField === 'indices' || sortField === 'indexTemplates') {
     sorter = (item: PolicyFromES) => (item[sortField] || []).length;
   } else {
     sorter = (item: PolicyFromES) => item[sortField];
