@@ -11,10 +11,10 @@ import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
-import { NodeIcon } from '../../../shared/node_icon';
+import { ServiceLink } from '../../../shared/service_link';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 export function ServiceOverviewDependenciesTable() {
@@ -40,11 +40,8 @@ export function ServiceOverviewDependenciesTable() {
     comparisonType,
   });
 
-  const apmRouter = useApmRouter();
-
   const { serviceName, transactionType } = useApmServiceContext();
 
-  // Fetches current period dependencies
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -66,39 +63,43 @@ export function ServiceOverviewDependenciesTable() {
     data?.serviceDependencies.map((dependency) => {
       const { location } = dependency;
       const name = getNodeName(location);
-      const href =
-        location.type === NodeType.backend
-          ? apmRouter.link('/backends/:backendName/overview', {
-              path: { backendName: location.backendName },
-              query: {
-                comparisonEnabled: comparisonEnabled ? 'true' : 'false',
-                comparisonType,
-                environment,
-                kuery,
-                rangeFrom,
-                rangeTo,
-              },
-            })
-          : apmRouter.link('/services/:serviceName/overview', {
-              path: { serviceName: location.serviceName },
-              query: {
-                comparisonEnabled: comparisonEnabled ? 'true' : 'false',
-                comparisonType,
-                environment,
-                kuery,
-                rangeFrom,
-                rangeTo,
-                latencyAggregationType,
-                transactionType,
-              },
-            });
+      const link =
+        location.type === NodeType.backend ? (
+          <BackendLink
+            backendName={location.backendName}
+            type={location.spanType}
+            subtype={location.spanSubtype}
+            query={{
+              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonType,
+              environment,
+              kuery,
+              rangeFrom,
+              rangeTo,
+            }}
+          />
+        ) : (
+          <ServiceLink
+            serviceName={location.serviceName}
+            agentName={location.agentName}
+            query={{
+              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonType,
+              environment,
+              kuery,
+              rangeFrom,
+              rangeTo,
+              latencyAggregationType,
+              transactionType,
+            }}
+          />
+        );
 
       return {
         name,
-        href,
-        icon: <NodeIcon node={location} />,
         currentMetrics: dependency.currentMetrics,
         previousMetrics: dependency.previousMetrics,
+        link,
       };
     }) ?? [];
 

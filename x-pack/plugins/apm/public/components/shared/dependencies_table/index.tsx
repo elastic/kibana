@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
 import { ConnectionMetricItemWithComparisonData } from '../../../../common/connections';
 import {
   asMillisecondDuration,
@@ -35,8 +34,7 @@ export type DependenciesItem = Omit<
   'location'
 > & {
   name: string;
-  href: string;
-  icon: React.ReactElement;
+  link: React.ReactElement;
 };
 
 interface Props {
@@ -71,20 +69,8 @@ export function DependenciesTable(props: Props) {
       field: 'name',
       name: nameColumnTitle,
       render: (_, item) => {
-        const { name, href, icon } = item;
-        return (
-          <TruncateWithTooltip
-            text={name}
-            content={
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiLink href={href}>{name}</EuiLink>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          />
-        );
+        const { name, link } = item;
+        return <TruncateWithTooltip text={name} content={link} />;
       },
       sortable: true,
     },

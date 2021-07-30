@@ -9,12 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { DependenciesTable } from '../../../shared/dependencies_table';
-import { NodeIcon } from '../../../shared/node_icon';
+import { BackendLink } from '../../../shared/backend_link';
 
 export function BackendInventoryDependenciesTable() {
   const {
@@ -32,9 +31,6 @@ export function BackendInventoryDependenciesTable() {
     comparisonType,
   });
 
-  const apmRouter = useApmRouter();
-
-  // Fetches current period dependencies
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -59,24 +55,27 @@ export function BackendInventoryDependenciesTable() {
       if (location.type !== NodeType.backend) {
         throw new Error('Expected a backend node');
       }
-      const href = apmRouter.link('/backends/:backendName/overview', {
-        path: { backendName: location.backendName },
-        query: {
-          comparisonEnabled: comparisonEnabled ? 'true' : 'false',
-          comparisonType,
-          environment,
-          kuery,
-          rangeFrom,
-          rangeTo,
-        },
-      });
+      const link = (
+        <BackendLink
+          backendName={location.backendName}
+          type={location.spanType}
+          subtype={location.spanSubtype}
+          query={{
+            comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+            comparisonType,
+            environment,
+            kuery,
+            rangeFrom,
+            rangeTo,
+          }}
+        />
+      );
 
       return {
         name,
-        href,
-        icon: <NodeIcon node={location} />,
         currentMetrics: dependency.currentMetrics,
         previousMetrics: dependency.previousMetrics,
+        link,
       };
     }) ?? [];
 
