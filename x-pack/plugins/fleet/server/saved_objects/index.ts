@@ -42,7 +42,7 @@ import {
   migrateSettingsToV7130,
   migrateOutputToV7130,
 } from './migrations/to_v7_13_0';
-import { migratePackagePolicyToV7140 } from './migrations/to_v7_14_0';
+import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
 import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 
 /*
@@ -319,6 +319,9 @@ const getSavedObjectTypes = (
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.14.0': migrateInstallationToV7140,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {
