@@ -10,7 +10,6 @@ import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
 import { SettingDefinition } from './typings';
 import {
-  getFlattenedSettings,
   isSettingsFormValid,
   mergeNewVars,
   OPTIONAL_LABEL,
@@ -91,9 +90,6 @@ interface Props {
   onChange: OnFormChangeFn;
 }
 
-// flats the settings to have all settings in the same level in order to validate the form
-const flattenedTLSSettings = getFlattenedSettings(tlsSettings);
-
 export function TLSSettingsForm({ vars, onChange }: Props) {
   return (
     <SettingsForm
@@ -113,7 +109,7 @@ export function TLSSettingsForm({ vars, onChange }: Props) {
           newVars,
           // only validates TLS when its flag is enabled
           !newVars[TLS_ENABLED_KEY].value ||
-            isSettingsFormValid(flattenedTLSSettings, newVars)
+            isSettingsFormValid(tlsSettings, newVars)
         );
       }}
     />

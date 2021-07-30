@@ -10,12 +10,7 @@ import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_
 import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
 import { SettingDefinition } from './typings';
-import {
-  getFlattenedSettings,
-  isSettingsFormValid,
-  mergeNewVars,
-  OPTIONAL_LABEL,
-} from './utils';
+import { isSettingsFormValid, mergeNewVars, OPTIONAL_LABEL } from './utils';
 
 const ENABLE_RUM_KEY = 'enable_rum';
 const rumSettings: SettingDefinition[] = [
@@ -87,8 +82,7 @@ const rumSettings: SettingDefinition[] = [
         ),
       },
       {
-        key: 'advanced_option',
-        type: 'advanced_option',
+        type: 'advanced_settings',
         settings: [
           {
             key: 'rum_event_rate_limit',
@@ -171,9 +165,6 @@ const rumSettings: SettingDefinition[] = [
   },
 ];
 
-// flats the settings to have all settings in the same level in order to validate the form
-const flattenedRUMSettings = getFlattenedSettings(rumSettings);
-
 interface Props {
   vars: PackagePolicyVars;
   onChange: OnFormChangeFn;
@@ -198,7 +189,7 @@ export function RUMSettingsForm({ vars, onChange }: Props) {
           newVars,
           // only validates RUM when its flag is enabled
           !newVars[ENABLE_RUM_KEY].value ||
-            isSettingsFormValid(flattenedRUMSettings, newVars)
+            isSettingsFormValid(rumSettings, newVars)
         );
       }}
     />

@@ -10,7 +10,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isEmpty } from 'lodash';
 import { PackagePolicyVars } from '../typings';
-import { SettingDefinition } from './typings';
+import { SettingDefinition, Setting } from './typings';
 
 export const REQUIRED_LABEL = i18n.translate(
   'xpack.apm.fleet_integration.settings.requiredLabel',
@@ -34,18 +34,32 @@ export function mergeNewVars(
 }
 
 export function isSettingsFormValid(
-  settings: SettingDefinition[],
+  parentSettings: SettingDefinition[],
   vars: PackagePolicyVars
 ) {
-  return settings
-    .filter((field) => field.required || field.validation)
-    .every((field) => {
-      const { value } = vars[field.key];
-      return validateSettingValue(field, value).isValid;
-    });
+  function isSettingsValid(settings: SettingDefinition[]): boolean {
+    return !settings
+      .map((setting) => {
+        if (setting.type === 'advanced_settings') {
+          return isSettingsValid(setting.settings);
+        }
+
+        if (setting.settings) {
+          return isSettingsValid(setting.settings);
+        }
+        const { isValid } = validateSettingValue(
+          setting,
+          vars[setting.key]?.value
+        );
+        return isValid;
+      })
+      .flat()
+      .some((isValid) => !isValid);
+  }
+  return isSettingsValid(parentSettings);
 }
 
-export function validateSettingValue(setting: SettingDefinition, value?: any) {
+export function validateSettingValue(setting: Setting, value?: any) {
   if (isEmpty(value)) {
     return {
       isValid: !setting.required,
@@ -60,18 +74,4 @@ export function validateSettingValue(setting: SettingDefinition, value?: any) {
     return { isValid, message };
   }
   return { isValid: true, message: '' };
-}
-
-export function getFlattenedSettings(apmSettings: SettingDefinition[]) {
-  function getSettings(settings: SettingDefinition[]): SettingDefinition[] {
-    return settings
-      .map((setting) => {
-        return [
-          setting,
-          ...(setting.settings ? getSettings(setting.settings) : []),
-        ];
-      })
-      .flat();
-  }
-  return getSettings(apmSettings);
 }

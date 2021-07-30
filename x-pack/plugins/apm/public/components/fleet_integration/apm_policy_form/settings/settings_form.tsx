@@ -34,7 +34,7 @@ function FormRow({
   onChange: FormRowOnChange;
 }) {
   function getSettingFormRow(setting: SettingDefinition) {
-    if (setting.type === 'advanced_option') {
+    if (setting.type === 'advanced_settings') {
       return (
         <AdvancedOptions>
           {setting.settings.map((advancedSetting) =>

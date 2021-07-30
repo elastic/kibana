@@ -8,7 +8,20 @@ import * as t from 'io-ts';
 
 export type SettingValidation = t.Type<any, string, unknown>;
 
-interface BaseSetting {
+interface AdvancedSettings {
+  type: 'advanced_settings';
+  settings: SettingDefinition[];
+}
+
+export interface Setting {
+  type:
+    | 'text'
+    | 'combo'
+    | 'area'
+    | 'boolean'
+    | 'integer'
+    | 'bytes'
+    | 'duration';
   key: string;
   rowTitle?: string;
   rowDescription?: string;
@@ -22,45 +35,4 @@ interface BaseSetting {
   readOnly?: boolean;
 }
 
-interface TextSetting extends BaseSetting {
-  type: 'text';
-}
-
-interface ComboSetting extends BaseSetting {
-  type: 'combo';
-}
-
-interface AreaSetting extends BaseSetting {
-  type: 'area';
-}
-
-interface BooleanSetting extends BaseSetting {
-  type: 'boolean';
-}
-
-interface IntegerSetting extends BaseSetting {
-  type: 'integer';
-}
-
-interface BytesSetting extends BaseSetting {
-  type: 'bytes';
-}
-
-interface DurationSetting extends BaseSetting {
-  type: 'duration';
-}
-
-interface AdvancedSettings extends BaseSetting {
-  type: 'advanced_option';
-  settings: SettingDefinition[];
-}
-
-export type SettingDefinition =
-  | TextSetting
-  | ComboSetting
-  | AreaSetting
-  | IntegerSetting
-  | BooleanSetting
-  | BytesSetting
-  | DurationSetting
-  | AdvancedSettings;
+export type SettingDefinition = Setting | AdvancedSettings;

@@ -6,20 +6,13 @@
  */
 
 import { lazy } from 'react';
-import { CoreStart } from 'kibana/public';
 import { PackagePolicyEditExtensionComponent } from '../../../../fleet/public';
 
-export const getLazyAPMPolicyEditExtension = (coreStart: CoreStart) => {
+export const getLazyAPMPolicyEditExtension = () => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
     const { EditAPMPolicyForm } = await import(
       './apm_policy_form/edit_apm_policy_form'
     );
-
-    const { createCallApmApi } = await import(
-      '../../services/rest/createCallApmApi'
-    );
-
-    createCallApmApi(coreStart);
 
     return { default: EditAPMPolicyForm };
   });

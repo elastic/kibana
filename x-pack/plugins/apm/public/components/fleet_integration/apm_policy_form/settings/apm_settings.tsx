@@ -16,7 +16,6 @@ import {
   mergeNewVars,
   OPTIONAL_LABEL,
   REQUIRED_LABEL,
-  getFlattenedSettings,
 } from './utils';
 
 interface Props {
@@ -90,8 +89,7 @@ function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
       ),
     },
     {
-      key: 'advanced_option',
-      type: 'advanced_option',
+      type: 'advanced_settings',
       settings: [
         {
           key: 'max_header_bytes',
@@ -287,11 +285,6 @@ export function APMSettingsForm({ vars, onChange, isCloudPolicy }: Props) {
     return getApmSettings(isCloudPolicy);
   }, [isCloudPolicy]);
 
-  // flats the settings to have all settings in the same level in order to validate the form
-  const flattenedAPMSettings = useMemo(
-    () => getFlattenedSettings(apmSettings),
-    [apmSettings]
-  );
   return (
     <SettingsForm
       title={i18n.translate(
@@ -306,7 +299,7 @@ export function APMSettingsForm({ vars, onChange, isCloudPolicy }: Props) {
       vars={vars}
       onChange={(key, value) => {
         const newVars = mergeNewVars(vars, key, value);
-        onChange(newVars, isSettingsFormValid(flattenedAPMSettings, newVars));
+        onChange(newVars, isSettingsFormValid(apmSettings, newVars));
       }}
     />
   );

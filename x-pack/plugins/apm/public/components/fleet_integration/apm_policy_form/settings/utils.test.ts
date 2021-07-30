@@ -11,7 +11,6 @@ import {
   mergeNewVars,
   isSettingsFormValid,
   validateSettingValue,
-  getFlattenedSettings,
 } from './utils';
 
 describe('settings utils', () => {
@@ -71,29 +70,60 @@ describe('settings utils', () => {
     });
   });
   describe('isSettingsFormValid', () => {
+    const settings: SettingDefinition[] = [
+      { key: 'foo', type: 'text', required: true },
+      {
+        key: 'bar',
+        type: 'text',
+        settings: [{ type: 'text', key: 'bar_1', required: true }],
+      },
+      { key: 'baz', type: 'text', validation: getDurationRt({ min: '1ms' }) },
+      {
+        type: 'advanced_settings',
+        settings: [
+          {
+            type: 'text',
+            key: 'advanced_1',
+            required: true,
+            settings: [
+              {
+                type: 'text',
+                key: 'advanced_1_1',
+                validation: getDurationRt({ min: '1ms' }),
+                settings: [
+                  {
+                    type: 'text',
+                    key: 'advanced_1_1_1',
+                    required: true,
+                    validation: getDurationRt({ min: '1ms' }),
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
     it('returns false when form is invalid', () => {
-      const settings: SettingDefinition[] = [
-        { key: 'foo', type: 'text', required: true },
-        { key: 'bar', type: 'text' },
-        { key: 'baz', type: 'text', validation: getDurationRt({ min: '1ms' }) },
-      ];
       const vars: PackagePolicyVars = {
         foo: { value: undefined, type: 'text' },
         bar: { value: undefined, type: 'text' },
         baz: { value: 'baz', type: 'text' },
+        advanced_1: { value: undefined, type: 'text' },
+        advanced_1_1: { value: '1', type: 'text' },
+        advanced_1_1_1: { value: undefined, type: 'text' },
       };
       expect(isSettingsFormValid(settings, vars)).toBeFalsy();
     });
     it('returns true when form is valid', () => {
-      const settings: SettingDefinition[] = [
-        { key: 'foo', type: 'text', required: true },
-        { key: 'bar', type: 'text' },
-        { key: 'baz', type: 'text', validation: getDurationRt({ min: '1ms' }) },
-      ];
       const vars: PackagePolicyVars = {
         foo: { value: 'foo', type: 'text' },
         bar: { value: undefined, type: 'text' },
+        bar_1: { value: 'bar_1' },
         baz: { value: '1ms', type: 'text' },
+        advanced_1: { value: 'advanced_1', type: 'text' },
+        advanced_1_1: { value: undefined, type: 'text' },
+        advanced_1_1_1: { value: '1s', type: 'text' },
       };
       expect(isSettingsFormValid(settings, vars)).toBeTruthy();
     });
@@ -113,97 +143,6 @@ describe('settings utils', () => {
         baz: { value: '1ms', type: 'text' },
         qux: { value: 'qux', type: 'text' },
       });
-    });
-  });
-
-  describe('getFlattenedSettings', () => {
-    it('returns all settings in the same level', () => {
-      const settings: SettingDefinition[] = [
-        {
-          key: 'foo',
-          type: 'text',
-          required: true,
-          settings: [
-            {
-              key: 'foo_1',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          key: 'bar',
-          type: 'text',
-          settings: [
-            { key: 'bar_1', type: 'text' },
-            {
-              key: 'bar_2',
-              type: 'text',
-              settings: [{ key: 'bar_2_1', type: 'text' }],
-            },
-          ],
-        },
-        { key: 'baz', type: 'text' },
-      ];
-
-      expect(getFlattenedSettings(settings)).toEqual([
-        {
-          key: 'foo',
-          type: 'text',
-          required: true,
-          settings: [
-            {
-              key: 'foo_1',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          key: 'foo_1',
-          type: 'text',
-        },
-        {
-          key: 'bar',
-          type: 'text',
-          settings: [
-            {
-              key: 'bar_1',
-              type: 'text',
-            },
-            {
-              key: 'bar_2',
-              type: 'text',
-              settings: [
-                {
-                  key: 'bar_2_1',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          key: 'bar_1',
-          type: 'text',
-        },
-        {
-          key: 'bar_2',
-          type: 'text',
-          settings: [
-            {
-              key: 'bar_2_1',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          key: 'bar_2_1',
-          type: 'text',
-        },
-        {
-          key: 'baz',
-          type: 'text',
-        },
-      ]);
     });
   });
 });

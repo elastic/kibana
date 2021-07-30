@@ -338,13 +338,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fleet.registerExtension({
         package: 'apm',
         view: 'package-policy-create',
-        Component: getLazyAPMPolicyCreateExtension(core),
+        Component: getLazyAPMPolicyCreateExtension(),
       });
 
       fleet.registerExtension({
         package: 'apm',
         view: 'package-policy-edit',
-        Component: getLazyAPMPolicyEditExtension(core),
+        Component: getLazyAPMPolicyEditExtension(),
       });
     }
   }
