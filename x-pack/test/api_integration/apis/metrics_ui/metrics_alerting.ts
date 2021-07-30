@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             index,
             body: searchBody,
           });
-          expect(result.error).to.not.be.ok();
+
           expect(result.hits).to.be.ok();
           expect(result.aggregations).to.be.ok();
         });
@@ -67,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
           index,
           body: searchBody,
         });
-        expect(result.error).to.not.be.ok();
+
         expect(result.hits).to.be.ok();
         expect(result.aggregations).to.be.ok();
       });
@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
             index,
             body: searchBody,
           });
-          expect(result.error).to.not.be.ok();
+
           expect(result.hits).to.be.ok();
           expect(result.aggregations).to.be.ok();
         });
@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
           index,
           body: searchBody,
         });
-        expect(result.error).to.not.be.ok();
+
         expect(result.hits).to.be.ok();
         expect(result.aggregations).to.be.ok();
       });
