@@ -1,0 +1,423 @@
+[[sharing-saved-objects]]
+== Sharing Saved Objects
+
+This guide describes the Sharing Saved Objects effort, and the breaking changes that plugin developers need to be aware of for the planned
+8.0 release of {kib}.
+
+[[sharing-saved-objects-overview]]
+=== Overview
+
+<<saved-objects-service, Saved objects>> (hereinafter "objects") are used to store all sorts of things in {kib}, from Dashboards to Index
+Patterns to Machine Learning Jobs. The effort to make objects shareable can be summarized in a single picture:
+
+image::images/sharing-saved-objects-overview.png["Sharing Saved Objects overview"]
+
+Each plugin can register different object types to be used in {kib}. Historically, objects could be _isolated_ (existing in a single
+<<xpack-spaces, space>>) or _global_ (existing in all spaces), there was no in-between. As of the 7.12 release, {kib} now supports two
+additional types of objects:
+
+|======================================================================================================
+|                     | *Where it exists* | *Object IDs*         | *Registered as:*
+| Global              | All spaces        | Globally unique      | `namespaceType: 'agnostic'`
+| Isolated            | 1 space           | Unique in each space | `namespaceType: 'single'`
+| (NEW) Share-capable | 1 space           | Globally unique      | `namespaceType: 'multiple-isolated'`
+| (NEW) Shareable     | 1 or more spaces  | Globally unique      | `namespaceType: 'multiple'`
+|======================================================================================================
+
+Ideally, most types of objects in {kib} will eventually be _shareable_; however, we have also introduced _share-capable_ objects as a
+stepping stone for plugin developers to fully support this feature.
+
+[[sharing-saved-objects-breaking-changes]]
+=== Breaking changes
+
+To implement this feature, we had to make a key change to how objects are serialized into raw {es} documents. As a result, this caused some
+breaking changes to the way that consumers (plugin developers) interact with objects. We have implemented mitigations so that *these changes
+will not affect end-users _if_ consumers implement the required steps below.*
+
+Existing, isolated object types will need to go through a special _conversion process_ to become share-capable upon upgrading {kib} to
+version 8.0. Once objects are converted, they can easily be switched to become fully shareable in any future release. This conversion will
+change the IDs of any existing objects that are not in the Default space. Changing object IDs itself has several knock-on effects:
+
+* Nonstandard links to other objects can break - _mitigated by step 1_
+* "Deep link" pages (URLs) to objects can break - _mitigated by steps 2/3_
+* Encrypted objects may not be able to be decrypted - _mitigated by step 5_
+
+*To be perfectly clear: these effects will all be mitigated _if and only if_ you follow the steps below!*
+
+[[sharing-saved-objects-dev-flowchart]]
+=== Developer Flowchart
+
+If you're still reading this page, you're probably developing a {kib} plugin that registers an object type, and you want to know what steps
+you need to take to prepare for the 8.0 release and mitigate any breaking changes! Depending on how you are using saved objects, you may
+need to take up to 5 steps, which are detailed in separate sections below. Refer to this flowchart:
+
+image::images/sharing-saved-objects-dev-flowchart.png["Sharing Saved Objects developer flowchart"]
+
+TIP: There is a proof-of-concept (POC) pull request to demonstrate these changes. It first adds a simple test plugin that allows users to
+create and view notes. Then, it goes through the steps of the flowchart to convert the isolated "note" objects to become share-capable. As
+you read this guide, you can https://github.com/elastic/kibana/pull/107256[follow along in the POC] to see exactly how to take these steps.
+
+[[sharing-saved-objects-q1]]
+=== Question 1
+
+> *Do these objects contain links to other objects?*
+
+If your objects store _any_ links to other objects (with an object type/ID), you need to take specific steps to ensure that these links continue functioning after the 8.0 upgrade.
+
+[[sharing-saved-objects-step-1]]
+=== Step 1
+
+⚠️ This step *must* be included no later than the 7.16 release. ⚠️
+
+> *Ensure all object links use the root-level `references` field*
+
+If you answered "Yes" to <<sharing-saved-objects-q1>> above, you need to make sure that your object links are _only_ stored in the root-level `references` field. When a given object's ID is changed, this field will be updated accordingly for other objects.
+
+The image below shows two different examples of object links from a "case" object to an "action" object. The top shows the incorrect way to link to another object, and the bottom shows the correct way.
+
+image::images/sharing-saved-objects-step-1.png["Sharing Saved Objects step 1"]
+
+If your objects _do not_ use the root-level `references` field, you'll need to <<saved-objects-service-writing-migrations,add a migration>> _before the 8.0 release_ to fix that. Here's a migration function for the example above:
+
+```ts
+function migrateCaseToV716(
+  doc: SavedObjectUnsanitizedDoc<{ connector: { type: string; id: string } }>
+): SavedObjectSanitizedDoc<unknown> {
+  const {
+    connector: { type: connectorType, id: connectorId, ...otherConnectorAttrs },
+  } = doc.attributes;
+  const { references = [] } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      connector: otherConnectorAttrs,
+    },
+    references: [...references, { type: connectorType, id: connectorId, name: 'connector' }],
+  };
+}
+
+...
+
+// Use this migration function where the "case" object type is registered
+migrations: {
+  '7.16.0': migrateCaseToV716,
+},
+```
+
+NOTE: Reminder, don't forget to add unit tests and integration tests!
+
+[[sharing-saved-objects-q2]]
+=== Question 2
+
+> *Are there any "deep links" to these objects?*
+
+A deep link is a URL to a page that shows a specific object. End-users may bookmark these URLs or schedule reports with them, so it is
+critical to ensure that these URLs continue working. The image below shows an example of a deep link.
+
+image::images/sharing-saved-objects-q2.png["Sharing Saved Objects deep link example"]
+
+Note that some URLs may contain deep links to multiple objects, for example, a Dashboard _and_ a filter for an Index Pattern.
+
+[[sharing-saved-objects-step-2]]
+=== Step 2
+
+⚠️ This step will preferably be included in the 7.16 release; it *must* be included no later than the 8.0 release. ⚠️
+
+> *Update your code to use the new SavedObjectsClient `resolve()` method instead of `get()`*
+
+If you answered "Yes" to <<sharing-saved-objects-q2>> above, you need to make sure that when you use the SavedObjectsClient to fetch an
+object using its ID, you use a different API to do so. The existing `get()` function will only find an object using its current ID. To make
+sure your existing deep link URLs don't break, you should use the new `resolve()` function; this attempts to find an object using its old ID
+_and_ its current ID.
+
+In a nutshell, if your deep link page had something like this before:
+
+```ts
+const savedObject = savedObjectsClient.get(objType, objId);
+```
+
+You'll need to change it to this:
+
+```ts
+const resolveResult = savedObjectsClient.resolve(objType, objId);
+const { savedObject, outcome, aliasTargetId } = resolveResult;
+```
+
+TIP: See an example of this in https://github.com/elastic/kibana/pull/107256/commits/8abaf9fcf59f27cd7cdc44ddbb5515bae56b9d3d[step 2 of the
+POC]!
+
+The https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse interface] has three fields, summarized below:
+
+* `savedObject` - The saved object that was found.
+* `outcome` - One of the following values: `'exactMatch' | 'aliasMatch' | 'conflict'`
+* `aliasTargetId` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It means that a legacy URL alias with this ID points to an object with a _different_ ID.
+
+The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
+custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `aliasTargetId` fields need to be
+passed to your client-side code, and you should update your UI accordingly in the next step.
+
+[[sharing-saved-objects-step-3]]
+=== Step 3
+
+⚠️ This step will preferably be included in the 7.16 release; it *must* be included no later than the 8.0 release. ⚠️
+
+> *Update your _client-side code_ to correctly handle the three different `resolve()` outcomes*
+
+The Spaces plugin API exposes React components and functions that you should use to render your UI in a consistent manner for end-users.
+Your UI will need to use the Core HTTP service and the Spaces plugin API to do this.
+
+Your page should change according to the outcome:
+
+image::images/sharing-saved-objects-step-3.png["Sharing Saved Objects resolve outcomes overview"]
+
+TIP: See an example of this in https://github.com/elastic/kibana/pull/107256/commits/435ea49ec45651b9e5ba39b295009b410da2e5a6[step 3 of the
+POC]!
+
+1. Update your plugin's `kibana.json` to add a dependency on the Spaces plugin:
++
+```ts
+...
+"optionalPlugins": ["spaces"]
+```
+
+2. Update your plugin's `tsconfig.json` to add a dependency to the Space's plugin's type definitions:
++
+```ts
+...
+"references": [
+  ...
+  { "path": "../spaces/tsconfig.json" },
+]
+```
+
+3. Update your Plugin class implementation to depend on the Core HTTP service and Spaces plugin API:
++
+```ts
+interface PluginStartDeps {
+  spaces?: SpacesPluginStart;
+}
+
+export class MyPlugin implements Plugin<{}, {}, {}, PluginStartDeps> {
+  public setup(core: CoreSetup<PluginStartDeps>) {
+    core.application.register({
+      ...
+      async mount(appMountParams: AppMountParameters) {
+        const [coreStart, pluginStartDeps] = await core.getStartServices();
+        const { http } = coreStart;
+        const { spaces: spacesApi } = pluginStartDeps;
+        ...
+        // pass `http` and `spacesApi` to your app when you render it
+      },
+    });
+    ...
+  }
+}
+```
+
+4. In your deep link page, add a check for the `'aliasMatch'` outcome:
++
+```ts
+...
+const { savedObject, outcome, aliasTargetId } = resolveResult;
+...
+if (spacesApi && outcome === 'aliasMatch') {
+  // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+  const newObjectId = aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
+  const newPath = http.basePath.prepend(
+    `path/to/this/page/${newObjectId}${window.location.hash}`
+  );
+  await spacesApi.ui.redirectLegacyUrl(newPath, OBJECT_NOUN);
+  return;
+}
+```
+_Note that `OBJECT_NOUN` is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say "dashboard" or "index pattern" instead!_
+
+5. And finally, in your deep link page, add a function that will create a callout in the case of a `'conflict'` outcome:
++
+```tsx
+const getLegacyUrlConflictCallout = () => {
+  // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+  if (spacesApi && outcome === 'conflict') {
+    // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+    // callout with a warning for the user, and provide a way for them to navigate to the other object.
+    const currentObjectId = savedObject.id;
+    const otherObjectId = aliasTargetId!; // This is always defined if outcome === 'conflict'
+    const otherObjectPath = http.basePath.prepend(
+      `path/to/this/page/${otherObjectId}${window.location.hash}`
+    );
+    return (
+      <>
+        {spacesApi.ui.components.getLegacyUrlConflict({
+          objectNoun: OBJECT_NOUN,
+          currentObjectId,
+          otherObjectId,
+          otherObjectPath,
+        })}
+        <EuiSpacer />
+      </>
+    );
+  }
+  return null;
+};
+...
+return (
+  <EuiPage>
+    <EuiPageBody>
+      <EuiPageContent>
+        {/* If we have a legacy URL conflict callout to display, show it at the top of the page */}
+        {getLegacyUrlConflictCallout()}
+        <EuiPageContentHeader>
+...
+);
+```
+
+NOTE: Reminder, don't forget to add unit tests and functional tests!
+
+[[sharing-saved-objects-step-4]]
+=== Step 4
+
+⚠️ This step must be included in the 8.0 release (no earlier and no later). ⚠️
+
+> *Update your _server-side code_ to convert these objects to become "share-capable"*
+
+After <<sharing-saved-objects-step-3>> is complete, you can add the code to convert your objects.
+
+WARNING: The previous steps can be backported to the 7.x branch, but this step -- the conversion itself -- can only take place in 8.0!
+You should use a separate pull request for this.
+
+When you register your object, you need to change the `namespaceType` and also add a `convertToMultiNamespaceTypeVersion` field. This special field will trigger the actual conversion that will take place during the Core migration upgrade process when a user installs the Kibana 8.0 release:
+
+image::images/sharing-saved-objects-step-4.png["Sharing Saved Objects conversion code"]
+
+TIP: See an example of this in https://github.com/elastic/kibana/pull/107256/commits/d3fcabe808896d901ba05b10e7f2076acc6e3915[step 4 of the
+POC]!
+
+NOTE: Reminder, don't forget to add integration tests!
+
+[[sharing-saved-objects-q3]]
+=== Question 3
+
+> *Are these objects encrypted?*
+
+Saved objects can optionally be encrypted by using the Encrypted Saved Objects plugin. Very few object types are encrypted, so most plugin
+developers will not be affected.
+
+[[sharing-saved-objects-step-5]]
+=== Step 5
+
+⚠️ This step *must* be included in the 8.0 release (no earlier and no later). ⚠️
+
+> *Update your _server-side code_ to add an Encrypted Saved Object (ESO) migration for these objects*
+
+If you answered "Yes" to <<sharing-saved-objects-q3>> above, you need to take additional steps to make sure that your objects can still be
+decrypted after the conversion process. Encrypted saved objects use some fields as part of "additionally authenticated data" (AAD) to defend
+against different types of cryptographic attacks. The object ID is part of this AAD, and so it follows that the after the object's ID is
+changed, the object will not be able to be decrypted with the standard process.
+
+To mitigate this, you need to add a "no-op" ESO migration that will be applied immediately after the object is converted during the 8.0
+upgrade process. This will decrypt the object using its old ID and then re-encrypt it using its new ID:
+
+image::images/sharing-saved-objects-step-5.png["Sharing Saved Objects ESO migration"]
+
+NOTE: Reminder, don't forget to add unit tests and integration tests!
+
+[[sharing-saved-objects-step-6]]
+=== Step 6
+
+> *Update your code to make your objects shareable*
+
+_This is not required for the 8.0 release; this additional information will be added in the near future!_
+
+[[sharing-saved-objects-faq]]
+=== Frequently asked questions (FAQ)
+
+[[sharing-saved-objects-faq-changing-object-ids]]
+==== 1. Why do object IDs need to be changed?
+
+This is because of how isolated objects are serialized to raw Elasticsearch documents. Each raw document ID today contains its space ID
+(_namespace_) as a prefix. When objects are copied or imported to other spaces, they keep the same object ID, they just have a different
+prefix when they are serialized to Elasticsearch. This has resulted in a situation where many Kibana installations have saved objects in
+different spaces with the same object ID:
+
+image::images/sharing-saved-objects-faq-changing-object-ids-1.png["Sharing Saved Objects object ID diagram (before conversion)"]
+
+Once an object is converted, we need to remove this prefix. Because of limitations with our migration process, we cannot actively check if
+this would result in a conflict. Therefore, we decided to pre-emptively regenerate the object ID for every object in a non-Default space to
+ensure that every object ID becomes globally unique:
+
+image::images/sharing-saved-objects-faq-changing-object-ids-2.png["Sharing Saved Objects object ID diagram (after conversion)"]
+
+[[sharing-saved-objects-faq-legacy-url-alias]]
+==== 2. What is a "legacy URL alias"?
+
+As depicted above, when an object is converted to become share-capable, if it exists in a non-Default space, its ID gets changed. To
+preserve its old ID, we also create a special object called a _legacy URL alias_ ("alias" for short); this alias retains the target object's
+old ID (_sourceId_), and it contains a pointer to the target object's new ID (_targetId_).
+
+Aliases are meant to be mostly invisible to end-users by design. There is no UI to manage them directly. Our vision is that aliases will be
+used as a stop-gap to help us through the 8.0 upgrade process, but we will nudge users away from relying on aliases so we can eventually
+deprecate and remove them.
+
+[[sharing-saved-objects-faq-resolve-outcomes]]
+==== 3. Why are there three different resolve outcomes?
+
+The `resolve()` function first checks if an object with the given ID exists, and then it checks if an object has an alias with the given ID.
+
+1. If only the former is true, the outcome is an `'exactMatch'` -- we found the exact object we were looking for.
+2. If only the latter is true, the outcome is an `'aliasMatch'` -- we found an alias with this ID, that pointed us to an object with a
+different ID.
+3. Finally, if _both conditions_ are true, the outcome is a `'conflict'` -- we found two objects using this ID. Instead of returning an
+error in this situation, in the interest of usability, we decided to return the _most correct match_, which is the exact match. By informing
+the consumer that this is a conflict, the consumer can render an appropriate UI to the end-user explaining that this might not be the object
+they are actually looking for.
+
+*Outcome 1*
+
+If an object was converted in the Default space, then you tried to resolve it with its ID, you would have an `'exactMatch'`:
+
+image::images/sharing-saved-objects-faq-resolve-outcomes-1.png["Sharing Saved Objects resolve outcome 1 (exactMatch)"]
+
+*Outcome 2*
+
+If an object was converted in a non-Default space, then you tried to resolve it with its old ID, you would have an `'aliasMatch'`:
+
+image::images/sharing-saved-objects-faq-resolve-outcomes-2.png["Sharing Saved Objects resolve outcome 2 (aliasMatch)"]
+
+*Outcome 3*
+
+If two objects were converted in the Default space and a non-Default space, _then_ you shared one from the Default space to a non-Default
+space, _then_ you tried to resolve it in the non-Default space with its old ID, you would have a `'conflict'`:
+
+image::images/sharing-saved-objects-faq-resolve-outcomes-3.png["Sharing Saved Objects resolve outcome 3 (conflict)"]
+
+This last scenario is contrived, and we actually have controls in place to prevent this from happening when you share, import, or copy
+objects. However, this scenario _could_ still happen in a few different situations, if objects are created a certain way or if a user
+tampers with an object's raw ES document. Since we can't 100% rule out this scenario, we must handle it gracefully, but we do expect this
+will be a rare occurrence.
+
+[[sharing-saved-objects-faq-share-capable-vs-shareable]]
+==== 4. Why are there both "share-capable" and "shareable" object types?
+
+We implemented the share-capable object type as an intermediate step for consumers who currently have isolated objects, but are not yet
+ready to support fully shareable objects. This is primarily because we want to make sure all object types are converted at the same time in
+the 8.0 release to minimize confusion and disruption for the end-user experience.
+
+We realize that the conversion process and all that it entails can be a not-insignificant amount of work for some Kibana teams to prepare
+for by the 8.0 release. As long as an object is made share-capable, that ensures that its ID will be globally unique, so it will be trivial
+to make that object shareable later on when the time is right.
+
+A developer can easily flip a switch to make a share-capable object into a shareable one, since these are both serialized the same way.
+However, we envision that each consumer will need to enact their own plan and make additional UI changes when making an object shareable.
+For example, some users may not have access to the Saved Objects Management page, but we still want those users to be able to see what
+space(s) their objects exist them and share them to other spaces. Each application should add the appropriate UI controls to handle this.
+
+[[sharing-saved-objects-faq-multiple-deep-link-objects]]
+==== 5. What if one page has deep links to multiple objects?
+
+As mentioned in <<sharing-saved-objects-q2>>, some URLs may contain multiple object IDs, effectively deep linking to multiple objects.
+These should be handled on a case-by-case basis at the plugin owner's discretion. A good rule of thumb is:
+
+* The "primary" object on the page should always handle the three `resolve()` outcomes as described in <<sharing-saved-objects-step-3>>.
+* Any "secondary" objects on the page should usually handle the first two outcomes the same way, but may vary its behavior for the
+`'conflict'` outcome to ignore it throw an error instead. In the case of an error, an actionable message should be shown to the user.

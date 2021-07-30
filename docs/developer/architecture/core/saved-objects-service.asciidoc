@@ -153,6 +153,7 @@ should carefully consider the fields they add to the mappings. Similarly,
 Saved Object types should never use `dynamic: true` as this can cause an
 arbitrary amount of fields to be added to the `.kibana` index.
 
+[[saved-objects-service-writing-migrations]]
 ==== Writing Migrations
 
 Saved Objects support schema changes between Kibana versions, which we call
