@@ -266,6 +266,8 @@ you can find an extended guide about how to proceed.
 
 ## Folder Structure
 
+Below you can find the folder structure used on our Cypress tests.
+
 ### ccs_integration/
 
 Contains the specs that are executed in a Cross Cluster Search configuration.
