@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
@@ -93,7 +93,7 @@ export class CsvGenerator {
     };
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
-    ).rawResponse as SearchResponse<unknown>;
+    ).rawResponse as estypes.SearchResponse<unknown>;
 
     return results;
   }
@@ -107,7 +107,7 @@ export class CsvGenerator {
           scroll_id: scrollId,
         },
       })
-    ).body as SearchResponse<unknown>;
+    ).body;
     return results;
   }
 
@@ -321,13 +321,13 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
-        let results: SearchResponse<unknown> | undefined;
+        let results: estypes.SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
           results = await this.scan(index, searchSource, scrollSettings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
-            totalRecords = results.hits.total;
+            totalRecords = results.hits.total as number;
             this.logger.debug(`Total search results: ${totalRecords}`);
           }
         } else {

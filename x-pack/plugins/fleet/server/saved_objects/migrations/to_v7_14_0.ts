@@ -7,7 +7,7 @@
 
 import type { SavedObjectMigrationFn } from 'kibana/server';
 
-import type { PackagePolicy } from '../../../common';
+import type { PackagePolicy, Installation } from '../../../common';
 
 import { migrateEndpointPackagePolicyToV7140 } from './security_solution';
 
@@ -26,4 +26,18 @@ export const migratePackagePolicyToV7140: SavedObjectMigrationFn<PackagePolicy, 
   }
 
   return updatedPackagePolicyDoc;
+};
+
+export const migrateInstallationToV7140: SavedObjectMigrationFn<Installation, Installation> = (
+  doc
+) => {
+  // Fix a missing migration for user that used Fleet before 7.9
+  if (!doc.attributes.install_source) {
+    doc.attributes.install_source = 'registry';
+  }
+  if (!doc.attributes.install_version) {
+    doc.attributes.install_version = doc.attributes.version;
+  }
+
+  return doc;
 };

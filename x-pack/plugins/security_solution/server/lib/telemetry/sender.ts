@@ -19,8 +19,11 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
+import { TelemetryTrustedAppsTask } from './trusted_apps_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
+import { ExceptionListClient } from '../../../../lists/server';
+import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -57,10 +60,12 @@ export class TelemetryEventsSender {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private diagTask?: TelemetryDiagTask;
   private epMetricsTask?: TelemetryEndpointTask;
+  private trustedAppsTask?: TelemetryTrustedAppsTask;
   private agentService?: AgentService;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
-  private savedObjectClient?: SavedObjectsClientContract;
+  private savedObjectsClient?: SavedObjectsClientContract;
+  private exceptionListClient?: ExceptionListClient;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -72,6 +77,7 @@ export class TelemetryEventsSender {
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
       this.epMetricsTask = new TelemetryEndpointTask(this.logger, taskManager, this);
+      this.trustedAppsTask = new TelemetryTrustedAppsTask(this.logger, taskManager, this);
     }
   }
 
@@ -79,18 +85,21 @@ export class TelemetryEventsSender {
     core?: CoreStart,
     telemetryStart?: TelemetryPluginStart,
     taskManager?: TaskManagerStartContract,
-    endpointContextService?: EndpointAppContextService
+    endpointContextService?: EndpointAppContextService,
+    exceptionListClient?: ExceptionListClient
   ) {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
-    this.savedObjectClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.savedObjectsClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.exceptionListClient = exceptionListClient;
 
     if (taskManager && this.diagTask && this.epMetricsTask) {
       this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
       this.diagTask.start(taskManager);
       this.epMetricsTask.start(taskManager);
+      this.trustedAppsTask?.start(taskManager);
     }
 
     this.logger.debug(`Starting local task`);
@@ -139,7 +148,7 @@ export class TelemetryEventsSender {
   }
 
   public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined) {
+    if (this.esClient === undefined || this.esClient === null) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
@@ -186,7 +195,7 @@ export class TelemetryEventsSender {
   }
 
   public async fetchFleetAgents() {
-    if (this.esClient === undefined) {
+    if (this.esClient === undefined || this.esClient === null) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
@@ -199,15 +208,15 @@ export class TelemetryEventsSender {
   }
 
   public async fetchPolicyConfigs(id: string) {
-    if (this.savedObjectClient === undefined) {
+    if (this.savedObjectsClient === undefined || this.savedObjectsClient === null) {
       throw Error('could not fetch endpoint policy configs. saved object client is not available');
     }
 
-    return this.agentPolicyService?.get(this.savedObjectClient, id);
+    return this.agentPolicyService?.get(this.savedObjectsClient, id);
   }
 
   public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
-    if (this.esClient === undefined) {
+    if (this.esClient === undefined || this.esClient === null) {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
@@ -251,6 +260,14 @@ export class TelemetryEventsSender {
     };
 
     return this.esClient.search(query);
+  }
+
+  public async fetchTrustedApplications() {
+    if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
+      throw Error('could not fetch trusted applications. exception list client not available.');
+    }
+
+    return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
