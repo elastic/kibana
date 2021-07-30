@@ -16,7 +16,8 @@ import {
   DocLinksStart,
   ToastsStart,
   IUiSettingsClient,
-  PluginInitializerContext, HttpStart,
+  PluginInitializerContext,
+  HttpStart,
 } from 'kibana/public';
 import {
   FilterManager,

@@ -7,11 +7,11 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { ContextApp } from '../../components/context_app/context_app';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
-import { i18n } from '@kbn/i18n';
 
 export interface ContextMainProps {
   /**

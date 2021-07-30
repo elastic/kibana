@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
-import { DiscoverServices } from '../../../build_services';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../../../kibana_react/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { toMountPoint } from '../../../../../kibana_react/public';
+import { DiscoverServices } from '../../../build_services';
 
 export interface NotFoundRouteProps {
   /**
