@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback } from 'react';
-
+import { DeepPartial } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
@@ -32,7 +32,14 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actio
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { makeConfigureStore, navigateAway, LensRootStore, loadInitial } from '../state_management';
+import {
+  makeConfigureStore,
+  navigateAway,
+  LensRootStore,
+  loadInitial,
+  LensState,
+} from '../state_management';
+import { getPreloadedState } from '../state_management/lens_slice';
 
 export async function getLensServices(
   coreStart: CoreStart,
@@ -160,13 +167,16 @@ export async function mountApp(
   }
 
   const { datasourceMap, visualizationMap } = instance;
-  const lensStore: LensRootStore = makeConfigureStore({
+  const storeDeps = {
     lensServices,
     datasourceMap,
     visualizationMap,
     embeddableEditorIncomingState,
     initialContext,
-  });
+  };
+  const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
+    lens: getPreloadedState(storeDeps),
+  } as DeepPartial<LensState>);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {

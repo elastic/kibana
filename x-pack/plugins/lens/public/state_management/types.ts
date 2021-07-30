@@ -54,7 +54,7 @@ export interface LensState {
   lens: LensAppState;
 }
 
-export interface StoreDeps {
+export interface LensStoreDeps {
   lensServices: LensAppServices;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;

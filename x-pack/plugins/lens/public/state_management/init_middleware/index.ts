@@ -6,12 +6,12 @@
  */
 
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
-import { StoreDeps } from '..';
+import { LensStoreDeps } from '..';
 import { lensSlice } from '../lens_slice';
 import { loadInitial } from './load_initial';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
 
-export const initMiddleware = (storeDeps: StoreDeps) => (store: MiddlewareAPI) => {
+export const initMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
   const unsubscribeFromExternalContext = subscribeToExternalContext(
     storeDeps.lensServices.data,
     store.getState,

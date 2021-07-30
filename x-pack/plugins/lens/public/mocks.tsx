@@ -16,6 +16,7 @@ import moment from 'moment';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
+import { DeepPartial } from '@reduxjs/toolkit';
 import { LensPublicStart } from '.';
 import { visualizationTypes } from './xy_visualization/types';
 import { navigationPluginMock } from '../../../../src/plugins/navigation/public/mocks';
@@ -35,7 +36,7 @@ import {
 import { LensAttributeService } from './lens_attribute_service';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 
-import { makeConfigureStore, LensAppState } from './state_management/index';
+import { makeConfigureStore, LensAppState, LensState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
 import { presentationUtilPluginMock } from '../../../../src/plugins/presentation_util/public/mocks';
 import { DatasourcePublicAPI, Datasource, Visualization, FramePublicAPI } from './types';
@@ -419,13 +420,15 @@ export function makeLensStore({
       visualizationMap,
     },
     {
-      ...defaultState,
-      searchSessionId: data.search.session.start(),
-      query: data.query.queryString.getQuery(),
-      filters: data.query.filterManager.getGlobalFilters(),
-      resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-      ...preloadedState,
-    }
+      lens: {
+        ...defaultState,
+        searchSessionId: data.search.session.start(),
+        query: data.query.queryString.getQuery(),
+        filters: data.query.filterManager.getGlobalFilters(),
+        resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+        ...preloadedState,
+      },
+    } as DeepPartial<LensState>
   );
 
   const origDispatch = lensStore.dispatch;

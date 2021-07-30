@@ -8,7 +8,7 @@
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
 import { setState } from '..';
-import { updateLayer, updateVisualizationState, StoreDeps } from '..';
+import { updateLayer, updateVisualizationState, LensStoreDeps } from '..';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
@@ -27,7 +27,7 @@ export function loadInitial(
     visualizationMap,
     embeddableEditorIncomingState,
     initialContext,
-  }: StoreDeps,
+  }: LensStoreDeps,
   redirectCallback: (savedObjectId?: string) => void,
   initialInput?: LensEmbeddableInput
 ) {
