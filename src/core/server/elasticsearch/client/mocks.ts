@@ -139,15 +139,16 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
   abort: jest.MockedFunction<() => undefined>;
 };
 
-const createSuccessTransportRequestPromise = <T>(
+const createSuccessTransportRequestPromise = <T, U>(
   body: T,
-  { statusCode = 200 }: { statusCode?: number } = {}
+  { statusCode = 200 }: { statusCode?: number } = {},
+  headers?: U
 ): MockedTransportRequestPromise<ApiResponse<T>> => {
-  const response = createApiResponse({ body, statusCode });
+  const response = createApiResponse({ body, statusCode, headers });
   const promise = Promise.resolve(response);
-  (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
+  (promise as MockedTransportRequestPromise<ApiResponse<T, U>>).abort = jest.fn();
 
-  return promise as MockedTransportRequestPromise<ApiResponse<T>>;
+  return promise as MockedTransportRequestPromise<ApiResponse<T, U>>;
 };
 
 const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPromise<never> => {
