@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Item, PoliciesSelector } from '../policies_selector';
+import { PolicySelectionItem, PoliciesSelector } from '../policies_selector';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 
 export interface SearchExceptionsProps {
@@ -36,7 +36,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');
 
     const onChangeSelection = useCallback(
-      (items: Item[]) => {
+      (items: PolicySelectionItem[]) => {
         const includePoliciesNew = items
           .filter((item) => item.checked === 'on')
           .map((item) => item.id)

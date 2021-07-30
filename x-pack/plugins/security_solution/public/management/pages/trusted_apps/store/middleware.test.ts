@@ -73,7 +73,6 @@ const createStoreSetup = (trustedAppsService: TrustedAppsService) => {
 
 describe('middleware', () => {
   type TrustedAppsEntriesExistState = Pick<TrustedAppsListPageState, 'entriesExist'>;
-  type TrustedAppsPoliciestate = Pick<TrustedAppsListPageState, 'policies'>;
   const entriesExistLoadedState = (): TrustedAppsEntriesExistState => {
     return {
       entriesExist: {
