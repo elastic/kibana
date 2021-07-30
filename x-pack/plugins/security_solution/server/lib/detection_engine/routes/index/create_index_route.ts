@@ -29,7 +29,7 @@ import {
 } from './get_signals_template';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
-import { fieldAliasesOutdated, templateNeedsUpdate } from './check_template_version';
+import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 import { RuleDataPluginService } from '../../../../../../rule_registry/server';
@@ -100,13 +100,12 @@ export const createDetectionIndex = async (
       name: index,
       body: getSignalsTemplate(index, spaceId, aadIndexAliasName) as Record<string, unknown>,
     });
-    if (await esClient.indices.existsTemplate({ name: index })) {
-      await esClient.indices.deleteTemplate({ name: index });
-    }
   }
-  if (await fieldAliasesOutdated(esClient, index)) {
-    await addAliasesToIndices({ esClient, index, aadIndexAliasName, spaceId });
+  // Check if the old legacy siem signals template exists and remove it
+  if (await esClient.indices.existsTemplate({ name: index })) {
+    await esClient.indices.deleteTemplate({ name: index });
   }
+  await addAliasesToIndices({ esClient, index, aadIndexAliasName, spaceId });
   const indexExists = await getIndexExists(esClient, index);
   if (indexExists) {
     const indexVersion = await getIndexVersion(esClient, index);
