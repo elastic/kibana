@@ -10,37 +10,16 @@ import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import styled from 'styled-components';
 import type { BrowserFields } from '../../../../../common';
 
-import { getFieldBrowserSearchInputClassName, getFieldCount, SEARCH_INPUT_WIDTH } from './helpers';
+import { getFieldBrowserSearchInputClassName, getFieldCount } from './helpers';
 
 import * as i18n from './translations';
 
 const CountsFlexGroup = styled(EuiFlexGroup)`
-  margin-top: 5px;
+  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
+  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 CountsFlexGroup.displayName = 'CountsFlexGroup';
-
-const CountFlexItem = styled(EuiFlexItem)`
-  margin-right: 5px;
-`;
-
-CountFlexItem.displayName = 'CountFlexItem';
-
-const SearchContainer = styled.div`
-  padding: 0 16px 16px 16px;
-  margin-bottom: 8px;
-`;
-
-SearchContainer.displayName = 'SearchContainer';
-
-const SearchInputContainer = styled.div`
-  input {
-    max-width: ${SEARCH_INPUT_WIDTH}px;
-    width: ${SEARCH_INPUT_WIDTH}px;
-  }
-`;
-
-SearchInputContainer.displayName = 'SearchInputContainer';
 
 interface Props {
   filteredBrowserFields: BrowserFields;
@@ -55,15 +34,15 @@ const CountRow = React.memo<Pick<Props, 'filteredBrowserFields'>>(({ filteredBro
     alignItems="center"
     data-test-subj="counts-flex-group"
     direction="row"
-    gutterSize="none"
+    gutterSize="xs"
   >
-    <CountFlexItem grow={false}>
+    <EuiFlexItem grow={false}>
       <EuiText color="subdued" data-test-subj="categories-count" size="xs">
         {i18n.CATEGORIES_COUNT(Object.keys(filteredBrowserFields).length)}
       </EuiText>
-    </CountFlexItem>
+    </EuiFlexItem>
 
-    <CountFlexItem grow={false}>
+    <EuiFlexItem grow={false}>
       <EuiText color="subdued" data-test-subj="fields-count" size="xs">
         {i18n.FIELDS_COUNT(
           Object.keys(filteredBrowserFields).reduce<number>(
@@ -72,7 +51,7 @@ const CountRow = React.memo<Pick<Props, 'filteredBrowserFields'>>(({ filteredBro
           )
         )}
       </EuiText>
-    </CountFlexItem>
+    </EuiFlexItem>
   </CountsFlexGroup>
 ));
 
@@ -80,20 +59,18 @@ CountRow.displayName = 'CountRow';
 
 export const Search = React.memo<Props>(
   ({ isSearching, filteredBrowserFields, onSearchInputChange, searchInput, timelineId }) => (
-    <SearchContainer>
-      <SearchInputContainer>
-        <EuiFieldSearch
-          className={getFieldBrowserSearchInputClassName(timelineId)}
-          data-test-subj="field-search"
-          isLoading={isSearching}
-          onChange={onSearchInputChange}
-          placeholder={i18n.FILTER_PLACEHOLDER}
-          value={searchInput}
-          fullWidth
-        />
-      </SearchInputContainer>
+    <>
+      <EuiFieldSearch
+        className={getFieldBrowserSearchInputClassName(timelineId)}
+        data-test-subj="field-search"
+        isLoading={isSearching}
+        onChange={onSearchInputChange}
+        placeholder={i18n.FILTER_PLACEHOLDER}
+        value={searchInput}
+        fullWidth
+      />
       <CountRow filteredBrowserFields={filteredBrowserFields} />
-    </SearchContainer>
+    </>
   )
 );
 

@@ -34,7 +34,7 @@ export const FIELD_BROWSER_WIDTH = 925;
 export const FIELDS_PANE_WIDTH = 670;
 export const HEADER_HEIGHT = 40;
 export const PANES_FLEX_GROUP_WIDTH = CATEGORY_PANE_WIDTH + FIELDS_PANE_WIDTH + 10;
-export const SEARCH_INPUT_WIDTH = 850;
+export const PANES_FLEX_GROUP_HEIGHT = 260;
 export const TABLE_HEIGHT = 260;
 export const TYPE_COLUMN_WIDTH = 50;
 

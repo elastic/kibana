@@ -15,6 +15,7 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import styled from 'styled-components';
@@ -194,7 +195,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             searchInput={searchInput}
             timelineId={timelineId}
           />
-
+          <EuiSpacer size="l" />
           <PanesFlexGroup alignItems="flexStart" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <CategoriesPane

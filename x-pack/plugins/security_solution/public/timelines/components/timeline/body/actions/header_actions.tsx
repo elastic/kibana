@@ -54,7 +54,7 @@ const SortingColumnsContainer = styled.div`
 const FieldBrowserContainer = styled.div`
   .euiToolTipAnchor {
     .euiButtonContent {
-      padding: 0 4px;
+      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.xs}`};
     }
     button {
       color: ${({ theme }) => theme.eui.euiColorPrimary};
