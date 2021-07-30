@@ -20,7 +20,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
 import { getAnimationOptions } from '../cytoscape_options';
-import { Contents } from './Contents';
+import { Contents } from './contents';
 
 interface PopoverProps {
   focusedServiceName?: string;

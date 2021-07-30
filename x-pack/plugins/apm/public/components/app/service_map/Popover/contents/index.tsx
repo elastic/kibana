@@ -13,10 +13,13 @@ import {
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
-import { Buttons } from './Buttons';
-import { Info } from './Info';
-import { ServiceStatsFetcher } from './ServiceStatsFetcher';
-import { popoverWidth } from '../cytoscape_options';
+import { Buttons } from '../Buttons';
+import { Info } from '../Info';
+import { ServiceStatsFetcher } from '../ServiceStatsFetcher';
+import { popoverWidth } from '../../cytoscape_options';
+import { Title } from './title';
+import { Externals } from './externals';
+import { Service } from './service';
 
 interface ContentsProps {
   isService: boolean;
@@ -26,29 +29,15 @@ interface ContentsProps {
   selectedNodeServiceName: string;
 }
 
-// IE 11 does not handle flex properties as expected. With browser detection,
-// we can use regular div elements to render contents that are almost identical.
-//
-// This method of detecting IE is from a Stack Overflow answer:
-// https://stackoverflow.com/a/21825207
-//
-// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
-const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
-
-function FlexColumnGroup(props: {
-  children: React.ReactNode;
-  style: React.CSSProperties;
-  direction: 'column';
-  gutterSize: 's';
-}) {
-  if (isIE11) {
-    const { direction, gutterSize, ...rest } = props;
-    return <div {...rest} />;
+function getContentsComponent(selectedNodeData: cytoscape.NodeDataDefinition) {
+  if (
+    selectedNodeData.groupedConnections &&
+    Array.isArray(selectedNodeData.groupedConnections)
+  ) {
+    return Externals;
   }
-  return <EuiFlexGroup {...props} />;
-}
-function FlexColumnItem(props: { children: React.ReactNode }) {
-  return isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
+
+  return Service;
 }
 
 export function Contents({
@@ -58,19 +47,25 @@ export function Contents({
   onFocusClick,
   selectedNodeServiceName,
 }: ContentsProps) {
+  const ContentsComponent = getContentsComponent(selectedNodeData);
+
   return (
-    <FlexColumnGroup
+    <EuiFlexGroup
       direction="column"
       gutterSize="s"
       style={{ width: popoverWidth }}
     >
-      <FlexColumnItem>
+      <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h3>{label}</h3>
+          <h3>{selectedNodeData.label ?? selectedNodeData.id}</h3>
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
-      </FlexColumnItem>
-      <FlexColumnItem>
+      </EuiFlexItem>
+      <ContentsComponent
+        onFocusClick={onFocusClick}
+        selectedNodeData={selectedNodeData}
+      />
+      {/* <EuiFlexItem>
         {isService ? (
           <ServiceStatsFetcher
             serviceName={selectedNodeServiceName}
@@ -79,13 +74,13 @@ export function Contents({
         ) : (
           <Info {...selectedNodeData} />
         )}
-      </FlexColumnItem>
+      </EuiFlexItem>
       {isService && (
         <Buttons
           onFocusClick={onFocusClick}
           selectedNodeServiceName={selectedNodeServiceName}
         />
-      )}
-    </FlexColumnGroup>
+      )} */}
+    </EuiFlexGroup>
   );
 }

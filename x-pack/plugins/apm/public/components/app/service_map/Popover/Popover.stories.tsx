@@ -5,91 +5,104 @@
  * 2.0.
  */
 
+import { Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import { CoreStart } from 'kibana/public';
 import React, { ComponentType } from 'react';
+import { Popover } from '.';
+import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { CytoscapeContext } from '../Cytoscape';
-import { Popover } from '.';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
+
+interface Args {
+  nodeData: cytoscape.NodeDataDefinition;
+}
 
 export default {
   title: 'app/ServiceMap/Popover',
   component: Popover,
   decorators: [
-    (Story: ComponentType) => {
+    (StoryComponent: ComponentType) => {
       const coreMock = ({
         http: {
-          get: async () => ({
-            avgCpuUsage: 0.32809666568309237,
-            avgErrorRate: 0.556068173242986,
-            avgMemoryUsage: 0.5504868173242986,
-            transactionStats: {
-              avgRequestsPerMinute: 164.47222031860858,
-              avgTransactionDuration: 61634.38905590272,
-            },
-          }),
+          get: () => {
+            return {
+              avgCpuUsage: 0.32809666568309237,
+              avgErrorRate: 0.556068173242986,
+              avgMemoryUsage: 0.5504868173242986,
+              transactionStats: {
+                avgRequestsPerMinute: 164.47222031860858,
+                avgTransactionDuration: 61634.38905590272,
+              },
+            };
+          },
         },
+        notifications: { toasts: { add: () => {} } },
+        uiSettings: { get: () => ({}) },
       } as unknown) as CoreStart;
+
+      const KibanaReactContext = createKibanaReactContext(coreMock);
 
       createCallApmApi(coreMock);
 
       return (
-        <MockUrlParamsContextProvider>
-          <MockApmPluginContextWrapper>
-            <div style={{ height: 325 }}>
-              <Story />
-            </div>
-          </MockApmPluginContextWrapper>
-        </MockUrlParamsContextProvider>
+        <KibanaReactContext.Provider>
+          <MockUrlParamsContextProvider>
+            <MockApmPluginContextWrapper>
+              <div style={{ height: 325 }}>
+                <StoryComponent />
+              </div>
+            </MockApmPluginContextWrapper>
+          </MockUrlParamsContextProvider>
+        </KibanaReactContext.Provider>
+      );
+    },
+    (StoryComponent: ComponentType, { args: { nodeData } }: { args: Args }) => {
+      const node = {
+        data: nodeData,
+      };
+
+      const cy = cytoscape({ elements: [node] });
+
+      setTimeout(() => {
+        cy.$id(node.data.id!).select();
+      }, 0);
+
+      return (
+        <CytoscapeContext.Provider value={cy}>
+          <StoryComponent />
+        </CytoscapeContext.Provider>
       );
     },
   ],
 };
 
-export function Example() {
+export const Service: Story<Args> = () => {
   return <Popover />;
-}
-Example.decorators = [
-  (Story: ComponentType) => {
-    const node = {
-      data: { id: 'example service', 'service.name': 'example service' },
-    };
+};
+Service.args = {
+  nodeData: { id: 'example service', 'service.name': 'example service' },
+};
 
-    const cy = cytoscape({ elements: [node] });
-
-    setTimeout(() => {
-      cy.$id('example service').select();
-    }, 0);
-
-    return (
-      <CytoscapeContext.Provider value={cy}>
-        <Story />
-      </CytoscapeContext.Provider>
-    );
-  },
-];
-
-export function Externals() {
+export const Backend: Story<Args> = () => {
   return <Popover />;
-}
-Externals.decorators = [
-  (Story: ComponentType) => {
-    const node = {
-      data: exampleGroupedConnectionsData,
-    };
-    const cy = cytoscape({ elements: [node] });
-
-    setTimeout(() => {
-      cy.$id(exampleGroupedConnectionsData.id).select();
-    }, 0);
-
-    return (
-      <CytoscapeContext.Provider value={cy}>
-        <Story />
-      </CytoscapeContext.Provider>
-    );
+};
+Backend.args = {
+  nodeData: {
+    'span.subtype': 'postgresql',
+    'span.destination.service.resource': 'postgresql',
+    'span.type': 'db',
+    id: '>postgresql',
+    label: 'postgresql',
   },
-];
+};
+
+export const Externals: Story<Args> = () => {
+  return <Popover />;
+};
+Externals.args = {
+  nodeData: exampleGroupedConnectionsData,
+};
