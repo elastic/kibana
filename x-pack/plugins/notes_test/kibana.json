@@ -6,5 +6,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [],
-  "optionalPlugins": []
+  "optionalPlugins": ["spaces"]
 }

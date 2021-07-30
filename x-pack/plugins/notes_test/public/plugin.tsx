@@ -6,18 +6,25 @@
  */
 
 import type { CoreStart, Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 import { getServices } from './services';
 
-export class NotesTestPlugin implements Plugin<{}, {}, {}, {}> {
-  public setup(core: CoreSetup) {
+interface PluginStartDeps {
+  spaces?: SpacesPluginStart;
+}
+
+export class NotesTestPlugin implements Plugin<{}, {}, {}, PluginStartDeps> {
+  public setup(core: CoreSetup<PluginStartDeps>) {
     core.application.register({
       id: 'notesTest',
       title: 'Notes test',
       async mount(appMountParams: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, pluginStartDeps] = await core.getStartServices();
         const services = getServices(coreStart);
+        const { http } = coreStart;
+        const { spaces: spacesApi } = pluginStartDeps;
         const { renderApp } = await import('./app');
-        return renderApp({ services, appMountParams });
+        return renderApp({ services, appMountParams, http, spacesApi });
       },
     });
 
