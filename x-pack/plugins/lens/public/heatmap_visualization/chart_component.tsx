@@ -124,7 +124,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const isDarkTheme = chartsThemeService.useDarkMode();
 
   const chartRef = useRef<Chart>(null);
-  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef);
+  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+    datatables: Object.values(data.tables),
+  });
   const tableId = Object.keys(data.tables)[0];
   const table = data.tables[tableId];
 

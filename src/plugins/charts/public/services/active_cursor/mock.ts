@@ -11,6 +11,9 @@ import type { ActiveCursor } from './active_cursor';
 export const activeCursorMock: ActiveCursor = {
   activeCursor$: {
     subscribe: jest.fn(),
+    pipe: jest.fn(() => ({
+      subscribe: jest.fn(),
+    })),
   },
   setup: jest.fn(),
 } as any;
