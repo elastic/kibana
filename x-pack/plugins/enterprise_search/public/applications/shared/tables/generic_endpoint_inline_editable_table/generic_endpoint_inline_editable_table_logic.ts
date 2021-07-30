@@ -13,6 +13,8 @@ import { HttpLogic } from '../../http';
 
 import { ItemWithAnID } from '../types';
 
+import { stripIdAndCreatedAtFromItem } from './utils';
+
 interface GenericEndpointInlineEditableTableValues {
   isLoading: boolean;
 }
@@ -49,14 +51,6 @@ type GenericEndpointInlineEditableTableLogicType<Item extends ItemWithAnID> = Ma
   GenericEndpointInlineEditableTableActions<Item>,
   GenericEndpointInlineEditableTableProps<Item>
 >;
-
-const stripIdAndCreatedAtFromItem = (item: object) => {
-  // TODO we should really enforce this type elsewhere
-  const itemToClean = { ...item } as { id?: string; created_at?: string };
-  delete itemToClean.id;
-  delete itemToClean.created_at;
-  return itemToClean;
-};
 
 const saveAndCallback = async <Item extends ItemWithAnID>(
   httpCall: (path: string, data: object) => Promise<object>,

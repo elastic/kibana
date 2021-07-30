@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export type ItemWithAnID = {
-  id: number | null;
-  created_at?: string;
-} & object;
+import { ItemWithAnID } from '../types';
+
+export const stripIdAndCreatedAtFromItem = (item: ItemWithAnID) => {
+  const itemToClean = { ...item } as Partial<ItemWithAnID>;
+  delete itemToClean.id;
+  delete itemToClean.created_at;
+  return itemToClean;
+};
