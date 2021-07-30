@@ -14,30 +14,10 @@ import {
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
 
-/**
- * Given an endpoint package policy, verifies that all enabled features that
- * require a certain license level have a valid license for them.
- */
-export const isEndpointPolicyValidForLicense = (
-  policy: PolicyConfig,
-  license: ILicense | null
-): boolean => {
+function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {
-    const defaults = policyFactoryWithSupportedFeatures();
-
-    // only platinum or higher may enable ransomware
-    if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
-      return false;
-    }
-
-    // only platinum or higher may enable ransomware
-    if (
-      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported
-    ) {
-      return false;
-    }
-
-    return true; // currently, platinum allows all features
+    // platinum allows all malware features
+    return true;
   }
 
   const defaults = policyFactoryWithoutPaidFeatures();
@@ -60,22 +40,37 @@ export const isEndpointPolicyValidForLicense = (
   ) {
     return false;
   }
+  return true;
+}
 
-  // only platinum or higher may enable ransomware
-  if (policy.windows.ransomware.mode !== defaults.windows.ransomware.mode) {
-    return false;
+function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  if (isAtLeast(license, 'platinum')) {
+    const defaults = policyFactoryWithSupportedFeatures();
+
+    // only platinum or higher may enable ransomware protection
+    if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
+      return false;
+    }
+    return true;
   }
   // only platinum or higher may enable ransomware
-  if (policy.windows.ransomware.mode !== defaults.windows.ransomware.mode) {
-    return false;
-  }
-
   // only platinum or higher may enable ransomware notification
+  // Only Platinum or higher may change the ransomware message
+  // (which can be blank or what Endpoint defaults)
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
+    return false;
+  }
+
+  if (policy.windows.ransomware.mode !== defaults.windows.ransomware.mode) {
+    return false;
+  }
+
   if (policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled) {
     return false;
   }
 
-  // Only Platinum or higher may change the ransomware message (which can be blank or what Endpoint defaults)
   if (
     policy.windows.popup.ransomware.message !== '' &&
     policy.windows.popup.ransomware.message !== DefaultPolicyNotificationMessage
@@ -83,16 +78,32 @@ export const isEndpointPolicyValidForLicense = (
     return false;
   }
 
-  // only platinum or higher may enable ransomware
-  if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
-    return false;
+  return true;
+}
+
+function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  if (isAtLeast(license, 'platinum')) {
+    const defaults = policyFactoryWithSupportedFeatures();
+    // only platinum or higher may enable memory protection
+    if (
+      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported
+    ) {
+      return false;
+    }
+    return true;
   }
+
   // only platinum or higher may enable memory_protection
+  // only platinum or higher may enable memory_protection notification
+  // Only Platinum or higher may change the memory_protection message
+  // (which can be blank or what Endpoint defaults)
+  // only platinum or higher may enable memory_protection
+  const defaults = policyFactoryWithoutPaidFeatures();
+
   if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
     return false;
   }
 
-  // only platinum or higher may enable memory_protection notification
   if (
     policy.windows.popup.memory_protection.enabled !==
     defaults.windows.popup.memory_protection.enabled
@@ -100,7 +111,6 @@ export const isEndpointPolicyValidForLicense = (
     return false;
   }
 
-  // Only Platinum or higher may change the memory_protection message (which can be blank or what Endpoint defaults)
   if (
     policy.windows.popup.memory_protection.message !== '' &&
     policy.windows.popup.memory_protection.message !== DefaultPolicyNotificationMessage
@@ -108,12 +118,70 @@ export const isEndpointPolicyValidForLicense = (
     return false;
   }
 
-  // only platinum or higher may enable memory_protection
   if (policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported) {
     return false;
   }
-
   return true;
+}
+function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  if (isAtLeast(license, 'platinum')) {
+    const defaults = policyFactoryWithSupportedFeatures();
+    // only platinum or higher may enable behavior protection
+    if (
+      policy.windows.behavior_protection.supported !==
+      defaults.windows.behavior_protection.supported
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may enable behavior_protection
+  if (policy.windows.behavior_protection.mode !== defaults.windows.behavior_protection.mode) {
+    return false;
+  }
+
+  // only platinum or higher may enable behavior_protection notification
+  if (
+    policy.windows.popup.behavior_protection.enabled !==
+    defaults.windows.popup.behavior_protection.enabled
+  ) {
+    return false;
+  }
+
+  // Only Platinum or higher may change the behavior_protection message (which can be blank or what Endpoint defaults)
+  if (
+    policy.windows.popup.behavior_protection.message !== '' &&
+    policy.windows.popup.behavior_protection.message !== DefaultPolicyNotificationMessage
+  ) {
+    return false;
+  }
+
+  // only platinum or higher may enable behavior_protection
+  if (
+    policy.windows.behavior_protection.supported !== defaults.windows.behavior_protection.supported
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Given an endpoint package policy, verifies that all enabled features that
+ * require a certain license level have a valid license for them.
+ */
+export const isEndpointPolicyValidForLicense = (
+  policy: PolicyConfig,
+  license: ILicense | null
+): boolean => {
+  return (
+    isEndpointMalwarePolicyValidForLicense(policy, license) &&
+    isEndpointRansomwarePolicyValidForLicense(policy, license) &&
+    isEndpointMemoryPolicyValidForLicense(policy, license) &&
+    isEndpointBehaviorPolicyValidForLicense(policy, license)
+  );
 };
 
 /**
