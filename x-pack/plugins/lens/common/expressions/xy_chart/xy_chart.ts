@@ -97,6 +97,12 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show x and y axes tick labels',
       }),
     },
+    labelsOrientation: {
+      types: ['lens_xy_labelsOrientationConfig'],
+      help: i18n.translate('xpack.lens.xyChart.labelsOrientation.help', {
+        defaultMessage: 'Defines the rotation of the axis labels',
+      }),
+    },
     gridlinesVisibilitySettings: {
       types: ['lens_xy_gridlinesConfig'],
       help: i18n.translate('xpack.lens.xyChart.gridlinesSettings.help', {

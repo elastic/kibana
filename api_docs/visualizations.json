@@ -2960,13 +2960,7 @@
                 "text": "TimeRange"
               },
               " | undefined) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.RangeFilter",
-                "text": "RangeFilter"
-              },
+              "RangeFilter",
               " | undefined; getBounds: () => ",
               {
                 "pluginId": "data",
@@ -4135,13 +4129,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "source": {
@@ -4158,13 +4146,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "source": {
@@ -4823,7 +4805,7 @@
       ],
       "source": {
         "path": "src/plugins/visualizations/public/plugin.ts",
-        "lineNumber": 76
+        "lineNumber": 77
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -4896,7 +4878,7 @@
       ],
       "source": {
         "path": "src/plugins/visualizations/public/plugin.ts",
-        "lineNumber": 78
+        "lineNumber": 79
       },
       "deprecated": false,
       "children": [
@@ -4921,7 +4903,7 @@
           ],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 79
+            "lineNumber": 80
           },
           "deprecated": false
         },
@@ -4969,7 +4951,7 @@
           ],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 80
+            "lineNumber": 81
           },
           "deprecated": false,
           "returnComment": [],
@@ -4983,7 +4965,7 @@
               "description": [],
               "source": {
                 "path": "src/plugins/visualizations/public/plugin.ts",
-                "lineNumber": 80
+                "lineNumber": 81
               },
               "deprecated": false
             },
@@ -5014,7 +4996,7 @@
               ],
               "source": {
                 "path": "src/plugins/visualizations/public/plugin.ts",
-                "lineNumber": 80
+                "lineNumber": 81
               },
               "deprecated": false
             }
@@ -5056,7 +5038,7 @@
           ],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 81
+            "lineNumber": 82
           },
           "deprecated": false,
           "returnComment": [],
@@ -5120,7 +5102,7 @@
           ],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 82
+            "lineNumber": 83
           },
           "deprecated": false,
           "returnComment": [],
@@ -5172,7 +5154,7 @@
           ],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 83
+            "lineNumber": 84
           },
           "deprecated": false,
           "returnComment": [],
@@ -5291,7 +5273,7 @@
           ],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 84
+            "lineNumber": 85
           },
           "deprecated": false
         }

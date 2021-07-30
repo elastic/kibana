@@ -27,6 +27,7 @@ import {
   XYCurveType,
   AxesSettingsConfig,
   FittingFunction,
+  LabelsOrientationConfig,
 } from '../../common/expressions';
 
 // Persisted parts of the state
@@ -44,6 +45,7 @@ export interface XYState {
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
+  labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;

@@ -18,7 +18,6 @@ import React, { ComponentType, useCallback, useEffect, useMemo, useState } from 
 import { connect, ConnectedProps } from 'react-redux';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
