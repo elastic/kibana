@@ -11,7 +11,7 @@ import { PLUGIN } from '../common/constants/plugin';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { IndexDataEnricher } from './services';
-import { isEsError, handleEsError, parseEsError } from './shared_imports';
+import { handleEsError } from './shared_imports';
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {
@@ -54,8 +54,6 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       },
       indexDataEnricher: this.indexDataEnricher,
       lib: {
-        isEsError,
-        parseEsError,
         handleEsError,
       },
     });

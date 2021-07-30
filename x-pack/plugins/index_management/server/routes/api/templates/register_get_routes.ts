@@ -17,7 +17,7 @@ import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_template
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDependencies) {
+export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/index_templates'), validate: false },
     async (context, request, response) => {
@@ -44,14 +44,7 @@ export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDepende
 
         return response.ok({ body });
       } catch (error) {
-        if (isEsError(error)) {
-          return response.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-        // Case: default
-        throw error;
+        return handleEsError({ error, response });
       }
     }
   );

@@ -11,7 +11,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { IndexDataEnricher } from './services';
-import { isEsError, parseEsError, handleEsError } from './shared_imports';
+import { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   security: SecurityPluginSetup;
@@ -26,8 +26,6 @@ export interface RouteDependencies {
   };
   indexDataEnricher: IndexDataEnricher;
   lib: {
-    isEsError: typeof isEsError;
-    parseEsError: typeof parseEsError;
     handleEsError: typeof handleEsError;
   };
 }
