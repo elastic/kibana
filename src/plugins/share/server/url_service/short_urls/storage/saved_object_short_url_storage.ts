@@ -13,15 +13,7 @@ import { ShortUrlStorage } from '../types';
 
 export type ShortUrlSavedObject = SavedObject<ShortUrlSavedObjectAttributes>;
 
-/**
- * Fields that stored in the short url saved object.
- */
-export interface ShortUrlSavedObjectAttributes {
-  /**
-   * The slug of the short URL, the part after the `/` in the URL.
-   */
-  readonly slug: string;
-
+export interface ShortUrlSavedObjectAttributesBase {
   /**
    * Number of times the short URL has been resolved.
    */
@@ -36,33 +28,69 @@ export interface ShortUrlSavedObjectAttributes {
    * The timestamp when the short URL was created.
    */
   readonly createDate: number;
+}
 
-  /**
-   * Serialized locator state.
-   */
-  readonly locatorJSON: string;
-
+export interface ShortUrlSavedObjectAttributesV1 extends ShortUrlSavedObjectAttributesBase {
   /**
    * Legacy field - was used in old short URL versions. This field will
-   * be removed in a future by a migration.
+   * be removed in the future by a migration.
    *
    * @deprecated
    */
   readonly url: string;
 }
 
+/**
+ * Fields that stored in the short url saved object.
+ */
+export interface ShortUrlSavedObjectAttributesV2 extends ShortUrlSavedObjectAttributesBase {
+  /**
+   * The slug of the short URL, the part after the `/` in the URL.
+   */
+  readonly slug: string;
+
+  /**
+   * Serialized locator state.
+   */
+  readonly locatorJSON: string;
+}
+
+export type ShortUrlSavedObjectAttributes =
+  | ShortUrlSavedObjectAttributesV1
+  | ShortUrlSavedObjectAttributesV2;
+
+const isShortUrlV1 = (x: ShortUrlSavedObjectAttributes): x is ShortUrlSavedObjectAttributesV1 =>
+  typeof (x as ShortUrlSavedObjectAttributesV1).url === 'string';
+
 const createShortUrlData = <P extends SerializableState = SerializableState>(
   savedObject: ShortUrlSavedObject
 ): ShortUrlData<P> => {
   const attributes = savedObject.attributes;
+
+  if (isShortUrlV1(attributes)) {
+    const { url, ...rest } = attributes;
+    const state = ({ url } as unknown) as P;
+
+    return {
+      id: savedObject.id,
+      slug: savedObject.id,
+      locator: {
+        id: 'FILL_THIS_IN',
+        version: 'FILL_THIS_IN',
+        state,
+      },
+      ...rest,
+    } as ShortUrlData<P>;
+  }
+
   const { locatorJSON, ...rest } = attributes;
   const locator = JSON.parse(locatorJSON) as ShortUrlData<P>['locator'];
 
   return {
     id: savedObject.id,
-    ...rest,
     locator,
-  };
+    ...rest,
+  } as ShortUrlData<P>;
 };
 
 const createAttributes = <P extends SerializableState = SerializableState>(

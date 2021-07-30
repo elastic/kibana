@@ -102,14 +102,6 @@ export interface ShortUrlData<LocatorParams extends SerializableState = Serializ
    * The timestamp when the short URL was last modified.
    */
   readonly locator: LocatorData<LocatorParams>;
-
-  /**
-   * Legacy field - was used in old short URL versions. This field will
-   * be removed in a future by a migration.
-   *
-   * @deprecated
-   */
-  readonly url: string;
 }
 
 /**
