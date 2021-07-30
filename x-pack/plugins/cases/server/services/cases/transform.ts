@@ -23,7 +23,7 @@ import {
   findConnectorIdReference,
   transformFieldsToESModel,
   transformESConnectorOrUseDefault,
-  transformESConnector,
+  transformESConnectorToExternalModel,
 } from '../transform';
 
 export function transformUpdateResponsesToExternalModels(
@@ -43,12 +43,12 @@ export function transformUpdateResponseToExternalModel(
 ): SavedObjectsUpdateResponse<CaseAttributes> {
   const { connector, external_service, ...restUpdateAttributes } = updatedCase.attributes ?? {};
 
-  const transformedConnector = transformESConnector(
+  const transformedConnector = transformESConnectorToExternalModel({
     // if the saved object had an error the attributes field will not exist
     connector,
-    updatedCase.references,
-    connectorIdReferenceName
-  );
+    references: updatedCase.references,
+    referenceName: connectorIdReferenceName,
+  });
 
   let externalService: CaseFullExternalService | null | undefined;
 
@@ -184,12 +184,12 @@ export function transformFindResponseToExternalModel(
 export function transformSavedObjectToExternalModel(
   caseSavedObject: SavedObject<ESCaseAttributes>
 ): SavedObject<CaseAttributes> {
-  const connector = transformESConnectorOrUseDefault(
+  const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
-    caseSavedObject.attributes?.connector,
-    caseSavedObject.references,
-    connectorIdReferenceName
-  );
+    connector: caseSavedObject.attributes?.connector,
+    references: caseSavedObject.references,
+    referenceName: connectorIdReferenceName,
+  });
 
   const externalService = transformESExternalService(
     caseSavedObject.attributes?.external_service,
@@ -201,8 +201,7 @@ export function transformSavedObjectToExternalModel(
     attributes: {
       ...caseSavedObject.attributes,
       connector,
-      // force the value to be null here because we can't have a partial response
-      external_service: externalService ?? null,
+      external_service: externalService,
     },
   };
 }

@@ -25,7 +25,7 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { connectorIdReferenceName, ESCaseConnector } from '..';
 import {
   transformFieldsToESModel,
-  transformESConnector,
+  transformESConnectorToExternalModel,
   transformESConnectorOrUseDefault,
 } from '../transform';
 
@@ -165,11 +165,11 @@ function transformUpdateResponseToExternalModel(
 ): SavedObjectsUpdateResponse<CasesConfigurePatch> {
   const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
 
-  const transformedConnector = transformESConnector(
+  const transformedConnector = transformESConnectorToExternalModel({
     connector,
-    updatedConfiguration.references,
-    connectorIdReferenceName
-  );
+    references: updatedConfiguration.references,
+    referenceName: connectorIdReferenceName,
+  });
 
   return {
     ...updatedConfiguration,
@@ -184,12 +184,12 @@ function transformUpdateResponseToExternalModel(
 function transformToExternalModel(
   configuration: SavedObject<ESCasesConfigureAttributes>
 ): SavedObject<CasesConfigureAttributes> {
-  const connector = transformESConnectorOrUseDefault(
+  const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
-    configuration.attributes?.connector,
-    configuration.references,
-    connectorIdReferenceName
-  );
+    connector: configuration.attributes?.connector,
+    references: configuration.references,
+    referenceName: connectorIdReferenceName,
+  });
 
   return {
     ...configuration,

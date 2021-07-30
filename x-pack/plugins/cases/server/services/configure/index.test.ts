@@ -17,7 +17,9 @@ import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks'
 import {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsCreateOptions,
   SavedObjectsFindResult,
+  SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { connectorIdReferenceName } from '..';
@@ -25,7 +27,7 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { CaseConfigureService, ESCasesConfigureAttributes } from '.';
 import { getNoneCaseConnector } from '../../common';
-import { createESConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
+import { createESJiraConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,
@@ -145,262 +147,191 @@ describe('CaseConfigureService', () => {
     service = new CaseConfigureService(mockLogger);
   });
 
-  describe('transform between external model and Elasticsearch model', () => {
+  describe('transforms the external model to the Elasticsearch model', () => {
     describe('patch', () => {
-      describe('formats the update attributes', () => {
-        it('formats the update saved object', async () => {
-          unsecuredSavedObjectsClient.update.mockReturnValue(
-            Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
-          );
+      it('creates the update attributes with the fields that were passed in', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+        );
 
-          await service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes: createConfigPostParams(createJiraConnector()),
-          });
-
-          expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-            Object {
-              "closure_type": "close-by-pushing",
-              "connector": Object {
-                "fields": Array [
-                  Object {
-                    "key": "issueType",
-                    "value": "bug",
-                  },
-                  Object {
-                    "key": "priority",
-                    "value": "high",
-                  },
-                  Object {
-                    "key": "parent",
-                    "value": "2",
-                  },
-                ],
-                "name": ".jira",
-                "type": ".jira",
-              },
-              "created_at": "2020-04-09T09:43:51.778Z",
-              "created_by": Object {
-                "email": "testemail@elastic.co",
-                "full_name": "elastic",
-                "username": "elastic",
-              },
-              "owner": "securitySolution",
-              "updated_at": "2020-04-09T09:43:51.778Z",
-              "updated_by": Object {
-                "email": "testemail@elastic.co",
-                "full_name": "elastic",
-                "username": "elastic",
-              },
-            }
-          `);
+        await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigPostParams(createJiraConnector()),
         });
 
-        it('transforms the update connector schema to ES schema', async () => {
-          unsecuredSavedObjectsClient.update.mockReturnValue(
-            Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
-          );
+        const { connector: ignoreConnector, ...restUpdateAttributes } = unsecuredSavedObjectsClient
+          .update.mock.calls[0][2] as Partial<ESCasesConfigureAttributes>;
 
-          await service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes: createConfigPostParams(createJiraConnector()),
-          });
-
-          const updateAttributes = unsecuredSavedObjectsClient.update.mock
-            .calls[0][2] as Partial<CasesConfigureAttributes>;
-          expect(updateAttributes.connector).toMatchInlineSnapshot(`
-            Object {
-              "fields": Array [
-                Object {
-                  "key": "issueType",
-                  "value": "bug",
-                },
-                Object {
-                  "key": "priority",
-                  "value": "high",
-                },
-                Object {
-                  "key": "parent",
-                  "value": "2",
-                },
-              ],
-              "name": ".jira",
-              "type": ".jira",
-            }
-          `);
-          expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-            Object {
-              "references": Array [
-                Object {
-                  "id": "1",
-                  "name": "connectorId",
-                  "type": "action",
-                },
-              ],
-            }
-          `);
-        });
-
-        it('formats the saved object without a connector', async () => {
-          unsecuredSavedObjectsClient.update.mockReturnValue(
-            Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
-          );
-
-          await service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes: createConfigUpdateParams(),
-          });
-
-          expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
-            `Object {}`
-          );
-          expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-            Object {
-              "references": undefined,
-            }
-          `);
-        });
-
-        it('returns the none connector after update', async () => {
-          unsecuredSavedObjectsClient.update.mockReturnValue(
-            Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
-          );
-
-          await service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes: createConfigUpdateParams(getNoneCaseConnector()),
-          });
-
-          expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-            Object {
-              "connector": Object {
-                "fields": Array [],
-                "name": "none",
-                "type": ".none",
-              },
-            }
-          `);
-        });
+        expect(restUpdateAttributes).toMatchInlineSnapshot(`
+          Object {
+            "closure_type": "close-by-pushing",
+            "created_at": "2020-04-09T09:43:51.778Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "owner": "securitySolution",
+            "updated_at": "2020-04-09T09:43:51.778Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+          }
+        `);
       });
 
-      describe('transforming to external model', () => {
-        it('returns an object with a none connector and without a reference', async () => {
-          unsecuredSavedObjectsClient.update.mockReturnValue(
-            Promise.resolve(createUpdateConfigSO(getNoneCaseConnector()))
-          );
+      it('transforms the connector.fields to an array of key/value pairs', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+        );
 
-          const res = await service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes: createConfigUpdateParams(),
-          });
-
-          expect(res.attributes).toMatchInlineSnapshot(`
-            Object {
-              "connector": Object {
-                "fields": null,
-                "id": "none",
-                "name": "none",
-                "type": ".none",
-              },
-            }
-          `);
-          expect(res.references).toMatchInlineSnapshot(`Array []`);
+        await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigPostParams(createJiraConnector()),
         });
 
-        it('returns an undefined connector if it is not returned by the update', async () => {
-          unsecuredSavedObjectsClient.update.mockReturnValue(
-            Promise.resolve({} as SavedObjectsUpdateResponse<ESCasesConfigureAttributes>)
-          );
+        const { connector } = unsecuredSavedObjectsClient.update.mock
+          .calls[0][2] as Partial<ESCasesConfigureAttributes>;
 
-          const res = await service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes: createConfigUpdateParams(),
-          });
-
-          expect(res).toMatchInlineSnapshot(`
+        expect(connector?.fields).toMatchInlineSnapshot(`
+          Array [
             Object {
-              "attributes": Object {},
-            }
-          `);
-        });
-
-        it('returns the default none connector when it cannot find the reference', async () => {
-          const { name, type, fields } = createESConnector();
-          const returnValue: SavedObjectsUpdateResponse<ESCasesConfigureAttributes> = {
-            type: CASE_CONFIGURE_SAVED_OBJECT,
-            id: '1',
-            attributes: {
-              connector: {
-                name,
-                type,
-                fields,
-              },
+              "key": "issueType",
+              "value": "bug",
             },
-            version: '1',
-            references: undefined,
-          };
-
-          unsecuredSavedObjectsClient.update.mockReturnValue(Promise.resolve(returnValue));
-
-          const res = await service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes: createConfigUpdateParams(),
-          });
-
-          expect(res).toMatchInlineSnapshot(`
             Object {
-              "attributes": Object {
-                "connector": Object {
-                  "fields": null,
-                  "id": "none",
-                  "name": "none",
-                  "type": ".none",
-                },
-              },
-              "id": "1",
-              "references": undefined,
-              "type": "cases-configure",
-              "version": "1",
-            }
-          `);
+              "key": "priority",
+              "value": "high",
+            },
+            Object {
+              "key": "parent",
+              "value": "2",
+            },
+          ]
+        `);
+      });
+
+      it('preserves the connector fields but does not include the id', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+        );
+
+        await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigPostParams(createJiraConnector()),
         });
 
-        it('returns the connector in the external schema', async () => {
-          unsecuredSavedObjectsClient.update.mockReturnValue(
-            Promise.resolve(createUpdateConfigSO(createESConnector()))
-          );
+        const { connector } = unsecuredSavedObjectsClient.update.mock
+          .calls[0][2] as Partial<ESCasesConfigureAttributes>;
 
-          const res = await service.patch({
-            configurationId: '1',
-            unsecuredSavedObjectsClient,
-            updatedAttributes: createConfigUpdateParams(),
-          });
-
-          expect(res.attributes.connector).toMatchInlineSnapshot(`
-            Object {
-              "fields": Object {
-                "issueType": "bug",
-                "parent": "2",
-                "priority": "high",
+        expect(connector).toMatchInlineSnapshot(`
+          Object {
+            "fields": Array [
+              Object {
+                "key": "issueType",
+                "value": "bug",
               },
-              "id": "1",
-              "name": ".jira",
-              "type": ".jira",
-            }
-          `);
+              Object {
+                "key": "priority",
+                "value": "high",
+              },
+              Object {
+                "key": "parent",
+                "value": "2",
+              },
+            ],
+            "name": ".jira",
+            "type": ".jira",
+          }
+        `);
+        expect(connector).not.toHaveProperty('id');
+      });
+
+      it('moves the connector.id to the references', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+        );
+
+        await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigPostParams(createJiraConnector()),
         });
+
+        const updateAttributes = unsecuredSavedObjectsClient.update.mock
+          .calls[0][2] as Partial<ESCasesConfigureAttributes>;
+
+        expect(updateAttributes.connector).not.toHaveProperty('id');
+
+        const updateOptions = unsecuredSavedObjectsClient.update.mock
+          .calls[0][3] as SavedObjectsUpdateOptions;
+        expect(updateOptions.references).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "1",
+              "name": "connectorId",
+              "type": "action",
+            },
+          ]
+        `);
+      });
+
+      it('creates an empty update object and null reference when there is no connector', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+        );
+
+        await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigUpdateParams(),
+        });
+
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
+          `Object {}`
+        );
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+          Object {
+            "references": undefined,
+          }
+        `);
+      });
+
+      it('creates an update object with the none connector', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+        );
+
+        await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigUpdateParams(getNoneCaseConnector()),
+        });
+
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+          Object {
+            "connector": Object {
+              "fields": Array [],
+              "name": "none",
+              "type": ".none",
+            },
+          }
+        `);
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+                  Object {
+                    "references": undefined,
+                  }
+              `);
       });
     });
 
     describe('post', () => {
-      it('transforms the creation attributes to the ES acceptable form', async () => {
+      it('includes the creation attributes excluding the connector.id field', async () => {
         unsecuredSavedObjectsClient.create.mockReturnValue(
           Promise.resolve({} as SavedObject<ESCasesConfigureAttributes>)
         );
@@ -411,7 +342,10 @@ describe('CaseConfigureService', () => {
           id: '1',
         });
 
-        expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
+        const creationAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as ESCasesConfigureAttributes;
+        expect(creationAttributes.connector).not.toHaveProperty('id');
+        expect(creationAttributes).toMatchInlineSnapshot(`
           Object {
             "closure_type": "close-by-pushing",
             "connector": Object {
@@ -447,21 +381,9 @@ describe('CaseConfigureService', () => {
             },
           }
         `);
-        expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
-          Object {
-            "id": "1",
-            "references": Array [
-              Object {
-                "id": "1",
-                "name": "connectorId",
-                "type": "action",
-              },
-            ],
-          }
-        `);
       });
 
-      it('transforms the connector in the ES schema', async () => {
+      it('moves the connector.id to the references', async () => {
         unsecuredSavedObjectsClient.create.mockReturnValue(
           Promise.resolve({} as SavedObject<ESCasesConfigureAttributes>)
         );
@@ -472,28 +394,6 @@ describe('CaseConfigureService', () => {
           id: '1',
         });
 
-        const postAttributes = unsecuredSavedObjectsClient.create.mock
-          .calls[0][1] as CasesConfigureAttributes;
-        expect(postAttributes.connector).toMatchInlineSnapshot(`
-          Object {
-            "fields": Array [
-              Object {
-                "key": "issueType",
-                "value": "bug",
-              },
-              Object {
-                "key": "priority",
-                "value": "high",
-              },
-              Object {
-                "key": "parent",
-                "value": "2",
-              },
-            ],
-            "name": ".jira",
-            "type": ".jira",
-          }
-        `);
         expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
           Object {
             "id": "1",
@@ -508,14 +408,14 @@ describe('CaseConfigureService', () => {
         `);
       });
 
-      it('sets fields to an empty array when it is not included', async () => {
+      it('sets connector.fields to an empty array when it is not included', async () => {
         unsecuredSavedObjectsClient.create.mockReturnValue(
           Promise.resolve({} as SavedObject<ESCasesConfigureAttributes>)
         );
 
         await service.post({
           unsecuredSavedObjectsClient,
-          attributes: createConfigPostParams(createJiraConnector(true)),
+          attributes: createConfigPostParams(createJiraConnector({ setFieldsToNull: true })),
           id: '1',
         });
 
@@ -541,41 +441,132 @@ describe('CaseConfigureService', () => {
           id: '1',
         });
 
-        expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+        const creationOptions = unsecuredSavedObjectsClient.create.mock
+          .calls[0][2] as SavedObjectsCreateOptions;
+        expect(creationOptions.references).toBeUndefined();
+      });
+    });
+  });
+
+  describe('transform the Elasticsearch model to the external model', () => {
+    describe('patch', () => {
+      it('returns an object with a none connector and without a reference', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve(createUpdateConfigSO(getNoneCaseConnector()))
+        );
+
+        const res = await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigUpdateParams(),
+        });
+
+        expect(res.attributes).toMatchInlineSnapshot(`
+            Object {
+              "connector": Object {
+                "fields": null,
+                "id": "none",
+                "name": "none",
+                "type": ".none",
+              },
+            }
+          `);
+        expect(res.references).toMatchInlineSnapshot(`Array []`);
+      });
+
+      it('returns an undefined connector if it is not returned by the update', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<ESCasesConfigureAttributes>)
+        );
+
+        const res = await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigUpdateParams(),
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+            Object {
+              "attributes": Object {},
+            }
+          `);
+      });
+
+      it('returns the default none connector when it cannot find the reference', async () => {
+        const { name, type, fields } = createESJiraConnector();
+        const returnValue: SavedObjectsUpdateResponse<ESCasesConfigureAttributes> = {
+          type: CASE_CONFIGURE_SAVED_OBJECT,
+          id: '1',
+          attributes: {
+            connector: {
+              name,
+              type,
+              fields,
+            },
+          },
+          version: '1',
+          references: undefined,
+        };
+
+        unsecuredSavedObjectsClient.update.mockReturnValue(Promise.resolve(returnValue));
+
+        const res = await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigUpdateParams(),
+        });
+
+        expect(res.attributes.connector).toMatchInlineSnapshot(`
           Object {
-            "id": "1",
-            "references": undefined,
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
           }
         `);
+      });
+
+      it('returns a jira connector', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve(createUpdateConfigSO(createESJiraConnector()))
+        );
+
+        const res = await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigUpdateParams(),
+        });
+
+        expect(res.attributes.connector).toMatchInlineSnapshot(`
+            Object {
+              "fields": Object {
+                "issueType": "bug",
+                "parent": "2",
+                "priority": "high",
+              },
+              "id": "1",
+              "name": ".jira",
+              "type": ".jira",
+            }
+          `);
       });
     });
 
     describe('find', () => {
       it('includes the id field in the response', async () => {
         const findMockReturn = createSOFindResponse([
-          createConfigFindSO(createESConnector()),
+          createConfigFindSO(createESJiraConnector()),
           createConfigFindSO(),
         ]);
         unsecuredSavedObjectsClient.find.mockReturnValue(Promise.resolve(findMockReturn));
 
         const res = await service.find({ unsecuredSavedObjectsClient });
-        expect(res.saved_objects[0].attributes.connector).toMatchInlineSnapshot(`
-          Object {
-            "fields": Object {
-              "issueType": "bug",
-              "parent": "2",
-              "priority": "high",
-            },
-            "id": "1",
-            "name": ".jira",
-            "type": ".jira",
-          }
-        `);
+        expect(res.saved_objects[0].attributes.connector.id).toMatchInlineSnapshot(`"1"`);
       });
 
       it('includes the saved object find response fields in the result', async () => {
         const findMockReturn = createSOFindResponse([
-          createConfigFindSO(createESConnector()),
+          createConfigFindSO(createESJiraConnector()),
           createConfigFindSO(),
         ]);
         unsecuredSavedObjectsClient.find.mockReturnValue(Promise.resolve(findMockReturn));
@@ -593,7 +584,7 @@ describe('CaseConfigureService', () => {
 
       it('defaults to the none connector when the id cannot be found in the references', async () => {
         const findMockReturn = createSOFindResponse([
-          createConfigFindSO(createESConnector()),
+          createConfigFindSO(createESJiraConnector()),
           createConfigFindSO(),
         ]);
         unsecuredSavedObjectsClient.find.mockReturnValue(Promise.resolve(findMockReturn));
@@ -612,21 +603,12 @@ describe('CaseConfigureService', () => {
 
     describe('get', () => {
       it('includes the id field in the response', async () => {
-        unsecuredSavedObjectsClient.get.mockReturnValue(createConfigSOPromise(createESConnector()));
+        unsecuredSavedObjectsClient.get.mockReturnValue(
+          createConfigSOPromise(createESJiraConnector())
+        );
         const res = await service.get({ unsecuredSavedObjectsClient, configurationId: '1' });
 
-        expect(res.attributes.connector).toMatchInlineSnapshot(`
-          Object {
-            "fields": Object {
-              "issueType": "bug",
-              "parent": "2",
-              "priority": "high",
-            },
-            "id": "1",
-            "name": ".jira",
-            "type": ".jira",
-          }
-        `);
+        expect(res.attributes.connector.id).toMatchInlineSnapshot(`"1"`);
       });
 
       it('defaults to the none connector when the connector reference cannot be found', async () => {

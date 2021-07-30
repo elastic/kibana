@@ -18,11 +18,15 @@ export function findConnectorIdReference(
   return references?.find((ref) => ref.type === ACTION_SAVED_OBJECT_TYPE && ref.name === name);
 }
 
-export function transformESConnector(
-  connector: ESCaseConnector | undefined,
-  references: SavedObjectReference[] | undefined,
-  referenceName: string
-): CaseConnector | undefined {
+export function transformESConnectorToExternalModel({
+  connector,
+  references,
+  referenceName,
+}: {
+  connector?: ESCaseConnector;
+  references?: SavedObjectReference[];
+  referenceName: string;
+}): CaseConnector | undefined {
   const connectorIdRef = findConnectorIdReference(referenceName, references);
   return transformConnectorFieldsToExternalModel(connector, connectorIdRef?.id);
 }
@@ -63,12 +67,19 @@ function transformConnectorFieldsToExternalModel(
   };
 }
 
-export function transformESConnectorOrUseDefault(
-  connector: ESCaseConnector | undefined,
-  references: SavedObjectReference[] | undefined,
-  referenceName: string
-): CaseConnector {
-  return transformESConnector(connector, references, referenceName) ?? getNoneCaseConnector();
+export function transformESConnectorOrUseDefault({
+  connector,
+  references,
+  referenceName,
+}: {
+  connector?: ESCaseConnector;
+  references?: SavedObjectReference[];
+  referenceName: string;
+}): CaseConnector {
+  return (
+    transformESConnectorToExternalModel({ connector, references, referenceName }) ??
+    getNoneCaseConnector()
+  );
 }
 
 export function transformFieldsToESModel(connector: CaseConnector): ESConnectorFields {
