@@ -35,7 +35,7 @@ jest.mock('uuid', () => {
   };
 });
 
-const field = 'process.name';
+const field = 'host.name';
 const value = 'nice';
 const combinedQueries = {
   bool: {
