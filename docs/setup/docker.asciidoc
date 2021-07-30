@@ -117,8 +117,9 @@ Some example translations are shown here:
 `SERVER_BASEPATH`:: `server.basePath`
 `MONITORING_ENABLED`:: `monitoring.enabled`
 
-In general, any setting listed in <<settings>> can be
-configured with this technique.
+In general, any setting listed in <<settings>> can be configured with this technique.
+
+Supplying array options can be tricky. The following example shows the syntax for providing an array to `ELASTICSEARCH_HOSTS`.
 
 These variables can be set with +docker-compose+ like this:
 
@@ -130,7 +131,7 @@ services:
     image: {docker-image}
     environment:
       SERVER_NAME: kibana.example.org
-      ELASTICSEARCH_HOSTS: http://elasticsearch.example.org
+      ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take
