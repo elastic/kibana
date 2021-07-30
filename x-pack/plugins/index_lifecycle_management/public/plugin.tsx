@@ -55,7 +55,7 @@ export class IndexLifecycleManagementPlugin
             chrome: { docTitle },
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-            application: { navigateToApp, getUrlForApp },
+            application,
           } = coreStart;
 
           const license = await licensing.license$.pipe(first()).toPromise();
@@ -74,8 +74,7 @@ export class IndexLifecycleManagementPlugin
             element,
             I18nContext,
             history,
-            navigateToApp,
-            getUrlForApp,
+            application,
             this.breadcrumbService,
             license,
             cloud
