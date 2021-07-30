@@ -6,16 +6,16 @@
  */
 
 import React, { FocusEventHandler } from 'react';
-import PropTypes from 'prop-types';
 import { EuiComboBox } from '@elastic/eui';
 
 export interface ESFieldsSelectProps {
   index: string;
   value: string;
-  onChange: (field: string | null) => void;
+  onChange: (fields: string[]) => void;
   onBlur: FocusEventHandler<HTMLDivElement> | undefined;
   onFocus: FocusEventHandler<HTMLDivElement> | undefined;
   fields: string[];
+  selected: string[];
 }
 
 export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = ({
@@ -25,13 +25,8 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = ({
   onFocus,
   onBlur,
 }) => {
-  const options = fields.map((value) => ({
-    label: value,
-  }));
-
-  const selectedOptions = selected.map((value) => ({
-    label: value,
-  }));
+  const options = fields.map((value) => ({ label: value }));
+  const selectedOptions = selected.map((value) => ({ label: value }));
 
   return (
     <EuiComboBox
@@ -44,17 +39,4 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = ({
       compressed
     />
   );
-};
-
-ESFieldsSelect.propTypes = {
-  onChange: PropTypes.func,
-  selected: PropTypes.array,
-  fields: PropTypes.array,
-  onFocus: PropTypes.func,
-  onBlur: PropTypes.func,
-};
-
-ESFieldsSelect.defaultProps = {
-  selected: [],
-  fields: [],
 };
