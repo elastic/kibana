@@ -35,13 +35,20 @@ const INITIAL_STATE = {
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
 type SortDirection = 'asc' | 'desc';
-const PAGE_SIZE = 5;
 const DEFAULT_SORT = {
   direction: 'desc' as const,
   field: 'impact' as const,
 };
 
-export function ServiceOverviewTransactionsTable() {
+interface Props {
+  hideViewTransactionsLink?: boolean;
+  numberOfTransactionsPerPage?: number;
+}
+
+export function ServiceOverviewTransactionsTable({
+  hideViewTransactionsLink = false,
+  numberOfTransactionsPerPage = 5,
+}: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -100,7 +107,10 @@ export function ServiceOverviewTransactionsTable() {
           response.transactionGroups,
           field,
           direction
-        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+        ).slice(
+          pageIndex * numberOfTransactionsPerPage,
+          (pageIndex + 1) * numberOfTransactionsPerPage
+        );
 
         return {
           ...response,
@@ -186,7 +196,7 @@ export function ServiceOverviewTransactionsTable() {
 
   const pagination = {
     pageIndex,
-    pageSize: PAGE_SIZE,
+    pageSize: numberOfTransactionsPerPage,
     totalItemCount: transactionGroupsTotalItems,
     hidePerPageOptions: true,
   };
@@ -207,20 +217,22 @@ export function ServiceOverviewTransactionsTable() {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TransactionOverviewLink
-              serviceName={serviceName}
-              latencyAggregationType={latencyAggregationType}
-              transactionType={transactionType}
-            >
-              {i18n.translate(
-                'xpack.apm.serviceOverview.transactionsTableLinkText',
-                {
-                  defaultMessage: 'View transactions',
-                }
-              )}
-            </TransactionOverviewLink>
-          </EuiFlexItem>
+          {!hideViewTransactionsLink && (
+            <EuiFlexItem grow={false}>
+              <TransactionOverviewLink
+                serviceName={serviceName}
+                latencyAggregationType={latencyAggregationType}
+                transactionType={transactionType}
+              >
+                {i18n.translate(
+                  'xpack.apm.serviceOverview.transactionsTableLinkText',
+                  {
+                    defaultMessage: 'View transactions',
+                  }
+                )}
+              </TransactionOverviewLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
