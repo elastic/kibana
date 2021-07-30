@@ -6,6 +6,7 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
+import 'jest-canvas-mock';
 import React, { ChangeEvent, MouseEvent, ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import {
