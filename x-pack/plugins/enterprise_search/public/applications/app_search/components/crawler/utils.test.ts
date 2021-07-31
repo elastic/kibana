@@ -104,7 +104,7 @@ describe('crawlerDataServerToClient', () => {
 });
 
 describe('crawlDomainValidationToResult', () => {
-  test('with warning', () => {
+  it('handles results with warnings', () => {
     const data: CrawlerDomainValidationResultFromServer = {
       valid: true,
       results: [
@@ -123,7 +123,7 @@ describe('crawlDomainValidationToResult', () => {
     } as CrawlerDomainValidationStep);
   });
 
-  test('valid, without warning', () => {
+  it('handles valid results, without warnings', () => {
     const data: CrawlerDomainValidationResultFromServer = {
       valid: true,
       results: [
@@ -140,7 +140,7 @@ describe('crawlDomainValidationToResult', () => {
     } as CrawlerDomainValidationStep);
   });
 
-  test('invalid', () => {
+  it('handes invalid results', () => {
     const data: CrawlerDomainValidationResultFromServer = {
       valid: false,
       results: [
