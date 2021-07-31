@@ -33,13 +33,13 @@ export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h4>{label}</h4>
+            <h3>{label}</h3>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       {step.state === 'invalid' && (
         <>
-          <EuiText size="s" data-test-subj="ErrorMessage">
+          <EuiText size="s" data-test-subj="errorMessage">
             <p>{step.message}</p>
           </EuiText>
           {action && (
