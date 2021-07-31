@@ -13,7 +13,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 170
+          "lineNumber": 169
         },
         "deprecated": false,
         "children": [
@@ -47,7 +47,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 225
+              "lineNumber": 224
             },
             "deprecated": false,
             "children": [
@@ -63,7 +63,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 226
+                  "lineNumber": 225
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -80,7 +80,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 227
+                  "lineNumber": 226
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -103,7 +103,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 228
+                  "lineNumber": 227
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -151,7 +151,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 260
+              "lineNumber": 259
             },
             "deprecated": false,
             "children": [
@@ -176,7 +176,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 261
+                  "lineNumber": 260
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -199,7 +199,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 262
+                  "lineNumber": 261
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -225,7 +225,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 288
+              "lineNumber": 287
             },
             "deprecated": false,
             "children": [
@@ -241,7 +241,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 289
+                  "lineNumber": 288
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -258,7 +258,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 290
+                  "lineNumber": 289
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -276,7 +276,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 291
+                  "lineNumber": 290
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -322,7 +322,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 318
+              "lineNumber": 317
             },
             "deprecated": false,
             "children": [
@@ -346,7 +346,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 319
+                  "lineNumber": 318
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -378,7 +378,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 385
+              "lineNumber": 384
             },
             "deprecated": false,
             "children": [
@@ -394,7 +394,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 385
+                  "lineNumber": 384
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -411,7 +411,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 385
+                  "lineNumber": 384
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -443,7 +443,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 408
+              "lineNumber": 407
             },
             "deprecated": false,
             "children": [
@@ -461,7 +461,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 408
+                  "lineNumber": 407
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -493,7 +493,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 435
+              "lineNumber": 434
             },
             "deprecated": false,
             "children": [
@@ -509,7 +509,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 436
+                  "lineNumber": 435
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -526,7 +526,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 437
+                  "lineNumber": 436
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -569,7 +569,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 462
+              "lineNumber": 461
             },
             "deprecated": false,
             "children": [
@@ -585,7 +585,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 463
+                  "lineNumber": 462
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -602,7 +602,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 464
+                  "lineNumber": 463
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -619,7 +619,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 465
+                  "lineNumber": 464
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -643,7 +643,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 466
+                  "lineNumber": 465
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -681,7 +681,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 494
+              "lineNumber": 493
             },
             "deprecated": false,
             "children": [
@@ -706,7 +706,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 494
+                  "lineNumber": 493
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1232,7 +1232,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 91
+          "lineNumber": 90
         },
         "deprecated": false,
         "children": [
@@ -1255,7 +1255,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 92
+              "lineNumber": 91
             },
             "deprecated": false
           }
@@ -1288,7 +1288,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 58
+          "lineNumber": 57
         },
         "deprecated": false,
         "children": [
@@ -1301,7 +1301,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 59
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -1317,7 +1317,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 60
+              "lineNumber": 59
             },
             "deprecated": false
           }
@@ -1333,7 +1333,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 64
+          "lineNumber": 63
         },
         "deprecated": false,
         "children": [
@@ -1351,7 +1351,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 66
+              "lineNumber": 65
             },
             "deprecated": false
           }
@@ -1377,7 +1377,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 70
+          "lineNumber": 69
         },
         "deprecated": false,
         "children": [
@@ -1390,7 +1390,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 71
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -1403,7 +1403,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 72
+              "lineNumber": 71
             },
             "deprecated": false
           },
@@ -1419,7 +1419,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 73
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -1435,7 +1435,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 74
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -1452,7 +1452,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 75
+              "lineNumber": 74
             },
             "deprecated": false
           }
@@ -1468,7 +1468,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 79
+          "lineNumber": 78
         },
         "deprecated": false,
         "children": [
@@ -1484,7 +1484,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 80
+              "lineNumber": 79
             },
             "deprecated": false
           }
@@ -1500,7 +1500,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 38
+          "lineNumber": 37
         },
         "deprecated": false,
         "children": [
@@ -1518,7 +1518,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 42
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -1536,7 +1536,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 44
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -1555,7 +1555,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 46
+              "lineNumber": 45
             },
             "deprecated": false
           },
@@ -1573,7 +1573,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 48
+              "lineNumber": 47
             },
             "deprecated": false
           },
@@ -1590,7 +1590,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 49
+              "lineNumber": 48
             },
             "deprecated": false
           }
@@ -1626,7 +1626,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 109
+          "lineNumber": 108
         },
         "deprecated": false,
         "children": [
@@ -1642,7 +1642,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 111
+              "lineNumber": 110
             },
             "deprecated": false
           },
@@ -1655,7 +1655,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 112
+              "lineNumber": 111
             },
             "deprecated": false
           },
@@ -1668,7 +1668,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 113
+              "lineNumber": 112
             },
             "deprecated": false
           },
@@ -1681,7 +1681,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 114
+              "lineNumber": 113
             },
             "deprecated": false
           }
@@ -1855,7 +1855,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 84
+          "lineNumber": 83
         },
         "deprecated": false,
         "children": [
@@ -1871,7 +1871,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 85
+              "lineNumber": 84
             },
             "deprecated": false
           },
@@ -1887,7 +1887,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 86
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -1904,7 +1904,7 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 87
+              "lineNumber": 86
             },
             "deprecated": false
           }
@@ -2042,7 +2042,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 143
+          "lineNumber": 142
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -10487,6 +10487,21 @@
               "lineNumber": 67
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectMigrationContext.isSingleNamespaceType",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSingleNamespaceType",
+            "description": [
+              "\nWhether this is a single-namespace type or not"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/migrations/types.ts",
+              "lineNumber": 71
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -10502,7 +10517,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/migrations/types.ts",
-          "lineNumber": 87
+          "lineNumber": 91
         },
         "deprecated": false,
         "children": [
@@ -10518,7 +10533,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/migrations/types.ts",
-              "lineNumber": 88
+              "lineNumber": 92
             },
             "deprecated": false
           }
@@ -10656,7 +10671,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 162
+          "lineNumber": 163
         },
         "deprecated": false,
         "children": [
@@ -10674,7 +10689,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 164
+              "lineNumber": 165
             },
             "deprecated": false
           }
@@ -12711,7 +12726,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 78
+          "lineNumber": 79
         },
         "deprecated": false,
         "children": [
@@ -12727,7 +12742,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 79
+              "lineNumber": 80
             },
             "deprecated": false
           },
@@ -12743,7 +12758,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -12759,7 +12774,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 81
+              "lineNumber": 82
             },
             "deprecated": false
           },
@@ -12775,7 +12790,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 82
+              "lineNumber": 83
             },
             "deprecated": false
           },
@@ -12791,7 +12806,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 83
+              "lineNumber": 84
             },
             "deprecated": false
           },
@@ -12809,7 +12824,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 89
+              "lineNumber": 90
             },
             "deprecated": false
           },
@@ -12827,7 +12842,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 91
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -12845,7 +12860,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 93
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -12863,7 +12878,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 97
+              "lineNumber": 98
             },
             "deprecated": false
           },
@@ -12881,7 +12896,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 102
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -12914,7 +12929,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 108
+              "lineNumber": 109
             },
             "deprecated": false
           },
@@ -12932,7 +12947,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 112
+              "lineNumber": 113
             },
             "deprecated": false
           },
@@ -12950,7 +12965,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 117
+              "lineNumber": 118
             },
             "deprecated": false
           },
@@ -12966,7 +12981,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 118
+              "lineNumber": 119
             },
             "deprecated": false
           },
@@ -12988,7 +13003,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 140
+              "lineNumber": 141
             },
             "deprecated": false
           },
@@ -13004,7 +13019,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 141
+              "lineNumber": 142
             },
             "deprecated": false
           },
@@ -13022,7 +13037,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 149
+              "lineNumber": 150
             },
             "deprecated": false
           },
@@ -13040,7 +13055,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 151
+              "lineNumber": 152
             },
             "deprecated": false
           },
@@ -13065,7 +13080,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 155
+              "lineNumber": 156
             },
             "deprecated": false
           }
@@ -13081,7 +13096,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 61
+          "lineNumber": 62
         },
         "deprecated": false,
         "children": [
@@ -13094,7 +13109,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             },
             "deprecated": false
           },
@@ -13107,7 +13122,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             },
             "deprecated": false
           }
@@ -14848,7 +14863,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 69
+          "lineNumber": 70
         },
         "deprecated": false,
         "children": [
@@ -14861,7 +14876,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 70
+              "lineNumber": 71
             },
             "deprecated": false
           },
@@ -14877,7 +14892,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 71
+              "lineNumber": 72
             },
             "deprecated": false
           }
@@ -16647,7 +16662,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 50
+          "lineNumber": 51
         },
         "deprecated": false,
         "children": [
@@ -16663,7 +16678,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 51
+              "lineNumber": 52
             },
             "deprecated": false
           }
@@ -16689,7 +16704,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 256
+          "lineNumber": 257
         },
         "deprecated": false,
         "children": [
@@ -16704,7 +16719,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 260
+              "lineNumber": 261
             },
             "deprecated": false
           },
@@ -16719,7 +16734,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 267
+              "lineNumber": 268
             },
             "deprecated": false
           },
@@ -16737,7 +16752,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 271
+              "lineNumber": 272
             },
             "deprecated": false
           },
@@ -16755,7 +16770,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 275
+              "lineNumber": 276
             },
             "deprecated": false
           },
@@ -16773,7 +16788,32 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 279
+              "lineNumber": 280
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsType.excludeOnUpgrade",
+            "type": "Function",
+            "tags": [],
+            "label": "excludeOnUpgrade",
+            "description": [
+              "\nIf defined, allows a type to exclude unneeded documents from the migration process and effectively be deleted.\nSee {@link SavedObjectTypeExcludeFromUpgradeFilterHook} for more details."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectTypeExcludeFromUpgradeFilterHook",
+                "text": "SavedObjectTypeExcludeFromUpgradeFilterHook"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/types.ts",
+              "lineNumber": 285
             },
             "deprecated": false
           },
@@ -16797,7 +16837,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 283
+              "lineNumber": 289
             },
             "deprecated": false
           },
@@ -16830,7 +16870,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 287
+              "lineNumber": 293
             },
             "deprecated": false
           },
@@ -16848,7 +16888,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 336
+              "lineNumber": 342
             },
             "deprecated": false
           },
@@ -16873,7 +16913,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 340
+              "lineNumber": 346
             },
             "deprecated": false
           }
@@ -16901,7 +16941,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 348
+          "lineNumber": 354
         },
         "deprecated": false,
         "children": [
@@ -16919,7 +16959,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 352
+              "lineNumber": 358
             },
             "deprecated": false
           },
@@ -16937,7 +16977,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 356
+              "lineNumber": 362
             },
             "deprecated": false
           },
@@ -16955,7 +16995,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 361
+              "lineNumber": 367
             },
             "deprecated": false
           },
@@ -16975,7 +17015,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 366
+              "lineNumber": 372
             },
             "deprecated": false
           },
@@ -16995,7 +17035,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 371
+              "lineNumber": 377
             },
             "deprecated": false
           },
@@ -17015,7 +17055,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 380
+              "lineNumber": 386
             },
             "deprecated": false
           },
@@ -17040,7 +17080,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 398
+              "lineNumber": 404
             },
             "deprecated": false
           },
@@ -17065,7 +17105,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 441
+              "lineNumber": 447
             },
             "deprecated": false
           },
@@ -17084,7 +17124,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 481
+              "lineNumber": 487
             },
             "deprecated": false
           }
@@ -18040,7 +18080,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 171
+          "lineNumber": 172
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -18421,7 +18461,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 235
+          "lineNumber": 236
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -18794,7 +18834,40 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 249
+          "lineNumber": 250
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectTypeExcludeFromUpgradeFilterHook",
+        "type": "Type",
+        "tags": [
+          "alpha"
+        ],
+        "label": "SavedObjectTypeExcludeFromUpgradeFilterHook",
+        "description": [
+          "\nIf defined, allows a type to run a search query and return a query filter that may match any documents which may\nbe excluded from the next migration upgrade process. Useful for cleaning up large numbers of old documents which\nare no longer needed and may slow the migration process.\n\nIf this hook fails, the migration will proceed without these documents having been filtered out, so this\nshould not be used as a guarantee that these documents have been deleted.\n"
+        ],
+        "signature": [
+          "(toolkit: { readonlyEsClient: Pick<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", \"search\">; }) => ",
+          "QueryDslQueryContainer",
+          " | Promise<",
+          "QueryDslQueryContainer",
+          ">"
+        ],
+        "source": {
+          "path": "src/core/server/saved_objects/types.ts",
+          "lineNumber": 508
         },
         "deprecated": false,
         "initialIsOpen": false
