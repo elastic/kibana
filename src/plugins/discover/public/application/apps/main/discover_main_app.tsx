@@ -52,6 +52,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { services, history, navigateTo, indexPatternList } = props.opts;
   const { chrome, docLinks, uiSettings: config, data } = services;
 
+  console.log('DiscoverMainApp ' + props.opts.savedSearch.title);
   /**
    * State related logic
    */
@@ -61,8 +62,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     onChangeIndexPattern,
     onUpdateQuery,
     refetch$,
-    resetSavedSearch,
     savedSearch,
+    resetSavedSearch,
     searchSource,
     state,
     stateContainer,
@@ -98,7 +99,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   }, [stateContainer, chrome, docLinks]);
 
   const resetQuery = useCallback(() => {
-    resetSavedSearch(savedSearch.id);
+    resetSavedSearch(props.opts.savedSearch.id);
   }, [resetSavedSearch, savedSearch]);
 
   return (

@@ -45,7 +45,8 @@ interface DiscoverLandingParams {
 }
 
 export function DiscoverMainRoute(props: DiscoverMainProps) {
-  const { services, history } = props.opts;
+  const { opts } = props;
+  const { services, history } = opts;
   const {
     chrome,
     uiSettings: config,
@@ -57,6 +58,9 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
+  const [indexPatternList, setIndexPatternList] = useState<
+    Array<SavedObject<IndexPatternAttributes>>
+  >(opts.indexPatternList);
 
   const { id } = useParams<DiscoverLandingParams>();
 
@@ -66,6 +70,11 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     async function loadSavedSearch() {
       const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
       setSavedSearch(loadedSavedSearch);
+      const { appStateContainer } = getState({ history, uiSettings: config });
+      appStateContainer.set({
+        ...appStateContainer.getState(),
+        index: loadedSavedSearch.searchSource.getId(),
+      });
       if (savedSearchId) {
         chrome.recentlyAccessed.add(
           ((loadedSavedSearch as unknown) as SavedObjectDeprecated).getFullPath(),
@@ -75,8 +84,21 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
       }
     }
 
-    loadSavedSearch();
-  }, [chrome.recentlyAccessed, id, services]);
+    if (!savedSearch || (savedSearch && savedSearchId !== savedSearch.id)) {
+      loadSavedSearch();
+    }
+  }, [
+    chrome.recentlyAccessed,
+    config,
+    data.indexPatterns,
+    history,
+    id,
+    indexPatternList.length,
+    props.opts,
+    savedSearch,
+    services,
+    toastNotifications,
+  ]);
 
   useEffect(() => {
     async function loadDefaultOrCurrentIndexPattern() {
@@ -87,12 +109,16 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
       const { appStateContainer } = getState({ history, uiSettings: config });
       const { index } = appStateContainer.getState();
       const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
+      const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
       const indexPatternData = await resolveIndexPattern(
         ip,
         savedSearch?.searchSource,
         toastNotifications
       );
       setIndexPattern(indexPatternData);
+      if (indexPatternList.length === 0) {
+        setIndexPatternList(ipList);
+      }
     }
 
     try {
@@ -125,20 +151,22 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     toastNotifications,
     core.application.navigateToApp,
     basePath,
+    indexPatternList.length,
   ]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs(id ? getSavedSearchBreadcrumbs(id) : getRootBreadcrumbs());
-  }, [chrome, id]);
+    chrome.setBreadcrumbs(
+      savedSearch ? getSavedSearchBreadcrumbs(savedSearch.title) : getRootBreadcrumbs()
+    );
+  }, [chrome, savedSearch]);
 
   if (!indexPattern || !savedSearch) {
     return null;
   }
-
-  const opts = {
-    ...props.opts,
-    savedSearch,
-  };
-
-  return <DiscoverMainApp indexPattern={indexPattern} opts={opts} />;
+  return (
+    <DiscoverMainApp
+      indexPattern={indexPattern}
+      opts={{ ...props.opts, savedSearch, indexPatternList }}
+    />
+  );
 }
