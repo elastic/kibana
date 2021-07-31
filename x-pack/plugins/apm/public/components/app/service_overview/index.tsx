@@ -95,9 +95,7 @@ export function ServiceOverview() {
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
                   <EuiPanel hasBorder={true}>
-                    <ServiceOverviewDependenciesTable
-                      serviceName={serviceName}
-                    />
+                    <ServiceOverviewDependenciesTable />
                   </EuiPanel>
                 </EuiFlexItem>
               )}

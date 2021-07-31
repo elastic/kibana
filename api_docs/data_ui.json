@@ -5,6 +5,84 @@
     "functions": [
       {
         "parentPluginId": "data",
+        "id": "def-public.FilterItem",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterItem",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FilterItemProps",
+          ") => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+          "lineNumber": 24
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterItem.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FilterItemProps"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+              "lineNumber": 24
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.FilterLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterLabel",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FilterLabelProps",
+          ") => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+          "lineNumber": 15
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterLabel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FilterLabelProps"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+              "lineNumber": 15
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.QueryStringInput",
         "type": "Function",
         "tags": [],
@@ -96,12 +174,12 @@
           {
             "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "{ query: string | { [key: string]: any; }; language: string; }"
+              "any"
             ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
@@ -262,9 +340,7 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "((query: ",
-              "Query",
-              ") => void) | undefined"
+              "((query: any) => void) | undefined"
             ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
@@ -296,9 +372,7 @@
             "label": "onSubmit",
             "description": [],
             "signature": [
-              "((query: ",
-              "Query",
-              ") => void) | undefined"
+              "((query: any) => void) | undefined"
             ],
             "source": {
               "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
