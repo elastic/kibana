@@ -234,7 +234,7 @@ describe('AddDomainLogic', () => {
     });
 
     describe('startDomainValidation', () => {
-      it('shold set validation results to loading', () => {
+      it('should set validation results to loading', () => {
         mount({
           domainValidationResult: {
             steps: {
@@ -442,7 +442,7 @@ describe('AddDomainLogic', () => {
       });
 
       describe('on success', () => {
-        it('sets all remaining validation steps invaid on a blocking failure', async () => {
+        it('sets all remaining validation steps invalid on a blocking failure', async () => {
           http.post.mockReturnValueOnce(
             Promise.resolve({
               valid: false,
@@ -592,9 +592,9 @@ describe('AddDomainLogic', () => {
         mount({
           domainValidationResult: {
             steps: {
-              contentVerification: { state: 'loading' },
-              indexingRestrictions: { state: 'loading' },
-              initialValidation: { state: 'loading' },
+              contentVerification: { state: 'valid' },
+              indexingRestrictions: { state: 'valid' },
+              initialValidation: { state: 'valid' },
               networkConnectivity: { state: 'loading' },
             },
           },
