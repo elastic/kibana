@@ -123,7 +123,7 @@ describe('AddDomainForm', () => {
     });
   });
 
-  describe('vaidation', () => {
+  describe('validation', () => {
     it('is hidden by default', () => {
       expect(wrapper.find(AddDomainValidation)).toHaveLength(0);
     });
