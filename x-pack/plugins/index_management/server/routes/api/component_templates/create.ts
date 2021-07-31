@@ -57,7 +57,7 @@ export const registerCreateRoute = ({
       try {
         const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
-          // @ts-expect-error Type 'ComponentTemplateSerialized' is not assignable
+          // @ts-expect-error @elastic/elasticsearch Type 'ComponentTemplateSerialized' is not assignable
           body: serializedComponentTemplate,
         });
 

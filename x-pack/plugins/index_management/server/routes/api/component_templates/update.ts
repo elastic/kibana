@@ -39,7 +39,7 @@ export const registerUpdateRoute = ({
         const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           body: {
-            // @ts-expect-error Not assignable to type 'IndicesIndexState'
+            // @ts-expect-error @elastic/elasticsearch Not assignable to type 'IndicesIndexState'
             template,
             version,
             _meta,

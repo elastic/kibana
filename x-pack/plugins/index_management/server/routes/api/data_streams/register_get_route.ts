@@ -129,11 +129,11 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         }
 
         const enhancedDataStreams = enhanceDataStreams({
-          // @ts-expect-error DataStreamFromEs incompatible with IndicesGetDataStreamIndicesGetDataStreamItem
+          // @ts-expect-error @elastic/elasticsearch DataStreamFromEs incompatible with IndicesGetDataStreamIndicesGetDataStreamItem
           dataStreams,
-          // @ts-expect-error StatsFromEs incompatible with IndicesDataStreamsStatsDataStreamsStatsItem
+          // @ts-expect-error @elastic/elasticsearch StatsFromEs incompatible with IndicesDataStreamsStatsDataStreamsStatsItem
           dataStreamsStats,
-          // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
+          // @ts-expect-error @elastic/elasticsearch PrivilegesFromEs incompatible with ApplicationsPrivileges
           dataStreamsPrivileges,
         });
 
@@ -176,11 +176,11 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           }
 
           const enhancedDataStreams = enhanceDataStreams({
-            // @ts-expect-error DataStreamFromEs incompatible with IndicesGetDataStreamIndicesGetDataStreamItem
+            // @ts-expect-error @elastic/elasticsearch DataStreamFromEs incompatible with IndicesGetDataStreamIndicesGetDataStreamItem
             dataStreams,
-            // @ts-expect-error StatsFromEs incompatible with IndicesDataStreamsStatsDataStreamsStatsItem
+            // @ts-expect-error @elastic/elasticsearch StatsFromEs incompatible with IndicesDataStreamsStatsDataStreamsStatsItem
             dataStreamsStats,
-            // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
+            // @ts-expect-error @elastic/elasticsearch PrivilegesFromEs incompatible with ApplicationsPrivileges
             dataStreamsPrivileges,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);

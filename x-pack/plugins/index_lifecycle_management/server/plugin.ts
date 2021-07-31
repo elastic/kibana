@@ -35,7 +35,7 @@ const indexLifecycleDataEnricher = async (
   return indicesList.map((index: IndexWithoutIlm) => {
     return {
       ...index,
-      // @ts-expect-error Element implicitly has an 'any' type
+      // @ts-expect-error @elastic/elasticsearch Element implicitly has an 'any' type
       ilm: { ...(ilmIndicesData[index.name] || {}) },
     };
   });
