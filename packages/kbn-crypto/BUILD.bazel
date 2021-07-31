@@ -28,7 +28,6 @@ NPM_MODULE_EXTRA_FILES = [
 
 SRC_DEPS = [
   "//packages/kbn-dev-utils",
-  "@npm//jest-styled-components",
   "@npm//node-forge",
 ]
 
