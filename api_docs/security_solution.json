@@ -16518,7 +16518,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
             "deprecated": false

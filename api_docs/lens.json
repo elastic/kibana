@@ -3465,7 +3465,8 @@
             "section": "def-common.PersistableFilter",
             "text": "PersistableFilter"
           },
-          " extends any"
+          " extends ",
+          "Filter"
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -3507,7 +3508,8 @@
             "section": "def-common.PersistableFilterMeta",
             "text": "PersistableFilterMeta"
           },
-          " extends any"
+          " extends ",
+          "FilterMeta"
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,

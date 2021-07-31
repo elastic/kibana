@@ -150,12 +150,12 @@
           {
             "parentPluginId": "data",
             "id": "def-public.QueryStringInputProps.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "any"
+              "{ query: string | { [key: string]: any; }; language: string; }"
             ],
             "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
             "deprecated": false
@@ -288,7 +288,9 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "((query: any) => void) | undefined"
+              "((query: ",
+              "Query",
+              ") => void) | undefined"
             ],
             "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
             "deprecated": false,
@@ -296,12 +298,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.QueryStringInputProps.onChange.$1",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Query"
                 ],
                 "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
                 "deprecated": false,
@@ -348,7 +350,9 @@
             "label": "onSubmit",
             "description": [],
             "signature": [
-              "((query: any) => void) | undefined"
+              "((query: ",
+              "Query",
+              ") => void) | undefined"
             ],
             "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
             "deprecated": false,
@@ -356,12 +360,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.QueryStringInputProps.onSubmit.$1",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Query"
                 ],
                 "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
                 "deprecated": false,

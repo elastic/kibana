@@ -2613,7 +2613,9 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => any; getBounds: () => ",
+              " | undefined) => ",
+              "RangeFilter",
+              " | undefined; getBounds: () => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3709,12 +3711,13 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-public.VisualizeInput.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "any"
+              "Query",
+              " | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
             "deprecated": false
@@ -3727,7 +3730,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
             "deprecated": false

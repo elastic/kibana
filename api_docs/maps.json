@@ -373,7 +373,9 @@
             "label": "_getFilters",
             "description": [],
             "signature": [
-              "() => any[]"
+              "() => ",
+              "Filter",
+              "[]"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -608,7 +610,9 @@
             "label": "addFilters",
             "description": [],
             "signature": [
-              "(filters: any[], actionId?: string) => Promise<void>"
+              "(filters: ",
+              "Filter",
+              "[], actionId?: string) => Promise<void>"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -621,7 +625,8 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "any[]"
+                  "Filter",
+                  "[]"
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
@@ -822,7 +827,9 @@
             "label": "addFilters",
             "description": [],
             "signature": [
-              "((filters: any[], actionId: string) => Promise<void>) | null"
+              "((filters: ",
+              "Filter",
+              "[], actionId: string) => Promise<void>) | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false

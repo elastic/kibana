@@ -5906,7 +5906,9 @@
             "label": "getSearchSourceTimeFilter",
             "description": [],
             "signature": [
-              "(forceNow?: Date | undefined) => any[]"
+              "(forceNow?: Date | undefined) => ",
+              "RangeFilter",
+              "[] | { meta: { index: string | undefined; params: {}; alias: string; disabled: boolean; negate: boolean; }; query: { bool: { should: { bool: { filter: { range: { [x: string]: { gte: string; lte: string; }; }; }[]; }; }[]; minimum_should_match: number; }; }; }[]"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
             "deprecated": false,
@@ -11172,7 +11174,11 @@
         "label": "filtersToAst",
         "description": [],
         "signature": [
-          "(filters: any) => ",
+          "(filters: ",
+          "Filter",
+          " | ",
+          "Filter",
+          "[]) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -11188,12 +11194,15 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filtersToAst.$1",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filters",
             "description": [],
             "signature": [
-              "any"
+              "Filter",
+              " | ",
+              "Filter",
+              "[]"
             ],
             "path": "src/plugins/data/common/search/expressions/filters_to_ast.ts",
             "deprecated": false,
@@ -14330,7 +14339,9 @@
         "label": "queryToAst",
         "description": [],
         "signature": [
-          "(query: any) => ",
+          "(query: ",
+          "Query",
+          ") => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -14345,12 +14356,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.queryToAst.$1",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "any"
+              "Query"
             ],
             "path": "src/plugins/data/common/search/expressions/query_to_ast.ts",
             "deprecated": false,
@@ -14840,7 +14851,17 @@
                 "section": "def-common.GeoPoint",
                 "text": "GeoPoint"
               },
-              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: any; }, \"filter\" | \"geo_bounding_box\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
+              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueBoxed",
+                "text": "ExpressionValueBoxed"
+              },
+              "<\"kibana_query\", ",
+              "Query",
+              "> | undefined; }, \"filter\" | \"geo_bounding_box\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -14872,7 +14893,17 @@
                 "section": "def-common.GeoPoint",
                 "text": "GeoPoint"
               },
-              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: any; }, never>, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"timeShift\">, ",
+              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueBoxed",
+                "text": "ExpressionValueBoxed"
+              },
+              "<\"kibana_query\", ",
+              "Query",
+              "> | undefined; }, never>, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"timeShift\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -21887,12 +21918,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.QueryFilter.input",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "input",
             "description": [],
             "signature": [
-              "any"
+              "{ query: string | { [key: string]: any; }; language: string; }"
             ],
             "path": "src/plugins/data/common/search/expressions/query_filter.ts",
             "deprecated": false
@@ -22742,14 +22773,15 @@
           {
             "parentPluginId": "data",
             "id": "def-common.SearchSourceFields.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [
               "\n{@link Query}"
             ],
             "signature": [
-              "any"
+              "Query",
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -22757,14 +22789,21 @@
           {
             "parentPluginId": "data",
             "id": "def-common.SearchSourceFields.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [
               "\n{@link Filter}"
             ],
             "signature": [
-              "any"
+              "Filter",
+              " | ",
+              "Filter",
+              "[] | (() => ",
+              "Filter",
+              " | ",
+              "Filter",
+              "[] | undefined) | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -24460,7 +24499,13 @@
         "label": "ExecutionContextSearch",
         "description": [],
         "signature": [
-          "{ filters?: any[] | undefined; query?: any; timeRange?: ",
+          "{ filters?: ",
+          "Filter",
+          "[] | undefined; query?: ",
+          "Query",
+          " | ",
+          "Query",
+          "[] | undefined; timeRange?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -24615,7 +24660,17 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<\"existsFilter\", null, Arguments, any, ",
+          "<\"existsFilter\", null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_filter\", ",
+          "Filter",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -25067,7 +25122,17 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<\"kibanaFilter\", null, Arguments, any, ",
+          "<\"kibanaFilter\", null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_filter\", ",
+          "Filter",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -25169,7 +25234,17 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<\"kql\", null, Arguments, any, ",
+          "<\"kql\", null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_query\", ",
+          "Query",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -25208,7 +25283,17 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<\"lucene\", null, Arguments, any, ",
+          "<\"lucene\", null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_query\", ",
+          "Query",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -25310,7 +25395,17 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<\"rangeFilter\", null, Arguments, any, ",
+          "<\"rangeFilter\", null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_filter\", ",
+          "Filter",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -25451,7 +25546,17 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<\"rangeFilter\", null, Arguments, any, ",
+          "<\"rangeFilter\", null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_filter\", ",
+          "Filter",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -26482,7 +26587,8 @@
         "label": "KibanaFilter",
         "description": [],
         "signature": [
-          "any"
+          "{ type: \"kibana_filter\"; } & ",
+          "Filter"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,
@@ -26496,7 +26602,8 @@
         "label": "KibanaQueryOutput",
         "description": [],
         "signature": [
-          "any"
+          "{ type: \"kibana_query\"; } & ",
+          "Query"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,
@@ -27227,6 +27334,9 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "\"kibana_filter\""
+            ],
             "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
             "deprecated": false
           },
@@ -27369,7 +27479,11 @@
             "label": "fn",
             "description": [],
             "signature": [
-              "(input: null, args: Arguments) => any"
+              "(input: null, args: Arguments) => { $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
             "deprecated": false,
@@ -29118,6 +29232,9 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "\"kibana_filter\""
+            ],
             "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
             "deprecated": false
           },
@@ -29666,6 +29783,9 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "\"kibana_query\""
+            ],
             "path": "src/plugins/data/common/search/expressions/kql.ts",
             "deprecated": false
           },
@@ -29773,7 +29893,7 @@
             "label": "fn",
             "description": [],
             "signature": [
-              "(input: null, args: Arguments) => { type: string; language: string; query: string; }"
+              "(input: null, args: Arguments) => { type: \"kibana_query\"; language: string; query: string; }"
             ],
             "path": "src/plugins/data/common/search/expressions/kql.ts",
             "deprecated": false,
@@ -29842,6 +29962,9 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "\"kibana_query\""
+            ],
             "path": "src/plugins/data/common/search/expressions/lucene.ts",
             "deprecated": false
           },
@@ -29949,7 +30072,7 @@
             "label": "fn",
             "description": [],
             "signature": [
-              "(input: null, args: Arguments) => { type: string; language: string; query: any; }"
+              "(input: null, args: Arguments) => { type: \"kibana_query\"; language: string; query: any; }"
             ],
             "path": "src/plugins/data/common/search/expressions/lucene.ts",
             "deprecated": false,
@@ -30477,6 +30600,9 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "\"kibana_filter\""
+            ],
             "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
             "deprecated": false
           },
@@ -30680,7 +30806,11 @@
             "label": "fn",
             "description": [],
             "signature": [
-              "(input: null, args: Arguments) => any"
+              "(input: null, args: Arguments) => { $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
             "deprecated": false,
@@ -30979,6 +31109,9 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "\"kibana_filter\""
+            ],
             "path": "src/plugins/data/common/search/expressions/range_filter.ts",
             "deprecated": false
           },
@@ -31169,7 +31302,11 @@
             "label": "fn",
             "description": [],
             "signature": [
-              "(input: null, args: Arguments) => any"
+              "(input: null, args: Arguments) => { $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/range_filter.ts",
             "deprecated": false,

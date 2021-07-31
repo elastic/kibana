@@ -1531,7 +1531,9 @@
             "section": "def-common.ColumnHeaderOptions",
             "text": "ColumnHeaderOptions"
           },
-          "[]; filters?: any[] | undefined; title: string; id: string; sort: ",
+          "[]; filters?: ",
+          "Filter",
+          "[] | undefined; title: string; id: string; sort: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -10609,7 +10611,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
             "deprecated": false
