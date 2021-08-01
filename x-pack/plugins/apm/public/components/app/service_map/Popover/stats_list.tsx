@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { ServiceNodeStats } from '../../../../../common/service_map';
+import { NodeStats } from '../../../../../common/service_map';
 import {
   asDuration,
   asPercent,
@@ -54,7 +54,7 @@ function NoDataMessage() {
 
 interface StatsListProps {
   isLoading: boolean;
-  data: ServiceNodeStats;
+  data: NodeStats;
 }
 
 export function StatsList({ data, isLoading }: StatsListProps) {

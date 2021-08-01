@@ -11,7 +11,7 @@ import { EuiButton, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ContentsProps } from '.';
-import { ServiceNodeStats } from '../../../../../common/service_map';
+import { NodeStats } from '../../../../../common/service_map';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -27,10 +27,7 @@ export function ServiceContents({ onFocusClick, nodeData }: ContentsProps) {
 
   const serviceName = nodeData.id!;
 
-  const {
-    data = { transactionStats: {} } as ServiceNodeStats,
-    status,
-  } = useFetcher(
+  const { data = { transactionStats: {} } as NodeStats, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
