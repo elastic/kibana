@@ -25,7 +25,7 @@ export type ExistsFilter = Filter & {
  * @public
  */
 export const isExistsFilter = (filter: FieldFilter): filter is ExistsFilter =>
-  has(filter, 'exists')!;
+  has(filter, 'exists');
 
 /**
  * @internal

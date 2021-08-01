@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { get, isPlainObject } from 'lodash';
+import { has, isPlainObject } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta } from './types';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
@@ -57,7 +57,7 @@ export const isPhraseFilter = (filter: FieldFilter): filter is PhraseFilter => {
  * @public
  */
 export const isScriptedPhraseFilter = (filter: FieldFilter): filter is PhraseFilter =>
-  Boolean(get(filter, 'script.script.params.value'));
+  has(filter, 'script.script.params.value');
 
 /** @internal */
 export const getPhraseFilterField = (filter: PhraseFilter) => {
