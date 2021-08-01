@@ -81,7 +81,7 @@ export function getServiceMapBackendNodeInfo({
 
     const count = response.aggregations?.count.value ?? 0;
     const errorCount =
-      response.aggregations?.['event.outcome'].buckets[0]?.doc_count ?? 0;
+      response.aggregations?.[EVENT_OUTCOME].buckets[0]?.doc_count ?? 0;
     const latencySum = response.aggregations?.latency_sum.value ?? 0;
 
     const avgErrorRate = errorCount / count;
