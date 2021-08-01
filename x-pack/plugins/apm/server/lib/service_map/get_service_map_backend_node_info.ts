@@ -7,9 +7,13 @@
 
 import { rangeQuery } from '../../../../observability/server';
 import {
+  EVENT_OUTCOME,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
@@ -59,16 +63,16 @@ export function getServiceMapBackendNodeInfo({
           aggs: {
             latency_sum: {
               sum: {
-                field: 'span.destination.service.response_time.sum.us',
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
               },
             },
             count: {
               sum: {
-                field: 'span.destination.service.response_time.count',
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
               },
             },
-            'event.outcome': {
-              terms: { field: 'event.outcome', include: ['failure'] },
+            [EVENT_OUTCOME]: {
+              terms: { field: EVENT_OUTCOME, include: [EventOutcome.failure] },
             },
           },
         },
