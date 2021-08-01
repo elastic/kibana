@@ -25,6 +25,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 DEPS = [
+  "//packages/kbn-babel-preset",
   "//packages/kbn-dev-utils",
   "@npm//eslint-config-prettier",
   "@npm//semver",

@@ -21,7 +21,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-          "lineNumber": 63
+          "lineNumber": 59
         },
         "deprecated": false,
         "children": [
@@ -37,7 +37,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 66
+              "lineNumber": 62
             },
             "deprecated": false,
             "children": [
@@ -59,7 +59,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 66
+                  "lineNumber": 62
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -79,7 +79,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 70
+              "lineNumber": 66
             },
             "deprecated": false,
             "children": [
@@ -95,7 +95,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 70
+                  "lineNumber": 66
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -115,7 +115,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 77
+              "lineNumber": 73
             },
             "deprecated": false,
             "children": [
@@ -131,7 +131,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 77
+                  "lineNumber": 73
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -151,7 +151,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 83
+              "lineNumber": 79
             },
             "deprecated": false,
             "children": [
@@ -167,7 +167,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 83
+                  "lineNumber": 79
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -189,7 +189,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 89
+              "lineNumber": 85
             },
             "deprecated": false,
             "children": [
@@ -205,7 +205,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 89
+                  "lineNumber": 85
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -222,7 +222,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 89
+                  "lineNumber": 85
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -242,7 +242,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 104
+              "lineNumber": 100
             },
             "deprecated": false,
             "children": [],
@@ -256,11 +256,11 @@
             "label": "getError",
             "description": [],
             "signature": [
-              "(jobId: string) => Promise<any>"
+              "(jobId: string) => Promise<string>"
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 110
+              "lineNumber": 106
             },
             "deprecated": false,
             "children": [
@@ -276,7 +276,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 110
+                  "lineNumber": 106
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -298,7 +298,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 116
+              "lineNumber": 120
             },
             "deprecated": false,
             "children": [
@@ -314,7 +314,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 116
+                  "lineNumber": 120
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -336,7 +336,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 123
+              "lineNumber": 127
             },
             "deprecated": false,
             "children": [
@@ -352,7 +352,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 123
+                  "lineNumber": 127
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -372,7 +372,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 131
+              "lineNumber": 135
             },
             "deprecated": false,
             "children": [
@@ -388,7 +388,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 131
+                  "lineNumber": 135
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -405,7 +405,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 131
+                  "lineNumber": 135
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -427,7 +427,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 136
+              "lineNumber": 140
             },
             "deprecated": false,
             "children": [
@@ -443,7 +443,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 136
+                  "lineNumber": 140
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -460,7 +460,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 136
+                  "lineNumber": 140
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -480,7 +480,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 153
+              "lineNumber": 157
             },
             "deprecated": false,
             "children": [],
@@ -498,7 +498,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 156
+              "lineNumber": 160
             },
             "deprecated": false,
             "children": [
@@ -514,7 +514,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-                  "lineNumber": 156
+                  "lineNumber": 160
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -534,7 +534,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 159
+              "lineNumber": 163
             },
             "deprecated": false,
             "children": [],
@@ -552,7 +552,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 161
+              "lineNumber": 165
             },
             "deprecated": false,
             "children": [],
@@ -570,7 +570,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 167
+              "lineNumber": 171
             },
             "deprecated": false,
             "children": [],
@@ -588,7 +588,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 173
+              "lineNumber": 177
             },
             "deprecated": false,
             "children": [],
@@ -606,7 +606,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-              "lineNumber": 179
+              "lineNumber": 183
             },
             "deprecated": false,
             "children": [],
