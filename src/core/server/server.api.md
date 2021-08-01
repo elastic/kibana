@@ -2268,6 +2268,7 @@ export interface SavedObjectExportBaseOptions {
 // @public
 export interface SavedObjectMigrationContext {
     readonly convertToMultiNamespaceTypeVersion?: string;
+    readonly isSingleNamespaceType: boolean;
     readonly log: SavedObjectsMigrationLogger;
     readonly migrationVersion: string;
 }
