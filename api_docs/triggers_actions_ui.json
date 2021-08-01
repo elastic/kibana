@@ -2175,9 +2175,9 @@
               "ActionTypeModel",
               "<unknown, unknown, any>; register: (objectType: ",
               "ActionTypeModel",
-              "<unknown, unknown, any>) => void; list: () => ",
+              "<unknown, unknown, any>) => void; has: (id: string) => boolean; list: () => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>[]; has: (id: string) => boolean; }"
+              "<unknown, unknown, any>[]; }"
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -2209,7 +2209,7 @@
                 "section": "def-public.AlertTypeModel",
                 "text": "AlertTypeModel"
               },
-              "<Record<string, unknown>>) => void; list: () => ",
+              "<Record<string, unknown>>) => void; has: (id: string) => boolean; list: () => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -2217,7 +2217,7 @@
                 "section": "def-public.AlertTypeModel",
                 "text": "AlertTypeModel"
               },
-              "<Record<string, unknown>>[]; has: (id: string) => boolean; }"
+              "<Record<string, unknown>>[]; }"
             ],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -2447,9 +2447,9 @@
           "ActionTypeModel",
           "<ActionConnector, ActionParams, any>; register: (objectType: ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>) => void; list: () => ",
+          "<ActionConnector, ActionParams, any>) => void; has: (id: string) => boolean; list: () => ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>[]; has: (id: string) => boolean; }"
+          "<ActionConnector, ActionParams, any>[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
@@ -2591,7 +2591,7 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<Record<string, unknown>>) => void; list: () => ",
+          "<Record<string, unknown>>) => void; has: (id: string) => boolean; list: () => ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -2599,7 +2599,7 @@
             "section": "def-public.AlertTypeModel",
             "text": "AlertTypeModel"
           },
-          "<Record<string, unknown>>[]; has: (id: string) => boolean; }"
+          "<Record<string, unknown>>[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
