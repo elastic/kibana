@@ -68,7 +68,19 @@ const stories: Meta<Args> = {
         data: args?.nodeData!,
       };
 
-      const cy = cytoscape({ elements: [node] });
+      const cy = cytoscape({
+        elements: [
+          { data: { id: 'upstreamService' } },
+          {
+            data: {
+              id: 'edge',
+              source: 'upstreamService',
+              target: node.data.id,
+            },
+          },
+          node,
+        ],
+      });
 
       setTimeout(() => {
         cy.$id(node.data.id!).select();
@@ -100,7 +112,7 @@ Backend.args = {
 export const BackendWithLongTitle: Story<Args> = () => {
   return <Popover />;
 };
-Backend.args = {
+BackendWithLongTitle.args = {
   nodeData: {
     'span.subtype': 'http',
     'span.destination.service.resource':
