@@ -39,7 +39,7 @@ describe('Action Menu', function () {
         attributes: sampleAttribute,
         timeRange: { to: 'now', from: 'now-10m' },
       },
-      true
+      { openInNewTab: true }
     );
   });
 
