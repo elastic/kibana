@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
+import { has } from 'lodash';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 import type { FieldFilter, Filter, FilterMeta } from './types';
 
@@ -25,7 +25,7 @@ export type ExistsFilter = Filter & {
  * @public
  */
 export const isExistsFilter = (filter: FieldFilter): filter is ExistsFilter =>
-  get(filter, 'exists');
+  has(filter, 'exists')!;
 
 /**
  * @internal

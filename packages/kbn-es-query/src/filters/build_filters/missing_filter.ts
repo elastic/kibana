@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
+import { has } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta } from './types';
 
 export type MissingFilterMeta = FilterMeta;
@@ -25,7 +25,7 @@ export type MissingFilter = Filter & {
  * @public
  */
 export const isMissingFilter = (filter: FieldFilter): filter is MissingFilter =>
-  get(filter, 'missing');
+  has(filter, 'missing');
 
 /**
  * @internal

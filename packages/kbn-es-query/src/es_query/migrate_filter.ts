@@ -11,7 +11,8 @@ import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
 import { IndexPatternBase } from './types';
 
-interface DeprecatedMatchPhraseFilter extends Filter {
+/** @internal */
+export interface DeprecatedMatchPhraseFilter extends Filter {
   query: {
     match: {
       [field: string]: {

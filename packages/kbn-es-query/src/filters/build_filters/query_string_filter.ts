@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
+import { has } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta } from './types';
 
 export type QueryStringFilterMeta = FilterMeta;
@@ -27,7 +27,7 @@ export type QueryStringFilter = Filter & {
  * @public
  */
 export const isQueryStringFilter = (filter: FieldFilter): filter is QueryStringFilter =>
-  get(filter, 'query.query_string');
+  has(filter, 'query.query_string');
 
 /**
  * Creates a filter corresponding to a raw Elasticsearch query DSL object

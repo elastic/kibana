@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
+import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta } from './types';
 import type { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
 
@@ -83,7 +83,7 @@ export type RangeFilter = Filter &
  *
  * @public
  */
-export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => get(filter, 'range');
+export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => has(filter, 'range');
 
 /**
  *

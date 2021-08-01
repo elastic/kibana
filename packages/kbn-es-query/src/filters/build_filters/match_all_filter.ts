@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
+import { has } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta } from './types';
 
 export interface MatchAllFilterMeta extends FilterMeta {
@@ -26,4 +26,4 @@ export type MatchAllFilter = Filter & {
  * @public
  */
 export const isMatchAllFilter = (filter: FieldFilter): filter is MatchAllFilter =>
-  get(filter, 'match_all');
+  has(filter, 'match_all');

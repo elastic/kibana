@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
+import { has } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
 
 export type GeoPolygonFilterMeta = FilterMeta & {
@@ -27,7 +27,7 @@ export type GeoPolygonFilter = Filter & {
  * @public
  */
 export const isGeoPolygonFilter = (filter: FieldFilter): filter is GeoPolygonFilter =>
-  get(filter, 'geo_polygon');
+  has(filter, 'geo_polygon');
 
 /**
  * @internal
