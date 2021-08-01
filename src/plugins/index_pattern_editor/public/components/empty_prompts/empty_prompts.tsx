@@ -16,6 +16,7 @@ import { getIndices } from '../../lib';
 
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
+import { PromptFooter } from './prompt_footer';
 
 const removeAliases = (item: MatchedItem) =>
   !((item as unknown) as ResolveIndexResponseItemAlias).indices;
@@ -54,23 +55,29 @@ export const EmptyPrompts: FC<Props> = ({
     if (!hasDataIndices && !remoteClustersExist) {
       // load data
       return (
-        <EmptyIndexListPrompt
-          onRefresh={loadSources}
-          closeFlyout={onCancel}
-          createAnyway={() => setGoToForm(true)}
-          canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
-          navigateToApp={application.navigateToApp}
-          addDataUrl={docLinks.links.indexPatterns.introduction}
-        />
+        <>
+          <EmptyIndexListPrompt
+            onRefresh={loadSources}
+            closeFlyout={onCancel}
+            createAnyway={() => setGoToForm(true)}
+            canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
+            navigateToApp={application.navigateToApp}
+            addDataUrl={docLinks.links.indexPatterns.introduction}
+          />
+          <PromptFooter onCancel={onCancel} />
+        </>
       );
     } else {
       // first time
       return (
-        <EmptyIndexPatternPrompt
-          goToCreate={() => setGoToForm(true)}
-          indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
-          canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
-        />
+        <>
+          <EmptyIndexPatternPrompt
+            goToCreate={() => setGoToForm(true)}
+            indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
+            canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
+          />
+          <PromptFooter onCancel={onCancel} />
+        </>
       );
     }
   }
