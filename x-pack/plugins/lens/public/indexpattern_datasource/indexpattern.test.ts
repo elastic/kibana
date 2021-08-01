@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import 'jest-canvas-mock';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, IndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
@@ -18,8 +20,6 @@ import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
-import React from 'react';
-
 jest.mock('./loader');
 jest.mock('../id_generator');
 jest.mock('./operations');
