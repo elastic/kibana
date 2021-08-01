@@ -6,17 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const deleteSavedQueryRoute = (router: IRouter) => {
   router.delete(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/internal/osquery/scheduled_query_group',
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-allPacks`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;

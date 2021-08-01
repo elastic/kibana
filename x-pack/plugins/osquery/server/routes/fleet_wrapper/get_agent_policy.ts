@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { schema } from '@kbn/config-schema';
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
-      path: '/internal/osquery/status',
-      validate: false,
+      path: '/internal/osquery/fleet_wrapper/agent_policies/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
       const soClient = context.core.savedObjects.client;
 
       const packageInfo = await osqueryContext.service
-        .getPackageService()
-        ?.getInstallation({ savedObjectsClient: soClient, pkgName: OSQUERY_INTEGRATION_NAME });
+        .getAgentPolicyService()
+        ?.get(soClient, request.params.id);
 
-      return response.ok({ body: packageInfo });
+      return response.ok({ body: { item: packageInfo } });
     }
   );
 };

@@ -28,12 +28,18 @@ const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
 `;
 
 interface ActiveStateSwitchProps {
+  disabled?: boolean;
   item: PackagePolicy;
 }
 
 const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) => {
   const queryClient = useQueryClient();
   const {
+    application: {
+      capabilities: {
+        osquery: { allPacks },
+      },
+    },
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -126,7 +132,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       {isLoading && <StyledEuiLoadingSpinner />}
       <EuiSwitch
         checked={item.enabled}
-        disabled={isLoading}
+        disabled={!allPacks || isLoading}
         showLabel={false}
         label=""
         onChange={handleToggleActiveClick}

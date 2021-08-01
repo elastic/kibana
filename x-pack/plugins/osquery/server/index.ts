@@ -16,7 +16,6 @@ export const config = {
     actionEnabled: true,
     savedQueries: true,
     packs: true,
-    rbac: true,
   },
 };
 export function plugin(initializerContext: PluginInitializerContext) {

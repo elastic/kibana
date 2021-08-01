@@ -8,6 +8,7 @@
 import uuid from 'uuid';
 import moment from 'moment';
 
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
@@ -30,9 +31,12 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           CreateActionRequestBodySchema
         >(createActionRequestBodySchema),
       },
+      options: {
+        tags: [`access:${PLUGIN_ID}-readLiveQueries`, `access:${PLUGIN_ID}-runSavedQueries`],
+      },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = context.core.elasticsearch.client.asInternalUser;
       const soClient = context.core.savedObjects.client;
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
       const selectedAgents = await parseAgentSelection(
@@ -46,6 +50,8 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         incrementCount(soClient, 'live_query', 'errors');
         return response.badRequest({ body: new Error('No agents found for selection') });
       }
+
+      // TODO: Add check for `runSavedQueries` only
 
       try {
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;

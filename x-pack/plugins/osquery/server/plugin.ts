@@ -7,6 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+} from '../../fleet/common';
+import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -23,33 +28,40 @@ import { initUsageCollectors } from './usage';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
+import { PLUGIN_ID } from '../common';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
-    id: 'osquery',
+    id: PLUGIN_ID,
     name: i18n.translate('xpack.features.osqueryFeatureName', {
       defaultMessage: 'Osquery',
     }),
-    order: 1300,
+    order: 2300,
     category: DEFAULT_APP_CATEGORIES.management,
-    app: ['osquery', 'kibana'],
-    catalogue: ['osquery'],
+    app: [PLUGIN_ID, 'kibana'],
+    catalogue: [PLUGIN_ID],
     privileges: {
       all: {
-        app: ['osquery', 'kibana'],
-        catalogue: ['osquery'],
+        api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+        app: [PLUGIN_ID, 'kibana'],
+        catalogue: [PLUGIN_ID],
         savedObject: {
-          all: ['search', 'query'],
-          read: ['index-pattern'],
+          all: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+          read: [PACKAGES_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE],
         },
         ui: ['show', 'save'],
       },
       read: {
-        app: ['osquery', 'kibana'],
-        catalogue: ['osquery'],
+        api: [`${PLUGIN_ID}-read`],
+        app: [PLUGIN_ID, 'kibana'],
+        catalogue: [PLUGIN_ID],
         savedObject: {
           all: [],
-          read: ['index-pattern', 'search', 'query'],
+          read: [
+            PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            PACKAGES_SAVED_OBJECT_TYPE,
+            AGENT_POLICY_SAVED_OBJECT_TYPE,
+          ],
         },
         ui: ['show'],
       },
@@ -64,6 +76,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
+                api: [`${PLUGIN_ID}-allLiveQueries`, `${PLUGIN_ID}-readLiveQueries`],
                 id: 'live_queries_all',
                 includeIn: 'all',
                 name: 'All',
@@ -71,9 +84,10 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [],
                   read: [],
                 },
-                ui: ['crudLiveQueries', 'readLiveQueries'],
+                ui: ['allLiveQueries', 'readLiveQueries'],
               },
               {
+                api: [`${PLUGIN_ID}-readLiveQueries`],
                 id: 'live_queries_read',
                 includeIn: 'read',
                 name: 'Read',
@@ -89,19 +103,20 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'independent',
             privileges: [
               {
-                id: 'saved_queries_only',
+                api: [`${PLUGIN_ID}-runSavedQueries`],
+                id: 'run_saved_queries',
                 name: i18n.translate(
                   'xpack.features.ossFeatures.discoverCreateShortUrlPrivilegeName',
                   {
-                    defaultMessage: 'Run Saved queries only',
+                    defaultMessage: 'Run Saved queries',
                   }
                 ),
-                includeIn: 'none',
+                includeIn: 'all',
                 savedObject: {
                   all: [],
-                  read: [savedQuerySavedObjectType],
+                  read: [],
                 },
-                ui: ['savedQueriesOnly'],
+                ui: ['runSavedQueries'],
               },
             ],
           },
@@ -123,7 +138,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [savedQuerySavedObjectType],
                   read: [savedQuerySavedObjectType],
                 },
-                ui: ['crudSavedQueries', 'readSavedQueries'],
+                ui: ['allSavedQueries', 'readSavedQueries'],
               },
               {
                 id: 'saved_queries_read',
@@ -148,6 +163,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
+                api: [`${PLUGIN_ID}-allPacks`],
                 id: 'packs_all',
                 includeIn: 'all',
                 name: 'All',
@@ -155,9 +171,10 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [packSavedObjectType],
                   read: [packSavedObjectType],
                 },
-                ui: ['crudPacks', 'readPacks'],
+                ui: ['allPacks', 'readPacks'],
               },
               {
+                api: [`${PLUGIN_ID}-readPacks`],
                 id: 'packs_read',
                 includeIn: 'read',
                 name: 'Read',
@@ -165,7 +182,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [],
                   read: [packSavedObjectType],
                 },
-                ui: ['savedLiveQueries'],
+                ui: ['readPacks'],
               },
             ],
           },

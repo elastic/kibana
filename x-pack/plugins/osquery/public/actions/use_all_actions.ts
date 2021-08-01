@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
@@ -49,34 +51,25 @@ export const useAllActions = ({
   filterQuery,
   skip = false,
 }: UseAllActions) => {
-  const { data } = useKibana().services;
+  const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actions', { activePage, direction, limit, sortField }],
     async () => {
-      const responseData = await data.search
-        .search<ActionsRequestOptions, ActionsStrategyResponse>(
-          {
-            factoryQueryType: OsqueryQueries.actions,
-            filterQuery: createFilter(filterQuery),
-            pagination: generateTablePaginationOptions(activePage, limit),
-            sort: {
-              direction,
-              field: sortField,
-            },
-          },
-          {
-            strategy: 'osquerySearchStrategy',
-          }
-        )
-        .toPromise();
+      const responseData = await http.get(
+        '/internal/osquery/action'
+        // query: {
+        //   filterQuery: createFilter(filterQuery),
+        //   pagination: generateTablePaginationOptions(activePage, limit),
+        //   sort: {
+        //     direction,
+        //     field: sortField,
+        //   },
+        // },
+      );
 
-      return {
-        ...responseData,
-        actions: responseData.edges,
-        inspect: getInspectResponse(responseData, {} as InspectResponse),
-      };
+      return responseData;
     },
     {
       keepPreviousData: true,
