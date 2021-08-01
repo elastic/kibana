@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType } from '../../../../../../plugins/data/public';
+import { IndexPatternFieldBase } from '@kbn/es-query';
+import { IndexPatternField } from '../../../../../../plugins/data/public';
 
-export interface IndexedFieldItem extends IFieldType {
+type IndexedFieldItemBase = Partial<IndexPatternField> & IndexPatternFieldBase;
+
+export interface IndexedFieldItem extends IndexedFieldItemBase {
   info: string[];
   excluded: boolean;
   kbnType: string;

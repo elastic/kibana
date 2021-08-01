@@ -21,6 +21,7 @@ export interface CustomExtentsOptionsProps {
   setMultipleValidity(paramName: string, isValid: boolean): void;
   setValueAxis<T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]): void;
   setValueAxisScale: SetScale;
+  disableAxisExtents?: boolean;
 }
 
 function CustomExtentsOptions({
@@ -28,6 +29,7 @@ function CustomExtentsOptions({
   setMultipleValidity,
   setValueAxis,
   setValueAxisScale,
+  disableAxisExtents = false,
 }: CustomExtentsOptionsProps) {
   const invalidBoundsMarginMessage = i18n.translate(
     'visTypeXy.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin',
@@ -111,9 +113,10 @@ function CustomExtentsOptions({
         paramName="setYExtents"
         value={axisScale.setYExtents}
         setValue={onSetYExtentsChange}
+        disabled={disableAxisExtents}
       />
 
-      {axisScale.setYExtents && (
+      {axisScale.setYExtents && !disableAxisExtents && (
         <YExtents
           scale={axisScale}
           setScale={setValueAxisScale}

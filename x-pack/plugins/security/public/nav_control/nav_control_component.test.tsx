@@ -64,6 +64,7 @@ describe('SecurityNavControl', () => {
         onClick={[Function]}
       >
         <EuiAvatar
+          data-test-subj="userMenuAvatar"
           name="foo"
           size="s"
         />

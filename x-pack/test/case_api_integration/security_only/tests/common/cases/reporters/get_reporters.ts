@@ -34,7 +34,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
-  describe('get_reporters', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/106658
+  describe.skip('get_reporters', () => {
     afterEach(async () => {
       await deleteCasesByESQuery(es);
     });
