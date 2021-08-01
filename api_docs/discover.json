@@ -205,8 +205,7 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "Filter",
-              "[] | undefined"
+              "any[] | undefined"
             ],
             "source": {
               "path": "src/plugins/discover/public/locator.ts",
@@ -217,15 +216,14 @@
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverAppLocatorParams.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [
               "\nOptionally set a query."
             ],
             "signature": [
-              "Query",
-              " | undefined"
+              "any"
             ],
             "source": {
               "path": "src/plugins/discover/public/locator.ts",
@@ -461,8 +459,7 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "Filter",
-              "[] | undefined"
+              "any[] | undefined"
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
@@ -473,15 +470,14 @@
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverUrlGeneratorState.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              "Query",
-              " | undefined"
+              "any"
             ],
             "source": {
               "path": "src/plugins/discover/public/url_generator.ts",
@@ -1050,13 +1046,12 @@
           {
             "parentPluginId": "discover",
             "id": "def-public.SearchInput.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "Query",
-              " | undefined"
+              "any"
             ],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
@@ -1072,8 +1067,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
-              "[] | undefined"
+              "any[] | undefined"
             ],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",

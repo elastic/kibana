@@ -2798,6 +2798,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/field-types@link:bazel-bin/packages/kbn-field-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n@link:bazel-bin/packages/kbn-i18n":
   version "0.0.0"
   uid ""
