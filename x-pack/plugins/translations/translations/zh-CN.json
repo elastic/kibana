@@ -5929,7 +5929,6 @@
     "xpack.apm.serviceMap.invalidLicenseMessage": "要访问服务地图，必须订阅 Elastic 白金级许可。使用该许可证，您将能够可视化整个应用程序堆栈以及 APM 数据。",
     "xpack.apm.serviceMap.noServicesPromptDescription": "我们在当前选择的时间范围和环境内找不到任何要映射的服务。请尝试其他范围或检查选定环境。如果您未使用任何服务，请使用我们的设置说明以开始。",
     "xpack.apm.serviceMap.noServicesPromptTitle": "没有可用服务",
-    "xpack.apm.serviceMap.popoverMetrics.noDataText": "选定的环境没有数据。请尝试切换到其他环境。",
     "xpack.apm.serviceMap.resourceCountLabel": "{count} 项资源",
     "xpack.apm.serviceMap.serviceDetailsButtonText": "服务详情",
     "xpack.apm.serviceMap.subtypePopoverStat": "子类型",

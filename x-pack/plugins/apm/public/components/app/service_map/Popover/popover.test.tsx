@@ -8,7 +8,7 @@
 import { composeStories } from '@storybook/testing-react';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import * as stories from './popover.stories';
+import * as stories from './Popover.stories';
 
 const { Backend, ExternalsList, Resource, Service } = composeStories(stories);
 
