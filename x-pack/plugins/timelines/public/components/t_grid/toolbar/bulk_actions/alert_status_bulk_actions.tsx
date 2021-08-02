@@ -193,3 +193,5 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export const StatefulAlertStatusBulkActions = connector(AlertStatusBulkActionsComponent);
+
+export { StatefulAlertStatusBulkActions as default };

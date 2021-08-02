@@ -11,10 +11,19 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { ComponentType, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  ComponentType,
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { BulkActionsProp, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
@@ -36,13 +45,16 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { StatefulFieldsBrowser } from '../../../';
-import { StatefulAlertStatusBulkActions } from '../toolbar/bulk_actions/alert_status_bulk_actions';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../toolbar/fields_browser/helpers';
 import * as i18n from './translations';
 import { AlertCount } from '../styles';
+
+const StatefulAlertStatusBulkActions = lazy(
+  () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
+);
 
 interface OwnProps {
   activePage: number;
@@ -258,32 +270,37 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
-        additionalControls: showBulkActions ? (
+        additionalControls: (
           <>
             <AlertCount>{subtitle}</AlertCount>
-            <StatefulAlertStatusBulkActions
-              data-test-subj="bulk-actions"
-              id={id}
-              totalItems={totalItems}
-              filterStatus={filterStatus}
-              onActionSuccess={onAlertStatusActionSuccess}
-              onActionFailure={onAlertStatusActionFailure}
-              refetch={refetch}
-            />
-            {additionalControls ?? null}
-          </>
-        ) : (
-          <>
-            <AlertCount>{subtitle}</AlertCount>
-            {additionalControls ?? null}
-            <StatefulFieldsBrowser
-              data-test-subj="field-browser"
-              height={FIELD_BROWSER_HEIGHT}
-              width={FIELD_BROWSER_WIDTH}
-              browserFields={browserFields}
-              timelineId={id}
-              columnHeaders={columnHeaders}
-            />
+            {showBulkActions ? (
+              <>
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <StatefulAlertStatusBulkActions
+                    data-test-subj="bulk-actions"
+                    id={id}
+                    totalItems={totalItems}
+                    filterStatus={filterStatus}
+                    onActionSuccess={onAlertStatusActionSuccess}
+                    onActionFailure={onAlertStatusActionFailure}
+                    refetch={refetch}
+                  />
+                </Suspense>
+                {additionalControls ?? null}
+              </>
+            ) : (
+              <>
+                {additionalControls ?? null}
+                <StatefulFieldsBrowser
+                  data-test-subj="field-browser"
+                  height={FIELD_BROWSER_HEIGHT}
+                  width={FIELD_BROWSER_WIDTH}
+                  browserFields={browserFields}
+                  timelineId={id}
+                  columnHeaders={columnHeaders}
+                />
+              </>
+            )}
           </>
         ),
         ...(showBulkActions
