@@ -1082,11 +1082,12 @@ describe('Lens App', () => {
     });
 
     it('updates the state if session id changes from the outside', async () => {
-      const services = makeDefaultServices(sessionIdSubject);
+      const sessionIdS = new Subject<string>();
+      const services = makeDefaultServices(sessionIdS);
       const { lensStore } = await mountWith({ props: undefined, services });
 
       act(() => {
-        sessionIdSubject.next('new-session-id');
+        sessionIdS.next('new-session-id');
       });
       await act(async () => {
         await new Promise((r) => setTimeout(r, 0));
