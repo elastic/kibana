@@ -27,14 +27,12 @@ const getBarSeriesStyle = ({ color, bars }: BarSeriesComponentProps['visData']) 
 
   return {
     rectBorder: {
-      stroke: color,
-      strokeWidth: Math.max(1, bars.lineWidth ? Math.ceil(bars.lineWidth / 2) : 1),
-      visible: true,
+      visible: false,
     },
     rect: {
       fill: color,
       opacity,
-      widthPixel: 1,
+      widthPixel: Math.max(1, bars.lineWidth ?? 1),
     },
   } as BarSeriesStyle;
 };
