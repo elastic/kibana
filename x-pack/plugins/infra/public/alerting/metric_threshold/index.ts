@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { validateMetricThreshold } from './components/validation';
+import { formatReason } from './rule_data_formatters';
 import { AlertTypeParams } from '../../../../alerting/common';
 import {
   MetricExpressionParams,
@@ -21,7 +21,7 @@ interface MetricThresholdAlertTypeParams extends AlertTypeParams {
   criteria: MetricExpressionParams[];
 }
 
-export function createMetricThresholdAlertType(): AlertTypeModel<MetricThresholdAlertTypeParams> {
+export function createMetricThresholdAlertType(): ObservabilityRuleTypeModel<MetricThresholdAlertTypeParams> {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {
@@ -44,5 +44,6 @@ Reason:
       }
     ),
     requiresAppContext: false,
+    format: formatReason,
   };
 }

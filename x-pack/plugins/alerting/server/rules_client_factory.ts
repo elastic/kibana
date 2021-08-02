@@ -13,7 +13,7 @@ import {
 } from 'src/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { RulesClient } from './rules_client';
-import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
+import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
@@ -23,7 +23,7 @@ import { ALERTS_FEATURE_ID } from '../common';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
-  alertTypeRegistry: AlertTypeRegistry;
+  ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpaceId: (request: KibanaRequest) => string | undefined;
@@ -39,7 +39,7 @@ export class RulesClientFactory {
   private isInitialized = false;
   private logger!: Logger;
   private taskManager!: TaskManagerStartContract;
-  private alertTypeRegistry!: AlertTypeRegistry;
+  private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
   private securityPluginStart?: SecurityPluginStart;
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
@@ -58,7 +58,7 @@ export class RulesClientFactory {
     this.logger = options.logger;
     this.getSpaceId = options.getSpaceId;
     this.taskManager = options.taskManager;
-    this.alertTypeRegistry = options.alertTypeRegistry;
+    this.ruleTypeRegistry = options.ruleTypeRegistry;
     this.securityPluginSetup = options.securityPluginSetup;
     this.securityPluginStart = options.securityPluginStart;
     this.spaceIdToNamespace = options.spaceIdToNamespace;
@@ -82,7 +82,7 @@ export class RulesClientFactory {
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,
       taskManager: this.taskManager,
-      alertTypeRegistry: this.alertTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedWrappers: ['security'],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],

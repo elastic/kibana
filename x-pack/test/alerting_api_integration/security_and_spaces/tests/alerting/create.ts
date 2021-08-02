@@ -418,7 +418,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'Alert type "test.unregistered-alert-type" is not registered.',
+                message: 'Rule type "test.unregistered-alert-type" is not registered.',
               });
               break;
             default:

@@ -27,7 +27,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  alertingAuthMock.getSpaceId.mockImplementation(() => Promise.resolve('test_default_space_id'));
+  alertingAuthMock.getSpaceId.mockImplementation(() => 'test_default_space_id');
 });
 
 describe('get()', () => {

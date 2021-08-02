@@ -71,6 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct service names', () => {
         expectSnapshot(sortedItems.map((item) => item.serviceName)).toMatchInline(`
           Array [
+            "auditbeat",
             "kibana",
             "kibana-frontend",
             "opbeans-dotnet",
@@ -96,103 +97,104 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           )
         ).toMatchInline(`
           Array [
+            Object {},
             Object {
               "avgResponseTime": Object {
-                "value": 421616.337243402,
+                "value": 658101.291021672,
               },
               "transactionErrorRate": Object {
                 "value": 0,
               },
               "transactionsPerMinute": Object {
-                "value": 25.2,
+                "value": 75.3666666666667,
               },
             },
             Object {
               "avgResponseTime": Object {
-                "value": 2387606.33333333,
+                "value": 3588095,
               },
               "transactionErrorRate": Object {
                 "value": null,
               },
               "transactionsPerMinute": Object {
-                "value": 0.2,
+                "value": 0.133333333333333,
               },
             },
             Object {
               "avgResponseTime": Object {
-                "value": 633386.908045977,
+                "value": 586249.027027027,
               },
               "transactionErrorRate": Object {
-                "value": 0.027027027027027,
+                "value": 0.00337837837837838,
               },
               "transactionsPerMinute": Object {
-                "value": 2.46666666666667,
+                "value": 9.86666666666667,
               },
             },
             Object {
               "avgResponseTime": Object {
-                "value": 27891.1507936508,
+                "value": 218838.954459203,
               },
               "transactionErrorRate": Object {
-                "value": 0.0186915887850467,
+                "value": 0.0113851992409867,
               },
               "transactionsPerMinute": Object {
-                "value": 3.56666666666667,
+                "value": 17.5666666666667,
               },
             },
             Object {
               "avgResponseTime": Object {
-                "value": 237995.266666667,
+                "value": 17660.3103448276,
               },
               "transactionErrorRate": Object {
-                "value": 0.159420289855072,
+                "value": 0.0646551724137931,
               },
               "transactionsPerMinute": Object {
-                "value": 2.3,
+                "value": 7.73333333333333,
               },
             },
             Object {
               "avgResponseTime": Object {
-                "value": 24989.3157894737,
+                "value": 22281.4255319149,
               },
               "transactionErrorRate": Object {
-                "value": 0.0263157894736842,
+                "value": 0.00531914893617021,
               },
               "transactionsPerMinute": Object {
-                "value": 2.53333333333333,
+                "value": 6.26666666666667,
               },
             },
             Object {
               "avgResponseTime": Object {
-                "value": 29161.3703703704,
+                "value": 243948.538461538,
               },
               "transactionErrorRate": Object {
-                "value": 0.0392156862745098,
+                "value": 0.032051282051282,
               },
               "transactionsPerMinute": Object {
-                "value": 1.7,
+                "value": 5.2,
               },
             },
             Object {
               "avgResponseTime": Object {
-                "value": 71576.4545454545,
+                "value": 44571.2584615385,
               },
               "transactionErrorRate": Object {
-                "value": 0.0454545454545455,
+                "value": 0.00307692307692308,
               },
               "transactionsPerMinute": Object {
-                "value": 3.66666666666667,
+                "value": 10.8333333333333,
               },
             },
             Object {
               "avgResponseTime": Object {
-                "value": 2324991,
+                "value": 1381526.7037037,
               },
               "transactionErrorRate": Object {
                 "value": null,
               },
               "transactionsPerMinute": Object {
-                "value": 0.5,
+                "value": 1.8,
               },
             },
           ]
@@ -212,6 +214,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "production",
             ],
             Array [
+              "production",
+            ],
+            Array [
               "testing",
             ],
             Array [
@@ -220,8 +225,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Array [
               "testing",
             ],
-            Array [],
-            Array [],
+            Array [
+              "production",
+            ],
+            Array [
+              "production",
+            ],
             Array [
               "testing",
             ],
@@ -241,7 +250,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('non-RUM services all report transaction error rates', () => {
-        const nonRumServices = sortedItems.filter((item) => item.agentName !== 'rum-js');
+        const nonRumServices = sortedItems.filter(
+          (item) => item.agentName !== 'rum-js' && item.serviceName !== 'auditbeat'
+        );
 
         expect(
           nonRumServices.every((item) => {
@@ -329,18 +340,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(healthStatuses.filter(Boolean).length).to.be.greaterThan(0);
 
             expectSnapshot(healthStatuses).toMatchInline(`
-                          Array [
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                          ]
-                      `);
+              Array [
+                undefined,
+                "healthy",
+                "healthy",
+                "healthy",
+                undefined,
+                "healthy",
+                undefined,
+                "healthy",
+                "healthy",
+                undefined,
+              ]
+            `);
           });
         });
       });
