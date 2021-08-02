@@ -10,50 +10,24 @@ import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
 import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
-import { DiscoverLayout } from './discover_layout';
 import { esHits } from '../../../../../__mocks__/es_hits';
-import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../../data/common/search/search_source/mocks';
-import { IndexPattern, IndexPatternAttributes } from '../../../../../../../data/common';
-import { SavedObject } from '../../../../../../../../core/types';
-import { indexPatternWithTimefieldMock } from '../../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
-import { DiscoverLayoutProps } from './types';
-import {
-  DataCharts$,
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-} from '../../services/use_saved_search';
+import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { FetchStatus } from '../../../../types';
-import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
-import { RequestAdapter } from '../../../../../../../inspector';
-import { Chart } from '../chart/point_series';
+import { Chart } from './point_series';
+import { DiscoverChart } from './discover_chart';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
+function getProps(timefield?: string) {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
-
-  const indexPatternList = ([indexPattern].map((ip) => {
-    return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
-
-  const main$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    foundDocuments: true,
-  }) as DataMain$;
-
-  const documents$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: esHits as ElasticSearchHit[],
-  }) as DataDocuments$;
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -121,40 +95,28 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
     },
   }) as DataCharts$;
 
-  const savedSearchData$ = {
-    main$,
-    documents$,
-    totalHits$,
-    charts$,
-  };
-
   return {
-    indexPattern,
-    indexPatternList,
-    inspectorAdapters: { requests: new RequestAdapter() },
-    navigateTo: jest.fn(),
-    onChangeIndexPattern: jest.fn(),
-    onUpdateQuery: jest.fn(),
+    isLegacy: false,
     resetQuery: jest.fn(),
     savedSearch: savedSearchMock,
-    savedSearchData$,
+    savedSearchDataChart$: charts$,
+    savedSearchDataTotalHits$: totalHits$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     services,
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
+    timefield,
   };
 }
 
-describe('Discover component', () => {
-  test('selected index pattern without time field displays no chart toggle', () => {
-    const component = mountWithIntl(<DiscoverLayout {...getProps(indexPatternMock)} />);
+describe('Discover chart', () => {
+  test('render without timefield', () => {
+    const component = mountWithIntl(<DiscoverChart {...getProps()} />);
     expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
   });
-  test('selected index pattern with time field displays chart toggle', () => {
-    const component = mountWithIntl(
-      <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
-    );
+  test('render with filefield', () => {
+    const component = mountWithIntl(<DiscoverChart {...getProps('timefield')} />);
     expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
   });
 });
