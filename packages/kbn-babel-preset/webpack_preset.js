@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { USES_STYLED_COMPONENTS } = require.resolve('@kbn/dev-utils');
+const { USES_STYLED_COMPONENTS } = require.resolve('./styled_components_files');
 
 module.exports = () => {
   return {

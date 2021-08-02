@@ -31,11 +31,12 @@ export interface RunOptions {
 }
 
 export async function run(fn: RunFn, options: RunOptions = {}) {
-  const flags = getFlags(process.argv.slice(2), options.flags);
+  const flags = getFlags(process.argv.slice(2), options.flags, options.log?.defaultLevel);
   const helpText = getHelp({
     description: options.description,
     usage: options.usage,
     flagHelp: options.flags?.help,
+    defaultLogLevel: options.log?.defaultLevel,
   });
 
   const log = new ToolingLog({

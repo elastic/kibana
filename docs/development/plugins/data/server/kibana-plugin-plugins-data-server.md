@@ -22,8 +22,6 @@
 |  Enumeration | Description |
 |  --- | --- |
 |  [BUCKET\_TYPES](./kibana-plugin-plugins-data-server.bucket_types.md) |  |
-|  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-server.es_field_types.md) | \* |
-|  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-server.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-server.metric_types.md) |  |
 
 ## Functions
@@ -32,6 +30,7 @@
 |  --- | --- |
 |  [getCapabilitiesForRollupIndices(indices)](./kibana-plugin-plugins-data-server.getcapabilitiesforrollupindices.md) |  |
 |  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
+|  [getEsQueryConfig(config)](./kibana-plugin-plugins-data-server.getesqueryconfig.md) |  |
 |  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
@@ -72,7 +71,8 @@
 |  --- | --- |
 |  [AggGroupLabels](./kibana-plugin-plugins-data-server.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-server.agggroupnames.md) |  |
-|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
+|  [buildQueryFromFilters](./kibana-plugin-plugins-data-server.buildqueryfromfilters.md) |  |
+|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) |  |
 |  [config](./kibana-plugin-plugins-data-server.config.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-server.es_search_strategy.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |

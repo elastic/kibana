@@ -84,12 +84,11 @@ describe('EventDetails', () => {
   describe('alerts tabs', () => {
     ['Overview', 'Threat Intel', 'Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
-        const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
           alertsWrapper
             .find('[data-test-subj="eventDetails"]')
             .find('[role="tablist"]')
-            .containsMatchingElement(<span>{expectedCopy}</span>)
+            .containsMatchingElement(<span>{tab}</span>)
         ).toBeTruthy();
       });
     });
@@ -102,6 +101,12 @@ describe('EventDetails', () => {
           .first()
           .text()
       ).toEqual('Overview');
+    });
+
+    test('Enrichment count is displayed as a notification', () => {
+      expect(
+        alertsWrapper.find('[data-test-subj="enrichment-count-notification"]').hostNodes().text()
+      ).toEqual('1');
     });
   });
 
