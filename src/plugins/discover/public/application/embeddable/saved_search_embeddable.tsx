@@ -43,7 +43,6 @@ import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
 import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
-
 import { DocTableProps } from '../angular/doc_table/doc_table';
 
 export type SearchProps = Partial<DiscoverGridProps> &

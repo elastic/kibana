@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DocTable } from '../../angular/doc_table/doc_table';
+import { DocTableWrapper } from '../../angular/doc_table/doc_table_wrapper';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
 import { AppState, GetStateReturn } from '../../angular/context_state';
@@ -19,25 +19,14 @@ import { getServices, setServices } from '../../../kibana_services';
 import { LoadingStatus } from '../../angular/context_query_state';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { DiscoverGrid } from '../discover_grid/discover_grid';
-import { DiscoverServices } from '../../../build_services';
-import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from 'src/plugins/discover/common';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('ContextAppContent test', () => {
   let hit;
   let defaultProps: ContextAppContentProps;
 
   beforeEach(() => {
-    setServices(({
-      uiSettings: {
-        get: (key: string) => {
-          if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
-            return false;
-          } else if (key === CONTEXT_STEP_SETTING) {
-            return 5;
-          }
-        },
-      },
-    } as unknown) as DiscoverServices);
+    setServices(discoverServiceMock);
 
     hit = {
       _id: '123',
@@ -88,7 +77,7 @@ describe('ContextAppContent test', () => {
 
   it('should render legacy table correctly', () => {
     const component = mountWithIntl(<ContextAppContent {...defaultProps} />);
-    expect(component.find(DocTable).length).toBe(1);
+    expect(component.find(DocTableWrapper).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
@@ -99,7 +88,7 @@ describe('ContextAppContent test', () => {
     props.anchorStatus = LoadingStatus.LOADING;
     const component = mountWithIntl(<ContextAppContent {...props} />);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
-    expect(component.find(DocTable).length).toBe(1);
+    expect(component.find(DocTableWrapper).length).toBe(1);
     expect(loadingIndicator.length).toBe(1);
   });
 

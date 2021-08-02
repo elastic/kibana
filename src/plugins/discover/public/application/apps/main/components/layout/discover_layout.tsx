@@ -50,13 +50,18 @@ import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { FetchStatus } from '../../../../types';
-import { DocTable } from '../../../../angular/doc_table/doc_table';
+import {
+  DocTableRenderProps,
+  DocTableWrapper,
+} from '../../../../angular/doc_table/doc_table_wrapper';
+import { DocTableInfinite } from '../../../../angular/doc_table/doc_table_infinite';
 
-const DocTableMemoized = React.memo(DocTable);
+const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
+const DocTableWrapperMemoized = React.memo(DocTableWrapper);
 
 interface DiscoverLayoutFetchState extends SavedSearchDataMessage {
   state: FetchStatus;
@@ -64,6 +69,8 @@ interface DiscoverLayoutFetchState extends SavedSearchDataMessage {
   fieldCounts: Record<string, number>;
   rows: ElasticSearchHit[];
 }
+
+const renderDocTable = (params: DocTableRenderProps) => <DocTableInfiniteMemoized {...params} />;
 
 export function DiscoverLayout({
   indexPattern,
@@ -325,11 +332,10 @@ export function DiscoverLayout({
                         />
                       </h2>
                       {isLegacy && rows && rows.length && (
-                        <DocTableMemoized
+                        <DocTableWrapperMemoized
                           columns={columns}
                           indexPattern={indexPattern}
                           rows={rows}
-                          type="infinite"
                           sort={state.sort || []}
                           isLoading={fetchStatus === 'loading'}
                           searchDescription={savedSearch.description}
@@ -341,6 +347,7 @@ export function DiscoverLayout({
                           onSort={onSort}
                           useNewFieldsApi={useNewFieldsApi}
                           dataTestSubj="discoverDocTable"
+                          render={renderDocTable}
                         />
                       )}
                       {!isLegacy && rows && rows.length && (

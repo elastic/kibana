@@ -40,8 +40,6 @@
 }
 
 .kbnDocTable {
-  font-size: $euiFontSizeXS;
-
   th {
     white-space: nowrap;
     padding-right: $euiSizeS;
@@ -94,19 +92,6 @@
   .kbnDocTableRowFilterButton {
     background-color: tintOrShade($euiColorPrimary, 90%, 70%);
   }
-}
-
-.kbnDocTable__bar {
-  margin: $euiSizeXS $euiSizeXS 0;
-}
-
-.kbnDocTable__bar--footer {
-  position: relative;
-  margin: -($euiSize * 3) $euiSizeXS 0;
-}
-
-.kbnDocTable__padBottom {
-  padding-bottom: $euiSizeXL;
 }
 
 .kbnDocTable__error {

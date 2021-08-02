@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import './index.scss';
-import { EuiButtonEmpty, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TableHeader } from './components/table_header/table_header';
 import {
@@ -21,23 +21,29 @@ import { UI_SETTINGS } from '../../../../../data/public';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
-import { DocTableEmbeddable } from './doc_table_embeddable';
-import { DocTableInfinite } from './doc_table_infinite';
-import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
+
+export interface DocTableRenderProps {
+  rows: DocTableRow[];
+  minimumVisibleRows: number;
+  sampleSize: number;
+  renderRows: (row: DocTableRow[]) => JSX.Element[];
+  renderHeader: () => JSX.Element;
+  onSkipBottomButtonClick: () => void;
+}
 
 export interface DocTableProps {
   /**
-   * Columns of classic table
+   * Renders Doc table content
    */
-  columns: string[];
+  render: (params: DocTableRenderProps) => JSX.Element;
   /**
    * Rows of classic table
    */
   rows: DocTableRow[];
   /**
-   * Type of classic table
+   * Columns of classic table
    */
-  type: 'infinite' | 'embeddable' | 'context';
+  columns: string[];
   /**
    * Current IndexPattern
    */
@@ -46,10 +52,6 @@ export interface DocTableProps {
    * Current sorting
    */
   sort: string[][];
-  /**
-   * Total rows count. Used only for 'embeddable' table
-   */
-  totalHitCount?: number;
   /**
    * New fields api switch
    */
@@ -92,14 +94,10 @@ export interface DocTableProps {
   onRemoveColumn?: (column: string) => void;
 }
 
-const DocTableEmbeddableMemoized = memo(DocTableEmbeddable);
-const DocTableInfiniteMemoized = memo(DocTableInfinite);
-
-export const DocTable = ({
+export const DocTableWrapper = ({
+  render,
   columns,
   rows,
-  type,
-  totalHitCount,
   indexPattern,
   onSort,
   onAddColumn,
@@ -113,7 +111,6 @@ export const DocTable = ({
   dataTestSubj,
   isLoading,
 }: DocTableProps) => {
-  const scrollableDesktop = useRef<HTMLDivElement>(null);
   const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
   const [
     defaultSortOrder,
@@ -148,19 +145,6 @@ export const DocTable = ({
     await wait(50);
     bottomMarker!.blur();
   }, [setMinimumVisibleRows, rows]);
-
-  const onBackToTop = useCallback(() => {
-    if (scrollableDesktop && scrollableDesktop.current) {
-      scrollableDesktop.current.focus();
-    }
-    const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
-    // Only the desktop one needs to target a specific container
-    if (!isMobileView && scrollableDesktop.current) {
-      scrollableDesktop.current.scrollTo(0, 0);
-    } else if (window) {
-      window.scrollTo(0, 0);
-    }
-  }, []);
 
   const renderHeader = useCallback(
     () => (
@@ -198,7 +182,7 @@ export const DocTable = ({
           filter={onFilter}
           indexPattern={indexPattern}
           row={current}
-          useNewFieldsApi={!!useNewFieldsApi}
+          useNewFieldsApi={useNewFieldsApi}
           hideTimeColumn={hideTimeColumn}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
@@ -220,9 +204,27 @@ export const DocTable = ({
     ]
   );
 
+  if (isLoading) {
+    return null;
+  }
+
+  if (rows && !rows.length) {
+    return (
+      <div className="kbnDocTable__error">
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="visualizeApp" size="m" color="subdued" />
+          <EuiSpacer size="m" />
+          <FormattedMessage
+            id="discover.docTable.noResultsTitle"
+            defaultMessage="No results found"
+          />
+        </EuiText>
+      </div>
+    );
+  }
+
   return (
     <div
-      ref={scrollableDesktop}
       className="kbnDocTableWrapper eui-yScroll eui-xScroll"
       data-shared-item
       data-title={sharedItemTitle}
@@ -230,72 +232,14 @@ export const DocTable = ({
       data-test-subj={dataTestSubj}
       data-render-complete={!isLoading}
     >
-      {rows.length !== 0 ? (
-        <Fragment>
-          {type === 'infinite' && (
-            <Fragment>
-              <SkipBottomButton onClick={onSkipBottomButtonClick} />
-              <DocTableInfiniteMemoized
-                rows={rows}
-                renderHeader={renderHeader}
-                renderRows={renderRows}
-                minimumVisibleRows={minimumVisibleRows || 50}
-              />
-            </Fragment>
-          )}
-          {type === 'embeddable' && (
-            <DocTableEmbeddableMemoized
-              rows={rows}
-              renderHeader={renderHeader}
-              renderRows={renderRows}
-              totalHitCount={totalHitCount!}
-              sampleSize={sampleSize}
-            />
-          )}
-          {type === 'context' && (
-            <Fragment>
-              <SkipBottomButton onClick={onSkipBottomButtonClick} />
-              <table className="kbn-table table" data-test-subj="docTable">
-                <thead>{renderHeader()}</thead>
-                <tbody>{renderRows(rows)}</tbody>
-              </table>
-            </Fragment>
-          )}
-          {type === 'infinite' && rows.length === sampleSize ? (
-            <div
-              className="kbnDocTable__footer"
-              data-test-subj="discoverDocTableFooter"
-              tabIndex={-1}
-              id="discoverBottomMarker"
-            >
-              <FormattedMessage
-                id="discover.howToSeeOtherMatchingDocumentsDescription"
-                defaultMessage="These are the first {sampleSize} documents matching
-            your search, refine your search to see others."
-                values={{ sampleSize }}
-              />
-              <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
-                <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-              </EuiButtonEmpty>
-            </div>
-          ) : (
-            <span tabIndex={-1} id="discoverBottomMarker">
-              &#8203;
-            </span>
-          )}
-        </Fragment>
-      ) : (
-        <div className="kbnDocTable__error">
-          <EuiText size="xs" color="subdued">
-            <EuiIcon type="visualizeApp" size="m" color="subdued" />
-            <EuiSpacer size="m" />
-            <FormattedMessage
-              id="discover.docTable.noResultsTitle"
-              defaultMessage="No results found"
-            />
-          </EuiText>
-        </div>
-      )}
+      {render({
+        rows,
+        minimumVisibleRows,
+        sampleSize,
+        onSkipBottomButtonClick,
+        renderHeader,
+        renderRows,
+      })}
     </div>
   );
 };

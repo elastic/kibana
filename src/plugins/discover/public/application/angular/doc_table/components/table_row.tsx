@@ -19,6 +19,7 @@ import { DocViewFilterFn, ElasticSearchHit } from '../../../doc_views/doc_views_
 import { trimAngularSpan } from '../../../components/table/table_helper';
 import { TableRowDetails } from './table_row_details';
 import { FilterManager } from '../../../../../../data/public';
+import { getSingleDocUrl } from '../../helpers/get_single_doc_url';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -65,9 +66,11 @@ export const TableRow = ({
   /**
    * Fill an element with the value of a field
    */
-  const _displayField = (fieldName: string) => {
+  const displayField = (fieldName: string) => {
     const text = indexPattern.formatField(row, fieldName);
     const formattedField = trimAngularSpan(String(text));
+
+    // field formatters take care of escaping
     // eslint-disable-next-line react/no-danger
     const fieldElement = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
 
@@ -86,9 +89,7 @@ export const TableRow = ({
   };
 
   const getSingleDocHref = () => {
-    return addBasePath(
-      `/app/discover#/doc/${indexPattern.id!}/${row._index}?id=${encodeURIComponent(row._id)}`
-    );
+    return addBasePath(getSingleDocUrl(indexPattern.id!, row._index, row._id));
   };
 
   const rowCells = [
@@ -113,7 +114,7 @@ export const TableRow = ({
       <TableCell
         key={indexPattern.timeFieldName}
         timefield={true}
-        formatted={_displayField(indexPattern.timeFieldName)}
+        formatted={displayField(indexPattern.timeFieldName)}
         filterable={Boolean(mapping(indexPattern.timeFieldName)?.filterable && filter)}
         column={indexPattern.timeFieldName}
         inlineFilter={inlineFilter}
@@ -163,7 +164,7 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={column === '_source'}
-            formatted={_displayField(column)}
+            formatted={displayField(column)}
             filterable={isFilterable}
             column={column}
             inlineFilter={inlineFilter}

@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
-import { DocTableRow } from './components/table_row';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
+import { DocTableRenderProps } from './doc_table_wrapper';
 
-interface DocTableInfiniteProps {
-  minimumVisibleRows: number;
-  rows: DocTableRow[];
-  renderRows: (row: DocTableRow[]) => JSX.Element[];
-  renderHeader: () => JSX.Element;
-}
-
-export const DocTableInfinite = (props: DocTableInfiniteProps) => {
+export const DocTableInfinite = (props: DocTableRenderProps) => {
   const [limit, setLimit] = useState(props.minimumVisibleRows);
 
   // Reset infinite scroll limit
@@ -53,14 +49,48 @@ export const DocTableInfinite = (props: DocTableInfiniteProps) => {
 
     return () => {
       scrollDiv.removeEventListener('scroll', scheduleCheck);
-      window.addEventListener('scroll', scheduleCheck);
+      window.removeEventListener('scroll', scheduleCheck);
     };
   }, []);
 
+  const onBackToTop = useCallback(() => {
+    const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
+
+    const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
+    // Only the desktop one needs to target a specific container
+    if (!isMobileView && scrollDiv) {
+      scrollDiv.focus();
+      scrollDiv.scrollTo(0, 0);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   return (
-    <table className="kbn-table table" data-test-subj="docTable">
-      <thead>{props.renderHeader()}</thead>
-      <tbody>{props.renderRows(props.rows.slice(0, limit))}</tbody>
-    </table>
+    <Fragment>
+      <SkipBottomButton onClick={props.onSkipBottomButtonClick} />
+      <table className="kbn-table table" data-test-subj="docTable">
+        <thead>{props.renderHeader()}</thead>
+        <tbody>{props.renderRows(props.rows.slice(0, limit))}</tbody>
+      </table>
+      {props.rows.length === props.sampleSize && (
+        <div
+          className="kbnDocTable__footer"
+          data-test-subj="discoverDocTableFooter"
+          tabIndex={-1}
+          id="discoverBottomMarker"
+        >
+          <FormattedMessage
+            id="discover.howToSeeOtherMatchingDocumentsDescription"
+            defaultMessage="These are the first {sampleSize} documents matching
+  your search, refine your search to see others."
+            values={{ sampleSize: props.sampleSize }}
+          />
+          <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
+            <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
+          </EuiButtonEmpty>
+        </div>
+      )}
+    </Fragment>
   );
 };

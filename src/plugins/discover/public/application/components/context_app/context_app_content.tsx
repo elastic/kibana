@@ -20,7 +20,8 @@ import { AppState } from '../../angular/context_state';
 import { EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
 import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
-import { DocTable } from '../../angular/doc_table/doc_table';
+import { DocTableRenderProps, DocTableWrapper } from '../../angular/doc_table/doc_table_wrapper';
+import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -51,8 +52,23 @@ export function clamp(value: number) {
 }
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
-const DocTableMemoized = React.memo(DocTable);
+const DocTableWrapperMemoized = React.memo(DocTableWrapper);
 const ActionBarMemoized = React.memo(ActionBar);
+
+const renderDocTable = (props: DocTableRenderProps) => {
+  return (
+    <Fragment>
+      <SkipBottomButton onClick={props.onSkipBottomButtonClick} />
+      <table className="kbn-table table" data-test-subj="docTable">
+        <thead>{props.renderHeader()}</thead>
+        <tbody>{props.renderRows(props.rows)}</tbody>
+      </table>
+      <span tabIndex={-1} id="discoverBottomMarker">
+        &#8203;
+      </span>
+    </Fragment>
+  );
+};
 
 export function ContextAppContent({
   columns,
@@ -124,23 +140,22 @@ export function ContextAppContent({
       />
       {loadingFeedback()}
       <EuiHorizontalRule margin="xs" />
-      {isLegacy ? (
-        <div className="discover-table">
-          <DocTableMemoized
-            type="context"
-            columns={columns}
-            indexPattern={indexPattern}
-            rows={rows}
-            isLoading={isAnchorLoading}
-            onFilter={addFilter}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-            sort={sort}
-            useNewFieldsApi={useNewFieldsApi}
-            dataTestSubj="contextDocTable"
-          />
-        </div>
-      ) : (
+      {isLegacy && rows && rows.length !== 0 && (
+        <DocTableWrapperMemoized
+          columns={columns}
+          indexPattern={indexPattern}
+          rows={rows}
+          isLoading={isAnchorLoading}
+          onFilter={addFilter}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+          sort={sort}
+          useNewFieldsApi={useNewFieldsApi}
+          dataTestSubj="contextDocTable"
+          render={renderDocTable}
+        />
+      )}
+      {!isLegacy && rows && rows.length && (
         <div className="dscDocsGrid">
           <DiscoverGridMemoized
             ariaLabelledBy="surDocumentsAriaLabel"

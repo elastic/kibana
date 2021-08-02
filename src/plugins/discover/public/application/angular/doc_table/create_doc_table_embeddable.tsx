@@ -8,15 +8,14 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DocTable, DocTableProps } from './doc_table';
+import { DocTableEmbeddable, DocTableEmbeddableProps } from './doc_table_embeddable';
 
-export function DiscoverDocTableEmbeddable(renderProps: DocTableProps) {
+export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps) {
   return (
     <I18nProvider>
-      <DocTable
+      <DocTableEmbeddable
         columns={renderProps.columns}
         rows={renderProps.rows}
-        type="embeddable"
         totalHitCount={renderProps.totalHitCount}
         indexPattern={renderProps.indexPattern}
         onSort={renderProps.onSort}

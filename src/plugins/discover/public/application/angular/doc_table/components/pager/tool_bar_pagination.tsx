@@ -47,38 +47,18 @@ export const ToolBarPagination = ({
     return size === pageSize ? 'check' : 'empty';
   };
 
-  const items = [
+  const rowsPerPageOptions = [25, 50, 100, 250].map((cur) => (
     <EuiContextMenuItem
-      key="25 rows"
-      icon={getIconType(25)}
+      key={`${cur} rows`}
+      icon={getIconType(cur)}
       onClick={() => {
         closePopover();
-        onPageSizeChange(25);
+        onPageSizeChange(cur);
       }}
     >
-      25 {rowsWord}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="50 rows"
-      icon={getIconType(50)}
-      onClick={() => {
-        closePopover();
-        onPageSizeChange(50);
-      }}
-    >
-      50 {rowsWord}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="100 rows"
-      icon={getIconType(100)}
-      onClick={() => {
-        closePopover();
-        onPageSizeChange(100);
-      }}
-    >
-      100 {rowsWord}
-    </EuiContextMenuItem>,
-  ];
+      {cur} {rowsWord}
+    </EuiContextMenuItem>
+  ));
 
   return (
     <EuiFlexGroup
@@ -91,7 +71,7 @@ export const ToolBarPagination = ({
         <EuiPopover
           button={
             <EuiButtonEmpty
-              size="s"
+              size="xs"
               color="text"
               iconType="arrowDown"
               iconSide="right"
@@ -108,7 +88,7 @@ export const ToolBarPagination = ({
           closePopover={closePopover}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel items={items} />
+          <EuiContextMenuPanel items={rowsPerPageOptions} />
         </EuiPopover>
       </EuiFlexItem>
 

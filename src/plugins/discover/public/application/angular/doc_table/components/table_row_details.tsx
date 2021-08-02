@@ -30,9 +30,9 @@ export const TableRowDetails = ({
   if (open) {
     return (
       <td colSpan={(colLength || 1) + 2}>
-        <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween">
+        <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="folderOpen" size="m" />
               </EuiFlexItem>
@@ -49,7 +49,7 @@ export const TableRowDetails = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="l" alignItems="center">
+            <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 {isTimeBased && (
                   <EuiLink data-test-subj="docTableRowAction" href={getContextAppHref()}>

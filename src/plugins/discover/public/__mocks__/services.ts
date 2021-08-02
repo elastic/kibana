@@ -8,7 +8,11 @@
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { chromeServiceMock, coreMock, docLinksServiceMock } from '../../../../core/public/mocks';
-import { DEFAULT_COLUMNS_SETTING } from '../../common';
+import {
+  CONTEXT_STEP_SETTING,
+  DEFAULT_COLUMNS_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+} from '../../common';
 import { savedSearchMock } from './saved_search';
 import { UI_SETTINGS } from '../../../data/common';
 import { TopNavMenu } from '../../../navigation/public';
@@ -44,6 +48,10 @@ export const discoverServiceMock = ({
         return [];
       } else if (key === UI_SETTINGS.META_FIELDS) {
         return [];
+      } else if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+        return false;
+      } else if (key === CONTEXT_STEP_SETTING) {
+        return 5;
       }
     },
   },

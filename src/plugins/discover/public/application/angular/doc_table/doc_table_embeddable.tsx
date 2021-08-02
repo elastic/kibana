@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { usePager } from './lib/use_pager';
-import { DocTableRow } from './components/table_row';
 import { ToolBarPagination } from './components/pager/tool_bar_pagination';
+import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
+import { TotalDocuments } from '../../apps/main/components/total_documents/total_documents';
+import { getServices } from '../../../kibana_services';
 
-export interface DocTableEmbeddableProps {
+export type DocTableEmbeddableProps = Omit<DocTableProps, 'render'> & {
   totalHitCount: number;
-  rows: DocTableRow[];
-  sampleSize: number;
-  renderRows: (row: DocTableRow[]) => JSX.Element[];
-  renderHeader: () => JSX.Element;
-}
+};
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const pager = usePager({ totalItems: props.rows.length });
@@ -32,11 +31,40 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const shouldShowLimitedResultsWarning = () =>
     !pager.hasNextPage && props.rows.length < props.totalHitCount;
 
-  const onPageSizeChange = (size: number) => pager.onPageSizeChange(size);
+  const moveFocus = () => {
+    const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
+    scrollDiv.focus();
+    scrollDiv.scrollTo(0, 0);
+  };
+
+  const onPageChange = (page: number) => {
+    moveFocus();
+    pager.onPageChange(page);
+  };
+
+  const onPageSizeChange = (size: number) => {
+    moveFocus();
+    pager.onPageSizeChange(size);
+  };
+
+  const sampleSize = useMemo(() => {
+    return getServices().uiSettings.get(SAMPLE_SIZE_SETTING, 500);
+  }, []);
+
+  const renderDocTable = (renderProps: DocTableRenderProps) => {
+    return (
+      <div className="kbnDocTable__container">
+        <table className="kbnDocTable table" data-test-subj="docTable">
+          <thead>{renderProps.renderHeader()}</thead>
+          <tbody>{renderProps.renderRows(pageOfItems)}</tbody>
+        </table>
+      </div>
+    );
+  };
 
   return (
-    <Fragment>
-      <div className="kuiBar kbnDocTable__bar">
+    <EuiFlexGroup style={{ width: '100%' }} direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup
           justifyContent="flexEnd"
           alignItems="center"
@@ -50,39 +78,30 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
                 <FormattedMessage
                   id="discover.docTable.limitedSearchResultLabel"
                   defaultMessage="Limited to {resultCount} results. Refine your search."
-                  values={{ resultCount: props.sampleSize }}
+                  values={{ resultCount: sampleSize }}
                 />
               </EuiText>
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
-            <EuiText grow={false} size="s">
-              <FormattedMessage
-                id="discover.docTable.totalDocuments"
-                defaultMessage="{totalDocuments} documents"
-                values={{
-                  totalDocuments: <strong>{props.totalHitCount}</strong>,
-                }}
-              />
-            </EuiText>
+            <TotalDocuments totalHitCount={props.totalHitCount} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
-      <div className="kbnDocTable__container kbnDocTable__padBottom">
-        <table className="kbnDocTable table" data-test-subj="docTable">
-          <thead>{props.renderHeader()}</thead>
-          <tbody>{props.renderRows(pageOfItems)}</tbody>
-        </table>
-      </div>
-      <div className="kuiBar kbnDocTable__bar--footer">
+      </EuiFlexItem>
+
+      <EuiFlexItem style={{ minHeight: 0 }}>
+        <DocTableWrapper {...props} render={renderDocTable} />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
         <ToolBarPagination
           pageSize={pager.pageSize}
           pageCount={pager.totalPages}
           activePage={pager.currentPage}
-          onPageClick={pager.onPageChange}
+          onPageClick={onPageChange}
           onPageSizeChange={onPageSizeChange}
         />
-      </div>
-    </Fragment>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
