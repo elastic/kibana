@@ -13,32 +13,39 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MultiValueRow } from './multi_value_row';
 
 interface PercentileRankValuesProps {
-  model: Array<string | null>;
+  values: string[];
+  colors: string[];
   disableDelete: boolean;
   disableAdd: boolean;
   showOnlyLastRow: boolean;
-  onChange: (values: any[]) => void;
+  enableColorPicker: boolean;
+  onChange: (values: string[], colors: string[]) => void;
 }
 
 export const PercentileRankValues = (props: PercentileRankValuesProps) => {
-  const model = props.model || [];
-  const { onChange, disableAdd, disableDelete, showOnlyLastRow } = props;
+  const values = props.values || [];
+  const colors = props.colors || [];
+  const { onChange, disableAdd, disableDelete, showOnlyLastRow, enableColorPicker } = props;
 
-  const onChangeValue = ({ value, id }: { value: string; id: number }) => {
-    model[id] = value;
+  const onChangeValue = ({ value, id, color }: { value: string; id: number; color: string }) => {
+    values[id] = value;
+    colors[id] = color;
 
-    onChange(model);
+    onChange(values, colors);
   };
   const onDeleteValue = ({ id }: { id: number }) =>
-    onChange(model.filter((item, currentIndex) => id !== currentIndex));
-  const onAddValue = () => onChange([...model, '']);
+    onChange(
+      values.filter((item, currentIndex) => id !== currentIndex),
+      colors.filter((item, currentIndex) => id !== currentIndex)
+    );
+  const onAddValue = () => onChange([...values, ''], [...colors, '#68BC00']);
 
   const renderRow = ({
     rowModel,
     disableDeleteRow,
     disableAddRow,
   }: {
-    rowModel: { id: number; value: string };
+    rowModel: { id: number; value: string; color: string };
     disableDeleteRow: boolean;
     disableAddRow: boolean;
   }) => (
@@ -50,6 +57,7 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
         disableDelete={disableDeleteRow}
         disableAdd={disableAddRow}
         model={rowModel}
+        enableColorPicker={enableColorPicker}
       />
     </EuiFlexItem>
   );
@@ -59,19 +67,21 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
       {showOnlyLastRow &&
         renderRow({
           rowModel: {
-            id: model.length - 1,
-            value: last(model) || '',
+            id: values.length - 1,
+            value: last(values) || '',
+            color: last(colors) || '',
           },
           disableAddRow: true,
           disableDeleteRow: true,
         })}
 
       {!showOnlyLastRow &&
-        model.map((value, id, array) =>
+        values.map((value, id, array) =>
           renderRow({
             rowModel: {
               id,
               value: value || '',
+              color: colors[id] || '',
             },
             disableAddRow: disableAdd,
             disableDeleteRow: disableDelete || array.length < 2,

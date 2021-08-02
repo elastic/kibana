@@ -12,15 +12,18 @@ import { get } from 'lodash';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
+import { ColorPicker, ColorProps } from '../../color_picker';
 
 interface MultiValueRowProps {
   model: {
     id: number;
     value: string;
+    color: string;
   };
   disableAdd: boolean;
   disableDelete: boolean;
-  onChange: ({ value, id }: { id: number; value: string }) => void;
+  enableColorPicker: boolean;
+  onChange: ({ value, id, color }: { id: number; value: string; color: string }) => void;
   onDelete: (model: { id: number; value: string }) => void;
   onAdd: () => void;
 }
@@ -32,6 +35,7 @@ export const MultiValueRow = ({
   onAdd,
   disableAdd,
   disableDelete,
+  enableColorPicker,
 }: MultiValueRowProps) => {
   const onFieldNumberChange = (event: ChangeEvent<HTMLInputElement>) =>
     onChange({
@@ -39,9 +43,25 @@ export const MultiValueRow = ({
       value: get(event, 'target.value'),
     });
 
+  const onColorPickerChange = (props: ColorProps) =>
+    onChange({
+      ...model,
+      color: props.color || '#68BC00',
+    });
+
   return (
     <EuiPanel paddingSize="s" className="tvbAggRow__multiValueRow">
       <EuiFlexGroup alignItems="center" gutterSize="s">
+        {enableColorPicker && (
+          <EuiFlexItem grow={false}>
+            <ColorPicker
+              disableTrash={true}
+              onChange={onColorPickerChange}
+              value={model.color}
+              name="color"
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <EuiFieldNumber
             value={model.value === '' ? '' : Number(model.value)}

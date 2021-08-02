@@ -50,8 +50,10 @@ export class Percentiles extends Component {
   renderRow = (row, i, items) => {
     const defaults = { value: '', percentile: '', shade: '', color: '' };
     const model = { ...defaults, ...row };
-    const { panel } = this.props;
+    const { panel, seriesId } = this.props;
     const flexItemStyle = { minWidth: 100 };
+    const percentileSeries = panel.series.find((s) => s.id === seriesId) || panel.series[0];
+    const isGroupedBy = panel.series.length > 0 && percentileSeries.split_mode !== 'everything';
 
     const percentileFieldNumber = (
       <EuiFlexItem style={flexItemStyle}>
@@ -115,14 +117,18 @@ export class Percentiles extends Component {
           <EuiFlexGroup key={model.id} alignItems="center">
             <EuiFlexItem>
               <EuiFlexGrid columns={3}>
-                <EuiFlexItem grow={false}>
-                  <ColorPicker
-                    disableTrash={true}
-                    onChange={this.handleColorChange(model)}
-                    value={model.color}
-                    name="color"
-                  />
-                </EuiFlexItem>
+                {/* If the series is grouped by, then these colors are not respected,
+                 no need to display the color picker */}
+                {!isGroupedBy && !['table', 'metric', 'markdown'].includes(panel.type) && (
+                  <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+                    <ColorPicker
+                      disableTrash={true}
+                      onChange={this.handleColorChange(model)}
+                      value={model.color}
+                      name="color"
+                    />
+                  </EuiFlexItem>
+                )}
                 {percentileFieldNumber}
                 <EuiFlexItem style={flexItemStyle}>
                   <EuiFormRow
@@ -222,4 +228,5 @@ Percentiles.propTypes = {
   model: PropTypes.object,
   panel: PropTypes.object,
   onChange: PropTypes.func,
+  seriesId: PropTypes.string,
 };
