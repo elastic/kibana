@@ -7,7 +7,7 @@
  */
 
 import type { PointerEvent } from '@elastic/charts';
-import type { Datatable } from '../../../../expressions';
+import type { Datatable } from '../../../../expressions/public';
 
 /** @public **/
 export type ActiveCursorSyncOption = DateHistogramSyncOption | DatatablesSyncOption;

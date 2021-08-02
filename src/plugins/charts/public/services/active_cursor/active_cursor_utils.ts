@@ -7,9 +7,9 @@
  */
 import { uniq } from 'lodash';
 
-import type { Datatable } from '../../../../expressions';
+import type { Datatable } from '../../../../expressions/public';
 import type { ActiveCursorSyncOption, DateHistogramSyncOption } from './types';
-import { ActiveCursorPayload } from './types';
+import type { ActiveCursorPayload } from './types';
 
 function isDateHistogramSyncOption(
   syncOption?: ActiveCursorSyncOption

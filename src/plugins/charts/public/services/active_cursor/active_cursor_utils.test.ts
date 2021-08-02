@@ -7,7 +7,7 @@
  */
 
 import { parseSyncOptions } from './active_cursor_utils';
-import { Datatable } from '../../../../expressions';
+import type { Datatable } from '../../../../expressions/public';
 
 describe('active_cursor_utils', () => {
   describe('parseSyncOptions', () => {

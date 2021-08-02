@@ -13,7 +13,7 @@ import { useActiveCursor } from './use_active_cursor';
 
 import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
 import type { Chart, PointerEvent } from '@elastic/charts';
-import { Datatable } from '../../../../expressions';
+import type { Datatable } from '../../../../expressions/public';
 
 describe('useActiveCursor', () => {
   let cursor: ActiveCursorPayload['cursor'];
