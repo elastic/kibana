@@ -8,14 +8,16 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { ShallowPromise } from '../../index';
+import { PublicContract } from '../..';
 
-type P1 = ShallowPromise<string>;
-type P2 = ShallowPromise<ShallowPromise<string>>;
-type P3 = ShallowPromise<ShallowPromise<ShallowPromise<string>>>;
-type P4 = ShallowPromise<ShallowPromise<ShallowPromise<number>>>;
+class Test {
+  public str: string = '';
+  // @ts-ignore
+  private num: number = 0;
+}
 
-expectType<P1>(Promise.resolve<string>('a'));
-expectType<P2>(Promise.resolve<string>('a'));
-expectType<P3>(Promise.resolve<string>('a'));
-expectType<P4>(Promise.resolve<number>(123));
+type CONTRACT = PublicContract<Test>;
+
+expectType<CONTRACT>({
+  str: 'foo',
+});
