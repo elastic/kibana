@@ -9,7 +9,6 @@ import React, { FC, memo, useMemo } from 'react';
 import { CommonProps, EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { BETA_BADGE_LABEL } from '../common/translations';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;

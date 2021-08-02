@@ -52,7 +52,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
       <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
       <DragDropContextWrapper browserFields={browserFields}>
         <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-        <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
+        <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave} pathname={pathname}>
           {children}
         </SecuritySolutionTemplateWrapper>
       </DragDropContextWrapper>

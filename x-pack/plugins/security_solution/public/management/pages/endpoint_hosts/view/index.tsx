@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, memo, useContext } from 'react';
+import React, { useMemo, useCallback, memo } from 'react';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
