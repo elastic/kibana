@@ -10,38 +10,40 @@ import { EuiCallOut } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
 import { Ast, fromExpression } from '@kbn/interpreter/common';
 import { ArgAddPopover } from '../components/arg_add_popover';
+// @ts-expect-error unconverted components
 import { SidebarSection } from '../components/sidebar/sidebar_section';
+// @ts-expect-error unconverted components
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
 import { BaseForm, BaseFormProps } from './base_form';
-import { Arg } from './arg';
+import { Arg, ArgProps } from './arg';
 import { ArgType, ArgTypeDef } from './types';
 
 export interface FunctionFormOwnProps {
-  args?: Arg[];
+  args?: ArgProps[];
   resolve: (...args: any[]) => any;
   argType: ArgType;
   expressionIndex: number;
-  onValueAdd: (argName: string, argValue: Arg) => () => void;
-  onValueChange: (argName: string, argIndex: number) => (value: Arg) => void;
+  onValueAdd: (argName: string, argValue: string | Ast | null) => () => void;
+  onValueChange: (argName: string, argIndex: number) => (value: string | Ast) => void;
   onValueRemove: (argName: string, argIndex: number) => () => void;
 }
 
 export interface DataArg {
-  arg: Arg;
-  argValues?: string[] | Ast[];
+  arg: Arg | undefined;
+  argValues?: Array<string | Ast | undefined>;
   skipRender?: boolean;
   label?: 'string';
 }
 
 export interface RenderArgData {
   argTypeDef?: ArgTypeDef;
-  args: Arg[] | null;
+  args: Record<string, Array<Ast | string>> | null;
 }
 
 export type FunctionFormProps = FunctionFormOwnProps & BaseFormProps;
 
 export class FunctionForm extends BaseForm {
-  args: Arg[];
+  args: ArgProps[];
   resolve: (...args: any[]) => any;
 
   constructor(props: FunctionFormProps) {
@@ -60,7 +62,7 @@ export class FunctionForm extends BaseForm {
     if (!arg || skipRender) {
       return null;
     }
-    const renderArgWithProps = (argValue: Arg, valueIndex: number) =>
+    const renderArgWithProps = (argValue: string | Ast | undefined, valueIndex: number) =>
       arg.render({
         key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
         ...passedProps,
@@ -118,7 +120,6 @@ export class FunctionForm extends BaseForm {
     const argNames = uniq(argInstances.map((arg) => arg.name).concat(Object.keys(args)));
     const dataArgs = argNames.map((argName) => {
       const arg = argInstances.find((argument) => argument.name === argName);
-
       // if arg is not multi, only preserve the last value found
       // otherwise, leave the value alone (including if the arg is not defined)
       const isMulti = arg && arg.multi;
@@ -134,8 +135,12 @@ export class FunctionForm extends BaseForm {
       // allow a hook to override the data args
       const resolvedDataArgs = dataArgs.map((d) => ({ ...d, ...this.resolveArg(d, props) }));
 
-      const argumentForms = compact(resolvedDataArgs.map((d) => this.renderArg(props, d)));
-      const addableArgs = compact(resolvedDataArgs.map((d) => this.getAddableArg(props, d)));
+      const argumentForms = compact(
+        resolvedDataArgs.map((dataArg) => this.renderArg(props, dataArg))
+      );
+      const addableArgs = compact(
+        resolvedDataArgs.map((dataArg) => this.getAddableArg(props, dataArg))
+      );
 
       if (!addableArgs.length && !argumentForms.length) {
         return null;

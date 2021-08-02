@@ -7,11 +7,48 @@
 
 import { createElement } from 'react';
 import { pick } from 'lodash';
+import { Ast } from '@kbn/interpreter/common';
+// @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
-import { argTypeRegistry } from './arg_type';
+import { argTypeRegistry } from './arg_type_registry';
+import { ArgType } from './types';
+import { FunctionFormProps } from './function_form';
+
+interface ArtOwnProps {
+  argType: ArgType | undefined;
+  multi?: boolean;
+  required?: boolean;
+  types?: string[];
+  default?: string | null;
+  resolve?: (...args: any[]) => any;
+  options?: string[];
+}
+
+export type ArgProps = ArtOwnProps & FunctionFormProps;
+
+export interface DataArg {
+  argValue?: string | Ast;
+  skipRender?: boolean;
+  label?: 'string';
+  valueIndex: number;
+  onValueAdd?: (argName: string, argValue: string | Ast | null) => void;
+  onValueChange?: (value: string | Ast) => void;
+  onValueRemove?: () => void;
+  key?: string;
+}
 
 export class Arg {
-  constructor(props) {
+  multi?: boolean;
+  required?: boolean;
+  types?: string[];
+  default?: string | null;
+  resolve?: (...args: any[]) => any;
+  options?: string[];
+  name: string = '';
+  displayName?: string;
+  help?: string;
+
+  constructor(props: ArgProps) {
     const argType = argTypeRegistry.get(props.argType);
     if (!argType) {
       throw new Error(`Invalid arg type: ${props.argType}`);
@@ -49,11 +86,11 @@ export class Arg {
   }
 
   // TODO: Document what these otherProps are. Maybe make them named arguments?
-  render({ onValueChange, onValueRemove, argValue, key, label, ...otherProps }) {
+  render({ onValueChange, onValueRemove, argValue, key, label, ...otherProps }: DataArg) {
     // This is everything the arg_type template needs to render
     const templateProps = {
       ...otherProps,
-      ...this.resolve(otherProps),
+      ...this.resolve?.(otherProps),
       onValueChange,
       argValue,
       typeInstance: this,
