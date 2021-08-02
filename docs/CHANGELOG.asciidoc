@@ -8,6 +8,9 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
+// Best practices:
+// * When there are changes to kibana.yml settings, include the links to the new settings.
+
 Review important information about the {kib} 7.14.x releases.
 
 * <<release-notes-7.14.0>>
