@@ -13,33 +13,28 @@ import type {
   UpdatePackagePolicy,
 } from '../../common';
 
+export type PostPackagePolicyDeleteCallback = (
+  deletedPackagePolicies: DeletePackagePoliciesResponse,
+  context: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<void>;
+
+export type PostPackagePolicyCreateCallback = (
+  newPackagePolicy: NewPackagePolicy,
+  context: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<NewPackagePolicy>;
+
+export type PutPackagePolicyUpdateCallback = (
+  updatePackagePolicy: UpdatePackagePolicy,
+  context: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<UpdatePackagePolicy>;
+
 /**
  * Callbacks supported by the Fleet plugin
  */
 export type ExternalCallback =
-  | [
-      'packagePolicyCreate',
-      (
-        newPackagePolicy: NewPackagePolicy,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<NewPackagePolicy>
-    ]
-  | [
-      'postPackagePolicyDelete',
-      (
-        deletedPackagePolicies: DeletePackagePoliciesResponse,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<void>
-    ]
-  | [
-      'packagePolicyUpdate',
-      (
-        updatePackagePolicy: UpdatePackagePolicy,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<UpdatePackagePolicy>
-    ];
-
-export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
+  | ['packagePolicyCreate', PostPackagePolicyCreateCallback]
+  | ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback]
+  | ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];

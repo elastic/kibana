@@ -171,6 +171,17 @@ export const deletePackagePolicyHandler: RequestHandler<
       request.body.packagePolicyIds,
       { user, force: request.body.force }
     );
+    try {
+      await packagePolicyService.runExternalCallbacks(
+        'postPackagePolicyDelete',
+        body,
+        context,
+        request
+      );
+    } catch (error) {
+      // @ts-ignore
+      console.error(`An error occurred executing external callback: ${error}`);
+    }
     return response.ok({
       body,
     });

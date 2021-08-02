@@ -25,7 +25,12 @@ export {
 } from './services';
 
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
-export type { ExternalCallback } from './types';
+export type {
+  ExternalCallback,
+  PutPackagePolicyUpdateCallback,
+  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyCreateCallback,
+} from './types';
 export { AgentNotFoundError } from './errors';
 
 export const config: PluginConfigDescriptor = {
