@@ -14,8 +14,10 @@ import { cloneDeep, merge } from 'lodash';
 import { EndpointDocGenerator, Event, TreeOptions } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
+  Agent,
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
+  AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -24,6 +26,7 @@ import {
   EPM_API_ROUTES,
   FLEET_SERVER_SERVERS_INDEX,
   FleetServerAgent,
+  GetOneAgentResponse,
   GetPackagesResponse,
   PACKAGE_POLICY_API_ROUTES,
 } from '../../../fleet/common';
@@ -112,7 +115,7 @@ function delay(ms: number) {
 interface IndexedHostsResponse {
   hosts: HostMetadata[];
   policies: Array<CreatePackagePolicyResponse['item']>;
-  agents: FleetServerAgent[];
+  agents: Agent[];
 }
 async function indexHostDocs({
   numDocs,
@@ -182,7 +185,7 @@ async function indexHostDocs({
           kibanaVersion
         );
 
-        response.agents.push(enrolledAgent);
+        response.agents.push(await fetchFleetAgent(kbnClient, enrolledAgent?._id));
       }
       // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
       hostMetadata = {
@@ -537,4 +540,11 @@ const indexFleetActionsForHost = async (
       ]);
     }
   }
+};
+
+const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<Agent> => {
+  return ((await kbnClient.request({
+    path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
+    method: 'GET',
+  })) as AxiosResponse<GetOneAgentResponse>).data.item;
 };
