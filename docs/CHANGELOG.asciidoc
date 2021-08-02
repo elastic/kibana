@@ -80,7 +80,7 @@ Before you upgrade to 7.14.0, review the breaking changes, then mitigate the imp
 [%collapsible]
 ====
 *Details* +
-The terminology has changed for audit events logged by the alerting framework alerts client when CRUD operations are performed on rules. 
+The terminology has changed for audit events logged by the alerting framework's rules client when CRUD operations are performed. 
 
 The following audit actions are renamed:
 
