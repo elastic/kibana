@@ -23,7 +23,6 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
-import { SecurityPageName } from '../../types';
 
 /* eslint-disable react/display-name */
 
@@ -65,18 +64,16 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
 
 interface SecuritySolutionPageWrapperProps {
   onAppLeave: (handler: AppLeaveHandler) => void;
-  pathname: string;
 }
 
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> = React.memo(
-  ({ children, onAppLeave, pathname }) => {
+  ({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
-    const isAdminPage = pathname.includes(SecurityPageName.administration);
 
     return (
       <StyledKibanaPageTemplate
@@ -94,7 +91,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
           className="securityPageWrapper"
           data-test-subj="pageContainer"
           hasShadow={false}
-          paddingSize={isAdminPage ? 'none' : 'l'}
+          paddingSize="l"
         >
           {children}
         </EuiPanel>

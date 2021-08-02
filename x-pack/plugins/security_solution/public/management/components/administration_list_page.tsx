@@ -6,7 +6,7 @@
  */
 
 import React, { FC, memo, useMemo } from 'react';
-import { CommonProps, EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import { CommonProps, EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 
@@ -23,10 +23,8 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
       return (
         <>
           {headerBackComponent && <>{headerBackComponent}</>}
-          <EuiTitle size="l">
-            <h1 data-test-subj="header-page-title">
-              <>{title}</>
-            </h1>
+          <EuiTitle size="l" data-test-subj="header-page-title">
+            <>{title}</>
           </EuiTitle>
         </>
       );
@@ -37,20 +35,21 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     }, [subtitle]);
 
     return (
-      <EuiPageTemplate
-        pageHeader={{
-          pageTitle: header,
-          description,
-          children: actions,
-          bottomBorder: true,
-        }}
-        restrictWidth={false}
-        {...otherProps}
-      >
+      <>
+        <EuiPageHeader
+          pageTitle={header}
+          description={description}
+          bottomBorder={true}
+          restrictWidth={false}
+          {...otherProps}
+        >
+          {actions}
+        </EuiPageHeader>
+        <EuiSpacer size="l" />
         {children}
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </EuiPageTemplate>
+      </>
     );
   }
 );
