@@ -23,8 +23,13 @@ const isShowLines = (lines: VisSeries['lines'], points: VisSeries['points']) =>
 
 const getPointFillColor = (points: VisSeries['points'], color: string | undefined) => {
   const pointFillColor = points?.fillColor ?? color;
-  return pointFillColor && chroma(pointFillColor).alpha((points?.fill || 0) * 10).css();
-}
+  return (
+    pointFillColor &&
+    chroma(pointFillColor)
+      .alpha((points?.fill || 0) * 10)
+      .css()
+  );
+};
 
 const getAreaSeriesStyle = ({ color, lines, points }: AreaSeriesComponentProps['visData']) =>
   ({
