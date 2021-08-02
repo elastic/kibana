@@ -60,9 +60,9 @@ export interface ExpressionRenderable {
 }
 
 export interface ExpressionContext {
-  state: 'ready' | 'pending';
+  state: 'ready' | 'pending' | 'error';
   value: ExpressionType;
-  error: null;
+  error: null | string;
 }
 
 export interface ResolvedArgType {

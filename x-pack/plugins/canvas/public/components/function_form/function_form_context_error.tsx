@@ -7,10 +7,10 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Context } from './types';
+import { ExpressionContext } from '../../../types';
 
 const strings = {
-  getContextErrorMessage: (errorMessage: string) =>
+  getContextErrorMessage: (errorMessage: string | null = '') =>
     i18n.translate('xpack.canvas.functionForm.contextError', {
       defaultMessage: 'ERROR: {errorMessage}',
       values: {
@@ -19,7 +19,7 @@ const strings = {
     }),
 };
 interface FunctionFormContextErrorProps {
-  context: Context;
+  context: ExpressionContext;
 }
 
 export const FunctionFormContextError: FunctionComponent<FunctionFormContextErrorProps> = ({

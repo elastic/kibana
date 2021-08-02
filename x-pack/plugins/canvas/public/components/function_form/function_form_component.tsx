@@ -10,26 +10,26 @@ import {
   ExpressionAstExpression,
   ExpressionValue,
 } from '../../../../../../src/plugins/expressions/common';
-import { ArgType, Arg } from '../../expression_types/types';
-import { Context, ExpressionType, ArgDefType } from './types';
-import { ElementSpec } from '../../../types';
+import { ArgType, Arg, ArgTypeDef } from '../../expression_types/types';
+import { ExpressionType } from './types';
+import { AssetType, CanvasElement, ExpressionContext } from '../../../types';
 
 interface FunctionFormComponentProps {
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
   args: Arg[];
   argType: ArgType;
-  argTypeDef: ArgDefType;
+  argTypeDef: ArgTypeDef;
   filterGroups: string[];
-  context?: Context;
+  context?: ExpressionContext;
   expressionIndex: number;
   expressionType: ExpressionType;
   nextArgType?: ArgType;
   nextExpressionType?: ExpressionType;
-  onValueAdd: (argName: string, argValue: unknown) => () => void;
-  onAssetAdd: (type: string, content: string) => string;
-  onValueChange: (argName: string, argIndex: number) => (value: unknown) => void;
+  onValueAdd: (argName: string, argValue: Arg) => () => void;
+  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
+  onValueChange: (argName: string, argIndex: number) => (value: Arg) => void;
   onValueRemove: (argName: string, argIndex: number) => () => void;
-  updateContext: (element?: ElementSpec) => void;
+  updateContext: (element?: CanvasElement) => void;
 }
 
 export const FunctionFormComponent: FunctionComponent<FunctionFormComponentProps> = (props) => (
