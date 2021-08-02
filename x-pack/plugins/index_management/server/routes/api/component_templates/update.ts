@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { estypes } from '@elastic/elasticsearch';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
@@ -39,8 +40,7 @@ export const registerUpdateRoute = ({
         const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           body: {
-            // @ts-expect-error @elastic/elasticsearch Not assignable to type 'IndicesIndexState'
-            template,
+            template: template as estypes.IndicesIndexState,
             version,
             _meta,
           },
