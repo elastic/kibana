@@ -15,10 +15,11 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { mapValues, once } from 'lodash';
+import { isEmpty, mapValues, once } from 'lodash';
+import { SavedObjectsClient } from '../../../../src/core/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { APMConfig, APMXPackConfig } from '.';
+import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
@@ -104,21 +105,6 @@ export class APMPlugin
       });
     }
 
-    plugins.home?.tutorials.registerTutorial(
-      tutorialProvider({
-        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
-        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
-        cloud: plugins.cloud,
-        indices: {
-          errorIndices: this.currentConfig['apm_oss.errorIndices'],
-          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
-          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
-          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
-        },
-      })
-    );
-
     plugins.features.registerKibanaFeature(APM_FEATURE);
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
@@ -126,6 +112,10 @@ export class APMPlugin
     const { ruleDataService } = plugins.ruleRegistry;
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
+
+    const alertsIndexPattern = ruleDataService.getFullAssetName(
+      'observability-apm*'
+    );
 
     const initializeRuleDataTemplates = once(async () => {
       const componentTemplateName = ruleDataService.getFullAssetName(
@@ -164,15 +154,16 @@ export class APMPlugin
       await ruleDataService.createOrUpdateIndexTemplate({
         name: ruleDataService.getFullAssetName('apm-index-template'),
         body: {
-          index_patterns: [
-            ruleDataService.getFullAssetName('observability-apm*'),
-          ],
+          index_patterns: [alertsIndexPattern],
           composed_of: [
             ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
           ],
         },
       });
+      await ruleDataService.updateIndexMappingsMatchingPattern(
+        alertsIndexPattern
+      );
     });
 
     // initialize eagerly
@@ -183,6 +174,7 @@ export class APMPlugin
     );
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
+      APM_SERVER_FEATURE_ID,
       ruleDataService.getFullAssetName('observability-apm'),
       () => initializeRuleDataTemplatesPromise
     );
@@ -200,8 +192,24 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
+    plugins.home?.tutorials.registerTutorial(
+      tutorialProvider({
+        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
+        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
+        cloud: plugins.cloud,
+        isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+        indices: {
+          errorIndices: this.currentConfig['apm_oss.errorIndices'],
+          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
+          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
+          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
+          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
+        },
+      })
+    );
+
     const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
-      'apm'
+      APM_SERVER_FEATURE_ID
     );
 
     registerRoutes({
@@ -241,12 +249,24 @@ export class APMPlugin
     });
 
     // search strategies for async partial search results
-    if (plugins.data?.search?.registerSearchStrategy !== undefined) {
-      plugins.data.search.registerSearchStrategy(
-        'apmCorrelationsSearchStrategy',
-        apmCorrelationsSearchStrategyProvider()
-      );
-    }
+    core.getStartServices().then(([coreStart]) => {
+      (async () => {
+        const savedObjectsClient = new SavedObjectsClient(
+          coreStart.savedObjects.createInternalRepository()
+        );
+
+        plugins.data.search.registerSearchStrategy(
+          'apmCorrelationsSearchStrategy',
+          apmCorrelationsSearchStrategyProvider(
+            boundGetApmIndices,
+            await coreStart.uiSettings
+              .asScopedToClient(savedObjectsClient)
+              .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
+          )
+        );
+      })();
+    });
+
     return {
       config$: mergedConfig$,
       getApmIndices: boundGetApmIndices,

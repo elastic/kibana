@@ -7,13 +7,13 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import { SanitizedAlert } from '../../../../../alerting/common';
-import { AlertsClient } from '../../../../../alerting/server';
+import { RulesClient } from '../../../../../alerting/server';
 import { RuleParams } from '../schemas/rule_schemas';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 
 interface EnableRuleArgs {
   rule: SanitizedAlert<RuleParams>;
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -21,11 +21,11 @@ interface EnableRuleArgs {
  * Enables the rule and updates its status to 'going to run'
  *
  * @param rule - rule to enable
- * @param alertsClient - Alerts client
+ * @param rulesClient - Alerts client
  * @param savedObjectsClient - Saved Objects client
  */
-export const enableRule = async ({ rule, alertsClient, savedObjectsClient }: EnableRuleArgs) => {
-  await alertsClient.enable({ id: rule.id });
+export const enableRule = async ({ rule, rulesClient, savedObjectsClient }: EnableRuleArgs) => {
+  await rulesClient.enable({ id: rule.id });
 
   const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
   const ruleCurrentStatus = await ruleStatusClient.find({

@@ -11,6 +11,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
+  ALERT_REASON,
   ALERT_SEVERITY_LEVEL,
   ALERT_SEVERITY_VALUE,
   ALERT_START,
@@ -18,6 +19,7 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
+  OWNER,
   PRODUCER,
   RULE_CATEGORY,
   RULE_ID,
@@ -25,6 +27,7 @@ import {
   RULE_UUID,
   TAGS,
   TIMESTAMP,
+  SPACE_IDS,
 } from '../../../common/technical_rule_data_field_names';
 import { ecsFieldMap } from './ecs_field_map';
 
@@ -40,7 +43,9 @@ export const technicalRuleFieldMap = {
     RULE_CATEGORY,
     TAGS
   ),
+  [OWNER]: { type: 'keyword' },
   [PRODUCER]: { type: 'keyword' },
+  [SPACE_IDS]: { type: 'keyword', array: true },
   [ALERT_UUID]: { type: 'keyword' },
   [ALERT_ID]: { type: 'keyword' },
   [ALERT_START]: { type: 'date' },
@@ -51,6 +56,7 @@ export const technicalRuleFieldMap = {
   [ALERT_STATUS]: { type: 'keyword' },
   [ALERT_EVALUATION_THRESHOLD]: { type: 'scaled_float', scaling_factor: 100 },
   [ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100 },
+  [ALERT_REASON]: { type: 'keyword' },
 } as const;
 
 export type TechnicalRuleFieldMaps = typeof technicalRuleFieldMap;

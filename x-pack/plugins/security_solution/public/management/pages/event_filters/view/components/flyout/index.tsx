@@ -70,6 +70,15 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           payload: { entry: getInitialExceptionFromEvent() },
         });
       }
+
+      return () => {
+        dispatch({
+          type: 'eventFiltersFormStateChanged',
+          payload: {
+            type: 'UninitialisedResourceState',
+          },
+        });
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -94,12 +103,12 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           {id ? (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update"
-              defaultMessage="Update Endpoint Event Filter"
+              defaultMessage="Update event filter"
             />
           ) : (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.create"
-              defaultMessage="Add Endpoint Event Filter"
+              defaultMessage="Add event filter"
             />
           )}
         </EuiButton>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../common';
@@ -60,6 +60,8 @@ export const DocViewerTable = ({
     indexPattern?.fields,
   ]);
 
+  const [childParentFieldsMap] = useState({} as Record<string, string>);
+
   const formattedHit = useMemo(() => indexPattern?.formatHit(hit, 'html'), [hit, indexPattern]);
 
   const tableColumns = useMemo(() => {
@@ -92,11 +94,21 @@ export const DocViewerTable = ({
   }
 
   const flattened = indexPattern.flattenHit(hit);
+  Object.keys(flattened).forEach((key) => {
+    const field = mapping(key);
+    if (field && field.spec?.subType?.multi?.parent) {
+      childParentFieldsMap[field.name] = field.spec.subType.multi.parent;
+    }
+  });
   const items: FieldRecord[] = Object.keys(flattened)
     .filter((fieldName) => {
       const fieldMapping = mapping(fieldName);
       const isMultiField = !!fieldMapping?.spec?.subType?.multi;
-      return isMultiField ? showMultiFields : true;
+      if (!isMultiField) {
+        return true;
+      }
+      const parent = childParentFieldsMap[fieldName];
+      return showMultiFields || (parent && !flattened.hasOwnProperty(parent));
     })
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);

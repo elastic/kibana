@@ -18,13 +18,13 @@ import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
 
 export const updateRules = async ({
-  alertsClient,
+  rulesClient,
   savedObjectsClient,
   defaultOutputIndex,
   ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   const existingRule = await readRules({
-    alertsClient,
+    rulesClient,
     ruleId: ruleUpdate.rule_id,
     id: ruleUpdate.id,
   });
@@ -80,15 +80,15 @@ export const updateRules = async ({
     notifyWhen: null,
   };
 
-  const update = await alertsClient.update({
+  const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
   });
 
   if (existingRule.enabled && enabled === false) {
-    await alertsClient.disable({ id: existingRule.id });
+    await rulesClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
-    await enableRule({ rule: existingRule, alertsClient, savedObjectsClient });
+    await enableRule({ rule: existingRule, rulesClient, savedObjectsClient });
   }
   return { ...update, enabled };
 };

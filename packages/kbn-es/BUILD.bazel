@@ -39,9 +39,7 @@ DEPS = [
   "@npm//glob",
   "@npm//node-fetch",
   "@npm//simple-git",
-  "@npm//tar-fs",
   "@npm//tree-kill",
-  "@npm//yauzl",
   "@npm//zlib"
 ]
 

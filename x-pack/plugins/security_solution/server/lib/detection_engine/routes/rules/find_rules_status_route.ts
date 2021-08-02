@@ -40,10 +40,10 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
     async (context, request, response) => {
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -52,7 +52,7 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const [statusesById, failingRules] = await Promise.all([
           ruleStatusClient.findBulk(ids, 6),
-          getFailingRules(ids, alertsClient),
+          getFailingRules(ids, rulesClient),
         ]);
 
         const statuses = ids.reduce((acc, id) => {

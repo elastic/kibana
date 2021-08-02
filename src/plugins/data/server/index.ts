@@ -10,33 +10,8 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
-import {
-  buildQueryFilter,
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  isFilterDisabled,
-} from '../common';
-
-/*
- * Filter helper namespace:
- */
-
-export const esFilters = {
-  buildQueryFilter,
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  isFilterDisabled,
-};
+export * from './deprecated';
+export { getEsQueryConfig, buildQueryFromFilters } from '../common';
 
 /**
  * Exporters (CSV)
@@ -47,33 +22,6 @@ export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
 };
-
-/*
- * esQuery and esKuery:
- */
-
-import {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  buildEsQuery,
-  buildQueryFromFilters,
-  getEsQueryConfig,
-} from '../common';
-
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
-
-export const esQuery = {
-  buildQueryFromFilters,
-  getEsQueryConfig,
-  buildEsQuery,
-};
-
-export { EsQueryConfig, KueryNode } from '../common';
 
 /*
  * Field Formats:
@@ -146,7 +94,6 @@ export {
 
 export {
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
@@ -281,10 +228,7 @@ export const search = {
 export {
   // kbn field types
   castEsToKbnFieldTypeName,
-  // query
-  Filter,
   getTime,
-  Query,
   // timefilter
   RefreshInterval,
   TimeRange,

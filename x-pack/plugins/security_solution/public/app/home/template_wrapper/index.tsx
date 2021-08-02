@@ -87,7 +87,12 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         template="default"
       >
         <GlobalKQLHeader />
-        <EuiPanel className="securityPageWrapper" data-test-subj="pageContainer" hasShadow={false}>
+        <EuiPanel
+          className="securityPageWrapper"
+          data-test-subj="pageContainer"
+          hasShadow={false}
+          paddingSize="l"
+        >
           {children}
         </EuiPanel>
       </StyledKibanaPageTemplate>

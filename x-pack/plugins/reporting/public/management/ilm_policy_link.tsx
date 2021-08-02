@@ -21,7 +21,7 @@ interface Props {
 
 const i18nTexts = {
   buttonLabel: i18n.translate('xpack.reporting.listing.reports.ilmPolicyLinkText', {
-    defaultMessage: 'Edit ILM policy',
+    defaultMessage: 'Edit reporting ILM policy',
   }),
 };
 

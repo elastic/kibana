@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.browser.json",
+  "compilerOptions": {
+    "incremental": true,
+    "outDir": "./target_web",
+    "stripInternal": true,
+    "declaration": false,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../../packages/kbn-typed-react-router-config/src",
+    "types": [
+      "node",
+      "jest"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

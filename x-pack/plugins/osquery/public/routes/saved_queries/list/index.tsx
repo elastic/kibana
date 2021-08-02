@@ -16,6 +16,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useHistory } from 'react-router-dom';
 
 import { SavedObject } from 'kibana/public';
 import { WithHeaderLayout } from '../../../components/layouts';
@@ -51,29 +52,24 @@ const EditButton = React.memo(EditButtonComponent);
 
 const SavedQueriesPageComponent = () => {
   useBreadcrumbs('saved_queries');
+  const { push } = useHistory();
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('updated_at');
+  const [pageSize, setPageSize] = useState(20);
+  const [sortField, setSortField] = useState('attributes.updated_at');
   const [sortDirection, setSortDirection] = useState('desc');
 
   const { data } = useSavedQueries({ isLive: true });
 
-  // const handlePlayClick = useCallback(
-  //   (item) =>
-  //     push({
-  //       search: qs.stringify({
-  //         tab: 'live_query',
-  //       }),
-  //       state: {
-  //         query: {
-  //           id: item.id,
-  //           query: item.attributes.query,
-  //         },
-  //       },
-  //     }),
-  //   [push]
-  // );
+  const handlePlayClick = useCallback(
+    (item) =>
+      push('/live_queries/new', {
+        form: {
+          savedQueryId: item.id,
+        },
+      }),
+    [push]
+  );
 
   const renderEditAction = useCallback(
     (item: SavedObject<{ name: string }>) => (
@@ -96,45 +92,53 @@ const SavedQueriesPageComponent = () => {
     () => [
       {
         field: 'attributes.id',
-        name: 'Query ID',
+        name: i18n.translate('xpack.osquery.savedQueries.table.queryIdColumnTitle', {
+          defaultMessage: 'Query ID',
+        }),
         sortable: true,
         truncateText: true,
       },
       {
         field: 'attributes.description',
-        name: 'Description',
+        name: i18n.translate('xpack.osquery.savedQueries.table.descriptionColumnTitle', {
+          defaultMessage: 'Description',
+        }),
         sortable: true,
         truncateText: true,
       },
       {
         field: 'attributes.created_by',
-        name: 'Created by',
+        name: i18n.translate('xpack.osquery.savedQueries.table.createdByColumnTitle', {
+          defaultMessage: 'Created by',
+        }),
         sortable: true,
         truncateText: true,
       },
       {
         field: 'attributes.updated_at',
-        name: 'Last updated at',
+        name: i18n.translate('xpack.osquery.savedQueries.table.updatedAtColumnTitle', {
+          defaultMessage: 'Last updated at',
+        }),
         sortable: (item: SavedObject<{ updated_at: string }>) =>
           item.attributes.updated_at ? Date.parse(item.attributes.updated_at) : 0,
         truncateText: true,
         render: renderUpdatedAt,
       },
       {
-        name: 'Actions',
+        name: i18n.translate('xpack.osquery.savedQueries.table.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
         actions: [
-          // {
-          //   name: 'Live query',
-          //   description: 'Run live query',
-          //   type: 'icon',
-          //   icon: 'play',
-          //   onClick: handlePlayClick,
-          // },
+          {
+            type: 'icon',
+            icon: 'play',
+            onClick: handlePlayClick,
+          },
           { render: renderEditAction },
         ],
       },
     ],
-    [renderEditAction, renderUpdatedAt]
+    [handlePlayClick, renderEditAction, renderUpdatedAt]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }) => {

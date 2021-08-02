@@ -61,18 +61,15 @@ export const configSchema = schema.object({
   endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
 
   /**
-   * Alert Endpoint Configuration
-   */
-  alertResultListDefaultDateRange: schema.object({
-    from: schema.string({ defaultValue: 'now-15m' }),
-    to: schema.string({ defaultValue: 'now' }),
-  }),
-
-  /**
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
-  validateArtifactDownloads: schema.boolean({ defaultValue: true }),
+
+  /**
+   * Detection prebuilt rules
+   */
+  prebuiltRulesFromFileSystem: schema.boolean({ defaultValue: true }),
+  prebuiltRulesFromSavedObjects: schema.boolean({ defaultValue: true }),
 });
 
 export const createConfig = (context: PluginInitializerContext) =>

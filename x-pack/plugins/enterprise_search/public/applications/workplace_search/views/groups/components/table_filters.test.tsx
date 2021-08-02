@@ -14,7 +14,6 @@ import { shallow } from 'enzyme';
 import { EuiFieldSearch } from '@elastic/eui';
 
 import { TableFilterSourcesDropdown } from './table_filter_sources_dropdown';
-import { TableFilterUsersDropdown } from './table_filter_users_dropdown';
 import { TableFilters } from './table_filters';
 
 const setFilterValue = jest.fn();
@@ -29,7 +28,6 @@ describe('TableFilters', () => {
 
     expect(wrapper.find(EuiFieldSearch)).toHaveLength(1);
     expect(wrapper.find(TableFilterSourcesDropdown)).toHaveLength(1);
-    expect(wrapper.find(TableFilterUsersDropdown)).toHaveLength(1);
   });
 
   it('handles search input value change', () => {

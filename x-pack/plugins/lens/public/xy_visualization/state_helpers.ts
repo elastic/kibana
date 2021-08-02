@@ -6,8 +6,9 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import { SeriesType, visualizationTypes, XYLayerConfig, YConfig, ValidLayer } from './types';
+import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
+import type { SeriesType, XYLayerConfig, YConfig, ValidLayer } from '../../common/expressions';
+import { visualizationTypes } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (

@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import { GroupsLogic } from '../groups_logic';
 
 import { TableFilterSourcesDropdown } from './table_filter_sources_dropdown';
-import { TableFilterUsersDropdown } from './table_filter_users_dropdown';
 
 const FILTER_GROUPS_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.filterGroups.placeholder',
@@ -44,9 +43,6 @@ export const TableFilters: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem className="user-groups-filters__filter-sources">
             <TableFilterSourcesDropdown />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <TableFilterUsersDropdown />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

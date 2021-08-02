@@ -6,4 +6,9 @@
  */
 
 export { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
-export { IVectorLayer, VectorLayer, VectorLayerArguments } from './vector_layer';
+export {
+  IVectorLayer,
+  VectorLayer,
+  VectorLayerArguments,
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+} from './vector_layer';

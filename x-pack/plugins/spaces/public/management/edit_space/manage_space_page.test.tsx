@@ -55,7 +55,6 @@ describe('ManageSpacePage', () => {
     });
   });
 
-  const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
 
   it('allows a space to be created', async () => {
@@ -68,7 +67,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -98,8 +96,9 @@ describe('ManageSpacePage', () => {
       id: 'new-space-name',
       name: 'New Space Name',
       description: 'some description',
-      color: undefined,
-      initials: undefined,
+      initials: 'NS',
+      color: '#AA6556',
+      imageUrl: '',
       disabledFeatures: [],
     });
   });
@@ -129,7 +128,6 @@ describe('ManageSpacePage', () => {
         onLoadSpace={onLoadSpace}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -161,8 +159,9 @@ describe('ManageSpacePage', () => {
       id: 'existing-space',
       name: 'New Space Name',
       description: 'some description',
-      color: '#aabbcc',
+      color: '#AABBCC',
       initials: 'AB',
+      imageUrl: '',
       disabledFeatures: ['feature-1'],
     });
   });
@@ -181,7 +180,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -218,7 +216,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -279,7 +276,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},

@@ -81,6 +81,9 @@ export const getEndpointDetailsPath = (
   const queryParams: EndpointDetailsUrlProps = { ...rest };
 
   switch (props.name) {
+    case 'endpointDetails':
+      queryParams.show = 'details';
+      break;
     case 'endpointIsolate':
       queryParams.show = 'isolate';
       break;

@@ -60,6 +60,8 @@ export type ActivityLogEntry = ActivityLogAction | ActivityLogActionResponse;
 export interface ActivityLog {
   page: number;
   pageSize: number;
+  startDate?: string;
+  endDate?: string;
   data: ActivityLogEntry[];
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DslQuery, EsQueryConfig } from 'src/plugins/data/common';
+import { DslQuery, EsQueryConfig } from '@kbn/es-query';
 
 import { Filter, Query, esQuery } from '../../../../../../src/plugins/data/server';
 

@@ -51,6 +51,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": 0,
           "visible": true,
         },
       }
@@ -81,6 +82,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": -90,
           "visible": false,
         },
       }
@@ -266,6 +268,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": 0,
           "visible": true,
         },
       }
@@ -296,6 +299,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": -90,
           "visible": false,
         },
       }
@@ -335,9 +339,12 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -399,9 +406,12 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -489,6 +499,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": 0,
           "visible": true,
         },
       }
@@ -519,6 +530,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": -90,
           "visible": false,
         },
       }
@@ -558,9 +570,12 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -622,9 +637,12 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -712,6 +730,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": 0,
           "visible": true,
         },
       }
@@ -742,6 +761,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": -90,
           "visible": false,
         },
       }
@@ -927,6 +947,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": 0,
           "visible": true,
         },
       }
@@ -957,6 +978,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": -90,
           "visible": false,
         },
       }
@@ -1150,6 +1172,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": 0,
           "visible": true,
         },
       }
@@ -1180,6 +1203,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": -90,
           "visible": false,
         },
       }
@@ -1219,9 +1243,12 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1287,9 +1314,12 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1381,6 +1411,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": 0,
           "visible": true,
         },
       }
@@ -1411,6 +1442,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
           "visible": true,
         },
         "tickLabel": Object {
+          "rotation": -90,
           "visible": false,
         },
       }
@@ -1450,9 +1482,12 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }
@@ -1518,9 +1553,12 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     displayValueSettings={
       Object {
-        "hideClippedValue": true,
         "isAlternatingValueLabel": false,
-        "isValueContainedInElement": true,
+        "isValueContainedInElement": false,
+        "overflowConstraints": Array [
+          "chartEdges",
+          "barGeometry",
+        ],
         "showValueLabel": false,
         "valueFormatter": [Function],
       }

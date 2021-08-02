@@ -36,12 +36,6 @@ const SOURCES_TABLE_HEADER = i18n.translate(
     defaultMessage: 'Content sources',
   }
 );
-const USERS_TABLE_HEADER = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.usersTableHeader',
-  {
-    defaultMessage: 'Users',
-  }
-);
 
 export const GroupsTable: React.FC<{}> = () => {
   const { setActivePage } = useActions(GroupsLogic);
@@ -77,7 +71,6 @@ export const GroupsTable: React.FC<{}> = () => {
         <EuiTableHeader>
           <EuiTableHeaderCell>{GROUP_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>
-          <EuiTableHeaderCell>{USERS_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell />
         </EuiTableHeader>
         <EuiTableBody>

@@ -207,6 +207,7 @@ export class TablePanelConfig extends Component<
               <EuiFieldText
                 onChange={this.handleTextChange('drilldown_url')}
                 value={model.drilldown_url ?? ''}
+                data-test-subj="drilldownUrl"
               />
             </EuiFormRow>
 

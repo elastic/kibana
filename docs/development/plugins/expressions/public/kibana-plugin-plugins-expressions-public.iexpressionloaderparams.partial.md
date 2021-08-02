@@ -4,6 +4,8 @@
 
 ## IExpressionLoaderParams.partial property
 
+The flag to toggle on emitting partial results. By default, the partial results are disabled.
+
 <b>Signature:</b>
 
 ```typescript

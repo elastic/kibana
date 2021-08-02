@@ -313,7 +313,7 @@ export const getColumns = ({
 };
 
 export const getMonitoringColumns = (
-  history: H.History,
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   formatUrl: FormatUrl
 ): RulesStatusesColumns[] => {
   const cols: RulesStatusesColumns[] = [
@@ -326,7 +326,10 @@ export const getMonitoringColumns = (
             data-test-subj="ruleName"
             onClick={(ev: { preventDefault: () => void }) => {
               ev.preventDefault();
-              history.push(getRuleDetailsUrl(item.id));
+              navigateToApp(APP_ID, {
+                deepLinkId: SecurityPageName.rules,
+                path: getRuleDetailsUrl(item.id),
+              });
             }}
             href={formatUrl(getRuleDetailsUrl(item.id))}
           >

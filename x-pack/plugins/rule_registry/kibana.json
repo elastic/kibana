@@ -12,5 +12,6 @@
     "spaces",
     "triggersActionsUi"
   ],
+  "optionalPlugins": ["security"],
   "server": true
 }

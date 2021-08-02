@@ -7,6 +7,7 @@
 
 import { get, omit } from 'lodash';
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
+import { CanvasRenderedWorkpad } from '../../../shareable_runtime/types';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import {
@@ -500,7 +501,7 @@ export function getRenderedWorkpad(state: State) {
   return {
     pages: renderedPages,
     ...rest,
-  };
+  } as CanvasRenderedWorkpad;
 }
 
 export function getRenderedWorkpadExpressions(state: State) {

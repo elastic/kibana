@@ -1,8 +1,8 @@
 .kbnPageTemplateSolutionNavCollapseButton {
   position: absolute;
   opacity: 0;
-  left: 240px - $euiSize;
-  top: $euiSize;
+  left: 248px - $euiSize;
+  top: $euiSizeL;
   z-index: 2;
 
   @include euiCanAnimate {
@@ -18,11 +18,11 @@
   &:hover,
   &:focus {
     opacity: 1;
-    left: 240px - $euiSizeL;
+    left: 248px - $euiSizeL;
   }
 
   .kbnPageTemplate__pageSideBar:hover & {
-    transition-delay: $euiAnimSpeedSlow;
+    transition-delay: $euiAnimSpeedSlow * 2;
   }
 }
 

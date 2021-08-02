@@ -10,7 +10,13 @@ import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '../task_running';
-import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from '../task_events';
+import {
+  TaskEvent,
+  asTaskRunEvent,
+  asTaskMarkRunningEvent,
+  TaskRun,
+  TaskPersistence,
+} from '../task_events';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import moment from 'moment';
@@ -854,7 +860,12 @@ describe('TaskManagerRunner', () => {
       const onTaskEvent = jest.fn();
       const { runner, store, instance: originalInstance } = await readyToRunStageSetup({
         onTaskEvent,
-        instance: { id, status: TaskStatus.Running, startedAt: new Date() },
+        instance: {
+          id,
+          schedule: { interval: '20m' },
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
         definitions: {
           bar: {
             title: 'Bar!',
@@ -878,6 +889,7 @@ describe('TaskManagerRunner', () => {
             id,
             asErr({
               error,
+              persistence: TaskPersistence.Recurring,
               task: originalInstance,
               result: TaskRunResult.Failed,
             })
@@ -1209,7 +1221,16 @@ describe('TaskManagerRunner', () => {
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
-          withAnyTiming(asTaskRunEvent(id, asOk({ task: instance, result: TaskRunResult.Success })))
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asOk({
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.Success,
+              })
+            )
+          )
         );
       });
 
@@ -1238,7 +1259,16 @@ describe('TaskManagerRunner', () => {
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
-          withAnyTiming(asTaskRunEvent(id, asOk({ task: instance, result: TaskRunResult.Success })))
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asOk({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Success,
+              })
+            )
+          )
         );
       });
 
@@ -1268,7 +1298,12 @@ describe('TaskManagerRunner', () => {
           withAnyTiming(
             asTaskRunEvent(
               id,
-              asErr({ error, task: instance, result: TaskRunResult.RetryScheduled })
+              asErr({
+                error,
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.RetryScheduled,
+              })
             )
           )
         );
@@ -1304,7 +1339,12 @@ describe('TaskManagerRunner', () => {
           withAnyTiming(
             asTaskRunEvent(
               id,
-              asErr({ error, task: instance, result: TaskRunResult.RetryScheduled })
+              asErr({
+                error,
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.RetryScheduled,
+              })
             )
           )
         );
@@ -1346,6 +1386,7 @@ describe('TaskManagerRunner', () => {
               asErr({
                 error,
                 task: originalInstance,
+                persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.Failed,
               })
             )

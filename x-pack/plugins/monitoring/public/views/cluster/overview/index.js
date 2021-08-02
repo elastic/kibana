@@ -83,7 +83,7 @@ uiRoutes.when('/overview', {
                     setupMode={setupMode}
                     showLicenseExpiration={showLicenseExpiration}
                   />
-                  <EnableAlertsModal />
+                  <EnableAlertsModal alerts={this.alerts} />
                   {bottomBarComponent}
                 </SetupModeContext.Provider>
               )}

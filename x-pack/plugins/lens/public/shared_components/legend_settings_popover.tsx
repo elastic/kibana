@@ -8,15 +8,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { Position } from '@elastic/charts';
+import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
+import { LegendLocationSettings } from './legend_location_settings';
 import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
+import { TooltipWrapper } from './tooltip_wrapper';
 
 export interface LegendSettingsPopoverProps {
   /**
    * Determines the legend display options
    */
-  legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide' | 'default'; label: string }>;
+  legendOptions: Array<{
+    id: string;
+    value: 'auto' | 'show' | 'hide' | 'default';
+    label: string;
+  }>;
   /**
    * Determines the legend mode
    */
@@ -33,6 +39,34 @@ export interface LegendSettingsPopoverProps {
    * Callback on position option change
    */
   onPositionChange: (id: string) => void;
+  /**
+   * Determines the legend location
+   */
+  location?: 'inside' | 'outside';
+  /**
+   * Callback on location option change
+   */
+  onLocationChange?: (id: string) => void;
+  /**
+   * Sets the vertical alignment for legend inside chart
+   */
+  verticalAlignment?: VerticalAlignment;
+  /**
+   * Sets the vertical alignment for legend inside chart
+   */
+  horizontalAlignment?: HorizontalAlignment;
+  /**
+   * Callback on horizontal alignment option change
+   */
+  onAlignmentChange?: (id: string) => void;
+  /**
+   * Sets the number of columns for legend inside chart
+   */
+  floatingColumns?: number;
+  /**
+   * Callback on horizontal alignment option change
+   */
+  onFloatingColumnsChange?: (value: number) => void;
   /**
    * If true, nested legend switch is rendered
    */
@@ -63,42 +97,18 @@ export interface LegendSettingsPopoverProps {
   groupPosition?: ToolbarButtonProps['groupPosition'];
 }
 
-const toggleButtonsIcons = [
-  {
-    id: Position.Bottom,
-    label: i18n.translate('xpack.lens.shared.legendPositionBottom', {
-      defaultMessage: 'Bottom',
-    }),
-    iconType: 'arrowDown',
-  },
-  {
-    id: Position.Left,
-    label: i18n.translate('xpack.lens.shared.legendPositionLeft', {
-      defaultMessage: 'Left',
-    }),
-    iconType: 'arrowLeft',
-  },
-  {
-    id: Position.Right,
-    label: i18n.translate('xpack.lens.shared.legendPositionRight', {
-      defaultMessage: 'Right',
-    }),
-    iconType: 'arrowRight',
-  },
-  {
-    id: Position.Top,
-    label: i18n.translate('xpack.lens.shared.legendPositionTop', {
-      defaultMessage: 'Top',
-    }),
-    iconType: 'arrowUp',
-  },
-];
-
 export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
   legendOptions,
   mode,
   onDisplayChange,
   position,
+  location,
+  onLocationChange = () => {},
+  verticalAlignment,
+  horizontalAlignment,
+  floatingColumns,
+  onAlignmentChange = () => {},
+  onFloatingColumnsChange = () => {},
   onPositionChange,
   renderNestedLegendSwitch,
   nestedLegend,
@@ -136,26 +146,18 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           onChange={onDisplayChange}
         />
       </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        label={i18n.translate('xpack.lens.shared.legendPositionLabel', {
-          defaultMessage: 'Position',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.lens.shared.legendPositionLabel', {
-            defaultMessage: 'Position',
-          })}
-          isDisabled={mode === 'hide'}
-          data-test-subj="lens-legend-position-btn"
-          name="legendPosition"
-          buttonSize="compressed"
-          options={toggleButtonsIcons}
-          idSelected={position || Position.Right}
-          onChange={onPositionChange}
-          isIconOnly
-        />
-      </EuiFormRow>
+      <LegendLocationSettings
+        location={location}
+        onLocationChange={onLocationChange}
+        verticalAlignment={verticalAlignment}
+        horizontalAlignment={horizontalAlignment}
+        onAlignmentChange={onAlignmentChange}
+        floatingColumns={floatingColumns}
+        onFloatingColumnsChange={onFloatingColumnsChange}
+        isDisabled={mode === 'hide'}
+        position={position}
+        onPositionChange={onPositionChange}
+      />
       {renderNestedLegendSwitch && (
         <EuiFormRow
           display="columnCompressedSwitch"
@@ -163,17 +165,27 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             defaultMessage: 'Nested',
           })}
         >
-          <EuiSwitch
-            compressed
-            label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
-              defaultMessage: 'Nested',
+          <TooltipWrapper
+            tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
+              defaultMessage: 'Requires legend to be shown',
             })}
-            data-test-subj="lens-legend-nested-switch"
-            showLabel={false}
-            disabled={mode === 'hide'}
-            checked={!!nestedLegend}
-            onChange={onNestedLegendChange}
-          />
+            condition={mode === 'hide'}
+            position="top"
+            delay="regular"
+            display="block"
+          >
+            <EuiSwitch
+              compressed
+              label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
+                defaultMessage: 'Nested',
+              })}
+              data-test-subj="lens-legend-nested-switch"
+              showLabel={false}
+              disabled={mode === 'hide'}
+              checked={!!nestedLegend}
+              onChange={onNestedLegendChange}
+            />
+          </TooltipWrapper>
         </EuiFormRow>
       )}
       {renderValueInLegendSwitch && (
@@ -183,17 +195,27 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             defaultMessage: 'Show value',
           })}
         >
-          <EuiSwitch
-            compressed
-            label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
-              defaultMessage: 'Show value',
+          <TooltipWrapper
+            tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
+              defaultMessage: 'Requires legend to be shown',
             })}
-            data-test-subj="lens-legend-show-value"
-            showLabel={false}
-            disabled={mode === 'hide'}
-            checked={!!valueInLegend}
-            onChange={onValueInLegendChange}
-          />
+            condition={mode === 'hide'}
+            position="top"
+            delay="regular"
+            display="block"
+          >
+            <EuiSwitch
+              compressed
+              label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
+                defaultMessage: 'Show value',
+              })}
+              data-test-subj="lens-legend-show-value"
+              showLabel={false}
+              disabled={mode === 'hide'}
+              checked={!!valueInLegend}
+              onChange={onValueInLegendChange}
+            />
+          </TooltipWrapper>
         </EuiFormRow>
       )}
     </ToolbarPopover>

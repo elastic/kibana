@@ -27,7 +27,6 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
   created_at: ReportSource['created_at'];
   created_by: ReportSource['created_by'];
   jobtype: ReportSource['jobtype'];
-  max_attempts: ReportSource['max_attempts'];
   attempts: ReportSource['attempts'];
   meta: ReportSource['meta'];
 }

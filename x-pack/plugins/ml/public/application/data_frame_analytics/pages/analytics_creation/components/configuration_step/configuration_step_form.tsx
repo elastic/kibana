@@ -115,6 +115,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const [fetchingExplainData, setFetchingExplainData] = useState<boolean>(false);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
   const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
+  const [noDocsContainMappedFields, setNoDocsContainMappedFields] = useState<boolean>(false);
   const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
     undefined | string
   >();
@@ -261,9 +262,13 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       formToUse.includes = [...includes, dependentVariable];
     }
 
-    const { success, expectedMemory, fieldSelection, errorMessage } = await fetchExplainData(
-      formToUse
-    );
+    const {
+      success,
+      expectedMemory,
+      fieldSelection,
+      errorMessage,
+      noDocsContainMappedFields: noDocsWithFields,
+    } = await fetchExplainData(formToUse);
 
     if (success) {
       if (shouldUpdateEstimatedMml) {
@@ -286,6 +291,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         setFieldOptionsFetchFail(false);
         setMaxDistinctValuesError(undefined);
         setUnsupportedFieldsError(undefined);
+        setNoDocsContainMappedFields(false);
         setIncludesTableItems(fieldSelection ? fieldSelection : []);
       }
 
@@ -315,6 +321,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
       setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+      setNoDocsContainMappedFields(noDocsWithFields);
       setFetchingExplainData(false);
       setFormState({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
@@ -325,6 +332,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   useEffect(() => {
     setFormState({ sourceIndex: currentIndexPattern.title });
   }, []);
+
+  const indexPatternFieldsTableItems = useMemo(() => {
+    if (indexData?.indexPatternFields !== undefined) {
+      return indexData.indexPatternFields.map((field) => ({
+        name: field,
+        is_included: false,
+        is_required: false,
+      }));
+    }
+    return [];
+  }, [`${indexData?.indexPatternFields}`]);
 
   useEffect(() => {
     if (typeof savedSearchQueryStr === 'string') {
@@ -399,7 +417,12 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           ? [...updatedIncludes, dependentVariable]
           : updatedIncludes;
 
-        const { success, fieldSelection, errorMessage } = await fetchExplainData(formCopy);
+        const {
+          success,
+          fieldSelection,
+          errorMessage,
+          noDocsContainMappedFields: noDocsWithFields,
+        } = await fetchExplainData(formCopy);
         if (success) {
           // update the field selection table
           const hasRequiredFields = fieldSelection.some(
@@ -423,6 +446,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           setIncludesTableItems(updatedFieldSelection ? updatedFieldSelection : fieldSelection);
           setMaxDistinctValuesError(undefined);
           setUnsupportedFieldsError(undefined);
+          setNoDocsContainMappedFields(noDocsWithFields);
           setFormState({
             includes: updatedIncludes,
             requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
@@ -444,6 +468,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
           setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
           setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+          setNoDocsContainMappedFields(noDocsWithFields);
         }
       }
     }
@@ -500,6 +525,11 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   // Don't render until `savedSearchQuery` has been initialized.
   // `undefined` means uninitialized, `null` means initialized but not used.
   if (savedSearchQuery === undefined) return null;
+
+  const tableItems =
+    includesTableItems.length > 0 && !noDocsContainMappedFields
+      ? includesTableItems
+      : indexPatternFieldsTableItems;
 
   return (
     <Fragment>
@@ -649,7 +679,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         includes={includes}
         minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
         setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
-        tableItems={includesTableItems}
+        tableItems={firstUpdate.current ? includesTableItems : tableItems}
         unsupportedFieldsError={unsupportedFieldsError}
         setUnsupportedFieldsError={setUnsupportedFieldsError}
         setFormState={setFormState}

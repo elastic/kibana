@@ -23,17 +23,18 @@ export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
   browserFields: BrowserFields
 ): ColumnHeaderOptions[] => {
-  return headers.map((header) => {
-    const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
-
-    return {
-      ...header,
-      ...get(
-        [splitHeader.length > 1 ? splitHeader[0] : 'base', 'fields', header.id],
-        browserFields
-      ),
-    };
-  });
+  return headers
+    ? headers.map((header) => {
+        const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
+        return {
+          ...header,
+          ...get(
+            [splitHeader.length > 1 ? splitHeader[0] : 'base', 'fields', header.id],
+            browserFields
+          ),
+        };
+      })
+    : [];
 };
 
 export const getColumnWidthFromType = (type: string): number =>

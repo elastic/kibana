@@ -1,0 +1,103 @@
+{
+  "id": "expressionRevealImage",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "expressionRevealImage",
+        "id": "def-public.revealImageRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "revealImageRenderer",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          "RevealImageRendererConfig",
+          ">"
+        ],
+        "source": {
+          "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
+          "lineNumber": 30
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "expressionRevealImage",
+        "id": "def-public.renderers",
+        "type": "Array",
+        "tags": [],
+        "label": "renderers",
+        "description": [],
+        "signature": [
+          "(() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          "RevealImageRendererConfig",
+          ">)[]"
+        ],
+        "source": {
+          "path": "src/plugins/expression_reveal_image/public/expression_renderers/index.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionRevealImage",
+      "id": "def-public.ExpressionRevealImagePluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionRevealImagePluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "source": {
+        "path": "src/plugins/expression_reveal_image/public/plugin.ts",
+        "lineNumber": 23
+      },
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { SearchStrategyRegistry } from './search_strategy_registry';
-export { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
+import { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
+import { AbstractSearchStrategy } from './strategies';
 
+export { SearchStrategyRegistry } from './search_strategy_registry';
 export { AbstractSearchStrategy, RollupSearchStrategy, DefaultSearchStrategy } from './strategies';
+
+export type SearchCapabilities = DefaultSearchCapabilities;
+export type SearchStrategy = AbstractSearchStrategy;

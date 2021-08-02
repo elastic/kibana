@@ -30,7 +30,6 @@ export const useAgentPolicies = () => {
       }),
     {
       initialData: { items: [], total: 0, page: 1, perPage: 100 },
-      placeholderData: [],
       keepPreviousData: true,
       select: (response) => response.items,
       onSuccess: () => setErrorToast(),

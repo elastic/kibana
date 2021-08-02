@@ -152,7 +152,10 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('returns a 401 if not a valid job type', async () => {
     mockEsClient.search.mockResolvedValueOnce({
-      body: getHits({ jobtype: 'invalidJobType' }),
+      body: getHits({
+        jobtype: 'invalidJobType',
+        payload: { title: 'invalid!' },
+      }),
     } as any);
     registerJobInfoRoutes(core);
 
@@ -163,7 +166,11 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('when a job is incomplete', async () => {
     mockEsClient.search.mockResolvedValueOnce({
-      body: getHits({ jobtype: 'unencodedJobType', status: 'pending' }),
+      body: getHits({
+        jobtype: 'unencodedJobType',
+        status: 'pending',
+        payload: { title: 'incomplete!' },
+      }),
     } as any);
     registerJobInfoRoutes(core);
 
@@ -182,6 +189,7 @@ describe('GET /api/reporting/jobs/download', () => {
         jobtype: 'unencodedJobType',
         status: 'failed',
         output: { content: 'job failure message' },
+        payload: { title: 'failing job!' },
       }),
     } as any);
     registerJobInfoRoutes(core);
@@ -207,9 +215,7 @@ describe('GET /api/reporting/jobs/download', () => {
         jobtype: jobType,
         status: 'completed',
         output: { content: outputContent, content_type: outputContentType },
-        payload: {
-          title,
-        },
+        payload: { title },
       });
     };
 

@@ -34,3 +34,9 @@ export const UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
   });
+
+export const ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.timelines.eventsViewer.alertsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+  });

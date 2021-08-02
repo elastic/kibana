@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
     });
 
-    it('should allow creation of a multi-axis chart', async () => {
+    it('should allow creation of a multi-axis chart and switching multiple times', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
@@ -225,14 +225,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.changeAxisSide('right');
-
-      await PageObjects.lens.closeDimensionEditor();
-
       await PageObjects.lens.waitForVisualization();
-
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(2);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
+
+      await PageObjects.lens.changeAxisSide('left');
+      await PageObjects.lens.waitForVisualization();
+      data = await PageObjects.lens.getCurrentChartDebugState();
+      expect(data?.axes?.y.length).to.eql(1);
+      expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(false);
+
+      await PageObjects.lens.changeAxisSide('right');
+      await PageObjects.lens.waitForVisualization();
+
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should show value labels on bar charts when enabled', async () => {

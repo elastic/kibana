@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
 import { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 import { resolveMaxTimeInterval } from './job_utils';
 import { isDefined } from '../types/guards';
 import { parseInterval } from './parse_interval';
+import { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
 
 const narrowBucketLength = 60;
 
@@ -50,4 +52,32 @@ export function getTopNBuckets(job: Job): number {
   }
 
   return Math.ceil(narrowBucketLength / bucketSpan.asSeconds());
+}
+
+const implementedTests = ['datafeed', 'mml'] as JobsHealthTests[];
+
+/**
+ * Returns tests configuration combined with default values.
+ * @param config
+ */
+export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig) {
+  const result = {
+    datafeed: {
+      enabled: config?.datafeed?.enabled ?? true,
+    },
+    mml: {
+      enabled: config?.mml?.enabled ?? true,
+    },
+    delayedData: {
+      enabled: config?.delayedData?.enabled ?? true,
+    },
+    behindRealtime: {
+      enabled: config?.behindRealtime?.enabled ?? true,
+    },
+    errorMessages: {
+      enabled: config?.errorMessages?.enabled ?? true,
+    },
+  };
+
+  return pick(result, implementedTests);
 }

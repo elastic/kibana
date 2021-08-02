@@ -43,6 +43,7 @@ Supported configurations are also tagged with the image:./images/dynamic-config.
 
 [horizontal]
 Go Agent:: {apm-go-ref}/configuration.html[Configuration reference]
+iOS agent:: _Not yet supported_
 Java Agent:: {apm-java-ref}/configuration.html[Configuration reference]
 .NET Agent:: {apm-dotnet-ref}/configuration.html[Configuration reference]
 Node.js Agent:: {apm-node-ref}/configuration.html[Configuration reference]

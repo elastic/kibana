@@ -13,6 +13,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
 
 describe('useSignalIndex', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;

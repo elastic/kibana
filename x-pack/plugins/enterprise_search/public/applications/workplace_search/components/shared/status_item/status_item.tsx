@@ -44,7 +44,7 @@ export const StatusItem: React.FC<StatusItemProps> = ({ details }) => {
   const infoPopover = (
     <EuiPopover button={tooltipPopoverTrigger} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiCodeBlock
-        language="cmd"
+        language="bash"
         fontSize="m"
         paddingSize="m"
         style={{ maxWidth: 300 }}

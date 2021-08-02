@@ -8,6 +8,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { forOwn, isFunction, memoize, identity } from 'lodash';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {
   FieldFormatsGetConfigFn,
@@ -20,7 +21,6 @@ import {
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { FormatFactory } from './utils';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../kbn_field_types/types';
 import { UI_SETTINGS } from '../constants';
 import { FieldFormatNotFoundError } from '../field_formats';
 import { SerializedFieldFormat } from '../../../expressions/common/types';
@@ -30,7 +30,7 @@ export class FieldFormatsRegistry {
   protected defaultMap: Record<string, FieldFormatConfig> = {};
   protected metaParamsOptions: Record<string, any> = {};
   protected getConfig?: FieldFormatsGetConfigFn;
-  // overriden on the public contract
+
   public deserialize: FormatFactory = (mapping?: SerializedFieldFormat) => {
     if (!mapping) {
       return new (FieldFormat.from(identity))();
@@ -215,7 +215,8 @@ export class FieldFormatsRegistry {
   }
 
   /**
-   * Get filtered list of field formats by format type
+   * Get filtered list of field formats by format type,
+   * Skips hidden field formats
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @return {FieldFormatInstanceType[]}
@@ -223,7 +224,8 @@ export class FieldFormatsRegistry {
   getByFieldType(fieldType: KBN_FIELD_TYPES): FieldFormatInstanceType[] {
     return [...this.fieldFormats.values()]
       .filter(
-        (format: FieldFormatInstanceType) => format && format.fieldType.indexOf(fieldType) !== -1
+        (format: FieldFormatInstanceType) =>
+          format && !format.hidden && format.fieldType.indexOf(fieldType) !== -1
       )
       .map(
         (format: FieldFormatInstanceType) =>
@@ -253,7 +255,21 @@ export class FieldFormatsRegistry {
   }
 
   register(fieldFormats: FieldFormatInstanceType[]) {
-    fieldFormats.forEach((fieldFormat) => this.fieldFormats.set(fieldFormat.id, fieldFormat));
+    fieldFormats.forEach((fieldFormat) => {
+      if (this.fieldFormats.has(fieldFormat.id))
+        throw new Error(
+          `Failed to register field format with id "${fieldFormat.id}" as it already has been registered`
+        );
+      this.fieldFormats.set(fieldFormat.id, fieldFormat);
+    });
+  }
+
+  /**
+   * Checks if field format with id already registered
+   * @param id
+   */
+  has(id: string): boolean {
+    return this.fieldFormats.has(id);
   }
 
   /**

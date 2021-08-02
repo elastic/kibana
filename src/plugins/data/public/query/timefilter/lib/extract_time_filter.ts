@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Filter, isRangeFilter, RangeFilter } from '@kbn/es-query';
 import { keys, partition } from 'lodash';
-import { Filter, isRangeFilter, RangeFilter, TimeRange } from '../../../../common';
+import { TimeRange } from '../../../../common';
 import { convertRangeFilterToTimeRangeString } from './change_time_filter';
 
 export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {

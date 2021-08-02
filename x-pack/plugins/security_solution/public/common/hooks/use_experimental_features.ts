@@ -14,8 +14,8 @@ import {
 
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
-export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
-  return useSelector(({ app: { enableExperimental } }: State) => {
+export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean =>
+  useSelector(({ app: { enableExperimental } }: State) => {
     if (!enableExperimental || !(feature in enableExperimental)) {
       throw new Error(
         `Invalid enable value ${feature}. Allowed values are: ${allowedExperimentalValues.join(
@@ -25,4 +25,3 @@ export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatu
     }
     return enableExperimental[feature];
   });
-};

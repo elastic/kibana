@@ -34,3 +34,5 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     );
   }
 );
+
+ContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';

@@ -470,3 +470,10 @@ export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
       'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
   }
 );
+
+export const PERSONAL_DASHBOARD_SOURCE_ERROR = (error: string) =>
+  i18n.translate('xpack.enterpriseSearch.workplaceSearch.personalDashboardSourceError', {
+    defaultMessage:
+      'Could not connect the source, reach out to your admin for help. Error message: {error}',
+    values: { error },
+  });

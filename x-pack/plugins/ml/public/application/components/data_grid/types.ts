@@ -82,6 +82,7 @@ export interface UseIndexDataReturnType
     | 'resultsField'
   > {
   renderCellValue: RenderCellValue;
+  indexPatternFields?: string[];
 }
 
 export interface UseDataGridReturnType {

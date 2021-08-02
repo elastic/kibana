@@ -27,6 +27,12 @@ export const LOADING = i18n.translate('xpack.timelines.footer.loadingLabel', {
   defaultMessage: 'Loading',
 });
 
+export const ROWS_PER_PAGE = (rowsPerPage: number) =>
+  i18n.translate('xpack.timelines.footer.rowsPerPageLabel', {
+    values: { rowsPerPage },
+    defaultMessage: `Rows per page: {rowsPerPage}`,
+  });
+
 export const TOTAL_COUNT_OF_EVENTS = i18n.translate('xpack.timelines.footer.totalCountOfEvents', {
   defaultMessage: 'events',
 });

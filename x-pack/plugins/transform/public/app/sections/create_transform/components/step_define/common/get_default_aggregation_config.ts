@@ -43,7 +43,11 @@ export function getDefaultAggregationConfig(
     case PIVOT_SUPPORTED_AGGS.FILTER:
       return getFilterAggConfig(commonConfig);
     case PIVOT_SUPPORTED_AGGS.TOP_METRICS:
-      return getTopMetricsAggConfig(commonConfig);
+      return getTopMetricsAggConfig({
+        ...commonConfig,
+        // top_metrics agg has different naming convention by default
+        aggName: PIVOT_SUPPORTED_AGGS.TOP_METRICS,
+      });
     default:
       return commonConfig;
   }

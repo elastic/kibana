@@ -97,4 +97,18 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
     action('workpadService.remove')(id);
     return Promise.resolve();
   },
+  update: (id, workpad) => {
+    action('worpadService.update')(workpad, id);
+    return Promise.resolve();
+  },
+  updateWorkpad: (id, workpad) => {
+    action('workpadService.updateWorkpad')(workpad, id);
+    return Promise.resolve();
+  },
+  updateAssets: (id, assets) => {
+    action('workpadService.updateAssets')(assets, id);
+    return Promise.resolve();
+  },
+  getRuntimeZip: (workpad) =>
+    Promise.resolve(new Blob([JSON.stringify(workpad)], { type: 'application/json' })),
 });

@@ -10,22 +10,24 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
 import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
 
-export const mlAnomalyDetectionAlertParams = schema.object({
-  jobSelection: schema.object(
-    {
-      jobIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
-      groupIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+const jobsSelectionSchema = schema.object(
+  {
+    jobIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    groupIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  },
+  {
+    validate: (v) => {
+      if (!v.jobIds?.length && !v.groupIds?.length) {
+        return i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
+          defaultMessage: 'Job selection is required',
+        });
+      }
     },
-    {
-      validate: (v) => {
-        if (!v.jobIds?.length && !v.groupIds?.length) {
-          return i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
-            defaultMessage: 'Job selection is required',
-          });
-        }
-      },
-    }
-  ),
+  }
+);
+
+export const mlAnomalyDetectionAlertParams = schema.object({
+  jobSelection: jobsSelectionSchema,
   /** Anomaly score threshold  */
   severity: schema.number({ min: 0, max: 100 }),
   /** Result type to alert upon  */
@@ -58,3 +60,47 @@ export type MlAnomalyDetectionAlertParams = TypeOf<typeof mlAnomalyDetectionAler
 export type MlAnomalyDetectionAlertPreviewRequest = TypeOf<
   typeof mlAnomalyDetectionAlertPreviewRequest
 >;
+
+export const anomalyDetectionJobsHealthRuleParams = schema.object({
+  includeJobs: jobsSelectionSchema,
+  excludeJobs: schema.nullable(jobsSelectionSchema),
+  testsConfig: schema.nullable(
+    schema.object({
+      datafeed: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        })
+      ),
+      mml: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        })
+      ),
+      delayedData: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+          docsCount: schema.nullable(schema.number()),
+          timeInterval: schema.nullable(schema.string()),
+        })
+      ),
+      behindRealtime: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+          timeInterval: schema.nullable(schema.string()),
+        })
+      ),
+      errorMessages: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        })
+      ),
+    })
+  ),
+});
+
+export type AnomalyDetectionJobsHealthRuleParams = TypeOf<
+  typeof anomalyDetectionJobsHealthRuleParams
+>;
+
+export type TestsConfig = AnomalyDetectionJobsHealthRuleParams['testsConfig'];
+export type JobSelection = AnomalyDetectionJobsHealthRuleParams['includeJobs'];

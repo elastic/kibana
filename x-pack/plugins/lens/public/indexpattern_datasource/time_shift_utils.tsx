@@ -81,12 +81,6 @@ export const timeShiftOptions = [
     }),
     value: '1y',
   },
-  {
-    label: i18n.translate('xpack.lens.indexPattern.timeShift.previous', {
-      defaultMessage: 'Previous time range',
-    }),
-    value: 'previous',
-  },
 ];
 
 export const timeShiftOptionOrder = timeShiftOptions.reduce<{ [key: string]: number }>(

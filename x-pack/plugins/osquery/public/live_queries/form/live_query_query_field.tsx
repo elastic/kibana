@@ -6,12 +6,15 @@
  */
 
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { FieldHook } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
-import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+import {
+  SavedQueriesDropdown,
+  SavedQueriesDropdownRef,
+} from '../../saved_queries/saved_queries_dropdown';
 
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
@@ -21,16 +24,18 @@ interface LiveQueryQueryFieldProps {
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
   const { value, setValue, errors } = field;
   const error = errors[0]?.message;
+  const savedQueriesDropdownRef = useRef<SavedQueriesDropdownRef>(null);
 
   const handleSavedQueryChange = useCallback(
     (savedQuery) => {
-      setValue(savedQuery.query);
+      setValue(savedQuery?.query ?? '');
     },
     [setValue]
   );
 
   const handleEditorChange = useCallback(
     (newValue) => {
+      savedQueriesDropdownRef.current?.clearSelection();
       setValue(newValue);
     },
     [setValue]
@@ -39,7 +44,11 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
   return (
     <EuiFormRow isInvalid={typeof error === 'string'} error={error} fullWidth>
       <>
-        <SavedQueriesDropdown disabled={disabled} onChange={handleSavedQueryChange} />
+        <SavedQueriesDropdown
+          ref={savedQueriesDropdownRef}
+          disabled={disabled}
+          onChange={handleSavedQueryChange}
+        />
         <EuiSpacer />
         <EuiFormRow fullWidth labelAppend={<OsquerySchemaLink />}>
           <OsqueryEditor defaultValue={value} disabled={disabled} onChange={handleEditorChange} />

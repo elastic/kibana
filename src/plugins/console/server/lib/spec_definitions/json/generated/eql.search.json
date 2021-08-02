@@ -1,0 +1,17 @@
+{
+  "eql.search": {
+    "url_params": {
+      "wait_for_completion_timeout": "",
+      "keep_on_completion": "__flag__",
+      "keep_alive": ""
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_eql/search"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/eql-search-api.html"
+  }
+}

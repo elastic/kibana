@@ -23,7 +23,10 @@ import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
+import {
+  DEFAULT_INDEX_PATTERN,
+  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
+} from '../../../../../common/constants';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
@@ -49,6 +52,7 @@ import { AlertData, EcsHit } from '../../../../common/components/exceptions/type
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -84,6 +88,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [ecsRowData]
   );
 
+  // TODO: Steph/ueba remove when past experimental
+  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
   const ruleIndices = useMemo((): string[] => {
     if (
@@ -93,9 +99,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ) {
       return ecsRowData.signal.rule.index;
     } else {
-      return DEFAULT_INDEX_PATTERN;
+      return uebaEnabled
+        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
+        : DEFAULT_INDEX_PATTERN;
     }
-  }, [ecsRowData]);
+  }, [ecsRowData.signal?.rule, uebaEnabled]);
 
   const { addWarning } = useAppToasts();
 
