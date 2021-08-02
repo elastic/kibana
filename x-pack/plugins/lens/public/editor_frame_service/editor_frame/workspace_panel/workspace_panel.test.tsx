@@ -28,7 +28,7 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { esFilters, IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
@@ -443,7 +443,7 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
-    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
     const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
     await act(async () => {

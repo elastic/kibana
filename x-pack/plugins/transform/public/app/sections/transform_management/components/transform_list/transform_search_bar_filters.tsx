@@ -9,7 +9,12 @@ import React from 'react';
 import { EuiBadge, SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TermClause, FieldClause, Value } from './common';
-import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
+import {
+  TRANSFORM_FUNCTION,
+  TRANSFORM_MODE,
+  TRANSFORM_STATE,
+} from '../../../../../../common/constants';
+import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TransformListRow } from '../../../../common';
 import { getTaskStateBadge } from './use_columns';
 
@@ -93,7 +98,20 @@ export const filterTransforms = (
         // the status value is an array of string(s) e.g. ['failed', 'stopped']
         ts = transforms.filter((transform) => (c.value as Value[]).includes(transform.stats.state));
       } else {
-        ts = transforms.filter((transform) => transform.mode === c.value);
+        ts = transforms.filter((transform) => {
+          if (c.field === 'mode') {
+            return transform.mode === c.value;
+          }
+          if (c.field === 'type') {
+            if (c.value === TRANSFORM_FUNCTION.PIVOT) {
+              return isPivotTransform(transform.config);
+            }
+            if (c.value === TRANSFORM_FUNCTION.LATEST) {
+              return isLatestTransform(transform.config);
+            }
+          }
+          return false;
+        });
       }
     }
 

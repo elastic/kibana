@@ -20,18 +20,18 @@ esFilters: {
     FILTERS: typeof import("@kbn/es-query").FILTERS;
     FilterStateStore: typeof FilterStateStore;
     buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("@kbn/es-query").Filter;
-    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: any[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
+    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: string[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
     buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
-    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: any, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
+    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: string | number | boolean, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
     buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;
     buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter;
-    isPhraseFilter: (filter: any) => filter is import("@kbn/es-query").PhraseFilter;
-    isExistsFilter: (filter: any) => filter is import("@kbn/es-query").ExistsFilter;
-    isPhrasesFilter: (filter: any) => filter is import("@kbn/es-query").PhrasesFilter;
-    isRangeFilter: (filter: any) => filter is import("@kbn/es-query").RangeFilter;
-    isMatchAllFilter: (filter: any) => filter is import("@kbn/es-query").MatchAllFilter;
-    isMissingFilter: (filter: any) => filter is import("@kbn/es-query").MissingFilter;
-    isQueryStringFilter: (filter: any) => filter is import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;
+    isPhraseFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").PhraseFilter;
+    isExistsFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").ExistsFilter;
+    isPhrasesFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").PhrasesFilter;
+    isRangeFilter: (filter?: import("@kbn/es-query").ExistsFilter | import("@kbn/es-query").GeoPolygonFilter | import("@kbn/es-query").PhrasesFilter | import("@kbn/es-query").PhraseFilter | import("@kbn/es-query").MatchAllFilter | import("@kbn/es-query").MissingFilter | import("@kbn/es-query").RangeFilter | import("@kbn/es-query").GeoBoundingBoxFilter | undefined) => filter is import("@kbn/es-query").RangeFilter;
+    isMatchAllFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").MatchAllFilter;
+    isMissingFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").MissingFilter;
+    isQueryStringFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;
     isFilterPinned: (filter: import("@kbn/es-query").Filter) => boolean | undefined;
     toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
         meta: {
@@ -46,7 +46,9 @@ esFilters: {
             params?: any;
             value?: string | undefined;
         };
-        $state?: import("@kbn/es-query").FilterState | undefined;
+        $state?: {
+            store: FilterStateStore;
+        } | undefined;
         query?: any;
     };
     disableFilter: (filter: import("@kbn/es-query").Filter) => import("@kbn/es-query").Filter;
