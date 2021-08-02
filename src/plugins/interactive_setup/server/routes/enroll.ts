@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from './';
 
 /**
  * Defines routes to deal with Elasticsearch `enroll_kibana` APIs.
@@ -16,7 +16,7 @@ import type { RouteDefinitionParams } from '../';
 export function defineEnrollRoutes({ router }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/interactive_setup/enrollment/enroll',
+      path: '/internal/interactive_setup/enroll',
       validate: {
         body: schema.object({ token: schema.string() }),
       },

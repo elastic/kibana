@@ -10,7 +10,7 @@ import type { IBasePath, IRouter, Logger } from 'src/core/server';
 
 import type { ElasticsearchConnectionStatus } from '../../common';
 import type { ConfigType } from '../config';
-import { defineEnrollmentRoutes } from './enrollment';
+import { defineEnrollRoutes } from './enroll';
 import { defineViewRoutes } from './views';
 
 /**
@@ -25,6 +25,6 @@ export interface RouteDefinitionParams {
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
-  defineEnrollmentRoutes(params);
+  defineEnrollRoutes(params);
   defineViewRoutes(params);
 }

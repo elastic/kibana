@@ -46,12 +46,10 @@ export class UserSetupPlugin implements PrebootPlugin {
     // We shouldn't activate interactive setup mode if we detect that user has already configured
     // Elasticsearch connection manually: either if Kibana system user credentials are specified or
     // user specified non-default host for the Elasticsearch.
-    // User can also set `interactiveSetup.forceSetup` config to `true` to force interactive setup mode.
     const shouldActiveSetupMode =
-      this.#getConfig().forceSetup ||
-      (!core.elasticsearch.config.credentialsSpecified &&
-        core.elasticsearch.config.hosts.length === 1 &&
-        core.elasticsearch.config.hosts[0] === 'http://localhost:9200');
+      !core.elasticsearch.config.credentialsSpecified &&
+      core.elasticsearch.config.hosts.length === 1 &&
+      core.elasticsearch.config.hosts[0] === 'http://localhost:9200';
     if (!shouldActiveSetupMode) {
       this.#logger.debug(
         'Interactive setup mode will not be activated since Elasticsearch connection is already configured.'
