@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getDurationFormatter } from '../../../../common/utils/formatters';
+import { asTransactionRate } from '../../../../common/utils/formatters';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useComparison } from '../../../hooks/use_comparison';
@@ -15,12 +15,8 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 import { useTheme } from '../../../hooks/use_theme';
-import {
-  getMaxY,
-  getResponseTimeTickFormatter,
-} from '../../shared/charts/transaction_charts/helper';
 
-export function BackendLatencyChart({ height }: { height: number }) {
+export function BackendThroughputChart({ height }: { height: number }) {
   const { backendName } = useApmBackendContext();
 
   const theme = useTheme();
@@ -40,7 +36,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/charts/latency',
+        endpoint: 'GET /api/apm/backends/{backendName}/charts/throughput',
         params: {
           path: {
             backendName,
@@ -65,9 +61,9 @@ export function BackendLatencyChart({ height }: { height: number }) {
       specs.push({
         data: data.currentTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis1,
-        title: i18n.translate('xpack.apm.backendLatencyChart.chartTitle', {
-          defaultMessage: 'Latency',
+        color: theme.eui.euiColorVis0,
+        title: i18n.translate('xpack.apm.backendThroughputChart.chartTitle', {
+          defaultMessage: 'Throughput',
         }),
       });
     }
@@ -78,26 +74,23 @@ export function BackendLatencyChart({ height }: { height: number }) {
         type: 'area',
         color: theme.eui.euiColorMediumShade,
         title: i18n.translate(
-          'xpack.apm.backendLatencyChart.previousPeriodLabel',
+          'xpack.apm.backendThroughputChart.previousPeriodLabel',
           { defaultMessage: 'Previous period' }
         ),
       });
     }
 
     return specs;
-  }, [data, theme.eui.euiColorVis1, theme.eui.euiColorMediumShade]);
-
-  const maxY = getMaxY(timeseries);
-  const latencyFormatter = getDurationFormatter(maxY);
+  }, [data, theme.eui.euiColorVis0, theme.eui.euiColorMediumShade]);
 
   return (
     <TimeseriesChart
       height={height}
       fetchStatus={status}
-      id="latencyChart"
+      id="throughputChart"
       customTheme={comparisonChartTheme}
       timeseries={timeseries}
-      yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+      yLabelFormat={asTransactionRate}
     />
   );
 }
