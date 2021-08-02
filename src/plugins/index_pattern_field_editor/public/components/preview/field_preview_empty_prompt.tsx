@@ -30,7 +30,7 @@ export const FieldPreviewEmptyPrompt = () => {
                 <p>
                   {i18n.translate('indexPatternFieldEditor.fieldPreview.emptyPromptDescription', {
                     defaultMessage:
-                      'Configure field name and value or format to see a preview of how new fields will appear.',
+                      'Enter the name of an existing field or define a script to view a preview of the calculated output.',
                   })}
                 </p>
               </EuiTextColor>

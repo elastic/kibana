@@ -563,7 +563,7 @@ describe('Field editor Preview panel', () => {
       await waitForUpdates();
 
       expect(exists('previewError')).toBe(true);
-      expect(find('previewError').text()).toContain('the document provided was not found');
+      expect(find('previewError').text()).toContain('Document ID not found');
       expect(exists('isUpdatingIndicator')).toBe(false);
     });
   });
