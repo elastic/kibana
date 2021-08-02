@@ -13,7 +13,10 @@
         "signature": [
           "(props: Props) => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 74
+        },
         "deprecated": false,
         "children": [
           {
@@ -26,7 +29,10 @@
             "signature": [
               "Props"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 74
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -44,7 +50,10 @@
         "signature": [
           "() => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 70
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -62,7 +71,10 @@
           "AllSeries",
           "; }, baseHref: string) => string"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+          "lineNumber": 45
+        },
         "deprecated": false,
         "children": [
           {
@@ -72,7 +84,10 @@
             "tags": [],
             "label": "{ reportType, allSeries }",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 46
+            },
             "deprecated": false,
             "children": [
               {
@@ -85,7 +100,10 @@
                 "signature": [
                   "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\""
                 ],
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+                  "lineNumber": 46
+                },
                 "deprecated": false
               },
               {
@@ -105,7 +123,10 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+                  "lineNumber": 46
+                },
                 "deprecated": false
               }
             ]
@@ -120,7 +141,10 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 47
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -154,7 +178,10 @@
           },
           " | undefined; } & { getFormatter: () => () => string; registerFormatter: () => void; }"
         ],
-        "path": "x-pack/plugins/observability/public/rules/observability_rule_type_registry_mock.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/rules/observability_rule_type_registry_mock.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -172,7 +199,10 @@
           "FieldValueSuggestionsProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+          "lineNumber": 38
+        },
         "deprecated": false,
         "children": [
           {
@@ -185,7 +215,10 @@
             "signature": [
               "FieldValueSuggestionsProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+              "lineNumber": 38
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -203,7 +236,10 @@
         "signature": [
           "({\n  label,\n  field,\n  value,\n  negate,\n  indexPattern,\n  invertFilter,\n  removeFilter,\n  allowExclusion = true,\n}: Props) => JSX.Element | null"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx",
+          "lineNumber": 54
+        },
         "deprecated": false,
         "children": [
           {
@@ -216,7 +252,10 @@
             "signature": [
               "Props"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/filter_value_label/filter_value_label.tsx",
+              "lineNumber": 54
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -234,7 +273,10 @@
         "signature": [
           "({\n  traceId,\n  rangeFrom,\n  rangeTo,\n}: { traceId: string; rangeFrom: string; rangeTo: string; }) => string"
         ],
-        "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "children": [
           {
@@ -244,7 +286,10 @@
             "tags": [],
             "label": "{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
             "description": [],
-            "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+              "lineNumber": 12
+            },
             "deprecated": false,
             "children": [
               {
@@ -254,7 +299,10 @@
                 "tags": [],
                 "label": "traceId",
                 "description": [],
-                "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                  "lineNumber": 13
+                },
                 "deprecated": false
               },
               {
@@ -264,7 +312,10 @@
                 "tags": [],
                 "label": "rangeFrom",
                 "description": [],
-                "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                  "lineNumber": 14
+                },
                 "deprecated": false
               },
               {
@@ -274,7 +325,10 @@
                 "tags": [],
                 "label": "rangeTo",
                 "description": [],
-                "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                  "lineNumber": 15
+                },
                 "deprecated": false
               }
             ]
@@ -295,7 +349,10 @@
           "CoreVitalProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "children": [
           {
@@ -308,7 +365,10 @@
             "signature": [
               "CoreVitalProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+              "lineNumber": 18
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -328,7 +388,10 @@
           "HeaderMenuPortalProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+          "lineNumber": 28
+        },
         "deprecated": false,
         "children": [
           {
@@ -341,7 +404,10 @@
             "signature": [
               "HeaderMenuPortalProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+              "lineNumber": 28
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -359,7 +425,10 @@
         "signature": [
           "React.ExoticComponent<Pick<AlertsFlyoutProps, \"children\" | \"type\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"key\" | \"title\" | \"id\" | \"size\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"onClose\" | \"data-test-subj\" | \"alert\" | \"paddingSize\" | \"as\" | \"css\" | \"ownFocus\" | \"alerts\" | \"maxWidth\" | \"hideCloseButton\" | \"closeButtonAriaLabel\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\" | \"isInApp\" | \"observabilityRuleTypeRegistry\" | \"selectedAlertId\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: ({ alert, alerts, isInApp, observabilityRuleTypeRegistry, onClose, selectedAlertId, }: AlertsFlyoutProps) => JSX.Element | null; }"
         ],
-        "path": "x-pack/plugins/observability/public/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/index.ts",
+          "lineNumber": 58
+        },
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -373,7 +442,10 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
             "deprecated": false
           }
         ],
@@ -393,7 +465,10 @@
           "NonReactStatics",
           "<never, {}>"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 58
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -409,7 +484,10 @@
           "EuiListGroupItemProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 66
+        },
         "deprecated": false,
         "children": [
           {
@@ -422,7 +500,10 @@
             "signature": [
               "EuiListGroupItemProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 66
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -444,7 +525,10 @@
           "EuiListGroupItemProps",
           "[] | undefined; color?: \"text\" | \"primary\" | \"inherit\" | \"ghost\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 46
+        },
         "deprecated": false,
         "children": [
           {
@@ -461,7 +545,10 @@
               "EuiListGroupItemProps",
               "[] | undefined; color?: \"text\" | \"primary\" | \"inherit\" | \"ghost\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 46
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -479,7 +566,10 @@
         "signature": [
           "() => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 54
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -495,7 +585,10 @@
         "signature": [
           "({ children }: { children?: React.ReactNode; }) => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 35
+        },
         "deprecated": false,
         "children": [
           {
@@ -505,7 +598,10 @@
             "tags": [],
             "label": "{ children }",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 35
+            },
             "deprecated": false,
             "children": [
               {
@@ -518,7 +614,10 @@
                 "signature": [
                   "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
                 ],
-                "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+                  "lineNumber": 35
+                },
                 "deprecated": false
               }
             ]
@@ -537,7 +636,10 @@
         "signature": [
           "({ children }: { children?: React.ReactNode; }) => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "children": [
           {
@@ -547,7 +649,10 @@
             "tags": [],
             "label": "{ children }",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "children": [
               {
@@ -560,7 +665,10 @@
                 "signature": [
                   "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
                 ],
-                "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+                  "lineNumber": 24
+                },
                 "deprecated": false
               }
             ]
@@ -581,7 +689,10 @@
           "EuiBreadcrumb",
           "[]) => void"
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
+          "lineNumber": 37
+        },
         "deprecated": false,
         "children": [
           {
@@ -595,7 +706,10 @@
               "EuiBreadcrumb",
               "[]"
             ],
-            "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
+              "lineNumber": 37
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -665,7 +779,10 @@
           "CrosshairStyle",
           "> | undefined; markSizeRatio?: number | undefined; }"
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_chart_theme.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_chart_theme.tsx",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -683,7 +800,10 @@
           "FetcherResult",
           "<InferResponseType<TReturn>> & { refetch: () => void; }"
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+          "lineNumber": 30
+        },
         "deprecated": false,
         "children": [
           {
@@ -696,7 +816,10 @@
             "signature": [
               "({}: { signal: AbortSignal; }) => TReturn"
             ],
-            "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+              "lineNumber": 31
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -710,7 +833,10 @@
             "signature": [
               "any[]"
             ],
-            "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+              "lineNumber": 32
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -721,7 +847,10 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+              "lineNumber": 33
+            },
             "deprecated": false,
             "children": [
               {
@@ -734,7 +863,10 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+                  "lineNumber": 34
+                },
                 "deprecated": false
               }
             ]
@@ -760,7 +892,10 @@
             "text": "EuiTheme"
           }
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_theme.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_theme.tsx",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -784,7 +919,10 @@
           },
           ", effectDependencies: EffectDeps) => void"
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 52
+        },
         "deprecated": false,
         "children": [
           {
@@ -803,7 +941,10 @@
                 "text": "TrackMetricOptions"
               }
             ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 53
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -817,7 +958,10 @@
             "signature": [
               "EffectDeps"
             ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 54
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -835,7 +979,10 @@
         "signature": [
           "({ path, ...rest }: TrackPageviewProps, effectDependencies: EffectDeps) => void"
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 87
+        },
         "deprecated": false,
         "children": [
           {
@@ -848,7 +995,10 @@
             "signature": [
               "TrackPageviewProps"
             ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 88
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -862,7 +1012,10 @@
             "signature": [
               "EffectDeps"
             ],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 89
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -888,7 +1041,10 @@
           },
           ") => void"
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 38
+        },
         "deprecated": false,
         "children": [
           {
@@ -898,7 +1054,10 @@
             "tags": [],
             "label": "{\n  app: defaultApp,\n}",
             "description": [],
-            "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 40
+            },
             "deprecated": false,
             "children": [
               {
@@ -911,7 +1070,10 @@
                 "signature": [
                   "\"fleet\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ],
-                "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+                  "lineNumber": 40
+                },
                 "deprecated": false
               }
             ]
@@ -946,7 +1108,10 @@
             "text": "FetchDataResponse"
           }
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 125
+        },
         "deprecated": false,
         "children": [
           {
@@ -975,7 +1140,10 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 126
+            },
             "deprecated": false
           },
           {
@@ -996,7 +1164,10 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 130
+            },
             "deprecated": false
           }
         ],
@@ -1009,7 +1180,10 @@
         "tags": [],
         "label": "APMHasDataResponse",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 50
+        },
         "deprecated": false,
         "children": [
           {
@@ -1019,7 +1193,10 @@
             "tags": [],
             "label": "hasData",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 51
+            },
             "deprecated": false
           },
           {
@@ -1032,7 +1209,10 @@
             "signature": [
               "ApmIndicesConfig"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 52
+            },
             "deprecated": false
           }
         ],
@@ -1045,7 +1225,10 @@
         "tags": [],
         "label": "ConfigSchema",
         "description": [],
-        "path": "x-pack/plugins/observability/public/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/index.ts",
+          "lineNumber": 25
+        },
         "deprecated": false,
         "children": [
           {
@@ -1058,7 +1241,10 @@
             "signature": [
               "{ alertingExperience: { enabled: boolean; }; cases: { enabled: boolean; }; }"
             ],
-            "path": "x-pack/plugins/observability/public/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/index.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           }
         ],
@@ -1071,7 +1257,10 @@
         "tags": [],
         "label": "Coordinates",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -1081,7 +1270,10 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -1094,7 +1286,10 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           }
         ],
@@ -1117,7 +1312,10 @@
           },
           "<T>"
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 68
+        },
         "deprecated": false,
         "children": [
           {
@@ -1146,7 +1344,10 @@
               },
               "[T]>"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 71
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1166,7 +1367,10 @@
                     "text": "FetchDataParams"
                   }
                 ],
-                "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+                  "lineNumber": 56
+                },
                 "deprecated": false
               }
             ]
@@ -1197,7 +1401,10 @@
               },
               "[T]>"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 72
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1218,7 +1425,10 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+                  "lineNumber": 60
+                },
                 "deprecated": false
               }
             ]
@@ -1233,7 +1443,10 @@
         "tags": [],
         "label": "FetchDataParams",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "children": [
           {
@@ -1246,7 +1459,10 @@
             "signature": [
               "{ start: number; end: number; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -1259,7 +1475,10 @@
             "signature": [
               "{ start: string; end: string; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -1269,7 +1488,10 @@
             "tags": [],
             "label": "bucketSize",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -1282,7 +1504,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           }
         ],
@@ -1295,7 +1520,10 @@
         "tags": [],
         "label": "FetchDataResponse",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 75
+        },
         "deprecated": false,
         "children": [
           {
@@ -1305,7 +1533,10 @@
             "tags": [],
             "label": "appLink",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 76
+            },
             "deprecated": false
           }
         ],
@@ -1318,7 +1549,10 @@
         "tags": [],
         "label": "HasDataParams",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [
           {
@@ -1331,7 +1565,10 @@
             "signature": [
               "{ start: number; end: number; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           }
         ],
@@ -1344,7 +1581,10 @@
         "tags": [],
         "label": "HasDataResponse",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 37
+        },
         "deprecated": false,
         "children": [
           {
@@ -1354,7 +1594,10 @@
             "tags": [],
             "label": "hasData",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 38
+            },
             "deprecated": false
           }
         ],
@@ -1384,7 +1627,10 @@
             "text": "FetchDataResponse"
           }
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 79
+        },
         "deprecated": false,
         "children": [
           {
@@ -1405,7 +1651,10 @@
               },
               " & { label: string; }; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 80
+            },
             "deprecated": false
           },
           {
@@ -1426,7 +1675,10 @@
               },
               " & { label: string; }; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 81
+            },
             "deprecated": false
           }
         ],
@@ -1456,7 +1708,10 @@
             "text": "FetchDataResponse"
           }
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 108
+        },
         "deprecated": false,
         "children": [
           {
@@ -1477,31 +1732,48 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 109
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "observability",
-                "id": "def-public.by",
+                "id": "def-public.MetricsFetchDataResponse.sort.$1",
                 "type": "string",
                 "tags": [],
                 "label": "by",
                 "description": [],
-                "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+                  "lineNumber": 109
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-public.direction",
+                "id": "def-public.MetricsFetchDataResponse.sort.$2",
                 "type": "string",
                 "tags": [],
                 "label": "direction",
                 "description": [],
-                "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+                  "lineNumber": 109
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "observability",
@@ -1520,7 +1792,10 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 110
+            },
             "deprecated": false
           }
         ],
@@ -1533,7 +1808,10 @@
         "tags": [],
         "label": "MetricsFetchDataSeries",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 87
+        },
         "deprecated": false,
         "children": [
           {
@@ -1543,7 +1821,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 88
+            },
             "deprecated": false
           },
           {
@@ -1556,7 +1837,10 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 89
+            },
             "deprecated": false
           },
           {
@@ -1569,7 +1853,10 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 90
+            },
             "deprecated": false
           },
           {
@@ -1582,7 +1869,10 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 91
+            },
             "deprecated": false
           },
           {
@@ -1595,7 +1885,10 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 92
+            },
             "deprecated": false
           },
           {
@@ -1608,7 +1901,10 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 93
+            },
             "deprecated": false
           },
           {
@@ -1621,7 +1917,10 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 94
+            },
             "deprecated": false
           },
           {
@@ -1634,7 +1933,10 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 95
+            },
             "deprecated": false
           },
           {
@@ -1647,7 +1949,10 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 96
+            },
             "deprecated": false
           },
           {
@@ -1660,7 +1965,10 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 97
+            },
             "deprecated": false
           },
           {
@@ -1673,7 +1981,10 @@
             "signature": [
               "{ timestamp: number; cpu: number | null; iowait: number | null; load: number | null; rx: number | null; tx: number | null; }[]"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 98
+            },
             "deprecated": false
           }
         ],
@@ -1686,7 +1997,10 @@
         "tags": [],
         "label": "ObservabilityFetchDataResponse",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 139
+        },
         "deprecated": false,
         "children": [
           {
@@ -1705,7 +2019,10 @@
                 "text": "ApmFetchDataResponse"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 140
+            },
             "deprecated": false
           },
           {
@@ -1724,7 +2041,10 @@
                 "text": "MetricsFetchDataResponse"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 141
+            },
             "deprecated": false
           },
           {
@@ -1743,7 +2063,10 @@
                 "text": "LogsFetchDataResponse"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 142
+            },
             "deprecated": false
           },
           {
@@ -1762,7 +2085,10 @@
                 "text": "UptimeFetchDataResponse"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 143
+            },
             "deprecated": false
           },
           {
@@ -1781,7 +2107,10 @@
                 "text": "UxFetchDataResponse"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 144
+            },
             "deprecated": false
           }
         ],
@@ -1794,7 +2123,10 @@
         "tags": [],
         "label": "ObservabilityHasDataResponse",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 147
+        },
         "deprecated": false,
         "children": [
           {
@@ -1813,7 +2145,10 @@
                 "text": "APMHasDataResponse"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 148
+            },
             "deprecated": false
           },
           {
@@ -1823,7 +2158,10 @@
             "tags": [],
             "label": "infra_metrics",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 149
+            },
             "deprecated": false
           },
           {
@@ -1833,7 +2171,10 @@
             "tags": [],
             "label": "infra_logs",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 150
+            },
             "deprecated": false
           },
           {
@@ -1852,7 +2193,10 @@
                 "text": "SyntheticsHasDataResponse"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 151
+            },
             "deprecated": false
           },
           {
@@ -1871,7 +2215,10 @@
                 "text": "UXHasDataResponse"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 152
+            },
             "deprecated": false
           }
         ],
@@ -1884,7 +2231,10 @@
         "tags": [],
         "label": "ObservabilityPublicPluginsSetup",
         "description": [],
-        "path": "x-pack/plugins/observability/public/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/plugin.ts",
+          "lineNumber": 48
+        },
         "deprecated": false,
         "children": [
           {
@@ -1903,7 +2253,10 @@
                 "text": "DataPublicPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 49
+            },
             "deprecated": false
           },
           {
@@ -1922,7 +2275,10 @@
                 "text": "TriggersAndActionsUIPublicPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           },
           {
@@ -1942,7 +2298,10 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 51
+            },
             "deprecated": false
           }
         ],
@@ -1955,7 +2314,10 @@
         "tags": [],
         "label": "ObservabilityPublicPluginsStart",
         "description": [],
-        "path": "x-pack/plugins/observability/public/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/plugin.ts",
+          "lineNumber": 54
+        },
         "deprecated": false,
         "children": [
           {
@@ -1974,7 +2336,10 @@
                 "text": "CasesUiStart"
               }
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 55
+            },
             "deprecated": false
           },
           {
@@ -1994,7 +2359,10 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 56
+            },
             "deprecated": false
           },
           {
@@ -2013,7 +2381,10 @@
                 "text": "TriggersAndActionsUIPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 57
+            },
             "deprecated": false
           },
           {
@@ -2032,7 +2403,10 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 58
+            },
             "deprecated": false
           },
           {
@@ -2051,7 +2425,10 @@
                 "text": "LensPublicStart"
               }
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 59
+            },
             "deprecated": false
           },
           {
@@ -2070,7 +2447,10 @@
                 "text": "DiscoverStart"
               }
             ],
-            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 60
+            },
             "deprecated": false
           }
         ],
@@ -2101,7 +2481,10 @@
           },
           "<Params>"
         ],
-        "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -2116,7 +2499,10 @@
               "Optional",
               "<{ readonly \"kibana.rac.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.owner\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.uuid\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\" | \"kibana.rac.alert.reason\" | \"kibana.space_ids\">> & Record<string, any>; formatters: { asDuration: (value: number | null | undefined, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: number | null | undefined, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link: string; }"
             ],
-            "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+              "lineNumber": 23
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2132,7 +2518,10 @@
                   "Optional",
                   "<{ readonly \"kibana.rac.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.owner\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.uuid\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\" | \"kibana.rac.alert.reason\" | \"kibana.space_ids\">> & Record<string, any>; formatters: { asDuration: (value: number | null | undefined, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: number | null | undefined, denominator: number | undefined, fallbackResult?: string) => string; }; }"
                 ],
-                "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+                  "lineNumber": 16
+                },
                 "deprecated": false
               }
             ]
@@ -2147,7 +2536,10 @@
         "tags": [],
         "label": "Series",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 22
+        },
         "deprecated": false,
         "children": [
           {
@@ -2167,7 +2559,10 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           }
         ],
@@ -2180,7 +2575,10 @@
         "tags": [],
         "label": "SeriesUrl",
         "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+          "lineNumber": 71
+        },
         "deprecated": false,
         "children": [
           {
@@ -2190,7 +2588,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 72
+            },
             "deprecated": false
           },
           {
@@ -2203,7 +2604,10 @@
             "signature": [
               "{ to: string; from: string; }"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 73
+            },
             "deprecated": false
           },
           {
@@ -2216,7 +2620,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 77
+            },
             "deprecated": false
           },
           {
@@ -2230,7 +2637,10 @@
               "UrlFilter",
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 78
+            },
             "deprecated": false
           },
           {
@@ -2243,7 +2653,10 @@
             "signature": [
               "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\" | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 79
+            },
             "deprecated": false
           },
           {
@@ -2256,7 +2669,10 @@
             "signature": [
               "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 80
+            },
             "deprecated": false
           },
           {
@@ -2269,7 +2685,10 @@
             "signature": [
               "\"mobile\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"ux\""
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 81
+            },
             "deprecated": false
           },
           {
@@ -2282,7 +2701,10 @@
             "signature": [
               "Record<string, string[]> | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 82
+            },
             "deprecated": false
           },
           {
@@ -2295,7 +2717,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 83
+            },
             "deprecated": false
           },
           {
@@ -2308,7 +2733,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 84
+            },
             "deprecated": false
           },
           {
@@ -2321,7 +2749,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 85
+            },
             "deprecated": false
           }
         ],
@@ -2334,7 +2765,10 @@
         "tags": [],
         "label": "Stat",
         "description": [],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -2347,7 +2781,10 @@
             "signature": [
               "\"number\" | \"percent\" | \"bytesPerSecond\""
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -2357,7 +2794,10 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           }
         ],
@@ -2387,7 +2827,10 @@
             "text": "HasDataResponse"
           }
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 46
+        },
         "deprecated": false,
         "children": [
           {
@@ -2397,7 +2840,10 @@
             "tags": [],
             "label": "indices",
             "description": [],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 47
+            },
             "deprecated": false
           }
         ],
@@ -2427,7 +2873,10 @@
             "text": "FetchDataResponse"
           }
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 113
+        },
         "deprecated": false,
         "children": [
           {
@@ -2464,7 +2913,10 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 114
+            },
             "deprecated": false
           },
           {
@@ -2493,7 +2945,10 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 119
+            },
             "deprecated": false
           }
         ],
@@ -2523,7 +2978,10 @@
             "text": "FetchDataResponse"
           }
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 135
+        },
         "deprecated": false,
         "children": [
           {
@@ -2542,7 +3000,10 @@
                 "text": "UXMetrics"
               }
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 136
+            },
             "deprecated": false
           }
         ],
@@ -2572,7 +3033,10 @@
             "text": "HasDataResponse"
           }
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 41
+        },
         "deprecated": false,
         "children": [
           {
@@ -2585,7 +3049,10 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 42
+            },
             "deprecated": false
           },
           {
@@ -2598,7 +3065,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 43
+            },
             "deprecated": false
           }
         ],
@@ -2611,7 +3081,10 @@
         "tags": [],
         "label": "UXMetrics",
         "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+          "lineNumber": 23
+        },
         "deprecated": false,
         "children": [
           {
@@ -2624,7 +3097,10 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -2637,7 +3113,10 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -2650,7 +3129,10 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -2660,7 +3142,10 @@
             "tags": [],
             "label": "tbt",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -2673,7 +3158,10 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -2683,7 +3171,10 @@
             "tags": [],
             "label": "coreVitalPages",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -2696,7 +3187,10 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -2709,7 +3203,10 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 31
+            },
             "deprecated": false
           },
           {
@@ -2722,7 +3219,10 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 32
+            },
             "deprecated": false
           }
         ],
@@ -2737,7 +3237,10 @@
         "tags": [],
         "label": "FETCH_STATUS",
         "description": [],
-        "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2751,7 +3254,10 @@
         "signature": [
           "METRIC_TYPE"
         ],
-        "path": "node_modules/@kbn/analytics/target_types/metrics/index.d.ts",
+        "source": {
+          "path": "node_modules/@kbn/analytics/target_types/metrics/index.d.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2767,7 +3273,10 @@
         "signature": [
           "\"ALL_VALUES\""
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/field_value_suggestions/field_value_combobox.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/field_value_suggestions/field_value_combobox.tsx",
+          "lineNumber": 19
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2782,7 +3291,10 @@
           "DraggableProvidedDragHandleProps",
           " | undefined"
         ],
-        "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2796,7 +3308,10 @@
         "signature": [
           "DropResult"
         ],
-        "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2810,7 +3325,10 @@
         "signature": [
           "\"observability:enableInspectEsQueries\""
         ],
-        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2832,8 +3350,36 @@
           },
           ") => Promise<T>"
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 55
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.fetchDataParams",
+            "type": "Object",
+            "tags": [],
+            "label": "fetchDataParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.FetchDataParams",
+                "text": "FetchDataParams"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 56
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2862,8 +3408,37 @@
           },
           "[T]>"
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 59
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.HasDataParams",
+                "text": "HasDataParams"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 60
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2884,7 +3459,10 @@
           "EuiPageContentBodyProps",
           " | undefined; }"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/page_template/lazy_page_template.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/page_template/lazy_page_template.tsx",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2898,7 +3476,10 @@
         "signature": [
           "number | null"
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 85
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2912,7 +3493,10 @@
         "signature": [
           "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"ux\""
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 63
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2928,8 +3512,32 @@
           "Optional",
           "<{ readonly \"kibana.rac.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.owner\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.uuid\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\" | \"kibana.rac.alert.reason\" | \"kibana.space_ids\">> & Record<string, any>; formatters: { asDuration: (value: number | null | undefined, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: number | null | undefined, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link: string; }"
         ],
-        "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ fields: OutputOf<",
+              "Optional",
+              "<{ readonly \"kibana.rac.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.owner\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.uuid\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\" | \"kibana.rac.alert.reason\" | \"kibana.space_ids\">> & Record<string, any>; formatters: { asDuration: (value: number | null | undefined, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: number | null | undefined, denominator: number | undefined, fallbackResult?: string) => string; }; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2958,7 +3566,10 @@
           },
           " | undefined; }"
         ],
-        "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+          "lineNumber": 41
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2999,7 +3610,10 @@
           "EuiButtonIconProps",
           " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: ((instance: HTMLButtonElement | null) => void) | React.RefObject<HTMLButtonElement> | null | undefined; } & { alwaysShow?: boolean | undefined; }) | undefined; onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; wrapText?: boolean | undefined; buttonRef?: ((instance: HTMLButtonElement | null) => void) | React.RefObject<HTMLButtonElement> | null | undefined; }"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 65
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3013,7 +3627,10 @@
         "signature": [
           "string | null"
         ],
-        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 84
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3027,7 +3644,10 @@
         "signature": [
           "TrackOptions & { metric: string; }"
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3049,8 +3669,30 @@
           },
           ") => void"
         ],
-        "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 34
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.__0",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "TrackOptions & { metric: string; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 43
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -3093,7 +3735,10 @@
         "NavigationSection",
         "[]>) => void; }; }"
       ],
-      "path": "x-pack/plugins/observability/public/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/observability/public/plugin.ts",
+        "lineNumber": 46
+      },
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -3116,7 +3761,10 @@
         },
         ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"restrictWidth\" | \"template\" | \"pageHeader\" | \"isEmptyState\" | \"pageBodyProps\" | \"pageContentProps\" | \"pageContentBodyProps\">) => JSX.Element; }; }"
       ],
-      "path": "x-pack/plugins/observability/public/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/observability/public/plugin.ts",
+        "lineNumber": 63
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -3141,7 +3789,10 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -3154,7 +3805,10 @@
             "signature": [
               "ElasticsearchClientError"
             ],
-            "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           },
           {
@@ -3167,7 +3821,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+              "lineNumber": 13
+            },
             "deprecated": false,
             "children": [
               {
@@ -3180,7 +3837,10 @@
                 "signature": [
                   "ElasticsearchClientError"
                 ],
-                "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+                  "lineNumber": 13
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3220,7 +3880,10 @@
           "Logger",
           "; }) => Promise<void>"
         ],
-        "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -3230,7 +3893,10 @@
             "tags": [],
             "label": "{\n  index,\n  mappings,\n  client,\n  logger,\n}",
             "description": [],
-            "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+              "lineNumber": 19
+            },
             "deprecated": false,
             "children": [
               {
@@ -3240,7 +3906,10 @@
                 "tags": [],
                 "label": "index",
                 "description": [],
-                "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                  "lineNumber": 20
+                },
                 "deprecated": false
               },
               {
@@ -3297,7 +3966,10 @@
                   "MappingRuntimeField",
                   "> | undefined; })"
                 ],
-                "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                  "lineNumber": 21
+                },
                 "deprecated": false
               },
               {
@@ -3320,7 +3992,10 @@
                   "ApiResponse",
                   "<Record<string, any>, unknown>>; }; }"
                 ],
-                "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                  "lineNumber": 22
+                },
                 "deprecated": false
               },
               {
@@ -3333,7 +4008,10 @@
                 "signature": [
                   "Logger"
                 ],
-                "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                  "lineNumber": 23
+                },
                 "deprecated": false
               }
             ]
@@ -3354,7 +4032,10 @@
           "QueryDslQueryContainer",
           "[]"
         ],
-        "path": "x-pack/plugins/observability/server/utils/queries.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/queries.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [
           {
@@ -3367,7 +4048,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability/server/utils/queries.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/queries.ts",
+              "lineNumber": 39
+            },
             "deprecated": false,
             "isRequired": false
           }
@@ -3387,7 +4071,10 @@
           "QueryDslQueryContainer",
           "[]"
         ],
-        "path": "x-pack/plugins/observability/server/utils/queries.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/queries.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -3400,7 +4087,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/observability/server/utils/queries.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/queries.ts",
+              "lineNumber": 22
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -3414,7 +4104,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/observability/server/utils/queries.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/queries.ts",
+              "lineNumber": 23
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -3428,7 +4121,10 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability/server/utils/queries.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/queries.ts",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -3448,7 +4144,10 @@
           "PromiseType",
           "<T>[\"body\"]>"
         ],
-        "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [
           {
@@ -3461,7 +4160,10 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+              "lineNumber": 40
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -3478,7 +4180,10 @@
         "tags": [],
         "label": "ObservabilityRouteCreateOptions",
         "description": [],
-        "path": "x-pack/plugins/observability/server/routes/types.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/types.ts",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [
           {
@@ -3491,7 +4196,10 @@
             "signature": [
               "{ tags: string[]; }"
             ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           }
         ],
@@ -3504,7 +4212,10 @@
         "tags": [],
         "label": "ObservabilityRouteHandlerResources",
         "description": [],
-        "path": "x-pack/plugins/observability/server/routes/types.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/types.ts",
+          "lineNumber": 22
+        },
         "deprecated": false,
         "children": [
           {
@@ -3533,7 +4244,10 @@
               },
               "<object, unknown>; }"
             ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           },
           {
@@ -3552,7 +4266,10 @@
                 "text": "RuleDataClient"
               }
             ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -3572,7 +4289,10 @@
               },
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -3585,7 +4305,10 @@
             "signature": [
               "ObservabilityRequestHandlerContext"
             ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -3598,7 +4321,10 @@
             "signature": [
               "Logger"
             ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           }
         ],
@@ -3654,7 +4380,10 @@
           },
           ">>>"
         ],
-        "path": "x-pack/plugins/observability/server/routes/types.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/types.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3712,7 +4441,10 @@
           "MappingRuntimeField",
           "> | undefined; })"
         ],
-        "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3796,7 +4528,10 @@
           "ServerRoute",
           "<any, any, any, infer TReturnType, Record<string, any>> ? TReturnType : never : never"
         ],
-        "path": "x-pack/plugins/observability/server/routes/types.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/types.ts",
+          "lineNumber": 54
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3810,7 +4545,10 @@
         "signature": [
           "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { cases: Readonly<{} & { enabled: boolean; }>; alertingExperience: Readonly<{} & { enabled: boolean; }>; }>; }"
         ],
-        "path": "x-pack/plugins/observability/server/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/index.ts",
+          "lineNumber": 35
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3909,7 +4647,10 @@
           },
           ">; }>"
         ],
-        "path": "x-pack/plugins/observability/server/routes/get_global_observability_server_route_repository.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/get_global_observability_server_route_repository.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3929,7 +4670,10 @@
           "DeleteResponse",
           ">; }"
         ],
-        "path": "x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts",
+          "lineNumber": 29
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -3975,7 +4719,10 @@
         "DeleteResponse",
         ">; } | undefined>; }"
       ],
-      "path": "x-pack/plugins/observability/server/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/observability/server/plugin.ts",
+        "lineNumber": 28
+      },
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -3997,7 +4744,10 @@
         "signature": [
           "\"observabilityCases\""
         ],
-        "path": "x-pack/plugins/observability/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/common/index.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4011,7 +4761,10 @@
         "signature": [
           "\"observability-overview\""
         ],
-        "path": "x-pack/plugins/observability/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/common/index.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4025,7 +4778,10 @@
         "signature": [
           "\"observability\""
         ],
-        "path": "x-pack/plugins/observability/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/observability/common/index.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

@@ -15,7 +15,10 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -35,7 +38,10 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -46,7 +52,10 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "path": "src/plugins/screenshot_mode/common/constants.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/constants.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -62,7 +71,10 @@
       "signature": [
         "IScreenshotModeService"
       ],
-      "path": "src/plugins/screenshot_mode/public/types.ts",
+      "source": {
+        "path": "src/plugins/screenshot_mode/public/types.ts",
+        "lineNumber": 18
+      },
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -83,7 +95,10 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -115,7 +130,10 @@
             "text": "RequestHandlerContext"
           }
         ],
-        "path": "src/plugins/screenshot_mode/server/types.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "lineNumber": 31
+        },
         "deprecated": false,
         "children": [
           {
@@ -128,7 +146,10 @@
             "signature": [
               "{ isScreenshot: boolean; }"
             ],
-            "path": "src/plugins/screenshot_mode/server/types.ts",
+            "source": {
+              "path": "src/plugins/screenshot_mode/server/types.ts",
+              "lineNumber": 32
+            },
             "deprecated": false
           }
         ],
@@ -147,7 +168,10 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -158,7 +182,10 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "path": "src/plugins/screenshot_mode/common/constants.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/constants.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -171,7 +198,10 @@
       "tags": [],
       "label": "ScreenshotModePluginSetup",
       "description": [],
-      "path": "src/plugins/screenshot_mode/server/types.ts",
+      "source": {
+        "path": "src/plugins/screenshot_mode/server/types.ts",
+        "lineNumber": 18
+      },
       "deprecated": false,
       "children": [
         {
@@ -192,7 +222,10 @@
             },
             "<unknown, unknown, unknown, any>) => boolean"
           ],
-          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "source": {
+            "path": "src/plugins/screenshot_mode/server/types.ts",
+            "lineNumber": 19
+          },
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -213,7 +246,10 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "src/plugins/screenshot_mode/server/types.ts",
+              "source": {
+                "path": "src/plugins/screenshot_mode/server/types.ts",
+                "lineNumber": 16
+              },
               "deprecated": false
             }
           ]
@@ -230,10 +266,13 @@
           "signature": [
             "() => void"
           ],
-          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "source": {
+            "path": "src/plugins/screenshot_mode/server/types.ts",
+            "lineNumber": 24
+          },
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -246,7 +285,10 @@
       "tags": [],
       "label": "ScreenshotModePluginStart",
       "description": [],
-      "path": "src/plugins/screenshot_mode/server/types.ts",
+      "source": {
+        "path": "src/plugins/screenshot_mode/server/types.ts",
+        "lineNumber": 27
+      },
       "deprecated": false,
       "children": [
         {
@@ -267,7 +309,10 @@
             },
             "<unknown, unknown, unknown, any>) => boolean"
           ],
-          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "source": {
+            "path": "src/plugins/screenshot_mode/server/types.ts",
+            "lineNumber": 28
+          },
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -288,7 +333,10 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "src/plugins/screenshot_mode/server/types.ts",
+              "source": {
+                "path": "src/plugins/screenshot_mode/server/types.ts",
+                "lineNumber": 16
+              },
               "deprecated": false
             }
           ]
@@ -313,7 +361,10 @@
         "signature": [
           "() => boolean"
         ],
-        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 22
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -329,7 +380,10 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 52
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -347,7 +401,10 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -367,7 +424,10 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -378,7 +438,10 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "path": "src/plugins/screenshot_mode/common/constants.ts",
+        "source": {
+          "path": "src/plugins/screenshot_mode/common/constants.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

@@ -11,7 +11,10 @@
         "tags": [],
         "label": "WithKibanaProps",
         "description": [],
-        "path": "x-pack/plugins/canvas/public/index.ts",
+        "source": {
+          "path": "x-pack/plugins/canvas/public/index.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "children": [
           {
@@ -36,7 +39,10 @@
               "CanvasServices",
               "; }; }"
             ],
-            "path": "x-pack/plugins/canvas/public/index.ts",
+            "source": {
+              "path": "x-pack/plugins/canvas/public/index.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           }
         ],
@@ -58,7 +64,10 @@
       "signature": [
         "CanvasApi"
       ],
-      "path": "x-pack/plugins/canvas/public/plugin.tsx",
+      "source": {
+        "path": "x-pack/plugins/canvas/public/plugin.tsx",
+        "lineNumber": 70
+      },
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -73,7 +82,10 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/canvas/public/plugin.tsx",
+      "source": {
+        "path": "x-pack/plugins/canvas/public/plugin.tsx",
+        "lineNumber": 71
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -101,7 +113,10 @@
         "tags": [],
         "label": "UI_SETTINGS",
         "description": [],
-        "path": "x-pack/plugins/canvas/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/canvas/common/index.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "children": [
           {
@@ -111,7 +126,10 @@
             "tags": [],
             "label": "ENABLE_LABS_UI",
             "description": [],
-            "path": "x-pack/plugins/canvas/common/index.ts",
+            "source": {
+              "path": "x-pack/plugins/canvas/common/index.ts",
+              "lineNumber": 9
+            },
             "deprecated": false
           }
         ],

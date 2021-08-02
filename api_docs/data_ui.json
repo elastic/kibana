@@ -15,7 +15,10 @@
           "FilterItemProps",
           ") => JSX.Element"
         ],
-        "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+        "source": {
+          "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "children": [
           {
@@ -28,7 +31,10 @@
             "signature": [
               "FilterItemProps"
             ],
-            "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -48,7 +54,10 @@
           "FilterLabelProps",
           ") => JSX.Element"
         ],
-        "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+        "source": {
+          "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "children": [
           {
@@ -61,7 +70,10 @@
             "signature": [
               "FilterLabelProps"
             ],
-            "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
+              "lineNumber": 15
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -87,7 +99,10 @@
           },
           ") => JSX.Element"
         ],
-        "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
+        "source": {
+          "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "children": [
           {
@@ -106,7 +121,10 @@
                 "text": "QueryStringInputProps"
               }
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/index.tsx",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -123,7 +141,10 @@
         "tags": [],
         "label": "QueryStringInputProps",
         "description": [],
-        "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+        "source": {
+          "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+          "lineNumber": 42
+        },
         "deprecated": false,
         "children": [
           {
@@ -144,7 +165,10 @@
               },
               ")[]"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 43
+            },
             "deprecated": false
           },
           {
@@ -157,7 +181,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 44
+            },
             "deprecated": false
           },
           {
@@ -170,7 +197,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 45
+            },
             "deprecated": false
           },
           {
@@ -183,7 +213,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 46
+            },
             "deprecated": false
           },
           {
@@ -196,7 +229,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 47
+            },
             "deprecated": false
           },
           {
@@ -210,7 +246,10 @@
               "PersistedLog",
               "<any> | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 48
+            },
             "deprecated": false
           },
           {
@@ -223,7 +262,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 49
+            },
             "deprecated": false
           },
           {
@@ -236,7 +278,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 50
+            },
             "deprecated": false
           },
           {
@@ -249,7 +294,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 51
+            },
             "deprecated": false
           },
           {
@@ -262,7 +310,10 @@
             "signature": [
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 52
+            },
             "deprecated": false
           },
           {
@@ -275,8 +326,13 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 53
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -288,8 +344,31 @@
             "signature": [
               "((query: any) => void) | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 54
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onChange.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                  "lineNumber": 54
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -301,8 +380,31 @@
             "signature": [
               "((isFocused: boolean) => void) | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 55
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isFocused",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "source": {
+                  "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                  "lineNumber": 55
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -314,8 +416,31 @@
             "signature": [
               "((query: any) => void) | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 56
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onSubmit.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                  "lineNumber": 56
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -327,7 +452,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 57
+            },
             "deprecated": false
           },
           {
@@ -340,7 +468,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 58
+            },
             "deprecated": false
           },
           {
@@ -353,7 +484,10 @@
             "signature": [
               "\"s\" | \"l\" | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 59
+            },
             "deprecated": false
           },
           {
@@ -366,7 +500,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 60
+            },
             "deprecated": false
           },
           {
@@ -379,7 +516,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 61
+            },
             "deprecated": false
           },
           {
@@ -392,7 +532,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 62
+            },
             "deprecated": false
           },
           {
@@ -405,7 +548,10 @@
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 63
+            },
             "deprecated": false
           },
           {
@@ -418,7 +564,10 @@
             "signature": [
               "\"text\" | \"lucene\" | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 69
+            },
             "deprecated": false
           },
           {
@@ -431,7 +580,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 70
+            },
             "deprecated": false
           },
           {
@@ -444,7 +596,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 74
+            },
             "deprecated": false
           },
           {
@@ -457,7 +612,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+            "source": {
+              "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+              "lineNumber": 78
+            },
             "deprecated": false
           }
         ],
@@ -480,7 +638,10 @@
           "EuiComboBoxProps",
           "<any>, \"children\" | \"onClick\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"async\" | \"compressed\" | \"fullWidth\" | \"isClearable\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\" | \"autoFocus\" | \"customOptionText\" | \"onCreateOption\" | \"renderOption\" | \"inputRef\" | \"isDisabled\" | \"isInvalid\" | \"noSuggestions\" | \"rowHeight\" | \"delimiter\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
         ],
-        "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx",
+        "source": {
+          "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -510,7 +671,10 @@
           },
           ", \"filters\" | \"query\" | \"placeholder\" | \"iconType\" | \"isClearable\" | \"isLoading\" | \"intl\" | \"indexPatterns\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"timeHistory\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & ReactIntl.InjectedIntlProps>; }"
         ],
-        "path": "src/plugins/data/public/ui/search_bar/index.tsx",
+        "source": {
+          "path": "src/plugins/data/public/ui/search_bar/index.tsx",
+          "lineNumber": 23
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -525,7 +689,10 @@
           "SearchBarOwnProps",
           " & SearchBarInjectedDeps"
         ],
-        "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx",
+        "source": {
+          "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx",
+          "lineNumber": 79
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -540,7 +707,10 @@
           "SearchBarOwnProps",
           " & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; }"
         ],
-        "path": "src/plugins/data/public/ui/search_bar/create_search_bar.tsx",
+        "source": {
+          "path": "src/plugins/data/public/ui/search_bar/create_search_bar.tsx",
+          "lineNumber": 31
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

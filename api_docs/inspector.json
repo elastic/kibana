@@ -43,7 +43,10 @@
           },
           ", object, object>"
         ],
-        "path": "src/plugins/inspector/public/plugin.tsx",
+        "source": {
+          "path": "src/plugins/inspector/public/plugin.tsx",
+          "lineNumber": 54
+        },
         "deprecated": false,
         "children": [
           {
@@ -57,7 +60,10 @@
               "InspectorViewRegistry",
               " | undefined"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 55
+            },
             "deprecated": false
           },
           {
@@ -70,7 +76,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 57
+            },
             "deprecated": false,
             "children": [
               {
@@ -90,7 +99,10 @@
                   },
                   "<object>"
                 ],
-                "path": "src/plugins/inspector/public/plugin.tsx",
+                "source": {
+                  "path": "src/plugins/inspector/public/plugin.tsx",
+                  "lineNumber": 57
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -125,7 +137,10 @@
               "InspectorViewRegistry",
               "; }; }"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 59
+            },
             "deprecated": false,
             "children": [
               {
@@ -145,7 +160,10 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "src/plugins/inspector/public/plugin.tsx",
+                "source": {
+                  "path": "src/plugins/inspector/public/plugin.tsx",
+                  "lineNumber": 59
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -202,7 +220,10 @@
               },
               "; }"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 73
+            },
             "deprecated": false,
             "children": [
               {
@@ -221,7 +242,10 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "src/plugins/inspector/public/plugin.tsx",
+                "source": {
+                  "path": "src/plugins/inspector/public/plugin.tsx",
+                  "lineNumber": 73
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -238,7 +262,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 114
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -267,7 +294,10 @@
           },
           " extends EventEmitter"
         ],
-        "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -280,7 +310,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -308,7 +341,10 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 39
+            },
             "deprecated": false,
             "children": [
               {
@@ -323,7 +359,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 39
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -337,7 +376,10 @@
                 "signature": [
                   "RequestParams"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 39
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -356,7 +398,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 52
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -371,7 +416,10 @@
             "signature": [
               "(id: string) => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 57
+            },
             "deprecated": false,
             "children": [
               {
@@ -384,7 +432,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 57
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -403,7 +454,10 @@
               "Request",
               "[]"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 62
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -420,7 +474,10 @@
         "description": [
           "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
         ],
-        "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -433,7 +490,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 20
+            },
             "deprecated": false,
             "children": [
               {
@@ -446,7 +506,10 @@
                 "signature": [
                   "Request"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 20
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -460,7 +523,10 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 20
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -484,7 +550,10 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 25
+            },
             "deprecated": false,
             "children": [
               {
@@ -497,7 +566,10 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 25
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -529,7 +601,10 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 31
+            },
             "deprecated": false,
             "children": [
               {
@@ -548,7 +623,10 @@
                     "text": "RequestStatistics"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 31
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -575,7 +653,10 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 53
+            },
             "deprecated": false,
             "children": [
               {
@@ -594,7 +675,10 @@
                     "text": "RequestStatus"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 53
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -608,7 +692,10 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 53
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -627,7 +714,10 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 60
+            },
             "deprecated": false,
             "children": [
               {
@@ -640,7 +730,10 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 60
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -659,7 +752,10 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 64
+            },
             "deprecated": false,
             "children": [
               {
@@ -672,7 +768,10 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 64
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -694,7 +793,10 @@
         "description": [
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
-        "path": "src/plugins/inspector/common/adapters/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/types.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -714,7 +816,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/types.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -727,7 +832,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/types.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           }
         ],
@@ -745,7 +853,10 @@
         "description": [
           "\nOptions that can be specified when opening the inspector."
         ],
-        "path": "src/plugins/inspector/public/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/public/types.ts",
+          "lineNumber": 59
+        },
         "deprecated": false,
         "children": [
           {
@@ -758,7 +869,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 60
+            },
             "deprecated": false
           },
           {
@@ -771,7 +885,10 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 61
+            },
             "deprecated": false
           }
         ],
@@ -788,7 +905,10 @@
         "description": [
           "\nAn object describing an inspector view."
         ],
-        "path": "src/plugins/inspector/public/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/public/types.ts",
+          "lineNumber": 45
+        },
         "deprecated": false,
         "children": [
           {
@@ -833,7 +953,10 @@
               },
               ">>"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 46
+            },
             "deprecated": false
           },
           {
@@ -846,7 +969,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 47
+            },
             "deprecated": false
           },
           {
@@ -859,7 +985,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 48
+            },
             "deprecated": false
           },
           {
@@ -880,8 +1009,37 @@
               },
               ") => boolean) | undefined"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.InspectorViewDescription.shouldShow.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "adapters",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Adapters",
+                    "text": "Adapters"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/inspector/public/types.ts",
+                  "lineNumber": 49
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "inspector",
@@ -890,7 +1048,10 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           }
         ],
@@ -915,7 +1076,10 @@
           },
           "<TAdapters>"
         ],
-        "path": "src/plugins/inspector/public/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/public/types.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -930,7 +1094,10 @@
             "signature": [
               "TAdapters"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -942,7 +1109,10 @@
             "description": [
               "\nThe title that the inspector is currently using e.g. a visualization name."
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -957,7 +1127,10 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           }
         ],
@@ -970,7 +1143,10 @@
         "tags": [],
         "label": "RequestStatistic",
         "description": [],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 48
+        },
         "deprecated": false,
         "children": [
           {
@@ -980,7 +1156,10 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 49
+            },
             "deprecated": false
           },
           {
@@ -993,7 +1172,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           },
           {
@@ -1006,7 +1188,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 51
+            },
             "deprecated": false
           }
         ],
@@ -1019,7 +1204,10 @@
         "tags": [],
         "label": "RequestStatistics",
         "description": [],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 44
+        },
         "deprecated": false,
         "children": [
           {
@@ -1032,7 +1220,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 45
+            },
             "deprecated": false
           }
         ],
@@ -1049,7 +1240,10 @@
         "description": [
           "\nThe status a request can have."
         ],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1071,7 +1265,10 @@
             "text": "OverlayRef"
           }
         ],
-        "path": "src/plugins/inspector/public/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/public/types.ts",
+          "lineNumber": 64
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1084,7 +1281,10 @@
       "tags": [],
       "label": "Setup",
       "description": [],
-      "path": "src/plugins/inspector/public/plugin.tsx",
+      "source": {
+        "path": "src/plugins/inspector/public/plugin.tsx",
+        "lineNumber": 20
+      },
       "deprecated": false,
       "children": [
         {
@@ -1105,7 +1305,10 @@
             },
             ") => void"
           ],
-          "path": "src/plugins/inspector/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "lineNumber": 21
+          },
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -1125,7 +1328,10 @@
                   "text": "InspectorViewDescription"
                 }
               ],
-              "path": "src/plugins/inspector/public/view_registry.ts",
+              "source": {
+                "path": "src/plugins/inspector/public/view_registry.ts",
+                "lineNumber": 33
+              },
               "deprecated": false
             }
           ]
@@ -1142,7 +1348,10 @@
             "InspectorViewRegistry",
             "; }"
           ],
-          "path": "src/plugins/inspector/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "lineNumber": 23
+          },
           "deprecated": false
         }
       ],
@@ -1156,7 +1365,10 @@
       "tags": [],
       "label": "Start",
       "description": [],
-      "path": "src/plugins/inspector/public/plugin.tsx",
+      "source": {
+        "path": "src/plugins/inspector/public/plugin.tsx",
+        "lineNumber": 28
+      },
       "deprecated": false,
       "children": [
         {
@@ -1179,15 +1391,15 @@
             },
             " | undefined) => boolean"
           ],
-          "path": "src/plugins/inspector/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "lineNumber": 37
+          },
           "deprecated": false,
-          "returnComment": [
-            "True, if a call to `open` with the same adapters\nwould have shown the inspector panel, false otherwise."
-          ],
           "children": [
             {
               "parentPluginId": "inspector",
-              "id": "def-public.adapters",
+              "id": "def-public.Start.isAvailable.$1",
               "type": "Object",
               "tags": [],
               "label": "adapters",
@@ -1204,9 +1416,16 @@
                 },
                 " | undefined"
               ],
-              "path": "src/plugins/inspector/public/plugin.tsx",
-              "deprecated": false
+              "source": {
+                "path": "src/plugins/inspector/public/plugin.tsx",
+                "lineNumber": 37
+              },
+              "deprecated": false,
+              "isRequired": false
             }
+          ],
+          "returnComment": [
+            "True, if a call to `open` with the same adapters\nwould have shown the inspector panel, false otherwise."
           ]
         },
         {
@@ -1247,15 +1466,15 @@
               "text": "OverlayRef"
             }
           ],
-          "path": "src/plugins/inspector/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "lineNumber": 51
+          },
           "deprecated": false,
-          "returnComment": [
-            "The session instance for the opened inspector."
-          ],
           "children": [
             {
               "parentPluginId": "inspector",
-              "id": "def-public.adapters",
+              "id": "def-public.Start.open.$1",
               "type": "Object",
               "tags": [],
               "label": "adapters",
@@ -1271,12 +1490,16 @@
                   "text": "Adapters"
                 }
               ],
-              "path": "src/plugins/inspector/public/plugin.tsx",
-              "deprecated": false
+              "source": {
+                "path": "src/plugins/inspector/public/plugin.tsx",
+                "lineNumber": 51
+              },
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "inspector",
-              "id": "def-public.options",
+              "id": "def-public.Start.open.$2",
               "type": "Object",
               "tags": [],
               "label": "options",
@@ -1293,9 +1516,16 @@
                 },
                 " | undefined"
               ],
-              "path": "src/plugins/inspector/public/plugin.tsx",
-              "deprecated": false
+              "source": {
+                "path": "src/plugins/inspector/public/plugin.tsx",
+                "lineNumber": 51
+              },
+              "deprecated": false,
+              "isRequired": false
             }
+          ],
+          "returnComment": [
+            "The session instance for the opened inspector."
           ]
         }
       ],
@@ -1334,7 +1564,10 @@
           },
           " extends EventEmitter"
         ],
-        "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -1347,7 +1580,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1375,7 +1611,10 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 39
+            },
             "deprecated": false,
             "children": [
               {
@@ -1390,7 +1629,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 39
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1404,7 +1646,10 @@
                 "signature": [
                   "RequestParams"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 39
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1423,7 +1668,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 52
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1438,7 +1686,10 @@
             "signature": [
               "(id: string) => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 57
+            },
             "deprecated": false,
             "children": [
               {
@@ -1451,7 +1702,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 57
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1470,7 +1724,10 @@
               "Request",
               "[]"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 62
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1487,7 +1744,10 @@
         "description": [
           "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
         ],
-        "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -1500,7 +1760,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 20
+            },
             "deprecated": false,
             "children": [
               {
@@ -1513,7 +1776,10 @@
                 "signature": [
                   "Request"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 20
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1527,7 +1793,10 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 20
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1551,7 +1820,10 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 25
+            },
             "deprecated": false,
             "children": [
               {
@@ -1564,7 +1836,10 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 25
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1596,7 +1871,10 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 31
+            },
             "deprecated": false,
             "children": [
               {
@@ -1615,7 +1893,10 @@
                     "text": "RequestStatistics"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 31
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1642,7 +1923,10 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 53
+            },
             "deprecated": false,
             "children": [
               {
@@ -1661,7 +1945,10 @@
                     "text": "RequestStatus"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 53
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1675,7 +1962,10 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 53
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1694,7 +1984,10 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 60
+            },
             "deprecated": false,
             "children": [
               {
@@ -1707,7 +2000,10 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 60
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1726,7 +2022,10 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 64
+            },
             "deprecated": false,
             "children": [
               {
@@ -1739,7 +2038,10 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 64
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1761,7 +2063,10 @@
         "description": [
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
-        "path": "src/plugins/inspector/common/adapters/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/types.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -1781,7 +2086,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/types.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -1794,7 +2102,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/types.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           }
         ],
@@ -1807,7 +2118,10 @@
         "tags": [],
         "label": "RequestStatistic",
         "description": [],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 48
+        },
         "deprecated": false,
         "children": [
           {
@@ -1817,7 +2131,10 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 49
+            },
             "deprecated": false
           },
           {
@@ -1830,7 +2147,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           },
           {
@@ -1843,7 +2163,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 51
+            },
             "deprecated": false
           }
         ],
@@ -1856,7 +2179,10 @@
         "tags": [],
         "label": "RequestStatistics",
         "description": [],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 44
+        },
         "deprecated": false,
         "children": [
           {
@@ -1869,7 +2195,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 45
+            },
             "deprecated": false
           }
         ],
@@ -1886,7 +2215,10 @@
         "description": [
           "\nThe status a request can have."
         ],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

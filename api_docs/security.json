@@ -24,7 +24,10 @@
           " extends ",
           "User"
         ],
-        "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+        "source": {
+          "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -39,7 +42,10 @@
             "signature": [
               "UserRealm"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -54,7 +60,10 @@
             "signature": [
               "UserRealm"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -69,7 +78,10 @@
             "signature": [
               "AuthenticationProvider"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -81,7 +93,10 @@
             "description": [
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 42
+            },
             "deprecated": false
           }
         ],
@@ -94,7 +109,10 @@
         "tags": [],
         "label": "AuthenticationServiceSetup",
         "description": [],
-        "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+        "source": {
+          "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [
           {
@@ -117,10 +135,13 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+              "lineNumber": 37
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "security",
@@ -134,10 +155,13 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+              "lineNumber": 42
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -149,7 +173,10 @@
         "tags": [],
         "label": "SecurityLicense",
         "description": [],
-        "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+        "source": {
+          "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -162,7 +189,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 15
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -177,7 +207,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 16
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -193,7 +226,10 @@
               "() => ",
               "SecurityLicenseFeatures"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 17
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -208,7 +244,10 @@
             "signature": [
               "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 18
+            },
             "deprecated": false,
             "children": [
               {
@@ -221,7 +260,10 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+                "source": {
+                  "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+                  "lineNumber": 18
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -241,7 +283,10 @@
               "SecurityLicenseFeatures",
               ">"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           }
         ],
@@ -256,7 +301,10 @@
         "description": [
           "\nDescribes Security plugin features that depend on license."
         ],
-        "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+        "source": {
+          "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -268,7 +316,10 @@
             "description": [
               "\nIndicates whether we show login page or skip it."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -280,7 +331,10 @@
             "description": [
               "\nIndicates whether we allow login or disable it on the login page."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -292,7 +346,10 @@
             "description": [
               "\nIndicates whether we show security links throughout the kibana app."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -304,7 +361,10 @@
             "description": [
               "\nIndicates whether we show the Role Mappings UI."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -316,7 +376,10 @@
             "description": [
               "\nIndicates whether we allow users to access agreement UI and acknowledge it."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -328,7 +391,10 @@
             "description": [
               "\nIndicates whether we allow logging of audit events."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 45
+            },
             "deprecated": false
           },
           {
@@ -342,7 +408,10 @@
             "description": [
               "\nIndicates whether we allow logging of legacy audit events."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 51
+            },
             "deprecated": true,
             "references": []
           },
@@ -355,7 +424,10 @@
             "description": [
               "\nIndicates whether we allow users to define document level security in roles."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 56
+            },
             "deprecated": false
           },
           {
@@ -367,7 +439,10 @@
             "description": [
               "\nIndicates whether we allow users to define field level security in roles."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 61
+            },
             "deprecated": false
           },
           {
@@ -379,7 +454,10 @@
             "description": [
               "\nIndicates whether we allow Role-based access control (RBAC)."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 66
+            },
             "deprecated": false
           },
           {
@@ -391,7 +469,10 @@
             "description": [
               "\nIndicates whether we allow sub-feature privileges."
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 71
+            },
             "deprecated": false
           },
           {
@@ -406,7 +487,10 @@
             "signature": [
               "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\" | undefined"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 76
+            },
             "deprecated": false
           }
         ],
@@ -419,7 +503,10 @@
         "tags": [],
         "label": "SecurityNavControlServiceStart",
         "description": [],
-        "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+        "source": {
+          "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+          "lineNumber": 32
+        },
         "deprecated": false,
         "children": [
           {
@@ -444,10 +531,13 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+              "lineNumber": 36
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "security",
@@ -469,13 +559,15 @@
               },
               "[]) => void"
             ],
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+              "lineNumber": 41
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-public.newUserMenuLink",
+                "id": "def-public.SecurityNavControlServiceStart.addUserMenuLinks.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "newUserMenuLink",
@@ -490,10 +582,15 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
+                  "lineNumber": 41
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -505,7 +602,10 @@
         "tags": [],
         "label": "UserMenuLink",
         "description": [],
-        "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+        "source": {
+          "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+          "lineNumber": 27
+        },
         "deprecated": false,
         "children": [
           {
@@ -515,7 +615,10 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -528,7 +631,10 @@
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -538,7 +644,10 @@
             "tags": [],
             "label": "href",
             "description": [],
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -551,7 +660,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 31
+            },
             "deprecated": false
           },
           {
@@ -564,7 +676,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 32
+            },
             "deprecated": false
           }
         ],
@@ -591,7 +706,10 @@
             "text": "AuthenticationServiceSetup"
           }
         ],
-        "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+        "source": {
+          "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
+          "lineNumber": 48
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -604,7 +722,10 @@
       "tags": [],
       "label": "SecurityPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security/public/plugin.tsx",
+      "source": {
+        "path": "x-pack/plugins/security/public/plugin.tsx",
+        "lineNumber": 170
+      },
       "deprecated": false,
       "children": [
         {
@@ -625,7 +746,10 @@
               "text": "AuthenticationServiceSetup"
             }
           ],
-          "path": "x-pack/plugins/security/public/plugin.tsx",
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 174
+          },
           "deprecated": false
         },
         {
@@ -646,7 +770,10 @@
               "text": "SecurityLicense"
             }
           ],
-          "path": "x-pack/plugins/security/public/plugin.tsx",
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 178
+          },
           "deprecated": false
         }
       ],
@@ -660,7 +787,10 @@
       "tags": [],
       "label": "SecurityPluginStart",
       "description": [],
-      "path": "x-pack/plugins/security/public/plugin.tsx",
+      "source": {
+        "path": "x-pack/plugins/security/public/plugin.tsx",
+        "lineNumber": 181
+      },
       "deprecated": false,
       "children": [
         {
@@ -681,7 +811,10 @@
               "text": "SecurityNavControlServiceStart"
             }
           ],
-          "path": "x-pack/plugins/security/public/plugin.tsx",
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 185
+          },
           "deprecated": false
         },
         {
@@ -702,7 +835,10 @@
               "text": "AuthenticationServiceSetup"
             }
           ],
-          "path": "x-pack/plugins/security/public/plugin.tsx",
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 189
+          },
           "deprecated": false
         },
         {
@@ -717,7 +853,10 @@
           "signature": [
             "UiApi"
           ],
-          "path": "x-pack/plugins/security/public/plugin.tsx",
+          "source": {
+            "path": "x-pack/plugins/security/public/plugin.tsx",
+            "lineNumber": 193
+          },
           "deprecated": false
         }
       ],
@@ -749,7 +888,10 @@
           " extends ",
           "LogMeta"
         ],
-        "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "children": [
           {
@@ -759,7 +901,10 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -772,7 +917,10 @@
             "signature": [
               "{ space_id?: string | undefined; session_id?: string | undefined; saved_object?: { type: string; id: string; } | undefined; authentication_provider?: string | undefined; authentication_type?: string | undefined; authentication_realm?: string | undefined; lookup_realm?: string | undefined; add_to_spaces?: readonly string[] | undefined; delete_from_spaces?: readonly string[] | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           }
         ],
@@ -785,7 +933,10 @@
         "tags": [],
         "label": "AuditLogger",
         "description": [],
-        "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+          "lineNumber": 36
+        },
         "deprecated": false,
         "children": [
           {
@@ -806,13 +957,15 @@
               },
               " | undefined) => void"
             ],
-            "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+              "lineNumber": 37
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.event",
+                "id": "def-server.AuditLogger.log.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -827,10 +980,15 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 37
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -842,7 +1000,10 @@
         "tags": [],
         "label": "AuditServiceSetup",
         "description": [],
-        "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+          "lineNumber": 40
+        },
         "deprecated": false,
         "children": [
           {
@@ -870,13 +1031,15 @@
                 "text": "AuditLogger"
               }
             ],
-            "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.request",
+                "id": "def-server.AuditServiceSetup.asScoped.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -891,10 +1054,15 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 41
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "security",
@@ -913,13 +1081,15 @@
                 "text": "LegacyAuditLogger"
               }
             ],
-            "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+              "lineNumber": 42
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.id",
+                "id": "def-server.AuditServiceSetup.getLogger.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -927,10 +1097,15 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -955,7 +1130,10 @@
           " extends ",
           "User"
         ],
-        "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+        "source": {
+          "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -970,7 +1148,10 @@
             "signature": [
               "UserRealm"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -985,7 +1166,10 @@
             "signature": [
               "UserRealm"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -1000,7 +1184,10 @@
             "signature": [
               "AuthenticationProvider"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -1012,7 +1199,10 @@
             "description": [
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 42
+            },
             "deprecated": false
           }
         ],
@@ -1027,7 +1217,10 @@
         "description": [
           "\nAuthentication services available on the security plugin's start contract."
         ],
-        "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+          "lineNumber": 72
+        },
         "deprecated": false,
         "children": [
           {
@@ -1116,7 +1309,10 @@
               },
               " | null>; }"
             ],
-            "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+              "lineNumber": 73
+            },
             "deprecated": false
           },
           {
@@ -1145,13 +1341,15 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+              "lineNumber": 81
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.request",
+                "id": "def-server.AuthenticationServiceStart.getCurrentUser.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -1166,10 +1364,15 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
+                  "lineNumber": 81
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1181,7 +1384,10 @@
         "tags": [],
         "label": "CheckPrivilegesPayload",
         "description": [],
-        "path": "x-pack/plugins/security/server/authorization/types.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/authorization/types.ts",
+          "lineNumber": 70
+        },
         "deprecated": false,
         "children": [
           {
@@ -1194,7 +1400,10 @@
             "signature": [
               "string | string[] | undefined"
             ],
-            "path": "x-pack/plugins/security/server/authorization/types.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authorization/types.ts",
+              "lineNumber": 71
+            },
             "deprecated": false
           },
           {
@@ -1207,7 +1416,10 @@
             "signature": [
               "{ cluster: string[]; index: Record<string, string[]>; } | undefined"
             ],
-            "path": "x-pack/plugins/security/server/authorization/types.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authorization/types.ts",
+              "lineNumber": 72
+            },
             "deprecated": false
           }
         ],
@@ -1222,7 +1434,10 @@
         "description": [
           "\nThe return value when creating an API key in Elasticsearch. The API key returned by this API\ncan then be used by sending a request with a Authorization header with a value having the\nprefix ApiKey `{token}` where token is id and api_key joined by a colon `{id}:{api_key}` and\nthen encoded to base64."
         ],
-        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+          "lineNumber": 62
+        },
         "deprecated": false,
         "children": [
           {
@@ -1234,7 +1449,10 @@
             "description": [
               "\nUnique id for this API key"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 66
+            },
             "deprecated": false
           },
           {
@@ -1246,7 +1464,10 @@
             "description": [
               "\nName for this API key"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 70
+            },
             "deprecated": false
           },
           {
@@ -1261,7 +1482,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 74
+            },
             "deprecated": false
           },
           {
@@ -1273,7 +1497,10 @@
             "description": [
               "\nGenerated API key"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 78
+            },
             "deprecated": false
           }
         ],
@@ -1286,7 +1513,10 @@
         "tags": [],
         "label": "GrantAPIKeyResult",
         "description": [],
-        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+          "lineNumber": 81
+        },
         "deprecated": false,
         "children": [
           {
@@ -1298,7 +1528,10 @@
             "description": [
               "\nUnique id for this API key"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 85
+            },
             "deprecated": false
           },
           {
@@ -1310,7 +1543,10 @@
             "description": [
               "\nName for this API key"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 89
+            },
             "deprecated": false
           },
           {
@@ -1322,7 +1558,10 @@
             "description": [
               "\nGenerated API key"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 93
+            },
             "deprecated": false
           }
         ],
@@ -1337,7 +1576,10 @@
         "description": [
           "\nThe return value when invalidating an API key in Elasticsearch."
         ],
-        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+          "lineNumber": 99
+        },
         "deprecated": false,
         "children": [
           {
@@ -1352,7 +1594,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 103
+            },
             "deprecated": false
           },
           {
@@ -1367,7 +1612,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 107
+            },
             "deprecated": false
           },
           {
@@ -1379,7 +1627,10 @@
             "description": [
               "\nThe number of errors that were encountered when invalidating the API keys."
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 111
+            },
             "deprecated": false
           },
           {
@@ -1394,7 +1645,10 @@
             "signature": [
               "{ type: string; reason: string; caused_by?: { type: string; reason: string; } | undefined; }[] | undefined"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 115
+            },
             "deprecated": false
           }
         ],
@@ -1409,7 +1663,10 @@
         "description": [
           "\nRepresents the params for invalidating multiple API keys"
         ],
-        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+          "lineNumber": 52
+        },
         "deprecated": false,
         "children": [
           {
@@ -1422,7 +1679,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 53
+            },
             "deprecated": false
           }
         ],
@@ -1437,48 +1697,81 @@
         ],
         "label": "LegacyAuditLogger",
         "description": [],
-        "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+          "lineNumber": 32
+        },
         "deprecated": true,
         "references": [
           {
             "plugin": "encryptedSavedObjects",
-            "path": "x-pack/plugins/encrypted_saved_objects/server/audit/audit_logger.ts"
+            "link": {
+              "path": "x-pack/plugins/encrypted_saved_objects/server/audit/audit_logger.ts",
+              "lineNumber": 8
+            }
           },
           {
             "plugin": "encryptedSavedObjects",
-            "path": "x-pack/plugins/encrypted_saved_objects/server/audit/audit_logger.ts"
+            "link": {
+              "path": "x-pack/plugins/encrypted_saved_objects/server/audit/audit_logger.ts",
+              "lineNumber": 16
+            }
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts"
+            "link": {
+              "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts",
+              "lineNumber": 8
+            }
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts"
+            "link": {
+              "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts",
+              "lineNumber": 16
+            }
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts"
+            "link": {
+              "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts",
+              "lineNumber": 18
+            }
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts"
+            "link": {
+              "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts",
+              "lineNumber": 8
+            }
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts"
+            "link": {
+              "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts",
+              "lineNumber": 21
+            }
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts"
+            "link": {
+              "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts",
+              "lineNumber": 23
+            }
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts"
+            "link": {
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts",
+              "lineNumber": 23
+            }
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts"
+            "link": {
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts",
+              "lineNumber": 98
+            }
           }
         ],
         "children": [
@@ -1492,33 +1785,49 @@
             "signature": [
               "(eventType: string, message: string, data?: Record<string, any> | undefined) => void"
             ],
-            "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+              "lineNumber": 33
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.eventType",
+                "id": "def-server.LegacyAuditLogger.log.$1",
                 "type": "string",
                 "tags": [],
                 "label": "eventType",
                 "description": [],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 33
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "security",
-                "id": "def-server.message",
+                "id": "def-server.LegacyAuditLogger.log.$2",
                 "type": "string",
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 33
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "security",
-                "id": "def-server.data",
+                "id": "def-server.LegacyAuditLogger.log.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "data",
@@ -1526,10 +1835,15 @@
                 "signature": [
                   "Record<string, any> | undefined"
                 ],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+                  "lineNumber": 33
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1544,7 +1858,10 @@
         "tags": [],
         "label": "AuthorizationServiceSetup",
         "description": [],
-        "path": "x-pack/plugins/security/server/index.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/index.ts",
+          "lineNumber": 31
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1560,7 +1877,10 @@
         "signature": [
           "\"security:canRedirect\""
         ],
-        "path": "x-pack/plugins/security/server/routes/tags.ts",
+        "source": {
+          "path": "x-pack/plugins/security/server/routes/tags.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1575,7 +1895,10 @@
       "description": [
         "\nDescribes public Security plugin contract returned at the `setup` stage."
       ],
-      "path": "x-pack/plugins/security/server/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/security/server/plugin.ts",
+        "lineNumber": 71
+      },
       "deprecated": false,
       "children": [
         {
@@ -1606,56 +1929,95 @@
             },
             " | null; }"
           ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 75
+          },
           "deprecated": true,
           "references": [
             {
               "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/server/routes/lib/get_user.ts"
+              "link": {
+                "path": "x-pack/plugins/reporting/server/routes/lib/get_user.ts",
+                "lineNumber": 13
+              }
             },
             {
               "plugin": "encryptedSavedObjects",
-              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_key_rotation_service.ts"
+              "link": {
+                "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_key_rotation_service.ts",
+                "lineNumber": 107
+              }
             },
             {
               "plugin": "encryptedSavedObjects",
-              "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts"
+              "link": {
+                "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+                "lineNumber": 67
+              }
             },
             {
               "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/plugin.ts"
+              "link": {
+                "path": "x-pack/plugins/actions/server/plugin.ts",
+                "lineNumber": 458
+              }
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/routes/annotations.ts"
+              "link": {
+                "path": "x-pack/plugins/ml/server/routes/annotations.ts",
+                "lineNumber": 105
+              }
             },
             {
               "plugin": "dashboardMode",
-              "path": "x-pack/plugins/dashboard_mode/server/interceptors/dashboard_mode_request_interceptor.ts"
+              "link": {
+                "path": "x-pack/plugins/dashboard_mode/server/interceptors/dashboard_mode_request_interceptor.ts",
+                "lineNumber": 33
+              }
             },
             {
               "plugin": "dataEnhanced",
-              "path": "x-pack/plugins/data_enhanced/server/search/session/session_service.ts"
+              "link": {
+                "path": "x-pack/plugins/data_enhanced/server/search/session/session_service.ts",
+                "lineNumber": 516
+              }
             },
             {
               "plugin": "logstash",
-              "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
+              "link": {
+                "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts",
+                "lineNumber": 41
+              }
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts"
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
+                "lineNumber": 48
+              }
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts"
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
+                "lineNumber": 45
+              }
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts"
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
+                "lineNumber": 45
+              }
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts"
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
+                "lineNumber": 28
+              }
             }
           ]
         },
@@ -1677,40 +2039,67 @@
               "text": "AuthorizationServiceSetup"
             }
           ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 79
+          },
           "deprecated": true,
           "references": [
             {
               "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/plugin.ts"
+              "link": {
+                "path": "x-pack/plugins/actions/server/plugin.ts",
+                "lineNumber": 457
+              }
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/saved_objects/initialization/initialization.ts"
+              "link": {
+                "path": "x-pack/plugins/ml/server/saved_objects/initialization/initialization.ts",
+                "lineNumber": 54
+              }
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
+              "link": {
+                "path": "x-pack/plugins/ml/server/plugin.ts",
+                "lineNumber": 153
+              }
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
+              "link": {
+                "path": "x-pack/plugins/ml/server/plugin.ts",
+                "lineNumber": 203
+              }
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+              "link": {
+                "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
+                "lineNumber": 46
+              }
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+              "link": {
+                "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
+                "lineNumber": 78
+              }
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+              "link": {
+                "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts",
+                "lineNumber": 80
+              }
             },
             {
               "plugin": "savedObjectsTagging",
-              "path": "x-pack/plugins/saved_objects_tagging/server/request_handler_context.ts"
+              "link": {
+                "path": "x-pack/plugins/saved_objects_tagging/server/request_handler_context.ts",
+                "lineNumber": 37
+              }
             }
           ]
         },
@@ -1732,7 +2121,10 @@
               "text": "SecurityLicense"
             }
           ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 83
+          },
           "deprecated": false
         },
         {
@@ -1753,7 +2145,10 @@
               "text": "AuditServiceSetup"
             }
           ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 87
+          },
           "deprecated": false
         }
       ],
@@ -1769,7 +2164,10 @@
       "description": [
         "\nDescribes public Security plugin contract returned at the `start` stage."
       ],
-      "path": "x-pack/plugins/security/server/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/security/server/plugin.ts",
+        "lineNumber": 93
+      },
       "deprecated": false,
       "children": [
         {
@@ -1790,7 +2188,10 @@
               "text": "AuthenticationServiceStart"
             }
           ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 97
+          },
           "deprecated": false
         },
         {
@@ -1811,7 +2212,10 @@
               "text": "AuthorizationServiceSetup"
             }
           ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/security/server/plugin.ts",
+            "lineNumber": 101
+          },
           "deprecated": false
         }
       ],
@@ -1843,7 +2247,10 @@
           " extends ",
           "User"
         ],
-        "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+        "source": {
+          "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -1858,7 +2265,10 @@
             "signature": [
               "UserRealm"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -1873,7 +2283,10 @@
             "signature": [
               "UserRealm"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -1888,7 +2301,10 @@
             "signature": [
               "AuthenticationProvider"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -1900,7 +2316,10 @@
             "description": [
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
-            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 42
+            },
             "deprecated": false
           }
         ],
@@ -1913,7 +2332,10 @@
         "tags": [],
         "label": "SecurityLicense",
         "description": [],
-        "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+        "source": {
+          "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -1926,7 +2348,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 15
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1941,7 +2366,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 16
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1957,7 +2385,10 @@
               "() => ",
               "SecurityLicenseFeatures"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 17
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1972,7 +2403,10 @@
             "signature": [
               "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 18
+            },
             "deprecated": false,
             "children": [
               {
@@ -1985,7 +2419,10 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+                "source": {
+                  "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+                  "lineNumber": 18
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2005,7 +2442,10 @@
               "SecurityLicenseFeatures",
               ">"
             ],
-            "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           }
         ],

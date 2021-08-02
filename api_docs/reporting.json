@@ -19,7 +19,10 @@
           },
           " implements IReportingAPI"
         ],
-        "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+          "lineNumber": 59
+        },
         "deprecated": false,
         "children": [
           {
@@ -32,7 +35,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 62
+            },
             "deprecated": false,
             "children": [
               {
@@ -51,7 +57,10 @@
                     "text": "HttpSetup"
                   }
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 62
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -68,7 +77,10 @@
             "signature": [
               "(jobId: string) => string"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 66
+            },
             "deprecated": false,
             "children": [
               {
@@ -81,7 +93,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 66
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -98,7 +113,10 @@
             "signature": [
               "(jobId: string) => void"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 73
+            },
             "deprecated": false,
             "children": [
               {
@@ -111,7 +129,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 73
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -128,7 +149,10 @@
             "signature": [
               "(jobId: string) => Promise<any>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 79
+            },
             "deprecated": false,
             "children": [
               {
@@ -141,7 +165,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 79
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -160,7 +187,10 @@
               "Job",
               "[]>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 85
+            },
             "deprecated": false,
             "children": [
               {
@@ -173,7 +203,10 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 85
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -187,7 +220,10 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 85
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -204,7 +240,10 @@
             "signature": [
               "() => Promise<any>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 100
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -217,9 +256,12 @@
             "label": "getError",
             "description": [],
             "signature": [
-              "(jobId: string) => Promise<any>"
+              "(jobId: string) => Promise<string>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 106
+            },
             "deprecated": false,
             "children": [
               {
@@ -232,7 +274,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 106
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -251,7 +296,10 @@
               "Job",
               ">"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 120
+            },
             "deprecated": false,
             "children": [
               {
@@ -264,7 +312,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 120
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -283,7 +334,10 @@
               "Job",
               "[]>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 127
+            },
             "deprecated": false,
             "children": [
               {
@@ -296,7 +350,10 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 127
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -313,7 +370,10 @@
             "signature": [
               "(exportType: string, jobParams: JobParams) => string"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 135
+            },
             "deprecated": false,
             "children": [
               {
@@ -326,7 +386,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 135
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -340,7 +403,10 @@
                 "signature": [
                   "JobParams"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 135
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -359,7 +425,10 @@
               "Job",
               ">"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 140
+            },
             "deprecated": false,
             "children": [
               {
@@ -372,7 +441,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 140
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -386,7 +458,10 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 140
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -403,7 +478,10 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 157
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -418,7 +496,10 @@
             "signature": [
               "(jobId: string) => string"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 160
+            },
             "deprecated": false,
             "children": [
               {
@@ -431,7 +512,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                  "lineNumber": 160
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -448,7 +532,10 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 163
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -463,7 +550,10 @@
             "signature": [
               "() => Promise<any>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 165
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -478,7 +568,10 @@
             "signature": [
               "() => Promise<any>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 171
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -493,7 +586,10 @@
             "signature": [
               "() => Promise<any>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 177
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -508,7 +604,10 @@
             "signature": [
               "() => Promise<any>"
             ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+              "lineNumber": 183
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -561,7 +660,10 @@
           "ReportingPublicPluginStartDendencies",
           ">"
         ],
-        "path": "x-pack/plugins/reporting/public/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/public/plugin.ts",
+          "lineNumber": 84
+        },
         "deprecated": false,
         "children": [
           {
@@ -574,7 +676,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/reporting/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/plugin.ts",
+              "lineNumber": 102
+            },
             "deprecated": false,
             "children": [
               {
@@ -594,7 +699,10 @@
                   },
                   "<object>"
                 ],
-                "path": "x-pack/plugins/reporting/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/plugin.ts",
+                  "lineNumber": 102
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -628,7 +736,10 @@
                 "text": "ReportingSetup"
               }
             ],
-            "path": "x-pack/plugins/reporting/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/plugin.ts",
+              "lineNumber": 122
+            },
             "deprecated": false,
             "children": [
               {
@@ -648,7 +759,10 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "x-pack/plugins/reporting/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/plugin.ts",
+                  "lineNumber": 122
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -662,7 +776,10 @@
                 "signature": [
                   "ReportingPublicPluginSetupDendencies"
                 ],
-                "path": "x-pack/plugins/reporting/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/plugin.ts",
+                  "lineNumber": 122
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -694,7 +811,10 @@
                 "text": "ReportingSetup"
               }
             ],
-            "path": "x-pack/plugins/reporting/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/plugin.ts",
+              "lineNumber": 215
+            },
             "deprecated": false,
             "children": [
               {
@@ -713,7 +833,10 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "x-pack/plugins/reporting/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/public/plugin.ts",
+                  "lineNumber": 215
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -730,7 +853,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/reporting/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/public/plugin.ts",
+              "lineNumber": 234
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -751,7 +877,10 @@
           "() => ",
           "LayoutSelectorDictionary"
         ],
-        "path": "x-pack/plugins/reporting/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/common/index.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -778,7 +907,10 @@
           "text": "ReportingSetup"
         }
       ],
-      "path": "x-pack/plugins/reporting/public/index.ts",
+      "source": {
+        "path": "x-pack/plugins/reporting/public/index.ts",
+        "lineNumber": 20
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -793,7 +925,10 @@
         "tags": [],
         "label": "ReportingCore",
         "description": [],
-        "path": "x-pack/plugins/reporting/server/core.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/server/core.ts",
+          "lineNumber": 60
+        },
         "deprecated": false,
         "children": [
           {
@@ -813,7 +948,10 @@
                 "text": "ReportingSetup"
               }
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 72
+            },
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -828,7 +966,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 74
+            },
             "deprecated": false,
             "children": [
               {
@@ -841,7 +982,10 @@
                 "signature": [
                   "LevelLogger"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 74
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -864,7 +1008,10 @@
                   "ByteSizeValue",
                   "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 74
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -883,7 +1030,10 @@
               "ReportingInternalSetup",
               ") => void"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 90
+            },
             "deprecated": false,
             "children": [
               {
@@ -896,7 +1046,10 @@
                 "signature": [
                   "ReportingInternalSetup"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 90
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -915,7 +1068,10 @@
               "ReportingInternalStart",
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 104
+            },
             "deprecated": false,
             "children": [
               {
@@ -928,7 +1084,10 @@
                 "signature": [
                   "ReportingInternalStart"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 104
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -945,7 +1104,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 117
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -960,7 +1122,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 128
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -975,7 +1140,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 135
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -998,7 +1166,10 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 142
+            },
             "deprecated": false,
             "children": [
               {
@@ -1017,7 +1188,10 @@
                     "text": "ReportingConfig"
                   }
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 142
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1036,7 +1210,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 151
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1058,7 +1235,10 @@
                 "text": "ReportingConfig"
               }
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 185
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1073,7 +1253,10 @@
             "signature": [
               "() => false | string[]"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 197
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1090,7 +1273,10 @@
               "ReportingInternalStart",
               ">"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 204
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1106,7 +1292,10 @@
               "() => ",
               "ExportTypesRegistry"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 212
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1133,7 +1322,10 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 216
+            },
             "deprecated": false,
             "children": [
               {
@@ -1149,7 +1341,10 @@
                   "BasePayload",
                   ">"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 216
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1168,7 +1363,10 @@
               "ReportingStore",
               ">"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 220
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1185,7 +1383,10 @@
               "LicenseCheckResult",
               ">>"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 224
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1202,7 +1403,10 @@
               "ScreenshotsObservableFn",
               ">"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 234
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1217,7 +1421,10 @@
             "signature": [
               "() => () => void"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 240
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1233,7 +1440,10 @@
               "() => ",
               "ReportingInternalSetup"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 248
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1264,7 +1474,10 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 260
+            },
             "deprecated": false,
             "children": [
               {
@@ -1285,7 +1498,10 @@
                   },
                   ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 260
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1312,7 +1528,10 @@
               "LevelLogger",
               ") => string | undefined"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 266
+            },
             "deprecated": false,
             "children": [
               {
@@ -1332,7 +1551,10 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 266
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1346,7 +1568,10 @@
                 "signature": [
                   "LevelLogger"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 266
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1373,7 +1598,10 @@
               },
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 280
+            },
             "deprecated": false,
             "children": [
               {
@@ -1386,7 +1614,10 @@
                 "signature": [
                   "object"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 280
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1400,7 +1631,10 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 280
+                },
                 "deprecated": false,
                 "isRequired": false
               },
@@ -1414,7 +1648,10 @@
                 "signature": [
                   "LevelLogger"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 280
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1449,7 +1686,10 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 300
+            },
             "deprecated": false,
             "children": [
               {
@@ -1469,7 +1709,10 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 300
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1483,7 +1726,10 @@
                 "signature": [
                   "LevelLogger"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 300
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1508,7 +1754,10 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 310
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1531,7 +1780,10 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 315
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1546,7 +1798,10 @@
             "signature": [
               "(reportId: string) => void"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 320
+            },
             "deprecated": false,
             "children": [
               {
@@ -1559,7 +1814,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 320
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1576,7 +1834,10 @@
             "signature": [
               "(reportId: string) => void"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 324
+            },
             "deprecated": false,
             "children": [
               {
@@ -1589,7 +1850,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/reporting/server/core.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 324
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1606,7 +1870,10 @@
             "signature": [
               "() => number"
             ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 328
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1671,7 +1938,10 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/reporting/server/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/server/plugin.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "children": [
           {
@@ -1684,7 +1954,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/reporting/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/plugin.ts",
+              "lineNumber": 31
+            },
             "deprecated": false,
             "children": [
               {
@@ -1706,7 +1979,10 @@
                   "ByteSizeValue",
                   "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
-                "path": "x-pack/plugins/reporting/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/plugin.ts",
+                  "lineNumber": 31
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1746,7 +2022,10 @@
                 "text": "ReportingSetup"
               }
             ],
-            "path": "x-pack/plugins/reporting/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/plugin.ts",
+              "lineNumber": 35
+            },
             "deprecated": false,
             "children": [
               {
@@ -1766,7 +2045,10 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "x-pack/plugins/reporting/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/plugin.ts",
+                  "lineNumber": 35
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1786,7 +2068,10 @@
                     "text": "ReportingSetupDeps"
                   }
                 ],
-                "path": "x-pack/plugins/reporting/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/plugin.ts",
+                  "lineNumber": 35
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1826,7 +2111,10 @@
                 "text": "ReportingSetup"
               }
             ],
-            "path": "x-pack/plugins/reporting/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/plugin.ts",
+              "lineNumber": 91
+            },
             "deprecated": false,
             "children": [
               {
@@ -1845,7 +2133,10 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "x-pack/plugins/reporting/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/plugin.ts",
+                  "lineNumber": 91
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1865,7 +2156,10 @@
                     "text": "ReportingStartDeps"
                   }
                 ],
-                "path": "x-pack/plugins/reporting/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/plugin.ts",
+                  "lineNumber": 91
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1897,7 +2191,10 @@
           "ByteSizeValue",
           "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
         ],
-        "path": "x-pack/plugins/reporting/server/config/config.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/server/config/config.ts",
+          "lineNumber": 55
+        },
         "deprecated": false,
         "children": [
           {
@@ -1910,7 +2207,10 @@
             "signature": [
               "Config<KbnServerConfigType>"
             ],
-            "path": "x-pack/plugins/reporting/server/config/config.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/config/config.ts",
+              "lineNumber": 56
+            },
             "deprecated": false
           }
         ],
@@ -1923,7 +2223,10 @@
         "tags": [],
         "label": "ReportingSetupDeps",
         "description": [],
-        "path": "x-pack/plugins/reporting/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/server/types.ts",
+          "lineNumber": 29
+        },
         "deprecated": false,
         "children": [
           {
@@ -1942,7 +2245,10 @@
                 "text": "LicensingPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -1961,7 +2267,10 @@
                 "text": "PluginSetupContract"
               }
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 31
+            },
             "deprecated": false
           },
           {
@@ -1981,7 +2290,10 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 32
+            },
             "deprecated": false
           },
           {
@@ -2001,7 +2313,10 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 33
+            },
             "deprecated": false
           },
           {
@@ -2018,7 +2333,10 @@
               "TaskTypeDictionary",
               ", \"registerTaskDefinitions\">"
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           },
           {
@@ -2038,7 +2356,10 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -2057,7 +2378,10 @@
                 "text": "ScreenshotModePluginSetup"
               }
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 36
+            },
             "deprecated": false
           }
         ],
@@ -2070,7 +2394,10 @@
         "tags": [],
         "label": "ReportingStartDeps",
         "description": [],
-        "path": "x-pack/plugins/reporting/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/server/types.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [
           {
@@ -2089,7 +2416,10 @@
                 "text": "DataPluginStart"
               }
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -2106,7 +2436,10 @@
               "TaskStore",
               ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
             ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           }
         ],
@@ -2123,7 +2456,10 @@
       "tags": [],
       "label": "ReportingSetup",
       "description": [],
-      "path": "x-pack/plugins/reporting/server/types.ts",
+      "source": {
+        "path": "x-pack/plugins/reporting/server/types.ts",
+        "lineNumber": 44
+      },
       "deprecated": false,
       "children": [
         {
@@ -2136,10 +2472,13 @@
           "signature": [
             "() => boolean"
           ],
-          "path": "x-pack/plugins/reporting/server/types.ts",
+          "source": {
+            "path": "x-pack/plugins/reporting/server/types.ts",
+            "lineNumber": 45
+          },
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -2155,7 +2494,10 @@
         "tags": [],
         "label": "CancellationToken",
         "description": [],
-        "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "children": [
           {
@@ -2168,7 +2510,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+              "lineNumber": 14
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2183,7 +2528,10 @@
             "signature": [
               "(callback: Function) => void"
             ],
-            "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+              "lineNumber": 19
+            },
             "deprecated": false,
             "children": [
               {
@@ -2196,7 +2544,10 @@
                 "signature": [
                   "Function"
                 ],
-                "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+                  "lineNumber": 19
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2213,7 +2564,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+              "lineNumber": 32
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2228,7 +2582,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/cancellation_token.ts",
+              "lineNumber": 37
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2243,7 +2600,10 @@
         "tags": [],
         "label": "Poller",
         "description": [],
-        "path": "x-pack/plugins/reporting/common/poller.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/common/poller.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -2256,7 +2616,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/reporting/common/poller.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 32
+            },
             "deprecated": false,
             "children": [
               {
@@ -2269,7 +2632,10 @@
                 "signature": [
                   "PollerOptions"
                 ],
-                "path": "x-pack/plugins/reporting/common/poller.ts",
+                "source": {
+                  "path": "x-pack/plugins/reporting/common/poller.ts",
+                  "lineNumber": 32
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2286,7 +2652,10 @@
             "signature": [
               "() => number"
             ],
-            "path": "x-pack/plugins/reporting/common/poller.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 45
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2301,7 +2670,10 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/plugins/reporting/common/poller.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 49
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2316,7 +2688,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/reporting/common/poller.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 76
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2331,7 +2706,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/reporting/common/poller.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 89
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2346,7 +2724,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/reporting/common/poller.ts",
+            "source": {
+              "path": "x-pack/plugins/reporting/common/poller.ts",
+              "lineNumber": 103
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2367,7 +2748,10 @@
           "() => ",
           "LayoutSelectorDictionary"
         ],
-        "path": "x-pack/plugins/reporting/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/common/index.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -2389,7 +2773,10 @@
           "typeof ",
           "x-pack/plugins/reporting/common/constants"
         ],
-        "path": "x-pack/plugins/reporting/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/reporting/common/index.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

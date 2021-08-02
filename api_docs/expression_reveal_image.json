@@ -23,7 +23,10 @@
           "RevealImageRendererConfig",
           ">"
         ],
-        "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
+        "source": {
+          "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
+          "lineNumber": 30
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -53,7 +56,10 @@
           "RevealImageRendererConfig",
           ">)[]"
         ],
-        "path": "src/plugins/expression_reveal_image/public/expression_renderers/index.ts",
+        "source": {
+          "path": "src/plugins/expression_reveal_image/public/expression_renderers/index.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -69,7 +75,10 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_reveal_image/public/plugin.ts",
+      "source": {
+        "path": "src/plugins/expression_reveal_image/public/plugin.ts",
+        "lineNumber": 23
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true

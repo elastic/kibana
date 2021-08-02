@@ -47,7 +47,10 @@
           "StartPlugins",
           ">"
         ],
-        "path": "x-pack/plugins/lists/public/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/lists/public/plugin.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -60,7 +63,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/lists/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/public/plugin.ts",
+              "lineNumber": 19
+            },
             "deprecated": false,
             "children": [
               {
@@ -80,7 +86,10 @@
                   },
                   "<object>"
                 ],
-                "path": "x-pack/plugins/lists/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 19
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -124,7 +133,10 @@
                 "text": "PluginSetup"
               }
             ],
-            "path": "x-pack/plugins/lists/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/public/plugin.ts",
+              "lineNumber": 22
+            },
             "deprecated": false,
             "children": [
               {
@@ -154,7 +166,10 @@
                   },
                   ">"
                 ],
-                "path": "x-pack/plugins/lists/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 22
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -168,7 +183,10 @@
                 "signature": [
                   "SetupPlugins"
                 ],
-                "path": "x-pack/plugins/lists/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 22
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -202,7 +220,10 @@
                 "text": "PluginStart"
               }
             ],
-            "path": "x-pack/plugins/lists/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/public/plugin.ts",
+              "lineNumber": 27
+            },
             "deprecated": false,
             "children": [
               {
@@ -221,7 +242,10 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "x-pack/plugins/lists/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 27
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -235,7 +259,10 @@
                 "signature": [
                   "StartPlugins"
                 ],
-                "path": "x-pack/plugins/lists/public/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 27
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -262,7 +289,10 @@
           "typeof ",
           "x-pack/plugins/lists/public/exceptions/components/builder/index"
         ],
-        "path": "x-pack/plugins/lists/public/shared_exports.ts",
+        "source": {
+          "path": "x-pack/plugins/lists/public/shared_exports.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -274,7 +304,10 @@
       "tags": [],
       "label": "PluginSetup",
       "description": [],
-      "path": "x-pack/plugins/lists/public/types.ts",
+      "source": {
+        "path": "x-pack/plugins/lists/public/types.ts",
+        "lineNumber": 9
+      },
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
@@ -287,7 +320,10 @@
       "tags": [],
       "label": "PluginStart",
       "description": [],
-      "path": "x-pack/plugins/lists/public/types.ts",
+      "source": {
+        "path": "x-pack/plugins/lists/public/types.ts",
+        "lineNumber": 11
+      },
       "deprecated": false,
       "children": [],
       "lifecycle": "start",
@@ -303,7 +339,10 @@
         "tags": [],
         "label": "ExceptionListClient",
         "description": [],
-        "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+        "source": {
+          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+          "lineNumber": 58
+        },
         "deprecated": false,
         "children": [
           {
@@ -316,7 +355,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 63
+            },
             "deprecated": false,
             "children": [
               {
@@ -329,7 +371,10 @@
                 "signature": [
                   "ConstructorOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 63
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -348,7 +393,10 @@
               "GetExceptionListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 68
+            },
             "deprecated": false,
             "children": [
               {
@@ -361,7 +409,10 @@
                 "signature": [
                   "GetExceptionListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 68
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -380,7 +431,10 @@
               "GetExceptionListSummaryOptions",
               ") => Promise<{ windows: number; linux: number; macos: number; total: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 77
+            },
             "deprecated": false,
             "children": [
               {
@@ -393,7 +447,10 @@
                 "signature": [
                   "GetExceptionListSummaryOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 77
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -412,7 +469,10 @@
               "GetExceptionListItemOptions",
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 86
+            },
             "deprecated": false,
             "children": [
               {
@@ -425,7 +485,10 @@
                 "signature": [
                   "GetExceptionListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 86
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -444,7 +507,10 @@
             "signature": [
               "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 101
+            },
             "deprecated": false,
             "children": [],
             "returnComment": [
@@ -463,7 +529,10 @@
             "signature": [
               "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 113
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -482,7 +551,10 @@
               "CreateEndpointListItemOptions",
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 127
+            },
             "deprecated": false,
             "children": [
               {
@@ -495,7 +567,10 @@
                 "signature": [
                   "CreateEndpointListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 127
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -516,7 +591,10 @@
               "UpdateEndpointListItemOptions",
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 163
+            },
             "deprecated": false,
             "children": [
               {
@@ -529,7 +607,10 @@
                 "signature": [
                   "UpdateEndpointListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 163
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -550,7 +631,10 @@
               "GetEndpointListItemOptions",
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 199
+            },
             "deprecated": false,
             "children": [
               {
@@ -563,7 +647,10 @@
                 "signature": [
                   "GetEndpointListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 199
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -582,7 +669,10 @@
               "CreateExceptionListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 207
+            },
             "deprecated": false,
             "children": [
               {
@@ -595,7 +685,10 @@
                 "signature": [
                   "CreateExceptionListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 207
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -614,7 +707,10 @@
               "UpdateExceptionListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 234
+            },
             "deprecated": false,
             "children": [
               {
@@ -627,7 +723,10 @@
                 "signature": [
                   "UpdateExceptionListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 234
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -646,7 +745,10 @@
               "DeleteExceptionListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 265
+            },
             "deprecated": false,
             "children": [
               {
@@ -659,7 +761,10 @@
                 "signature": [
                   "DeleteExceptionListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 265
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -684,7 +789,10 @@
               },
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 279
+            },
             "deprecated": false,
             "children": [
               {
@@ -703,7 +811,10 @@
                     "text": "CreateExceptionListItemOptions"
                   }
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 279
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -728,7 +839,10 @@
               },
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 310
+            },
             "deprecated": false,
             "children": [
               {
@@ -747,7 +861,10 @@
                     "text": "UpdateExceptionListItemOptions"
                   }
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 310
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -766,7 +883,10 @@
               "DeleteExceptionListItemOptions",
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 343
+            },
             "deprecated": false,
             "children": [
               {
@@ -779,7 +899,10 @@
                 "signature": [
                   "DeleteExceptionListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 343
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -798,7 +921,10 @@
               "DeleteExceptionListItemByIdOptions",
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 357
+            },
             "deprecated": false,
             "children": [
               {
@@ -811,7 +937,10 @@
                 "signature": [
                   "DeleteExceptionListItemByIdOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 357
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -832,7 +961,10 @@
               "DeleteEndpointListItemOptions",
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 372
+            },
             "deprecated": false,
             "children": [
               {
@@ -845,7 +977,10 @@
                 "signature": [
                   "DeleteEndpointListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 372
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -864,7 +999,10 @@
               "FindExceptionListItemOptions",
               ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 385
+            },
             "deprecated": false,
             "children": [
               {
@@ -877,7 +1015,10 @@
                 "signature": [
                   "FindExceptionListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 385
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -896,7 +1037,10 @@
               "FindExceptionListsItemOptions",
               ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 407
+            },
             "deprecated": false,
             "children": [
               {
@@ -909,7 +1053,10 @@
                 "signature": [
                   "FindExceptionListsItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 407
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -928,7 +1075,10 @@
               "FindValueListExceptionListsItems",
               ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 429
+            },
             "deprecated": false,
             "children": [
               {
@@ -941,7 +1091,10 @@
                 "signature": [
                   "FindValueListExceptionListsItems"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 429
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -960,7 +1113,10 @@
               "FindExceptionListOptions",
               ") => Promise<{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 447
+            },
             "deprecated": false,
             "children": [
               {
@@ -973,7 +1129,10 @@
                 "signature": [
                   "FindExceptionListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 447
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -994,7 +1153,10 @@
               "FindEndpointListItemOptions",
               ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 475
+            },
             "deprecated": false,
             "children": [
               {
@@ -1007,7 +1169,10 @@
                 "signature": [
                   "FindEndpointListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 475
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1024,7 +1189,10 @@
         "tags": [],
         "label": "ListClient",
         "description": [],
-        "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+        "source": {
+          "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+          "lineNumber": 79
+        },
         "deprecated": false,
         "children": [
           {
@@ -1037,7 +1205,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 85
+            },
             "deprecated": false,
             "children": [
               {
@@ -1050,7 +1221,10 @@
                 "signature": [
                   "ConstructorOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 85
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1067,7 +1241,10 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 92
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1082,7 +1259,10 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 100
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1099,7 +1279,10 @@
               "GetListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 108
+            },
             "deprecated": false,
             "children": [
               {
@@ -1112,7 +1295,10 @@
                 "signature": [
                   "GetListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 108
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1131,7 +1317,10 @@
               "CreateListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 114
+            },
             "deprecated": false,
             "children": [
               {
@@ -1144,7 +1333,10 @@
                 "signature": [
                   "CreateListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 114
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1163,7 +1355,10 @@
               "CreateListIfItDoesNotExistOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 143
+            },
             "deprecated": false,
             "children": [
               {
@@ -1176,7 +1371,10 @@
                 "signature": [
                   "CreateListIfItDoesNotExistOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 143
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1193,7 +1391,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 172
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1208,7 +1409,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 178
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1223,7 +1427,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 184
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1238,7 +1445,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 190
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1253,7 +1463,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 196
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1268,7 +1481,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 202
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1283,7 +1499,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 208
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1298,7 +1517,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 214
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1313,7 +1535,10 @@
             "signature": [
               "() => Record<string, unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 220
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1328,7 +1553,10 @@
             "signature": [
               "() => Record<string, unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 225
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1343,7 +1571,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 230
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1358,7 +1589,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 237
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1373,7 +1607,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 244
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1388,7 +1625,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 250
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1403,7 +1643,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 256
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1418,7 +1661,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 262
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1433,7 +1679,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 268
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1448,7 +1697,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 274
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1463,7 +1715,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 280
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1478,7 +1733,10 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 286
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1495,7 +1753,10 @@
               "DeleteListItemOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 292
+            },
             "deprecated": false,
             "children": [
               {
@@ -1508,7 +1769,10 @@
                 "signature": [
                   "DeleteListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 292
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1527,7 +1791,10 @@
               "DeleteListItemByValueOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 298
+            },
             "deprecated": false,
             "children": [
               {
@@ -1540,7 +1807,10 @@
                 "signature": [
                   "DeleteListItemByValueOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 298
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1559,7 +1829,10 @@
               "DeleteListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 314
+            },
             "deprecated": false,
             "children": [
               {
@@ -1572,7 +1845,10 @@
                 "signature": [
                   "DeleteListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 314
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1591,7 +1867,10 @@
               "ExportListItemsToStreamOptions",
               ") => void"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 326
+            },
             "deprecated": false,
             "children": [
               {
@@ -1604,7 +1883,10 @@
                 "signature": [
                   "ExportListItemsToStreamOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 326
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1623,7 +1905,10 @@
               "ImportListItemsToStreamOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 342
+            },
             "deprecated": false,
             "children": [
               {
@@ -1636,7 +1921,10 @@
                 "signature": [
                   "ImportListItemsToStreamOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 342
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1655,7 +1943,10 @@
               "GetListItemByValueOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 370
+            },
             "deprecated": false,
             "children": [
               {
@@ -1668,7 +1959,10 @@
                 "signature": [
                   "GetListItemByValueOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 370
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1687,7 +1981,10 @@
               "CreateListItemOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 386
+            },
             "deprecated": false,
             "children": [
               {
@@ -1700,7 +1997,10 @@
                 "signature": [
                   "CreateListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 386
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1719,7 +2019,10 @@
               "UpdateListItemOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 411
+            },
             "deprecated": false,
             "children": [
               {
@@ -1732,7 +2035,10 @@
                 "signature": [
                   "UpdateListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 411
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1751,7 +2057,10 @@
               "UpdateListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 430
+            },
             "deprecated": false,
             "children": [
               {
@@ -1764,7 +2073,10 @@
                 "signature": [
                   "UpdateListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 430
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1783,7 +2095,10 @@
               "GetListItemOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 453
+            },
             "deprecated": false,
             "children": [
               {
@@ -1796,7 +2111,10 @@
                 "signature": [
                   "GetListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 453
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1815,7 +2133,10 @@
               "GetListItemsByValueOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 463
+            },
             "deprecated": false,
             "children": [
               {
@@ -1828,7 +2149,10 @@
                 "signature": [
                   "GetListItemsByValueOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 463
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1847,7 +2171,10 @@
               "SearchListItemByValuesOptions",
               ") => Promise<{ items: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 479
+            },
             "deprecated": false,
             "children": [
               {
@@ -1860,7 +2187,10 @@
                 "signature": [
                   "SearchListItemByValuesOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 479
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1879,7 +2209,10 @@
               "FindListOptions",
               ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 495
+            },
             "deprecated": false,
             "children": [
               {
@@ -1892,7 +2225,10 @@
                 "signature": [
                   "FindListOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 495
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1911,7 +2247,10 @@
               "FindListItemOptions",
               ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 519
+            },
             "deprecated": false,
             "children": [
               {
@@ -1924,7 +2263,10 @@
                 "signature": [
                   "FindListItemOptions"
                 ],
-                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 519
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1944,7 +2286,10 @@
         "tags": [],
         "label": "CreateExceptionListItemOptions",
         "description": [],
-        "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+        "source": {
+          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+          "lineNumber": 124
+        },
         "deprecated": false,
         "children": [
           {
@@ -1957,7 +2302,10 @@
             "signature": [
               "{ comment: string; }[]"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 125
+            },
             "deprecated": false
           },
           {
@@ -1970,7 +2318,10 @@
             "signature": [
               "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 126
+            },
             "deprecated": false
           },
           {
@@ -1980,7 +2331,10 @@
             "tags": [],
             "label": "itemId",
             "description": [],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 127
+            },
             "deprecated": false
           },
           {
@@ -1990,7 +2344,10 @@
             "tags": [],
             "label": "listId",
             "description": [],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 128
+            },
             "deprecated": false
           },
           {
@@ -2003,7 +2360,10 @@
             "signature": [
               "\"single\" | \"agnostic\""
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 129
+            },
             "deprecated": false
           },
           {
@@ -2013,7 +2373,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 130
+            },
             "deprecated": false
           },
           {
@@ -2026,7 +2389,10 @@
             "signature": [
               "(\"windows\" | \"linux\" | \"macos\")[]"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 131
+            },
             "deprecated": false
           },
           {
@@ -2036,7 +2402,10 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 132
+            },
             "deprecated": false
           },
           {
@@ -2049,7 +2418,10 @@
             "signature": [
               "object | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 133
+            },
             "deprecated": false
           },
           {
@@ -2062,7 +2434,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 134
+            },
             "deprecated": false
           },
           {
@@ -2075,7 +2450,10 @@
             "signature": [
               "\"simple\""
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 135
+            },
             "deprecated": false
           }
         ],
@@ -2088,7 +2466,10 @@
         "tags": [],
         "label": "ListPluginSetup",
         "description": [],
-        "path": "x-pack/plugins/lists/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/lists/server/types.ts",
+          "lineNumber": 40
+        },
         "deprecated": false,
         "children": [
           {
@@ -2116,7 +2497,10 @@
                 "text": "ExceptionListClient"
               }
             ],
-            "path": "x-pack/plugins/lists/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2430,7 +2814,10 @@
                   },
                   "; }"
                 ],
-                "path": "x-pack/plugins/lists/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/types.ts",
+                  "lineNumber": 36
+                },
                 "deprecated": false
               },
               {
@@ -2440,7 +2827,10 @@
                 "tags": [],
                 "label": "user",
                 "description": [],
-                "path": "x-pack/plugins/lists/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/types.ts",
+                  "lineNumber": 37
+                },
                 "deprecated": false
               }
             ]
@@ -2470,7 +2860,10 @@
                 "text": "ListClient"
               }
             ],
-            "path": "x-pack/plugins/lists/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "lineNumber": 42
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2494,7 +2887,10 @@
                   "ApiResponse",
                   "<Record<string, any>, unknown>>; }; }"
                 ],
-                "path": "x-pack/plugins/lists/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/types.ts",
+                  "lineNumber": 30
+                },
                 "deprecated": false
               },
               {
@@ -2504,7 +2900,10 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "path": "x-pack/plugins/lists/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/types.ts",
+                  "lineNumber": 31
+                },
                 "deprecated": false
               },
               {
@@ -2514,7 +2913,10 @@
                 "tags": [],
                 "label": "user",
                 "description": [],
-                "path": "x-pack/plugins/lists/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/lists/server/types.ts",
+                  "lineNumber": 32
+                },
                 "deprecated": false
               }
             ]
@@ -2529,7 +2931,10 @@
         "tags": [],
         "label": "ListsApiRequestHandlerContext",
         "description": [],
-        "path": "x-pack/plugins/lists/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/lists/server/types.ts",
+          "lineNumber": 48
+        },
         "deprecated": false,
         "children": [
           {
@@ -2549,10 +2954,13 @@
                 "text": "ListClient"
               }
             ],
-            "path": "x-pack/plugins/lists/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "lineNumber": 49
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "lists",
@@ -2571,10 +2979,13 @@
                 "text": "ExceptionListClient"
               }
             ],
-            "path": "x-pack/plugins/lists/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "lineNumber": 50
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2586,7 +2997,10 @@
         "tags": [],
         "label": "UpdateExceptionListItemOptions",
         "description": [],
-        "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+        "source": {
+          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+          "lineNumber": 150
+        },
         "deprecated": false,
         "children": [
           {
@@ -2599,7 +3013,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 151
+            },
             "deprecated": false
           },
           {
@@ -2612,7 +3029,10 @@
             "signature": [
               "({ comment: string; } & { id?: string | undefined; })[]"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 152
+            },
             "deprecated": false
           },
           {
@@ -2625,7 +3045,10 @@
             "signature": [
               "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 153
+            },
             "deprecated": false
           },
           {
@@ -2638,7 +3061,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 154
+            },
             "deprecated": false
           },
           {
@@ -2651,7 +3077,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 155
+            },
             "deprecated": false
           },
           {
@@ -2664,7 +3093,10 @@
             "signature": [
               "\"single\" | \"agnostic\""
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 156
+            },
             "deprecated": false
           },
           {
@@ -2677,7 +3109,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 157
+            },
             "deprecated": false
           },
           {
@@ -2690,7 +3125,10 @@
             "signature": [
               "(\"windows\" | \"linux\" | \"macos\")[]"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 158
+            },
             "deprecated": false
           },
           {
@@ -2703,7 +3141,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 159
+            },
             "deprecated": false
           },
           {
@@ -2716,7 +3157,10 @@
             "signature": [
               "object | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 160
+            },
             "deprecated": false
           },
           {
@@ -2729,7 +3173,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 161
+            },
             "deprecated": false
           },
           {
@@ -2742,7 +3189,10 @@
             "signature": [
               "\"simple\" | undefined"
             ],
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 162
+            },
             "deprecated": false
           }
         ],

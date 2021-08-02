@@ -24,7 +24,10 @@
         "signature": [
           "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
         ],
-        "path": "src/plugins/apm_oss/server/index.ts",
+        "source": {
+          "path": "src/plugins/apm_oss/server/index.ts",
+          "lineNumber": 34
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -37,7 +40,10 @@
       "tags": [],
       "label": "APMOSSPluginSetup",
       "description": [],
-      "path": "src/plugins/apm_oss/server/plugin.ts",
+      "source": {
+        "path": "src/plugins/apm_oss/server/plugin.ts",
+        "lineNumber": 27
+      },
       "deprecated": false,
       "children": [
         {
@@ -50,7 +56,10 @@
           "signature": [
             "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
           ],
-          "path": "src/plugins/apm_oss/server/plugin.ts",
+          "source": {
+            "path": "src/plugins/apm_oss/server/plugin.ts",
+            "lineNumber": 28
+          },
           "deprecated": false
         },
         {
@@ -64,7 +73,10 @@
             "Observable",
             "<Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>>"
           ],
-          "path": "src/plugins/apm_oss/server/plugin.ts",
+          "source": {
+            "path": "src/plugins/apm_oss/server/plugin.ts",
+            "lineNumber": 29
+          },
           "deprecated": false
         }
       ],

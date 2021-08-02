@@ -51,7 +51,10 @@
           },
           ", object, object>"
         ],
-        "path": "x-pack/plugins/task_manager/server/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/plugin.ts",
+          "lineNumber": 51
+        },
         "deprecated": false,
         "children": [
           {
@@ -64,7 +67,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/plugin.ts",
+              "lineNumber": 63
+            },
             "deprecated": false,
             "children": [
               {
@@ -84,7 +90,10 @@
                   },
                   "<unknown>"
                 ],
-                "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                  "lineNumber": 63
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -124,7 +133,10 @@
                 "text": "TaskManagerSetupContract"
               }
             ],
-            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/plugin.ts",
+              "lineNumber": 70
+            },
             "deprecated": false,
             "children": [
               {
@@ -144,7 +156,10 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                  "lineNumber": 71
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -155,7 +170,10 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                  "lineNumber": 72
+                },
                 "deprecated": false,
                 "children": [
                   {
@@ -175,7 +193,10 @@
                       },
                       " | undefined"
                     ],
-                    "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                    "source": {
+                      "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                      "lineNumber": 72
+                    },
                     "deprecated": false
                   }
                 ]
@@ -208,7 +229,10 @@
                 "text": "TaskManagerStartContract"
               }
             ],
-            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/plugin.ts",
+              "lineNumber": 129
+            },
             "deprecated": false,
             "children": [
               {
@@ -227,7 +251,10 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                  "lineNumber": 129
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -249,7 +276,10 @@
         "signature": [
           "(ms: number) => string"
         ],
-        "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
+          "lineNumber": 41
+        },
         "deprecated": false,
         "children": [
           {
@@ -262,7 +292,10 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -282,7 +315,10 @@
           "EphemeralTaskRejectedDueToCapacityError",
           ") => boolean"
         ],
-        "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+          "lineNumber": 44
+        },
         "deprecated": false,
         "children": [
           {
@@ -296,7 +332,10 @@
               "Error | ",
               "EphemeralTaskRejectedDueToCapacityError"
             ],
-            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+              "lineNumber": 45
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -316,7 +355,10 @@
           "DecoratedError",
           ") => boolean"
         ],
-        "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+          "lineNumber": 35
+        },
         "deprecated": false,
         "children": [
           {
@@ -330,7 +372,10 @@
               "Error | ",
               "DecoratedError"
             ],
-            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+              "lineNumber": 35
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -348,7 +393,10 @@
         "signature": [
           "(error: Error) => void"
         ],
-        "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [
           {
@@ -361,7 +409,10 @@
             "signature": [
               "Error"
             ],
-            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+              "lineNumber": 39
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -397,7 +448,10 @@
             "text": "TaskInstance"
           }
         ],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 302
+        },
         "deprecated": false,
         "children": [
           {
@@ -409,7 +463,10 @@
             "description": [
               "\nThe id of the Elastic document that stores this instance's data. This can\nbe passed by the caller when scheduling the task."
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 307
+            },
             "deprecated": false
           },
           {
@@ -424,7 +481,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 312
+            },
             "deprecated": false
           },
           {
@@ -439,7 +499,10 @@
             "signature": [
               "Date"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 318
+            },
             "deprecated": false
           },
           {
@@ -451,7 +514,10 @@
             "description": [
               "\nThe number of unsuccessful attempts since the last successful run. This\nwill be zeroed out after a successful run."
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 324
+            },
             "deprecated": false
           },
           {
@@ -472,7 +538,10 @@
                 "text": "TaskStatus"
               }
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 329
+            },
             "deprecated": false
           },
           {
@@ -487,7 +556,10 @@
             "signature": [
               "Date"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 335
+            },
             "deprecated": false
           },
           {
@@ -502,7 +574,10 @@
             "signature": [
               "Date | null"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 342
+            },
             "deprecated": false
           },
           {
@@ -517,7 +592,10 @@
             "signature": [
               "Date | null"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 348
+            },
             "deprecated": false
           },
           {
@@ -532,7 +610,10 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 358
+            },
             "deprecated": false
           },
           {
@@ -547,7 +628,10 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 363
+            },
             "deprecated": false
           }
         ],
@@ -562,7 +646,10 @@
         "description": [
           "\nThe run context is passed into a task's run function as its sole argument."
         ],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [
           {
@@ -583,7 +670,10 @@
                 "text": "ConcreteTaskInstance"
               }
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 37
+            },
             "deprecated": false
           }
         ],
@@ -596,7 +686,10 @@
         "tags": [],
         "label": "RunNowResult",
         "description": [],
-        "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+          "lineNumber": 59
+        },
         "deprecated": false,
         "children": [
           {
@@ -606,7 +699,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+              "lineNumber": 60
+            },
             "deprecated": false
           },
           {
@@ -619,7 +715,10 @@
             "signature": [
               "Record<string, any> | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+              "lineNumber": 61
+            },
             "deprecated": false
           }
         ],
@@ -632,7 +731,10 @@
         "tags": [],
         "label": "TaskInstance",
         "description": [],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 195
+        },
         "deprecated": false,
         "children": [
           {
@@ -647,7 +749,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 201
+            },
             "deprecated": false
           },
           {
@@ -659,7 +764,10 @@
             "description": [
               "\nThe task definition type whose run function will execute this instance."
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 206
+            },
             "deprecated": false
           },
           {
@@ -674,7 +782,10 @@
             "signature": [
               "Date | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 212
+            },
             "deprecated": false
           },
           {
@@ -689,7 +800,10 @@
             "signature": [
               "Date | null | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 219
+            },
             "deprecated": false
           },
           {
@@ -704,7 +818,10 @@
             "signature": [
               "Date | null | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 225
+            },
             "deprecated": false
           },
           {
@@ -719,7 +836,10 @@
             "signature": [
               "Date | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 232
+            },
             "deprecated": false
           },
           {
@@ -735,7 +855,10 @@
               "IntervalSchedule",
               " | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 239
+            },
             "deprecated": false
           },
           {
@@ -750,7 +873,10 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 248
+            },
             "deprecated": false
           },
           {
@@ -765,7 +891,10 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 258
+            },
             "deprecated": false
           },
           {
@@ -780,7 +909,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 263
+            },
             "deprecated": false
           },
           {
@@ -795,7 +927,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 268
+            },
             "deprecated": false
           },
           {
@@ -810,7 +945,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 274
+            },
             "deprecated": false
           },
           {
@@ -825,7 +963,10 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 279
+            },
             "deprecated": false
           }
         ],
@@ -840,7 +981,10 @@
         "tags": [],
         "label": "TaskStatus",
         "description": [],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 171
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -858,7 +1002,10 @@
         "signature": [
           "{ params: Record<string, any>; scope?: string[] | undefined; state: Record<string, any>; taskType: string; }"
         ],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 369
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -881,8 +1028,36 @@
           ") => ",
           "CancellableTask"
         ],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 96
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.RunContext",
+                "text": "RunContext"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 96
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -901,7 +1076,10 @@
         "TaskTypeDictionary",
         ", \"registerTaskDefinitions\">"
       ],
-      "path": "x-pack/plugins/task_manager/server/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/task_manager/server/plugin.ts",
+        "lineNumber": 35
+      },
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -920,7 +1098,10 @@
         "TaskStore",
         ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
       ],
-      "path": "x-pack/plugins/task_manager/server/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/task_manager/server/plugin.ts",
+        "lineNumber": 43
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true

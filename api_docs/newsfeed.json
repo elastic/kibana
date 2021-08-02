@@ -11,7 +11,10 @@
         "tags": [],
         "label": "FetchResult",
         "description": [],
-        "path": "src/plugins/newsfeed/public/types.ts",
+        "source": {
+          "path": "src/plugins/newsfeed/public/types.ts",
+          "lineNumber": 49
+        },
         "deprecated": false,
         "children": [
           {
@@ -21,7 +24,10 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           },
           {
@@ -31,7 +37,10 @@
             "tags": [],
             "label": "hasNew",
             "description": [],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 51
+            },
             "deprecated": false
           },
           {
@@ -51,7 +60,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 52
+            },
             "deprecated": false
           },
           {
@@ -64,7 +76,10 @@
             "signature": [
               "Error | null"
             ],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 53
+            },
             "deprecated": false
           }
         ],
@@ -77,7 +92,10 @@
         "tags": [],
         "label": "NewsfeedItem",
         "description": [],
-        "path": "src/plugins/newsfeed/public/types.ts",
+        "source": {
+          "path": "src/plugins/newsfeed/public/types.ts",
+          "lineNumber": 38
+        },
         "deprecated": false,
         "children": [
           {
@@ -87,7 +105,10 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -97,7 +118,10 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -110,7 +134,10 @@
             "signature": [
               "string | null"
             ],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           },
           {
@@ -120,7 +147,10 @@
             "tags": [],
             "label": "linkUrl",
             "description": [],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 42
+            },
             "deprecated": false
           },
           {
@@ -133,7 +163,10 @@
             "signature": [
               "string | null"
             ],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 43
+            },
             "deprecated": false
           },
           {
@@ -146,7 +179,10 @@
             "signature": [
               "moment.Moment"
             ],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 44
+            },
             "deprecated": false
           },
           {
@@ -159,7 +195,10 @@
             "signature": [
               "moment.Moment"
             ],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 45
+            },
             "deprecated": false
           },
           {
@@ -169,7 +208,10 @@
             "tags": [],
             "label": "hash",
             "description": [],
-            "path": "src/plugins/newsfeed/public/types.ts",
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 46
+            },
             "deprecated": false
           }
         ],
@@ -184,7 +226,10 @@
         "tags": [],
         "label": "NewsfeedApiEndpoint",
         "description": [],
-        "path": "src/plugins/newsfeed/public/lib/api.ts",
+        "source": {
+          "path": "src/plugins/newsfeed/public/lib/api.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -201,7 +246,10 @@
       "signature": [
         "{}"
       ],
-      "path": "src/plugins/newsfeed/public/plugin.tsx",
+      "source": {
+        "path": "src/plugins/newsfeed/public/plugin.tsx",
+        "lineNumber": 20
+      },
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -234,7 +282,10 @@
         },
         " | null>; }"
       ],
-      "path": "src/plugins/newsfeed/public/plugin.tsx",
+      "source": {
+        "path": "src/plugins/newsfeed/public/plugin.tsx",
+        "lineNumber": 21
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true

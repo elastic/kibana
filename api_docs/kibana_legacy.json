@@ -9,7 +9,10 @@
         "tags": [],
         "label": "KibanaLegacyPlugin",
         "description": [],
-        "path": "src/plugins/kibana_legacy/public/plugin.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/plugin.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -22,7 +25,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/kibana_legacy/public/plugin.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/plugin.ts",
+              "lineNumber": 15
+            },
             "deprecated": false,
             "children": [
               {
@@ -42,7 +48,10 @@
                   },
                   "<Readonly<{} & { defaultAppId: string; }>>"
                 ],
-                "path": "src/plugins/kibana_legacy/public/plugin.ts",
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/plugin.ts",
+                  "lineNumber": 15
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -69,7 +78,10 @@
               "DashboardConfig",
               "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>) => {}"
             ],
-            "path": "src/plugins/kibana_legacy/public/plugin.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/plugin.ts",
+              "lineNumber": 17
+            },
             "deprecated": false,
             "children": [
               {
@@ -91,7 +103,10 @@
                   "DashboardConfig",
                   "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>"
                 ],
-                "path": "src/plugins/kibana_legacy/public/plugin.ts",
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/plugin.ts",
+                  "lineNumber": 17
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -118,7 +133,10 @@
               "DashboardConfig",
               "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
             ],
-            "path": "src/plugins/kibana_legacy/public/plugin.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/plugin.ts",
+              "lineNumber": 21
+            },
             "deprecated": false,
             "children": [
               {
@@ -137,7 +155,10 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "src/plugins/kibana_legacy/public/plugin.ts",
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/plugin.ts",
+                  "lineNumber": 21
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -159,7 +180,10 @@
         "signature": [
           "(version: string) => ($httpProvider: angular.IHttpProvider) => void"
         ],
-        "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+          "lineNumber": 141
+        },
         "deprecated": false,
         "children": [
           {
@@ -172,7 +196,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 141
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -206,7 +233,10 @@
           },
           ", location: string | undefined) => void"
         ],
-        "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -225,7 +255,10 @@
                 "text": "FatalErrorsSetup"
               }
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
+              "lineNumber": 17
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -246,7 +279,10 @@
                 "text": "AngularHttpError"
               }
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
+              "lineNumber": 18
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -260,7 +296,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
+              "lineNumber": 19
+            },
             "deprecated": false,
             "isRequired": false
           }
@@ -292,7 +331,10 @@
           "History",
           "<any>) | undefined) => void"
         ],
-        "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+          "lineNumber": 67
+        },
         "deprecated": false,
         "children": [
           {
@@ -305,7 +347,10 @@
             "signature": [
               "angular.IModule"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 68
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -316,7 +361,10 @@
             "tags": [],
             "label": "newPlatform",
             "description": [],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 69
+            },
             "deprecated": false,
             "children": [
               {
@@ -335,7 +383,10 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                  "lineNumber": 70
+                },
                 "deprecated": false
               },
               {
@@ -352,7 +403,10 @@
                   "PackageInfo",
                   ">; }"
                 ],
-                "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                  "lineNumber": 71
+                },
                 "deprecated": false
               }
             ]
@@ -367,7 +421,10 @@
             "signature": [
               "boolean"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 76
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -383,7 +440,10 @@
               "History",
               "<any>) | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 77
+            },
             "deprecated": false,
             "isRequired": false
           }
@@ -401,7 +461,10 @@
         "signature": [
           "(options: unknown) => angular.Injectable<angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>>"
         ],
-        "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -415,7 +478,10 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           }
         ],
@@ -439,7 +505,10 @@
           },
           ") => string"
         ],
-        "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "children": [
           {
@@ -458,7 +527,10 @@
                 "text": "AngularHttpError"
               }
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -478,7 +550,10 @@
         "signature": [
           "(err: string | Record<string, any>) => string | undefined"
         ],
-        "path": "src/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "children": [
           {
@@ -491,7 +566,10 @@
             "signature": [
               "string | Record<string, any>"
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts",
+              "lineNumber": 18
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -511,7 +589,10 @@
         "signature": [
           "(err: string | Record<string, any>, source: string) => string"
         ],
-        "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -524,7 +605,10 @@
             "signature": [
               "string | Record<string, any>"
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+              "lineNumber": 21
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -540,7 +624,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+              "lineNumber": 21
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -558,7 +645,10 @@
         "signature": [
           "(err: Record<string, any>) => any"
         ],
-        "path": "src/plugins/kibana_legacy/public/notify/lib/format_stack.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_stack.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -571,7 +661,10 @@
             "signature": [
               "Record<string, any>"
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/format_stack.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_stack.ts",
+              "lineNumber": 12
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -589,7 +682,10 @@
         "signature": [
           "(error: any) => boolean"
         ],
-        "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -602,7 +698,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+              "lineNumber": 14
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -620,7 +719,10 @@
         "signature": [
           "(navUi: unknown) => void"
         ],
-        "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -633,7 +735,10 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+              "lineNumber": 17
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -651,7 +756,10 @@
         "signature": [
           "() => any"
         ],
-        "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -667,7 +775,10 @@
         "signature": [
           "($parse: any, $compile: any) => any"
         ],
-        "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -680,7 +791,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+              "lineNumber": 9
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -694,7 +808,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+              "lineNumber": 9
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -712,7 +829,10 @@
         "signature": [
           "() => angular.IServiceProvider"
         ],
-        "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -728,7 +848,10 @@
         "signature": [
           "($rootScope: unknown) => void"
         ],
-        "path": "src/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -741,7 +864,10 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts",
+              "lineNumber": 9
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -770,7 +896,10 @@
           "<T> | undefined, fatalError: FatalErrorFn | undefined) => ",
           "Subscription"
         ],
-        "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [
           {
@@ -783,7 +912,10 @@
             "signature": [
               "angular.IScope"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+              "lineNumber": 40
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -798,7 +930,10 @@
               "Observable",
               "<T>"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -817,7 +952,10 @@
               "CompletionObserver",
               "<T> | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+              "lineNumber": 42
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -831,7 +969,10 @@
             "signature": [
               "FatalErrorFn | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+              "lineNumber": 43
+            },
             "deprecated": false,
             "isRequired": false
           }
@@ -849,7 +990,10 @@
         "signature": [
           "($provide: unknown) => void"
         ],
-        "path": "src/plugins/kibana_legacy/public/angular/watch_multi.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/watch_multi.d.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -862,7 +1006,10 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/watch_multi.d.ts",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/watch_multi.d.ts",
+              "lineNumber": 9
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -879,7 +1026,10 @@
         "tags": [],
         "label": "RouteConfiguration",
         "description": [],
-        "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+          "lineNumber": 28
+        },
         "deprecated": false,
         "children": [
           {
@@ -892,7 +1042,10 @@
             "signature": [
               "string | ((...args: any[]) => void) | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -905,7 +1058,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -918,8 +1074,31 @@
             "signature": [
               "((...args: any[]) => void) | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 31
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaLegacy",
+                "id": "def-public.RouteConfiguration.resolveRedirectTo.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                  "lineNumber": 31
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaLegacy",
@@ -931,7 +1110,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 32
+            },
             "deprecated": false
           },
           {
@@ -944,7 +1126,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 33
+            },
             "deprecated": false
           },
           {
@@ -957,7 +1142,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 34
+            },
             "deprecated": false
           },
           {
@@ -970,7 +1158,10 @@
             "signature": [
               "object | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -983,7 +1174,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 36
+            },
             "deprecated": false
           },
           {
@@ -998,8 +1192,31 @@
               "EuiBreadcrumb",
               "[]) | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 37
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaLegacy",
+                "id": "def-public.RouteConfiguration.k7Breadcrumbs.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                  "lineNumber": 37
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaLegacy",
@@ -1011,7 +1228,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 38
+            },
             "deprecated": false
           }
         ],
@@ -1030,7 +1250,10 @@
         "signature": [
           "angular.IHttpResponse<{ message: string; }>"
         ],
-        "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1044,7 +1267,10 @@
         "signature": [
           "angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController> | (string | angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>)[]"
         ],
-        "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1058,8 +1284,49 @@
         "signature": [
           "<T>(provider: (...injectable: any[]) => T) => T"
         ],
-        "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaLegacy",
+            "id": "def-public.provider",
+            "type": "Function",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "signature": [
+              "(...injectable: any[]) => T"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaLegacy",
+                "id": "def-public.injectable",
+                "type": "Array",
+                "tags": [],
+                "label": "injectable",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+                  "lineNumber": 11
+                },
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1072,7 +1339,10 @@
         "signature": [
           "angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController> | (string | angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>)[]"
         ],
-        "path": "src/plugins/kibana_legacy/public/utils/kbn_accessible_click.d.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/utils/kbn_accessible_click.d.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1086,7 +1356,10 @@
         "signature": [
           "{}"
         ],
-        "path": "src/plugins/kibana_legacy/public/plugin.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/plugin.ts",
+          "lineNumber": 53
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1102,7 +1375,10 @@
           "DashboardConfig",
           "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
         ],
-        "path": "src/plugins/kibana_legacy/public/plugin.ts",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/plugin.ts",
+          "lineNumber": 54
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

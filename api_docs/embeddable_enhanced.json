@@ -45,7 +45,10 @@
           },
           "> ? E : never>"
         ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -58,7 +61,10 @@
             "signature": [
               "E"
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
+              "lineNumber": 12
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -75,7 +81,10 @@
         "tags": [],
         "label": "EnhancedEmbeddableContext",
         "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "children": [
           {
@@ -119,7 +128,10 @@
               },
               "; }; }"
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           }
         ],
@@ -132,7 +144,10 @@
         "tags": [],
         "label": "SetupDependencies",
         "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+          "lineNumber": 34
+        },
         "deprecated": false,
         "children": [
           {
@@ -151,7 +166,10 @@
                 "text": "EmbeddableSetup"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -170,7 +188,10 @@
                 "text": "SetupContract"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 36
+            },
             "deprecated": false
           }
         ],
@@ -183,7 +204,10 @@
         "tags": [],
         "label": "StartDependencies",
         "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [
           {
@@ -202,7 +226,10 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -221,7 +248,10 @@
                 "text": "StartContract"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           }
         ],
@@ -265,7 +295,10 @@
           },
           "> | undefined; }>[]"
         ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -287,7 +320,10 @@
           },
           "; }; }"
         ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -300,7 +336,10 @@
       "tags": [],
       "label": "SetupContract",
       "description": [],
-      "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "lineNumber": 45
+      },
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
@@ -313,7 +352,10 @@
       "tags": [],
       "label": "StartContract",
       "description": [],
-      "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "lineNumber": 48
+      },
       "deprecated": false,
       "children": [],
       "lifecycle": "start",

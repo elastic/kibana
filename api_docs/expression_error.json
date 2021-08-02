@@ -21,7 +21,10 @@
           },
           "<any>"
         ],
-        "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+        "source": {
+          "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -47,7 +50,10 @@
           "ErrorRendererConfig",
           ">"
         ],
-        "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+        "source": {
+          "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
+          "lineNumber": 30
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -63,7 +69,10 @@
         "signature": [
           "React.ExoticComponent<{ payload: unknown; }> & { readonly _result: ({ payload }: { payload: unknown; }) => JSX.Element; }"
         ],
-        "path": "src/plugins/expression_error/public/components/index.ts",
+        "source": {
+          "path": "src/plugins/expression_error/public/components/index.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -77,7 +86,10 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
             "deprecated": false
           }
         ],
@@ -97,7 +109,10 @@
           "Props",
           ">; }"
         ],
-        "path": "src/plugins/expression_error/public/components/index.ts",
+        "source": {
+          "path": "src/plugins/expression_error/public/components/index.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -111,7 +126,10 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
             "deprecated": false
           }
         ],
@@ -141,7 +159,10 @@
           "ErrorRendererConfig",
           ">)[]"
         ],
-        "path": "src/plugins/expression_error/public/expression_renderers/index.ts",
+        "source": {
+          "path": "src/plugins/expression_error/public/expression_renderers/index.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -157,7 +178,10 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_error/public/plugin.ts",
+      "source": {
+        "path": "src/plugins/expression_error/public/plugin.ts",
+        "lineNumber": 22
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -187,7 +211,10 @@
         "signature": [
           "\"JSON\""
         ],
-        "path": "src/plugins/expression_error/common/constants.ts",
+        "source": {
+          "path": "src/plugins/expression_error/common/constants.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -201,7 +228,10 @@
         "signature": [
           "\"expressionError\""
         ],
-        "path": "src/plugins/expression_error/common/constants.ts",
+        "source": {
+          "path": "src/plugins/expression_error/common/constants.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -215,7 +245,10 @@
         "signature": [
           "\"expressionError\""
         ],
-        "path": "src/plugins/expression_error/common/constants.ts",
+        "source": {
+          "path": "src/plugins/expression_error/common/constants.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

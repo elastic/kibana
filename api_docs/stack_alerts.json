@@ -24,7 +24,10 @@
         "signature": [
           "\".index-threshold\""
         ],
-        "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -47,7 +50,10 @@
         "signature": [
           "{ readonly enabled: boolean; }"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/config.ts",
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/config.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -61,7 +67,10 @@
         "signature": [
           "\"stackAlerts\""
         ],
-        "path": "x-pack/plugins/stack_alerts/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/index.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -80,7 +89,10 @@
           "Type",
           "<boolean>; }>"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/config.ts",
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/config.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

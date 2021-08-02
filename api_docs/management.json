@@ -20,7 +20,10 @@
           " extends ",
           "ManagementItem"
         ],
-        "path": "src/plugins/management/public/utils/management_app.ts",
+        "source": {
+          "path": "src/plugins/management/public/utils/management_app.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "children": [
           {
@@ -45,7 +48,10 @@
               "Unmount",
               ">"
             ],
-            "path": "src/plugins/management/public/utils/management_app.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_app.ts",
+              "lineNumber": 19
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -65,7 +71,10 @@
                     "text": "ManagementAppMountParams"
                   }
                 ],
-                "path": "src/plugins/management/public/types.ts",
+                "source": {
+                  "path": "src/plugins/management/public/types.ts",
+                  "lineNumber": 59
+                },
                 "deprecated": false
               }
             ]
@@ -77,7 +86,10 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "path": "src/plugins/management/public/utils/management_app.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_app.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -90,7 +102,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/management/public/utils/management_app.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_app.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -103,7 +118,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/management/public/utils/management_app.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_app.ts",
+              "lineNumber": 23
+            },
             "deprecated": false,
             "children": [
               {
@@ -122,7 +140,10 @@
                     "text": "RegisterManagementAppArgs"
                   }
                 ],
-                "path": "src/plugins/management/public/utils/management_app.ts",
+                "source": {
+                  "path": "src/plugins/management/public/utils/management_app.ts",
+                  "lineNumber": 23
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -150,7 +171,10 @@
           " extends ",
           "ManagementItem"
         ],
-        "path": "src/plugins/management/public/utils/management_section.ts",
+        "source": {
+          "path": "src/plugins/management/public/utils/management_section.ts",
+          "lineNumber": 19
+        },
         "deprecated": false,
         "children": [
           {
@@ -170,7 +194,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/management/public/utils/management_section.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_section.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -183,7 +210,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/management/public/utils/management_section.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_section.ts",
+              "lineNumber": 22
+            },
             "deprecated": false,
             "children": [
               {
@@ -198,7 +228,10 @@
                   "CreateManagementItemArgs",
                   ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"title\" | \"id\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
-                "path": "src/plugins/management/public/utils/management_section.ts",
+                "source": {
+                  "path": "src/plugins/management/public/utils/management_section.ts",
+                  "lineNumber": 22
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -230,7 +263,10 @@
                 "text": "ManagementApp"
               }
             ],
-            "path": "src/plugins/management/public/utils/management_section.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_section.ts",
+              "lineNumber": 26
+            },
             "deprecated": false,
             "children": [
               {
@@ -251,7 +287,10 @@
                   },
                   ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
-                "path": "src/plugins/management/public/utils/management_section.ts",
+                "source": {
+                  "path": "src/plugins/management/public/utils/management_section.ts",
+                  "lineNumber": 26
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -276,7 +315,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/management/public/utils/management_section.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_section.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
             "children": [
               {
@@ -289,7 +331,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/management/public/utils/management_section.ts",
+                "source": {
+                  "path": "src/plugins/management/public/utils/management_section.ts",
+                  "lineNumber": 41
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -314,7 +359,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/management/public/utils/management_section.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_section.ts",
+              "lineNumber": 45
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -332,7 +380,10 @@
         "tags": [],
         "label": "DefinedSections",
         "description": [],
-        "path": "src/plugins/management/public/types.ts",
+        "source": {
+          "path": "src/plugins/management/public/types.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "children": [
           {
@@ -351,7 +402,10 @@
                 "text": "ManagementSection"
               }
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -370,7 +424,10 @@
                 "text": "ManagementSection"
               }
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -389,7 +446,10 @@
                 "text": "ManagementSection"
               }
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           },
           {
@@ -408,7 +468,10 @@
                 "text": "ManagementSection"
               }
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -427,7 +490,10 @@
                 "text": "ManagementSection"
               }
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -446,7 +512,10 @@
                 "text": "ManagementSection"
               }
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           }
         ],
@@ -459,7 +528,10 @@
         "tags": [],
         "label": "ManagementAppMountParams",
         "description": [],
-        "path": "src/plugins/management/public/types.ts",
+        "source": {
+          "path": "src/plugins/management/public/types.ts",
+          "lineNumber": 61
+        },
         "deprecated": false,
         "children": [
           {
@@ -469,7 +541,10 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 62
+            },
             "deprecated": false
           },
           {
@@ -482,7 +557,10 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 63
+            },
             "deprecated": false
           },
           {
@@ -497,13 +575,15 @@
               "EuiBreadcrumb",
               "[]) => void"
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 64
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "management",
-                "id": "def-public.crumbs",
+                "id": "def-public.ManagementAppMountParams.setBreadcrumbs.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "crumbs",
@@ -512,10 +592,15 @@
                   "EuiBreadcrumb",
                   "[]"
                 ],
-                "path": "src/plugins/management/public/types.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/management/public/types.ts",
+                  "lineNumber": 64
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "management",
@@ -534,7 +619,10 @@
               },
               "<unknown>"
             ],
-            "path": "src/plugins/management/public/types.ts",
+            "source": {
+              "path": "src/plugins/management/public/types.ts",
+              "lineNumber": 65
+            },
             "deprecated": false
           }
         ],
@@ -558,7 +646,10 @@
           " extends ",
           "CreateManagementItemArgs"
         ],
-        "path": "src/plugins/management/public/utils/management_app.ts",
+        "source": {
+          "path": "src/plugins/management/public/utils/management_app.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -583,7 +674,10 @@
               "Unmount",
               ">"
             ],
-            "path": "src/plugins/management/public/utils/management_app.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_app.ts",
+              "lineNumber": 13
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -603,7 +697,10 @@
                     "text": "ManagementAppMountParams"
                   }
                 ],
-                "path": "src/plugins/management/public/types.ts",
+                "source": {
+                  "path": "src/plugins/management/public/types.ts",
+                  "lineNumber": 59
+                },
                 "deprecated": false
               }
             ]
@@ -615,7 +712,10 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "path": "src/plugins/management/public/utils/management_app.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_app.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -628,7 +728,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/management/public/utils/management_app.ts",
+            "source": {
+              "path": "src/plugins/management/public/utils/management_app.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           }
         ],
@@ -647,7 +750,10 @@
         "signature": [
           "\"management\""
         ],
-        "path": "src/plugins/management/common/contants.ts",
+        "source": {
+          "path": "src/plugins/management/common/contants.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -660,7 +766,10 @@
       "tags": [],
       "label": "ManagementSetup",
       "description": [],
-      "path": "src/plugins/management/public/types.ts",
+      "source": {
+        "path": "src/plugins/management/public/types.ts",
+        "lineNumber": 15
+      },
       "deprecated": false,
       "children": [
         {
@@ -673,7 +782,10 @@
           "signature": [
             "SectionsServiceSetup"
           ],
-          "path": "src/plugins/management/public/types.ts",
+          "source": {
+            "path": "src/plugins/management/public/types.ts",
+            "lineNumber": 16
+          },
           "deprecated": false
         },
         {
@@ -695,7 +807,10 @@
             "ManagementAppLocatorParams",
             ">"
           ],
-          "path": "src/plugins/management/public/types.ts",
+          "source": {
+            "path": "src/plugins/management/public/types.ts",
+            "lineNumber": 17
+          },
           "deprecated": false
         }
       ],
@@ -709,7 +824,10 @@
       "tags": [],
       "label": "ManagementStart",
       "description": [],
-      "path": "src/plugins/management/public/types.ts",
+      "source": {
+        "path": "src/plugins/management/public/types.ts",
+        "lineNumber": 30
+      },
       "deprecated": false,
       "children": [],
       "lifecycle": "start",
@@ -749,7 +867,10 @@
           "ManagementAppLocatorParams",
           ">"
         ],
-        "path": "src/plugins/management/common/locator.ts",
+        "source": {
+          "path": "src/plugins/management/common/locator.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

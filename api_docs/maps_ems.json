@@ -11,7 +11,10 @@
         "tags": [],
         "label": "FileLayer",
         "description": [],
-        "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -21,7 +24,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -31,7 +37,10 @@
             "tags": [],
             "label": "origin",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -41,7 +50,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -54,7 +66,10 @@
             "signature": [
               "string | { type: string; }"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -74,7 +89,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -87,7 +105,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           },
           {
@@ -100,7 +121,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -113,7 +137,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -126,7 +153,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -139,7 +169,10 @@
             "signature": [
               "{ [key: string]: string; } | undefined"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           }
         ],
@@ -152,7 +185,10 @@
         "tags": [],
         "label": "FileLayerField",
         "description": [],
-        "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+          "lineNumber": 32
+        },
         "deprecated": false,
         "children": [
           {
@@ -162,7 +198,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 33
+            },
             "deprecated": false
           },
           {
@@ -172,7 +211,10 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           },
           {
@@ -182,7 +224,10 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           }
         ],
@@ -195,7 +240,10 @@
         "tags": [],
         "label": "IServiceSettings",
         "description": [],
-        "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+          "lineNumber": 43
+        },
         "deprecated": false,
         "children": [
           {
@@ -216,7 +264,10 @@
               },
               ") => Promise<string | null>"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 44
+            },
             "deprecated": false,
             "children": [
               {
@@ -235,7 +286,10 @@
                     "text": "FileLayer"
                   }
                 ],
-                "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                "source": {
+                  "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                  "lineNumber": 44
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -260,7 +314,10 @@
               },
               "[]>"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 45
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -283,7 +340,10 @@
               },
               "[]>"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 46
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -306,7 +366,10 @@
               },
               ") => Promise<string | undefined>"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 47
+            },
             "deprecated": false,
             "children": [
               {
@@ -325,7 +388,10 @@
                     "text": "FileLayer"
                   }
                 ],
-                "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                "source": {
+                  "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                  "lineNumber": 47
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -342,7 +408,10 @@
             "signature": [
               "(params: { [p: string]: string; }) => void"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 48
+            },
             "deprecated": false,
             "children": [
               {
@@ -352,7 +421,10 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                "source": {
+                  "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                  "lineNumber": 48
+                },
                 "deprecated": false,
                 "children": [
                   {
@@ -365,7 +437,10 @@
                     "signature": [
                       "any"
                     ],
-                    "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                    "source": {
+                      "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                      "lineNumber": 48
+                    },
                     "deprecated": false
                   }
                 ]
@@ -391,7 +466,10 @@
               },
               ", isDesaturated: boolean, isDarkMode: boolean) => any"
             ],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 49
+            },
             "deprecated": false,
             "children": [
               {
@@ -410,7 +488,10 @@
                     "text": "TmsLayer"
                   }
                 ],
-                "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                "source": {
+                  "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                  "lineNumber": 50
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -424,7 +505,10 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                "source": {
+                  "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                  "lineNumber": 51
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -438,7 +522,10 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                "source": {
+                  "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+                  "lineNumber": 52
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -455,7 +542,10 @@
         "tags": [],
         "label": "TmsLayer",
         "description": [],
-        "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -465,7 +555,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           },
           {
@@ -475,7 +568,10 @@
             "tags": [],
             "label": "origin",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 11
+            },
             "deprecated": false
           },
           {
@@ -485,7 +581,10 @@
             "tags": [],
             "label": "minZoom",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           },
           {
@@ -495,7 +594,10 @@
             "tags": [],
             "label": "maxZoom",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -505,7 +607,10 @@
             "tags": [],
             "label": "attribution",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           }
         ],
@@ -535,7 +640,10 @@
             "text": "FileLayer"
           }
         ],
-        "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+          "lineNumber": 38
+        },
         "deprecated": false,
         "children": [
           {
@@ -545,7 +653,10 @@
             "tags": [],
             "label": "layerId",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -555,7 +666,10 @@
             "tags": [],
             "label": "isEMS",
             "description": [],
-            "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           }
         ],
@@ -574,7 +688,10 @@
         "signature": [
           "\"dark_map\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -588,7 +705,10 @@
         "signature": [
           "\"https://vector.maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -602,7 +722,10 @@
         "signature": [
           "\"https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -616,7 +739,10 @@
         "signature": [
           "\"https://maps.elastic.co/v7.13\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -630,7 +756,10 @@
         "signature": [
           "\"road_map_desaturated\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -644,7 +773,10 @@
         "signature": [
           "\"road_map\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -658,7 +790,10 @@
         "signature": [
           "\"https://tiles.maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -672,7 +807,10 @@
         "signature": [
           "{ readonly name: string; readonly fields: Readonly<{} & { description: string; name: string; }>[]; readonly meta: Readonly<{} & { feature_collection_path: string; }>; readonly format: Readonly<{} & { type: string; }>; readonly url: string; readonly attribution: string; }"
         ],
-        "path": "src/plugins/maps_ems/config.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/config.ts",
+          "lineNumber": 57
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -686,7 +824,10 @@
         "signature": [
           "{ readonly includeElasticMapsService: boolean; readonly proxyElasticMapsServiceInMaps: boolean; readonly regionmap: Readonly<{} & { layers: Readonly<{} & { name: string; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; format: Readonly<{} & { type: string; }>; url: string; attribution: string; }>[]; includeElasticMapsService: boolean; }>; readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly manifestServiceUrl: string; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }"
         ],
-        "path": "src/plugins/maps_ems/config.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/config.ts",
+          "lineNumber": 89
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -700,7 +841,10 @@
         "signature": [
           "\"TMS in config/kibana.yml\""
         ],
-        "path": "src/plugins/maps_ems/common/index.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/index.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -713,7 +857,10 @@
         "tags": [],
         "label": "ORIGIN",
         "description": [],
-        "path": "src/plugins/maps_ems/common/origin.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/origin.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -723,7 +870,10 @@
             "tags": [],
             "label": "EMS",
             "description": [],
-            "path": "src/plugins/maps_ems/common/origin.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/common/origin.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           },
           {
@@ -733,7 +883,10 @@
             "tags": [],
             "label": "KIBANA_YML",
             "description": [],
-            "path": "src/plugins/maps_ems/common/origin.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/common/origin.ts",
+              "lineNumber": 11
+            },
             "deprecated": false
           }
         ],
@@ -747,7 +900,10 @@
       "tags": [],
       "label": "MapsEmsPluginSetup",
       "description": [],
-      "path": "src/plugins/maps_ems/public/index.ts",
+      "source": {
+        "path": "src/plugins/maps_ems/public/index.ts",
+        "lineNumber": 31
+      },
       "deprecated": false,
       "children": [
         {
@@ -760,7 +916,10 @@
           "signature": [
             "{ readonly includeElasticMapsService: boolean; readonly proxyElasticMapsServiceInMaps: boolean; readonly regionmap: Readonly<{} & { layers: Readonly<{} & { name: string; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; format: Readonly<{} & { type: string; }>; url: string; attribution: string; }>[]; includeElasticMapsService: boolean; }>; readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly manifestServiceUrl: string; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }"
           ],
-          "path": "src/plugins/maps_ems/public/index.ts",
+          "source": {
+            "path": "src/plugins/maps_ems/public/index.ts",
+            "lineNumber": 32
+          },
           "deprecated": false
         },
         {
@@ -781,10 +940,13 @@
             },
             ">"
           ],
-          "path": "src/plugins/maps_ems/public/index.ts",
+          "source": {
+            "path": "src/plugins/maps_ems/public/index.ts",
+            "lineNumber": 33
+          },
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -800,7 +962,10 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/maps_ems/public/index.ts",
+      "source": {
+        "path": "src/plugins/maps_ems/public/index.ts",
+        "lineNumber": 35
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -841,7 +1006,10 @@
           },
           ", void, object, object>"
         ],
-        "path": "src/plugins/maps_ems/server/index.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/server/index.ts",
+          "lineNumber": 38
+        },
         "deprecated": false,
         "children": [
           {
@@ -861,7 +1029,10 @@
               },
               "<Readonly<{} & { includeElasticMapsService: boolean; proxyElasticMapsServiceInMaps: boolean; regionmap: Readonly<{} & { layers: Readonly<{} & { name: string; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; format: Readonly<{} & { type: string; }>; url: string; attribution: string; }>[]; includeElasticMapsService: boolean; }>; tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; manifestServiceUrl: string; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }>>"
             ],
-            "path": "src/plugins/maps_ems/server/index.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/server/index.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -874,7 +1045,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/maps_ems/server/index.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/server/index.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
             "children": [
               {
@@ -894,7 +1068,10 @@
                   },
                   "<Readonly<{} & { includeElasticMapsService: boolean; proxyElasticMapsServiceInMaps: boolean; regionmap: Readonly<{} & { layers: Readonly<{} & { name: string; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; format: Readonly<{} & { type: string; }>; url: string; attribution: string; }>[]; includeElasticMapsService: boolean; }>; tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; manifestServiceUrl: string; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }>>"
                 ],
-                "path": "src/plugins/maps_ems/server/index.ts",
+                "source": {
+                  "path": "src/plugins/maps_ems/server/index.ts",
+                  "lineNumber": 41
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -919,7 +1096,10 @@
               },
               "<object, unknown>) => { config: Readonly<{} & { includeElasticMapsService: boolean; proxyElasticMapsServiceInMaps: boolean; regionmap: Readonly<{} & { layers: Readonly<{} & { name: string; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; format: Readonly<{} & { type: string; }>; url: string; attribution: string; }>[]; includeElasticMapsService: boolean; }>; tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; manifestServiceUrl: string; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }>; }"
             ],
-            "path": "src/plugins/maps_ems/server/index.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/server/index.ts",
+              "lineNumber": 45
+            },
             "deprecated": false,
             "children": [
               {
@@ -939,7 +1119,10 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "src/plugins/maps_ems/server/index.ts",
+                "source": {
+                  "path": "src/plugins/maps_ems/server/index.ts",
+                  "lineNumber": 45
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -956,7 +1139,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/maps_ems/server/index.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/server/index.ts",
+              "lineNumber": 52
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -974,7 +1160,10 @@
         "tags": [],
         "label": "MapsEmsPluginSetup",
         "description": [],
-        "path": "src/plugins/maps_ems/server/index.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/server/index.ts",
+          "lineNumber": 34
+        },
         "deprecated": false,
         "children": [
           {
@@ -987,7 +1176,10 @@
             "signature": [
               "{ readonly includeElasticMapsService: boolean; readonly proxyElasticMapsServiceInMaps: boolean; readonly regionmap: Readonly<{} & { layers: Readonly<{} & { name: string; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; format: Readonly<{} & { type: string; }>; url: string; attribution: string; }>[]; includeElasticMapsService: boolean; }>; readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly manifestServiceUrl: string; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }"
             ],
-            "path": "src/plugins/maps_ems/server/index.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/server/index.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           }
         ],
@@ -1014,7 +1206,10 @@
         "signature": [
           "\"dark_map\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1028,7 +1223,10 @@
         "signature": [
           "\"https://vector.maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1042,7 +1240,10 @@
         "signature": [
           "\"https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1056,7 +1257,10 @@
         "signature": [
           "\"https://maps.elastic.co/v7.13\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1070,7 +1274,10 @@
         "signature": [
           "\"road_map_desaturated\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1084,7 +1291,10 @@
         "signature": [
           "\"road_map\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1098,7 +1308,10 @@
         "signature": [
           "\"https://tiles.maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1112,7 +1325,10 @@
         "signature": [
           "\"TMS in config/kibana.yml\""
         ],
-        "path": "src/plugins/maps_ems/common/index.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/index.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1125,7 +1341,10 @@
         "tags": [],
         "label": "ORIGIN",
         "description": [],
-        "path": "src/plugins/maps_ems/common/origin.ts",
+        "source": {
+          "path": "src/plugins/maps_ems/common/origin.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -1135,7 +1354,10 @@
             "tags": [],
             "label": "EMS",
             "description": [],
-            "path": "src/plugins/maps_ems/common/origin.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/common/origin.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           },
           {
@@ -1145,7 +1367,10 @@
             "tags": [],
             "label": "KIBANA_YML",
             "description": [],
-            "path": "src/plugins/maps_ems/common/origin.ts",
+            "source": {
+              "path": "src/plugins/maps_ems/common/origin.ts",
+              "lineNumber": 11
+            },
             "deprecated": false
           }
         ],

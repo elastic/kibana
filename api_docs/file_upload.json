@@ -11,7 +11,10 @@
         "tags": [],
         "label": "CreateDocsResponse",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 30
+        },
         "deprecated": false,
         "children": [
           {
@@ -21,7 +24,10 @@
             "tags": [],
             "label": "success",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 31
+            },
             "deprecated": false
           },
           {
@@ -31,7 +37,10 @@
             "tags": [],
             "label": "remainder",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 32
+            },
             "deprecated": false
           },
           {
@@ -51,7 +60,10 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 33
+            },
             "deprecated": false
           },
           {
@@ -64,7 +76,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           }
         ],
@@ -77,7 +92,10 @@
         "tags": [],
         "label": "FileUploadComponentProps",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+          "lineNumber": 23
+        },
         "deprecated": false,
         "children": [
           {
@@ -87,7 +105,10 @@
             "tags": [],
             "label": "isIndexingTriggered",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -100,13 +121,15 @@
             "signature": [
               "(geojsonFile: GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>, name: string, previewCoverage: number) => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 25
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.geojsonFile",
+                "id": "def-public.FileUploadComponentProps.onFileSelect.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "geojsonFile",
@@ -114,30 +137,49 @@
                 "signature": [
                   "GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"
                 ],
-                "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+                  "lineNumber": 25
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.name",
+                "id": "def-public.FileUploadComponentProps.onFileSelect.$2",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+                  "lineNumber": 25
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.previewCoverage",
+                "id": "def-public.FileUploadComponentProps.onFileSelect.$3",
                 "type": "number",
                 "tags": [],
                 "label": "previewCoverage",
                 "description": [],
-                "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false
+                "signature": [
+                  "number"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+                  "lineNumber": 25
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -149,10 +191,13 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 26
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -164,10 +209,13 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 27
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -179,10 +227,13 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 28
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -202,13 +253,15 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 29
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.results",
+                "id": "def-public.FileUploadComponentProps.onUploadComplete.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "results",
@@ -222,10 +275,15 @@
                     "text": "FileUploadGeoResults"
                   }
                 ],
-                "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+                  "lineNumber": 29
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -237,10 +295,13 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 30
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -252,7 +313,10 @@
         "tags": [],
         "label": "FileUploadGeoResults",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -262,7 +326,10 @@
             "tags": [],
             "label": "indexPatternId",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -272,7 +339,10 @@
             "tags": [],
             "label": "geoFieldName",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -283,24 +353,15 @@
             "label": "geoFieldType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".GEO_POINT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".GEO_SHAPE"
             ],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -310,7 +371,10 @@
             "tags": [],
             "label": "docCount",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           }
         ],
@@ -323,7 +387,10 @@
         "tags": [],
         "label": "IImporter",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 43
+        },
         "deprecated": false,
         "children": [
           {
@@ -336,7 +403,10 @@
             "signature": [
               "(data: ArrayBuffer) => { success: boolean; }"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 44
+            },
             "deprecated": false,
             "children": [
               {
@@ -349,7 +419,10 @@
                 "signature": [
                   "ArrayBuffer"
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 44
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -398,7 +471,10 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 45
+            },
             "deprecated": false,
             "children": [
               {
@@ -411,7 +487,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 46
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -431,7 +510,10 @@
                     "text": "Settings"
                   }
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 47
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -451,7 +533,10 @@
                     "text": "Mappings"
                   }
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 48
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -471,7 +556,10 @@
                     "text": "IngestPipeline"
                   }
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 49
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -496,7 +584,10 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 51
+            },
             "deprecated": false,
             "children": [
               {
@@ -509,7 +600,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 52
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -523,7 +617,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 53
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -537,7 +634,10 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 54
+                },
                 "deprecated": false,
                 "isRequired": false
               },
@@ -551,7 +651,10 @@
                 "signature": [
                   "(progress: number) => void"
                 ],
-                "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 55
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -568,7 +671,10 @@
         "tags": [],
         "label": "ImportConfig",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -587,7 +693,10 @@
                 "text": "Settings"
               }
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -606,7 +715,10 @@
                 "text": "Mappings"
               }
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -625,7 +737,10 @@
                 "text": "IngestPipeline"
               }
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           }
         ],
@@ -638,7 +753,10 @@
         "tags": [],
         "label": "ImportFactoryOptions",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 37
+        },
         "deprecated": false,
         "children": [
           {
@@ -651,7 +769,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 38
+            },
             "deprecated": false
           },
           {
@@ -664,7 +785,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -683,7 +807,10 @@
                 "text": "ImportConfig"
               }
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           }
         ],
@@ -696,7 +823,10 @@
         "tags": [],
         "label": "ImportResults",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 23
+        },
         "deprecated": false,
         "children": [
           {
@@ -706,7 +836,10 @@
             "tags": [],
             "label": "success",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -726,7 +859,10 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -739,7 +875,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -752,7 +891,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           }
         ],
@@ -765,7 +907,10 @@
         "tags": [],
         "label": "Props",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -775,7 +920,10 @@
             "tags": [],
             "label": "indexName",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -788,7 +936,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+              "lineNumber": 16
+            },
             "deprecated": false
           },
           {
@@ -801,23 +952,32 @@
             "signature": [
               "(name: string, error?: string | undefined) => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+              "lineNumber": 17
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.name",
+                "id": "def-public.Props.onIndexNameChange.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+                  "lineNumber": 17
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.error",
+                "id": "def-public.Props.onIndexNameChange.$2",
                 "type": "string",
                 "tags": [],
                 "label": "error",
@@ -825,10 +985,15 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+                  "lineNumber": 17
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -840,10 +1005,13 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+              "lineNumber": 18
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -855,10 +1023,13 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+              "lineNumber": 19
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -877,7 +1048,10 @@
       "signature": [
         "FileUploadStartApi"
       ],
-      "path": "x-pack/plugins/file_upload/public/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/file_upload/public/plugin.ts",
+        "lineNumber": 30
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -902,7 +1076,10 @@
         "tags": [],
         "label": "AnalysisResult",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -921,7 +1098,10 @@
                 "text": "FindFileStructureResponse"
               }
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -941,7 +1121,10 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           }
         ],
@@ -954,7 +1137,10 @@
         "tags": [],
         "label": "Doc",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 117
+        },
         "deprecated": false,
         "children": [
           {
@@ -964,7 +1150,10 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 118
+            },
             "deprecated": false
           }
         ],
@@ -977,7 +1166,10 @@
         "tags": [],
         "label": "FindFileStructureErrorResponse",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 74
+        },
         "deprecated": false,
         "children": [
           {
@@ -990,7 +1182,10 @@
             "signature": [
               "{ statusCode: number; error: string; message: string; attributes?: ErrorAttribute | undefined; }"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 75
+            },
             "deprecated": false
           },
           {
@@ -1000,7 +1195,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 81
+            },
             "deprecated": false
           }
         ],
@@ -1013,7 +1211,10 @@
         "tags": [],
         "label": "FindFileStructureResponse",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "children": [
           {
@@ -1023,7 +1224,10 @@
             "tags": [],
             "label": "charset",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -1033,7 +1237,10 @@
             "tags": [],
             "label": "has_header_row",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -1043,7 +1250,10 @@
             "tags": [],
             "label": "has_byte_order_marker",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -1053,7 +1263,10 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -1066,7 +1279,10 @@
             "signature": [
               "{ [fieldName: string]: { count: number; cardinality: number; top_hits: { count: number; value: any; }[]; mean_value?: number | undefined; median_value?: number | undefined; max_value?: number | undefined; min_value?: number | undefined; earliest?: string | undefined; latest?: string | undefined; }; }"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 31
+            },
             "deprecated": false
           },
           {
@@ -1076,7 +1292,10 @@
             "tags": [],
             "label": "sample_start",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 44
+            },
             "deprecated": false
           },
           {
@@ -1086,7 +1305,10 @@
             "tags": [],
             "label": "num_messages_analyzed",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 45
+            },
             "deprecated": false
           },
           {
@@ -1098,256 +1320,73 @@
             "description": [],
             "signature": [
               "{ properties: { [fieldName: string]: { type: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".STRING | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".TEXT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".KEYWORD | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".VERSION | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".BOOLEAN | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".OBJECT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DATE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DATE_NANOS | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DATE_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".GEO_POINT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".GEO_SHAPE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".FLOAT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".HALF_FLOAT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".SCALED_FLOAT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DOUBLE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".INTEGER | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".LONG | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".SHORT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".UNSIGNED_LONG | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".FLOAT_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DOUBLE_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".INTEGER_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".LONG_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".NESTED | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".BYTE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".IP | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".IP_RANGE | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".ATTACHMENT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".TOKEN_COUNT | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".MURMUR3 | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".HISTOGRAM; format?: string | undefined; }; }; }"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 46
+            },
             "deprecated": false
           },
           {
@@ -1357,7 +1396,10 @@
             "tags": [],
             "label": "quote",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 59
+            },
             "deprecated": false
           },
           {
@@ -1367,7 +1409,10 @@
             "tags": [],
             "label": "delimiter",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 60
+            },
             "deprecated": false
           },
           {
@@ -1377,7 +1422,10 @@
             "tags": [],
             "label": "need_client_timezone",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 61
+            },
             "deprecated": false
           },
           {
@@ -1387,7 +1435,10 @@
             "tags": [],
             "label": "num_lines_analyzed",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 62
+            },
             "deprecated": false
           },
           {
@@ -1400,7 +1451,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 63
+            },
             "deprecated": false
           },
           {
@@ -1413,7 +1467,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 64
+            },
             "deprecated": false
           },
           {
@@ -1426,7 +1483,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 65
+            },
             "deprecated": false
           },
           {
@@ -1439,7 +1499,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 66
+            },
             "deprecated": false
           },
           {
@@ -1452,7 +1515,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 67
+            },
             "deprecated": false
           },
           {
@@ -1465,7 +1531,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 68
+            },
             "deprecated": false
           },
           {
@@ -1478,7 +1547,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 69
+            },
             "deprecated": false
           },
           {
@@ -1491,7 +1563,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 70
+            },
             "deprecated": false
           },
           {
@@ -1504,7 +1579,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 71
+            },
             "deprecated": false
           }
         ],
@@ -1517,7 +1595,10 @@
         "tags": [],
         "label": "HasImportPermission",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 92
+        },
         "deprecated": false,
         "children": [
           {
@@ -1527,7 +1608,10 @@
             "tags": [],
             "label": "hasImportPermission",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 93
+            },
             "deprecated": false
           }
         ],
@@ -1540,7 +1624,10 @@
         "tags": [],
         "label": "ImportFailure",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 111
+        },
         "deprecated": false,
         "children": [
           {
@@ -1550,7 +1637,10 @@
             "tags": [],
             "label": "item",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 112
+            },
             "deprecated": false
           },
           {
@@ -1560,7 +1650,10 @@
             "tags": [],
             "label": "reason",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 113
+            },
             "deprecated": false
           },
           {
@@ -1580,7 +1673,10 @@
                 "text": "Doc"
               }
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 114
+            },
             "deprecated": false
           }
         ],
@@ -1593,7 +1689,10 @@
         "tags": [],
         "label": "ImportResponse",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 98
+        },
         "deprecated": false,
         "children": [
           {
@@ -1603,7 +1702,10 @@
             "tags": [],
             "label": "success",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 99
+            },
             "deprecated": false
           },
           {
@@ -1613,7 +1715,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 100
+            },
             "deprecated": false
           },
           {
@@ -1626,7 +1731,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 101
+            },
             "deprecated": false
           },
           {
@@ -1639,7 +1747,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 102
+            },
             "deprecated": false
           },
           {
@@ -1649,7 +1760,10 @@
             "tags": [],
             "label": "docCount",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 103
+            },
             "deprecated": false
           },
           {
@@ -1669,7 +1783,10 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 104
+            },
             "deprecated": false
           },
           {
@@ -1684,7 +1801,10 @@
               "ErrorCause",
               "; } | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 105
+            },
             "deprecated": false
           },
           {
@@ -1697,7 +1817,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 108
+            },
             "deprecated": false
           }
         ],
@@ -1710,7 +1833,10 @@
         "tags": [],
         "label": "IngestPipeline",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 144
+        },
         "deprecated": false,
         "children": [
           {
@@ -1720,7 +1846,10 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 145
+            },
             "deprecated": false
           },
           {
@@ -1733,7 +1862,10 @@
             "signature": [
               "any[]"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 146
+            },
             "deprecated": false
           }
         ],
@@ -1746,7 +1878,10 @@
         "tags": [],
         "label": "IngestPipelineWrapper",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 139
+        },
         "deprecated": false,
         "children": [
           {
@@ -1756,7 +1891,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 140
+            },
             "deprecated": false
           },
           {
@@ -1775,7 +1913,10 @@
                 "text": "IngestPipeline"
               }
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 141
+            },
             "deprecated": false
           }
         ],
@@ -1788,7 +1929,10 @@
         "tags": [],
         "label": "InputOverrides",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -1801,7 +1945,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           }
         ],
@@ -1814,7 +1961,10 @@
         "tags": [],
         "label": "Mappings",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 130
+        },
         "deprecated": false,
         "children": [
           {
@@ -1827,7 +1977,10 @@
             "signature": [
               "{ created_by: string; } | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 131
+            },
             "deprecated": false
           },
           {
@@ -1840,7 +1993,10 @@
             "signature": [
               "{ [key: string]: any; }"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 134
+            },
             "deprecated": false
           }
         ],
@@ -1853,7 +2009,10 @@
         "tags": [],
         "label": "Settings",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 123
+        },
         "deprecated": false,
         "children": [
           {
@@ -1866,7 +2025,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 124
+            },
             "deprecated": false
           },
           {
@@ -1876,7 +2038,10 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 125
+            },
             "deprecated": false
           },
           {
@@ -1889,7 +2054,10 @@
             "signature": [
               "any[]"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 126
+            },
             "deprecated": false
           },
           {
@@ -1902,7 +2070,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 127
+            },
             "deprecated": false
           }
         ],
@@ -1921,7 +2092,10 @@
         "signature": [
           "1073741274"
         ],
-        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1935,7 +2109,10 @@
         "signature": [
           "\"0,0.[0] b\""
         ],
-        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1956,7 +2133,10 @@
           },
           " & { column_names: string[]; has_header_row: boolean; should_trim_fields: boolean; }"
         ],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1977,7 +2157,10 @@
             "text": "Doc"
           }
         ],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 121
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1991,7 +2174,10 @@
         "signature": [
           "\"file-data-visualizer\""
         ],
-        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 19
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2005,7 +2191,10 @@
         "signature": [
           "any[]"
         ],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 96
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2019,7 +2208,10 @@
         "signature": [
           "\"100MB\""
         ],
-        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2033,7 +2225,10 @@
         "signature": [
           "104857600"
         ],
-        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2044,7 +2239,10 @@
         "tags": [],
         "label": "MB",
         "description": [],
-        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2058,7 +2256,10 @@
         "signature": [
           "\"fileUpload:maxFileSize\""
         ],
-        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

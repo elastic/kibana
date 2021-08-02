@@ -21,7 +21,10 @@
           },
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+          "lineNumber": 22
+        },
         "deprecated": false,
         "children": [
           {
@@ -40,7 +43,10 @@
                 "text": "Props"
               }
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+              "lineNumber": 22
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -66,7 +72,10 @@
           },
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+          "lineNumber": 78
+        },
         "deprecated": false,
         "children": [
           {
@@ -85,7 +94,10 @@
                 "text": "Props"
               }
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 78
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -102,7 +114,10 @@
         "tags": [],
         "label": "FormState",
         "description": [],
-        "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "children": [
           {
@@ -115,7 +130,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -125,7 +143,10 @@
             "tags": [],
             "label": "isSubmitted",
             "description": [],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 41
+            },
             "deprecated": false
           },
           {
@@ -146,7 +167,10 @@
               },
               "; isValid: boolean; }>"
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 42
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -160,7 +184,10 @@
                 "signature": [
                   "React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined"
                 ],
-                "path": "src/plugins/es_ui_shared/static/forms/hook_form_lib/types.ts",
+                "source": {
+                  "path": "src/plugins/es_ui_shared/static/forms/hook_form_lib/types.ts",
+                  "lineNumber": 29
+                },
                 "deprecated": false
               }
             ]
@@ -175,7 +202,10 @@
         "tags": [],
         "label": "Props",
         "description": [],
-        "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+          "lineNumber": 55
+        },
         "deprecated": false,
         "children": [
           {
@@ -198,13 +228,15 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 59
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "runtimeFields",
-                "id": "def-public.field",
+                "id": "def-public.Props.onSave.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "field",
@@ -218,10 +250,15 @@
                     "text": "RuntimeField"
                   }
                 ],
-                "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+                  "lineNumber": 59
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "runtimeFields",
@@ -235,10 +272,13 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 63
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "runtimeFields",
@@ -258,7 +298,10 @@
                 "text": "DocLinksStart"
               }
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 67
+            },
             "deprecated": false
           },
           {
@@ -280,7 +323,10 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 71
+            },
             "deprecated": false
           },
           {
@@ -295,7 +341,10 @@
             "signature": [
               "{ namesNotAllowed?: string[] | undefined; existingConcreteFields?: Field[] | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 75
+            },
             "deprecated": false
           }
         ],
@@ -308,7 +357,10 @@
         "tags": [],
         "label": "RuntimeField",
         "description": [],
-        "path": "x-pack/plugins/runtime_fields/public/types.ts",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/types.ts",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [
           {
@@ -318,7 +370,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/runtime_fields/public/types.ts",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/types.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           },
           {
@@ -331,7 +386,10 @@
             "signature": [
               "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\""
             ],
-            "path": "x-pack/plugins/runtime_fields/public/types.ts",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/types.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -344,7 +402,10 @@
             "signature": [
               "{ source: string; }"
             ],
-            "path": "x-pack/plugins/runtime_fields/public/types.ts",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/types.ts",
+              "lineNumber": 36
+            },
             "deprecated": false
           }
         ],
@@ -364,7 +425,10 @@
           "ComboBoxOption",
           "<\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\">[]"
         ],
-        "path": "x-pack/plugins/runtime_fields/public/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/constants.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -378,7 +442,10 @@
         "signature": [
           "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\""
         ],
-        "path": "x-pack/plugins/runtime_fields/public/types.ts",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/types.ts",
+          "lineNumber": 31
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -391,7 +458,10 @@
       "tags": [],
       "label": "PluginSetup",
       "description": [],
-      "path": "x-pack/plugins/runtime_fields/public/types.ts",
+      "source": {
+        "path": "x-pack/plugins/runtime_fields/public/types.ts",
+        "lineNumber": 17
+      },
       "deprecated": false,
       "children": [
         {
@@ -406,7 +476,10 @@
             "LoadEditorResponse",
             ">"
           ],
-          "path": "x-pack/plugins/runtime_fields/public/types.ts",
+          "source": {
+            "path": "x-pack/plugins/runtime_fields/public/types.ts",
+            "lineNumber": 18
+          },
           "deprecated": false,
           "children": [],
           "returnComment": []

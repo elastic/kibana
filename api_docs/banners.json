@@ -27,7 +27,10 @@
         "tags": [],
         "label": "BannerConfiguration",
         "description": [],
-        "path": "x-pack/plugins/banners/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/banners/common/types.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "children": [
           {
@@ -40,7 +43,10 @@
             "signature": [
               "\"top\" | \"disabled\""
             ],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           },
           {
@@ -50,7 +56,10 @@
             "tags": [],
             "label": "textContent",
             "description": [],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -60,7 +69,10 @@
             "tags": [],
             "label": "textColor",
             "description": [],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -70,7 +82,10 @@
             "tags": [],
             "label": "backgroundColor",
             "description": [],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           }
         ],
@@ -83,7 +98,10 @@
         "tags": [],
         "label": "BannerInfoResponse",
         "description": [],
-        "path": "x-pack/plugins/banners/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/banners/common/types.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "children": [
           {
@@ -93,7 +111,10 @@
             "tags": [],
             "label": "allowed",
             "description": [],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 9
+            },
             "deprecated": false
           },
           {
@@ -112,7 +133,10 @@
                 "text": "BannerConfiguration"
               }
             ],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           }
         ],
@@ -131,7 +155,10 @@
         "signature": [
           "\"top\" | \"disabled\""
         ],
-        "path": "x-pack/plugins/banners/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/banners/common/types.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

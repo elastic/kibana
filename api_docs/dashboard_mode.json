@@ -35,7 +35,10 @@
           },
           "<void, void, object, object>"
         ],
-        "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+        "source": {
+          "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "children": [
           {
@@ -48,7 +51,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+              "lineNumber": 30
+            },
             "deprecated": false,
             "children": [
               {
@@ -68,7 +74,10 @@
                   },
                   "<unknown>"
                 ],
-                "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                  "lineNumber": 30
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -93,7 +102,10 @@
               },
               "<object, unknown>, { security }: DashboardModeServerSetupDependencies) => void"
             ],
-            "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+              "lineNumber": 34
+            },
             "deprecated": false,
             "children": [
               {
@@ -113,7 +125,10 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                  "lineNumber": 34
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -127,7 +142,10 @@
                 "signature": [
                   "DashboardModeServerSetupDependencies"
                 ],
-                "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                  "lineNumber": 34
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -152,7 +170,10 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+              "lineNumber": 60
+            },
             "deprecated": false,
             "children": [
               {
@@ -171,7 +192,10 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                "source": {
+                  "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                  "lineNumber": 60
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -188,7 +212,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+              "lineNumber": 62
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -217,7 +244,10 @@
         "tags": [],
         "label": "UI_SETTINGS",
         "description": [],
-        "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "children": [
           {
@@ -227,7 +257,10 @@
             "tags": [],
             "label": "CONFIG_DASHBOARD_ONLY_MODE_ROLES",
             "description": [],
-            "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
+              "lineNumber": 9
+            },
             "deprecated": false
           }
         ],

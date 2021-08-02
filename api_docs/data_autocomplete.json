@@ -11,7 +11,10 @@
         "tags": [],
         "label": "QuerySuggestionBasic",
         "description": [],
-        "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 38
+        },
         "deprecated": false,
         "children": [
           {
@@ -30,7 +33,10 @@
                 "text": "QuerySuggestionTypes"
               }
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -43,7 +49,10 @@
             "signature": [
               "string | JSX.Element | undefined"
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -53,7 +62,10 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           },
           {
@@ -63,7 +75,10 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 42
+            },
             "deprecated": false
           },
           {
@@ -73,7 +88,10 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 43
+            },
             "deprecated": false
           },
           {
@@ -86,7 +104,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 44
+            },
             "deprecated": false
           }
         ],
@@ -116,7 +137,10 @@
             "text": "QuerySuggestionBasic"
           }
         ],
-        "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 48
+        },
         "deprecated": false,
         "children": [
           {
@@ -136,7 +160,10 @@
               },
               ".Field"
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 49
+            },
             "deprecated": false
           },
           {
@@ -155,7 +182,10 @@
                 "text": "IFieldType"
               }
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           }
         ],
@@ -168,7 +198,10 @@
         "tags": [],
         "label": "QuerySuggestionGetFnArgs",
         "description": [],
-        "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 25
+        },
         "deprecated": false,
         "children": [
           {
@@ -178,7 +211,10 @@
             "tags": [],
             "label": "language",
             "description": [],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -198,7 +234,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -208,7 +247,10 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -218,7 +260,10 @@
             "tags": [],
             "label": "selectionStart",
             "description": [],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -228,7 +273,10 @@
             "tags": [],
             "label": "selectionEnd",
             "description": [],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -241,7 +289,10 @@
             "signature": [
               "AbortSignal | undefined"
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 31
+            },
             "deprecated": false
           },
           {
@@ -254,7 +305,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 32
+            },
             "deprecated": false
           },
           {
@@ -267,7 +321,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 33
+            },
             "deprecated": false
           },
           {
@@ -280,7 +337,10 @@
             "signature": [
               "\"terms_enum\" | \"terms_agg\" | undefined"
             ],
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           }
         ],
@@ -295,7 +355,10 @@
         "tags": [],
         "label": "QuerySuggestionTypes",
         "description": [],
-        "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -321,7 +384,10 @@
           "ValueSuggestionsGetFn",
           "; }"
         ],
-        "path": "src/plugins/data/public/autocomplete/autocomplete_service.ts",
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/autocomplete_service.ts",
+          "lineNumber": 103
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -349,7 +415,10 @@
             "text": "QuerySuggestionField"
           }
         ],
-        "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 54
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -379,8 +448,36 @@
           },
           "[]> | undefined"
         ],
-        "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+        "source": {
+          "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.args",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataAutocompletePluginApi",
+                "section": "def-public.QuerySuggestionGetFnArgs",
+                "text": "QuerySuggestionGetFnArgs"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

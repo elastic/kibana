@@ -11,7 +11,10 @@
         "tags": [],
         "label": "Tag",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -21,7 +24,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           },
           {
@@ -31,7 +37,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 11
+            },
             "deprecated": false
           },
           {
@@ -41,7 +50,10 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           },
           {
@@ -51,7 +63,10 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           }
         ],
@@ -77,7 +92,10 @@
           "text": "SavedObjectsTaggingApi"
         }
       ],
-      "path": "x-pack/plugins/saved_objects_tagging/public/types.ts",
+      "source": {
+        "path": "x-pack/plugins/saved_objects_tagging/public/types.ts",
+        "lineNumber": 10
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -113,7 +131,10 @@
             "text": "TagsCapabilities"
           }
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+          "lineNumber": 23
+        },
         "deprecated": false,
         "children": [
           {
@@ -126,7 +147,10 @@
             "signature": [
               "Capabilities"
             ],
-            "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+              "lineNumber": 23
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -144,7 +168,10 @@
         "signature": [
           "(color: string) => string | undefined"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+          "lineNumber": 27
+        },
         "deprecated": false,
         "children": [
           {
@@ -157,7 +184,10 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+              "lineNumber": 27
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -175,7 +205,10 @@
         "signature": [
           "(description: string) => string | undefined"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+          "lineNumber": 54
+        },
         "deprecated": false,
         "children": [
           {
@@ -188,7 +221,10 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+              "lineNumber": 54
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -206,7 +242,10 @@
         "signature": [
           "(name: string) => string | undefined"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+          "lineNumber": 35
+        },
         "deprecated": false,
         "children": [
           {
@@ -219,7 +258,10 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+              "lineNumber": 35
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -236,7 +278,10 @@
         "tags": [],
         "label": "ITagsClient",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "children": [
           {
@@ -265,7 +310,10 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 27
+            },
             "deprecated": false,
             "children": [
               {
@@ -284,7 +332,10 @@
                     "text": "TagAttributes"
                   }
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 27
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -309,7 +360,10 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 28
+            },
             "deprecated": false,
             "children": [
               {
@@ -322,7 +376,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 28
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -355,7 +412,10 @@
               },
               "[]>"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 29
+            },
             "deprecated": false,
             "children": [
               {
@@ -375,7 +435,10 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 29
+                },
                 "deprecated": false,
                 "isRequired": false
               }
@@ -392,7 +455,10 @@
             "signature": [
               "(id: string) => Promise<void>"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 30
+            },
             "deprecated": false,
             "children": [
               {
@@ -405,7 +471,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 30
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -438,7 +507,10 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 31
+            },
             "deprecated": false,
             "children": [
               {
@@ -451,7 +523,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 31
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -471,7 +546,10 @@
                     "text": "TagAttributes"
                   }
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 31
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -488,7 +566,10 @@
         "tags": [],
         "label": "Tag",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -498,7 +579,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           },
           {
@@ -508,7 +592,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 11
+            },
             "deprecated": false
           },
           {
@@ -518,7 +605,10 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           },
           {
@@ -528,7 +618,10 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           }
         ],
@@ -541,7 +634,10 @@
         "tags": [],
         "label": "TagAttributes",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -551,7 +647,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -561,7 +660,10 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -571,7 +673,10 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           }
         ],
@@ -586,7 +691,10 @@
         "description": [
           "\nRepresent the UI capabilities for the `savedObjectsTagging` section of `Capabilities`"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -596,7 +704,10 @@
             "tags": [],
             "label": "view",
             "description": [],
-            "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -606,7 +717,10 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           },
           {
@@ -616,7 +730,10 @@
             "tags": [],
             "label": "edit",
             "description": [],
-            "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -626,7 +743,10 @@
             "tags": [],
             "label": "delete",
             "description": [],
-            "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -636,7 +756,10 @@
             "tags": [],
             "label": "assign",
             "description": [],
-            "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -646,7 +769,10 @@
             "tags": [],
             "label": "viewConnections",
             "description": [],
-            "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           }
         ],
@@ -659,7 +785,10 @@
         "tags": [],
         "label": "TagValidation",
         "description": [],
-        "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -669,7 +798,10 @@
             "tags": [],
             "label": "valid",
             "description": [],
-            "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -682,7 +814,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -695,7 +830,10 @@
             "signature": [
               "{ color?: string | undefined; description?: string | undefined; id?: string | undefined; name?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+            "source": {
+              "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           }
         ],
@@ -714,7 +852,10 @@
         "signature": [
           "100"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -730,7 +871,10 @@
         "signature": [
           "\"savedObjectsTagging\""
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -746,7 +890,10 @@
         "signature": [
           "\"tags\""
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
+          "lineNumber": 19
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -760,7 +907,10 @@
         "signature": [
           "50"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -774,7 +924,10 @@
         "signature": [
           "2"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -797,7 +950,10 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -813,7 +969,10 @@
         "signature": [
           "\"tag\""
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -834,7 +993,10 @@
           },
           " & { relationCount: number; }"
         ],
-        "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/saved_objects_tagging/common/types.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

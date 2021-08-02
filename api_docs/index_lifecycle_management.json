@@ -28,7 +28,10 @@
             "text": "SerializableState"
           }
         ],
-        "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+        "source": {
+          "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "children": [
           {
@@ -41,7 +44,10 @@
             "signature": [
               "\"policies_list\" | \"policy_edit\" | \"policy_create\""
             ],
-            "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+            "source": {
+              "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -54,7 +60,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+            "source": {
+              "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           }
         ],
@@ -73,7 +82,10 @@
         "signature": [
           "\"ILM_LOCATOR_ID\""
         ],
-        "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+        "source": {
+          "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

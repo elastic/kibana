@@ -17,7 +17,10 @@
         "tags": [],
         "label": "License",
         "description": [],
-        "path": "x-pack/plugins/license_api_guard/server/license.ts",
+        "source": {
+          "path": "x-pack/plugins/license_api_guard/server/license.ts",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [
           {
@@ -30,7 +33,10 @@
             "signature": [
               "({ pluginName, logger }: SetupSettings) => void"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
             "children": [
               {
@@ -43,7 +49,10 @@
                 "signature": [
                   "SetupSettings"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "source": {
+                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                  "lineNumber": 41
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -60,7 +69,10 @@
             "signature": [
               "({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 46
+            },
             "deprecated": false,
             "children": [
               {
@@ -73,7 +85,10 @@
                 "signature": [
                   "StartSettings"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "source": {
+                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                  "lineNumber": 46
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -478,7 +493,10 @@
               },
               "<any>>"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 92
+            },
             "deprecated": false,
             "children": [
               {
@@ -672,7 +690,10 @@
                   "KibanaResponse",
                   "<undefined>; }>"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "source": {
+                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                  "lineNumber": 93
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -686,7 +707,10 @@
             "tags": [],
             "label": "isEsSecurityEnabled",
             "description": [],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 116
+            },
             "deprecated": false
           }
         ],

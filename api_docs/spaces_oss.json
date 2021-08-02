@@ -13,7 +13,10 @@
         "description": [
           "\nProperties for the LegacyUrlConflict component."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 254
+        },
         "deprecated": false,
         "children": [
           {
@@ -28,7 +31,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 261
+            },
             "deprecated": false
           },
           {
@@ -40,7 +46,10 @@
             "description": [
               "\nThe ID of the object that is currently shown on the page."
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 265
+            },
             "deprecated": false
           },
           {
@@ -52,7 +61,10 @@
             "description": [
               "\nThe ID of the other object that the legacy URL alias points to."
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 269
+            },
             "deprecated": false
           },
           {
@@ -64,7 +76,10 @@
             "description": [
               "\nThe path to use for the new URL, optionally including `search` and/or `hash` URL components."
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 273
+            },
             "deprecated": false
           }
         ],
@@ -79,7 +94,10 @@
         "description": [
           "\nProperties for the ShareToSpaceFlyout."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 131
+        },
         "deprecated": false,
         "children": [
           {
@@ -100,7 +118,10 @@
                 "text": "ShareToSpaceSavedObjectTarget"
               }
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 135
+            },
             "deprecated": false
           },
           {
@@ -115,7 +136,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 141
+            },
             "deprecated": false
           },
           {
@@ -130,7 +154,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 147
+            },
             "deprecated": false
           },
           {
@@ -145,7 +172,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 154
+            },
             "deprecated": false
           },
           {
@@ -160,7 +190,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 161
+            },
             "deprecated": false
           },
           {
@@ -175,7 +208,10 @@
             "signature": [
               "\"within-space\" | \"outside-space\" | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 169
+            },
             "deprecated": false
           },
           {
@@ -190,8 +226,65 @@
             "signature": [
               "((objects: { type: string; id: string; }[], spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 175
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "{ type: string; id: string; }[]"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 176
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToAdd",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 177
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToRemove",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 178
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "spacesOss",
@@ -205,8 +298,31 @@
             "signature": [
               "((updatedObjects: { type: string; id: string; }[]) => void) | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 183
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.ShareToSpaceFlyoutProps.onUpdate.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "updatedObjects",
+                "description": [],
+                "signature": [
+                  "{ type: string; id: string; }[]"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 183
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "spacesOss",
@@ -220,8 +336,13 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 187
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -235,7 +356,10 @@
         "description": [
           "\nDescribes the target saved object during a share operation."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 193
+        },
         "deprecated": false,
         "children": [
           {
@@ -247,7 +371,10 @@
             "description": [
               "\nThe object's type."
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 197
+            },
             "deprecated": false
           },
           {
@@ -259,7 +386,10 @@
             "description": [
               "\nThe object's ID."
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 201
+            },
             "deprecated": false
           },
           {
@@ -274,7 +404,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 205
+            },
             "deprecated": false
           },
           {
@@ -289,7 +422,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 211
+            },
             "deprecated": false
           },
           {
@@ -304,7 +440,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 217
+            },
             "deprecated": false
           },
           {
@@ -319,7 +458,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 223
+            },
             "deprecated": false
           }
         ],
@@ -334,7 +476,10 @@
         "description": [
           "\nProperties for the SpaceAvatar component."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 279
+        },
         "deprecated": false,
         "children": [
           {
@@ -349,7 +494,10 @@
             "signature": [
               "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; }"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 281
+            },
             "deprecated": false
           },
           {
@@ -364,7 +512,10 @@
             "signature": [
               "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 284
+            },
             "deprecated": false
           },
           {
@@ -379,7 +530,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 287
+            },
             "deprecated": false
           },
           {
@@ -394,7 +548,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 294
+            },
             "deprecated": false
           },
           {
@@ -409,7 +566,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 301
+            },
             "deprecated": false
           }
         ],
@@ -424,7 +584,10 @@
         "description": [
           "\nProperties for the SpaceList component."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 229
+        },
         "deprecated": false,
         "children": [
           {
@@ -439,7 +602,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 233
+            },
             "deprecated": false
           },
           {
@@ -454,7 +620,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 240
+            },
             "deprecated": false
           },
           {
@@ -469,7 +638,10 @@
             "signature": [
               "\"within-space\" | \"outside-space\" | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 248
+            },
             "deprecated": false
           }
         ],
@@ -484,7 +656,10 @@
         "description": [
           "\nClient-side Spaces API."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -509,7 +684,10 @@
               },
               ">"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 22
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -534,7 +712,10 @@
               },
               ">"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 27
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -557,7 +738,10 @@
                 "text": "SpacesApiUi"
               }
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 32
+            },
             "deprecated": false
           }
         ],
@@ -572,7 +756,10 @@
         "description": [
           "\nUI components and services to add spaces capabilities to an application."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 43
+        },
         "deprecated": false,
         "children": [
           {
@@ -593,7 +780,10 @@
                 "text": "SpacesApiUiComponent"
               }
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 47
+            },
             "deprecated": false
           },
           {
@@ -608,25 +798,34 @@
             "signature": [
               "(path: string, objectNoun?: string | undefined) => Promise<void>"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 68
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "spacesOss",
-                "id": "def-public.path",
+                "id": "def-public.SpacesApiUi.redirectLegacyUrl.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
                 "description": [
                   "The path to use for the new URL, optionally including `search` and/or `hash` URL components."
                 ],
-                "path": "src/plugins/spaces_oss/public/api.ts",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 68
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "spacesOss",
-                "id": "def-public.objectNoun",
+                "id": "def-public.SpacesApiUi.redirectLegacyUrl.$2",
                 "type": "string",
                 "tags": [],
                 "label": "objectNoun",
@@ -636,10 +835,15 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/spaces_oss/public/api.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 68
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -653,7 +857,10 @@
         "description": [
           "\nReact UI components to be used to display the Spaces feature in any application."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 74
+        },
         "deprecated": false,
         "children": [
           {
@@ -676,7 +883,10 @@
               },
               ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 78
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -690,7 +900,10 @@
                 "signature": [
                   "T"
                 ],
-                "path": "src/plugins/spaces_oss/public/api.ts",
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
                 "deprecated": false
               }
             ]
@@ -715,7 +928,10 @@
               },
               ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 84
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -729,7 +945,10 @@
                 "signature": [
                   "T"
                 ],
-                "path": "src/plugins/spaces_oss/public/api.ts",
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
                 "deprecated": false
               }
             ]
@@ -754,7 +973,10 @@
               },
               ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 93
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -768,7 +990,10 @@
                 "signature": [
                   "T"
                 ],
-                "path": "src/plugins/spaces_oss/public/api.ts",
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
                 "deprecated": false
               }
             ]
@@ -793,7 +1018,10 @@
               },
               ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 111
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -807,7 +1035,10 @@
                 "signature": [
                   "T"
                 ],
-                "path": "src/plugins/spaces_oss/public/api.ts",
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
                 "deprecated": false
               }
             ]
@@ -832,7 +1063,10 @@
               },
               ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 115
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -846,7 +1080,10 @@
                 "signature": [
                   "T"
                 ],
-                "path": "src/plugins/spaces_oss/public/api.ts",
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
                 "deprecated": false
               }
             ]
@@ -880,7 +1117,10 @@
             "text": "SpacesApi"
           }
         ],
-        "path": "src/plugins/spaces_oss/public/types.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/types.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -895,7 +1135,10 @@
             "signature": [
               "true"
             ],
-            "path": "src/plugins/spaces_oss/public/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/types.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           }
         ],
@@ -910,7 +1153,10 @@
         "description": [
           "\nProperties for the SpacesContext."
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 121
+        },
         "deprecated": false,
         "children": [
           {
@@ -925,7 +1171,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/public/api.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 125
+            },
             "deprecated": false
           }
         ],
@@ -942,7 +1191,10 @@
         "description": [
           "\nOSS Spaces plugin start contract when the Spaces feature is disabled."
         ],
-        "path": "src/plugins/spaces_oss/public/types.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/types.ts",
+          "lineNumber": 24
+        },
         "deprecated": true,
         "removeBy": "8.0",
         "references": [],
@@ -959,7 +1211,10 @@
             "signature": [
               "false"
             ],
-            "path": "src/plugins/spaces_oss/public/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/public/types.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           }
         ],
@@ -980,8 +1235,30 @@
         "signature": [
           "(props: T) => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
         ],
-        "path": "src/plugins/spaces_oss/public/api.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 38
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 38
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -995,7 +1272,10 @@
       "description": [
         "\nOSS Spaces plugin setup contract."
       ],
-      "path": "src/plugins/spaces_oss/public/types.ts",
+      "source": {
+        "path": "src/plugins/spaces_oss/public/types.ts",
+        "lineNumber": 32
+      },
       "deprecated": false,
       "children": [
         {
@@ -1020,7 +1300,10 @@
             },
             ") => void"
           ],
-          "path": "src/plugins/spaces_oss/public/types.ts",
+          "source": {
+            "path": "src/plugins/spaces_oss/public/types.ts",
+            "lineNumber": 42
+          },
           "deprecated": false,
           "children": [
             {
@@ -1041,7 +1324,10 @@
                   "text": "SpacesApi"
                 }
               ],
-              "path": "src/plugins/spaces_oss/public/types.ts",
+              "source": {
+                "path": "src/plugins/spaces_oss/public/types.ts",
+                "lineNumber": 42
+              },
               "deprecated": false,
               "isRequired": true
             }
@@ -1078,7 +1364,10 @@
           "text": "SpacesUnavailableStartContract"
         }
       ],
-      "path": "src/plugins/spaces_oss/public/types.ts",
+      "source": {
+        "path": "src/plugins/spaces_oss/public/types.ts",
+        "lineNumber": 48
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1105,7 +1394,10 @@
         "description": [
           "\nA Space."
         ],
-        "path": "src/plugins/spaces_oss/common/types.ts",
+        "source": {
+          "path": "src/plugins/spaces_oss/common/types.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -1117,7 +1409,10 @@
             "description": [
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
-            "path": "src/plugins/spaces_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -1129,7 +1424,10 @@
             "description": [
               "\nDisplay name for this space."
             ],
-            "path": "src/plugins/spaces_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -1144,7 +1442,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -1159,7 +1460,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -1174,7 +1478,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 43
+            },
             "deprecated": false
           },
           {
@@ -1189,7 +1496,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/spaces_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 49
+            },
             "deprecated": false
           },
           {
@@ -1204,7 +1514,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/spaces_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 54
+            },
             "deprecated": false
           },
           {
@@ -1221,7 +1534,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/spaces_oss/common/types.ts",
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 61
+            },
             "deprecated": false
           }
         ],

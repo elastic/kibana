@@ -45,7 +45,10 @@
           },
           ">"
         ],
-        "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+        "source": {
+          "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+          "lineNumber": 87
+        },
         "deprecated": false,
         "children": [
           {
@@ -58,7 +61,10 @@
             "signature": [
               "\"dashboard\""
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 88
+            },
             "deprecated": false
           },
           {
@@ -71,7 +77,10 @@
             "signature": [
               "() => number"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 90
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -86,7 +95,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 94
+            },
             "deprecated": false,
             "children": [
               {
@@ -105,7 +117,10 @@
                     "text": "DashboardContainerInput"
                   }
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 95
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -119,7 +134,10 @@
                 "signature": [
                   "DashboardContainerServices"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 96
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -156,7 +174,10 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 97
+                },
                 "deprecated": false,
                 "isRequired": false
               }
@@ -201,7 +222,10 @@
               "DashboardPanelState",
               "<TEmbeddableInput>"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 110
+            },
             "deprecated": false,
             "children": [
               {
@@ -223,7 +247,10 @@
                   "SavedObjectAttributes",
                   ">"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 114
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -237,7 +264,10 @@
                 "signature": [
                   "Partial<TEmbeddableInput>"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 115
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -266,7 +296,10 @@
               "PanelPlacementMethod",
               "<TPlacementMethodArgs> | undefined, placementArgs?: TPlacementMethodArgs | undefined) => void"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 122
+            },
             "deprecated": false,
             "children": [
               {
@@ -287,7 +320,10 @@
                   },
                   "<{ id: string; }>>>"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 123
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -302,7 +338,10 @@
                   "PanelPlacementMethod",
                   "<TPlacementMethodArgs> | undefined"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 124
+                },
                 "deprecated": false,
                 "isRequired": false
               },
@@ -316,7 +355,10 @@
                 "signature": [
                   "TPlacementMethodArgs | undefined"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 125
+                },
                 "deprecated": false,
                 "isRequired": false
               }
@@ -351,7 +393,10 @@
               },
               "<{ id: string; }>>, generateNewId?: boolean | undefined) => void"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 164
+            },
             "deprecated": false,
             "children": [
               {
@@ -373,7 +418,10 @@
                   },
                   ">"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 165
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -395,7 +443,10 @@
                   },
                   "<{ id: string; }>>"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 166
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -409,7 +460,10 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 167
+                },
                 "deprecated": false,
                 "isRequired": false
               }
@@ -482,7 +536,10 @@
               },
               ">"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 211
+            },
             "deprecated": false,
             "children": [
               {
@@ -495,7 +552,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 215
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -509,7 +569,10 @@
                 "signature": [
                   "Partial<EEI>"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 215
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -523,7 +586,10 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 215
+                },
                 "deprecated": false,
                 "isRequired": false
               }
@@ -540,7 +606,10 @@
             "signature": [
               "(dom: HTMLElement) => void"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 229
+            },
             "deprecated": false,
             "children": [
               {
@@ -553,7 +622,10 @@
                 "signature": [
                   "HTMLElement"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 229
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -571,7 +643,10 @@
               "(id: string) => ",
               "InheritedChildInput"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+              "lineNumber": 242
+            },
             "deprecated": false,
             "children": [
               {
@@ -584,7 +659,10 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                  "lineNumber": 242
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -645,7 +723,10 @@
           "SavedObjectAttributes",
           ">"
         ],
-        "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+        "source": {
+          "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+          "lineNumber": 32
+        },
         "deprecated": false,
         "children": [
           {
@@ -658,7 +739,10 @@
             "signature": [
               "true"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -671,7 +755,10 @@
             "signature": [
               "\"dashboard\""
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 36
+            },
             "deprecated": false
           },
           {
@@ -684,7 +771,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 38
+            },
             "deprecated": false,
             "children": [
               {
@@ -699,7 +789,10 @@
                   "DashboardContainerServices",
                   ">"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+                  "lineNumber": 39
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -719,7 +812,10 @@
                     "text": "EmbeddablePersistableStateService"
                   }
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+                  "lineNumber": 40
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -736,7 +832,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 43
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -751,7 +850,10 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 48
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -774,7 +876,10 @@
               },
               ">"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 54
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -837,7 +942,10 @@
               },
               ">"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 64
+            },
             "deprecated": false,
             "children": [
               {
@@ -856,7 +964,10 @@
                     "text": "DashboardContainerInput"
                   }
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+                  "lineNumber": 65
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -893,7 +1004,10 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+                "source": {
+                  "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+                  "lineNumber": 66
+                },
                 "deprecated": false,
                 "isRequired": false
               }
@@ -927,7 +1041,10 @@
                 "text": "EmbeddableStateWithType"
               }
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 72
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -941,7 +1058,10 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 150
+                },
                 "deprecated": false
               },
               {
@@ -955,7 +1075,10 @@
                   "SavedObjectReference",
                   "[]"
                 ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 150
+                },
                 "deprecated": false
               }
             ]
@@ -988,7 +1111,10 @@
               "SavedObjectReference",
               "[]; }"
             ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+              "lineNumber": 74
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1002,7 +1128,10 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "source": {
+                  "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                  "lineNumber": 161
+                },
                 "deprecated": false
               }
             ]
@@ -1022,7 +1151,10 @@
         "signature": [
           "(id: string | undefined, editMode: boolean | undefined) => string"
         ],
-        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "children": [
           {
@@ -1035,7 +1167,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -1049,7 +1184,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "isRequired": false
           }
@@ -1085,7 +1223,10 @@
           },
           "<\"DASHBOARD_APP_URL_GENERATOR\">"
         ],
-        "path": "src/plugins/dashboard/public/url_generator.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/url_generator.ts",
+          "lineNumber": 97
+        },
         "deprecated": true,
         "references": [],
         "children": [
@@ -1107,7 +1248,10 @@
               },
               "; }>"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 98
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -1141,7 +1285,10 @@
             "text": "SerializableState"
           }
         ],
-        "path": "src/plugins/dashboard/public/locator.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/locator.ts",
+          "lineNumber": 29
+        },
         "deprecated": false,
         "children": [
           {
@@ -1156,7 +1303,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           },
           {
@@ -1178,7 +1328,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 38
+            },
             "deprecated": false
           },
           {
@@ -1209,7 +1362,10 @@
               },
               ") | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 43
+            },
             "deprecated": false
           },
           {
@@ -1224,7 +1380,10 @@
             "signature": [
               "any[] | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 49
+            },
             "deprecated": false
           },
           {
@@ -1239,7 +1398,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 54
+            },
             "deprecated": false
           },
           {
@@ -1254,7 +1416,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 59
+            },
             "deprecated": false
           },
           {
@@ -1269,7 +1434,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 67
+            },
             "deprecated": false
           },
           {
@@ -1291,7 +1459,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 72
+            },
             "deprecated": false
           },
           {
@@ -1306,7 +1477,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 78
+            },
             "deprecated": false
           },
           {
@@ -1337,7 +1511,10 @@
               },
               ") | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 83
+            },
             "deprecated": false
           },
           {
@@ -1352,7 +1529,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/locator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/locator.ts",
+              "lineNumber": 88
+            },
             "deprecated": false
           }
         ],
@@ -1383,7 +1563,10 @@
           },
           "<{}>"
         ],
-        "path": "src/plugins/dashboard/public/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/types.ts",
+          "lineNumber": 72
+        },
         "deprecated": false,
         "children": [
           {
@@ -1397,7 +1580,10 @@
               "DashboardAppCapabilities",
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 73
+            },
             "deprecated": false
           },
           {
@@ -1417,7 +1603,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 74
+            },
             "deprecated": false
           },
           {
@@ -1430,7 +1619,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 75
+            },
             "deprecated": false
           },
           {
@@ -1440,7 +1632,10 @@
             "tags": [],
             "label": "isFullScreenMode",
             "description": [],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 76
+            },
             "deprecated": false
           },
           {
@@ -1453,7 +1648,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 77
+            },
             "deprecated": false
           },
           {
@@ -1466,7 +1664,10 @@
             "signature": [
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 78
+            },
             "deprecated": false
           },
           {
@@ -1479,7 +1680,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 79
+            },
             "deprecated": false
           },
           {
@@ -1489,7 +1693,10 @@
             "tags": [],
             "label": "useMargins",
             "description": [],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 80
+            },
             "deprecated": false
           },
           {
@@ -1502,7 +1709,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 81
+            },
             "deprecated": false
           },
           {
@@ -1521,7 +1731,10 @@
                 "text": "ViewMode"
               }
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 82
+            },
             "deprecated": false
           },
           {
@@ -1534,7 +1747,10 @@
             "signature": [
               "any[]"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 83
+            },
             "deprecated": false
           },
           {
@@ -1544,7 +1760,10 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 84
+            },
             "deprecated": false
           },
           {
@@ -1557,7 +1776,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 85
+            },
             "deprecated": false
           },
           {
@@ -1580,7 +1802,10 @@
               },
               " & { [k: string]: unknown; }>; }"
             ],
-            "path": "src/plugins/dashboard/public/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/types.ts",
+              "lineNumber": 86
+            },
             "deprecated": false
           }
         ],
@@ -1593,7 +1818,10 @@
         "tags": [],
         "label": "DashboardFeatureFlagConfig",
         "description": [],
-        "path": "src/plugins/dashboard/public/plugin.tsx",
+        "source": {
+          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "lineNumber": 93
+        },
         "deprecated": false,
         "children": [
           {
@@ -1603,7 +1831,10 @@
             "tags": [],
             "label": "allowByValueEmbeddables",
             "description": [],
-            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "source": {
+              "path": "src/plugins/dashboard/public/plugin.tsx",
+              "lineNumber": 94
+            },
             "deprecated": false
           }
         ],
@@ -1633,7 +1864,10 @@
             "text": "SavedObject"
           }
         ],
-        "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+          "lineNumber": 19
+        },
         "deprecated": false,
         "children": [
           {
@@ -1646,7 +1880,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -1656,7 +1893,10 @@
             "tags": [],
             "label": "timeRestore",
             "description": [],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -1669,7 +1909,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -1682,7 +1925,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           },
           {
@@ -1695,7 +1941,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -1705,7 +1954,10 @@
             "tags": [],
             "label": "panelsJSON",
             "description": [],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -1718,7 +1970,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -1731,7 +1986,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -1741,7 +1999,10 @@
             "tags": [],
             "label": "lastSavedTitle",
             "description": [],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -1761,7 +2022,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -1950,7 +2214,10 @@
               "SavedObjectReference",
               "[]; }; }"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 31
+            },
             "deprecated": false
           },
           {
@@ -1963,7 +2230,10 @@
             "signature": [
               "() => any"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 32
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1978,7 +2248,10 @@
             "signature": [
               "() => any[]"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 33
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1993,13 +2266,15 @@
             "signature": [
               "(editMode?: boolean | undefined) => string"
             ],
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+              "lineNumber": 34
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "dashboard",
-                "id": "def-public.editMode",
+                "id": "def-public.DashboardSavedObject.getFullEditPath.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "editMode",
@@ -2007,10 +2282,15 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+                  "lineNumber": 34
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2024,7 +2304,10 @@
         ],
         "label": "DashboardUrlGeneratorState",
         "description": [],
-        "path": "src/plugins/dashboard/public/url_generator.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/url_generator.ts",
+          "lineNumber": 32
+        },
         "deprecated": true,
         "references": [],
         "children": [
@@ -2040,7 +2323,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 37
+            },
             "deprecated": false
           },
           {
@@ -2062,7 +2348,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           },
           {
@@ -2084,7 +2373,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 46
+            },
             "deprecated": false
           },
           {
@@ -2099,7 +2391,10 @@
             "signature": [
               "any[] | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 52
+            },
             "deprecated": false
           },
           {
@@ -2114,7 +2409,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 57
+            },
             "deprecated": false
           },
           {
@@ -2129,7 +2427,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 62
+            },
             "deprecated": false
           },
           {
@@ -2144,7 +2445,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 70
+            },
             "deprecated": false
           },
           {
@@ -2166,7 +2470,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 75
+            },
             "deprecated": false
           },
           {
@@ -2181,7 +2488,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 81
+            },
             "deprecated": false
           },
           {
@@ -2203,7 +2513,10 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 86
+            },
             "deprecated": false
           },
           {
@@ -2218,7 +2531,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/url_generator.ts",
+              "lineNumber": 91
+            },
             "deprecated": false
           }
         ],
@@ -2237,7 +2553,10 @@
         "signature": [
           "\"DASHBOARD_APP_URL_GENERATOR\""
         ],
-        "path": "src/plugins/dashboard/public/url_generator.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/url_generator.ts",
+          "lineNumber": 27
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2251,7 +2570,10 @@
         "signature": [
           "\"dashboard\""
         ],
-        "path": "src/plugins/dashboard/public/application/embeddable/dashboard_constants.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/application/embeddable/dashboard_constants.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2280,7 +2602,10 @@
           },
           ">"
         ],
-        "path": "src/plugins/dashboard/public/locator.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/locator.ts",
+          "lineNumber": 91
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2301,7 +2626,10 @@
           },
           "<\"DASHBOARD_APP_URL_GENERATOR\">"
         ],
-        "path": "src/plugins/dashboard/public/plugin.tsx",
+        "source": {
+          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "lineNumber": 91
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2325,7 +2653,10 @@
           },
           ", \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/types.ts",
+          "lineNumber": 46
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2338,7 +2669,10 @@
         "tags": [],
         "label": "DashboardConstants",
         "description": [],
-        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "source": {
+          "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -2348,7 +2682,10 @@
             "tags": [],
             "label": "LANDING_PAGE_PATH",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           },
           {
@@ -2358,7 +2695,10 @@
             "tags": [],
             "label": "CREATE_NEW_DASHBOARD_URL",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -2368,7 +2708,10 @@
             "tags": [],
             "label": "VIEW_DASHBOARD_URL",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -2378,7 +2721,10 @@
             "tags": [],
             "label": "ADD_EMBEDDABLE_ID",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -2388,7 +2734,10 @@
             "tags": [],
             "label": "ADD_EMBEDDABLE_TYPE",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           },
           {
@@ -2398,7 +2747,10 @@
             "tags": [],
             "label": "DASHBOARDS_ID",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -2408,7 +2760,10 @@
             "tags": [],
             "label": "DASHBOARD_ID",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -2418,7 +2773,10 @@
             "tags": [],
             "label": "SEARCH_SESSION_ID",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -2428,7 +2786,10 @@
             "tags": [],
             "label": "CHANGE_CHECK_DEBOUNCE",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -2438,7 +2799,10 @@
             "tags": [],
             "label": "CHANGE_APPLY_DEBOUNCE",
             "description": [],
-            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "source": {
+              "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           }
         ],
@@ -2452,7 +2816,10 @@
       "tags": [],
       "label": "DashboardSetup",
       "description": [],
-      "path": "src/plugins/dashboard/public/plugin.tsx",
+      "source": {
+        "path": "src/plugins/dashboard/public/plugin.tsx",
+        "lineNumber": 125
+      },
       "deprecated": false,
       "children": [
         {
@@ -2472,7 +2839,10 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "lineNumber": 126
+          },
           "deprecated": false
         }
       ],
@@ -2486,7 +2856,10 @@
       "tags": [],
       "label": "DashboardStart",
       "description": [],
-      "path": "src/plugins/dashboard/public/plugin.tsx",
+      "source": {
+        "path": "src/plugins/dashboard/public/plugin.tsx",
+        "lineNumber": 129
+      },
       "deprecated": false,
       "children": [
         {
@@ -2506,10 +2879,13 @@
               "text": "SavedObjectLoader"
             }
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "lineNumber": 130
+          },
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "dashboard",
@@ -2521,10 +2897,13 @@
           "signature": [
             "() => React.FC<Props>"
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "lineNumber": 131
+          },
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "dashboard",
@@ -2545,12 +2924,18 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "lineNumber": 142
+          },
           "deprecated": true,
           "references": [
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/public/overview/containers/overview_cti_links/index.tsx"
+              "link": {
+                "path": "x-pack/plugins/security_solution/public/overview/containers/overview_cti_links/index.tsx",
+                "lineNumber": 24
+              }
             }
           ]
         },
@@ -2571,7 +2956,10 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "lineNumber": 143
+          },
           "deprecated": false
         },
         {
@@ -2590,7 +2978,10 @@
               "text": "DashboardFeatureFlagConfig"
             }
           ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "source": {
+            "path": "src/plugins/dashboard/public/plugin.tsx",
+            "lineNumber": 144
+          },
           "deprecated": false
         }
       ],
@@ -2619,7 +3010,10 @@
           },
           ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">, embeddableType: string) => Promise<{ [key: string]: unknown; }[]>"
         ],
-        "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+        "source": {
+          "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -2640,7 +3034,10 @@
               },
               ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">"
             ],
-            "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+            "source": {
+              "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+              "lineNumber": 13
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -2654,7 +3051,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+            "source": {
+              "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+              "lineNumber": 14
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -2674,7 +3074,10 @@
       "tags": [],
       "label": "DashboardPluginSetup",
       "description": [],
-      "path": "src/plugins/dashboard/server/types.ts",
+      "source": {
+        "path": "src/plugins/dashboard/server/types.ts",
+        "lineNumber": 10
+      },
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
@@ -2687,7 +3090,10 @@
       "tags": [],
       "label": "DashboardPluginStart",
       "description": [],
-      "path": "src/plugins/dashboard/server/types.ts",
+      "source": {
+        "path": "src/plugins/dashboard/server/types.ts",
+        "lineNumber": 12
+      },
       "deprecated": false,
       "children": [],
       "lifecycle": "start",
@@ -2755,7 +3161,10 @@
           },
           "[]"
         ],
-        "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+          "lineNumber": 261
+        },
         "deprecated": false,
         "children": [
           {
@@ -2808,7 +3217,10 @@
               },
               ")[]"
             ],
-            "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+              "lineNumber": 262
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -2822,7 +3234,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+              "lineNumber": 274
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -2836,7 +3251,10 @@
             "signature": [
               "boolean"
             ],
-            "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+              "lineNumber": 275
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -2847,7 +3265,10 @@
             "tags": [],
             "label": "uiState",
             "description": [],
-            "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+              "lineNumber": 276
+            },
             "deprecated": false,
             "children": [
               {
@@ -2860,7 +3281,10 @@
                 "signature": [
                   "any"
                 ],
-                "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+                "source": {
+                  "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
+                  "lineNumber": 276
+                },
                 "deprecated": false
               }
             ]
@@ -2895,7 +3319,10 @@
             "text": "EmbeddableStateWithType"
           }
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/types.ts",
+          "lineNumber": 99
+        },
         "deprecated": false,
         "children": [
           {
@@ -2918,7 +3345,10 @@
               },
               " & { [k: string]: unknown; }>; }"
             ],
-            "path": "src/plugins/dashboard/common/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/types.ts",
+              "lineNumber": 100
+            },
             "deprecated": false
           }
         ],
@@ -2931,7 +3361,10 @@
         "tags": [],
         "label": "GridData",
         "description": [],
-        "path": "src/plugins/dashboard/common/embeddable/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/embeddable/types.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -2941,7 +3374,10 @@
             "tags": [],
             "label": "w",
             "description": [],
-            "path": "src/plugins/dashboard/common/embeddable/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/embeddable/types.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           },
           {
@@ -2951,7 +3387,10 @@
             "tags": [],
             "label": "h",
             "description": [],
-            "path": "src/plugins/dashboard/common/embeddable/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/embeddable/types.ts",
+              "lineNumber": 11
+            },
             "deprecated": false
           },
           {
@@ -2961,7 +3400,10 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "path": "src/plugins/dashboard/common/embeddable/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/embeddable/types.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           },
           {
@@ -2971,7 +3413,10 @@
             "tags": [],
             "label": "y",
             "description": [],
-            "path": "src/plugins/dashboard/common/embeddable/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/embeddable/types.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -2981,7 +3426,10 @@
             "tags": [],
             "label": "i",
             "description": [],
-            "path": "src/plugins/dashboard/common/embeddable/types.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/embeddable/types.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           }
         ],
@@ -3000,7 +3448,10 @@
         "signature": [
           "Doc<DashboardAttributesTo720>"
         ],
-        "path": "src/plugins/dashboard/common/bwc/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/bwc/types.ts",
+          "lineNumber": 55
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3014,7 +3465,10 @@
         "signature": [
           "Doc<DashboardAttributes>"
         ],
-        "path": "src/plugins/dashboard/common/bwc/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/bwc/types.ts",
+          "lineNumber": 53
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3028,7 +3482,10 @@
         "signature": [
           "DocPre700<DashboardAttributesTo720>"
         ],
-        "path": "src/plugins/dashboard/common/bwc/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/bwc/types.ts",
+          "lineNumber": 57
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3044,7 +3501,10 @@
           "RawSavedDashboardPanel620",
           ", \"title\" | \"panelIndex\" | \"name\" | \"gridData\" | \"version\" | \"embeddableConfig\">, \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly type?: string | undefined; readonly name?: string | undefined; panelIndex: string; panelRefName?: string | undefined; }"
         ],
-        "path": "src/plugins/dashboard/common/bwc/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/bwc/types.ts",
+          "lineNumber": 70
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3060,7 +3520,10 @@
           "RawSavedDashboardPanel610",
           ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\"> & { readonly id: string; readonly type: string; }"
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/types.ts",
+          "lineNumber": 72
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3076,7 +3539,10 @@
           "RawSavedDashboardPanel620",
           ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/types.ts",
+          "lineNumber": 64
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3092,7 +3558,10 @@
           "RawSavedDashboardPanel620",
           ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/types.ts",
+          "lineNumber": 56
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3108,7 +3577,10 @@
           "RawSavedDashboardPanel620",
           ", \"title\" | \"panelIndex\" | \"name\" | \"gridData\" | \"version\" | \"embeddableConfig\">, \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/types.ts",
+          "lineNumber": 48
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3130,7 +3602,10 @@
           },
           ", \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/types.ts",
+          "lineNumber": 89
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3146,7 +3621,10 @@
           "RawSavedDashboardPanelTo60",
           ", \"columns\" | \"title\" | \"sort\" | \"size_x\" | \"size_y\" | \"row\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
         ],
-        "path": "src/plugins/dashboard/common/types.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/types.ts",
+          "lineNumber": 80
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -3159,7 +3637,10 @@
         "tags": [],
         "label": "UI_SETTINGS",
         "description": [],
-        "path": "src/plugins/dashboard/common/index.ts",
+        "source": {
+          "path": "src/plugins/dashboard/common/index.ts",
+          "lineNumber": 28
+        },
         "deprecated": false,
         "children": [
           {
@@ -3169,7 +3650,10 @@
             "tags": [],
             "label": "ENABLE_LABS_UI",
             "description": [],
-            "path": "src/plugins/dashboard/common/index.ts",
+            "source": {
+              "path": "src/plugins/dashboard/common/index.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           }
         ],

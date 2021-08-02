@@ -9,7 +9,10 @@
         "tags": [],
         "label": "SavedObjectsManagementAction",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -22,7 +25,10 @@
             "signature": [
               "() => React.ReactNode"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 18
+            },
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -34,7 +40,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -79,7 +88,10 @@
               },
               ") => any) | undefined; }"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -92,7 +104,10 @@
             "signature": [
               "(() => { type: string; id: string; }[]) | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -105,7 +120,10 @@
             "signature": [
               "ActionContext | null"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 34
+            },
             "deprecated": false
           },
           {
@@ -125,7 +143,10 @@
               },
               " | null"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           },
           {
@@ -138,7 +159,10 @@
             "signature": [
               "(actionContext: ActionContext) => void"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 37
+            },
             "deprecated": false,
             "children": [
               {
@@ -151,7 +175,10 @@
                 "signature": [
                   "ActionContext"
                 ],
-                "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+                  "lineNumber": 37
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -168,7 +195,10 @@
             "signature": [
               "(callback: Function) => void"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
             "children": [
               {
@@ -181,7 +211,10 @@
                 "signature": [
                   "Function"
                 ],
-                "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+                  "lineNumber": 41
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -206,7 +239,10 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 45
+            },
             "deprecated": false,
             "children": [
               {
@@ -225,7 +261,10 @@
                     "text": "SavedObjectsManagementRecord"
                   }
                 ],
-                "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+                "source": {
+                  "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+                  "lineNumber": 45
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -242,7 +281,10 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
+              "lineNumber": 49
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -277,7 +319,10 @@
             "text": "ProcessedImportResponse"
           }
         ],
-        "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+          "lineNumber": 51
+        },
         "deprecated": false,
         "children": [
           {
@@ -296,7 +341,10 @@
                 "text": "SavedObjectsImportResponse"
               }
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 52
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -313,7 +361,10 @@
         "tags": [],
         "label": "FailedImport",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -326,7 +377,10 @@
             "signature": [
               "{ type: string; title?: string | undefined; id: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -377,7 +431,10 @@
                 "text": "SavedObjectsImportUnknownError"
               }
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           }
         ],
@@ -390,7 +447,10 @@
         "tags": [],
         "label": "ProcessedImportResponse",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+          "lineNumber": 37
+        },
         "deprecated": false,
         "children": [
           {
@@ -410,7 +470,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 38
+            },
             "deprecated": false
           },
           {
@@ -430,7 +493,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -443,7 +509,10 @@
             "signature": [
               "UnmatchedReference[]"
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -456,7 +525,10 @@
             "signature": [
               "\"success\" | \"idle\""
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           },
           {
@@ -466,7 +538,10 @@
             "tags": [],
             "label": "importCount",
             "description": [],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 42
+            },
             "deprecated": false
           },
           {
@@ -479,7 +554,10 @@
             "signature": [
               "undefined"
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 43
+            },
             "deprecated": false
           },
           {
@@ -492,7 +570,10 @@
             "signature": [
               "undefined"
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 44
+            },
             "deprecated": false
           },
           {
@@ -512,7 +593,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
+              "lineNumber": 45
+            },
             "deprecated": false
           }
         ],
@@ -527,7 +611,10 @@
         "description": [
           "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -540,7 +627,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -553,7 +643,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -566,7 +659,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -579,7 +675,10 @@
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -592,7 +691,10 @@
             "signature": [
               "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\" | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -605,7 +707,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           }
         ],
@@ -620,7 +725,10 @@
         "description": [
           "\nRepresents a relation between two {@link SavedObject | saved object}"
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 37
+        },
         "deprecated": false,
         "children": [
           {
@@ -630,7 +738,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 38
+            },
             "deprecated": false
           },
           {
@@ -640,7 +751,10 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -653,7 +767,10 @@
             "signature": [
               "\"parent\" | \"child\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -672,7 +789,10 @@
                 "text": "SavedObjectMetadata"
               }
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           }
         ],
@@ -685,7 +805,10 @@
         "tags": [],
         "label": "SavedObjectsManagementActionServiceSetup",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -708,13 +831,15 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+              "lineNumber": 15
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
-                "id": "def-public.action",
+                "id": "def-public.SavedObjectsManagementActionServiceSetup.register.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -728,10 +853,15 @@
                     "text": "SavedObjectsManagementAction"
                   }
                 ],
-                "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+                  "lineNumber": 15
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -743,7 +873,10 @@
         "tags": [],
         "label": "SavedObjectsManagementActionServiceStart",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "children": [
           {
@@ -758,21 +891,31 @@
             "signature": [
               "(actionId: string) => boolean"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+              "lineNumber": 22
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
-                "id": "def-public.actionId",
+                "id": "def-public.SavedObjectsManagementActionServiceStart.has.$1",
                 "type": "string",
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+                  "lineNumber": 22
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -794,10 +937,13 @@
               },
               "[]"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
+              "lineNumber": 26
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -819,7 +965,10 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -829,7 +978,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -868,7 +1020,10 @@
               },
               ") => React.ReactNode) | undefined; header?: boolean | undefined; } | undefined; hideForMobile?: boolean | undefined; }"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           }
         ],
@@ -881,7 +1036,10 @@
         "tags": [],
         "label": "SavedObjectsManagementColumnServiceSetup",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -904,13 +1062,15 @@
               },
               "<unknown>) => void"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+              "lineNumber": 15
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
-                "id": "def-public.column",
+                "id": "def-public.SavedObjectsManagementColumnServiceSetup.register.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "column",
@@ -925,10 +1085,15 @@
                   },
                   "<unknown>"
                 ],
-                "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+                  "lineNumber": 15
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -940,7 +1105,10 @@
         "tags": [],
         "label": "SavedObjectsManagementColumnServiceStart",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "children": [
           {
@@ -963,10 +1131,13 @@
               },
               "<unknown>[]"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
+              "lineNumber": 22
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -978,7 +1149,10 @@
         "tags": [],
         "label": "SavedObjectsManagementRecord",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -988,7 +1162,10 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           },
           {
@@ -998,7 +1175,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -1019,7 +1199,10 @@
               },
               "; hiddenType: boolean; }"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -1033,7 +1216,10 @@
               "SavedObjectReference",
               "[]"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -1046,7 +1232,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           }
         ],
@@ -1059,7 +1248,10 @@
         "tags": [],
         "label": "SavedObjectsManagementServiceRegistryEntry",
         "description": [],
-        "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -1069,7 +1261,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -1088,7 +1283,10 @@
                 "text": "SavedObjectLoader"
               }
             ],
-            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -1098,7 +1296,10 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           }
         ],
@@ -1141,7 +1342,10 @@
           },
           ") => void; }"
         ],
-        "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/public/services/service_registry.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1166,7 +1370,10 @@
           },
           "; }"
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 28
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1179,7 +1386,10 @@
       "tags": [],
       "label": "SavedObjectsManagementPluginSetup",
       "description": [],
-      "path": "src/plugins/saved_objects_management/public/plugin.ts",
+      "source": {
+        "path": "src/plugins/saved_objects_management/public/plugin.ts",
+        "lineNumber": 31
+      },
       "deprecated": false,
       "children": [
         {
@@ -1198,7 +1408,10 @@
               "text": "SavedObjectsManagementActionServiceSetup"
             }
           ],
-          "path": "src/plugins/saved_objects_management/public/plugin.ts",
+          "source": {
+            "path": "src/plugins/saved_objects_management/public/plugin.ts",
+            "lineNumber": 32
+          },
           "deprecated": false
         },
         {
@@ -1217,7 +1430,10 @@
               "text": "SavedObjectsManagementColumnServiceSetup"
             }
           ],
-          "path": "src/plugins/saved_objects_management/public/plugin.ts",
+          "source": {
+            "path": "src/plugins/saved_objects_management/public/plugin.ts",
+            "lineNumber": 33
+          },
           "deprecated": false
         },
         {
@@ -1254,7 +1470,10 @@
             },
             ") => void; }"
           ],
-          "path": "src/plugins/saved_objects_management/public/plugin.ts",
+          "source": {
+            "path": "src/plugins/saved_objects_management/public/plugin.ts",
+            "lineNumber": 34
+          },
           "deprecated": false
         }
       ],
@@ -1268,7 +1487,10 @@
       "tags": [],
       "label": "SavedObjectsManagementPluginStart",
       "description": [],
-      "path": "src/plugins/saved_objects_management/public/plugin.ts",
+      "source": {
+        "path": "src/plugins/saved_objects_management/public/plugin.ts",
+        "lineNumber": 37
+      },
       "deprecated": false,
       "children": [
         {
@@ -1287,7 +1509,10 @@
               "text": "SavedObjectsManagementActionServiceStart"
             }
           ],
-          "path": "src/plugins/saved_objects_management/public/plugin.ts",
+          "source": {
+            "path": "src/plugins/saved_objects_management/public/plugin.ts",
+            "lineNumber": 38
+          },
           "deprecated": false
         },
         {
@@ -1306,7 +1531,10 @@
               "text": "SavedObjectsManagementColumnServiceStart"
             }
           ],
-          "path": "src/plugins/saved_objects_management/public/plugin.ts",
+          "source": {
+            "path": "src/plugins/saved_objects_management/public/plugin.ts",
+            "lineNumber": 39
+          },
           "deprecated": false
         }
       ],
@@ -1333,7 +1561,10 @@
         "tags": [],
         "label": "SavedObjectGetRelationshipsResponse",
         "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 51
+        },
         "deprecated": false,
         "children": [
           {
@@ -1353,7 +1584,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 52
+            },
             "deprecated": false
           },
           {
@@ -1373,7 +1607,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 53
+            },
             "deprecated": false
           }
         ],
@@ -1386,7 +1623,10 @@
         "tags": [],
         "label": "SavedObjectInvalidRelation",
         "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 44
+        },
         "deprecated": false,
         "children": [
           {
@@ -1396,7 +1636,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 45
+            },
             "deprecated": false
           },
           {
@@ -1406,7 +1649,10 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 46
+            },
             "deprecated": false
           },
           {
@@ -1419,7 +1665,10 @@
             "signature": [
               "\"parent\" | \"child\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 47
+            },
             "deprecated": false
           },
           {
@@ -1429,7 +1678,10 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 48
+            },
             "deprecated": false
           }
         ],
@@ -1444,7 +1696,10 @@
         "description": [
           "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "children": [
           {
@@ -1457,7 +1712,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -1470,7 +1728,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -1483,7 +1744,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -1496,7 +1760,10 @@
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -1509,7 +1776,10 @@
             "signature": [
               "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\" | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -1522,7 +1792,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           }
         ],
@@ -1537,7 +1810,10 @@
         "description": [
           "\nRepresents a relation between two {@link SavedObject | saved object}"
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 37
+        },
         "deprecated": false,
         "children": [
           {
@@ -1547,7 +1823,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 38
+            },
             "deprecated": false
           },
           {
@@ -1557,7 +1836,10 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -1570,7 +1852,10 @@
             "signature": [
               "\"parent\" | \"child\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -1589,7 +1874,10 @@
                 "text": "SavedObjectMetadata"
               }
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           }
         ],
@@ -1608,7 +1896,10 @@
         "signature": [
           "\"parent\" | \"child\""
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 32
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1633,7 +1924,10 @@
           },
           "; }"
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "source": {
+          "path": "src/plugins/saved_objects_management/common/types.ts",
+          "lineNumber": 28
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

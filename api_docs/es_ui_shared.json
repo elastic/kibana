@@ -21,7 +21,10 @@
           "FieldToValueMap",
           ", any>"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+          "lineNumber": 64
+        },
         "deprecated": false,
         "children": [
           {
@@ -35,7 +38,10 @@
               "(props: Props) => ",
               "FieldToValueMap"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+              "lineNumber": 65
+            },
             "deprecated": false,
             "children": [
               {
@@ -48,7 +54,10 @@
                 "signature": [
                   "Props"
                 ],
-                "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                  "lineNumber": 65
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -65,7 +74,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+              "lineNumber": 70
+            },
             "deprecated": false,
             "children": [
               {
@@ -78,7 +90,10 @@
                 "signature": [
                   "Props"
                 ],
-                "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                  "lineNumber": 70
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -103,7 +118,10 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+              "lineNumber": 80
+            },
             "deprecated": false,
             "children": [
               {
@@ -122,7 +140,10 @@
                     "text": "Frequency"
                   }
                 ],
-                "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                  "lineNumber": 80
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -141,7 +162,10 @@
               "FieldToValueMap",
               ") => void"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+              "lineNumber": 104
+            },
             "deprecated": false,
             "children": [
               {
@@ -154,7 +178,10 @@
                 "signature": [
                   "FieldToValueMap"
                 ],
-                "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                  "lineNumber": 104
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -171,7 +198,10 @@
             "signature": [
               "() => JSX.Element | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+              "lineNumber": 140
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -186,7 +216,10 @@
             "signature": [
               "() => JSX.Element"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+              "lineNumber": 215
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -206,7 +239,10 @@
         "signature": [
           "(value?: string | undefined) => string | undefined"
         ],
-        "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "children": [
           {
@@ -219,7 +255,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+              "lineNumber": 15
+            },
             "deprecated": false,
             "isRequired": false
           }
@@ -237,7 +276,10 @@
         "signature": [
           "({ privilegesEndpoint, httpClient, children }: Props) => JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+          "lineNumber": 47
+        },
         "deprecated": false,
         "children": [
           {
@@ -250,7 +292,10 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+              "lineNumber": 47
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -270,7 +315,10 @@
           "ParsedQuery",
           "<string>"
         ],
-        "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -283,7 +331,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+              "lineNumber": 11
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -301,7 +352,10 @@
         "signature": [
           "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, euiCodeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
+          "lineNumber": 102
+        },
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -315,7 +369,10 @@
             "signature": [
               "Props<T>"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
+              "lineNumber": 25
+            },
             "deprecated": false
           }
         ],
@@ -331,7 +388,10 @@
         "signature": [
           "({ title, message }: Props) => JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -344,7 +404,10 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+              "lineNumber": 17
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -362,7 +425,10 @@
         "signature": [
           "({ title, error, actions, isCentered, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+          "lineNumber": 28
+        },
         "deprecated": false,
         "children": [
           {
@@ -375,7 +441,10 @@
             "signature": [
               "React.PropsWithChildren<Props>"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+              "lineNumber": 28
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -393,7 +462,10 @@
         "signature": [
           "({ children }: { children?: React.ReactNode; }) => JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -406,7 +478,10 @@
             "signature": [
               "{ children?: React.ReactNode; }"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+              "lineNumber": 12
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -424,7 +499,10 @@
         "signature": [
           "({ title, error, actions, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+          "lineNumber": 19
+        },
         "deprecated": false,
         "children": [
           {
@@ -437,7 +515,10 @@
             "signature": [
               "React.PropsWithChildren<Props>"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+              "lineNumber": 19
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -455,7 +536,10 @@
         "signature": [
           "({ inline, children, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "children": [
           {
@@ -468,7 +552,10 @@
             "signature": [
               "React.PropsWithChildren<Props>"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
+              "lineNumber": 26
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -510,7 +597,10 @@
           },
           "<D, E>>"
         ],
-        "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+          "lineNumber": 28
+        },
         "deprecated": false,
         "children": [
           {
@@ -529,7 +619,10 @@
                 "text": "HttpSetup"
               }
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 29
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -549,7 +642,10 @@
                 "text": "SendRequestConfig"
               }
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 30
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -567,7 +663,10 @@
         "signature": [
           "() => Authorization"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -607,7 +706,10 @@
           },
           "<D, E>"
         ],
-        "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+          "lineNumber": 28
+        },
         "deprecated": false,
         "children": [
           {
@@ -626,7 +728,10 @@
                 "text": "HttpSetup"
               }
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 29
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -646,7 +751,10 @@
                 "text": "UseRequestConfig"
               }
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 30
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -664,7 +772,10 @@
         "signature": [
           "({ privileges: requiredPrivileges, children }: Props) => JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
+          "lineNumber": 32
+        },
         "deprecated": false,
         "children": [
           {
@@ -677,7 +788,10 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
+              "lineNumber": 32
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -694,7 +808,10 @@
         "tags": [],
         "label": "Error",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "children": [
           {
@@ -704,7 +821,10 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -717,7 +837,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -730,7 +853,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           }
         ],
@@ -753,7 +879,10 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -766,7 +895,10 @@
             "signature": [
               "{ raw: string; format(): T; }"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -779,7 +911,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+              "lineNumber": 19
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -794,7 +929,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           }
         ],
@@ -807,7 +945,10 @@
         "tags": [],
         "label": "MissingPrivileges",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -820,7 +961,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           }
         ],
@@ -833,7 +977,10 @@
         "tags": [],
         "label": "Privileges",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "children": [
           {
@@ -843,7 +990,10 @@
             "tags": [],
             "label": "hasAllPrivileges",
             "description": [],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -862,7 +1012,10 @@
                 "text": "MissingPrivileges"
               }
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           }
         ],
@@ -875,7 +1028,10 @@
         "tags": [],
         "label": "SendRequestConfig",
         "description": [],
-        "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [
           {
@@ -885,7 +1041,10 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 12
+            },
             "deprecated": false
           },
           {
@@ -898,7 +1057,10 @@
             "signature": [
               "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -918,7 +1080,10 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -931,7 +1096,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -946,7 +1114,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           }
         ],
@@ -969,7 +1140,10 @@
           },
           "<D, E>"
         ],
-        "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+          "lineNumber": 23
+        },
         "deprecated": false,
         "children": [
           {
@@ -982,7 +1156,10 @@
             "signature": [
               "D | null"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -995,7 +1172,10 @@
             "signature": [
               "E | null"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           }
         ],
@@ -1025,7 +1205,10 @@
             "text": "SendRequestConfig"
           }
         ],
-        "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -1038,7 +1221,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -1051,7 +1237,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           },
           {
@@ -1064,8 +1253,31 @@
             "signature": [
               "((data: any) => any) | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.UseRequestConfig.deserializer.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+                  "lineNumber": 17
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1087,7 +1299,10 @@
           },
           "<D, E>"
         ],
-        "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "children": [
           {
@@ -1097,7 +1312,10 @@
             "tags": [],
             "label": "isInitialRequest",
             "description": [],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -1107,7 +1325,10 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -1120,7 +1341,10 @@
             "signature": [
               "E | null"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           },
           {
@@ -1133,7 +1357,10 @@
             "signature": [
               "D | null | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           },
           {
@@ -1146,10 +1373,13 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+              "lineNumber": 25
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1167,7 +1397,10 @@
         "signature": [
           "\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""
         ],
-        "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1189,8 +1422,37 @@
           },
           "<T>) => void"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+          "lineNumber": 23
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.arg",
+            "type": "Object",
+            "tags": [],
+            "label": "arg",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "esUiShared",
+                "scope": "public",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-public.JsonEditorState",
+                "text": "JsonEditorState"
+              },
+              "<T>"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -1205,7 +1467,10 @@
         "signature": [
           "React.Context<Authorization>"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+          "lineNumber": 31
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1216,7 +1481,10 @@
         "tags": [],
         "label": "indices",
         "description": [],
-        "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -1229,7 +1497,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -1242,7 +1513,10 @@
             "signature": [
               "(indexName?: string | undefined) => boolean"
             ],
-            "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+              "lineNumber": 19
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1256,7 +1530,10 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 12
+                },
                 "deprecated": false
               }
             ]
@@ -1271,7 +1548,10 @@
             "signature": [
               "(indexName: string) => string[]"
             ],
-            "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+              "lineNumber": 20
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1282,7 +1562,10 @@
                 "tags": [],
                 "label": "indexName",
                 "description": [],
-                "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 19
+                },
                 "deprecated": false
               }
             ]
@@ -1297,7 +1580,10 @@
             "signature": [
               "(indexName: string) => boolean"
             ],
-            "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+              "lineNumber": 21
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1308,7 +1594,10 @@
                 "tags": [],
                 "label": "indexName",
                 "description": [],
-                "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                "source": {
+                  "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                  "lineNumber": 34
+                },
                 "deprecated": false
               }
             ]
@@ -1343,7 +1632,10 @@
           },
           "<any>"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
+          "lineNumber": 25
+        },
         "deprecated": false,
         "children": [
           {
@@ -1356,7 +1648,10 @@
             "signature": [
               "EsErrorHandlerParams"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
+              "lineNumber": 25
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -1374,7 +1669,10 @@
         "signature": [
           "(err: RequestError) => boolean"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -1387,7 +1685,10 @@
             "signature": [
               "RequestError"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
+              "lineNumber": 21
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -1405,7 +1706,10 @@
         "signature": [
           "(err: string) => ParsedError"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
+          "lineNumber": 27
+        },
         "deprecated": false,
         "children": [
           {
@@ -1418,7 +1722,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
+              "lineNumber": 27
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -1443,7 +1750,10 @@
         "tags": [],
         "label": "MissingPrivileges",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "children": [
           {
@@ -1456,7 +1766,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 10
+            },
             "deprecated": false
           }
         ],
@@ -1469,7 +1782,10 @@
         "tags": [],
         "label": "Privileges",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "children": [
           {
@@ -1479,7 +1795,10 @@
             "tags": [],
             "label": "hasAllPrivileges",
             "description": [],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -1498,7 +1817,10 @@
                 "text": "MissingPrivileges"
               }
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           }
         ],

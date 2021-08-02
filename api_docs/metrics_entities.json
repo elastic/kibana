@@ -22,7 +22,10 @@
       "tags": [],
       "label": "MetricsEntitiesPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/metrics_entities/server/types.ts",
+      "source": {
+        "path": "x-pack/plugins/metrics_entities/server/types.ts",
+        "lineNumber": 14
+      },
       "deprecated": false,
       "children": [
         {
@@ -44,7 +47,10 @@
             ") => ",
             "MetricsEntitiesClient"
           ],
-          "path": "x-pack/plugins/metrics_entities/server/types.ts",
+          "source": {
+            "path": "x-pack/plugins/metrics_entities/server/types.ts",
+            "lineNumber": 15
+          },
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -68,7 +74,10 @@
                 "ApiResponse",
                 "<Record<string, any>, unknown>>; }; }"
               ],
-              "path": "x-pack/plugins/metrics_entities/server/types.ts",
+              "source": {
+                "path": "x-pack/plugins/metrics_entities/server/types.ts",
+                "lineNumber": 12
+              },
               "deprecated": false
             }
           ]
@@ -87,7 +96,10 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/metrics_entities/server/types.ts",
+      "source": {
+        "path": "x-pack/plugins/metrics_entities/server/types.ts",
+        "lineNumber": 18
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -111,7 +123,10 @@
         "signature": [
           "\"estc\""
         ],
-        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -124,7 +139,10 @@
         "description": [
           "\nTransforms route"
         ],
-        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+          "lineNumber": 16
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -140,7 +158,10 @@
         "signature": [
           "\"/api/metrics_entities\""
         ],
-        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -154,7 +175,10 @@
         "signature": [
           "\"metricsEntities\""
         ],
-        "path": "x-pack/plugins/metrics_entities/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/index.ts",
+          "lineNumber": 8
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -168,7 +192,10 @@
         "signature": [
           "\"metrics_entities\""
         ],
-        "path": "x-pack/plugins/metrics_entities/common/index.ts",
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/index.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

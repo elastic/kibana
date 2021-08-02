@@ -13,7 +13,10 @@
         "signature": [
           "({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, maxDepth, layerIndex, }: ColorPickerProps) => JSX.Element"
         ],
-        "path": "src/plugins/charts/public/static/components/color_picker.tsx",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/color_picker.tsx",
+          "lineNumber": 119
+        },
         "deprecated": false,
         "children": [
           {
@@ -26,7 +29,10 @@
             "signature": [
               "ColorPickerProps"
             ],
-            "path": "src/plugins/charts/public/static/components/color_picker.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/color_picker.tsx",
+              "lineNumber": 119
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -46,7 +52,10 @@
         "signature": [
           "(num: number) => string[]"
         ],
-        "path": "src/plugins/charts/public/static/colors/color_palette.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/colors/color_palette.ts",
+          "lineNumber": 41
+        },
         "deprecated": false,
         "children": [
           {
@@ -59,7 +68,10 @@
             "signature": [
               "number"
             ],
-            "path": "src/plugins/charts/public/static/colors/color_palette.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/colors/color_palette.ts",
+              "lineNumber": 41
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -79,7 +91,10 @@
         "signature": [
           "({ isDarkMode, domainEnd }: React.PropsWithChildren<CurrentTimeProps>) => JSX.Element"
         ],
-        "path": "src/plugins/charts/public/static/components/current_time.tsx",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/current_time.tsx",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "children": [
           {
@@ -92,7 +107,10 @@
             "signature": [
               "React.PropsWithChildren<CurrentTimeProps>"
             ],
-            "path": "src/plugins/charts/public/static/components/current_time.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/current_time.tsx",
+              "lineNumber": 24
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -110,7 +128,10 @@
         "signature": [
           "({ isDarkMode, domainStart, domainEnd, interval, domainMin, domainMax, hideTooltips, isFullBin, }: React.PropsWithChildren<EndzonesProps>) => JSX.Element"
         ],
-        "path": "src/plugins/charts/public/static/components/endzones.tsx",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/endzones.tsx",
+          "lineNumber": 37
+        },
         "deprecated": false,
         "children": [
           {
@@ -123,7 +144,10 @@
             "signature": [
               "React.PropsWithChildren<EndzonesProps>"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 37
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -143,7 +167,10 @@
         "signature": [
           "(xValues: number[], esValue: number, esUnit: moment.unitOfTime.Base, timeZone: string) => number"
         ],
-        "path": "src/plugins/charts/public/static/components/endzones.tsx",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/endzones.tsx",
+          "lineNumber": 120
+        },
         "deprecated": false,
         "children": [
           {
@@ -158,7 +185,10 @@
             "signature": [
               "number[]"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 121
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -172,7 +202,10 @@
             "signature": [
               "number"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 122
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -186,7 +219,10 @@
             "signature": [
               "moment.unitOfTime.Base"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 123
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -200,7 +236,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 124
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -239,7 +278,10 @@
             "text": "BrushTriggerEvent"
           }
         ],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 254
+        },
         "deprecated": false,
         "children": [
           {
@@ -258,7 +300,10 @@
                 "text": "Datatable"
               }
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 255
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -273,7 +318,10 @@
               "string | number | ",
               "AccessorFn"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 256
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -318,7 +366,10 @@
             "text": "ClickTriggerEvent"
           }
         ],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 171
+        },
         "deprecated": false,
         "children": [
           {
@@ -337,7 +388,10 @@
                 "text": "Datatable"
               }
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 172
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -352,7 +406,10 @@
               "string | number | ",
               "AccessorFn"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 173
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -370,7 +427,10 @@
               "AccessorFn",
               "> | undefined"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 174
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -386,7 +446,10 @@
               "AccessorFn",
               " | undefined"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 175
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -400,7 +463,10 @@
             "signature": [
               "boolean"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 176
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -441,7 +507,10 @@
             "text": "ClickTriggerEvent"
           }
         ],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 220
+        },
         "deprecated": false,
         "children": [
           {
@@ -460,7 +529,10 @@
                 "text": "Datatable"
               }
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 220
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -478,7 +550,10 @@
         "signature": [
           "(value: any, colorSchemaName: string) => string"
         ],
-        "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+          "lineNumber": 47
+        },
         "deprecated": false,
         "children": [
           {
@@ -491,7 +566,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+              "lineNumber": 47
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -505,7 +583,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+              "lineNumber": 47
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -523,7 +604,10 @@
         "signature": [
           "React.NamedExoticComponent<LegendToggleProps> & { readonly type: ({ onClick, showLegend, legendPosition }: LegendToggleProps) => JSX.Element; }"
         ],
-        "path": "src/plugins/charts/public/static/components/legend_toggle.tsx",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/legend_toggle.tsx",
+          "lineNumber": 51
+        },
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -537,7 +621,10 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
             "deprecated": false
           }
         ],
@@ -553,7 +640,10 @@
         "signature": [
           "(baseColor: string, step: number, totalSteps: number) => string"
         ],
-        "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -566,7 +656,10 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -580,7 +673,10 @@
             "signature": [
               "number"
             ],
-            "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -594,7 +690,10 @@
             "signature": [
               "number"
             ],
-            "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/lighten_color.ts",
+              "lineNumber": 14
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -614,7 +713,10 @@
           "TooltipValue",
           ") => string | JSX.Element"
         ],
-        "path": "src/plugins/charts/public/static/components/endzones.tsx",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/endzones.tsx",
+          "lineNumber": 159
+        },
         "deprecated": false,
         "children": [
           {
@@ -627,7 +729,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 160
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -641,7 +746,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 161
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -655,7 +763,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 162
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -669,7 +780,10 @@
             "signature": [
               "((v: any) => string) | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 163
+            },
             "deprecated": false,
             "isRequired": false
           },
@@ -683,7 +797,10 @@
             "signature": [
               "boolean"
             ],
-            "path": "src/plugins/charts/public/static/components/endzones.tsx",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 164
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -700,7 +817,10 @@
         "tags": [],
         "label": "BrushTriggerEvent",
         "description": [],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "children": [
           {
@@ -713,7 +833,10 @@
             "signature": [
               "\"brush\""
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -734,7 +857,10 @@
               },
               "; column: number; range: number[]; timeFieldName?: string | undefined; }"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           }
         ],
@@ -749,7 +875,10 @@
         "description": [
           "\nInformation about the structure of a chart to determine the color of a series within it."
         ],
-        "path": "src/plugins/charts/public/services/palettes/types.ts",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/types.ts",
+          "lineNumber": 33
+        },
         "deprecated": false,
         "children": [
           {
@@ -764,7 +893,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 37
+            },
             "deprecated": false
           },
           {
@@ -779,7 +911,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           },
           {
@@ -794,7 +929,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 46
+            },
             "deprecated": false
           },
           {
@@ -809,7 +947,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 51
+            },
             "deprecated": false
           }
         ],
@@ -822,7 +963,10 @@
         "tags": [],
         "label": "ClickTriggerEvent",
         "description": [],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 21
+        },
         "deprecated": false,
         "children": [
           {
@@ -835,7 +979,10 @@
             "signature": [
               "\"filterBucket\""
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -856,7 +1003,10 @@
               },
               ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           }
         ],
@@ -869,7 +1019,10 @@
         "tags": [],
         "label": "ColorMap",
         "description": [],
-        "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 31
+        },
         "deprecated": false,
         "children": [
           {
@@ -882,7 +1035,10 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 32
+            },
             "deprecated": false
           }
         ],
@@ -895,7 +1051,10 @@
         "tags": [],
         "label": "ColorSchema",
         "description": [],
-        "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "children": [
           {
@@ -914,7 +1073,10 @@
                 "text": "ColorSchemas"
               }
             ],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -924,7 +1086,10 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           }
         ],
@@ -937,7 +1102,10 @@
         "tags": [],
         "label": "ColorSchemaParams",
         "description": [],
-        "path": "src/plugins/charts/public/static/components/types.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/types.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "children": [
           {
@@ -956,7 +1124,10 @@
                 "text": "ColorSchemas"
               }
             ],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 13
+            },
             "deprecated": false
           },
           {
@@ -966,7 +1137,10 @@
             "tags": [],
             "label": "invertColors",
             "description": [],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           }
         ],
@@ -979,7 +1153,10 @@
         "tags": [],
         "label": "CustomPaletteArguments",
         "description": [],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "children": [
           {
@@ -992,7 +1169,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -1002,7 +1182,10 @@
             "tags": [],
             "label": "gradient",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -1015,7 +1198,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           },
           {
@@ -1028,7 +1214,10 @@
             "signature": [
               "number[] | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -1041,7 +1230,10 @@
             "signature": [
               "\"number\" | \"percent\" | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -1054,7 +1246,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -1067,7 +1262,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -1080,7 +1278,10 @@
             "signature": [
               "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           }
         ],
@@ -1093,7 +1294,10 @@
         "tags": [],
         "label": "CustomPaletteState",
         "description": [],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "children": [
           {
@@ -1106,7 +1310,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -1116,7 +1323,10 @@
             "tags": [],
             "label": "gradient",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -1129,7 +1339,10 @@
             "signature": [
               "number[]"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -1142,7 +1355,10 @@
             "signature": [
               "\"number\" | \"percent\""
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -1152,7 +1368,10 @@
             "tags": [],
             "label": "rangeMin",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -1162,7 +1381,10 @@
             "tags": [],
             "label": "rangeMax",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -1175,7 +1397,10 @@
             "signature": [
               "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 31
+            },
             "deprecated": false
           }
         ],
@@ -1188,7 +1413,10 @@
         "tags": [],
         "label": "Labels",
         "description": [],
-        "path": "src/plugins/charts/public/static/components/types.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/types.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "children": [
           {
@@ -1201,7 +1429,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -1214,7 +1445,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -1227,7 +1461,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -1240,7 +1477,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -1253,7 +1493,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -1266,7 +1509,10 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           }
         ],
@@ -1291,7 +1537,10 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/charts/public/services/palettes/types.ts",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/types.ts",
+          "lineNumber": 63
+        },
         "deprecated": false,
         "children": [
           {
@@ -1303,7 +1552,10 @@
             "description": [
               "\nUnique id of the palette (this will be persisted along with the visualization state)"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 67
+            },
             "deprecated": false
           },
           {
@@ -1315,7 +1567,10 @@
             "description": [
               "\nUser facing title (should be i18n-ized)"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 71
+            },
             "deprecated": false
           },
           {
@@ -1330,7 +1585,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 75
+            },
             "deprecated": false
           },
           {
@@ -1352,13 +1610,15 @@
                 "text": "ExpressionAstExpression"
               }
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 81
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "charts",
-                "id": "def-public.state",
+                "id": "def-public.PaletteDefinition.toExpression.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -1368,10 +1628,15 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 81
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "charts",
@@ -1401,13 +1666,15 @@
               },
               " | undefined, state?: T | undefined) => string | null"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 87
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "charts",
-                "id": "def-public.series",
+                "id": "def-public.PaletteDefinition.getCategoricalColor.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "series",
@@ -1424,12 +1691,16 @@
                   },
                   "[]"
                 ],
-                "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 88
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "charts",
-                "id": "def-public.chartConfiguration",
+                "id": "def-public.PaletteDefinition.getCategoricalColor.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "chartConfiguration",
@@ -1444,12 +1715,16 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 89
+                },
+                "deprecated": false,
+                "isRequired": false
               },
               {
                 "parentPluginId": "charts",
-                "id": "def-public.state",
+                "id": "def-public.PaletteDefinition.getCategoricalColor.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -1459,10 +1734,15 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 90
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "charts",
@@ -1476,23 +1756,32 @@
             "signature": [
               "(size: number, state?: T | undefined) => string[]"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 96
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "charts",
-                "id": "def-public.size",
+                "id": "def-public.PaletteDefinition.getCategoricalColors.$1",
                 "type": "number",
                 "tags": [],
                 "label": "size",
                 "description": [],
-                "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "signature": [
+                  "number"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 96
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "charts",
-                "id": "def-public.state",
+                "id": "def-public.PaletteDefinition.getCategoricalColors.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -1500,10 +1789,15 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 96
+                },
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "charts",
@@ -1517,7 +1811,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 100
+            },
             "deprecated": false
           },
           {
@@ -1532,8 +1829,89 @@
             "signature": [
               "((value: number | undefined, state: T, { min, max }: { min: number; max: number; }) => string | undefined) | undefined"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
-            "deprecated": false
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 105
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.PaletteDefinition.getColorForValue.$1",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 106
+                },
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.PaletteDefinition.getColorForValue.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 107
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax",
+                "type": "Object",
+                "tags": [],
+                "label": "{ min, max }",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 108
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "charts",
+                    "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax.min",
+                    "type": "number",
+                    "tags": [],
+                    "label": "min",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/charts/public/services/palettes/types.ts",
+                      "lineNumber": 108
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "charts",
+                    "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax.max",
+                    "type": "number",
+                    "tags": [],
+                    "label": "max",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/charts/public/services/palettes/types.ts",
+                      "lineNumber": 108
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1555,7 +1933,10 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 38
+        },
         "deprecated": false,
         "children": [
           {
@@ -1568,7 +1949,10 @@
             "signature": [
               "\"palette\""
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -1578,7 +1962,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -1591,7 +1978,10 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           }
         ],
@@ -1604,7 +1994,10 @@
         "tags": [],
         "label": "PaletteRegistry",
         "description": [],
-        "path": "src/plugins/charts/public/services/palettes/types.ts",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/types.ts",
+          "lineNumber": 112
+        },
         "deprecated": false,
         "children": [
           {
@@ -1625,21 +2018,31 @@
               },
               "<unknown>"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 113
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "charts",
-                "id": "def-public.name",
+                "id": "def-public.PaletteRegistry.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "src/plugins/charts/public/services/palettes/types.ts",
+                  "lineNumber": 113
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "charts",
@@ -1659,10 +2062,13 @@
               },
               "<unknown>[]"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 114
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1674,7 +2080,10 @@
         "tags": [],
         "label": "RawColorSchema",
         "description": [],
-        "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 25
+        },
         "deprecated": false,
         "children": [
           {
@@ -1693,7 +2102,10 @@
                 "text": "ColorSchemas"
               }
             ],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -1703,7 +2115,10 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -1716,7 +2131,10 @@
             "signature": [
               "[number, number[]][]"
             ],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           }
         ],
@@ -1731,7 +2149,10 @@
         "description": [
           "\nInformation about a series in a chart used to determine its color.\nSeries layers can be nested, this means each series layer can have an ancestor."
         ],
-        "path": "src/plugins/charts/public/services/palettes/types.ts",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/types.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "children": [
           {
@@ -1743,7 +2164,10 @@
             "description": [
               "\nName of the series (can be used for lookup-based coloring)"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -1755,7 +2179,10 @@
             "description": [
               "\nRank of the series compared to siblings with the same ancestor"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           },
           {
@@ -1767,7 +2194,10 @@
             "description": [
               "\nTotal number of series with the same ancestor"
             ],
-            "path": "src/plugins/charts/public/services/palettes/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           }
         ],
@@ -1780,7 +2210,10 @@
         "tags": [],
         "label": "Style",
         "description": [],
-        "path": "src/plugins/charts/public/static/components/types.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/types.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "children": [
           {
@@ -1790,7 +2223,10 @@
             "tags": [],
             "label": "bgFill",
             "description": [],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -1800,7 +2236,10 @@
             "tags": [],
             "label": "bgColor",
             "description": [],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -1810,7 +2249,10 @@
             "tags": [],
             "label": "labelColor",
             "description": [],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -1820,7 +2262,10 @@
             "tags": [],
             "label": "subText",
             "description": [],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -1830,7 +2275,10 @@
             "tags": [],
             "label": "fontSize",
             "description": [],
-            "path": "src/plugins/charts/public/static/components/types.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 31
+            },
             "deprecated": false
           }
         ],
@@ -1843,7 +2291,10 @@
         "tags": [],
         "label": "SystemPaletteArguments",
         "description": [],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 34
+        },
         "deprecated": false,
         "children": [
           {
@@ -1853,7 +2304,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           }
         ],
@@ -1868,7 +2322,10 @@
         "tags": [],
         "label": "ColorSchemas",
         "description": [],
-        "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1884,7 +2341,10 @@
         "signature": [
           "\"Background\" | \"Labels\" | \"None\""
         ],
-        "path": "src/plugins/charts/public/static/components/collections.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 17
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1905,7 +2365,10 @@
           },
           "[]"
         ],
-        "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 174
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1916,7 +2379,10 @@
         "tags": [],
         "label": "defaultCountLabel",
         "description": [],
-        "path": "src/plugins/charts/public/static/components/collections.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1930,7 +2396,10 @@
         "signature": [
           "number"
         ],
-        "path": "src/plugins/charts/public/static/components/collections.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1944,7 +2413,10 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/plugins/charts/common/constants.ts",
+        "source": {
+          "path": "src/plugins/charts/common/constants.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1960,7 +2432,10 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/plugins/charts/public/static/colors/seed_colors.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/colors/seed_colors.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1981,7 +2456,10 @@
           },
           "[]"
         ],
-        "path": "src/plugins/charts/public/static/color_maps/truncated_color_maps.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/truncated_color_maps.ts",
+          "lineNumber": 26
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1997,7 +2475,10 @@
         "signature": [
           "{ readonly Background: \"Background\"; readonly Labels: \"Labels\"; readonly None: \"None\"; }"
         ],
-        "path": "src/plugins/charts/public/static/components/collections.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 12
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2011,7 +2492,10 @@
         "signature": [
           "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; }"
         ],
-        "path": "src/plugins/charts/public/static/components/collections.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 19
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2022,7 +2506,10 @@
         "tags": [],
         "label": "truncatedColorMaps",
         "description": [],
-        "path": "src/plugins/charts/public/static/color_maps/truncated_color_maps.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/truncated_color_maps.ts",
+          "lineNumber": 11
+        },
         "deprecated": false,
         "children": [],
         "initialIsOpen": false
@@ -2034,7 +2521,10 @@
         "tags": [],
         "label": "vislibColorMaps",
         "description": [],
-        "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 35
+        },
         "deprecated": false,
         "children": [
           {
@@ -2046,7 +2536,10 @@
             "description": [
               "// Sequential"
             ],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 37
+            },
             "deprecated": false,
             "children": [
               {
@@ -2066,7 +2559,10 @@
                   },
                   ".Blues"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 38
+                },
                 "deprecated": false
               },
               {
@@ -2076,7 +2572,10 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 39
+                },
                 "deprecated": false
               },
               {
@@ -2089,7 +2588,10 @@
                 "signature": [
                   "[number, number[]][]"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 42
+                },
                 "deprecated": false
               }
             ]
@@ -2101,7 +2603,10 @@
             "tags": [],
             "label": "[ColorSchemas.Greens]",
             "description": [],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 55
+            },
             "deprecated": false,
             "children": [
               {
@@ -2121,7 +2626,10 @@
                   },
                   ".Greens"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 56
+                },
                 "deprecated": false
               },
               {
@@ -2131,7 +2639,10 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 57
+                },
                 "deprecated": false
               },
               {
@@ -2144,7 +2655,10 @@
                 "signature": [
                   "[number, number[]][]"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 60
+                },
                 "deprecated": false
               }
             ]
@@ -2156,7 +2670,10 @@
             "tags": [],
             "label": "[ColorSchemas.Greys]",
             "description": [],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 73
+            },
             "deprecated": false,
             "children": [
               {
@@ -2176,7 +2693,10 @@
                   },
                   ".Greys"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 74
+                },
                 "deprecated": false
               },
               {
@@ -2186,7 +2706,10 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 75
+                },
                 "deprecated": false
               },
               {
@@ -2199,7 +2722,10 @@
                 "signature": [
                   "[number, number[]][]"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 78
+                },
                 "deprecated": false
               }
             ]
@@ -2211,7 +2737,10 @@
             "tags": [],
             "label": "[ColorSchemas.Reds]",
             "description": [],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 91
+            },
             "deprecated": false,
             "children": [
               {
@@ -2231,7 +2760,10 @@
                   },
                   ".Reds"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 92
+                },
                 "deprecated": false
               },
               {
@@ -2241,7 +2773,10 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 93
+                },
                 "deprecated": false
               },
               {
@@ -2254,7 +2789,10 @@
                 "signature": [
                   "[number, number[]][]"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 96
+                },
                 "deprecated": false
               }
             ]
@@ -2266,7 +2804,10 @@
             "tags": [],
             "label": "[ColorSchemas.YellowToRed]",
             "description": [],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 109
+            },
             "deprecated": false,
             "children": [
               {
@@ -2286,7 +2827,10 @@
                   },
                   ".YellowToRed"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 110
+                },
                 "deprecated": false
               },
               {
@@ -2296,7 +2840,10 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 111
+                },
                 "deprecated": false
               },
               {
@@ -2309,7 +2856,10 @@
                 "signature": [
                   "[number, number[]][]"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 114
+                },
                 "deprecated": false
               }
             ]
@@ -2321,7 +2871,10 @@
             "tags": [],
             "label": "[ColorSchemas.GreenToRed]",
             "description": [],
-            "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 128
+            },
             "deprecated": false,
             "children": [
               {
@@ -2341,7 +2894,10 @@
                   },
                   ".GreenToRed"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 129
+                },
                 "deprecated": false
               },
               {
@@ -2351,7 +2907,10 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 130
+                },
                 "deprecated": false
               },
               {
@@ -2364,7 +2923,10 @@
                 "signature": [
                   "[number, number[]][]"
                 ],
-                "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 133
+                },
                 "deprecated": false
               }
             ]
@@ -2389,7 +2951,10 @@
           "text": "ChartsPluginSetup"
         }
       ],
-      "path": "src/plugins/charts/public/plugin.ts",
+      "source": {
+        "path": "src/plugins/charts/public/plugin.ts",
+        "lineNumber": 31
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -2466,7 +3031,10 @@
           "SerializableState",
           ">>"
         ],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 63
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -2524,7 +3092,10 @@
           "SerializableState",
           ">>"
         ],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 175
+        },
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -2539,7 +3110,10 @@
         "tags": [],
         "label": "CustomPaletteArguments",
         "description": [],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "children": [
           {
@@ -2552,7 +3126,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -2562,7 +3139,10 @@
             "tags": [],
             "label": "gradient",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -2575,7 +3155,10 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 16
+            },
             "deprecated": false
           },
           {
@@ -2588,7 +3171,10 @@
             "signature": [
               "number[] | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 17
+            },
             "deprecated": false
           },
           {
@@ -2601,7 +3187,10 @@
             "signature": [
               "\"number\" | \"percent\" | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 18
+            },
             "deprecated": false
           },
           {
@@ -2614,7 +3203,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -2627,7 +3219,10 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -2640,7 +3235,10 @@
             "signature": [
               "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           }
         ],
@@ -2653,7 +3251,10 @@
         "tags": [],
         "label": "CustomPaletteState",
         "description": [],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 24
+        },
         "deprecated": false,
         "children": [
           {
@@ -2666,7 +3267,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 25
+            },
             "deprecated": false
           },
           {
@@ -2676,7 +3280,10 @@
             "tags": [],
             "label": "gradient",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -2689,7 +3296,10 @@
             "signature": [
               "number[]"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           },
           {
@@ -2702,7 +3312,10 @@
             "signature": [
               "\"number\" | \"percent\""
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -2712,7 +3325,10 @@
             "tags": [],
             "label": "rangeMin",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 29
+            },
             "deprecated": false
           },
           {
@@ -2722,7 +3338,10 @@
             "tags": [],
             "label": "rangeMax",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 30
+            },
             "deprecated": false
           },
           {
@@ -2735,7 +3354,10 @@
             "signature": [
               "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 31
+            },
             "deprecated": false
           }
         ],
@@ -2758,7 +3380,10 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 38
+        },
         "deprecated": false,
         "children": [
           {
@@ -2771,7 +3396,10 @@
             "signature": [
               "\"palette\""
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 39
+            },
             "deprecated": false
           },
           {
@@ -2781,7 +3409,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 40
+            },
             "deprecated": false
           },
           {
@@ -2794,7 +3425,10 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 41
+            },
             "deprecated": false
           }
         ],
@@ -2807,7 +3441,10 @@
         "tags": [],
         "label": "SystemPaletteArguments",
         "description": [],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 34
+        },
         "deprecated": false,
         "children": [
           {
@@ -2817,7 +3454,10 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/charts/common/palette.ts",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 35
+            },
             "deprecated": false
           }
         ],
@@ -2836,7 +3476,10 @@
         "signature": [
           "\"visualization:colorMapping\""
         ],
-        "path": "src/plugins/charts/common/index.ts",
+        "source": {
+          "path": "src/plugins/charts/common/index.ts",
+          "lineNumber": 9
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2850,7 +3493,10 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/plugins/charts/common/palette.ts",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 43
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2864,7 +3510,10 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/plugins/charts/common/constants.ts",
+        "source": {
+          "path": "src/plugins/charts/common/constants.ts",
+          "lineNumber": 10
+        },
         "deprecated": false,
         "initialIsOpen": false
       }

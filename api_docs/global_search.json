@@ -13,7 +13,10 @@
         "description": [
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 85
+        },
         "deprecated": false,
         "children": [
           {
@@ -29,7 +32,10 @@
               "GlobalSearchResult",
               "[]"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 89
+            },
             "deprecated": false
           }
         ],
@@ -44,7 +50,10 @@
         "description": [
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}"
         ],
-        "path": "x-pack/plugins/global_search/public/services/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/public/services/types.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "children": [
           {
@@ -59,7 +68,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/public/services/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/public/services/types.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -75,7 +87,10 @@
               "Observable",
               "<void> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/public/services/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/public/services/types.ts",
+              "lineNumber": 27
+            },
             "deprecated": false
           }
         ],
@@ -90,7 +105,10 @@
         "description": [
           "\nSearch parameters for the {@link GlobalSearchPluginStart.find | `find` API}\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 97
+        },
         "deprecated": false,
         "children": [
           {
@@ -105,7 +123,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 101
+            },
             "deprecated": false
           },
           {
@@ -120,7 +141,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 105
+            },
             "deprecated": false
           },
           {
@@ -135,7 +159,10 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 109
+            },
             "deprecated": false
           }
         ],
@@ -150,7 +177,10 @@
         "description": [
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -162,7 +192,10 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -178,7 +211,10 @@
               "Observable",
               "<void>"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -190,7 +226,10 @@
             "description": [
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 33
+            },
             "deprecated": false
           }
         ],
@@ -205,7 +244,10 @@
         "description": [
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 44
+        },
         "deprecated": false,
         "children": [
           {
@@ -217,7 +259,10 @@
             "description": [
               "an id that should be unique for an individual provider's results"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 46
+            },
             "deprecated": false
           },
           {
@@ -229,7 +274,10 @@
             "description": [
               "the title/label of the result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 48
+            },
             "deprecated": false
           },
           {
@@ -241,7 +289,10 @@
             "description": [
               "the type of result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           },
           {
@@ -256,7 +307,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 52
+            },
             "deprecated": false
           },
           {
@@ -271,7 +325,10 @@
             "signature": [
               "string | { path: string; prependBasePath: boolean; }"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 62
+            },
             "deprecated": false
           },
           {
@@ -283,7 +340,10 @@
             "description": [
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 64
+            },
             "deprecated": false
           },
           {
@@ -300,7 +360,10 @@
               "Serializable",
               "> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 66
+            },
             "deprecated": false
           }
         ],
@@ -315,7 +378,10 @@
         "description": [
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}"
         ],
-        "path": "x-pack/plugins/global_search/public/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/public/types.ts",
+          "lineNumber": 22
+        },
         "deprecated": false,
         "children": [
           {
@@ -327,7 +393,10 @@
             "description": [
               "\nid of the provider"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/public/types.ts",
+              "lineNumber": 26
+            },
             "deprecated": false
           },
           {
@@ -350,7 +419,10 @@
               "GlobalSearchProviderResult",
               "[]>"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/public/types.ts",
+              "lineNumber": 44
+            },
             "deprecated": false,
             "children": [
               {
@@ -363,7 +435,10 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/public/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/global_search/public/types.ts",
+                  "lineNumber": 45
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -377,7 +452,10 @@
                 "signature": [
                   "GlobalSearchProviderFindOptions"
                 ],
-                "path": "x-pack/plugins/global_search/public/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/global_search/public/types.ts",
+                  "lineNumber": 46
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -396,10 +474,13 @@
             "signature": [
               "() => string[] | Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/public/types.ts",
+              "lineNumber": 53
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -417,7 +498,10 @@
         "signature": [
           "GlobalSearchFindParams"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 115
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -433,7 +517,10 @@
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -451,7 +538,10 @@
           "GlobalSearchProviderResult",
           ", \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 72
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -475,7 +565,10 @@
         },
         ") => void; }"
       ],
-      "path": "x-pack/plugins/global_search/public/types.ts",
+      "source": {
+        "path": "x-pack/plugins/global_search/public/types.ts",
+        "lineNumber": 16
+      },
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -504,7 +597,10 @@
         "GlobalSearchBatchedResults",
         ">; getSearchableTypes: () => Promise<string[]>; }"
       ],
-      "path": "x-pack/plugins/global_search/public/types.ts",
+      "source": {
+        "path": "x-pack/plugins/global_search/public/types.ts",
+        "lineNumber": 17
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -523,7 +619,10 @@
         "description": [
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 85
+        },
         "deprecated": false,
         "children": [
           {
@@ -539,7 +638,10 @@
               "GlobalSearchResult",
               "[]"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 89
+            },
             "deprecated": false
           }
         ],
@@ -554,7 +656,10 @@
         "description": [
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/server/types.ts",
+          "lineNumber": 88
+        },
         "deprecated": false,
         "children": [
           {
@@ -569,7 +674,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 95
+            },
             "deprecated": false
           },
           {
@@ -585,7 +693,10 @@
               "Observable",
               "<void> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 100
+            },
             "deprecated": false
           }
         ],
@@ -600,7 +711,10 @@
         "description": [
           "\nContext passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/server/types.ts",
+          "lineNumber": 65
+        },
         "deprecated": false,
         "children": [
           {
@@ -649,7 +763,10 @@
               "Capabilities",
               ">; }"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 66
+            },
             "deprecated": false
           }
         ],
@@ -664,7 +781,10 @@
         "description": [
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 14
+        },
         "deprecated": false,
         "children": [
           {
@@ -676,7 +796,10 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -692,7 +815,10 @@
               "Observable",
               "<void>"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -704,7 +830,10 @@
             "description": [
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 33
+            },
             "deprecated": false
           }
         ],
@@ -719,7 +848,10 @@
         "description": [
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 44
+        },
         "deprecated": false,
         "children": [
           {
@@ -731,7 +863,10 @@
             "description": [
               "an id that should be unique for an individual provider's results"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 46
+            },
             "deprecated": false
           },
           {
@@ -743,7 +878,10 @@
             "description": [
               "the title/label of the result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 48
+            },
             "deprecated": false
           },
           {
@@ -755,7 +893,10 @@
             "description": [
               "the type of result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           },
           {
@@ -770,7 +911,10 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 52
+            },
             "deprecated": false
           },
           {
@@ -785,7 +929,10 @@
             "signature": [
               "string | { path: string; prependBasePath: boolean; }"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 62
+            },
             "deprecated": false
           },
           {
@@ -797,7 +944,10 @@
             "description": [
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 64
+            },
             "deprecated": false
           },
           {
@@ -814,7 +964,10 @@
               "Serializable",
               "> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 66
+            },
             "deprecated": false
           }
         ],
@@ -829,7 +982,10 @@
         "description": [
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/server/types.ts",
+          "lineNumber": 108
+        },
         "deprecated": false,
         "children": [
           {
@@ -841,7 +997,10 @@
             "description": [
               "\nid of the provider"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 112
+            },
             "deprecated": false
           },
           {
@@ -872,7 +1031,10 @@
               "GlobalSearchProviderResult",
               "[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 130
+            },
             "deprecated": false,
             "children": [
               {
@@ -885,7 +1047,10 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 131
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -899,7 +1064,10 @@
                 "signature": [
                   "GlobalSearchProviderFindOptions"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 132
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -919,7 +1087,10 @@
                     "text": "GlobalSearchProviderContext"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 133
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -946,13 +1117,15 @@
               },
               ") => string[] | Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 140
+            },
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "globalSearch",
-                "id": "def-server.context",
+                "id": "def-server.GlobalSearchResultProvider.getSearchableTypes.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -966,10 +1139,15 @@
                     "text": "GlobalSearchProviderContext"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
-                "deprecated": false
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 140
+                },
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -983,7 +1161,10 @@
         "description": [
           "\nglobalSearch route handler context.\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/server/types.ts",
+          "lineNumber": 46
+        },
         "deprecated": false,
         "children": [
           {
@@ -1012,7 +1193,10 @@
               "GlobalSearchBatchedResults",
               ">"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 50
+            },
             "deprecated": false,
             "children": [
               {
@@ -1025,7 +1209,10 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 51
+                },
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1045,7 +1232,10 @@
                     "text": "GlobalSearchFindOptions"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 52
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1064,10 +1254,13 @@
             "signature": [
               "() => Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 57
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1087,7 +1280,10 @@
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 39
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1105,7 +1301,10 @@
           "GlobalSearchProviderResult",
           ", \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 72
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1151,7 +1350,10 @@
         },
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"
       ],
-      "path": "x-pack/plugins/global_search/server/types.ts",
+      "source": {
+        "path": "x-pack/plugins/global_search/server/types.ts",
+        "lineNumber": 28
+      },
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1174,7 +1376,10 @@
         },
         ") => void; }"
       ],
-      "path": "x-pack/plugins/global_search/server/types.ts",
+      "source": {
+        "path": "x-pack/plugins/global_search/server/types.ts",
+        "lineNumber": 27
+      },
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true

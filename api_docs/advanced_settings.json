@@ -9,7 +9,10 @@
         "tags": [],
         "label": "ComponentRegistry",
         "description": [],
-        "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+        "source": {
+          "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+          "lineNumber": 27
+        },
         "deprecated": false,
         "children": [
           {
@@ -22,7 +25,10 @@
             "signature": [
               "{ [key: string]: Id; }"
             ],
-            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 28
+            },
             "deprecated": false
           },
           {
@@ -32,7 +38,10 @@
             "tags": [],
             "label": "defaultRegistry",
             "description": [],
-            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 29
+            },
             "deprecated": false,
             "children": [
               {
@@ -45,7 +54,10 @@
                 "signature": [
                   "() => JSX.Element"
                 ],
-                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 30
+                },
                 "deprecated": false,
                 "returnComment": [],
                 "children": []
@@ -60,7 +72,10 @@
                 "signature": [
                   "() => null"
                 ],
-                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 31
+                },
                 "deprecated": false,
                 "returnComment": [],
                 "children": []
@@ -75,7 +90,10 @@
                 "signature": [
                   "() => null"
                 ],
-                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 32
+                },
                 "deprecated": false,
                 "returnComment": [],
                 "children": []
@@ -89,7 +107,10 @@
             "tags": [],
             "label": "registry",
             "description": [],
-            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 35
+            },
             "deprecated": false,
             "children": []
           },
@@ -100,7 +121,10 @@
             "tags": [],
             "label": "setup",
             "description": [],
-            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 71
+            },
             "deprecated": false,
             "children": [
               {
@@ -113,7 +137,10 @@
                 "signature": [
                   "{ [key: string]: Id; }"
                 ],
-                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 72
+                },
                 "deprecated": false
               },
               {
@@ -126,7 +153,10 @@
                 "signature": [
                   "(id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void"
                 ],
-                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 73
+                },
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -140,7 +170,10 @@
                     "signature": [
                       "\"advanced_settings_page_title\" | \"advanced_settings_page_subtitle\" | \"advanced_settings_page_footer\""
                     ],
-                    "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                    "source": {
+                      "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                      "lineNumber": 47
+                    },
                     "deprecated": false
                   },
                   {
@@ -153,7 +186,10 @@
                     "signature": [
                       "React.ComponentClass<Record<string, any> | undefined, any> | React.FunctionComponent<Record<string, any> | undefined>"
                     ],
-                    "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                    "source": {
+                      "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                      "lineNumber": 47
+                    },
                     "deprecated": false
                   },
                   {
@@ -163,7 +199,10 @@
                     "tags": [],
                     "label": "allowOverride",
                     "description": [],
-                    "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                    "source": {
+                      "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                      "lineNumber": 47
+                    },
                     "deprecated": false
                   }
                 ]
@@ -177,7 +216,10 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 76
+            },
             "deprecated": false,
             "children": [
               {
@@ -190,7 +232,10 @@
                 "signature": [
                   "{ [key: string]: Id; }"
                 ],
-                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 77
+                },
                 "deprecated": false
               },
               {
@@ -203,7 +248,10 @@
                 "signature": [
                   "(id: Id) => React.ComponentType<Record<string, any> | undefined>"
                 ],
-                "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 78
+                },
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -217,7 +265,10 @@
                     "signature": [
                       "\"advanced_settings_page_title\" | \"advanced_settings_page_subtitle\" | \"advanced_settings_page_footer\""
                     ],
-                    "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                    "source": {
+                      "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                      "lineNumber": 67
+                    },
                     "deprecated": false
                   }
                 ]
@@ -245,7 +296,10 @@
           "Field",
           "; }"
         ],
-        "path": "src/plugins/advanced_settings/public/index.ts",
+        "source": {
+          "path": "src/plugins/advanced_settings/public/index.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -259,7 +313,10 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
             "deprecated": false
           }
         ],
@@ -277,7 +334,10 @@
       "tags": [],
       "label": "AdvancedSettingsSetup",
       "description": [],
-      "path": "src/plugins/advanced_settings/public/types.ts",
+      "source": {
+        "path": "src/plugins/advanced_settings/public/types.ts",
+        "lineNumber": 15
+      },
       "deprecated": false,
       "children": [
         {
@@ -290,7 +350,10 @@
           "signature": [
             "{ componentType: { [key: string]: Id; }; register: (id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void; }"
           ],
-          "path": "src/plugins/advanced_settings/public/types.ts",
+          "source": {
+            "path": "src/plugins/advanced_settings/public/types.ts",
+            "lineNumber": 16
+          },
           "deprecated": false
         }
       ],
@@ -304,7 +367,10 @@
       "tags": [],
       "label": "AdvancedSettingsStart",
       "description": [],
-      "path": "src/plugins/advanced_settings/public/types.ts",
+      "source": {
+        "path": "src/plugins/advanced_settings/public/types.ts",
+        "lineNumber": 18
+      },
       "deprecated": false,
       "children": [
         {
@@ -317,7 +383,10 @@
           "signature": [
             "{ componentType: { [key: string]: Id; }; get: (id: Id) => React.ComponentType<Record<string, any> | undefined>; }"
           ],
-          "path": "src/plugins/advanced_settings/public/types.ts",
+          "source": {
+            "path": "src/plugins/advanced_settings/public/types.ts",
+            "lineNumber": 19
+          },
           "deprecated": false
         }
       ],

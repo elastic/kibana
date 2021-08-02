@@ -34,7 +34,10 @@
             "text": "IRuleDataClient"
           }
         ],
-        "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+          "lineNumber": 22
+        },
         "deprecated": false,
         "children": [
           {
@@ -47,7 +50,10 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 23
+            },
             "deprecated": false,
             "children": [
               {
@@ -60,7 +66,10 @@
                 "signature": [
                   "RuleDataClientConstructorOptions"
                 ],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                  "lineNumber": 23
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -77,7 +86,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 30
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -93,7 +105,10 @@
               "(options?: { namespace?: string | undefined; }) => ",
               "RuleDataReader"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 34
+            },
             "deprecated": false,
             "children": [
               {
@@ -103,7 +118,10 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                  "lineNumber": 34
+                },
                 "deprecated": false,
                 "children": [
                   {
@@ -116,7 +134,10 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                      "lineNumber": 34
+                    },
                     "deprecated": false
                   }
                 ]
@@ -135,7 +156,10 @@
               "(options?: { namespace?: string | undefined; }) => ",
               "RuleDataWriter"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 76
+            },
             "deprecated": false,
             "children": [
               {
@@ -145,7 +169,10 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                  "lineNumber": 76
+                },
                 "deprecated": false,
                 "children": [
                   {
@@ -158,7 +185,10 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                      "lineNumber": 76
+                    },
                     "deprecated": false
                   }
                 ]
@@ -176,7 +206,10 @@
             "signature": [
               "({ namespace }: { namespace?: string | undefined; }) => Promise<void>"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 114
+            },
             "deprecated": false,
             "children": [
               {
@@ -186,7 +219,10 @@
                 "tags": [],
                 "label": "{ namespace }",
                 "description": [],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                  "lineNumber": 114
+                },
                 "deprecated": false,
                 "children": [
                   {
@@ -199,7 +235,10 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                      "lineNumber": 114
+                    },
                     "deprecated": false
                   }
                 ]
@@ -252,7 +291,10 @@
           "WrappedLifecycleRuleState",
           "<State>>"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+          "lineNumber": 102
+        },
         "deprecated": false,
         "children": [
           {
@@ -265,7 +307,10 @@
             "signature": [
               "Logger"
             ],
-            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+              "lineNumber": 103
+            },
             "deprecated": false,
             "isRequired": true
           },
@@ -287,7 +332,10 @@
               },
               ", \"isWriteEnabled\" | \"getReader\" | \"getWriter\" | \"createWriteTargetIfNeeded\">"
             ],
-            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+              "lineNumber": 104
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -339,7 +387,10 @@
           },
           "<TParams, TAlertInstanceContext, any>"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+          "lineNumber": 27
+        },
         "deprecated": false,
         "children": [
           {
@@ -349,7 +400,10 @@
             "tags": [],
             "label": "{\n  logger,\n  ruleDataClient,\n}",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+              "lineNumber": 30
+            },
             "deprecated": false,
             "children": [
               {
@@ -368,7 +422,10 @@
                     "text": "RuleDataClient"
                   }
                 ],
-                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+                  "lineNumber": 31
+                },
                 "deprecated": false
               },
               {
@@ -381,7 +438,10 @@
                 "signature": [
                   "Logger"
                 ],
-                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+                  "lineNumber": 32
+                },
                 "deprecated": false
               }
             ]
@@ -478,7 +538,10 @@
           "SavedObjectReference",
           "[]) => TParams; } | undefined; isExportable: boolean; }"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",
+          "lineNumber": 42
+        },
         "deprecated": false,
         "children": [
           {
@@ -501,7 +564,10 @@
               "Logger",
               "; }"
             ],
-            "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",
+              "lineNumber": 42
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -527,7 +593,10 @@
           },
           "<any, any, any, any, any>) => { \"rule.id\": string; \"rule.uuid\": string; \"rule.category\": string; \"rule.name\": string; tags: string[]; \"kibana.rac.alert.producer\": string; }"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+          "lineNumber": 27
+        },
         "deprecated": false,
         "children": [
           {
@@ -547,7 +616,10 @@
               },
               "<any, any, any, any, any>"
             ],
-            "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 27
+            },
             "deprecated": false,
             "isRequired": true
           }
@@ -564,7 +636,10 @@
         "tags": [],
         "label": "IRuleDataClient",
         "description": [],
-        "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+          "lineNumber": 36
+        },
         "deprecated": false,
         "children": [
           {
@@ -578,7 +653,10 @@
               "(options?: { namespace?: string | undefined; } | undefined) => ",
               "RuleDataReader"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+              "lineNumber": 37
+            },
             "deprecated": false,
             "children": [
               {
@@ -588,7 +666,10 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                  "lineNumber": 37
+                },
                 "deprecated": false,
                 "children": [
                   {
@@ -601,7 +682,10 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                      "lineNumber": 37
+                    },
                     "deprecated": false
                   }
                 ]
@@ -620,7 +704,10 @@
               "(options?: { namespace?: string | undefined; } | undefined) => ",
               "RuleDataWriter"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+              "lineNumber": 38
+            },
             "deprecated": false,
             "children": [
               {
@@ -630,7 +717,10 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                  "lineNumber": 38
+                },
                 "deprecated": false,
                 "children": [
                   {
@@ -643,7 +733,10 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                      "lineNumber": 38
+                    },
                     "deprecated": false
                   }
                 ]
@@ -661,7 +754,10 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+              "lineNumber": 39
+            },
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -676,7 +772,10 @@
             "signature": [
               "(options: { namespace?: string | undefined; }) => Promise<void>"
             ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+              "lineNumber": 40
+            },
             "deprecated": false,
             "children": [
               {
@@ -686,7 +785,10 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                  "lineNumber": 40
+                },
                 "deprecated": false,
                 "children": [
                   {
@@ -699,7 +801,10 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                      "lineNumber": 40
+                    },
                     "deprecated": false
                   }
                 ]
@@ -727,7 +832,10 @@
           },
           "<InstanceState, InstanceContext, ActionGroupIds>"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+          "lineNumber": 50
+        },
         "deprecated": false,
         "children": [
           {
@@ -744,7 +852,10 @@
               "AlertInstance",
               "<InstanceState, InstanceContext, ActionGroupIds>, \"getState\" | \"replaceState\" | \"scheduleActions\" | \"scheduleActionsWithSubGroup\">"
             ],
-            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+              "lineNumber": 55
+            },
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -760,7 +871,10 @@
                   "Optional",
                   "<{ readonly \"kibana.rac.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.owner\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.uuid\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\" | \"kibana.rac.alert.reason\" | \"kibana.space_ids\">>, \"tags\" | \"@timestamp\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.owner\" | \"kibana.rac.alert.uuid\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\" | \"kibana.rac.alert.reason\" | \"kibana.space_ids\">>; }"
                 ],
-                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+                  "lineNumber": 45
+                },
                 "deprecated": false
               }
             ]
@@ -775,7 +889,10 @@
         "tags": [],
         "label": "RacApiRequestHandlerContext",
         "description": [],
-        "path": "x-pack/plugins/rule_registry/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/types.ts",
+          "lineNumber": 77
+        },
         "deprecated": false,
         "children": [
           {
@@ -790,10 +907,13 @@
               "AlertsClient",
               ">"
             ],
-            "path": "x-pack/plugins/rule_registry/server/types.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/types.ts",
+              "lineNumber": 78
+            },
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -805,7 +925,10 @@
         "tags": [],
         "label": "RuleExecutorData",
         "description": [],
-        "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+          "lineNumber": 18
+        },
         "deprecated": false,
         "children": [
           {
@@ -815,7 +938,10 @@
             "tags": [],
             "label": "[RULE_CATEGORY]",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 19
+            },
             "deprecated": false
           },
           {
@@ -825,7 +951,10 @@
             "tags": [],
             "label": "[RULE_ID]",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 20
+            },
             "deprecated": false
           },
           {
@@ -835,7 +964,10 @@
             "tags": [],
             "label": "[RULE_UUID]",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 21
+            },
             "deprecated": false
           },
           {
@@ -845,7 +977,10 @@
             "tags": [],
             "label": "[RULE_NAME]",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 22
+            },
             "deprecated": false
           },
           {
@@ -855,7 +990,10 @@
             "tags": [],
             "label": "[PRODUCER]",
             "description": [],
-            "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 23
+            },
             "deprecated": false
           },
           {
@@ -868,7 +1006,10 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 24
+            },
             "deprecated": false
           }
         ],
@@ -897,7 +1038,10 @@
           "AlertTypeExecutor",
           "<TParams, TAlertInstanceContext, TServices>; }"
         ],
-        "path": "x-pack/plugins/rule_registry/server/types.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/types.ts",
+          "lineNumber": 41
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -913,8 +1057,30 @@
           "AlertInstance",
           "<{ [x: string]: unknown; }, TAlertInstanceContext, TActionGroupIds>, \"getState\" | \"replaceState\" | \"scheduleActions\" | \"scheduleActionsWithSubGroup\">"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+          "lineNumber": 19
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.alert",
+            "type": "Object",
+            "tags": [],
+            "label": "alert",
+            "description": [],
+            "signature": [
+              "{ id: string; fields: Record<string, unknown>; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -937,8 +1103,54 @@
           },
           "<InstanceState, InstanceContext, ActionGroupIds>>) => Promise<void | State>"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+          "lineNumber": 58
+        },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.options",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertExecutorOptions",
+                "text": "AlertExecutorOptions"
+              },
+              "<Params, State, InstanceState, InstanceContext, ActionGroupIds>, \"name\" | \"params\" | \"tags\" | \"spaceId\" | \"rule\" | \"createdBy\" | \"updatedBy\" | \"previousStartedAt\" | \"state\" | \"alertId\" | \"namespace\" | \"startedAt\"> & { services: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertServices",
+                "text": "AlertServices"
+              },
+              "<InstanceState, InstanceContext, ActionGroupIds> & ",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.LifecycleAlertServices",
+                "text": "LifecycleAlertServices"
+              },
+              "<InstanceState, InstanceContext, ActionGroupIds>; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+              "lineNumber": 65
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -951,7 +1163,10 @@
         "signature": [
           "{ readonly enabled: boolean; readonly index: string; readonly write: Readonly<{} & { enabled: boolean; }>; }"
         ],
-        "path": "x-pack/plugins/rule_registry/server/config.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/config.ts",
+          "lineNumber": 20
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -964,7 +1179,10 @@
       "tags": [],
       "label": "RuleRegistryPluginSetupContract",
       "description": [],
-      "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+        "lineNumber": 37
+      },
       "deprecated": false,
       "children": [
         {
@@ -977,7 +1195,10 @@
           "signature": [
             "RuleDataPluginService"
           ],
-          "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+            "lineNumber": 38
+          },
           "deprecated": false
         },
         {
@@ -990,7 +1211,10 @@
           "signature": [
             "IEventLogService"
           ],
-          "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+            "lineNumber": 39
+          },
           "deprecated": false
         }
       ],
@@ -1004,7 +1228,10 @@
       "tags": [],
       "label": "RuleRegistryPluginStartContract",
       "description": [],
-      "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+      "source": {
+        "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+        "lineNumber": 42
+      },
       "deprecated": false,
       "children": [
         {
@@ -1027,13 +1254,15 @@
             "AlertsClient",
             ">"
           ],
-          "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+            "lineNumber": 43
+          },
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "ruleRegistry",
-              "id": "def-server.req",
+              "id": "def-server.RuleRegistryPluginStartContract.getRacClientWithRequest.$1",
               "type": "Object",
               "tags": [],
               "label": "req",
@@ -1048,10 +1277,15 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "x-pack/plugins/rule_registry/server/plugin.ts",
-              "deprecated": false
+              "source": {
+                "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+                "lineNumber": 43
+              },
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "ruleRegistry",
@@ -1069,7 +1303,10 @@
               "text": "PluginStartContract"
             }
           ],
-          "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+          "source": {
+            "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+            "lineNumber": 44
+          },
           "deprecated": false
         }
       ],
@@ -1092,7 +1329,10 @@
           "Optional",
           "<{ readonly \"kibana.rac.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.owner\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.uuid\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\" | \"kibana.rac.alert.reason\" | \"kibana.space_ids\">>"
         ],
-        "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
+        "source": {
+          "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
+          "lineNumber": 15
+        },
         "deprecated": false,
         "children": [
           {
@@ -1105,7 +1345,10 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
+            "source": {
+              "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
+              "lineNumber": 15
+            },
             "deprecated": false,
             "isRequired": true
           }

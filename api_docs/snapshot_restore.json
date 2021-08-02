@@ -28,7 +28,10 @@
         "tags": [],
         "label": "REPOSITORY_TYPES",
         "description": [],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 25
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -44,7 +47,10 @@
         "signature": [
           "\"/api/snapshot_restore/\""
         ],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 23
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -58,7 +64,10 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 55
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -72,7 +81,10 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 59
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -86,7 +98,10 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 60
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -101,7 +116,10 @@
           "RepositoryType",
           "[]"
         ],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 36
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -116,7 +134,10 @@
           "RepositoryType",
           "[]"
         ],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 41
+        },
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -132,7 +153,10 @@
         "signature": [
           "1000"
         ],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 73
+        },
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -145,7 +169,10 @@
         "tags": [],
         "label": "PLUGIN",
         "description": [],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 13
+        },
         "deprecated": false,
         "children": [
           {
@@ -155,7 +182,10 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 14
+            },
             "deprecated": false
           },
           {
@@ -168,7 +198,10 @@
             "signature": [
               "\"basic\""
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 15
+            },
             "deprecated": false
           },
           {
@@ -181,7 +214,10 @@
             "signature": [
               "(i18n: any) => string"
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 16
+            },
             "deprecated": false,
             "children": [
               {
@@ -194,7 +230,10 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+                "source": {
+                  "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+                  "lineNumber": 16
+                },
                 "deprecated": false,
                 "isRequired": true
               }
@@ -211,7 +250,10 @@
         "tags": [],
         "label": "REPOSITORY_PLUGINS_MAP",
         "description": [],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 48
+        },
         "deprecated": false,
         "children": [
           {
@@ -231,7 +273,10 @@
               },
               ".s3"
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 49
+            },
             "deprecated": false
           },
           {
@@ -251,7 +296,10 @@
               },
               ".hdfs"
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 50
+            },
             "deprecated": false
           },
           {
@@ -271,7 +319,10 @@
               },
               ".azure"
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 51
+            },
             "deprecated": false
           },
           {
@@ -291,7 +342,10 @@
               },
               ".gcs"
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 52
+            },
             "deprecated": false
           }
         ],
@@ -304,7 +358,10 @@
         "tags": [],
         "label": "TIME_UNITS",
         "description": [],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 62
+        },
         "deprecated": false,
         "children": [
           {
@@ -317,7 +374,10 @@
             "signature": [
               "\"d\""
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 63
+            },
             "deprecated": false
           },
           {
@@ -330,7 +390,10 @@
             "signature": [
               "\"h\""
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 64
+            },
             "deprecated": false
           },
           {
@@ -343,7 +406,10 @@
             "signature": [
               "\"m\""
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 65
+            },
             "deprecated": false
           },
           {
@@ -356,7 +422,10 @@
             "signature": [
               "\"s\""
             ],
-            "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 66
+            },
             "deprecated": false
           }
         ],
