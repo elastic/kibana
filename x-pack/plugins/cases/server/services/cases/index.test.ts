@@ -20,11 +20,11 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { connectorIdReferenceName } from '..';
+import { CONNECTOR_ID_REFERENCE_NAME } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { getNoneCaseConnector } from '../../common';
-import { CasesService, ESCaseAttributes } from '.';
+import { CasesService } from '.';
 import {
   createESJiraConnector,
   createJiraConnector,
@@ -34,6 +34,7 @@ import {
   createCaseSavedObjectResponse,
   basicCaseFields,
 } from '../test_utils';
+import { ESCaseAttributes } from './types';
 
 const createUpdateSOResponse = ({
   connector,
@@ -350,7 +351,7 @@ describe('CasesService', () => {
           updatedAttributes: createCasePatchParams({ externalService: createExternalService() }),
           originalCase: {
             references: [
-              { id: '1', name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+              { id: '1', name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
             ],
           } as SavedObject<CaseAttributes>,
         });
@@ -1115,7 +1116,7 @@ describe('CasesService', () => {
             references: [
               {
                 id: '1',
-                name: connectorIdReferenceName,
+                name: CONNECTOR_ID_REFERENCE_NAME,
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],

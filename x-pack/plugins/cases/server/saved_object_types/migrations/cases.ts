@@ -11,12 +11,10 @@ import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
-  SavedObjectReference,
 } from '../../../../../../src/core/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { ESConnectorFields, pushConnectorIdReferenceName } from '../../services';
-import { ConnectorTypes, CaseType, noneConnectorId } from '../../../common';
-import { transformConnectorIdToReference } from './utils';
+import { ESConnectorFields } from '../../services';
+import { ConnectorTypes, CaseType } from '../../../common';
+import { transformConnectorIdToReference, transformPushConnectorIdToReference } from './utils';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -45,33 +43,6 @@ interface ConnectorIdFields {
   connector?: { id?: string };
   external_service?: { connector_id?: string | null } | null;
 }
-
-const transformPushConnectorIdToReference = (
-  external_service?: { connector_id?: string | null } | null
-): { transformedPushConnector: object; references: SavedObjectReference[] } => {
-  const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
-
-  const references =
-    pushConnectorId && pushConnectorId !== noneConnectorId
-      ? [
-          {
-            id: pushConnectorId,
-            type: ACTION_SAVED_OBJECT_TYPE,
-            name: pushConnectorIdReferenceName,
-          },
-        ]
-      : [];
-
-  let transformedPushConnector: object = {};
-
-  if (external_service) {
-    transformedPushConnector = { external_service: restExternalService };
-  } else if (external_service === null) {
-    transformedPushConnector = { external_service: null };
-  }
-
-  return { transformedPushConnector, references };
-};
 
 export const caseConnectorIdMigration = (
   doc: SavedObjectUnsanitizedDoc<ConnectorIdFields>

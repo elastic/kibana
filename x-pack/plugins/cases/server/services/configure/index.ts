@@ -20,13 +20,14 @@ import {
   CasesConfigurePatch,
 } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { connectorIdReferenceName, ESCaseConnector } from '..';
+import { CONNECTOR_ID_REFERENCE_NAME } from '..';
 import {
   transformFieldsToESModel,
   transformESConnectorToExternalModel,
   transformESConnectorOrUseDefault,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
+import { ESCasesConfigureAttributes } from './types';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -49,14 +50,6 @@ interface PatchCaseConfigureArgs extends ClientArgs {
   updatedAttributes: Partial<CasesConfigureAttributes>;
   originalConfiguration: SavedObject<CasesConfigureAttributes>;
 }
-
-/**
- * This type should only be used within the configure service. It represents how the configure saved object will be layed
- * out in ES.
- */
-export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
-  connector: ESCaseConnector;
-};
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
@@ -169,7 +162,7 @@ function transformUpdateResponseToExternalModel(
   const transformedConnector = transformESConnectorToExternalModel({
     connector,
     references: updatedConfiguration.references,
-    referenceName: connectorIdReferenceName,
+    referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
   return {
@@ -189,7 +182,7 @@ function transformToExternalModel(
     // if the saved object had an error the attributes field will not exist
     connector: configuration.attributes?.connector,
     references: configuration.references,
-    referenceName: connectorIdReferenceName,
+    referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
   return {
@@ -233,16 +226,20 @@ function transformAttributesToESModel(
 } {
   const { connector, ...restWithoutConnector } = configuration;
 
-  const transformedConnector = connector && {
-    name: connector.name,
-    type: connector.type,
-    fields: transformFieldsToESModel(connector),
+  const transformedConnector = {
+    ...(connector && {
+      connector: {
+        name: connector.name,
+        type: connector.type,
+        fields: transformFieldsToESModel(connector),
+      },
+    }),
   };
 
   return {
     attributes: {
       ...restWithoutConnector,
-      ...(transformedConnector && { connector: transformedConnector }),
+      ...transformedConnector,
     },
     referenceHandler: buildReferenceHandler(connector?.id),
   };
@@ -250,6 +247,6 @@ function transformAttributesToESModel(
 
 function buildReferenceHandler(id?: string): ConnectorReferenceHandler {
   return new ConnectorReferenceHandler([
-    { id, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+    { id, name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
   ]);
 }

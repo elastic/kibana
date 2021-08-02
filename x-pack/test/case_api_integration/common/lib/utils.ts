@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
-import * as rt from 'io-ts';
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
@@ -49,9 +48,6 @@ import {
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
-  CasesConfigureAttributes,
-  CaseAttributes,
-  CaseExternalServiceBasicRt,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -60,6 +56,8 @@ import { SignalHit } from '../../../../plugins/security_solution/server/lib/dete
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
+import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
+import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -609,19 +607,8 @@ export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) =
   return mappings;
 };
 
-type ESConnectorFields = Array<{
-  key: string;
-  value: unknown;
-}>;
-
 interface ConfigureSavedObject {
-  'cases-configure': Omit<CasesConfigureAttributes, 'connector'> & {
-    connector: {
-      name: string;
-      type: ConnectorTypes;
-      fields: ESConnectorFields | null;
-    };
-  };
+  'cases-configure': ESCasesConfigureAttributes;
 }
 
 /**
@@ -642,20 +629,6 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient 
   });
 
   return configure;
-};
-
-type ExternalServicesWithoutConnectorId = Omit<
-  rt.TypeOf<typeof CaseExternalServiceBasicRt>,
-  'connector_id'
->;
-
-type ESCaseAttributes = Omit<CaseAttributes, 'connector' | 'external_service'> & {
-  connector: {
-    name: string;
-    type: ConnectorTypes;
-    fields: ESConnectorFields | null;
-  };
-  external_service: ExternalServicesWithoutConnectorId | null;
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {

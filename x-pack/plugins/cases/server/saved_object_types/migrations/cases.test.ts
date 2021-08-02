@@ -102,7 +102,7 @@ describe('7.15.0 connector ID migration', () => {
     expect(migratedConnector.attributes.external_service).toBeNull();
   });
 
-  it('does not create a reference when the external_service is undefined', () => {
+  it('does not create a reference when the external_service is undefined and sets external_service to null', () => {
     const caseSavedObject = create_7_14_0_case();
 
     const migratedConnector = caseConnectorIdMigration(
@@ -110,7 +110,7 @@ describe('7.15.0 connector ID migration', () => {
     ) as SavedObjectSanitizedDoc<CaseAttributes>;
 
     expect(migratedConnector.references.length).toBe(0);
-    expect(migratedConnector.attributes).not.toHaveProperty('external_service');
+    expect(migratedConnector.attributes.external_service).toBeNull();
   });
 
   it('does not create a reference when the external_service.connector_id is none', () => {
@@ -161,7 +161,7 @@ describe('7.15.0 connector ID migration', () => {
     `);
   });
 
-  it('creates a reference and removes the connector.id field', () => {
+  it('creates a connector reference and removes the connector.id field', () => {
     const caseSavedObject = create_7_14_0_case({
       connector: {
         id: '123',
@@ -195,7 +195,7 @@ describe('7.15.0 connector ID migration', () => {
     `);
   });
 
-  it('creates a reference and removes the connector_id field', () => {
+  it('creates a push connector reference and removes the connector_id field', () => {
     const caseSavedObject = create_7_14_0_case({
       externalService: {
         connector_id: '100',

@@ -6,7 +6,11 @@
  */
 
 import { SavedObject, SavedObjectReference } from 'kibana/server';
-import { connectorIdReferenceName, ESConnectorFields, pushConnectorIdReferenceName } from '.';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  ESConnectorFields,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+} from '.';
 import {
   CaseConnector,
   CaseFullExternalService,
@@ -17,7 +21,7 @@ import {
   noneConnectorId,
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
-import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases';
+import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 
 /**
@@ -182,7 +186,7 @@ export const createSavedObjectReferences = ({
     ? [
         {
           id: connector.id,
-          name: connectorIdReferenceName,
+          name: CONNECTOR_ID_REFERENCE_NAME,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]
@@ -191,7 +195,7 @@ export const createSavedObjectReferences = ({
     ? [
         {
           id: externalService.connector_id,
-          name: pushConnectorIdReferenceName,
+          name: PUSH_CONNECTOR_ID_REFERENCE_NAME,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]

@@ -22,10 +22,11 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { connectorIdReferenceName } from '..';
+import { CONNECTOR_ID_REFERENCE_NAME } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
-import { CaseConfigureService, ESCasesConfigureAttributes } from '.';
+import { CaseConfigureService } from '.';
+import { ESCasesConfigureAttributes } from './types';
 import { getNoneCaseConnector } from '../../common';
 import { createESJiraConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
 
@@ -65,7 +66,7 @@ const createUpdateConfigSO = (
       ? [
           {
             id: connector.id,
-            name: connectorIdReferenceName,
+            name: CONNECTOR_ID_REFERENCE_NAME,
             type: ACTION_SAVED_OBJECT_TYPE,
           },
         ]
@@ -91,7 +92,7 @@ const createConfigSO = (
     ? [
         {
           id: connector.id,
-          name: connectorIdReferenceName,
+          name: CONNECTOR_ID_REFERENCE_NAME,
           type: ACTION_SAVED_OBJECT_TYPE,
         },
       ]
@@ -328,7 +329,7 @@ describe('CaseConfigureService', () => {
           updatedAttributes: createConfigUpdateParams(),
           originalConfiguration: {
             references: [
-              { id: '123', name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+              { id: '123', name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
             ],
           } as SavedObject<CasesConfigureAttributes>,
         });
@@ -700,7 +701,7 @@ describe('CaseConfigureService', () => {
             references: [
               {
                 id: '1',
-                name: connectorIdReferenceName,
+                name: CONNECTOR_ID_REFERENCE_NAME,
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],

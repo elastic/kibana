@@ -34,9 +34,9 @@ export interface ESCaseConnector {
  * The name of the saved object reference indicating the action connector ID. This is stored in the Saved Object reference
  * field's name property.
  */
-export const connectorIdReferenceName = 'connectorId';
+export const CONNECTOR_ID_REFERENCE_NAME = 'connectorId';
 
 /**
  * The name of the saved object reference indicating the action connector ID that was used to push a case.
  */
-export const pushConnectorIdReferenceName = 'pushConnectorId';
+export const PUSH_CONNECTOR_ID_REFERENCE_NAME = 'pushConnectorId';

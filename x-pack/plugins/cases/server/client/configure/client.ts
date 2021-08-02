@@ -319,7 +319,7 @@ async function update(
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
-        ...(connector && { connector }),
+        ...(connector != null && { connector }),
         updated_at: updateDate,
         updated_by: user,
       },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connectorIdReferenceName, pushConnectorIdReferenceName } from '..';
+import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '..';
 import {
   createCaseSavedObjectResponse,
   createESJiraConnector,
@@ -108,7 +108,7 @@ describe('case transforms', () => {
             external_service: createExternalService(),
           },
           references: [
-            { id: '1', name: pushConnectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+            { id: '1', name: PUSH_CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
           ],
         }).attributes.external_service?.connector_id
       ).toMatchInlineSnapshot(`"1"`);
@@ -123,7 +123,7 @@ describe('case transforms', () => {
             external_service: createExternalService(),
           },
           references: [
-            { id: '1', name: pushConnectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+            { id: '1', name: PUSH_CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
           ],
         }).attributes.external_service
       ).toMatchInlineSnapshot(`
@@ -155,7 +155,9 @@ describe('case transforms', () => {
               fields: [{ key: 'issueType', value: 'bug' }],
             },
           },
-          references: [{ id: '1', name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE }],
+          references: [
+            { id: '1', name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
+          ],
         }).attributes.connector
       ).toMatchInlineSnapshot(`
         Object {

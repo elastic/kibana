@@ -466,7 +466,7 @@ describe('common utils', () => {
       `);
     });
 
-    it('does not transform the connector to the ES schema, it should leave it with the id field', () => {
+    it('leaves the connector.id in the attributes', () => {
       const extraCaseData = {
         totalComment: 2,
       };

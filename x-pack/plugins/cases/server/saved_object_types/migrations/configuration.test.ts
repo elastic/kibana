@@ -13,9 +13,9 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common';
 import { getNoneCaseConnector } from '../../common';
-import { connectorIdReferenceName } from '../../services';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../services';
 import { ESCaseConnectorWithId } from '../../services/test_utils';
-import { ESCasesConfigureAttributes } from '../../services/configure';
+import { ESCasesConfigureAttributes } from '../../services/configure/types';
 import { configureConnectorIdMigration } from './configuration';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -83,7 +83,7 @@ describe('7.15.0 connector ID migration', () => {
     ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
 
     expect(migratedConnector.references).toEqual([
-      { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: connectorIdReferenceName },
+      { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: CONNECTOR_ID_REFERENCE_NAME },
     ]);
     expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
   });

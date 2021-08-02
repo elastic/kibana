@@ -16,8 +16,8 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from '.';
-import { connectorIdReferenceName, pushConnectorIdReferenceName } from '..';
+import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './types';
+import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '..';
 import { CaseAttributes, CaseFullExternalService } from '../../../common';
 import {
   findConnectorIdReference,
@@ -48,7 +48,7 @@ export function transformUpdateResponseToExternalModel(
     // if the saved object had an error the attributes field will not exist
     connector,
     references: updatedCase.references,
-    referenceName: connectorIdReferenceName,
+    referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
   let externalService: CaseFullExternalService | null | undefined;
@@ -89,34 +89,32 @@ export function transformAttributesToESModel(
   referenceHandler: ConnectorReferenceHandler;
 } {
   const { connector, external_service, ...restAttributes } = caseAttributes;
+  const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
-  let transformedAttributes: Partial<ESCaseAttributes> = { ...restAttributes };
-  let pushConnectorId: string | undefined | null;
-
-  if (external_service) {
-    let restExternalService: ExternalServicesWithoutConnectorId | null | undefined;
-    ({ connector_id: pushConnectorId, ...restExternalService } = external_service);
-    transformedAttributes = {
-      ...transformedAttributes,
-      external_service: restExternalService,
-    };
-  } else if (external_service === null) {
-    transformedAttributes = { ...transformedAttributes, external_service: null };
-  }
-
-  if (connector) {
-    transformedAttributes = {
-      ...transformedAttributes,
+  const transformedConnector = {
+    ...(connector && {
       connector: {
         name: connector.name,
         type: connector.type,
         fields: transformFieldsToESModel(connector),
       },
-    };
-  }
+    }),
+  };
+
+  const transformedExternalService = {
+    ...(external_service
+      ? { external_service: restExternalService }
+      : external_service === null
+      ? { external_service: null }
+      : {}),
+  };
 
   return {
-    attributes: transformedAttributes,
+    attributes: {
+      ...restAttributes,
+      ...transformedConnector,
+      ...transformedExternalService,
+    },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
 }
@@ -126,8 +124,8 @@ function buildReferenceHandler(
   pushConnectorId?: string | null
 ): ConnectorReferenceHandler {
   return new ConnectorReferenceHandler([
-    { id: connectorId, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
-    { id: pushConnectorId, name: pushConnectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+    { id: connectorId, name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
+    { id: pushConnectorId, name: PUSH_CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
   ]);
 }
 
@@ -173,7 +171,7 @@ export function transformSavedObjectToExternalModel(
     // if the saved object had an error the attributes field will not exist
     connector: caseSavedObject.attributes?.connector,
     references: caseSavedObject.references,
-    referenceName: connectorIdReferenceName,
+    referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
   const externalService = transformESExternalService(
@@ -197,7 +195,7 @@ function transformESExternalService(
   externalService: ExternalServicesWithoutConnectorId | null | undefined,
   references: SavedObjectReference[] | undefined
 ): CaseFullExternalService | null {
-  const connectorIdRef = findConnectorIdReference(pushConnectorIdReferenceName, references);
+  const connectorIdRef = findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references);
 
   if (!externalService) {
     return null;
