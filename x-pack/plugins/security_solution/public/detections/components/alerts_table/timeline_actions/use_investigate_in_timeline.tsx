@@ -17,7 +17,7 @@ import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
-import { useFetchEcsAlertsData } from './use_fetch_ecs_alerts_data';
+import { useFetchEcsAlertsData } from '../../../containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -64,10 +64,9 @@ export const useInvestigateInTimeline = ({
   );
 
   const showInvestigateInTimelineAction = alertIds != null;
-  const shouldFetchAlertsEcsData = ecsRowData == null && alertIds != null;
   const { isLoading: isFetchingAlertEcs, alertsEcsData } = useFetchEcsAlertsData({
     alertIds,
-    shouldFetchAlertsEcsData,
+    skip: ecsRowData != null || alertIds == null,
   });
 
   const investigateInTimelineAlertClick = useCallback(async () => {

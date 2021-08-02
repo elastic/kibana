@@ -6,6 +6,8 @@
  */
 import { useEffect, useState } from 'react';
 import { SearchResponse } from 'elasticsearch';
+import { isEmpty } from 'lodash';
+
 import {
   buildAlertsQuery,
   formatAlertToEcsSignal,
@@ -17,18 +19,19 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 
 export const useFetchEcsAlertsData = ({
   alertIds,
-  shouldFetchAlertsEcsData,
+  skip,
   onError,
 }: {
   alertIds?: string[] | null | undefined;
-  shouldFetchAlertsEcsData?: boolean;
+  skip?: boolean;
   onError?: (e: Error) => void;
 }): { isLoading: boolean | null; alertsEcsData: Ecs[] | null } => {
   const [isLoading, setIsLoading] = useState<boolean | null>(null);
   const [alertsEcsData, setAlertEcsData] = useState<Ecs[] | null>(null);
 
   useEffect(() => {
-    const isSubscribed = true;
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
 
     const fetchAlert = async () => {
       try {
@@ -39,6 +42,7 @@ export const useFetchEcsAlertsData = ({
           method: 'POST',
           body: JSON.stringify(buildAlertsQuery(alertIds ?? [])),
         });
+
         setAlertEcsData(
           alertResponse?.hits.hits.reduce<Ecs[]>(
             (acc, { _id, _index, _source }) => [
@@ -60,18 +64,20 @@ export const useFetchEcsAlertsData = ({
           }
         }
       }
-      setIsLoading(false);
+      if (isSubscribed) {
+        setIsLoading(false);
+      }
     };
 
-    if (shouldFetchAlertsEcsData) {
+    if (!isEmpty(alertIds) && !skip) {
       fetchAlert();
     }
 
-    // return (): void => {
-    //   isSubscribed = false;
-    //   abortCtrlRef.current.abort();
-    // };
-  }, [alertIds, onError, shouldFetchAlertsEcsData]);
+    return (): void => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
+  }, [alertIds, onError, skip]);
 
   return {
     isLoading,

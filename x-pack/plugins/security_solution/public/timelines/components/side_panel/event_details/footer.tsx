@@ -16,7 +16,7 @@ import { EventFiltersModal } from '../../../../management/pages/event_filters/vi
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { useFetchEcsAlertsData } from '../../../../detections/components/alerts_table/timeline_actions/use_fetch_ecs_alerts_data';
+import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -84,7 +84,7 @@ export const EventDetailsFooter = React.memo(
 
     const { alertsEcsData } = useFetchEcsAlertsData({
       alertIds: eventIds,
-      shouldFetchAlertsEcsData: eventId != null,
+      skip: eventId == null,
     });
 
     const ecsData = get(0, alertsEcsData);
