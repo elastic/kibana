@@ -9,9 +9,35 @@
         "tags": [],
         "label": "FilterManager",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.FilterManager",
+            "text": "FilterManager"
+          },
+          " implements ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PersistableStateService",
+            "text": "PersistableStateService"
+          },
+          "<",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ">"
+        ],
         "source": {
           "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-          "lineNumber": 29
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -27,7 +53,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 35
+              "lineNumber": 41
             },
             "deprecated": false,
             "children": [
@@ -49,7 +75,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 35
+                  "lineNumber": 41
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -65,19 +91,11 @@
             "label": "getFilters",
             "description": [],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
+              "() => any[]"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 92
+              "lineNumber": 98
             },
             "deprecated": false,
             "children": [],
@@ -91,19 +109,11 @@
             "label": "getAppFilters",
             "description": [],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
+              "() => any[]"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 96
+              "lineNumber": 102
             },
             "deprecated": false,
             "children": [],
@@ -117,19 +127,11 @@
             "label": "getGlobalFilters",
             "description": [],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
+              "() => any[]"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 101
+              "lineNumber": 107
             },
             "deprecated": false,
             "children": [],
@@ -148,7 +150,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 106
+              "lineNumber": 112
             },
             "deprecated": false,
             "children": [],
@@ -168,7 +170,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 110
+              "lineNumber": 116
             },
             "deprecated": false,
             "children": [],
@@ -188,7 +190,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 114
+              "lineNumber": 120
             },
             "deprecated": false,
             "children": [],
@@ -202,58 +204,27 @@
             "label": "addFilters",
             "description": [],
             "signature": [
-              "(filters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              " | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[], pinFilterStatus?: boolean) => void"
+              "(filters: any, pinFilterStatus?: boolean) => void"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 120
+              "lineNumber": 126
             },
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-public.FilterManager.addFilters.$1",
-                "type": "CompoundType",
+                "type": "Any",
                 "tags": [],
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]"
+                  "any"
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 121
+                  "lineNumber": 127
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -270,7 +241,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 122
+                  "lineNumber": 128
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -286,19 +257,11 @@
             "label": "setFilters",
             "description": [],
             "signature": [
-              "(newFilters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[], pinFilterStatus?: boolean) => void"
+              "(newFilters: any[], pinFilterStatus?: boolean) => void"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 148
+              "lineNumber": 154
             },
             "deprecated": false,
             "children": [
@@ -310,18 +273,11 @@
                 "label": "newFilters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]"
+                  "any[]"
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 149
+                  "lineNumber": 155
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -338,7 +294,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 150
+                  "lineNumber": 156
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -356,19 +312,11 @@
               "\nSets new global filters and leaves app filters untouched,\nRemoves app filters for which there is a duplicate within new global filters"
             ],
             "signature": [
-              "(newGlobalFilters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]) => void"
+              "(newGlobalFilters: any[]) => void"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 167
+              "lineNumber": 173
             },
             "deprecated": false,
             "children": [
@@ -380,18 +328,11 @@
                 "label": "newGlobalFilters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]"
+                  "any[]"
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 167
+                  "lineNumber": 173
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -409,19 +350,11 @@
               "\nSets new app filters and leaves global filters untouched,\nRemoves app filters for which there is a duplicate within new global filters"
             ],
             "signature": [
-              "(newAppFilters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]) => void"
+              "(newAppFilters: any[]) => void"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 184
+              "lineNumber": 190
             },
             "deprecated": false,
             "children": [
@@ -433,18 +366,11 @@
                 "label": "newAppFilters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]"
+                  "any[]"
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 184
+                  "lineNumber": 190
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -460,41 +386,27 @@
             "label": "removeFilter",
             "description": [],
             "signature": [
-              "(filter: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              ") => void"
+              "(filter: any) => void"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 195
+              "lineNumber": 201
             },
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-public.FilterManager.removeFilter.$1",
-                "type": "Object",
+                "type": "Any",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  }
+                  "any"
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 195
+                  "lineNumber": 201
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -514,7 +426,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 207
+              "lineNumber": 213
             },
             "deprecated": false,
             "children": [],
@@ -528,27 +440,13 @@
             "label": "setFiltersStore",
             "description": [],
             "signature": [
-              "(filters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[], store: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.FilterStateStore",
-                "text": "FilterStateStore"
-              },
+              "(filters: any[], store: ",
+              "FilterStateStore",
               ", shouldOverrideStore?: boolean) => void"
             ],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 211
+              "lineNumber": 217
             },
             "deprecated": false,
             "children": [
@@ -560,18 +458,11 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]"
+                  "any[]"
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 212
+                  "lineNumber": 218
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -584,17 +475,11 @@
                 "label": "store",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.FilterStateStore",
-                    "text": "FilterStateStore"
-                  }
+                  "FilterStateStore"
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 213
+                  "lineNumber": 219
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -611,13 +496,146 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 214
+                  "lineNumber": 220
                 },
                 "deprecated": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterManager.extract",
+            "type": "Any",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
+              "lineNumber": 232
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterManager.inject",
+            "type": "Any",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
+              "lineNumber": 235
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterManager.telemetry",
+            "type": "Function",
+            "tags": [],
+            "label": "telemetry",
+            "description": [],
+            "signature": [
+              "(filters: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ", collector: unknown) => {}"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
+              "lineNumber": 237
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filters",
+                "type": "Object",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  "{ [key: string]: ",
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
+                  },
+                  "; }"
+                ],
+                "source": {
+                  "path": "src/plugins/data/common/query/persistable_state.ts",
+                  "lineNumber": 54
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.collector",
+                "type": "Unknown",
+                "tags": [],
+                "label": "collector",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "source": {
+                  "path": "src/plugins/data/common/query/persistable_state.ts",
+                  "lineNumber": 54
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterManager.migrateToLatest",
+            "type": "Any",
+            "tags": [],
+            "label": "migrateToLatest",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
+              "lineNumber": 240
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.FilterManager.getAllMigrations",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllMigrations",
+            "description": [],
+            "signature": [
+              "() => {}"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
+              "lineNumber": 242
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -777,15 +795,7 @@
             "section": "def-public.QueryState",
             "text": "QueryState"
           },
-          ">({ timefilter: { timefilter }, filterManager, queryString, state$, }: Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          ") => void; filterManager: ",
+          ">({ timefilter: { timefilter }, filterManager, queryString, state$, }: Pick<{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -840,30 +850,8 @@
             "text": "TimeRange"
           },
           " | undefined) => { bool: { must: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.DslQuery",
-            "text": "DslQuery"
-          },
-          "[]; filter: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; should: never[]; must_not: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; }; }; } | { filterManager: ",
+          "DslQuery",
+          "[]; filter: any[]; should: never[]; must_not: any[]; }; }; } | { filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -902,13 +890,7 @@
             "text": "BaseStateContainer"
           },
           "<S>, syncConfig: { time?: boolean | undefined; refreshInterval?: boolean | undefined; filters?: boolean | ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.FilterStateStore",
-            "text": "FilterStateStore"
-          },
+          "FilterStateStore",
           " | undefined; query?: boolean | undefined; }) => () => void"
         ],
         "source": {
@@ -925,15 +907,7 @@
             "label": "{\n    timefilter: { timefilter },\n    filterManager,\n    queryString,\n    state$,\n  }",
             "description": [],
             "signature": [
-              "Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              ") => void; filterManager: ",
+              "Pick<{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -988,30 +962,8 @@
                 "text": "TimeRange"
               },
               " | undefined) => { bool: { must: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.DslQuery",
-                "text": "DslQuery"
-              },
-              "[]; filter: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; should: never[]; must_not: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; }; }; } | { filterManager: ",
+              "DslQuery",
+              "[]; filter: any[]; should: never[]; must_not: any[]; }; }; } | { filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1130,13 +1082,7 @@
                 "description": [],
                 "signature": [
                   "boolean | ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.FilterStateStore",
-                    "text": "FilterStateStore"
-                  },
+                  "FilterStateStore",
                   " | undefined"
                 ],
                 "source": {
@@ -1229,6 +1175,216 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.extractTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTimeRange",
+        "description": [],
+        "signature": [
+          "(filters: any[], timeFieldName: string | undefined) => { restOfFilters: any[]; timeRange?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; }"
+        ],
+        "source": {
+          "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
+          "lineNumber": 31
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.extractTimeRange.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.extractTimeRange.$2",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
+              "lineNumber": 33
+            },
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.generateFilters",
+        "type": "Function",
+        "tags": [],
+        "label": "generateFilters",
+        "description": [
+          "\nGenerate filter objects, as a result of triggering a filter action on a\nspecific index pattern field.\n"
+        ],
+        "signature": [
+          "(filterManager: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.FilterManager",
+            "text": "FilterManager"
+          },
+          ", field: string | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IFieldType",
+            "text": "IFieldType"
+          },
+          ", values: any, operation: string, index: string) => any[]"
+        ],
+        "source": {
+          "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+          "lineNumber": 67
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "filterManager",
+            "description": [
+              "- The active filter manager to lookup for existing filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.FilterManager",
+                "text": "FilterManager"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+              "lineNumber": 68
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "- The field for which filters should be generated"
+            ],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IFieldType",
+                "text": "IFieldType"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+              "lineNumber": 69
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "values",
+            "description": [
+              "- One or more values to filter for."
+            ],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+              "lineNumber": 70
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$4",
+            "type": "string",
+            "tags": [],
+            "label": "operation",
+            "description": [
+              "- \"-\" to create a negated filter"
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+              "lineNumber": 71
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$5",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "- Index string to generate filters for"
+            ],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+              "lineNumber": 72
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of filters to be added back to filterManager"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.getDefaultQuery",
         "type": "Function",
         "tags": [],
@@ -1270,6 +1426,75 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.getDisplayValueFromFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "getDisplayValueFromFilter",
+        "description": [],
+        "signature": [
+          "(filter: any, indexPatterns: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          "[]) => string"
+        ],
+        "source": {
+          "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
+          "lineNumber": 30
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.getDisplayValueFromFilter.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.getDisplayValueFromFilter.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IIndexPattern",
+                "text": "IIndexPattern"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.syncQueryStateWithUrl",
         "type": "Function",
         "tags": [],
@@ -1278,15 +1503,7 @@
           "\nHelper to setup syncing of global data with the URL"
         ],
         "signature": [
-          "(query: Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          ") => void; filterManager: ",
+          "(query: Pick<{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1341,30 +1558,8 @@
             "text": "TimeRange"
           },
           " | undefined) => { bool: { must: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.DslQuery",
-            "text": "DslQuery"
-          },
-          "[]; filter: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; should: never[]; must_not: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; }; }; } | { filterManager: ",
+          "DslQuery",
+          "[]; filter: any[]; should: never[]; must_not: any[]; }; }; } | { filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1418,15 +1613,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              ") => void; filterManager: ",
+              "Pick<{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1481,30 +1668,8 @@
                 "text": "TimeRange"
               },
               " | undefined) => { bool: { must: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.DslQuery",
-                "text": "DslQuery"
-              },
-              "[]; filter: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; should: never[]; must_not: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; }; }; } | { filterManager: ",
+              "DslQuery",
+              "[]; filter: any[]; should: never[]; must_not: any[]; }; }; } | { filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1643,14 +1808,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined"
+              "any[] | undefined"
             ],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/types.ts",
@@ -1661,19 +1819,12 @@
           {
             "parentPluginId": "data",
             "id": "def-public.QueryState.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | undefined"
+              "any"
             ],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/types.ts",
@@ -2107,15 +2258,7 @@
         "label": "QueryStart",
         "description": [],
         "signature": [
-          "{ addToQueryLog: (appName: string, { language, query }: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          ") => void; filterManager: ",
+          "{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -2170,34 +2313,12 @@
             "text": "TimeRange"
           },
           " | undefined) => { bool: { must: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.DslQuery",
-            "text": "DslQuery"
-          },
-          "[]; filter: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; should: never[]; must_not: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; }; }; }"
+          "DslQuery",
+          "[]; filter: any[]; should: never[]; must_not: any[]; }; }; }"
         ],
         "source": {
           "path": "src/plugins/data/public/query/query_service.ts",
-          "lineNumber": 103
+          "lineNumber": 104
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2316,15 +2437,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.RangeFilter",
-            "text": "RangeFilter"
-          },
-          " | undefined; getBounds: () => ",
+          " | undefined) => any; getBounds: () => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2455,7 +2568,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "deprecated": false,
         "children": [
@@ -2477,7 +2590,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 17
+              "lineNumber": 18
             },
             "deprecated": false,
             "isRequired": true
@@ -2494,303 +2607,13 @@
             ],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 18
+              "lineNumber": 19
             },
             "deprecated": false,
             "isRequired": true
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.compareFilters",
-        "type": "Function",
-        "tags": [],
-        "label": "compareFilters",
-        "description": [
-          "\nCompare two filters or filter arrays to see if they match.\nFor filter arrays, the assumption is they are sorted.\n"
-        ],
-        "signature": [
-          "(first: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          " | ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[], second: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          " | ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[], comparatorOptions?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.FilterCompareOptions",
-            "text": "FilterCompareOptions"
-          },
-          ") => boolean"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 64
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.compareFilters.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "first",
-            "description": [
-              "The first filter or filter array to compare"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              " | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 65
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.compareFilters.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "second",
-            "description": [
-              "The second filter or filter array to compare"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              " | ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 66
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.compareFilters.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "comparatorOptions",
-            "description": [
-              "Parameters to use for comparison"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.FilterCompareOptions",
-                "text": "FilterCompareOptions"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 67
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "Filters are the same"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.dedupFilters",
-        "type": "Function",
-        "tags": [],
-        "label": "dedupFilters",
-        "description": [
-          "\nCombine 2 filter collections, removing duplicates\n"
-        ],
-        "signature": [
-          "(existingFilters: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[], filters: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[], comparatorOptions?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.FilterCompareOptions",
-            "text": "FilterCompareOptions"
-          },
-          ") => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-          "lineNumber": 22
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.dedupFilters.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "existingFilters",
-            "description": [
-              "- The filters to compare to"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 23
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.dedupFilters.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [
-              "- The filters being added"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 24
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.dedupFilters.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "comparatorOptions",
-            "description": [
-              "- Parameters to use for comparison"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.FilterCompareOptions",
-                "text": "FilterCompareOptions"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 25
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "An array of filters that were not in existing"
-        ],
         "initialIsOpen": false
       },
       {
@@ -2820,7 +2643,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 26
+          "lineNumber": 27
         },
         "deprecated": false,
         "children": [
@@ -2842,7 +2665,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false,
             "isRequired": true
@@ -2856,7 +2679,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 28
+              "lineNumber": 29
             },
             "deprecated": false,
             "children": [
@@ -2872,7 +2695,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 28
+                  "lineNumber": 29
                 },
                 "deprecated": false
               }
@@ -2906,19 +2729,11 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.RangeFilter",
-            "text": "RangeFilter"
-          },
-          " | undefined"
+          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => any"
         ],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 37
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -2941,7 +2756,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "deprecated": false,
             "isRequired": false
@@ -2964,7 +2779,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false,
             "isRequired": true
@@ -2978,7 +2793,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "deprecated": false,
             "children": [
@@ -2994,7 +2809,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 40
+                  "lineNumber": 41
                 },
                 "deprecated": false
               },
@@ -3010,7 +2825,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 40
+                  "lineNumber": 41
                 },
                 "deprecated": false
               }
@@ -3028,14 +2843,7 @@
         "label": "isQuery",
         "description": [],
         "signature": [
-          "(x: unknown) => x is ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          }
+          "(x: unknown) => x is any"
         ],
         "source": {
           "path": "src/plugins/data/common/query/is_query.ts",
@@ -3107,190 +2915,9 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.uniqFilters",
-        "type": "Function",
-        "tags": [],
-        "label": "uniqFilters",
-        "description": [
-          "\nRemove duplicate filters from an array of filters\n"
-        ],
-        "signature": [
-          "(filters: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[], comparatorOptions?: any) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-          "lineNumber": 21
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.uniqFilters.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [
-              "The filters to remove duplicates from"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-              "lineNumber": 21
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.uniqFilters.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "comparatorOptions",
-            "description": [
-              "- Parameters to use for comparison"
-            ],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-              "lineNumber": 21
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "The original filters array with duplicates removed"
-        ],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "data",
-        "id": "def-common.FilterCompareOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "FilterCompareOptions",
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 12
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.index",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 13
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.disabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 14
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.negate",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "negate",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 15
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.state",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 16
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.alias",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "alias",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "data",
         "id": "def-common.RefreshInterval",
@@ -3386,23 +3013,6 @@
     "misc": [
       {
         "parentPluginId": "data",
-        "id": "def-common.Query",
-        "type": "Type",
-        "tags": [],
-        "label": "Query",
-        "description": [],
-        "signature": [
-          "{ query: string | { [key: string]: any; }; language: string; }"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/types.ts",
-          "lineNumber": 12
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.TimeRange",
         "type": "Type",
         "tags": [],
@@ -3419,105 +3029,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "data",
-        "id": "def-common.COMPARE_ALL_OPTIONS",
-        "type": "Object",
-        "tags": [],
-        "label": "COMPARE_ALL_OPTIONS",
-        "description": [
-          "\nInclude disabled, negate and store when comparing filters"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 23
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.index",
-            "type": "boolean",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 24
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.disabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "disabled",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 25
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.negate",
-            "type": "boolean",
-            "tags": [],
-            "label": "negate",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 26
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.state",
-            "type": "boolean",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 27
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.alias",
-            "type": "boolean",
-            "tags": [],
-            "label": "alias",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 28
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

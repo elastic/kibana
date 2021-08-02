@@ -825,7 +825,7 @@
             "signature": [
               "{ dashboardConfig: ",
               "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
+              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",

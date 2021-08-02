@@ -7,11 +7,12 @@
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/api/types';
+import { ValidFeatureId } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+
 import { ElasticsearchClient } from 'kibana/server';
 import { FieldDescriptor } from 'src/plugins/data/server';
 import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
 import { TechnicalRuleDataFieldName } from '../../common/technical_rule_data_field_names';
-import { ValidFeatureId } from '../utils/rbac';
 
 export interface RuleDataReader {
   search<TSearchRequest extends ESSearchRequest>(

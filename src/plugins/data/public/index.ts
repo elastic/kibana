@@ -6,142 +6,18 @@
  * Side Public License, v 1.
  */
 
-/*
- * esQuery and esKuery:
- */
-
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
+
+export * from './deprecated';
 
 /*
  * Filters:
  */
 
-import {
-  getPhraseFilterField,
-  getPhraseFilterValue,
-  isExistsFilter,
-  isFilterPinned,
-  isMatchAllFilter,
-  isMissingFilter,
-  isPhraseFilter,
-  isPhrasesFilter,
-  isQueryStringFilter,
-  isRangeFilter,
-  toggleFilterNegated,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildRangeFilter,
-  disableFilter,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-  buildEsQuery,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
-  FILTERS,
-  FilterStateStore,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-} from '../common';
-
-import { FilterLabel } from './ui';
-import { FilterItem } from './ui/filter_bar';
-
-import {
-  getDisplayValueFromFilter,
-  generateFilters,
-  onlyDisabledFiltersChanged,
-  changeTimeFilter,
-  mapAndFlattenFilters,
-  extractTimeFilter,
-  extractTimeRange,
-  convertRangeFilterToTimeRangeString,
-} from './query';
-
-// Filter helpers namespace:
-export const esFilters = {
-  FilterLabel,
-  FilterItem,
-
-  FILTERS,
-  FilterStateStore,
-
-  buildEmptyFilter,
-  buildPhrasesFilter,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildQueryFilter,
-  buildRangeFilter,
-
-  isPhraseFilter,
-  isExistsFilter,
-  isPhrasesFilter,
-  isRangeFilter,
-  isMatchAllFilter,
-  isMissingFilter,
-  isQueryStringFilter,
-  isFilterPinned,
-
-  toggleFilterNegated,
-  disableFilter,
-  getPhraseFilterField,
-  getPhraseFilterValue,
-  getDisplayValueFromFilter,
-
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  generateFilters,
-  onlyDisabledFiltersChanged,
-
-  changeTimeFilter,
-  convertRangeFilterToTimeRangeString,
-  mapAndFlattenFilters,
-  extractTimeFilter,
-  extractTimeRange,
-};
-
-export {
-  KueryNode,
-  RangeFilter,
-  RangeFilterMeta,
-  RangeFilterParams,
-  ExistsFilter,
-  PhrasesFilter,
-  PhraseFilter,
-  CustomFilter,
-  MatchAllFilter,
-  IFieldSubType,
-  EsQueryConfig,
-  isFilter,
-  isFilters,
-} from '../common';
-
-import { getEsQueryConfig } from '../common';
-
-/**
- * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
- */
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
-
-/**
- * @deprecated Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
- */
-export const esQuery = {
-  buildEsQuery,
-  getEsQueryConfig,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
-};
+export { getEsQueryConfig } from '../common';
+export { FilterLabel, FilterItem } from './ui';
+export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
 
 /*
  * Field Formatters:
@@ -462,7 +338,7 @@ export { QueryStringInput, SearchBar } from './ui';
  * Types to be shared externally
  * @public
  */
-export type { Filter, Query, RefreshInterval, TimeRange } from '../common';
+export type { RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,

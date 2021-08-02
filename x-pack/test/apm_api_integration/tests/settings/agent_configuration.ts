@@ -391,6 +391,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           Object {
             "serviceNames": Array [
               "ALL_OPTION_VALUE",
+              "auditbeat",
               "kibana",
               "kibana-frontend",
               "opbeans-dotnet",
