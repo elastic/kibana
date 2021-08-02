@@ -8,7 +8,7 @@
 import { openSans } from '../../../common/lib/fonts';
 import { ElementFactory } from '../../../types';
 import { SetupInitializer } from '../../plugin';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../src/plugins/field_formats/common';
 
 export const metricElementInitializer: SetupInitializer<ElementFactory> = (core, setup) => {
   return () => ({

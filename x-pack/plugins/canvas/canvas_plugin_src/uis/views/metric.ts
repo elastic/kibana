@@ -8,7 +8,7 @@
 import { openSans } from '../../../common/lib/fonts';
 import { ViewStrings } from '../../../i18n';
 import { SetupInitializer } from '../../plugin';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../src/plugins/field_formats/common';
 
 const { Metric: strings } = ViewStrings;
 

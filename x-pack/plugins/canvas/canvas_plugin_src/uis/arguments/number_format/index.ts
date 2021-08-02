@@ -11,7 +11,7 @@ import { templateFromReactComponent } from '../../../../public/lib/template_from
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
 import { SetupInitializer } from '../../../plugin';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/field_formats/common';
 
 const { NumberFormat: strings } = ArgumentStrings;
 
