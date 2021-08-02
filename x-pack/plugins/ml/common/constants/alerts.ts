@@ -48,7 +48,7 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     description: i18n.translate(
       'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataCheckDescription',
       {
-        defaultMessage: 'Get alerted if a job has been identified as suffering from delayed data.',
+        defaultMessage: 'Get alerted if a job missed data due to data delay.',
       }
     ),
   },

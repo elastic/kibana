@@ -63,7 +63,7 @@ export function registerJobsHealthAlertingRule(
           i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.timeIntervalErrorMessage',
             {
-              defaultMessage: 'Time interval is invalid',
+              defaultMessage: 'Invalid time interval',
             }
           )
         );
@@ -74,7 +74,7 @@ export function registerJobsHealthAlertingRule(
           i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountErrorMessage',
             {
-              defaultMessage: 'Number of documents is invalid',
+              defaultMessage: 'Invalid number of documents',
             }
           )
         );
