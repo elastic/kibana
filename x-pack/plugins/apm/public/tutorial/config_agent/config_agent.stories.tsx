@@ -8,8 +8,9 @@
 import { Story } from '@storybook/react';
 import { HttpStart } from 'kibana/public';
 import React from 'react';
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import TutorialConfigAgent from './';
-import { APIReturnType } from '../..//services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
 
@@ -22,7 +23,7 @@ interface Args {
 }
 
 const policyElasticAgentOnCloudAgent: APIResponseType['fleetAgents'][0] = {
-  id: 'policy-elastic-agent-on-cloud',
+  id: POLICY_ELASTIC_AGENT_ON_CLOUD,
   name: 'Elastic Cloud agent policy',
   apmServerUrl: 'apm_cloud_url',
   secretToken: 'apm_cloud_token',
