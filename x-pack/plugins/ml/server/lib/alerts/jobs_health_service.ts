@@ -16,7 +16,7 @@ import {
 } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
 import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
-import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import { DatafeedStats, JobId } from '../../../common/types/anomaly_detection_jobs';
 import { GetGuards } from '../../shared_services/shared_services';
 import {
   AnomalyDetectionJobsHealthAlertContext,
@@ -28,6 +28,7 @@ import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { isPopulatedObject } from '../../../common';
+import { Annotations } from '../../../common/types/annotations';
 
 interface TestResult {
   name: string;
@@ -170,7 +171,7 @@ export function jobsHealthServiceProvider(
       timeInterval: string | null,
       previousStartedAt: Date | null,
       docsCount: number | null
-    ): Promise<any> {
+    ): Promise<Record<JobId, Annotations>> {
       const currentTimestamp = Date.now();
 
       let earliestMs = null;
