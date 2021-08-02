@@ -140,6 +140,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
               side="left"
               size={248}
               closeButtonPosition="outside"
+              className="kbnPageTemplateSolutionNav__flyout"
             >
               {sideNav}
             </EuiFlyout>
