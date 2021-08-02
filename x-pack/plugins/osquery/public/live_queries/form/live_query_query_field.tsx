@@ -15,6 +15,7 @@ import {
   SavedQueriesDropdown,
   SavedQueriesDropdownRef,
 } from '../../saved_queries/saved_queries_dropdown';
+import { useKibana } from '../../common/lib/kibana';
 
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
@@ -22,6 +23,7 @@ interface LiveQueryQueryFieldProps {
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
+  const { runSavedQueries, allLiveQueries } = useKibana().services.application.capabilities.osquery;
   const { value, setValue, errors } = field;
   const error = errors[0]?.message;
   const savedQueriesDropdownRef = useRef<SavedQueriesDropdownRef>(null);
@@ -41,17 +43,23 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
     [setValue]
   );
 
+  console.error('deeed', disabled || !allLiveQueries);
+
   return (
     <EuiFormRow isInvalid={typeof error === 'string'} error={error} fullWidth>
       <>
         <SavedQueriesDropdown
           ref={savedQueriesDropdownRef}
-          disabled={disabled}
+          disabled={disabled || !runSavedQueries}
           onChange={handleSavedQueryChange}
         />
         <EuiSpacer />
         <EuiFormRow fullWidth labelAppend={<OsquerySchemaLink />}>
-          <OsqueryEditor defaultValue={value} disabled={disabled} onChange={handleEditorChange} />
+          <OsqueryEditor
+            defaultValue={value}
+            disabled={disabled || !allLiveQueries}
+            onChange={handleEditorChange}
+          />
         </EuiFormRow>
       </>
     </EuiFormRow>

@@ -65,9 +65,13 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     osqueryPolicyData
   );
   const grouper = useMemo(() => new AgentGrouper(), []);
-  const { agentsLoading, agents } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
-    perPage,
-  });
+  const { isLoading: agentsLoading, data: agents } = useAllAgents(
+    osqueryPolicyData,
+    debouncedSearchValue,
+    {
+      perPage,
+    }
+  );
 
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);

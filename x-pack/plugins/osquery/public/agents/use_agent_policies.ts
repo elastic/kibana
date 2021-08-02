@@ -19,7 +19,7 @@ export const useAgentPolicies = (policyIds: string[] = []) => {
   const agentResponse = useQueries(
     policyIds.map((policyId) => ({
       queryKey: ['agentPolicy', policyId],
-      queryFn: () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
+      queryFn: () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
       enabled: policyIds.length > 0,
       onSuccess: () => setErrorToast(),
       onError: (error) =>

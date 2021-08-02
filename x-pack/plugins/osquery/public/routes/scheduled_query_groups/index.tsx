@@ -13,18 +13,25 @@ import { AddScheduledQueryGroupPage } from './add';
 import { EditScheduledQueryGroupPage } from './edit';
 import { ScheduledQueryGroupDetailsPage } from './details';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
+import { useKibana } from '../../common/lib/kibana';
+import { MissingPrivileges } from '../components';
 
 const ScheduledQueryGroupsComponent = () => {
+  const { allPacks, readPacks } = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('scheduled_query_groups');
   const match = useRouteMatch();
+
+  if (!readPacks) {
+    return <MissingPrivileges />;
+  }
 
   return (
     <Switch>
       <Route path={`${match.url}/add`}>
-        <AddScheduledQueryGroupPage />
+        {allPacks ? <AddScheduledQueryGroupPage /> : <MissingPrivileges />}
       </Route>
       <Route path={`${match.url}/:scheduledQueryGroupId/edit`}>
-        <EditScheduledQueryGroupPage />
+        {allPacks ? <EditScheduledQueryGroupPage /> : <MissingPrivileges />}
       </Route>
       <Route path={`${match.url}/:scheduledQueryGroupId`}>
         <ScheduledQueryGroupDetailsPage />

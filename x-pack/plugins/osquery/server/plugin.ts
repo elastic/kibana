@@ -27,7 +27,11 @@ import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
-import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
+import {
+  packSavedObjectType,
+  savedQuerySavedObjectType,
+  usageMetricSavedObjectType,
+} from '../common/types';
 import { PLUGIN_ID } from '../common';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
@@ -46,10 +50,10 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         savedObject: {
-          all: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+          all: [PACKAGE_POLICY_SAVED_OBJECT_TYPE, usageMetricSavedObjectType],
           read: [PACKAGES_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE],
         },
-        ui: ['show', 'save'],
+        ui: ['all'],
       },
       read: {
         api: [`${PLUGIN_ID}-read`],
@@ -63,7 +67,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             AGENT_POLICY_SAVED_OBJECT_TYPE,
           ],
         },
-        ui: ['show'],
+        ui: ['read'],
       },
     },
     subFeatures: [
@@ -81,7 +85,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 includeIn: 'all',
                 name: 'All',
                 savedObject: {
-                  all: [],
+                  all: [usageMetricSavedObjectType],
                   read: [],
                 },
                 ui: ['allLiveQueries', 'readLiveQueries'],
@@ -113,7 +117,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 ),
                 includeIn: 'all',
                 savedObject: {
-                  all: [],
+                  all: [usageMetricSavedObjectType],
                   read: [],
                 },
                 ui: ['runSavedQueries'],

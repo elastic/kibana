@@ -20,12 +20,7 @@ export const useOsqueryPolicies = () => {
 
   const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies = [] } = useQuery(
     ['osqueryPolicies'],
-    () =>
-      http.get(packagePolicyRouteService.getListPath(), {
-        query: {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        },
-      }),
+    () => http.get('/internal/osquery/fleet_wrapper/package_policies'),
     {
       select: (response) =>
         uniq<string>(response.items.map((p: { policy_id: string }) => p.policy_id)),

@@ -23,7 +23,8 @@ import { OsqueryFactory } from './factory/types';
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+  // const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+  const es = data.search.searchAsInternalUser;
 
   return {
     search: (request, options, deps) => {
