@@ -156,7 +156,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
                 {i18n.translate(
                   'indexPatternFieldEditor.fieldPreview.searchResult.emptyPromptTitle',
                   {
-                    defaultMessage: 'No fields in this index pattern match your filter criteria.',
+                    defaultMessage: 'No matching fields in this index pattern',
                   }
                 )}
               </h3>
