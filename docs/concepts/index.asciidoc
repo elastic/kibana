@@ -116,6 +116,14 @@ Following are some example KQL queries.  For more detailed examples, refer to <<
 |===
 
 [float]
+[[autocomplete-suggestions]]
+==== Suggestions for autocomplete
+
+Beginning in 7.14, {kib} uses the {ref}/search-terms-enum.html[terms enum API] for autocomplete. {kib} returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range, even if `autocomplete:useTimeFilter` is enabled (as the terms enum API applies time filtering on an index-level, rather than document-level).
+
+Previously, {kib} used the {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation API], which is slower, but suggestions included all values that matched your query, and optionally, your time range, and were sorted by popularity. To revert to using the terms aggregation API, go to <<advanced-options, Advanced Settings>>, and set `autocomplete:valueSuggestionMethod` to `terms_agg`.
+
+[float]
 ==== Additional filters with AND
 
 Structured filters are a more interactive way to create {es} queries,

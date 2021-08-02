@@ -144,22 +144,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'ARIA label and tooltip content describing a button that expands an actions menu',
       }
     ),
-    'euiColorPicker.screenReaderAnnouncement': i18n.translate(
-      'core.euiColorPicker.screenReaderAnnouncement',
-      {
-        defaultMessage:
-          'A popup with a range of selectable colors opened. Tab forward to cycle through colors choices or press escape to close this popup.',
-        description:
-          'Message when the color picker popover is opened. Describes the interaction with the elements in the popover.',
-      }
-    ),
-    'euiColorPicker.swatchAriaLabel': ({ swatch }: EuiValues) =>
-      i18n.translate('core.euiColorPicker.swatchAriaLabel', {
-        defaultMessage: 'Select {swatch} as the color',
-        values: { swatch },
-        description:
-          'Screen reader text to describe the action and hex value of the selectable option',
-      }),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',
@@ -180,6 +164,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.closeLabel': i18n.translate('core.euiColorPicker.closeLabel', {
       defaultMessage: 'Press the down key to open a popover containing color options',
       description: 'Screen reader text to describe how to open the picker',
+    }),
+    'euiColorPicker.popoverLabel': i18n.translate('core.euiColorPicker.popoverLabel', {
+      defaultMessage: 'Color selection dialog',
     }),
     'euiColorStopThumb.removeLabel': i18n.translate('core.euiColorStopThumb.removeLabel', {
       defaultMessage: 'Remove this stop',
@@ -218,6 +205,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { label, readOnly, disabled },
         description:
           'Screen reader text to describe the composite behavior of the color stops component.',
+      }),
+    'euiColorPickerSwatch.ariaLabel': ({ color }: EuiValues) =>
+      i18n.translate('core.euiColorPickerSwatch.ariaLabel', {
+        defaultMessage: 'Select {color} as the color',
+        values: { color },
       }),
     'euiColumnActions.hideColumn': i18n.translate('core.euiColumnActions.hideColumn', {
       defaultMessage: 'Hide column',
@@ -693,11 +685,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Next page, {page}',
         values: { page },
       }),
-    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) =>
-      i18n.translate('core.euiPagination.pageOfTotalCompressed', {
-        defaultMessage: '{page} of {total}',
-        values: { page, total },
-      }),
+    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiPagination.pageOfTotalCompressed"
+        defaultMessage="{page} of {total}"
+        values={{ page, total }}
+      />
+    ),
     'euiPagination.previousPage': ({ page }: EuiValues) =>
       i18n.translate('core.euiPagination.previousPage', {
         defaultMessage: 'Previous page, {page}',
@@ -845,16 +839,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Press to toggle this panel',
       }
     ),
-    'euiSaturation.roleDescription': i18n.translate('core.euiSaturation.roleDescription', {
-      defaultMessage: 'HSV color mode saturation and value selection',
-    }),
-    'euiSaturation.screenReaderAnnouncement': i18n.translate(
-      'core.euiSaturation.screenReaderAnnouncement',
+    'euiSaturation.screenReaderInstructions': i18n.translate(
+      'core.euiSaturation.screenReaderInstructions',
       {
         defaultMessage:
-          'Use the arrow keys to navigate the square color gradient. The coordinates resulting from each key press will be used to calculate HSV color mode "saturation" and "value" numbers, in the range of 0 to 1. Left and right decrease and increase (respectively) the "saturation" value. Up and down decrease and increase (respectively) the "value" value.',
+          'Arrow keys to navigate the square color gradient. Coordinates will be used to calculate HSV color mode "saturation" and "value" numbers, in the range of 0 to 1. Left and right to change the saturation. Up and down change the value.',
       }
     ),
+    'euiSaturation.ariaLabel': i18n.translate('core.euiSaturation.ariaLabel', {
+      defaultMessage: 'HSV color mode saturation and value 2-axis slider',
+    }),
     'euiSelectable.loadingOptions': i18n.translate('core.euiSelectable.loadingOptions', {
       defaultMessage: 'Loading options',
       description: 'Placeholder message while data is asynchronously loaded',

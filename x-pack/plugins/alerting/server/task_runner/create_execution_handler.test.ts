@@ -16,7 +16,7 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType } from '../rule_type_registry';
 import {
   AlertTypeParams,
   AlertTypeState,

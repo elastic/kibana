@@ -143,6 +143,7 @@ export const TimeSeries = ({
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
+        debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}

@@ -27,7 +27,7 @@ import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { esKuery } from '../../es_query';
+import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 const { nodeTypes } = esKuery;
@@ -3807,6 +3807,25 @@ describe('SavedObjectsRepository', () => {
                 params: expect.objectContaining({
                   counterFieldNames: [counterFields[0]],
                   counts: [3],
+                }),
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('does not increment counter when incrementBy is 0', async () => {
+        await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 0 }]);
+
+        expect(client.update).toBeCalledTimes(1);
+        expect(client.update).toBeCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: expect.objectContaining({
+                  counterFieldNames: [counterFields[0]],
+                  counts: [0],
                 }),
               }),
             }),

@@ -36,8 +36,8 @@ import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
-import { UntypedNormalizedAlertType } from '../alert_type_registry';
-import { alertTypeRegistryMock } from '../alert_type_registry.mock';
+import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
 
 const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
@@ -84,7 +84,7 @@ describe('Task Runner', () => {
   const services = alertsMock.createAlertServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
-  const alertTypeRegistry = alertTypeRegistryMock.create();
+  const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -101,7 +101,7 @@ describe('Task Runner', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
-    alertTypeRegistry,
+    ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
@@ -184,7 +184,7 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
       (actionTypeId, actionId, params) => params
     );
-    alertTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.get.mockReturnValue(alertType);
   });
 
   test('successfully executes the task', async () => {
@@ -2257,7 +2257,13 @@ describe('Task Runner', () => {
           }),
         },
       },
-      mockedTaskInstance,
+      {
+        ...mockedTaskInstance,
+        params: {
+          ...mockedTaskInstance.params,
+          spaceId: 'foo',
+        },
+      },
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
@@ -2278,7 +2284,7 @@ describe('Task Runner', () => {
       }
     `);
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      `Executing Alert \"1\" has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
+      `Executing Alert foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
     );
   });
 
@@ -2617,7 +2623,7 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
-    alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+    ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementation(() => {
       throw new Error('OMG');
     });
 
@@ -3054,7 +3060,13 @@ describe('Task Runner', () => {
 
     const taskRunner = new TaskRunner(
       alertType,
-      mockedTaskInstance,
+      {
+        ...mockedTaskInstance,
+        params: {
+          ...mockedTaskInstance.params,
+          spaceId: 'foo',
+        },
+      },
       taskRunnerFactoryInitializerParams
     );
 
@@ -3071,12 +3083,12 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Alert "1" has resulted in Error: Saved object [alert/1] not found`
+        `Executing Alert foo:test:1 has resulted in Error: Saved object [alert/1] not found`
       );
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,
-        `Unable to execute rule "1" because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
+        `Unable to execute rule "1" in the "foo" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
       );
       expect(isUnrecoverableError(ex)).toBeTruthy();
     });
@@ -3112,7 +3124,7 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Alert "1" has resulted in Error: Saved object [alert/1] not found`
+        `Executing Alert test space:test:1 has resulted in Error: Saved object [alert/1] not found`
       );
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(

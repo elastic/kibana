@@ -703,6 +703,30 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: {
+      name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
+        defaultMessage: 'Autocomplete value suggestion method',
+      }),
+      type: 'select',
+      value: 'terms_enum',
+      description: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodText', {
+        defaultMessage:
+          'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the ' +
+          'Elasticsearch terms enum API for improved autocomplete suggestion performance. Select terms_agg to use an ' +
+          'Elasticsearch terms aggregation. {learnMoreLink}',
+        values: {
+          learnMoreLink:
+            '<a href="https://www.elastic.co/guide/en/kibana/current/kibana-concepts-analysts.html#autocomplete-suggestions" target="_blank" rel="noopener">' +
+            i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodLink', {
+              defaultMessage: 'Learn more.',
+            }) +
+            '</a>',
+        },
+      }),
+      options: ['terms_enum', 'terms_agg'],
+      category: ['autocomplete'],
+      schema: schema.string(),
+    },
     [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
       name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
         defaultMessage: 'Use time range',
@@ -711,8 +735,17 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: true,
       description: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerangeText', {
         defaultMessage:
-          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range.',
+          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. {learnMoreLink}',
+        values: {
+          learnMoreLink:
+            '<a href="https://www.elastic.co/guide/en/kibana/current/kibana-concepts-analysts.html#autocomplete-suggestions" target="_blank" rel="noopener">' +
+            i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodLearnMoreLink', {
+              defaultMessage: 'Learn more.',
+            }) +
+            '</a>',
+        },
       }),
+      category: ['autocomplete'],
       schema: schema.boolean(),
     },
     [UI_SETTINGS.SEARCH_TIMEOUT]: {

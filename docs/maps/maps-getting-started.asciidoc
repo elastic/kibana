@@ -163,13 +163,12 @@ View your geospatial data alongside a heat map and pie chart, and then filter th
 When you apply a filter in one panel, it is applied to all panels on the dashboard.
 
 . Click **Add from library** to open a list of panels that you can add to the dashboard.
-. Add **[Logs] Heatmap** and **[Logs] Visitors by OS** to the dashboard.
+. Add **[Logs] Unique Visitor Heatmap** and **[Logs] Bytes distribution** to the dashboard.
 +
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_map.png[]
 
-. To filter for documents where **machine.os.keyword** is **osx**, click
-the **osx** slice in the pie chart.
+. To filter for documents with unusually high byte values, click and drag in the *Bytes distribution* chart.
 
 . Remove the filter by clicking **x** next to its name in the filter bar.
 

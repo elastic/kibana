@@ -10,15 +10,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 type AutocompleteStart = any;
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-type IFieldType = any;
-type IIndexPattern = any;
 
 import * as i18n from '../translations';
 import {
@@ -30,9 +26,9 @@ import { paramIsValid } from '../param_is_valid';
 
 interface AutocompleteFieldMatchAnyProps {
   placeholder: string;
-  selectedField: IFieldType | undefined;
+  selectedField: IndexPatternFieldBase | undefined;
   selectedValue: string[];
-  indexPattern: IIndexPattern | undefined;
+  indexPattern: IndexPatternBase | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;

@@ -14,7 +14,7 @@ import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IIndexPattern, IFieldType, IndexPatternSelectProps } from '../../../../data/public';
+import { IndexPattern, IFieldType, IndexPatternSelectProps } from '../../../../data/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface ListControlEditorState {
@@ -25,7 +25,7 @@ interface ListControlEditorState {
 }
 
 interface ListControlEditorProps {
-  getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
   controlIndex: number;
   controlParams: ControlParams;
   handleFieldNameChange: (fieldName: string) => void;
@@ -104,7 +104,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPattern;
     try {
       indexPattern = await this.props.getIndexPattern(this.props.controlParams.indexPattern);
     } catch (err) {
