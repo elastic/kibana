@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
             id: createdRule.id,
             rule_id: createdRule.rule_id,
             created_at: createdRule.created_at,
-            updated_at: signal._source.signal.rule.updated_at,
+            updated_at: signal._source?.signal.rule.updated_at,
             actions: [],
             interval: '5m',
             name: 'Test ML rule',
