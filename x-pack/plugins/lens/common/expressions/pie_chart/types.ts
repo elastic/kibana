@@ -7,6 +7,7 @@
 
 import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
 import type { LensMultiTable } from '../../types';
+import { LayerType } from '../types';
 
 export interface SharedPieLayerState {
   groups: string[];
@@ -21,6 +22,7 @@ export interface SharedPieLayerState {
 
 export type PieLayerState = SharedPieLayerState & {
   layerId: string;
+  layerType: LayerType;
 };
 
 export interface PieVisualizationState {

@@ -21,7 +21,7 @@ import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { getStopsForFixedMode } from '../shared_components';
-import { getDefaultSummaryLabel } from '../../common/expressions';
+import { getDefaultSummaryLabel, layerTypes } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
 
 export interface DatatableVisualizationState {
@@ -294,6 +294,23 @@ export const getDatatableVisualization = ({
       </I18nProvider>,
       domElement
     );
+  },
+
+  getLayerTypes() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.datatable.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(state) {
+    if (state.layerId) {
+      return layerTypes.DATA;
+    }
   },
 
   toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {

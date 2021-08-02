@@ -31,6 +31,7 @@ import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
+import { layerTypes } from '../../common/expressions';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',
@@ -261,6 +262,23 @@ export const getHeatmapVisualization = ({
       </I18nProvider>,
       domElement
     );
+  },
+
+  getLayerTypes() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.heatmap.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(state) {
+    if (state.layerId) {
+      return layerTypes.DATA;
+    }
   },
 
   toExpression(state, datasourceLayers, attributes): Ast | null {

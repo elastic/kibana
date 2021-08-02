@@ -10,7 +10,7 @@ import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import type { MetricState } from '../../common/expressions';
+import { layerTypes, MetricState } from '../../common/expressions';
 
 const toExpression = (
   state: MetricState,
@@ -107,6 +107,23 @@ export const metricVisualization: Visualization<MetricState> = {
         },
       ],
     };
+  },
+
+  getLayerTypes() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.metric.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(state) {
+    if (state.layerId) {
+      return layerTypes.DATA;
+    }
   },
 
   toExpression,

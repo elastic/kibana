@@ -26,6 +26,7 @@ function newLayerState(layerId: string): PieLayerState {
     categoryDisplay: 'default',
     legendDisplay: 'default',
     nestedLegend: false,
+    layerType: layerTypes.DATA,
   };
 }
 
@@ -193,17 +194,6 @@ export const getPieVisualization = ({
     };
   },
 
-  getLayerTypes(state) {
-    return [
-      {
-        type: layerTypes.DATA,
-        label: i18n.translate('xpack.lens.pieChart.addDataLayerLabel', {
-          defaultMessage: 'Add chart layer',
-        }),
-      },
-    ];
-  },
-
   setDimension({ prevState, layerId, columnId, groupId }) {
     return {
       ...prevState,
@@ -240,6 +230,21 @@ export const getPieVisualization = ({
       </I18nProvider>,
       domElement
     );
+  },
+
+  getLayerTypes() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.pie.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(state, layerId) {
+    return state.layers.find(({ layerId: id }) => id === layerId)?.layerType || layerTypes.DATA;
   },
 
   toExpression: (state, layers, attributes) =>

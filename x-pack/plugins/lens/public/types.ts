@@ -33,6 +33,7 @@ import type {
   LensToggleActionData,
 } from './datatable_visualization/components/types';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { LayerType } from '../common/expressions';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -612,7 +613,7 @@ export interface Visualization<T = unknown> {
     state: T,
     frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
   ) => Array<{
-    type: string;
+    type: LayerType;
     label: string;
     icon?: IconType;
     disabled?: boolean;
@@ -625,7 +626,7 @@ export interface Visualization<T = unknown> {
       staticValue: unknown;
     }>;
   }>;
-  getLayerType: (state: T, layerId: string) => string;
+  getLayerType: (state: T, layerId: string) => string | undefined;
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 

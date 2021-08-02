@@ -229,7 +229,7 @@ export const getXyVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
-          defaultMessage: 'Add chart layer',
+          defaultMessage: 'Add visualization layer',
         }),
         icon: LensIconChartMixedXy,
       },
