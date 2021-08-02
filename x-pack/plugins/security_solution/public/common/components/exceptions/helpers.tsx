@@ -694,22 +694,10 @@ export const getPrepopulatedBehaviorException = ({
       value: alertEcsData.source?.ip ?? '',
     },
     {
-      field: 'source.port',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: String(alertEcsData.source?.port ?? ''),
-    },
-    {
       field: 'destination.ip',
       operator: 'included' as const,
       type: 'match' as const,
       value: alertEcsData.destination?.ip ?? '',
-    },
-    {
-      field: 'destination.port',
-      operator: 'included' as const,
-      type: 'match' as const,
-      value: String(alertEcsData.destination?.port ?? ''),
     },
     {
       field: 'registry.path',
@@ -728,6 +716,36 @@ export const getPrepopulatedBehaviorException = ({
       operator: 'included' as const,
       type: 'match' as const,
       value: alertEcsData.registry?.data?.strings ?? '',
+    },
+    {
+      field: 'dll.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.path ?? '',
+    },
+    {
+      field: 'dll.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'dll.pe.original_file_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.pe?.original_file_name ?? '',
+    },
+    {
+      field: 'dns.question.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.name ?? '',
+    },
+    {
+      field: 'dns.question.type',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.type ?? '',
     },
     {
       field: 'user.id',

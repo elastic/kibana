@@ -840,12 +840,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         path: 'C:/fake_behavior.exe',
       },
       destination: {
-        address: this.randomIP(),
         port: 443,
         ip: this.randomIP(),
       },
       source: {
-        address: this.randomIP(),
         port: 59406,
         ip: this.randomIP(),
       },
@@ -858,7 +856,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         path:
           'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
         value: processName,
-        strings: `C:/fake_behavior/${processName}`,
+        data: {
+          strings: `C:/fake_behavior/${processName}`,
+        },
       },
       process: {
         pid: 2,
