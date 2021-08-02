@@ -6637,7 +6637,23 @@
             "section": "def-common.InferFunctionDefinition",
             "text": "InferFunctionDefinition"
           },
-          "<FnDef>[\"name\"], initialArgs: { [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ",
+          "<FnDef>[\"name\"], initialArgs: { [K in keyof FunctionArgs<FnDef>]: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          " | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          "[] | FunctionArgs<FnDef>[K] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -6705,7 +6721,23 @@
               "Object containing the arguments to this function."
             ],
             "signature": [
-              "{ [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ",
+              "{ [K in keyof FunctionArgs<FnDef>]: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              " | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "[] | FunctionArgs<FnDef>[K] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -7087,7 +7119,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 98
+          "lineNumber": 102
         },
         "deprecated": false,
         "children": [
@@ -7103,7 +7135,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 99
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -7126,7 +7158,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 100
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -7142,7 +7174,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 101
+              "lineNumber": 105
             },
             "deprecated": false
           }
@@ -7160,7 +7192,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 89
+          "lineNumber": 93
         },
         "deprecated": false,
         "children": [
@@ -7173,7 +7205,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 90
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -7186,7 +7218,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 91
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -7208,7 +7240,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 92
+              "lineNumber": 96
             },
             "deprecated": false
           }
@@ -11255,7 +11287,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 104
+          "lineNumber": 108
         },
         "deprecated": false,
         "children": [
@@ -11271,7 +11303,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 105
+              "lineNumber": 109
             },
             "deprecated": false
           }
@@ -17527,7 +17559,23 @@
             "section": "def-common.InferFunctionDefinition",
             "text": "InferFunctionDefinition"
           },
-          "<FnDef>[\"name\"], initialArgs: { [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ",
+          "<FnDef>[\"name\"], initialArgs: { [K in keyof FunctionArgs<FnDef>]: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          " | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          "[] | FunctionArgs<FnDef>[K] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -17595,7 +17643,23 @@
               "Object containing the arguments to this function."
             ],
             "signature": [
-              "{ [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ",
+              "{ [K in keyof FunctionArgs<FnDef>]: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              " | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "[] | FunctionArgs<FnDef>[K] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -17926,7 +17990,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 98
+          "lineNumber": 102
         },
         "deprecated": false,
         "children": [
@@ -17942,7 +18006,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 99
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -17965,7 +18029,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 100
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -17981,7 +18045,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 101
+              "lineNumber": 105
             },
             "deprecated": false
           }
@@ -17999,7 +18063,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 89
+          "lineNumber": 93
         },
         "deprecated": false,
         "children": [
@@ -18012,7 +18076,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 90
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -18025,7 +18089,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 91
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -18047,7 +18111,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 92
+              "lineNumber": 96
             },
             "deprecated": false
           }
@@ -21026,7 +21090,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 104
+          "lineNumber": 108
         },
         "deprecated": false,
         "children": [
@@ -21042,7 +21106,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 105
+              "lineNumber": 109
             },
             "deprecated": false
           }
@@ -28133,7 +28197,23 @@
             "section": "def-common.InferFunctionDefinition",
             "text": "InferFunctionDefinition"
           },
-          "<FnDef>[\"name\"], initialArgs: { [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ",
+          "<FnDef>[\"name\"], initialArgs: { [K in keyof FunctionArgs<FnDef>]: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          " | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          "[] | FunctionArgs<FnDef>[K] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -28201,7 +28281,23 @@
               "Object containing the arguments to this function."
             ],
             "signature": [
-              "{ [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ",
+              "{ [K in keyof FunctionArgs<FnDef>]: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              " | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "[] | FunctionArgs<FnDef>[K] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -29823,7 +29919,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 98
+          "lineNumber": 102
         },
         "deprecated": false,
         "children": [
@@ -29839,7 +29935,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 99
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -29862,7 +29958,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 100
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -29878,7 +29974,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 101
+              "lineNumber": 105
             },
             "deprecated": false
           }
@@ -29896,7 +29992,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 89
+          "lineNumber": 93
         },
         "deprecated": false,
         "children": [
@@ -29909,7 +30005,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 90
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -29922,7 +30018,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 91
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -29944,7 +30040,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 92
+              "lineNumber": 96
             },
             "deprecated": false
           }
@@ -30020,6 +30116,24 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumnMeta.dimensionName",
+            "type": "string",
+            "tags": [],
+            "label": "dimensionName",
+            "description": [
+              "\nnames the domain this column represents"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+              "lineNumber": 75
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.DatatableColumnMeta.params",
             "type": "Object",
             "tags": [],
@@ -30039,7 +30153,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 75
+              "lineNumber": 79
             },
             "deprecated": false
           },
@@ -30057,7 +30171,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 79
+              "lineNumber": 83
             },
             "deprecated": false
           },
@@ -30076,7 +30190,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 83
+              "lineNumber": 87
             },
             "deprecated": false
           }
@@ -34830,7 +34944,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 104
+          "lineNumber": 108
         },
         "deprecated": false,
         "children": [
@@ -34846,7 +34960,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 105
+              "lineNumber": 109
             },
             "deprecated": false
           }
@@ -38321,7 +38435,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-          "lineNumber": 115
+          "lineNumber": 119
         },
         "deprecated": false,
         "children": [
@@ -38337,7 +38451,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 116
+              "lineNumber": 120
             },
             "deprecated": false
           },
@@ -38353,7 +38467,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 117
+              "lineNumber": 121
             },
             "deprecated": false,
             "children": [
@@ -38369,7 +38483,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                  "lineNumber": 117
+                  "lineNumber": 121
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -38405,7 +38519,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 127
+              "lineNumber": 131
             },
             "deprecated": false,
             "children": [
@@ -38427,7 +38541,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                  "lineNumber": 127
+                  "lineNumber": 131
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -38463,7 +38577,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 136
+              "lineNumber": 140
             },
             "deprecated": false,
             "children": [
@@ -38485,7 +38599,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                  "lineNumber": 136
+                  "lineNumber": 140
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -38502,7 +38616,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 145
+              "lineNumber": 149
             },
             "deprecated": false,
             "children": [
@@ -38518,7 +38632,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                  "lineNumber": 146
+                  "lineNumber": 150
                 },
                 "deprecated": false,
                 "children": [],
@@ -38552,7 +38666,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                  "lineNumber": 152
+                  "lineNumber": 156
                 },
                 "deprecated": false,
                 "children": [
@@ -38583,7 +38697,7 @@
                     ],
                     "source": {
                       "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                      "lineNumber": 152
+                      "lineNumber": 156
                     },
                     "deprecated": false,
                     "isRequired": true
@@ -38602,7 +38716,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-              "lineNumber": 161
+              "lineNumber": 165
             },
             "deprecated": false,
             "children": [
@@ -38634,7 +38748,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                  "lineNumber": 162
+                  "lineNumber": 166
                 },
                 "deprecated": false,
                 "children": [
@@ -38656,7 +38770,7 @@
                     ],
                     "source": {
                       "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                      "lineNumber": 162
+                      "lineNumber": 166
                     },
                     "deprecated": false,
                     "isRequired": true
@@ -38700,7 +38814,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                  "lineNumber": 172
+                  "lineNumber": 176
                 },
                 "deprecated": false,
                 "children": [
@@ -38722,7 +38836,7 @@
                     ],
                     "source": {
                       "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
-                      "lineNumber": 172
+                      "lineNumber": 176
                     },
                     "deprecated": false,
                     "isRequired": true
