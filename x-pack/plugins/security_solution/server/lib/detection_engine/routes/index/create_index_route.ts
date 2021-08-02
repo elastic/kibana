@@ -115,9 +115,8 @@ export const createDetectionIndex = async (
   await addFieldAliasesToIndices({ esClient, index, spaceId });
   // The internal user is used here because Elasticsearch requires the PUT alias requestor to have 'manage' permissions
   // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
-  // and not .alerts-security.alerts (the alias). From the security solution perspective, a user that has manage permissions
-  // for .siem-signals should be allowed to add this alias. If the call to addFieldAliasesToIndices above succeeds, then
-  // we assume they are allowed to add this alias.
+  // and not .alerts-security.alerts (the alias). From the security solution perspective, all .siem-signals-<space id>-*
+  // indices should have an alias to .alerts-security.alerts-<space id> so it's safe to add those aliases as the internal user.
   await context.core.elasticsearch.client.asInternalUser.indices.putAlias({
     index: `${index}-*`,
     name: aadIndexAliasName,
