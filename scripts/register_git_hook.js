@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env/no_transpilation');
-require('@kbn/dev-utils/target/precommit_hook/cli');
+require('@kbn/dev-utils/target_node/precommit_hook/cli');
