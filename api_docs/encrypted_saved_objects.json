@@ -305,7 +305,49 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "encryptedSavedObjects",
+        "id": "def-server.IsMigrationNeededPredicate",
+        "type": "Type",
+        "tags": [],
+        "label": "IsMigrationNeededPredicate",
+        "description": [],
+        "signature": [
+          "(encryptedDoc: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
+          "<InputAttributes> | ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
+          "<MigratedAttributes>) => encryptedDoc is ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
+          "<InputAttributes>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
+          "lineNumber": 25
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "encryptedSavedObjects",
@@ -392,31 +434,9 @@
           "label": "createMigration",
           "description": [],
           "signature": [
-            "<InputAttributes = unknown, MigratedAttributes = InputAttributes>(isMigrationNeededPredicate: IsMigrationNeededPredicate<InputAttributes, MigratedAttributes>, migration: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreSavedObjectsPluginApi",
-              "section": "def-server.SavedObjectMigrationFn",
-              "text": "SavedObjectMigrationFn"
-            },
-            "<InputAttributes, MigratedAttributes>, inputType?: ",
-            {
-              "pluginId": "encryptedSavedObjects",
-              "scope": "server",
-              "docId": "kibEncryptedSavedObjectsPluginApi",
-              "section": "def-server.EncryptedSavedObjectTypeRegistration",
-              "text": "EncryptedSavedObjectTypeRegistration"
-            },
-            " | undefined, migratedType?: ",
-            {
-              "pluginId": "encryptedSavedObjects",
-              "scope": "server",
-              "docId": "kibEncryptedSavedObjectsPluginApi",
-              "section": "def-server.EncryptedSavedObjectTypeRegistration",
-              "text": "EncryptedSavedObjectTypeRegistration"
-            },
-            " | undefined) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>"
+            "<InputAttributes = unknown, MigratedAttributes = InputAttributes>(opts: ",
+            "CreateEncryptedSavedObjectsMigrationFnOpts",
+            "<InputAttributes, MigratedAttributes>) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>"
           ],
           "source": {
             "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
@@ -427,127 +447,18 @@
           "children": [
             {
               "parentPluginId": "encryptedSavedObjects",
-              "id": "def-server.isMigrationNeededPredicate",
-              "type": "Function",
-              "tags": [],
-              "label": "isMigrationNeededPredicate",
-              "description": [],
-              "signature": [
-                "(encryptedDoc: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectUnsanitizedDoc",
-                  "text": "SavedObjectUnsanitizedDoc"
-                },
-                "<InputAttributes> | ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectUnsanitizedDoc",
-                  "text": "SavedObjectUnsanitizedDoc"
-                },
-                "<MigratedAttributes>) => encryptedDoc is ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectUnsanitizedDoc",
-                  "text": "SavedObjectUnsanitizedDoc"
-                },
-                "<InputAttributes>"
-              ],
-              "source": {
-                "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-                "lineNumber": 32
-              },
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "encryptedSavedObjects",
-              "id": "def-server.migration",
-              "type": "Function",
-              "tags": [],
-              "label": "migration",
-              "description": [],
-              "signature": [
-                "(doc: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectUnsanitizedDoc",
-                  "text": "SavedObjectUnsanitizedDoc"
-                },
-                "<InputAttributes>, context: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectMigrationContext",
-                  "text": "SavedObjectMigrationContext"
-                },
-                ") => ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectUnsanitizedDoc",
-                  "text": "SavedObjectUnsanitizedDoc"
-                },
-                "<MigratedAttributes>"
-              ],
-              "source": {
-                "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-                "lineNumber": 33
-              },
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "encryptedSavedObjects",
-              "id": "def-server.inputType",
+              "id": "def-server.opts",
               "type": "Object",
               "tags": [],
-              "label": "inputType",
+              "label": "opts",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "encryptedSavedObjects",
-                  "scope": "server",
-                  "docId": "kibEncryptedSavedObjectsPluginApi",
-                  "section": "def-server.EncryptedSavedObjectTypeRegistration",
-                  "text": "EncryptedSavedObjectTypeRegistration"
-                },
-                " | undefined"
+                "CreateEncryptedSavedObjectsMigrationFnOpts",
+                "<InputAttributes, MigratedAttributes>"
               ],
               "source": {
                 "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-                "lineNumber": 34
-              },
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "encryptedSavedObjects",
-              "id": "def-server.migratedType",
-              "type": "Object",
-              "tags": [],
-              "label": "migratedType",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "encryptedSavedObjects",
-                  "scope": "server",
-                  "docId": "kibEncryptedSavedObjectsPluginApi",
-                  "section": "def-server.EncryptedSavedObjectTypeRegistration",
-                  "text": "EncryptedSavedObjectTypeRegistration"
-                },
-                " | undefined"
-              ],
-              "source": {
-                "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-                "lineNumber": 35
+                "lineNumber": 46
               },
               "deprecated": false
             }

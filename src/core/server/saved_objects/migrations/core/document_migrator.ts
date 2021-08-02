@@ -667,6 +667,7 @@ function wrapWithTry(
     log: new MigrationLogger(log),
     migrationVersion: version,
     convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
+    isSingleNamespaceType: type.namespaceType === 'single',
   });
 
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
