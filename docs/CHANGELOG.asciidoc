@@ -320,7 +320,6 @@ Alerting::
 * Adds event log entry when an action starts executing {kibana-pull}102370[#102370]
 * Adds event log entry when a rule starts executing {kibana-pull}102001[#102001]
 * Export rules and connectors {kibana-pull}98802[#98802]
-* Updates connectors with isMissingSecrets flag {kibana-pull}98223[#98223]
 * Renames alert status OK to Recovered and fix some UX issues around disabling a rule while being in an error state {kibana-pull}98135[#98135]
 * Adds config allowing per-host networking options {kibana-pull}96630[#96630]
 APM::
