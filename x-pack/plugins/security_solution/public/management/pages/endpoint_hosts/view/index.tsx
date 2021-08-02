@@ -26,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import { ThemeContext } from 'styled-components';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -110,7 +109,6 @@ export const EndpointList = () => {
   } = useEndpointSelector(selector);
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { getAppUrl } = useAppUrl();
-  const theme = useContext(ThemeContext);
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
@@ -512,7 +510,6 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"

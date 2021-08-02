@@ -12,7 +12,6 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { BETA_BADGE_LABEL } from '../common/translations';
 
 interface AdministrationListPageProps {
-  beta: boolean;
   title: React.ReactNode;
   subtitle: React.ReactNode;
   actions?: React.ReactNode;
@@ -20,9 +19,7 @@ interface AdministrationListPageProps {
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
-    const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
-
+  ({ title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
     const header = useMemo(() => {
       return (
         <>

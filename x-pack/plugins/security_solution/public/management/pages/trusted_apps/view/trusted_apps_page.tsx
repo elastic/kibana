@@ -144,7 +144,6 @@ export const TrustedAppsPage = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="trustedAppsListPage"
-      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"
