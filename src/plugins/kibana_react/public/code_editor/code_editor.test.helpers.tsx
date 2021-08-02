@@ -5,19 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { KeyboardEventHandler } from 'react';
+import React, { useEffect, KeyboardEventHandler } from 'react';
 import { monaco } from '@kbn/monaco';
 
 import { keyCodes } from './code_editor';
 
-export function createEditorInstance() {
+function createEditorInstance() {
   const keyDownListeners: any[] = [];
   const didShowListeners: any[] = [];
   const didHideListeners: any[] = [];
   let areSuggestionsVisible = false;
 
   const editorInstance = {
+    // Mock monaco editor API
     getContribution: jest.fn((id: string) => {
       if (id === 'editor.contrib.suggestController') {
         return {
@@ -35,26 +35,29 @@ export function createEditorInstance() {
       }
     }),
     focus: jest.fn(),
-    areSuggestionsVisible: () => areSuggestionsVisible,
     onKeyDown: jest.fn((listener) => {
       keyDownListeners.push(listener);
     }),
-    onTextareaKeyDown: ((e) => {
-      // Let all our listener know that a key has been pressed on the textarea
-      keyDownListeners.forEach((listener) => listener(e));
+    // Helpers for our tests
+    __helpers__: {
+      areSuggestionsVisible: () => areSuggestionsVisible,
+      onTextareaKeyDown: ((e) => {
+        // Let all our listener know that a key has been pressed on the textarea
+        keyDownListeners.forEach((listener) => listener(e));
 
-      // Close the suggestions when hitting the ESC key
-      if (e.keyCode === keyCodes.ESCAPE && areSuggestionsVisible) {
-        editorInstance.hideSuggestions();
-      }
-    }) as KeyboardEventHandler,
-    showSuggestions: () => {
-      areSuggestionsVisible = true;
-      didShowListeners.forEach((listener) => listener());
-    },
-    hideSuggestions: () => {
-      areSuggestionsVisible = false;
-      didHideListeners.forEach((listener) => listener());
+        // Close the suggestions when hitting the ESC key
+        if (e.keyCode === keyCodes.ESCAPE && areSuggestionsVisible) {
+          editorInstance.__helpers__.hideSuggestions();
+        }
+      }) as KeyboardEventHandler,
+      showSuggestions: () => {
+        areSuggestionsVisible = true;
+        didShowListeners.forEach((listener) => listener());
+      },
+      hideSuggestions: () => {
+        areSuggestionsVisible = false;
+        didHideListeners.forEach((listener) => listener());
+      },
     },
   };
 
@@ -63,32 +66,25 @@ export function createEditorInstance() {
 
 type MockedEditor = ReturnType<typeof createEditorInstance>;
 
-export let mockedEditorInstance: MockedEditor | undefined;
+export const mockedEditorInstance: MockedEditor = createEditorInstance();
 
-export const setMockedEditorInstance = (instance: MockedEditor) => {
-  mockedEditorInstance = instance;
-};
+// <MonacoEditor /> mock
+const mockMonacoEditor = ({ editorWillMount, editorDidMount }: any) => {
+  editorWillMount(monaco);
 
-// MonacoEditor mock
-const mockMonacoEditor = React.forwardRef((props: any, ref) => {
-  props.editorWillMount(monaco);
-
-  if (ref) {
-    // We forward to the parent the ref with the editor instance
-    (ref as React.MutableRefObject<{ editor: MockedEditor | undefined }>).current = {
-      editor: mockedEditorInstance,
-    };
-  }
+  useEffect(() => {
+    editorDidMount(mockedEditorInstance, monaco);
+  }, [editorDidMount]);
 
   return (
     <div>
       <textarea
-        onKeyDown={mockedEditorInstance?.onTextareaKeyDown}
+        onKeyDown={mockedEditorInstance?.__helpers__.onTextareaKeyDown}
         data-test-subj="monacoEditorTextarea"
       />
     </div>
   );
-});
+};
 
 jest.mock('react-monaco-editor', () => {
   return function JestMockEditor() {

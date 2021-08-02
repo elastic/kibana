@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
 import { htmlIdGenerator, EuiText } from '@elastic/eui';
@@ -128,7 +128,7 @@ export const CodeEditor: React.FC<Props> = ({
   languageConfiguration,
 }) => {
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
-  // detail and having to call methods on the CodeEditor component instance.
+  // detail and not have to call methods on the <CodeEditor /> component instance.
   const MonacoEditor: typeof ReactMonacoEditor = useMemo(() => {
     const isMockedComponent =
       typeof ReactMonacoEditor === 'function' && ReactMonacoEditor.name === 'JestMockEditor';
@@ -137,7 +137,6 @@ export const CodeEditor: React.FC<Props> = ({
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
-  const monacoEditorRef = useRef<ReactMonacoEditor>(null);
   const editorHint = useRef<HTMLDivElement>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
@@ -148,73 +147,6 @@ export const CodeEditor: React.FC<Props> = ({
   });
   /* eslint-enable  @typescript-eslint/naming-convention */
 
-  const _editorWillMount = useCallback(
-    (__monaco: unknown) => {
-      if (__monaco !== monaco) {
-        throw new Error('react-monaco-editor is using a different version of monaco');
-      }
-
-      if (overrideEditorWillMount) {
-        overrideEditorWillMount();
-        return;
-      }
-
-      if (editorWillMount) {
-        editorWillMount();
-      }
-
-      monaco.languages.onLanguage(languageId, () => {
-        if (suggestionProvider) {
-          monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
-        }
-
-        if (signatureProvider) {
-          monaco.languages.registerSignatureHelpProvider(languageId, signatureProvider);
-        }
-
-        if (hoverProvider) {
-          monaco.languages.registerHoverProvider(languageId, hoverProvider);
-        }
-
-        if (languageConfiguration) {
-          monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
-        }
-      });
-
-      // Register themes
-      monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-      monaco.editor.defineTheme(
-        'euiColorsTransparent',
-        useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
-      );
-    },
-    [
-      overrideEditorWillMount,
-      editorWillMount,
-      languageId,
-      useDarkTheme,
-      suggestionProvider,
-      signatureProvider,
-      hoverProvider,
-      languageConfiguration,
-    ]
-  );
-
-  const _editorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
-      if (__monaco !== monaco) {
-        throw new Error('react-monaco-editor is using a different version of monaco');
-      }
-
-      _editor.current = editor;
-
-      if (editorDidMount) {
-        editorDidMount(editor);
-      }
-    },
-    [editorDidMount]
-  );
-
   const _updateDimensions = useCallback(() => {
     if (_editor.current) {
       _editor.current.layout();
@@ -223,7 +155,7 @@ export const CodeEditor: React.FC<Props> = ({
 
   const startEditing = useCallback(() => {
     setIsHintActive(false);
-    monacoEditorRef.current?.editor?.focus();
+    _editor.current?.focus();
   }, []);
 
   const stopEditing = useCallback(() => {
@@ -293,39 +225,96 @@ export const CodeEditor: React.FC<Props> = ({
     );
   }, [onKeyDownHint, promptClasses, startEditing]);
 
-  useEffect(() => {
-    if (monacoEditorRef.current) {
-      const {
-        current: { editor },
-      } = monacoEditorRef;
+  const _editorWillMount = useCallback(
+    (__monaco: unknown) => {
+      if (__monaco !== monaco) {
+        throw new Error('react-monaco-editor is using a different version of monaco');
+      }
 
-      if (editor === undefined) {
+      if (overrideEditorWillMount) {
+        overrideEditorWillMount();
         return;
       }
+
+      if (editorWillMount) {
+        editorWillMount();
+      }
+
+      monaco.languages.onLanguage(languageId, () => {
+        if (suggestionProvider) {
+          monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
+        }
+
+        if (signatureProvider) {
+          monaco.languages.registerSignatureHelpProvider(languageId, signatureProvider);
+        }
+
+        if (hoverProvider) {
+          monaco.languages.registerHoverProvider(languageId, hoverProvider);
+        }
+
+        if (languageConfiguration) {
+          monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
+        }
+      });
+
+      // Register themes
+      monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+      monaco.editor.defineTheme(
+        'euiColorsTransparent',
+        useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+      );
+    },
+    [
+      overrideEditorWillMount,
+      editorWillMount,
+      languageId,
+      useDarkTheme,
+      suggestionProvider,
+      signatureProvider,
+      hoverProvider,
+      languageConfiguration,
+    ]
+  );
+
+  const _editorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
+      if (__monaco !== monaco) {
+        throw new Error('react-monaco-editor is using a different version of monaco');
+      }
+
+      _editor.current = editor;
 
       editor.onKeyDown(onKeydownMonaco);
 
       // "widget" is not part of the TS interface but does exist
       // @ts-expect-errors
-      const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget;
+      const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget
+        ?.value;
 
-      if (suggestionWidget) {
-        suggestionWidget.value.onDidShow(() => {
+      // As I haven't found official documentation for "onDidShow" and "onDidHide"
+      // we guard from possible changes in the underlying lib
+      if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
+        suggestionWidget.onDidShow(() => {
           isSuggestionMenuOpen.current = true;
         });
-        suggestionWidget.value.onDidHide(() => {
+        suggestionWidget.onDidHide(() => {
           isSuggestionMenuOpen.current = false;
         });
       }
-    }
-  }, [onKeydownMonaco]);
+
+      if (editorDidMount) {
+        editorDidMount(editor);
+      }
+    },
+    [editorDidMount]
+  );
 
   return (
     <div className="kibanaCodeEditor">
       {renderPrompt()}
 
       <MonacoEditor
-        ref={monacoEditorRef}
         theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
         language={languageId}
         value={value}

@@ -12,11 +12,7 @@ import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
 import { monaco } from '@kbn/monaco';
 
 // This import needs to come before './code_editor' below as it sets the jest.mocks
-import {
-  mockedEditorInstance,
-  setMockedEditorInstance,
-  createEditorInstance,
-} from './code_editor.test.helpers';
+import { mockedEditorInstance } from './code_editor.test.helpers';
 
 import { CodeEditor, keyCodes } from './code_editor';
 
@@ -46,10 +42,6 @@ const logs = `
 `;
 
 describe('<CodeEditor />', () => {
-  beforeEach(() => {
-    setMockedEditorInstance(createEditorInstance());
-  });
-
   test('is rendered', () => {
     const component = mountWithIntl(
       <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
@@ -152,18 +144,18 @@ describe('<CodeEditor />', () => {
       getHint().simulate('keydown', { keyCode: keyCodes.ENTER });
 
       expect((getHint().props() as any).className).toContain('isInactive');
-      expect(mockedEditorInstance?.areSuggestionsVisible()).toBe(false);
+      expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(false);
 
       // Show the suggestions in the editor
-      mockedEditorInstance?.showSuggestions();
-      expect(mockedEditorInstance?.areSuggestionsVisible()).toBe(true);
+      mockedEditorInstance?.__helpers__.showSuggestions();
+      expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(true);
 
       // Hitting the ESC key with the suggestions visible
       findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
         keyCode: keyCodes.ESCAPE,
       });
 
-      expect(mockedEditorInstance?.areSuggestionsVisible()).toBe(false);
+      expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(false);
 
       // The keyboard hint is still **not** active
       expect((getHint().props() as any).className).toContain('isInactive');

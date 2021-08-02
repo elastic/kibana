@@ -181,7 +181,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
         </div>
       </EuiText>
     </div>
-    <ForwardRef
+    <mockMonacoEditor
       editorDidMount={[Function]}
       editorWillMount={[Function]}
       height={250}
@@ -216,7 +216,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
           onKeyDown={[Function]}
         />
       </div>
-    </ForwardRef>
+    </mockMonacoEditor>
     <ResizeDetector
       handleHeight={true}
       handleWidth={true}
