@@ -1,5 +1,5 @@
 [[release-notes]]
-= Release Notes
+= Release notes
 
 [partintro]
 --
@@ -12,8 +12,9 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-This section summarizes the changes in each release.
+Review important information about the {kib} 6.x.x releases.
 
+* <<release-notes-6.8.18>>
 * <<release-notes-6.8.17>>
 * <<release-notes-6.8.16>>
 * <<release-notes-6.8.15>>
@@ -81,6 +82,8 @@ This section summarizes the changes in each release.
 // [[release-notes-n.n.n]]
 // == {kib} n.n.n
 
+//coming::[x.x.x]
+
 //[float]
 //[[breaking-n.n.n]]
 //=== Breaking changes
@@ -104,10 +107,29 @@ This section summarizes the changes in each release.
 //=== Known issues
 ////
 
+[[release-notes-6.8.18]]
+== {kib} 6.8.18
+
+coming::[6.8.18]
+
+For information about the {kib} 6.8.18 release, review the following information.
+
+[float]
+[[breaking-changes-6.8.18]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade, review the <<breaking-changes,Breaking changes>>, then mitigate the impact to your application.
+
+[float]
+[[bug-fixes-and-enhancements-6.8.18]]
+=== Bug fixes and enhancements
+
+There are no user-facing changes in the 6.8.18 release.
+
 [[release-notes-6.8.17]]
 == {kib} 6.8.17
 
-The 6.8.17 release does not include user-facing changes.
+There are no user-facing changes in the 6.8.17 release.
 
 [[release-notes-6.8.16]]
 == {kib} 6.8.16
@@ -161,12 +183,12 @@ Reporting::
 [[release-notes-6.8.13]]
 == {kib} 6.8.13
 
-The 6.8.13 release does not include any user-facing changes.
+There are no user-facing changes in the 6.8.13 release.
 
 [[release-notes-6.8.12]]
 == {kib} 6.8.12
 
-The 6.8.12 release does not include any user-facing changes.
+There are no user-facing changes in the 6.8.12 release.
 
 [[release-notes-6.8.11]]
 == {kib} 6.8.11
@@ -2903,7 +2925,7 @@ passwords in {kib}. For more information, see <<xpack-dashboard-only-mode>>.
 [[release-notes-6.2.1]]
 == {kib} 6.2.1
 
-There were no changes for this release.
+There are no user-facing changes in the 6.2.1 release.
 
 [[release-notes-6.2.0]]
 == {kib} 6.2.0
@@ -3123,7 +3145,7 @@ Visualization::
 [[release-notes-6.1.4]]
 == {kib} 6.1.4
 
-The 6.1.4 release does not include any user-facing changes.
+There are no user-facing changes in the 6.1.4 release.
 
 [[release-notes-6.1.3]]
 == {kib} 6.1.3
