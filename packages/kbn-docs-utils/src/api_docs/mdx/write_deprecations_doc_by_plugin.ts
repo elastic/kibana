@@ -51,7 +51,9 @@ export function writeDeprecationDocByPlugin(
             .map(
               (ref) =>
                 `[${ref.path.substr(ref.path.lastIndexOf(Path.sep) + 1)}
-                ](https://github.com/elastic/kibana/tree/master/${ref.path}#:~:text=${api.label})`
+                ](https://github.com/elastic/kibana/tree/master/${
+                  ref.path
+                }#:~:text=${encodeURIComponent(api.label)})`
             )
             .join(', ') + (refs.length > 0 ? `+ ${refs.length} more` : '');
 
