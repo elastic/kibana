@@ -22,34 +22,52 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
     {
       path: '/api/short_url',
       validate: {
-        params: schema.object(
-          {
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
-          },
-          { unknowns: 'allow' }
-        ),
         body: schema.object({
-          url: schema.object({
-            slug: schema.string({
-              defaultValue: '',
-            }),
+          locatorId: schema.string({
+            minLength: 1,
+            maxLength: 255,
           }),
+          slug: schema.string({
+            defaultValue: '',
+            minLength: 3,
+            maxLength: 255,
+          }),
+          params: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       const savedObjects = ctx.core.savedObjects.client;
       const shortUrls = url.shortUrls.get({ savedObjects });
+      const { locatorId, params, slug } = req.body;
+      const locator = url.locators.get(locatorId);
+
+      if (!locator) {
+        return res.customError({
+          statusCode: 409,
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            error: {
+              message: 'Locator not found.',
+            },
+          }),
+        });
+      }
+
+      const shortUrl = await shortUrls.create({
+        locator,
+        params,
+        slug,
+      });
 
       return res.ok({
         headers: {
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          foo: 'bar',
+          url: shortUrl.data,
         }),
       });
     })
