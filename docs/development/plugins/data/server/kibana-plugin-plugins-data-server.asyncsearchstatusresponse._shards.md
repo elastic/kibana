@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-_shards: ShardsResponse;
+_shards: estypes.ShardStatistics;
 ```

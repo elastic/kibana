@@ -140,6 +140,25 @@
         },
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "snapshotRestore",
+        "id": "def-common.SNAPSHOT_LIST_MAX_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "SNAPSHOT_LIST_MAX_SIZE",
+        "description": [
+          "\n[Temporary workaround] In order to prevent client-side performance issues for users with a large number of snapshots,\nwe set a hard-coded limit on the number of snapshots we return from the ES snapshots API"
+        ],
+        "signature": [
+          "1000"
+        ],
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 73
+        },
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [

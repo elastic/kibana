@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const ALERT_FLYOUT = '[data-test-subj="timeline:details-panel:flyout"]';
+
 export const CELL_TEXT = '.euiText';
 
 export const JSON_CONTENT = '[data-test-subj="jsonView"]';

@@ -66,7 +66,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 68
+        "lineNumber": 70
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -84,7 +84,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 69
+        "lineNumber": 71
       },
       "deprecated": false,
       "lifecycle": "start",
