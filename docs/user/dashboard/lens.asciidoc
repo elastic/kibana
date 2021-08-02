@@ -282,7 +282,7 @@ which is helpful when you want to make a comparison to the whole documentation s
 ====
 Use runtime fields to format, concatenate, and extract document-level fields. Runtime fields work across all of {kib} and are best used for smaller computations without compromising performance.
 
-Use formulas to change aggregated metrics and data, such as {es} aggregations, time shifts, and filters, and combine aggregated fields. Formulas apply only to *Lens* panels and are computationally intensive.
+Use formulas to compare multiple {es} aggregations that can be filtered or shifted in time. Formulas apply only to *Lens* panels and are computationally intensive.
 ====
 
 [discrete]
