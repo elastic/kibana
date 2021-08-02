@@ -49,7 +49,7 @@ class DatacolumnArgInput extends Component {
       renderError();
       return null;
     }
-
+    console.log(this.props);
     const allowedTypes = typeInstance.options.allowedTypes || false;
     const onlyShowMathFunctions = typeInstance.options.onlyMath || false;
     const valueNotSet = (val) => !val || val.length === 0;

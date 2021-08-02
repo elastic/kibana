@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-export type { Transform } from './transform';
-import type { BaseForm } from './base_form';
+import type { Transform } from './transform';
+import type { View } from './view';
+import type { Datasource } from './datasource';
+import type { Model } from './model';
+
+export type ArgType = string;
+
+export type ArgTypeDef = View | Model | Transform | Datasource;
+
+export { Transform, View, Datasource, Model };
 export type { Arg } from './arg';
-export type { View } from './view';
-export type { Datasource } from './datasource';
-export type { Model } from './model';
-
-export type ArgType = 'view' | 'model' | 'transform' | 'datasource';
-
-export type ArgTypeDef = BaseForm;

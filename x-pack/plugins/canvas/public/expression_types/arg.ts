@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import { createElement } from 'react';
 import { Ast } from '@kbn/interpreter/common';
 // @ts-expect-error unconverted components
@@ -71,7 +72,8 @@ export class Arg {
 
     const { name, displayName, help, multi, types, options } = props;
 
-    Object.assign(this, defaultProps, argType, {
+    merge(this, defaultProps, argType, {
+      argType,
       name,
       displayName,
       help,
@@ -104,6 +106,7 @@ export class Arg {
       onValueRemove,
       templateProps,
       argId: key,
+      options: this.options,
     };
 
     return createElement(ArgForm, formProps);

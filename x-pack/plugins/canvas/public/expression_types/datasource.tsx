@@ -7,8 +7,9 @@
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import { RenderToDom } from '../components/render_to_dom';
-import { BaseForm, BaseFormProps } from './base_form';
+import { BaseForm } from './base_form';
 import { ExpressionFormHandlers } from '../../common/lib';
+import { FunctionFormProps } from './function_form';
 
 const defaultTemplate = () => (
   <div>
@@ -26,7 +27,7 @@ export type DatasourceProps = {
   template?: TemplateFn;
   image?: string;
   requiresContext?: boolean;
-} & BaseFormProps;
+} & FunctionFormProps;
 
 interface DatasourceWrapperProps {
   handlers: ExpressionFormHandlers;
@@ -77,7 +78,7 @@ export class Datasource extends BaseForm {
     this.image = props.image;
   }
 
-  render(props: DatasourceProps = { name: '' }) {
+  render(props: DatasourceProps) {
     const expressionFormHandlers = new ExpressionFormHandlers();
     return (
       <DatasourceWrapper spec={this} handlers={expressionFormHandlers} datasourceProps={props} />

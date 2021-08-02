@@ -80,7 +80,12 @@ export class FunctionForm extends BaseForm {
     }
 
     // render all included argument controls
-    return argValues && argValues.map(renderArgWithProps);
+    return (
+      argValues &&
+      argValues.map((value, index) => {
+        return renderArgWithProps(value, index);
+      })
+    );
   }
 
   // TODO: Argument adding isn't very good, we should improve this UI
@@ -97,7 +102,6 @@ export class FunctionForm extends BaseForm {
     }
 
     const value = arg.default == null ? null : fromExpression(arg.default, 'argument');
-
     return { arg, onValueAdd: onValueAdd(arg.name, value) };
   }
 
@@ -130,7 +134,6 @@ export class FunctionForm extends BaseForm {
 
     // props are passed to resolve and the returned object is mixed into the template props
     const props = { ...data, ...this.resolve(data), typeInstance: this };
-
     try {
       // allow a hook to override the data args
       const resolvedDataArgs = dataArgs.map((d) => ({ ...d, ...this.resolveArg(d, props) }));

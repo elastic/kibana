@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import { FunctionForm, FunctionFormProps } from './function_form';
 import { Arg } from './types';
 
@@ -29,7 +30,7 @@ export class View extends FunctionForm {
       requiresContext: true,
     };
 
-    Object.assign(this, defaultProps, { help, modelArgs: modelArgs || [], requiresContext });
+    merge(this, defaultProps, { help, modelArgs: modelArgs || [], requiresContext });
 
     if (!Array.isArray(this.modelArgs)) {
       throw new Error(`${this.name} element is invalid, modelArgs must be an array`);

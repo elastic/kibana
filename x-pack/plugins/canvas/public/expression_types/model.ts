@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import { FunctionForm, FunctionFormProps } from './function_form';
 import { Arg, View } from './types';
 
@@ -46,7 +47,7 @@ export class Model extends FunctionForm {
     const defaultProps = { requiresContext: true };
     const { requiresContext } = props;
 
-    Object.assign(this, defaultProps, { requiresContext });
+    merge(this, defaultProps, { requiresContext });
   }
 
   resolveArg(dataArg: DataArg, props: ModelProps) {
