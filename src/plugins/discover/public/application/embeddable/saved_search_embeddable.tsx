@@ -22,9 +22,9 @@ import {
   Query,
   TimeRange,
   Filter,
-  IFieldType,
   IndexPattern,
   ISearchSource,
+  IFieldType,
 } from '../../../../data/common';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
@@ -43,6 +43,7 @@ import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
 import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
+
 import { DocTableProps } from '../angular/doc_table/doc_table';
 
 export type SearchProps = Partial<DiscoverGridProps> &

@@ -34,7 +34,7 @@ import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { SyncBadge } from '../sync_badge';
 import { DatabaseContext } from './database_context';
-import { StickySpanProperties } from './StickySpanProperties';
+import { StickySpanProperties } from './sticky_span_properties';
 
 function formatType(type: string) {
   switch (type) {

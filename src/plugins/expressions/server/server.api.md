@@ -48,7 +48,7 @@ export function buildExpression(initialState?: ExpressionAstFunctionBuilder[] | 
 // @public
 export function buildExpressionFunction<FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition>(fnName: InferFunctionDefinition<FnDef>['name'],
 initialArgs: {
-    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[];
+    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[] | ExpressionAstExpression | ExpressionAstExpression[];
 }): ExpressionAstFunctionBuilder<FnDef>;
 
 // Warning: (ae-missing-release-tag) "Datatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

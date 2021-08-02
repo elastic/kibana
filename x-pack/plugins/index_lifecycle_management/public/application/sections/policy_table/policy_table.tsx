@@ -19,8 +19,7 @@ import {
   EuiPageHeader,
   EuiPageContent,
 } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { PolicyFromES } from '../../../../common/types';
 import { filterItems } from '../../services';
@@ -29,19 +28,13 @@ import { getPolicyCreatePath } from '../../services/navigation';
 
 interface Props {
   policies: PolicyFromES[];
-  history: RouteComponentProps['history'];
-  navigateToApp: ApplicationStart['navigateToApp'];
   updatePolicies: () => void;
 }
 
-export const PolicyTable: React.FunctionComponent<Props> = ({
-  policies,
-  history,
-  navigateToApp,
-  updatePolicies,
-}) => {
+export const PolicyTable: React.FunctionComponent<Props> = ({ policies, updatePolicies }) => {
   const [confirmModal, setConfirmModal] = useState<ReactNode | null>();
   const [filter, setFilter] = useState<string>('');
+  const history = useHistory();
 
   const createPolicyButton = (
     <EuiButton
@@ -67,13 +60,11 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         <TableContent
           policies={filteredPolicies}
           totalNumber={policies.length}
-          navigateToApp={navigateToApp}
           setConfirmModal={setConfirmModal}
           handleDelete={() => {
             updatePolicies();
             setConfirmModal(null);
           }}
-          history={history}
         />
       );
     } else {

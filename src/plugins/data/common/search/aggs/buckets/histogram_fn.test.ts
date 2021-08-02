@@ -50,10 +50,11 @@ describe('agg_expression_functions', () => {
         maxBars: 25,
         min_doc_count: false,
         has_extended_bounds: false,
-        extended_bounds: JSON.stringify({
+        extended_bounds: {
+          type: 'extended_bounds',
           min: 1,
           max: 2,
-        }),
+        },
       });
 
       expect(actual.value).toMatchInlineSnapshot(`
