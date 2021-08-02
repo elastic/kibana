@@ -36,6 +36,7 @@ import { useIsolationPrivileges } from '../../../../common/hooks/endpoint/use_is
 import { isIsolationSupported } from '../../../../../common/endpoint/service/host_isolation/utils';
 import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_check';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { TimelineEventsDetailsItem } from '../../../../../common';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -50,6 +51,20 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     }
   }
 `;
+
+const getFieldValue = (
+  {
+    category,
+    field,
+  }: {
+    category: string;
+    field: string;
+  },
+  data: TimelineEventsDetailsItem[] | null
+) => {
+  const currentField = find({ category, field }, data)?.values;
+  return currentField && currentField.length > 0 ? currentField[0] : '';
+};
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -106,31 +121,34 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     return endpointAlertCheck({ data: detailsData || [] });
   }, [detailsData]);
 
-  const agentId = useMemo(() => {
-    const findAgentId = find({ category: 'agent', field: 'agent.id' }, detailsData)?.values;
-    return findAgentId ? findAgentId[0] : '';
-  }, [detailsData]);
+  const ruleName = useMemo(
+    () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
+    [detailsData]
+  );
 
-  const hostOsFamily = useMemo(() => {
-    const findOsName = find({ category: 'host', field: 'host.os.name' }, detailsData)?.values;
-    return findOsName ? findOsName[0] : '';
-  }, [detailsData]);
+  const agentId = useMemo(
+    () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
+    [detailsData]
+  );
 
-  const agentVersion = useMemo(() => {
-    const findAgentVersion = find({ category: 'agent', field: 'agent.version' }, detailsData)
-      ?.values;
-    return findAgentVersion ? findAgentVersion[0] : '';
-  }, [detailsData]);
+  const hostOsFamily = useMemo(
+    () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
+    [detailsData]
+  );
 
-  const alertId = useMemo(() => {
-    const findAlertId = find({ category: '_id', field: '_id' }, detailsData)?.values;
-    return findAlertId ? findAlertId[0] : '';
-  }, [detailsData]);
+  const agentVersion = useMemo(
+    () => getFieldValue({ category: 'agent', field: 'agent.version' }, detailsData),
+    [detailsData]
+  );
 
-  const hostName = useMemo(() => {
-    const findHostName = find({ category: 'host', field: 'host.name' }, detailsData)?.values;
-    return findHostName ? findHostName[0] : '';
-  }, [detailsData]);
+  const alertId = useMemo(() => getFieldValue({ category: '_id', field: '_id' }, detailsData), [
+    detailsData,
+  ]);
+
+  const hostName = useMemo(
+    () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),
+    [detailsData]
+  );
 
   const isolationSupported = isIsolationSupported({
     osName: hostOsFamily,
@@ -177,7 +195,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
         ) : (
-          <ExpandableEventTitle isAlert={isAlert} loading={loading} />
+          <ExpandableEventTitle isAlert={isAlert} loading={loading} ruleName={ruleName} />
         )}
       </EuiFlyoutHeader>
       {isIsolateActionSuccessBannerVisible && (
@@ -225,6 +243,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       <ExpandableEventTitle
         isAlert={isAlert}
         loading={loading}
+        ruleName={ruleName}
         handleOnEventClosed={handleOnEventClosed}
       />
       <EuiSpacer size="m" />

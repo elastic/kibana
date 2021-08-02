@@ -143,7 +143,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       // Only if both min/max bounds are valid moment times set the bounds.
       // An invalid string restored from globalState might return `undefined`.
       if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
-        setBounds(timefilterBounds);
+        setBounds(timefilter.getBounds());
       }
     }
   }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
@@ -310,7 +310,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           );
         });
     }
-  }, [boundsMinMs, boundsMaxMs, selectedJob, selectedForecastId, autoZoomDuration]);
+  }, [selectedForecastId]);
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();

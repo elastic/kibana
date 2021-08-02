@@ -94,8 +94,14 @@ export const DurationChartComponent = ({
   const monitor = useSelector(monitorStatusSelector);
 
   return (
-    <ChartWrapper height={MONITOR_CHART_HEIGHT} loading={loading}>
-      {hasLines ? (
+    <ChartWrapper
+      aria-label={i18n.translate('xpack.uptime.monitorCharts.durationChart.wrapper.label', {
+        defaultMessage: `A chart displaying the monitor's ping duration, grouped by location.`,
+      })}
+      height={MONITOR_CHART_HEIGHT}
+      loading={loading}
+    >
+      {hasLines && typeof monitor?.monitor?.type === 'string' ? (
         <Chart>
           <Settings
             xDomain={{ min, max }}
@@ -119,7 +125,7 @@ export const DurationChartComponent = ({
             tickFormat={(d) => getTickFormat(d)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
               defaultMessage: 'Duration in {unit}',
-              values: { unit: monitor?.monitor.type === 'browser' ? SECONDS_LABEL : MS_LABEL },
+              values: { unit: monitor.monitor.type === 'browser' ? SECONDS_LABEL : MS_LABEL },
             })}
             labelFormat={(d) =>
               monitor?.monitor.type === 'browser' ? `${microToSec(d)}` : `${microToMilli(d)}`
@@ -127,7 +133,7 @@ export const DurationChartComponent = ({
           />
           <DurationLineSeriesList
             lines={locationDurationLines}
-            monitorType={monitor?.monitor.type!}
+            monitorType={monitor.monitor.type}
           />
           <DurationAnomaliesBar anomalies={anomalies} hiddenLegends={hiddenLegends} />
         </Chart>

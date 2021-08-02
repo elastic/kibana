@@ -22,6 +22,7 @@ export const RenderCellValue: React.FC<
   columnId,
   data,
   eventId,
+  isDraggable,
   header,
   isDetails,
   isExpandable,
@@ -35,6 +36,7 @@ export const RenderCellValue: React.FC<
     columnId={columnId}
     data={data}
     eventId={eventId}
+    isDraggable={isDraggable}
     header={header}
     isDetails={isDetails}
     isExpandable={isExpandable}

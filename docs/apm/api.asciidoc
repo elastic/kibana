@@ -11,6 +11,7 @@ Some APM app features are provided via a REST API:
 * <<agent-config-api>>
 * <<apm-annotation-api>>
 * <<kibana-api,Kibana API>>
+* <<rum-sourcemap-api>>
 
 [float]
 [[apm-api-example]]
@@ -71,6 +72,7 @@ curl -X POST \
 ----
 
 ////
+*******************************************************
 *******************************************************
 ////
 
@@ -202,10 +204,8 @@ DELETE /api/apm/settings/agent-configuration
 *******************************************************
 ////
 
-
 [[apm-list-config]]
 ==== List configuration
-
 
 [[apm-list-config-req]]
 ===== Request
@@ -273,7 +273,6 @@ GET  /api/apm/settings/agent-configuration
 ////
 *******************************************************
 ////
-
 
 [[apm-search-config]]
 ==== Search configuration
@@ -472,6 +471,7 @@ curl -X POST \
 
 ////
 *******************************************************
+*******************************************************
 ////
 
 [[kibana-api]]
@@ -553,3 +553,239 @@ The API returns the following:
 // More examples will go here
 
 More information on Kibana's API is available in <<api,REST API>>.
+
+////
+*******************************************************
+*******************************************************
+////
+
+[role="xpack"]
+[[rum-sourcemap-api]]
+=== RUM source map API
+
+IMPORTANT: This endpoint is only compatible with the
+{apm-server-ref}/apm-integration.html[APM integration for Elastic Agent].
+Users with a standalone APM Server should instead use the APM Server
+{apm-server-ref}/sourcemap-api.html[source map upload API].
+
+A source map allows minified files to be mapped back to original source code --
+allowing you to maintain the speed advantage of minified code,
+without losing the ability to quickly and easily debug your application.
+
+For best results, uploading source maps should become a part of your deployment procedure,
+and not something you only do when you see unhelpful errors.
+That’s because uploading source maps after errors happen won’t make old errors magically readable --
+errors must occur again for source mapping to occur.
+
+The following APIs are available:
+
+* <<rum-sourcemap-post>>
+* <<rum-sourcemap-get>>
+* <<rum-sourcemap-delete>>
+
+[float]
+[[use-sourcemap-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
+
+////
+*******************************************************
+////
+
+[[rum-sourcemap-post]]
+==== Create or update source map
+
+Create or update a source map for a specific service and version.
+
+[[rum-sourcemap-post-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[apm-sourcemap-post-req]]
+===== Request
+
+`POST /api/apm/sourcemaps`
+
+[role="child_attributes"]
+[[apm-sourcemap-post-req-body]]
+===== Request body
+
+`service_name`::
+(required, string) The name of the service that the service map should apply to.
+
+`service_version`::
+(required, string) The version of the service that the service map should apply to.
+
+`bundle_filepath`::
+(required, string) The absolute path of the final bundle as used in the web application.
+
+`sourcemap`::
+(required, string or file upload) The source map. It must follow the
+https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k[source map revision 3 proposal].
+
+[[apm-sourcemap-post-example]]
+===== Examples
+
+The following example uploads a source map for a service named `foo` and a service version of `1.0.0`:
+
+[source,curl]
+--------------------------------------------------
+curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
+-H 'Content-Type: multipart/form-data' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: ApiKey ${YOUR_API_KEY}' \
+-F 'service_name="foo"' \
+-F 'service_version="1.0.0"' \
+-F 'bundle_filepath="/test/e2e/general-usecase/bundle.js.map"' \
+-F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' <1>
+--------------------------------------------------
+<1> Alternatively, upload the source map as a file with `-F 'sourcemap=@path/to/source_map/bundle.js.map'`
+
+[[apm-sourcemap-post-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "type": "sourcemap",
+  "identifier": "foo-1.0.0",
+  "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "body": "eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI",
+  "created": "2021-07-09T20:47:44.812Z",
+  "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "compressionAlgorithm": "zlib",
+  "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "decodedSize": 441,
+  "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+  "encodedSize": 237,
+  "encryptionAlgorithm": "none",
+  "packageName": "apm"
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+[[rum-sourcemap-get]]
+==== Get source maps
+
+Returns an array of Fleet artifacts, including source map uploads.
+
+[[rum-sourcemap-get-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `Read` or `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[apm-sourcemap-get-req]]
+===== Request
+
+`GET /api/apm/sourcemaps`
+
+[[apm-sourcemap-get-example]]
+===== Example
+
+The following example requests all uploaded source maps:
+
+[source,curl]
+--------------------------------------------------
+curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: ApiKey ${YOUR_API_KEY}'
+--------------------------------------------------
+
+[[apm-sourcemap-get-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "artifacts": [
+    {
+      "type": "sourcemap",
+      "identifier": "foo-1.0.0",
+      "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "body": {
+        "serviceName": "foo",
+        "serviceVersion": "1.0.0",
+        "bundleFilepath": "/test/e2e/general-usecase/bundle.js.map",
+        "sourceMap": {
+          "version": 3,
+          "file": "static/js/main.chunk.js",
+          "sources": [
+            "fleet-source-map-client/src/index.css",
+            "fleet-source-map-client/src/App.js",
+            "webpack:///./src/index.css?bb0a",
+            "fleet-source-map-client/src/index.js",
+            "fleet-source-map-client/src/reportWebVitals.js"
+          ],
+          "sourcesContent": [
+            "content"
+          ],
+          "mappings": "mapping",
+          "sourceRoot": ""
+        }
+      },
+      "created": "2021-07-09T20:47:44.812Z",
+      "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "compressionAlgorithm": "zlib",
+      "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "decodedSize": 441,
+      "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+      "encodedSize": 237,
+      "encryptionAlgorithm": "none",
+      "packageName": "apm"
+    }
+  ]
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+[[rum-sourcemap-delete]]
+==== Delete source map
+
+Delete a previously uploaded source map.
+
+[[rum-sourcemap-delete-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[apm-sourcemap-delete-req]]
+===== Request
+
+`DELETE /api/apm/sourcemaps/:id`
+
+[[apm-sourcemap-delete-example]]
+===== Example
+
+The following example deletes a source map with an id of `apm:foo-1.0.0-644fd5a9`:
+
+[source,curl]
+--------------------------------------------------
+curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9" \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: ApiKey ${YOUR_API_KEY}'
+--------------------------------------------------
+
+[[apm-sourcemap-delete-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{}
+--------------------------------------------------

@@ -297,6 +297,26 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(1);
       });
 
+      it('memory protection card and user notification checkbox are shown', () => {
+        const memory = policyView.find('EuiPanel[data-test-subj="memoryProtectionsForm"]');
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="memory_protectionUserNotificationCheckbox"]'
+        );
+
+        expect(memory).toHaveLength(1);
+        expect(userNotificationCheckbox).toHaveLength(1);
+      });
+
+      it('behavior protection card and user notification checkbox are shown', () => {
+        const behavior = policyView.find('EuiPanel[data-test-subj="behaviorProtectionsForm"]');
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="behavior_protectionUserNotificationCheckbox"]'
+        );
+
+        expect(behavior).toHaveLength(1);
+        expect(userNotificationCheckbox).toHaveLength(1);
+      });
+
       it('ransomware card is shown', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(1);
@@ -321,6 +341,15 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(0);
       });
 
+      it('memory protection card, and user notification checkbox are hidden', () => {
+        const memory = policyView.find('EuiPanel[data-test-subj="memoryProtectionsForm"]');
+        expect(memory).toHaveLength(0);
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="memoryUserNotificationCheckbox"]'
+        );
+        expect(userNotificationCheckbox).toHaveLength(0);
+      });
+
       it('ransomware card is hidden', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(0);
@@ -328,7 +357,7 @@ describe('Policy Details', () => {
 
       it('shows the locked card in place of 1 paid feature', () => {
         const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
-        expect(lockedCard).toHaveLength(1);
+        expect(lockedCard).toHaveLength(3);
       });
     });
   });

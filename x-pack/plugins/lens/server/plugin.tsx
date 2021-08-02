@@ -9,6 +9,7 @@ import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { setupRoutes } from './routes';
 import {
@@ -24,6 +25,7 @@ export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
   taskManager?: TaskManagerSetupContract;
   embeddable: EmbeddableSetup;
+  expressions: ExpressionsServerSetup;
 }
 
 export interface PluginStartContract {

@@ -34,13 +34,13 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
       try {
         const { clusterUuid } = request.params;
         const { alertTypeIds, filters } = request.body;
-        const alertsClient = context.alerting?.getAlertsClient();
-        if (!alertsClient) {
+        const rulesClient = context.alerting?.getRulesClient();
+        if (!rulesClient) {
           return response.ok({ body: undefined });
         }
 
         const status = await fetchStatus(
-          alertsClient,
+          rulesClient,
           npRoute.licenseService,
           alertTypeIds,
           [clusterUuid],

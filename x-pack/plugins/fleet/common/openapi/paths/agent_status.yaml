@@ -1,5 +1,5 @@
 get:
-  summary: Fleet - Agent - Summary stats
+  summary: Agents - Summary stats
   tags: []
   responses:
     '200':
@@ -34,7 +34,7 @@ get:
               - other
               - total
               - updating
-  operationId: get-fleet-agent-status
+  operationId: get-agent-status
   parameters:
     - schema:
         type: string

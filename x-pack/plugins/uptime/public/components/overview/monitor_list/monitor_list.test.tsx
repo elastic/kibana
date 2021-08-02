@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import {
   MonitorSummariesResult,
   CursorDirection,
@@ -20,6 +21,7 @@ import * as redux from 'react-redux';
 import moment from 'moment';
 import { IHttpFetchError } from '../../../../../../../src/core/public';
 import { mockMoment } from '../../../lib/helper/test_helpers';
+import { render } from '../../../lib/helper/rtl_helpers';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
@@ -112,6 +114,10 @@ describe('MonitorList component', () => {
 
   beforeAll(() => {
     mockMoment();
+    global.innerWidth = 1200;
+
+    // Trigger the window resize event.
+    global.dispatchEvent(new Event('resize'));
   });
 
   const getMonitorList = (timestamp?: string): MonitorSummariesResult => {
@@ -272,6 +278,67 @@ describe('MonitorList component', () => {
       );
 
       expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('responsive behavior', () => {
+    describe('xl screens', () => {
+      beforeAll(() => {
+        global.innerWidth = 1200;
+
+        // Trigger the window resize event.
+        global.dispatchEvent(new Event('resize'));
+      });
+
+      it('shows ping histogram and expand button on xl and xxl screens', async () => {
+        const list = getMonitorList(moment().subtract(5, 'minute').toISOString());
+        const { getByTestId, getByText } = render(
+          <MonitorListComponent
+            monitorList={{
+              list,
+              loading: false,
+            }}
+            pageSize={10}
+            setPageSize={jest.fn()}
+          />
+        );
+
+        await waitFor(() => {
+          expect(
+            getByTestId(
+              `xpack.uptime.monitorList.${list.summaries[0].monitor_id}.expandMonitorDetail`
+            )
+          ).toBeInTheDocument();
+          expect(getByText('Downtime history')).toBeInTheDocument();
+        });
+      });
+    });
+
+    describe('large and medium screens', () => {
+      it('hides ping histogram and expand button on extra large screens', async () => {
+        global.innerWidth = 1199;
+
+        // Trigger the window resize event.
+        global.dispatchEvent(new Event('resize'));
+
+        const { queryByTestId, queryByText } = render(
+          <MonitorListComponent
+            monitorList={{
+              list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
+              loading: false,
+            }}
+            pageSize={10}
+            setPageSize={jest.fn()}
+          />
+        );
+
+        await waitFor(() => {
+          expect(
+            queryByTestId('xpack.uptime.monitorList.always-down.expandMonitorDetail')
+          ).not.toBeInTheDocument();
+          expect(queryByText('Downtime history')).not.toBeInTheDocument();
+        });
+      });
     });
   });
 

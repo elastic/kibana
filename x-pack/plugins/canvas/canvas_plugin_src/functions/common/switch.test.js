@@ -12,6 +12,7 @@ import { switchFn } from './switch';
 
 describe('switch', () => {
   const fn = functionWrapper(switchFn);
+
   const getter = (value) => () => of(value);
   const mockCases = [
     {

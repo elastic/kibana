@@ -80,9 +80,9 @@ export interface DataFrameAnalyticsConfig {
     runtime_mappings?: RuntimeMappings;
   };
   analysis: AnalysisConfig;
-  analyzed_fields: {
-    includes: string[];
-    excludes: string[];
+  analyzed_fields?: {
+    includes?: string[];
+    excludes?: string[];
   };
   model_memory_limit: string;
   max_num_threads?: number;

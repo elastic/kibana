@@ -22,7 +22,7 @@ import {
   EditorFrameStart,
 } from '../types';
 import { Document } from '../persistence/saved_object_store';
-import { mergeTables } from './merge_tables';
+import { mergeTables } from '../../common/expressions';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';

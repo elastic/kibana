@@ -8,13 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import {
-  callApmApi,
-  AutoAbortedAPMClient,
-} from '../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
+import {
+  AutoAbortedAPMClient,
+  callApmApi,
+} from '../services/rest/createCallApmApi';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -68,7 +67,7 @@ export function useFetcher<TReturn>(
     showToastOnError?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
-  const { notifications } = useApmPluginContext().core;
+  const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
   const [result, setResult] = useState<
     FetcherResult<InferResponseType<TReturn>>
@@ -124,12 +123,12 @@ export function useFetcher<TReturn>(
             'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
-            notifications.toasts.addDanger({
+            notifications.toasts.danger({
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
 
-              text: toMountPoint(
+              body: (
                 <div>
                   <h5>
                     {i18n.translate('xpack.apm.fetcher.error.status', {

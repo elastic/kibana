@@ -15,6 +15,7 @@ export interface ISearchOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [abortSignal](./kibana-plugin-plugins-data-server.isearchoptions.abortsignal.md) | <code>AbortSignal</code> | An <code>AbortSignal</code> that allows the caller of <code>search</code> to abort a search request. |
+|  [executionContext](./kibana-plugin-plugins-data-server.isearchoptions.executioncontext.md) | <code>KibanaExecutionContext</code> |  |
 |  [indexPattern](./kibana-plugin-plugins-data-server.isearchoptions.indexpattern.md) | <code>IndexPattern</code> | Index pattern reference is used for better error messages |
 |  [inspector](./kibana-plugin-plugins-data-server.isearchoptions.inspector.md) | <code>IInspectorInfo</code> | Inspector integration options |
 |  [isRestore](./kibana-plugin-plugins-data-server.isearchoptions.isrestore.md) | <code>boolean</code> | Whether the session is restored (i.e. search requests should re-use the stored search IDs, rather than starting from scratch) |

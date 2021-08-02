@@ -19,6 +19,8 @@ import type {
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
 
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+
 import { asyncSearchServiceProvider } from './async_search_service';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
@@ -26,10 +28,10 @@ export type PartialSearchResponse = IKibanaSearchResponse<{
   values: SearchServiceValue[];
 }>;
 
-export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
-  PartialSearchRequest,
-  PartialSearchResponse
-> => {
+export const apmCorrelationsSearchStrategyProvider = (
+  getApmIndices: () => Promise<ApmIndicesConfig>,
+  includeFrozen: boolean
+): ISearchStrategy<PartialSearchRequest, PartialSearchResponse> => {
   const asyncSearchServiceMap = new Map<
     string,
     ReturnType<typeof asyncSearchServiceProvider>
@@ -65,7 +67,9 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
       } else {
         getAsyncSearchServiceState = asyncSearchServiceProvider(
           deps.esClient.asCurrentUser,
-          request.params
+          getApmIndices,
+          request.params,
+          includeFrozen
         );
       }
 
@@ -73,6 +77,7 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
       const id = request.id ?? uuid();
 
       const {
+        ccsWarning,
         error,
         log,
         isRunning,
@@ -102,6 +107,7 @@ export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
         isRunning,
         isPartial: isRunning,
         rawResponse: {
+          ccsWarning,
           log,
           took,
           values,

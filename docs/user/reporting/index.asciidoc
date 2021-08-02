@@ -17,7 +17,7 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 
 * *PNG Reports* &mdash; Generate and download a PNG file of a dashboard or visualization.
 
-* *CSV Reports* &mdash; Generate and download a CSV file of a saved search.
+* *CSV Reports* &mdash; Generate and download a CSV file of a *Discover* saved search.
 
 * *Permalinks* &mdash; Share a direct link to a *Discover* saved search, dashboard, or visualization.
 
@@ -90,7 +90,7 @@ Share a direct link to a saved search, dashboard, or visualization. To access th
 [role="screenshot"]
 image::images/permalink-public-url.png[Permalink share menu with Public URL option highlighted]
 +
-NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to share.
+NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to share. For more information, refer to <<anonymous-authentication,Anonymous authentication>>.
 
 . Click *Copy link*.
 
@@ -156,7 +156,7 @@ Some users might not have access to the dashboard or visualization. For more inf
 [role="screenshot"]
 image::images/embed-code-public-url.png[Embed code share menu with Public URL option highlighted]
 +
-NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed.
+NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed. For more information, refer to <<anonymous-authentication,Anonymous authentication>>.
 
 . Click *Copy iFrame code*.
 

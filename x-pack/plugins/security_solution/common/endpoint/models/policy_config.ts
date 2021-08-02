@@ -29,12 +29,28 @@ export const policyFactory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
         supported: true,
       },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       popup: {
         malware: {
           message: '',
           enabled: true,
         },
         ransomware: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
           message: '',
           enabled: true,
         },
@@ -101,6 +117,14 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.windows.popup,
         malware: {
@@ -108,6 +132,14 @@ export const policyFactoryWithoutPaidFeatures = (
           enabled: true,
         },
         ransomware: {
+          message: '',
+          enabled: false,
+        },
+        memory_protection: {
+          message: '',
+          enabled: false,
+        },
+        behavior_protection: {
           message: '',
           enabled: false,
         },
@@ -150,6 +182,14 @@ export const policyFactoryWithSupportedFeatures = (
         ...policy.windows.ransomware,
         supported: true,
       },
+      memory_protection: {
+        ...policy.windows.memory_protection,
+        supported: true,
+      },
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
     },
   };
 };
@@ -157,4 +197,4 @@ export const policyFactoryWithSupportedFeatures = (
 /**
  * Reflects what string the Endpoint will use when message field is default/empty
  */
-export const DefaultMalwareMessage = 'Elastic Security {action} {filename}';
+export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';

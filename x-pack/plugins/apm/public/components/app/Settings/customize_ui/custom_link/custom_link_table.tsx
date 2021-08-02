@@ -49,7 +49,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       truncateText: true,
     },
     {
-      width: 160,
+      width: '160px',
       align: 'right',
       field: '@timestamp',
       name: i18n.translate(

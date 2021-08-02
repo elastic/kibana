@@ -12,6 +12,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 export const MetricsExplorerNoMetrics = () => {
   return (
     <EuiEmptyPrompt
+      data-test-subj="metricsExplorer-missingMetricMessage"
       iconType="stats"
       title={
         <h3>

@@ -16,11 +16,10 @@ import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
-  SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import { DateRange } from '../common';
-import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
@@ -36,8 +35,6 @@ import type {
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
-
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export interface PublicAPIProps<T> {
   state: T;
@@ -387,15 +384,6 @@ export interface OperationMetadata {
   // introduce a raw document datasource, this should be considered here.
 }
 
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
-
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
@@ -548,7 +536,7 @@ export interface VisualizationType {
    */
   label: string;
   /**
-   * Optional label used in chart type search if chart switcher is expanded and for tooltips
+   * Optional label used in visualization type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
   /**

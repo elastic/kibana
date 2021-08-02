@@ -4,8 +4,13 @@
 
 ## isFilters variable
 
+> Warning: This API is now obsolete.
+> 
+> Please import from the package kbn/es-query directly. This import will be removed in v8.0.0.
+> 
+
 <b>Signature:</b>
 
 ```typescript
-isFilters: (x: unknown) => x is Filter[]
+isFilters: (x: unknown) => x is oldFilter[]
 ```

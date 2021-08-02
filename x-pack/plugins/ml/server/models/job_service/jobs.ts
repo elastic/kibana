@@ -26,6 +26,7 @@ import {
   MlJobsResponse,
   MlJobsStatsResponse,
   JobsExistResponse,
+  BulkCreateResults,
 } from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
@@ -40,9 +41,10 @@ import {
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
 import { isPopulatedObject } from '../../../common/util/object_utils';
-import type { AlertsClient } from '../../../../alerting/server';
+import type { RulesClient } from '../../../../alerting/server';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
+import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 interface Results {
   [id: string]: {
@@ -54,7 +56,7 @@ interface Results {
 export function jobsProvider(
   client: IScopedClusterClient,
   mlClient: MlClient,
-  alertsClient?: AlertsClient
+  rulesClient?: RulesClient
 ) {
   const { asInternalUser } = client;
 
@@ -421,8 +423,8 @@ export function jobsProvider(
         jobs.push(tempJob);
       });
 
-      if (alertsClient) {
-        const mlAlertingRules = await alertsClient.find<MlAnomalyDetectionAlertParams>({
+      if (rulesClient) {
+        const mlAlertingRules = await rulesClient.find<MlAnomalyDetectionAlertParams>({
           options: {
             filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}`,
             perPage: 1000,
@@ -576,6 +578,37 @@ export function jobsProvider(
     return job.node === undefined && job.state === JOB_STATE.OPENING;
   }
 
+  async function bulkCreate(
+    jobs: Array<{ job: Job; datafeed: Datafeed }>,
+    authHeader: AuthorizationHeader
+  ) {
+    const results: BulkCreateResults = {};
+    await Promise.all(
+      jobs.map(async ({ job, datafeed }) => {
+        results[job.job_id] = { job: { success: false }, datafeed: { success: false } };
+
+        try {
+          await mlClient.putJob({ job_id: job.job_id, body: job });
+          results[job.job_id].job = { success: true };
+        } catch (error) {
+          results[job.job_id].job = { success: false, error: error.body ?? error };
+        }
+
+        try {
+          await mlClient.putDatafeed(
+            { datafeed_id: datafeed.datafeed_id, body: datafeed },
+            authHeader
+          );
+          results[job.job_id].datafeed = { success: true };
+        } catch (error) {
+          results[job.job_id].datafeed = { success: false, error: error.body ?? error };
+        }
+      })
+    );
+
+    return results;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
@@ -589,5 +622,6 @@ export function jobsProvider(
     jobsExist,
     getAllJobAndGroupIds,
     getLookBackProgress,
+    bulkCreate,
   };
 }

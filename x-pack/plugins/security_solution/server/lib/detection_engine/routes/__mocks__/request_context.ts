@@ -11,37 +11,54 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../../alerting/server/mocks';
+import { rulesClientMock } from '../../../../../../alerting/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { siemMock } from '../../../../mocks';
 
 const createMockClients = () => ({
-  alertsClient: alertsClientMock.create(),
-  clusterClient: elasticsearchServiceMock.createLegacyScopedClusterClient(),
+  rulesClient: rulesClientMock.create(),
   licensing: { license: licensingMock.createLicenseMock() },
-  newClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+  clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
   appClient: siemMock.createClient(),
 });
 
+/**
+ * Adds mocking to the interface so we don't have to cast everywhere
+ */
+type SecuritySolutionRequestHandlerContextMock = SecuritySolutionRequestHandlerContext & {
+  core: {
+    elasticsearch: {
+      client: {
+        asCurrentUser: {
+          updateByQuery: jest.Mock;
+          search: jest.Mock;
+          transport: {
+            request: jest.Mock;
+          };
+        };
+      };
+    };
+  };
+};
+
 const createRequestContextMock = (
   clients: ReturnType<typeof createMockClients> = createMockClients()
-) => {
+): SecuritySolutionRequestHandlerContextMock => {
   const coreContext = coreMock.createRequestHandlerContext();
   return ({
-    alerting: { getAlertsClient: jest.fn(() => clients.alertsClient) },
+    alerting: { getRulesClient: jest.fn(() => clients.rulesClient) },
     core: {
       ...coreContext,
       elasticsearch: {
         ...coreContext.elasticsearch,
-        client: clients.newClusterClient,
-        legacy: { ...coreContext.elasticsearch.legacy, client: clients.clusterClient },
+        client: clients.clusterClient,
       },
       savedObjects: { client: clients.savedObjectsClient },
     },
     licensing: clients.licensing,
     securitySolution: { getAppClient: jest.fn(() => clients.appClient) },
-  } as unknown) as SecuritySolutionRequestHandlerContext;
+  } as unknown) as SecuritySolutionRequestHandlerContextMock;
 };
 
 const createTools = () => {

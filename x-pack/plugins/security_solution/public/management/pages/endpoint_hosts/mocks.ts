@@ -11,14 +11,17 @@ import {
   ResponseProvidersInterface,
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
 import {
+  ActivityLog,
   HostInfo,
   HostPolicyResponse,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
+  ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
@@ -92,6 +95,53 @@ export const endpointPolicyResponseHttpMock = httpHandlerMockFactory<EndpointPol
       method: 'get',
       handler: () => {
         return new EndpointDocGenerator('seed').generatePolicyResponse();
+      },
+    },
+  ]
+);
+
+type EndpointActivityLogHttpMockInterface = ResponseProvidersInterface<{
+  activityLogResponse: () => ActivityLog;
+}>;
+export const endpointActivityLogHttpMock = httpHandlerMockFactory<EndpointActivityLogHttpMockInterface>(
+  [
+    {
+      id: 'activityLogResponse',
+      path: ENDPOINT_ACTION_LOG_ROUTE,
+      method: 'get',
+      handler: () => {
+        const generator = new EndpointDocGenerator('seed');
+        const endpointMetadata = generator.generateHostMetadata();
+        const fleetActionGenerator = new FleetActionGenerator('seed');
+        const actionData = fleetActionGenerator.generate({
+          agents: [endpointMetadata.agent.id],
+        });
+        const responseData = fleetActionGenerator.generateResponse({
+          agent_id: endpointMetadata.agent.id,
+        });
+
+        return {
+          body: {
+            page: 1,
+            pageSize: 50,
+            data: [
+              {
+                type: 'response',
+                item: {
+                  id: '',
+                  data: responseData,
+                },
+              },
+              {
+                type: 'action',
+                item: {
+                  id: '',
+                  data: actionData,
+                },
+              },
+            ],
+          },
+        };
       },
     },
   ]
@@ -184,6 +234,7 @@ export const fleetApisHttpMock = composeHttpHandlerMocks<FleetApisHttpMockInterf
 
 type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &
   EndpointPolicyResponseHttpMockInterface &
+  EndpointActivityLogHttpMockInterface &
   FleetApisHttpMockInterface &
   PendingActionsHttpMockInterface;
 /**
@@ -192,6 +243,7 @@ type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &
 export const endpointPageHttpMock = composeHttpHandlerMocks<EndpointPageHttpMockInterface>([
   endpointMetadataHttpMocks,
   endpointPolicyResponseHttpMock,
+  endpointActivityLogHttpMock,
   fleetApisHttpMock,
   pendingActionsHttpMock,
 ]);

@@ -13,9 +13,9 @@ import {
   DEFAULT_COLOR_STEPS,
   FIXED_PROGRESSION,
   defaultPaletteParams,
-} from '../../shared_components/coloring/constants';
-import { CustomPaletteParams } from '../../shared_components/coloring/types';
-import { getStopsForFixedMode } from '../../shared_components/coloring/utils';
+} from './constants';
+import type { CustomPaletteParams } from '../../../common';
+import { getStopsForFixedMode } from './utils';
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,

@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import { FieldFilter as Filter } from '@kbn/es-query';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FieldFilter as Filter } from '../../../../../../../../src/plugins/data/common';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   SERVICE_NAME,

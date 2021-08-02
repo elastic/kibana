@@ -1,0 +1,7 @@
+title: Fleet settings response
+type: object
+properties:
+  item:
+    $ref: ./settings.yaml
+required:
+  - item

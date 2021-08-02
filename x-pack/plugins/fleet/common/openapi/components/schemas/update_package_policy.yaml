@@ -1,4 +1,4 @@
-title: UpdatePackagePolicy
+title: Update package policy
 allOf:
   - type: object
     properties:
