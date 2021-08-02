@@ -46,9 +46,11 @@ export async function getServiceTransactionDetailedStatistics({
   offset?: string;
 }) {
   const { apmEventClient, start, end } = setup;
-  const offsetInMs = getOffsetInMs(start, offset);
-  const startWithOffset = start - offsetInMs;
-  const endWithOffset = end - offsetInMs;
+  const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const outcomes = getOutcomeAggregation();
 
