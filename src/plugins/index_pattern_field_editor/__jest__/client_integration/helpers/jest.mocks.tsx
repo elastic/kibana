@@ -30,6 +30,16 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
+    EuiResizeObserver: ({
+      onResize,
+      children,
+    }: {
+      onResize(data: { height: number }): void;
+      children(): JSX.Element;
+    }) => {
+      onResize({ height: 1000 });
+      return children();
+    },
   };
 });
 

@@ -15,16 +15,13 @@ describe('<FieldEditorFlyoutContent />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
+    httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['foo'] });
     jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
     server.restore();
-  });
-
-  beforeEach(() => {
-    httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['Set by Jest test'] });
   });
 
   test('should have the correct title', async () => {
@@ -114,20 +111,12 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       const {
         find,
-        component,
-        form,
-        actions: { toggleFormRow, changeFieldType },
+        actions: { toggleFormRow, fields },
       } = await setup({ onSave });
 
-      act(() => {
-        form.setInputValue('nameField.input', 'someName');
-        toggleFormRow('value');
-      });
-      component.update();
-
-      await act(async () => {
-        form.setInputValue('scriptField', 'echo("hello")');
-      });
+      await fields.updateName('someName');
+      await toggleFormRow('value');
+      await fields.updateScript('echo("hello")');
 
       await act(async () => {
         // Let's make sure that validation has finished running
@@ -149,7 +138,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       });
 
       // Change the type and make sure it is forwarded
-      await changeFieldType('other_type', 'Other type');
+      await fields.updateType('other_type', 'Other type');
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');

@@ -12,7 +12,7 @@ import { EuiEmptyPrompt, EuiText, EuiTextColor, EuiFlexGroup, EuiFlexItem } from
 
 export const FieldPreviewEmptyPrompt = () => {
   return (
-    <EuiFlexGroup style={{ height: '100%' }}>
+    <EuiFlexGroup style={{ height: '100%' }} data-test-subj="emptyPrompt">
       <EuiFlexItem>
         <EuiEmptyPrompt
           iconType="inspect"

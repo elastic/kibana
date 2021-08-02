@@ -37,6 +37,7 @@ export interface Props {
   backgroundColor?: 'euiPageBackground' | 'euiEmptyShade';
   /** Add a border to the panel */
   border?: 'left' | 'right';
+  'data-test-subj'?: string;
 }
 
 export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
@@ -45,6 +46,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   className = '',
   backgroundColor,
   border,
+  'data-test-subj': dataTestSubj,
   ...rest
 }) => {
   const [config, setConfig] = useState<{ hasFooter: boolean; hasContent: boolean }>({
@@ -116,7 +118,12 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   }, [width, addPanel]);
 
   return (
-    <EuiFlexItem className="fieldEditor__flyoutPanels__column" style={styles} grow={false}>
+    <EuiFlexItem
+      className="fieldEditor__flyoutPanels__column"
+      style={styles}
+      grow={false}
+      data-test-subj={dataTestSubj}
+    >
       <flyoutPanelContext.Provider value={ctx}>
         <div className={classes} {...rest}>
           {children}

@@ -22,9 +22,16 @@ const defaultProps: Props = {
   isSavingField: false,
 };
 
+const getActions = (testBed: TestBed) => {
+  return {
+    ...getCommonActions(testBed),
+  };
+};
+
 export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
   let testBed: TestBed;
 
+  // Setup testbed
   await act(async () => {
     testBed = await registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
       memoryRouter: {
@@ -35,9 +42,5 @@ export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => 
 
   testBed!.component.update();
 
-  const actions = {
-    ...getCommonActions(testBed!),
-  };
-
-  return { ...testBed!, actions };
+  return { ...testBed!, actions: getActions(testBed!) };
 };

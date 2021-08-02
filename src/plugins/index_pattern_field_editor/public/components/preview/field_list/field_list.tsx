@@ -45,7 +45,7 @@ function escapeRegExp(text: string) {
 
 function fuzzyMatch(searchValue: string, text: string) {
   const pattern = `.*${searchValue.split('').map(escapeRegExp).join('.*')}.*`;
-  const regex = new RegExp(pattern);
+  const regex = new RegExp(pattern, 'i');
   return regex.test(text);
 }
 
@@ -164,7 +164,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           }
           titleSize="xs"
           actions={
-            <EuiButton onClick={clearSearch}>
+            <EuiButton onClick={clearSearch} data-test-subj="clearSearchButton">
               {i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.searchResult.emptyPrompt.clearSearchButtonLabel',
                 {
@@ -214,7 +214,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
             const field = filteredFields[index];
 
             return (
-              <div key={field.key} style={style}>
+              <div key={field.key} style={style} data-test-subj="indexPatternFieldList">
                 <PreviewListItem
                   key={field.key}
                   field={field}

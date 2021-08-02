@@ -22,14 +22,24 @@ import { init as initHttpRequests } from './http_requests';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const dataStart = dataPluginMock.createStartContract();
-const { search } = dataStart;
+const { search, fieldFormats } = dataStart;
 
-export const spySearchResult = jest.fn();
+export const spySearchQuery = jest.fn();
+export const spySearchQueryResponse = jest.fn();
+export const spyIndexPatternGetAllFields = jest.fn().mockImplementation(() => []);
 
-search.search = () =>
-  ({
-    toPromise: spySearchResult,
-  } as any);
+spySearchQuery.mockImplementation((params) => {
+  return {
+    toPromise: () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(undefined);
+        }, 2000); // simulate 2s latency for the HTTP request
+      }).then(() => spySearchQueryResponse());
+    },
+  };
+});
+search.search = spySearchQuery;
 
 let apiService: ApiService;
 
@@ -44,29 +54,42 @@ export const setupEnvironment = () => {
   };
 };
 
-export const indexPatternFields = [
-  {
-    name: 'field1',
-    displayName: 'field1',
-  },
-  {
-    name: 'field2',
-    displayName: 'field2',
-  },
-  {
-    name: 'field3',
-    displayName: 'field3',
-  },
-];
+// The format options available in the dropdown select for our tests.
+export const fieldFormatsOptions = [{ id: 'upper', title: 'UpperCaseString' } as any];
+
+export const indexPatternNameForTest = 'testIndexPattern';
 
 export const WithFieldEditorDependencies = <T extends object = { [key: string]: unknown }>(
   Comp: FunctionComponent<T>,
   overridingDependencies?: Partial<Context>
 ) => (props: T) => {
+  // Setup mocks
+  (fieldFormats.getByFieldType as jest.MockedFunction<
+    typeof fieldFormats['getByFieldType']
+  >).mockReturnValue(fieldFormatsOptions);
+
+  (fieldFormats.getDefaultType as jest.MockedFunction<
+    typeof fieldFormats['getDefaultType']
+  >).mockReturnValue({ id: 'testDefaultFormat', title: 'TestDefaultFormat' } as any);
+
+  (fieldFormats.getInstance as jest.MockedFunction<
+    typeof fieldFormats['getInstance']
+  >).mockImplementation((id: string) => {
+    if (id === 'upper') {
+      return {
+        convertObject: {
+          html(value: string = '') {
+            return `<span>${value.toUpperCase()}</span>`;
+          },
+        },
+      } as any;
+    }
+  });
+
   const dependencies: Context = {
     indexPattern: {
-      title: 'testIndexPattern',
-      fields: { getAll: () => indexPatternFields },
+      title: indexPatternNameForTest,
+      fields: { getAll: spyIndexPatternGetAllFields },
     } as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     fieldTypeToProcess: 'runtime',
@@ -84,11 +107,7 @@ export const WithFieldEditorDependencies = <T extends object = { [key: string]: 
       getAll: () => [],
       getById: () => undefined,
     },
-    fieldFormats: {
-      getDefaultInstance: () => ({
-        convert: (val: any) => val,
-      }),
-    } as any,
+    fieldFormats,
   };
 
   const mergedDependencies = merge({}, dependencies, overridingDependencies);

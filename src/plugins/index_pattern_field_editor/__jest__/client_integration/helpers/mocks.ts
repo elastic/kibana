@@ -6,16 +6,20 @@
  * Side Public License, v 1.
  */
 
-export { findTestSubject, TestBed } from '@kbn/test/jest';
+interface PreviewErrorArgs {
+  reason: string;
+  scriptStack?: string[];
+  position?: { offset: number; start: number; end: number } | null;
+}
 
-export {
-  setupEnvironment,
-  WithFieldEditorDependencies,
-  spySearchQuery,
-  spySearchQueryResponse,
-  spyIndexPatternGetAllFields,
-  fieldFormatsOptions,
-  indexPatternNameForTest,
-} from './setup_environment';
-
-export { getCommonActions } from './common_actions';
+export const createPreviewError = ({
+  reason,
+  scriptStack = [],
+  position = null,
+}: PreviewErrorArgs) => {
+  return {
+    caused_by: { reason },
+    position,
+    script_stack: scriptStack,
+  };
+};
