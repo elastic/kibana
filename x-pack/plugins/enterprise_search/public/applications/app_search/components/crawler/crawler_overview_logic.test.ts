@@ -29,6 +29,7 @@ const DEFAULT_VALUES: CrawlerOverviewValues = {
   crawlRequests: [],
   dataLoading: true,
   domains: [],
+  mostRecentCrawlRequestStatus: CrawlerStatus.Success,
 };
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -167,6 +168,77 @@ describe('CrawlerOverviewLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+  });
+
+  describe('selectors', () => {
+    describe('mostRecentCrawlRequestStatus', () => {
+      it('is Success when there are no crawl requests', () => {
+        mount({
+          crawlRequests: [],
+        });
+
+        expect(CrawlerOverviewLogic.values.mostRecentCrawlRequestStatus).toEqual(
+          CrawlerStatus.Success
+        );
+      });
+
+      it('is Success when there are only crawl requests', () => {
+        mount({
+          crawlRequests: [
+            {
+              id: '2',
+              status: CrawlerStatus.Skipped,
+              createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+              beganAt: null,
+              completedAt: null,
+            },
+            {
+              id: '1',
+              status: CrawlerStatus.Skipped,
+              createdAt: 'Mon, 30 Aug 2020 17:00:00 +0000',
+              beganAt: null,
+              completedAt: null,
+            },
+          ],
+        });
+
+        expect(CrawlerOverviewLogic.values.mostRecentCrawlRequestStatus).toEqual(
+          CrawlerStatus.Success
+        );
+      });
+
+      it('is the first non-skipped crawl request status', () => {
+        mount({
+          crawlRequests: [
+            {
+              id: '3',
+              status: CrawlerStatus.Skipped,
+              createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+              beganAt: null,
+              completedAt: null,
+            },
+            {
+              id: '2',
+              status: CrawlerStatus.Failed,
+              createdAt: 'Mon, 30 Aug 2020 17:00:00 +0000',
+              beganAt: null,
+              completedAt: null,
+            },
+            {
+              id: '1',
+              status: CrawlerStatus.Success,
+              createdAt: 'Mon, 29 Aug 2020 17:00:00 +0000',
+              beganAt: null,
+              completedAt: null,
+            },
+          ],
+        });
+
+        expect(CrawlerOverviewLogic.values.mostRecentCrawlRequestStatus).toEqual(
+          CrawlerStatus.Failed
+        );
       });
     });
   });

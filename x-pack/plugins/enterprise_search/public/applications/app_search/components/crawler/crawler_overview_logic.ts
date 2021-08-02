@@ -14,7 +14,7 @@ import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlerData, CrawlerDomain, CrawlRequest } from './types';
+import { CrawlerData, CrawlerDomain, CrawlerStatus, CrawlRequest } from './types';
 import { crawlerDataServerToClient } from './utils';
 
 export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
@@ -32,6 +32,7 @@ export interface CrawlerOverviewValues {
   crawlRequests: CrawlRequest[];
   dataLoading: boolean;
   domains: CrawlerDomain[];
+  mostRecentCrawlRequestStatus: CrawlerStatus;
 }
 
 interface CrawlerOverviewActions {
@@ -69,6 +70,20 @@ export const CrawlerOverviewLogic = kea<
       },
     ],
   },
+  selectors: ({ selectors }) => ({
+    mostRecentCrawlRequestStatus: [
+      () => [selectors.crawlRequests],
+      (crawlRequests: CrawlerOverviewValues['crawlRequests']) => {
+        const eligibleCrawlRequests = crawlRequests.filter(
+          (req) => req.status !== CrawlerStatus.Skipped
+        );
+        if (eligibleCrawlRequests.length === 0) {
+          return CrawlerStatus.Success;
+        }
+        return eligibleCrawlRequests[0].status;
+      },
+    ],
+  }),
   listeners: ({ actions }) => ({
     fetchCrawlerData: async () => {
       const { http } = HttpLogic.values;
