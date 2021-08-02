@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { expectAssignable } from 'tsd';
-import { Writable } from '../../index';
+import { Subject } from 'rxjs';
+import { PointerEvent } from '@elastic/charts';
 
-type WritableArray = Writable<readonly string[]>;
-expectAssignable<WritableArray>(['1']);
-
-type WritableObject = Writable<{
-  readonly name: string;
-}>;
-expectAssignable<WritableObject>({ name: '1' });
+export const activeCursor$ = new Subject<PointerEvent>();

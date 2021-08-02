@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { expectType } from 'tsd';
-import { PublicContract } from '../../index';
-
-class Test {
-  public str: string = '';
-  // @ts-ignore
-  private num: number = 0;
-}
-
-type CONTRACT = PublicContract<Test>;
-
-expectType<CONTRACT>({
-  str: 'foo',
-});
+export const colors = [
+  '#01A4A4',
+  '#C66',
+  '#D0D102',
+  '#616161',
+  '#00A1CB',
+  '#32742C',
+  '#F18D05',
+  '#113F8C',
+  '#61AE24',
+  '#D70060',
+];
