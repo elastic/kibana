@@ -24,7 +24,7 @@ import {
   Filter,
   IndexPattern,
   ISearchSource,
-  IFieldType,
+  IndexPatternField,
 } from '../../../../data/common';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
@@ -53,7 +53,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     sharedItemTitle?: string;
     inspectorAdapters?: Adapters;
 
-    filter?: (field: IFieldType, value: string[], operator: string) => void;
+    filter?: (field: IndexPatternField, value: string[], operator: string) => void;
     hits?: ElasticSearchHit[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
