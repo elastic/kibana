@@ -11,12 +11,64 @@ import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { DomainsTable } from './components/domains_table';
 import { CrawlerOverview } from './crawler_overview';
+import {
+  CrawlerDomainFromServer,
+  CrawlerPolicies,
+  CrawlerRules,
+  CrawlerStatus,
+  CrawlRequestFromServer,
+} from './types';
+
+const domains: CrawlerDomainFromServer[] = [
+  {
+    id: 'x',
+    name: 'moviedatabase.com',
+    document_count: 13,
+    created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+    sitemaps: [],
+    entry_points: [],
+    crawl_rules: [],
+    default_crawl_rule: {
+      id: '-',
+      policy: CrawlerPolicies.allow,
+      rule: CrawlerRules.regex,
+      pattern: '.*',
+    },
+  },
+  {
+    id: 'y',
+    name: 'swiftype.com',
+    last_visited_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+    document_count: 40,
+    created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+    sitemaps: [],
+    entry_points: [],
+    crawl_rules: [],
+  },
+];
+
+const crawlRequests: CrawlRequestFromServer[] = [
+  {
+    id: 'a',
+    status: CrawlerStatus.Canceled,
+    created_at: 'Mon, 31 Aug 2020 11:00:00 +0000',
+    began_at: 'Mon, 31 Aug 2020 12:00:00 +0000',
+    completed_at: 'Mon, 31 Aug 2020 13:00:00 +0000',
+  },
+  {
+    id: 'b',
+    status: CrawlerStatus.Success,
+    created_at: 'Mon, 31 Aug 2020 14:00:00 +0000',
+    began_at: 'Mon, 31 Aug 2020 15:00:00 +0000',
+    completed_at: 'Mon, 31 Aug 2020 16:00:00 +0000',
+  },
+];
 
 describe('CrawlerOverview', () => {
   const mockActions = {
@@ -25,29 +77,66 @@ describe('CrawlerOverview', () => {
 
   const mockValues = {
     dataLoading: false,
-    domains: [],
+    domains,
+    crawlRequests,
   };
-
-  let wrapper: ShallowWrapper;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues(mockValues);
     setMockActions(mockActions);
-    wrapper = shallow(<CrawlerOverview />);
   });
 
   it('calls fetchCrawlerData on page load', () => {
+    setMockValues(mockValues);
+
+    shallow(<CrawlerOverview />);
+
     expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
   });
 
-  it('renders', () => {
-    expect(wrapper.find(DomainsTable)).toHaveLength(1);
+  // TODO update below line to 'hides the domain and crawl request tables when there are no domains, and no crawl requests' after empty state is added
+  it('shows domain table and hides the crawl request table when there are no domains, and no crawl requests', () => {
+    setMockValues({ ...mockValues, domains: [], crawlRequests: [] });
 
-    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
+    const wrapper = shallow(<CrawlerOverview />);
 
+    // expect(wrapper.find(AddDomainForm)).toHaveLength(1); // TODO uncomment this after empty state is added
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1); // TODO this should be 0 after empty state is added
+    expect(wrapper.find(DomainsTable)).toHaveLength(1); // TODO this should be 0 after empty state is added
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(0);
+  });
+
+  it('shows the domain and the crawl request tables when there are domains, but no crawl requests', () => {
+    setMockValues({ ...mockValues, crawlRequests: [] });
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    // expect(wrapper.find(AddDomainForm)).toHaveLength(0); // TODO uncomment this after empty state is added
     expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
+    expect(wrapper.find(DomainsTable)).toHaveLength(1);
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
+  });
 
-    // TODO test for empty state after it is built in a future PR
+  // TODO update below line to 'hides the domain table and shows the crawl request tables when there are crawl requests but no domains' after empty state is added
+  it('shows the domain and the crawl request tables when there are crawl requests, but no domains', () => {
+    setMockValues({ ...mockValues, domains: [] });
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    // expect(wrapper.find(AddDomainForm)).toHaveLength(1); // TODO uncomment this after empty state is added
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1); // TODO this should be 0 after empty state is added
+    expect(wrapper.find(DomainsTable)).toHaveLength(1); // TODO this should be 0 after empty state is added
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
+  });
+
+  it('shows the domain and the crawl request tableswhen there are crawl requests and domains', () => {
+    setMockValues(mockValues);
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    // expect(wrapper.find(AddDomainForm)).toHaveLength(0); // TODO uncomment this after empty state is added
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
+    expect(wrapper.find(DomainsTable)).toHaveLength(1);
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
   });
 });
