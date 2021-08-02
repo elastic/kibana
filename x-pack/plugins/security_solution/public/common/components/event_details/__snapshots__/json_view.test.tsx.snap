@@ -3,6 +3,7 @@
 exports[`JSON View rendering should match snapshot 1`] = `
 <styled.div>
   <EuiCodeBlock
+    data-test-subj="jsonView"
     fontSize="m"
     isCopyable={true}
     language="json"
