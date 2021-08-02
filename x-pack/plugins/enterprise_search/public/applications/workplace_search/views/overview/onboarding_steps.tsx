@@ -145,12 +145,12 @@ export const OrgNameOnboarding: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h4>
+            <h3>
               <FormattedMessage
                 id="xpack.enterpriseSearch.workplaceSearch.orgNameOnboarding.description"
                 defaultMessage="Before inviting your colleagues, name your organization to improve recognition."
               />
-            </h4>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
