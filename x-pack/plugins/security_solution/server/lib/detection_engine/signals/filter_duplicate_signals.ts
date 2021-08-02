@@ -5,22 +5,9 @@
  * 2.0.
  */
 
-import { WrappedRACAlert } from '../rule_types/types';
-import { Ancestor, SimpleHit, WrappedSignalHit } from './types';
-
-const isWrappedSignalHit = (
-  signals: SimpleHit[],
-  isRuleRegistryEnabled: boolean
-): signals is WrappedSignalHit[] => {
-  return !isRuleRegistryEnabled;
-};
-
-const isWrappedRACAlert = (
-  signals: SimpleHit[],
-  isRuleRegistryEnabled: boolean
-): signals is WrappedRACAlert[] => {
-  return isRuleRegistryEnabled;
-};
+import { isWrappedRACAlert } from '../rule_types/utils';
+import { Ancestor, SimpleHit } from './types';
+import { isWrappedSignalHit } from './utils';
 
 export const filterDuplicateSignals = (
   ruleId: string,

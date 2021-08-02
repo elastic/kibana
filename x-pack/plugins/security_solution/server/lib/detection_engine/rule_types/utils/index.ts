@@ -6,7 +6,8 @@
  */
 
 import { AlertTypeState } from '../../../../../../alerting/server';
-import { SecurityAlertTypeReturnValue } from '../types';
+import { SimpleHit } from '../../signals/types';
+import { SecurityAlertTypeReturnValue, WrappedRACAlert } from '../types';
 
 export const createResultObject = <TState extends AlertTypeState>(state: TState) => {
   const result: SecurityAlertTypeReturnValue<TState> = {
@@ -22,4 +23,11 @@ export const createResultObject = <TState extends AlertTypeState>(state: TState)
     warningMessages: [],
   };
   return result;
+};
+
+export const isWrappedRACAlert = (
+  signals: SimpleHit[],
+  isRuleRegistryEnabled: boolean
+): signals is WrappedRACAlert[] => {
+  return isRuleRegistryEnabled;
 };

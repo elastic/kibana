@@ -28,7 +28,7 @@ export const wrapHitsFactory = ({
         String(doc._version),
         ruleSO.attributes.params.ruleId ?? ''
       ),
-      _source: buildBulkBody(ruleSO, doc as SignalSourceHit, mergeStrategy),
+      _source: buildBulkBody(ruleSO, doc as SignalSourceHit, mergeStrategy, true),
     },
   ]);
 

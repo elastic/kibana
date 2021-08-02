@@ -39,6 +39,7 @@ import {
   RuleRangeTuple,
   BaseSignalHit,
   SignalSourceHit,
+  SimpleHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { ShardError } from '../../types';
@@ -927,4 +928,11 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
       return `${field}: (${joinedValues})`;
     })
     .join(' OR ');
+};
+
+export const isWrappedSignalHit = (
+  signals: SimpleHit[],
+  isRuleRegistryEnabled: boolean
+): signals is WrappedSignalHit[] => {
+  return !isRuleRegistryEnabled;
 };

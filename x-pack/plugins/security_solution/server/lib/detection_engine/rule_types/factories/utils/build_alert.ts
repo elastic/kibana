@@ -14,11 +14,15 @@ import {
   BaseSignalHit,
   SignalHit,
   SignalSourceHit,
+  SimpleHit,
   ThresholdResult,
+  WrappedSignalHit,
 } from '../../../signals/types';
-import { getValidDateFromDoc } from '../../../signals/utils';
+import { getValidDateFromDoc, isWrappedSignalHit } from '../../../signals/utils';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
+import { RACAlert } from '../../types';
+import { isWrappedRACAlert } from '../../utils';
 
 /**
  * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child

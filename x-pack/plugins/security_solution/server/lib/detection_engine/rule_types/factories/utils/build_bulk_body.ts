@@ -7,7 +7,7 @@
 
 import { SavedObject } from 'src/core/types';
 import type { ConfigType } from '../../../../../config';
-import { buildRuleWithOverrides } from '../../../signals/build_rule';
+import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
 import { AlertAttributes, SignalSourceHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
@@ -26,10 +26,13 @@ import { filterSource } from './filter_source';
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  applyOverrides: boolean
 ): RACAlert => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
-  const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
+  const rule = applyOverrides
+    ? buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {})
+    : buildRuleWithoutOverrides(ruleSO);
   const filteredSource = filterSource(mergedDoc);
   return {
     ...filteredSource,
