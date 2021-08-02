@@ -103,6 +103,18 @@ const createCasePostParams = (
   ...(externalService ? { external_service: externalService } : { external_service: null }),
 });
 
+const createCasePatchParams = ({
+  connector,
+  externalService,
+}: {
+  connector?: CaseConnector;
+  externalService?: CaseFullExternalService;
+} = {}): Partial<CaseAttributes> => ({
+  ...basicCaseFields,
+  connector,
+  ...(externalService && { external_service: externalService }),
+});
+
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
@@ -125,6 +137,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         const {
@@ -172,6 +185,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         const { connector } = unsecuredSavedObjectsClient.update.mock
@@ -203,6 +217,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         const { connector } = unsecuredSavedObjectsClient.update.mock
@@ -238,6 +253,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(createJiraConnector()),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         const updateAttributes = unsecuredSavedObjectsClient.update.mock
@@ -266,6 +282,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCasePostParams(getNoneCaseConnector(), createExternalService()),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         const updateAttributes = unsecuredSavedObjectsClient.update.mock
@@ -285,6 +302,77 @@ describe('CasesService', () => {
         `);
       });
 
+      it('builds references for connector_id, connector.id, and includes the existing references', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<ESCaseAttributes>)
+        );
+
+        await service.patchCase({
+          caseId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          originalCase: {
+            references: [{ id: 'a', name: 'awesome', type: 'hello' }],
+          } as SavedObject<CaseAttributes>,
+        });
+
+        const updateOptions = unsecuredSavedObjectsClient.update.mock
+          .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
+        expect(updateOptions.references).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "a",
+              "name": "awesome",
+              "type": "hello",
+            },
+            Object {
+              "id": "1",
+              "name": "connectorId",
+              "type": "action",
+            },
+            Object {
+              "id": "100",
+              "name": "pushConnectorId",
+              "type": "action",
+            },
+          ]
+        `);
+      });
+
+      it('builds references for connector_id and preserves the existing connector.id reference', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<ESCaseAttributes>)
+        );
+
+        await service.patchCase({
+          caseId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createCasePatchParams({ externalService: createExternalService() }),
+          originalCase: {
+            references: [
+              { id: '1', name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+            ],
+          } as SavedObject<CaseAttributes>,
+        });
+
+        const updateOptions = unsecuredSavedObjectsClient.update.mock
+          .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
+        expect(updateOptions.references).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "1",
+              "name": "connectorId",
+              "type": "action",
+            },
+            Object {
+              "id": "100",
+              "name": "pushConnectorId",
+              "type": "action",
+            },
+          ]
+        `);
+      });
+
       it('preserves the external_service fields except for the connector_id', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
           Promise.resolve({} as SavedObjectsUpdateResponse<ESCaseAttributes>)
@@ -294,6 +382,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCasePostParams(getNoneCaseConnector(), createExternalService()),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         const updateAttributes = unsecuredSavedObjectsClient.update.mock
@@ -323,17 +412,15 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
           `Object {}`
         );
-        expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-          Object {
-            "references": undefined,
-            "version": undefined,
-          }
-        `);
+        const updateOptions = unsecuredSavedObjectsClient.update.mock
+          .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
+        expect(updateOptions.references).toBeUndefined();
       });
 
       it('creates a updatedAttributes field with the none connector', async () => {
@@ -345,6 +432,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(getNoneCaseConnector()),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -530,7 +618,7 @@ describe('CasesService', () => {
 
         const creationOptions = unsecuredSavedObjectsClient.create.mock
           .calls[0][2] as SavedObjectsCreateOptions;
-        expect(creationOptions.references).toBeUndefined();
+        expect(creationOptions.references).toEqual([]);
       });
 
       it('does not create a reference for an external_service field that is null', async () => {
@@ -546,7 +634,7 @@ describe('CasesService', () => {
 
         const creationOptions = unsecuredSavedObjectsClient.create.mock
           .calls[0][2] as SavedObjectsCreateOptions;
-        expect(creationOptions.references).toBeUndefined();
+        expect(creationOptions.references).toEqual([]);
       });
     });
   });
@@ -578,6 +666,7 @@ describe('CasesService', () => {
                 createJiraConnector(),
                 createExternalService()
               ),
+              originalCase: {} as SavedObject<CaseAttributes>,
             },
           ],
         });
@@ -626,6 +715,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
@@ -650,6 +740,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
@@ -669,6 +760,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`Object {}`);
@@ -684,6 +776,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res).toMatchInlineSnapshot(`
@@ -715,6 +808,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -745,6 +839,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res.attributes.external_service?.connector_id).toBeNull();
@@ -768,6 +863,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res).toMatchInlineSnapshot(`
@@ -804,6 +900,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -830,6 +927,7 @@ describe('CasesService', () => {
           caseId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createCaseUpdateParams(),
+          originalCase: {} as SavedObject<CaseAttributes>,
         });
 
         expect(res.attributes.external_service).toMatchInlineSnapshot(`

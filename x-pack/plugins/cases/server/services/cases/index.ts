@@ -67,7 +67,6 @@ import {
   transformBulkResponseToExternalModel,
   transformFindResponseToExternalModel,
 } from './transform';
-import { mergeReferences } from '../transform';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
   alertId: string;
@@ -1095,7 +1094,7 @@ export class CasesService {
       const createdCase = await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
-        { id, references: mergeReferences({ newReferences: transformedAttributes.references }) }
+        { id, references: transformedAttributes.referenceHandler.build() }
       );
       return transformSavedObjectToExternalModel(createdCase);
     } catch (error) {
@@ -1114,16 +1113,17 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
       const transformedAttributes = transformAttributesToESModel(updatedAttributes);
-      const references = mergeReferences({
-        originalReferences: originalCase.references,
-        newReferences: transformedAttributes.references,
-      });
+
       const updatedCase = await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId,
         transformedAttributes.attributes,
-        { version, references }
+        {
+          version,
+          references: transformedAttributes.referenceHandler.build(originalCase.references),
+        }
       );
+
       return transformUpdateResponseToExternalModel(updatedCase);
     } catch (error) {
       this.log.error(`Error on UPDATE case ${caseId}: ${error}`);
@@ -1138,13 +1138,13 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
-      const bulkUpdate = cases.map(({ caseId, updatedAttributes, version }) => {
-        const { attributes, references } = transformAttributesToESModel(updatedAttributes);
+      const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
+        const { attributes, referenceHandler } = transformAttributesToESModel(updatedAttributes);
         return {
           type: CASE_SAVED_OBJECT,
           id: caseId,
           attributes,
-          references,
+          references: referenceHandler.build(originalCase.references),
           version,
         };
       });

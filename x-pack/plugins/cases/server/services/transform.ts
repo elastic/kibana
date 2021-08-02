@@ -9,7 +9,7 @@ import { SavedObjectReference } from 'kibana/server';
 import { CaseConnector, ConnectorTypeFields } from '../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 import { getNoneCaseConnector } from '../common';
-import { CaseSavedObjectReference, ESCaseConnector, ESConnectorFields } from '.';
+import { ESCaseConnector, ESConnectorFields } from '.';
 
 export function findConnectorIdReference(
   name: string,
@@ -97,30 +97,4 @@ export function transformFieldsToESModel(connector: CaseConnector): ESConnectorF
     ],
     []
   );
-}
-
-export function mergeReferences({
-  originalReferences,
-  newReferences,
-}: {
-  originalReferences?: SavedObjectReference[];
-  newReferences?: CaseSavedObjectReference[];
-}): SavedObjectReference[] | undefined {
-  if (!newReferences) {
-    return originalReferences;
-  }
-
-  const refMap = new Map<string, SavedObjectReference>(
-    originalReferences?.map((ref) => [ref.name, ref])
-  );
-
-  for (const newRef of newReferences) {
-    if (newRef.ref) {
-      refMap.set(newRef.name, newRef.ref);
-    } else {
-      refMap.delete(newRef.name);
-    }
-  }
-
-  return Array.from(refMap.values());
 }

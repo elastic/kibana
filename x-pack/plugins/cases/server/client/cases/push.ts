@@ -186,6 +186,7 @@ export const push = async (
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
+        originalCase: myCase,
         unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {

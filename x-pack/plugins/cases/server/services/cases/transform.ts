@@ -17,18 +17,15 @@ import {
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from '.';
-import {
-  CaseSavedObjectReference,
-  connectorIdReferenceName,
-  pushConnectorIdReferenceName,
-} from '..';
-import { CaseAttributes, CaseFullExternalService, noneConnectorId } from '../../../common';
+import { connectorIdReferenceName, pushConnectorIdReferenceName } from '..';
+import { CaseAttributes, CaseFullExternalService } from '../../../common';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,
   transformESConnectorOrUseDefault,
   transformESConnectorToExternalModel,
 } from '../transform';
+import { ConnectorReferenceHandler } from '../connector_reference_handler';
 
 export function transformUpdateResponsesToExternalModels(
   response: SavedObjectsBulkUpdateResponse<ESCaseAttributes>
@@ -77,19 +74,19 @@ export function transformAttributesToESModel(
   caseAttributes: CaseAttributes
 ): {
   attributes: ESCaseAttributes;
-  references?: CaseSavedObjectReference[];
+  referenceHandler: ConnectorReferenceHandler;
 };
 export function transformAttributesToESModel(
   caseAttributes: Partial<CaseAttributes>
 ): {
   attributes: Partial<ESCaseAttributes>;
-  references?: CaseSavedObjectReference[];
+  referenceHandler: ConnectorReferenceHandler;
 };
 export function transformAttributesToESModel(
   caseAttributes: Partial<CaseAttributes>
 ): {
   attributes: Partial<ESCaseAttributes>;
-  references?: CaseSavedObjectReference[];
+  referenceHandler: ConnectorReferenceHandler;
 } {
   const { connector, external_service, ...restAttributes } = caseAttributes;
 
@@ -120,45 +117,18 @@ export function transformAttributesToESModel(
 
   return {
     attributes: transformedAttributes,
-    references: buildReferences(connector?.id, pushConnectorId),
+    referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
 }
 
-function buildReferences(
+function buildReferenceHandler(
   connectorId?: string,
   pushConnectorId?: string | null
-): CaseSavedObjectReference[] | undefined {
-  const connectorRef: CaseSavedObjectReference[] = [];
-
-  // this means the reference should be removed
-  if (connectorId === noneConnectorId) {
-    connectorRef.push({ name: connectorIdReferenceName });
-  } else if (connectorId) {
-    connectorRef.push({
-      name: connectorIdReferenceName,
-      ref: { id: connectorId, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
-    });
-  }
-
-  const pushConnectorRef: CaseSavedObjectReference[] = [];
-
-  // this means the reference should be removed
-  if (pushConnectorId === noneConnectorId) {
-    pushConnectorRef.push({ name: pushConnectorIdReferenceName });
-  } else if (pushConnectorId) {
-    pushConnectorRef.push({
-      name: pushConnectorIdReferenceName,
-      ref: {
-        id: pushConnectorId,
-        name: pushConnectorIdReferenceName,
-        type: ACTION_SAVED_OBJECT_TYPE,
-      },
-    });
-  }
-
-  const references = [...connectorRef, ...pushConnectorRef];
-
-  return references.length > 0 ? references : undefined;
+): ConnectorReferenceHandler {
+  return new ConnectorReferenceHandler([
+    { id: connectorId, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+    { id: pushConnectorId, name: pushConnectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+  ]);
 }
 
 /**

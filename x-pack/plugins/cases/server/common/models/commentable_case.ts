@@ -163,6 +163,7 @@ export class CommentableCase {
       }
 
       const updatedCase = await this.caseService.patchCase({
+        originalCase: this.collection,
         unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         caseId: this.collection.id,
         updatedAttributes: {

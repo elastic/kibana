@@ -323,6 +323,7 @@ async function update(
         updated_at: updateDate,
         updated_by: user,
       },
+      originalConfiguration: configuration,
     });
 
     return CaseConfigureResponseRt.encode({

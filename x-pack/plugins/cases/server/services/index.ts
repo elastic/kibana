@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { ConnectorTypes } from '../../common';
 
 export { CasesService } from './cases';
@@ -28,11 +28,6 @@ export interface ESCaseConnector {
   name: string;
   type: ConnectorTypes;
   fields: ESConnectorFields | null;
-}
-
-export interface CaseSavedObjectReference {
-  ref?: SavedObjectReference;
-  name: string;
 }
 
 /**

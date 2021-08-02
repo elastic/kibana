@@ -8,7 +8,6 @@
 import {
   Logger,
   SavedObject,
-  SavedObjectReference,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
@@ -19,7 +18,6 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CasesConfigureAttributes,
   CasesConfigurePatch,
-  noneConnectorId,
 } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { connectorIdReferenceName, ESCaseConnector } from '..';
@@ -28,6 +26,7 @@ import {
   transformESConnectorToExternalModel,
   transformESConnectorOrUseDefault,
 } from '../transform';
+import { ConnectorReferenceHandler } from '../connector_reference_handler';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -48,6 +47,7 @@ interface PostCaseConfigureArgs extends ClientArgs {
 interface PatchCaseConfigureArgs extends ClientArgs {
   configurationId: string;
   updatedAttributes: Partial<CasesConfigureAttributes>;
+  originalConfiguration: SavedObject<CasesConfigureAttributes>;
 }
 
 /**
@@ -122,7 +122,7 @@ export class CaseConfigureService {
       const createdConfig = await unsecuredSavedObjectsClient.create<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         esConfigInfo.attributes,
-        { id, references: esConfigInfo.references }
+        { id, references: esConfigInfo.referenceHandler.build() }
       );
 
       return transformToExternalModel(createdConfig);
@@ -136,6 +136,7 @@ export class CaseConfigureService {
     unsecuredSavedObjectsClient,
     configurationId,
     updatedAttributes,
+    originalConfiguration,
   }: PatchCaseConfigureArgs): Promise<SavedObjectsUpdateResponse<CasesConfigurePatch>> {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
@@ -148,7 +149,7 @@ export class CaseConfigureService {
           ...esUpdateInfo.attributes,
         },
         {
-          references: esUpdateInfo.references,
+          references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
         }
       );
 
@@ -216,19 +217,19 @@ function transformAttributesToESModel(
   configuration: CasesConfigureAttributes
 ): {
   attributes: ESCasesConfigureAttributes;
-  references?: SavedObjectReference[];
+  referenceHandler: ConnectorReferenceHandler;
 };
 function transformAttributesToESModel(
   configuration: Partial<CasesConfigureAttributes>
 ): {
   attributes: Partial<ESCasesConfigureAttributes>;
-  references?: SavedObjectReference[];
+  referenceHandler: ConnectorReferenceHandler;
 };
 function transformAttributesToESModel(
   configuration: Partial<CasesConfigureAttributes>
 ): {
   attributes: Partial<ESCasesConfigureAttributes>;
-  references?: SavedObjectReference[];
+  referenceHandler: ConnectorReferenceHandler;
 } {
   const { connector, ...restWithoutConnector } = configuration;
 
@@ -243,18 +244,12 @@ function transformAttributesToESModel(
       ...restWithoutConnector,
       ...(transformedConnector && { connector: transformedConnector }),
     },
-    references: buildReferences(connector?.id),
+    referenceHandler: buildReferenceHandler(connector?.id),
   };
 }
 
-function buildReferences(id?: string): SavedObjectReference[] | undefined {
-  return id && id !== noneConnectorId
-    ? [
-        {
-          id,
-          name: connectorIdReferenceName,
-          type: ACTION_SAVED_OBJECT_TYPE,
-        },
-      ]
-    : undefined;
+function buildReferenceHandler(id?: string): ConnectorReferenceHandler {
+  return new ConnectorReferenceHandler([
+    { id, name: connectorIdReferenceName, type: ACTION_SAVED_OBJECT_TYPE },
+  ]);
 }

@@ -203,11 +203,11 @@ describe('case transforms', () => {
       ).not.toHaveProperty('external_service');
     });
 
-    it('does not create a reference when external_service is undefined', () => {
+    it('creates an undefined reference when external_service is undefined and the original reference is undefined', () => {
       expect(
         transformAttributesToESModel({
           external_service: undefined,
-        }).references
+        }).referenceHandler.build()
       ).toBeUndefined();
     });
 
@@ -219,11 +219,11 @@ describe('case transforms', () => {
       ).toBeNull();
     });
 
-    it('does not create a reference when external_service is null', () => {
+    it('creates an undefined reference when external_service is null and the original reference is undefined', () => {
       expect(
         transformAttributesToESModel({
           external_service: null,
-        }).references
+        }).referenceHandler.build()
       ).toBeUndefined();
     });
 
@@ -249,7 +249,7 @@ describe('case transforms', () => {
         }
       `);
       expect(transformedAttributes.attributes.external_service).not.toHaveProperty('connector_id');
-      expect(transformedAttributes.references).toMatchInlineSnapshot(`
+      expect(transformedAttributes.referenceHandler.build()).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "100",
@@ -260,12 +260,12 @@ describe('case transforms', () => {
       `);
     });
 
-    it('does not create a reference when connector_id is null', () => {
+    it('creates an empty references array to delete the connector_id when connector_id is null and the original references is undefined', () => {
       const transformedAttributes = transformAttributesToESModel({
         external_service: createExternalService({ connector_id: null }),
       });
 
-      expect(transformedAttributes.references).toBeUndefined();
+      expect(transformedAttributes.referenceHandler.build()).toEqual([]);
     });
 
     it('does not return the connector when it is undefined', () => {
@@ -274,8 +274,10 @@ describe('case transforms', () => {
       );
     });
 
-    it('does not create a reference when the connector is undefined', () => {
-      expect(transformAttributesToESModel({ connector: undefined }).references).toBeUndefined();
+    it('constructs an undefined reference when the connector is undefined and the original reference is undefined', () => {
+      expect(
+        transformAttributesToESModel({ connector: undefined }).referenceHandler.build()
+      ).toBeUndefined();
     });
 
     it('returns a jira connector', () => {
@@ -306,7 +308,7 @@ describe('case transforms', () => {
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
-      expect(transformedAttributes.references).toMatchInlineSnapshot(`
+      expect(transformedAttributes.referenceHandler.build()).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "1",
@@ -332,7 +334,7 @@ describe('case transforms', () => {
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
-      expect(transformedAttributes.references).toBeUndefined();
+      expect(transformedAttributes.referenceHandler.build()).toEqual([]);
     });
   });
 
