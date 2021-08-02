@@ -12,8 +12,10 @@ import { Unionize } from 'utility-types';
 import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import {
+  PARENT_ID,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_ROOT,
 } from '../../../common/elasticsearch_fieldnames';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -92,7 +94,27 @@ function getRequest(
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
+            ...(searchAggregatedTransactions
+              ? [
+                  {
+                    term: {
+                      [TRANSACTION_ROOT]: true,
+                    },
+                  },
+                ]
+              : []),
           ] as QueryDslQueryContainer[],
+          must_not: [
+            ...(!searchAggregatedTransactions
+              ? [
+                  {
+                    exists: {
+                      field: PARENT_ID,
+                    },
+                  },
+                ]
+              : []),
+          ],
         },
       },
       aggs: {
