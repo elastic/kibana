@@ -3719,48 +3719,15 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "(value: string, event: ",
+              "((value: string, event: ",
               "editor",
-              ".IModelContentChangedEvent) => void"
+              ".IModelContentChangedEvent) => void) | undefined"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
               "lineNumber": 27
             },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.value",
-                "type": "string",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/code_editor/code_editor.tsx",
-                  "lineNumber": 37
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.event",
-                "type": "Object",
-                "tags": [],
-                "label": "event",
-                "description": [],
-                "signature": [
-                  "editor",
-                  ".IModelContentChangedEvent"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_react/public/code_editor/code_editor.tsx",
-                  "lineNumber": 37
-                },
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
           },
           {
             "parentPluginId": "kibanaReact",

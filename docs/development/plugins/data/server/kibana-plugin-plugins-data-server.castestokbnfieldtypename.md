@@ -4,10 +4,13 @@
 
 ## castEsToKbnFieldTypeName variable
 
-Get the KbnFieldType name for an esType string
+> Warning: This API is now obsolete.
+> 
+> import from "<!-- -->@<!-- -->kbn/field-types" instead
+> 
 
 <b>Signature:</b>
 
 ```typescript
-castEsToKbnFieldTypeName: (esType: ES_FIELD_TYPES | string) => KBN_FIELD_TYPES
+castEsToKbnFieldTypeName: (esType: string) => import("@kbn/field-types").KBN_FIELD_TYPES
 ```
