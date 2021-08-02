@@ -10,8 +10,8 @@ import { Ast } from '@kbn/interpreter/common';
 // @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type_registry';
-import { ArgType } from './types';
-import { FunctionFormProps } from './function_form';
+import type { ArgType } from './types';
+import type { FunctionFormProps } from './function_form';
 
 interface ArtOwnProps {
   argType: ArgType | undefined;
@@ -64,7 +64,7 @@ export class Arg {
       multi: false,
       required: false,
       types: [],
-      default: argType.default != null ? argType.default : null,
+      // default: argType.default != null ? argType.default : null,
       options: {},
       resolve: () => ({}),
     };
@@ -78,7 +78,7 @@ export class Arg {
       multi,
       require,
       types,
-      default: props.default,
+      // default: props.default,
       resolve: props.resolve,
       required: props.required,
       options,

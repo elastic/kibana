@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import { FunctionForm, FunctionFormProps } from './function_form';
 import { Arg } from './types';
 

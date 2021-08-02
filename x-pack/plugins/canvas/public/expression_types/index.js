@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { Datasource, datasourceRegistry } from './datasource';
+export { Datasource } from './datasource';
+export { datasourceRegistry } from './datasource_registry';
 
 export { Transform } from './transform';
 export { transformRegistry } from './transform_registry';
