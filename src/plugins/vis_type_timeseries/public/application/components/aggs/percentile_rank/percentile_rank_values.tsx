@@ -69,7 +69,7 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
           rowModel: {
             id: values.length - 1,
             value: last(values) || '',
-            color: last(colors) || '',
+            color: last(colors) || '#68BC00',
           },
           disableAddRow: true,
           disableDeleteRow: true,
@@ -81,7 +81,7 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
             rowModel: {
               id,
               value: value || '',
-              color: colors[id] || '',
+              color: colors[id] || '#68BC00',
             },
             disableAddRow: disableAdd,
             disableDeleteRow: disableDelete || array.length < 2,
