@@ -5214,13 +5214,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.KBN_FIELD_TYPES",
-                "text": "KBN_FIELD_TYPES"
-              }
+              "KBN_FIELD_TYPES"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -7270,41 +7264,6 @@
             }
           },
           {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-              "lineNumber": 22
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-              "lineNumber": 96
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 14
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 50
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 72
-            }
-          },
-          {
             "plugin": "savedObjectsManagement",
             "link": {
               "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx",
@@ -7448,21 +7407,21 @@
             "plugin": "timelines",
             "link": {
               "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
-              "lineNumber": 149
+              "lineNumber": 148
             }
           },
           {
             "plugin": "timelines",
             "link": {
               "path": "x-pack/plugins/timelines/public/components/t_grid/integrated/index.tsx",
-              "lineNumber": 31
+              "lineNumber": 29
             }
           },
           {
             "plugin": "timelines",
             "link": {
               "path": "x-pack/plugins/timelines/public/components/t_grid/integrated/index.tsx",
-              "lineNumber": 122
+              "lineNumber": 120
             }
           },
           {
@@ -7952,7 +7911,7 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/common/components/top_n/top_n.tsx",
-              "lineNumber": 55
+              "lineNumber": 56
             }
           },
           {
@@ -7966,7 +7925,7 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/common/components/top_n/index.tsx",
-              "lineNumber": 79
+              "lineNumber": 80
             }
           },
           {
@@ -8142,20 +8101,6 @@
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts",
               "lineNumber": 54
-            }
-          },
-          {
-            "plugin": "uptime",
-            "link": {
-              "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "uptime",
-            "link": {
-              "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts",
-              "lineNumber": 28
             }
           },
           {
@@ -8856,20 +8801,6 @@
             "link": {
               "path": "x-pack/plugins/transform/server/routes/api/transforms.ts",
               "lineNumber": 405
-            }
-          },
-          {
-            "plugin": "uptime",
-            "link": {
-              "path": "x-pack/plugins/uptime/public/state/reducers/index_pattern.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "uptime",
-            "link": {
-              "path": "x-pack/plugins/uptime/public/state/reducers/index_pattern.ts",
-              "lineNumber": 13
             }
           },
           {
