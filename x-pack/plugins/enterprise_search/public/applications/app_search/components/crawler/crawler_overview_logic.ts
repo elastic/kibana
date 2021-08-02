@@ -14,7 +14,7 @@ import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlerData, CrawlerDomain } from './types';
+import { CrawlerData, CrawlerDomain, CrawlRequest } from './types';
 import { crawlerDataServerToClient } from './utils';
 
 export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
@@ -28,7 +28,8 @@ export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
     }
   );
 
-interface CrawlerOverviewValues {
+export interface CrawlerOverviewValues {
+  crawlRequests: CrawlRequest[];
   dataLoading: boolean;
   domains: CrawlerDomain[];
 }
@@ -59,6 +60,12 @@ export const CrawlerOverviewLogic = kea<
       [],
       {
         onReceiveCrawlerData: (_, { data: { domains } }) => domains,
+      },
+    ],
+    crawlRequests: [
+      [],
+      {
+        onReceiveCrawlerData: (_, { data: { crawlRequests } }) => crawlRequests,
       },
     ],
   },

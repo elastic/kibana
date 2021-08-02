@@ -14,17 +14,19 @@ import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { CrawlerOverviewLogic } from './crawler_overview_logic';
+import { CrawlerOverviewLogic, CrawlerOverviewValues } from './crawler_overview_logic';
 import {
   CrawlerDataFromServer,
   CrawlerDomain,
   CrawlerPolicies,
   CrawlerRules,
+  CrawlerStatus,
   CrawlRule,
 } from './types';
 import { crawlerDataServerToClient } from './utils';
 
-const DEFAULT_VALUES = {
+const DEFAULT_VALUES: CrawlerOverviewValues = {
+  crawlRequests: [],
   dataLoading: true,
   domains: [],
 };
@@ -46,6 +48,15 @@ const MOCK_SERVER_DATA: CrawlerDataFromServer = {
       sitemaps: [],
       entry_points: [],
       crawl_rules: [],
+    },
+  ],
+  crawl_requests: [
+    {
+      id: '618d0e66abe97bc688328900',
+      status: CrawlerStatus.Pending,
+      created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      began_at: null,
+      completed_at: null,
     },
   ],
 };
@@ -79,6 +90,15 @@ describe('CrawlerOverviewLogic', () => {
             entryPoints: [],
             crawlRules: [],
             defaultCrawlRule: DEFAULT_CRAWL_RULE,
+          },
+        ],
+        crawlRequests: [
+          {
+            id: '618d0e66abe97bc688328900',
+            status: CrawlerStatus.Pending,
+            createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+            beganAt: null,
+            completedAt: null,
           },
         ],
       };
