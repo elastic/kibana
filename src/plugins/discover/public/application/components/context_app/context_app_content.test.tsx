@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DocTableWrapper } from '../../angular/doc_table/doc_table_wrapper';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
 import { AppState, GetStateReturn } from '../../angular/context_state';
@@ -20,6 +19,7 @@ import { LoadingStatus } from '../../angular/context_query_state';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { DiscoverGrid } from '../discover_grid/discover_grid';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { DocTableWrapper } from '../../apps/main/components/doc_table/doc_table_wrapper';
 
 describe('ContextAppContent test', () => {
   let hit;

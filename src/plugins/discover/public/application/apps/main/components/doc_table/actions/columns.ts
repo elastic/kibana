@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { popularizeField } from '../../../helpers/popularize_field';
-import { IndexPattern, IndexPatternsContract } from '../../../../kibana_services';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../../../common';
+import { popularizeField } from '../../../../../../application/helpers/popularize_field';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,
-} from '../../../apps/main/services/discover_state';
+} from '../../../../../../application/apps/main/services/discover_state';
 import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
-} from '../../context_state';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+} from '../../../../../../application/angular/context_state';
+import { IndexPattern, IndexPatternsContract } from '../../../../../../../../data/public';
 
 /**
  * Helper function to provide a fallback to a single _source column if the given array of columns

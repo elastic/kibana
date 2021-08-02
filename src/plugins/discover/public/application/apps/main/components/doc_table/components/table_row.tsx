@@ -10,16 +10,15 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import { IndexPattern } from '../../../../kibana_services';
+import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
+import { formatRow, formatTopLevelObject } from '../../../../../angular/helpers';
+import { FilterManager, IndexPattern } from '../../../../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
-import { formatRow, formatTopLevelObject } from '../../helpers';
-import { getContextUrl } from '../../../helpers/get_context_url';
-import { DocViewer } from '../../../components/doc_viewer/doc_viewer';
-import { DocViewFilterFn, ElasticSearchHit } from '../../../doc_views/doc_views_types';
-import { trimAngularSpan } from '../../../components/table/table_helper';
+import { ElasticSearchHit, DocViewFilterFn } from '../../../../../doc_views/doc_views_types';
+import { trimAngularSpan } from '../../../../../components/table/table_helper';
+import { getContextUrl } from '../../../../../helpers/get_context_url';
+import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
-import { FilterManager } from '../../../../../../data/public';
-import { getSingleDocUrl } from '../../helpers/get_single_doc_url';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;

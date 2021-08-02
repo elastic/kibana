@@ -47,7 +47,7 @@ export const ToolBarPagination = ({
     return size === pageSize ? 'check' : 'empty';
   };
 
-  const rowsPerPageOptions = [25, 50, 100, 250].map((cur) => (
+  const rowsPerPageOptions = [25, 50, 100].map((cur) => (
     <EuiContextMenuItem
       key={`${cur} rows`}
       icon={getIconType(cur)}

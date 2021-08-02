@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EsQuerySortValue, IndexPattern } from '../../../../kibana_services';
+import { EsQuerySortValue, IndexPattern } from '../../../../../../kibana_services';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 

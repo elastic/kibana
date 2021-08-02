@@ -28,7 +28,7 @@ import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
 import { getContextUrl } from '../../helpers/get_context_url';
-import { getSingleDocUrl } from '../../angular/helpers/get_single_doc_url';
+import { getSingleDocUrl } from '../../helpers/get_single_doc_url';
 
 interface Props {
   columns: string[];

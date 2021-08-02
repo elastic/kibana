@@ -9,12 +9,12 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { SAMPLE_SIZE_SETTING } from '../../../../../../common';
 import { usePager } from './lib/use_pager';
 import { ToolBarPagination } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
-import { TotalDocuments } from '../../apps/main/components/total_documents/total_documents';
-import { getServices } from '../../../kibana_services';
+import { TotalDocuments } from '../total_documents/total_documents';
+import { getServices } from '../../../../../kibana_services';
 
 export type DocTableEmbeddableProps = Omit<DocTableProps, 'render'> & {
   totalHitCount: number;

@@ -26,7 +26,6 @@ import {
   ISearchSource,
   IndexPatternField,
 } from '../../../../data/common';
-import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../../ui_actions/public';
@@ -38,12 +37,13 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
-import * as columnActions from '../angular/doc_table/actions/columns';
-import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
+import * as columnActions from '../apps/main/components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
-import { DocTableProps } from '../angular/doc_table/doc_table';
+import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
+import { getDefaultSort, getSortForSearchSource } from '../apps/main/components/doc_table';
+import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {

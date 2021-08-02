@@ -10,8 +10,8 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
 import { DocTableRenderProps } from './doc_table_wrapper';
+import { SkipBottomButton } from '../skip_bottom_button';
 
 export const DocTableInfinite = (props: DocTableRenderProps) => {
   const [limit, setLimit] = useState(props.minimumVisibleRows);
@@ -73,7 +73,7 @@ export const DocTableInfinite = (props: DocTableRenderProps) => {
         <thead>{props.renderHeader()}</thead>
         <tbody>{props.renderRows(props.rows.slice(0, limit))}</tbody>
       </table>
-      {props.rows.length === props.sampleSize && (
+      {props.rows.length === props.sampleSize ? (
         <div
           className="kbnDocTable__footer"
           data-test-subj="discoverDocTableFooter"
@@ -90,6 +90,10 @@ export const DocTableInfinite = (props: DocTableRenderProps) => {
             <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
           </EuiButtonEmpty>
         </div>
+      ) : (
+        <span tabIndex={-1} id="discoverBottomMarker">
+          &#8203;
+        </span>
       )}
     </Fragment>
   );

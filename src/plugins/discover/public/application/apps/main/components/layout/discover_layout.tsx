@@ -31,7 +31,6 @@ import {
 } from '../../../../../../../data/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
-import { SortPairArr } from '../../../../angular/doc_table/lib/get_sort';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -50,11 +49,9 @@ import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { FetchStatus } from '../../../../types';
-import {
-  DocTableRenderProps,
-  DocTableWrapper,
-} from '../../../../angular/doc_table/doc_table_wrapper';
-import { DocTableInfinite } from '../../../../angular/doc_table/doc_table_infinite';
+import { SortPairArr } from '../doc_table/lib/get_sort';
+import { DocTableInfinite } from '../doc_table/doc_table_infinite';
+import { DocTableRenderProps, DocTableWrapper } from '../doc_table/doc_table_wrapper';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);

@@ -28,7 +28,6 @@ import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
-import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
@@ -40,6 +39,7 @@ import { getDisplayedColumns } from '../../helpers/columns';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
+import { SortPairArr } from '../../apps/main/components/doc_table/lib/get_sort';
 
 interface SortObj {
   id: string;

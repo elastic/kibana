@@ -12,8 +12,8 @@ import {
   DiscoverGridEmbeddable,
   DiscoverGridEmbeddableProps,
 } from '../angular/create_discover_grid_directive';
-import { DiscoverDocTableEmbeddable } from '../angular/doc_table/create_doc_table_embeddable';
-import { DocTableEmbeddableProps } from '../angular/doc_table/doc_table_embeddable';
+import { DiscoverDocTableEmbeddable } from '../apps/main/components/doc_table/create_doc_table_embeddable';
+import { DocTableEmbeddableProps } from '../apps/main/components/doc_table/doc_table_embeddable';
 import { SearchProps } from './saved_search_embeddable';
 
 interface SavedSearchEmbeddableComponentProps {

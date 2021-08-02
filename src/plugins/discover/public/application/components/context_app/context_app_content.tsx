@@ -20,7 +20,10 @@ import { AppState } from '../../angular/context_state';
 import { EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
 import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
-import { DocTableRenderProps, DocTableWrapper } from '../../angular/doc_table/doc_table_wrapper';
+import {
+  DocTableRenderProps,
+  DocTableWrapper,
+} from '../../apps/main/components/doc_table/doc_table_wrapper';
 import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
 
 export interface ContextAppContentProps {

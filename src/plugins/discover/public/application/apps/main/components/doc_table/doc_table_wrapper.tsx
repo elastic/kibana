@@ -15,12 +15,12 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../common';
-import { getServices, IndexPattern } from '../../../kibana_services';
-import { UI_SETTINGS } from '../../../../../data/public';
+} from '../../../../../../common';
+import { getServices, IndexPattern } from '../../../../../kibana_services';
+import { UI_SETTINGS } from '../../../../../../../data/public';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
-import { DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
 
 export interface DocTableRenderProps {
   rows: DocTableRow[];
@@ -204,25 +204,6 @@ export const DocTableWrapper = ({
     ]
   );
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (rows && !rows.length) {
-    return (
-      <div className="kbnDocTable__error">
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="visualizeApp" size="m" color="subdued" />
-          <EuiSpacer size="m" />
-          <FormattedMessage
-            id="discover.docTable.noResultsTitle"
-            defaultMessage="No results found"
-          />
-        </EuiText>
-      </div>
-    );
-  }
-
   return (
     <div
       className="kbnDocTableWrapper eui-yScroll eui-xScroll"
@@ -232,14 +213,28 @@ export const DocTableWrapper = ({
       data-test-subj={dataTestSubj}
       data-render-complete={!isLoading}
     >
-      {render({
-        rows,
-        minimumVisibleRows,
-        sampleSize,
-        onSkipBottomButtonClick,
-        renderHeader,
-        renderRows,
-      })}
+      {rows &&
+        rows.length &&
+        render({
+          rows,
+          minimumVisibleRows,
+          sampleSize,
+          onSkipBottomButtonClick,
+          renderHeader,
+          renderRows,
+        })}
+      {rows && !rows.length && (
+        <div className="kbnDocTable__error">
+          <EuiText size="xs" color="subdued">
+            <EuiIcon type="visualizeApp" size="m" color="subdued" />
+            <EuiSpacer size="m" />
+            <FormattedMessage
+              id="discover.docTable.noResultsTitle"
+              defaultMessage="No results found"
+            />
+          </EuiText>
+        </div>
+      )}
     </div>
   );
 };

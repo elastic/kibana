@@ -12,6 +12,7 @@ import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
 import { savedSearchMock } from './saved_search';
 import { UI_SETTINGS } from '../../../data/common';
@@ -52,6 +53,10 @@ export const discoverServiceMock = ({
         return false;
       } else if (key === CONTEXT_STEP_SETTING) {
         return 5;
+      } else if (key === SORT_DEFAULT_ORDER_SETTING) {
+        return 'desc';
+      } else if (UI_SETTINGS.SHORT_DOTS_ENABLE) {
+        return false;
       }
     },
   },
