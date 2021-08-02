@@ -263,7 +263,7 @@ When enabled, you’ll see *Labs* in the toolbar.
 [role="screenshot"]
 image::user/images/new-labs.png[Dashboard app showing how to access Labs from the toolbar]
 
-The first *Labs* project is *Defer loading panels below the fold*. To improve dashboard loading time,
+The first *Labs* project is <<defer-loading-panels-below-the-fold,Defer loading panels below the fold>>. To improve dashboard loading time,
 only the visible panels are loaded when you open the dashboard.
 All other panels are loaded as you scroll. Give the *Labs* project a try,
 and let us know what you think.
