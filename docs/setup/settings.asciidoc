@@ -42,13 +42,13 @@ that disables certain unnecessary and potentially insecure capabilities in
 the browser. It is strongly recommended that you keep the default CSP rules
 that ship with {kib}.
 
-| `csp.script_src:`
+| [[csp-script-src]]`csp.script_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
 
-| `csp.worker_src:`
+| [[csp-worker-src]]`csp.worker_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src[Content Security Policy `worker-src` directive].
 
-| `csp.style_src:`
+| [[csp-style-src]]`csp.style_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src[Content Security Policy `style-src` directive].
 
 | `csp.connect_src:`

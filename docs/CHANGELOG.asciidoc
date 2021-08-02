@@ -177,6 +177,8 @@ The 'map.regionmap' setting and Configured GeoJSON layer are deprecated. For mor
 . Remove the 'map.regionmap' setting in kibana.yml, the CLI flag, or Docker environment variable.
 . To upload each layer defined by `map.regionmap.layers`, use Upload GeoJSON.
 . To update all maps that use Configured GeoJSON, use the Choropleth layer wizard to build a replacement layer, then delete the Configured GeoJSON layer from your map.
+
+For detailed information, refer to <<maps,Maps>>.
 ====
       
 [discrete]
@@ -224,7 +226,7 @@ The *Explore Underlying Data* interaction now uses the *Discover* locator.
 The `csp.rules` configuration property is deprecated. You are no longer required to set the default {kib} values. For more information, refer to {kibana-pull}102059[#102059].
 
 *Impact* +
-Use `csp.script_src`, `csp.worker_src`, and `csp.style_src`.
+Use <<csp-script-src,`csp.script_src`>>, <<csp-worker-src,`csp.worker_src`>>, and <<csp-style-src,`csp.style_src`>>.
 ====
       
 [discrete]
@@ -236,7 +238,7 @@ Use `csp.script_src`, `csp.worker_src`, and `csp.style_src`.
 The `xpack.fleet.agents.elasticsearch.host` setting is deprecated. For more information, refer to {kibana-pull}101162[#101162].
 
 *Impact* +
-Use the `xpack.fleet.agents.elasticsearch.hosts` setting.
+Use the <<xpack-fleet-agents-elasticsearch-hosts,`xpack.fleet.agents.elasticsearch.hosts`>> setting.
 ====
       
 [discrete]
