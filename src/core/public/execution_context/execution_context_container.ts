@@ -34,9 +34,12 @@ export interface IExecutionContextContainer {
 }
 
 export class ExecutionContextContainer implements IExecutionContextContainer {
-  readonly #context: Readonly<KibanaExecutionContext>;
-  constructor(context: Readonly<KibanaExecutionContext>) {
-    this.#context = context;
+  readonly #context: KibanaExecutionContext;
+  constructor(
+    context: Readonly<KibanaExecutionContext>,
+    parent?: Readonly<IExecutionContextContainer>
+  ) {
+    this.#context = { parent: parent?.toJSON(), ...context };
   }
   private toString(): string {
     const value = JSON.stringify(this.#context);

@@ -325,13 +325,18 @@ export class Embeddable
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
-    const executionContext = this.deps.executionContext.create({
-      type: 'lens',
-      name: this.savedVis.visualizationType ?? '',
-      description: this.savedVis.title ?? this.savedVis.description ?? '',
-      id: this.id,
-      url: this.output.editUrl,
-    });
+
+    const executionContext = this.deps.executionContext.create(
+      {
+        type: 'lens',
+        name: this.savedVis.visualizationType ?? '',
+        description: this.savedVis.title ?? this.savedVis.description ?? '',
+        id: this.id,
+        url: this.output.editUrl,
+      },
+      this.input.executionContext
+    );
+
     const input = this.getInput();
 
     render(

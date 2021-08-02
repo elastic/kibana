@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { IExecutionContextContainer } from 'src/core/public';
 import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
 
 export enum ViewMode {
@@ -49,6 +49,8 @@ export type EmbeddableInput = {
    * Flag whether colors should be synced with other panels
    */
   syncColors?: boolean;
+
+  executionContext?: IExecutionContextContainer;
 };
 
 export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {

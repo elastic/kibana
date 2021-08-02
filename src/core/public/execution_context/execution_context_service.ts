@@ -23,15 +23,18 @@ export interface ExecutionContextServiceStart {
    * http.fetch('/endpoint/', { context });
    * ```
    */
-  create: (context: KibanaExecutionContext) => IExecutionContextContainer;
+  create: (
+    context: KibanaExecutionContext,
+    parent?: IExecutionContextContainer
+  ) => IExecutionContextContainer;
 }
 
 export class ExecutionContextService implements CoreService<void, ExecutionContextServiceStart> {
   setup() {}
   start(): ExecutionContextServiceStart {
     return {
-      create(context: KibanaExecutionContext) {
-        return new ExecutionContextContainer(context);
+      create(context: KibanaExecutionContext, parent?: IExecutionContextContainer) {
+        return new ExecutionContextContainer(context, parent);
       },
     };
   }

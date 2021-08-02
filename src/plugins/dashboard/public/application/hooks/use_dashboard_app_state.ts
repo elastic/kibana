@@ -90,7 +90,7 @@ export const useDashboardAppState = ({
     dashboardSessionStorage,
   } = services;
   const { docTitle } = chrome;
-  const { notifications } = core;
+  const { notifications, executionContext } = core;
   const { query, search } = data;
   const { getStateTransfer } = embeddable;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
@@ -168,6 +168,13 @@ export const useDashboardAppState = ({
         savedDashboard,
       });
 
+      const context = executionContext.create({
+        type: 'application',
+        name: 'dashboard',
+        id: savedDashboard.id ?? 'unsaved_dashboard',
+        description: savedDashboard.title,
+        url: history.location.pathname,
+      });
       /**
        * Build the dashboard container embeddable, and apply the incoming embeddable if it exists.
        */
@@ -177,6 +184,7 @@ export const useDashboardAppState = ({
         incomingEmbeddable,
         savedDashboard,
         data,
+        executionContext: context,
       });
       if (canceled || !dashboardContainer) {
         tryDestroyDashboardContainer(dashboardContainer);
@@ -314,6 +322,7 @@ export const useDashboardAppState = ({
     search,
     query,
     data,
+    executionContext,
   ]);
 
   /**

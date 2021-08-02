@@ -21,4 +21,6 @@ export interface KibanaExecutionContext {
   readonly description: string;
   /** in browser - url to navigate to a current page, on server - endpoint path, for task: task SO url */
   readonly url?: string;
+  /** a context that spawned the current context. */
+  parent?: KibanaExecutionContext;
 }

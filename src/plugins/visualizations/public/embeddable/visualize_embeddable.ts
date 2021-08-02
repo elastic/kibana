@@ -384,6 +384,17 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
+    const context = this.deps.start().core.executionContext.create(
+      {
+        type: 'visualization',
+        name: this.vis.type.name,
+        id: this.vis.id ?? 'an_unsaved_vis',
+        description: this.vis.title ?? this.vis.type.title,
+        url: this.output.editUrl,
+      },
+      this.parent?.getInput().executionContext
+    );
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -394,13 +405,7 @@ export class VisualizeEmbeddable
       syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
-      executionContext: this.deps.start().core.executionContext.create({
-        type: 'visualization',
-        name: this.vis.type.name,
-        id: this.vis.id ?? 'an_unsaved_vis',
-        description: this.vis.title ?? this.vis.type.title,
-        url: this.output.editUrl,
-      }),
+      executionContext: context,
     };
     if (this.abortController) {
       this.abortController.abort();
