@@ -52,9 +52,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.serviceCount).to.be.greaterThan(0);
         expect(response.body.transactionPerMinute.timeseries.length).to.be.greaterThan(0);
 
-        expectSnapshot(response.body.serviceCount).toMatchInline(`10`);
+        expectSnapshot(response.body.serviceCount).toMatchInline(`8`);
 
-        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`132.833333333333`);
+        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`63.6`);
         expectSnapshot(response.body.transactionPerMinute.timeseries.length).toMatchInline(`30`);
 
         expectSnapshot(
@@ -67,23 +67,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Array [
             Object {
-              "x": "2021-07-27T08:08:00.000Z",
-              "y": 85,
+              "x": "2021-08-02T06:32:00.000Z",
+              "y": 39,
             },
             Object {
-              "x": "2021-07-27T08:09:00.000Z",
-              "y": 108,
+              "x": "2021-08-02T06:33:00.000Z",
+              "y": 60,
             },
             Object {
-              "x": "2021-07-27T08:10:00.000Z",
-              "y": 76,
+              "x": "2021-08-02T06:34:00.000Z",
+              "y": 44,
             },
             Object {
-              "x": "2021-07-27T08:11:00.000Z",
-              "y": 77,
+              "x": "2021-08-02T06:35:00.000Z",
+              "y": 41,
             },
             Object {
-              "x": "2021-07-27T08:12:00.000Z",
+              "x": "2021-08-02T06:36:00.000Z",
               "y": 56,
             },
           ]

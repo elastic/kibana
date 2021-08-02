@@ -89,8 +89,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         expectSnapshot(serviceNames).toMatchInline(`
           Array [
             "auditbeat",
-            "kibana",
-            "kibana-frontend",
             "opbeans-dotnet",
             "opbeans-go",
             "opbeans-java",
@@ -109,10 +107,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
         expectSnapshot(externalDestinations).toMatchInline(`
           Array [
-            ">8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243",
             ">elasticsearch",
-            ">epr-snapshot.elastic.co:443",
-            ">feeds.elastic.co:443",
             ">postgresql",
             ">redis",
             ">sqlite",
@@ -150,37 +145,37 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
             expect(dataWithAnomalies).not.to.be.empty();
 
-            expectSnapshot(dataWithAnomalies.length).toMatchInline(`6`);
+            expectSnapshot(dataWithAnomalies.length).toMatchInline(`7`);
             expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
               Array [
                 Object {
                   "data": Object {
-                    "agent.name": "nodejs",
-                    "id": "kibana",
-                    "service.environment": "production",
-                    "service.name": "kibana",
+                    "agent.name": "go",
+                    "id": "opbeans-go",
+                    "service.environment": "testing",
+                    "service.name": "opbeans-go",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 635652.26283725,
+                      "actualValue": 38287.725433526,
                       "anomalyScore": 0,
                       "healthStatus": "healthy",
-                      "jobId": "apm-production-802c-high_mean_transaction_duration",
-                      "serviceName": "kibana",
+                      "jobId": "apm-testing-41e5-high_mean_transaction_duration",
+                      "serviceName": "opbeans-go",
                       "transactionType": "request",
                     },
                   },
                 },
                 Object {
                   "data": Object {
-                    "agent.name": "ruby",
-                    "id": "opbeans-ruby",
+                    "agent.name": "dotnet",
+                    "id": "opbeans-dotnet",
                     "service.environment": "production",
-                    "service.name": "opbeans-ruby",
+                    "service.name": "opbeans-dotnet",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 24400.8867924528,
+                      "actualValue": 653929.904347826,
                       "anomalyScore": 0,
                       "healthStatus": "healthy",
-                      "jobId": "apm-production-802c-high_mean_transaction_duration",
-                      "serviceName": "opbeans-ruby",
+                      "jobId": "apm-production-6117-high_mean_transaction_duration",
+                      "serviceName": "opbeans-dotnet",
                       "transactionType": "request",
                     },
                   },
@@ -192,10 +187,10 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                     "service.environment": "production",
                     "service.name": "opbeans-java",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 19105.8492063492,
+                      "actualValue": 76162.776119403,
                       "anomalyScore": 0,
                       "healthStatus": "healthy",
-                      "jobId": "apm-production-802c-high_mean_transaction_duration",
+                      "jobId": "apm-production-6117-high_mean_transaction_duration",
                       "serviceName": "opbeans-java",
                       "transactionType": "request",
                     },

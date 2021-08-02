@@ -4,10 +4,10 @@
     "aliases": {
       ".kibana": {
       },
-      ".kibana_8.0.0": {
+      ".kibana_$KIBANA_PACKAGE_VERSION": {
       }
     },
-    "index": ".kibana_1",
+    "index": ".kibana_$KIBANA_PACKAGE_VERSION_001",
     "mappings": {
       "_meta": {
         "migrationMappingPropertyHashes": {
@@ -87,12 +87,12 @@
           "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
           "spaces-usage-stats": "3d1b76c39bfb2cc8296b024d73854724",
           "tag": "83d55da58f6530f7055415717ec06474",
+          "telemetry": "36a616f7026dfa617d6655df850fe16d",
           "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "type": "2f4316de49999235636386fe51dc06c1",
           "ui-counter": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
-          "upgrade-assistant-ml-upgrade-operation": "ece1011519ca8fd057364605744d75ac",
           "upgrade-assistant-reindex-operation": "215107c281839ea9b3ad5f6419819763",
           "upgrade-assistant-telemetry": "8169c8bdd753da18d887e038aeb5cbc4",
           "uptime-dynamic-settings": "3d1b76c39bfb2cc8296b024d73854724",
@@ -1781,61 +1781,7 @@
         "migrationVersion": {
           "dynamic": "true",
           "properties": {
-            "action": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "alert": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "canvas-workpad": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "cases": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "cases-user-actions": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
             "config": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "core-usage-stats": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,
@@ -1853,52 +1799,7 @@
               },
               "type": "text"
             },
-            "endpoint:user-artifact-manifest": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "exception-list-agnostic": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "fleet-agent-actions": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "graph-workspace": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
             "index-pattern": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "infrastructure-ui-source": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,
@@ -1943,34 +1844,7 @@
               },
               "type": "text"
             },
-            "lens": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "map": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
             "ml-job": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "ml-module": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,
@@ -1988,43 +1862,7 @@
               },
               "type": "text"
             },
-            "search-session": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "search-telemetry": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "siem-detection-engine-rule-actions": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
             "space": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "spaces-usage-stats": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,
@@ -2870,6 +2708,34 @@
             }
           }
         },
+        "telemetry": {
+          "properties": {
+            "allowChangingOptInStatus": {
+              "type": "boolean"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "lastReported": {
+              "type": "date"
+            },
+            "lastVersionChecked": {
+              "type": "keyword"
+            },
+            "reportFailureCount": {
+              "type": "integer"
+            },
+            "reportFailureVersion": {
+              "type": "keyword"
+            },
+            "sendUsageFrom": {
+              "type": "keyword"
+            },
+            "userHasSeenNotice": {
+              "type": "boolean"
+            }
+          }
+        },
         "timelion-sheet": {
           "properties": {
             "description": {
@@ -2930,46 +2796,6 @@
         },
         "updated_at": {
           "type": "date"
-        },
-        "upgrade-assistant-ml-upgrade-operation": {
-          "properties": {
-            "jobId": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "nodeId": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "snapshotId": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "status": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
         },
         "upgrade-assistant-reindex-operation": {
           "properties": {
@@ -3170,6 +2996,9 @@
     "settings": {
       "index": {
         "auto_expand_replicas": "0-1",
+        "blocks": {
+          "read_only_allow_delete": "false"
+        },
         "number_of_replicas": "1",
         "number_of_shards": "1",
         "priority": "10",
@@ -3183,43 +3012,43 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".ml-anomalies-.write-apm-production-802c-high_mean_transaction_duration": {
+      ".ml-anomalies-.write-apm-environment_not_defined-337d-high_mean_transaction_duration": {
         "is_hidden": true
       },
-      ".ml-anomalies-.write-apm-production-d08f-high_mean_transaction_duration": {
+      ".ml-anomalies-.write-apm-production-6117-high_mean_transaction_duration": {
         "is_hidden": true
       },
-      ".ml-anomalies-.write-high_sum_total_sales": {
+      ".ml-anomalies-.write-apm-testing-41e5-high_mean_transaction_duration": {
         "is_hidden": true
       },
-      ".ml-anomalies-apm-production-802c-high_mean_transaction_duration": {
+      ".ml-anomalies-apm-environment_not_defined-337d-high_mean_transaction_duration": {
         "filter": {
           "term": {
             "job_id": {
               "boost": 1,
-              "value": "apm-production-802c-high_mean_transaction_duration"
+              "value": "apm-environment_not_defined-337d-high_mean_transaction_duration"
             }
           }
         },
         "is_hidden": true
       },
-      ".ml-anomalies-apm-production-d08f-high_mean_transaction_duration": {
+      ".ml-anomalies-apm-production-6117-high_mean_transaction_duration": {
         "filter": {
           "term": {
             "job_id": {
               "boost": 1,
-              "value": "apm-production-d08f-high_mean_transaction_duration"
+              "value": "apm-production-6117-high_mean_transaction_duration"
             }
           }
         },
         "is_hidden": true
       },
-      ".ml-anomalies-high_sum_total_sales": {
+      ".ml-anomalies-apm-testing-41e5-high_mean_transaction_duration": {
         "filter": {
           "term": {
             "job_id": {
               "boost": 1,
-              "value": "high_sum_total_sales"
+              "value": "apm-testing-41e5-high_mean_transaction_duration"
             }
           }
         },
@@ -3229,7 +3058,7 @@
     "index": ".ml-anomalies-shared",
     "mappings": {
       "_meta": {
-        "version": "8.0.0"
+        "version": "7.14.0"
       },
       "dynamic_templates": [
         {
@@ -3317,13 +3146,6 @@
         "categorized_doc_count": {
           "type": "keyword"
         },
-        "category": {
-          "properties": {
-            "keyword": {
-              "type": "keyword"
-            }
-          }
-        },
         "category_id": {
           "type": "long"
         },
@@ -3392,13 +3214,6 @@
             }
           },
           "type": "nested"
-        },
-        "customer_full_name": {
-          "properties": {
-            "keyword": {
-              "type": "keyword"
-            }
-          }
         },
         "dead_category_count": {
           "type": "keyword"
@@ -3809,9 +3624,6 @@
     "settings": {
       "index": {
         "auto_expand_replicas": "0-1",
-        "blocks": {
-          "read_only_allow_delete": "false"
-        },
         "hidden": "true",
         "number_of_replicas": "1",
         "number_of_shards": "1",
@@ -3831,7 +3643,7 @@
     "index": ".ml-config",
     "mappings": {
       "_meta": {
-        "version": "8.0.0"
+        "version": "7.14.0"
       },
       "dynamic_templates": [
         {
@@ -4321,6 +4133,9 @@
     "settings": {
       "index": {
         "auto_expand_replicas": "0-1",
+        "blocks": {
+          "read_only_allow_delete": "false"
+        },
         "max_result_window": "10000",
         "number_of_replicas": "1",
         "number_of_shards": "1"
@@ -4333,15 +4148,15 @@
   "type": "index",
   "value": {
     "aliases": {
-      "apm-8.0.0-error": {
+      "apm-7.14.0-error": {
         "is_write_index": true
       }
     },
-    "index": "apm-8.0.0-error-000002",
+    "index": "apm-7.14.0-error-000001",
     "mappings": {
       "_meta": {
         "beat": "apm",
-        "version": "8.0.0"
+        "version": "7.14.0"
       },
       "date_detection": false,
       "dynamic_templates": [
@@ -4487,8 +4302,8 @@
               "type": "keyword"
             },
             "hostname": {
-              "path": "agent.name",
-              "type": "alias"
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "id": {
               "ignore_above": 1024,
@@ -6260,16 +6075,7 @@
         "labels": {
           "dynamic": "true",
           "properties": {
-            "city": {
-              "type": "keyword"
-            },
             "company": {
-              "type": "keyword"
-            },
-            "country_code": {
-              "type": "keyword"
-            },
-            "customerId": {
               "type": "keyword"
             },
             "customer_tier": {
@@ -6278,38 +6084,13 @@
             "foo": {
               "type": "keyword"
             },
-            "git_rev": {
-              "type": "keyword"
-            },
-            "in_eu": {
-              "type": "boolean"
-            },
-            "ip": {
-              "type": "keyword"
-            },
-            "lang": {
-              "type": "keyword"
-            },
             "lorem": {
               "type": "keyword"
             },
             "multi-line": {
               "type": "keyword"
             },
-            "orderPrice": {
-              "scaling_factor": 1000000,
-              "type": "scaled_float"
-            },
-            "orderPriceRange": {
-              "type": "keyword"
-            },
-            "plugin": {
-              "type": "keyword"
-            },
             "request_id": {
-              "type": "keyword"
-            },
-            "shippingCountry": {
               "type": "keyword"
             },
             "this-is-a-very-long-tag-name-without-any-spaces": {
@@ -9437,13 +9218,14 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "blocks": {
           "read_only_allow_delete": "false"
         },
         "codec": "best_compression",
         "lifecycle": {
           "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-error"
+          "rollover_alias": "apm-7.14.0-error"
         },
         "mapping": {
           "total_fields": {
@@ -9453,6 +9235,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "1",
         "number_of_shards": "1",
+        "priority": "100",
         "refresh_interval": "5s"
       }
     }
@@ -9463,15 +9246,15 @@
   "type": "index",
   "value": {
     "aliases": {
-      "apm-8.0.0-metric": {
+      "apm-7.14.0-metric": {
         "is_write_index": true
       }
     },
-    "index": "apm-8.0.0-metric-000002",
+    "index": "apm-7.14.0-metric-000001",
     "mappings": {
       "_meta": {
         "beat": "apm",
-        "version": "8.0.0"
+        "version": "7.14.0"
       },
       "date_detection": false,
       "dynamic_templates": [
@@ -9617,8 +9400,8 @@
               "type": "keyword"
             },
             "hostname": {
-              "path": "agent.name",
-              "type": "alias"
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "id": {
               "ignore_above": 1024,
@@ -9641,9 +9424,6 @@
         "agent_config_applied": {
           "type": "long"
         },
-        "antifraud_order_check": {
-          "type": "long"
-        },
         "as": {
           "properties": {
             "number": {
@@ -9664,18 +9444,6 @@
               }
             }
           }
-        },
-        "cache_evictions": {
-          "type": "long"
-        },
-        "cache_gets": {
-          "type": "long"
-        },
-        "cache_puts": {
-          "type": "long"
-        },
-        "cache_size": {
-          "type": "long"
         },
         "child": {
           "dynamic": "false",
@@ -9960,13 +9728,13 @@
                   "type": "float"
                 },
                 "gen2size": {
-                  "type": "float"
+                  "type": "long"
                 },
                 "gen3size": {
                   "type": "float"
                 },
                 "time": {
-                  "type": "long"
+                  "type": "float"
                 }
               }
             }
@@ -10956,13 +10724,13 @@
                       "type": "float"
                     },
                     "frees": {
-                      "type": "float"
+                      "type": "long"
                     },
                     "idle": {
                       "type": "float"
                     },
                     "mallocs": {
-                      "type": "float"
+                      "type": "long"
                     },
                     "objects": {
                       "type": "long"
@@ -11049,66 +10817,6 @@
             "ssdeep": {
               "ignore_above": 1024,
               "type": "keyword"
-            }
-          }
-        },
-        "hikaricp_connections_acquire": {
-          "properties": {
-            "count": {
-              "type": "long"
-            },
-            "sum": {
-              "properties": {
-                "us": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "hikaricp_connections_active": {
-          "type": "long"
-        },
-        "hikaricp_connections_creation": {
-          "properties": {
-            "count": {
-              "type": "long"
-            },
-            "sum": {
-              "properties": {
-                "us": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "hikaricp_connections_idle": {
-          "type": "long"
-        },
-        "hikaricp_connections_max": {
-          "type": "long"
-        },
-        "hikaricp_connections_min": {
-          "type": "long"
-        },
-        "hikaricp_connections_pending": {
-          "type": "long"
-        },
-        "hikaricp_connections_timeout": {
-          "type": "long"
-        },
-        "hikaricp_connections_usage": {
-          "properties": {
-            "count": {
-              "type": "long"
-            },
-            "sum": {
-              "properties": {
-                "us": {
-                  "type": "float"
-                }
-              }
             }
           }
         },
@@ -11454,20 +11162,6 @@
             }
           }
         },
-        "http_server_requests": {
-          "properties": {
-            "count": {
-              "type": "long"
-            },
-            "sum": {
-              "properties": {
-                "us": {
-                  "type": "float"
-                }
-              }
-            }
-          }
-        },
         "interface": {
           "properties": {
             "alias": {
@@ -11483,18 +11177,6 @@
               "type": "keyword"
             }
           }
-        },
-        "jdbc_connections_active": {
-          "type": "long"
-        },
-        "jdbc_connections_idle": {
-          "type": "long"
-        },
-        "jdbc_connections_max": {
-          "type": "long"
-        },
-        "jdbc_connections_min": {
-          "type": "long"
         },
         "jvm": {
           "properties": {
@@ -11562,68 +11244,6 @@
               }
             }
           }
-        },
-        "jvm_buffer_count": {
-          "type": "long"
-        },
-        "jvm_buffer_memory_used": {
-          "type": "long"
-        },
-        "jvm_buffer_total_capacity": {
-          "type": "long"
-        },
-        "jvm_classes_loaded": {
-          "type": "long"
-        },
-        "jvm_classes_unloaded": {
-          "type": "long"
-        },
-        "jvm_gc_live_data_size": {
-          "type": "long"
-        },
-        "jvm_gc_max_data_size": {
-          "type": "float"
-        },
-        "jvm_gc_memory_allocated": {
-          "type": "float"
-        },
-        "jvm_gc_memory_promoted": {
-          "type": "float"
-        },
-        "jvm_gc_pause": {
-          "properties": {
-            "count": {
-              "type": "long"
-            },
-            "sum": {
-              "properties": {
-                "us": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "jvm_memory_committed": {
-          "type": "float"
-        },
-        "jvm_memory_max": {
-          "type": "float"
-        },
-        "jvm_memory_used": {
-          "type": "float"
-        },
-        "jvm_threads_daemon": {
-          "type": "long"
-        },
-        "jvm_threads_live": {
-          "type": "long"
-        },
-        "jvm_threads_peak": {
-          "type": "long"
-        },
-        "jvm_threads_states": {
-          "type": "long"
         },
         "kubernetes": {
           "dynamic": "false",
@@ -11724,37 +11344,10 @@
             "a": {
               "type": "keyword"
             },
-            "action": {
-              "type": "keyword"
-            },
-            "antifraud_order_check_price_range": {
-              "type": "keyword"
-            },
-            "antifraud_order_check_shipping_country": {
-              "type": "keyword"
-            },
-            "antifraud_order_check_success": {
-              "type": "keyword"
-            },
-            "area": {
-              "type": "keyword"
-            },
-            "cache": {
-              "type": "keyword"
-            },
-            "cause": {
-              "type": "keyword"
-            },
             "charset": {
               "type": "keyword"
             },
-            "city": {
-              "type": "keyword"
-            },
             "connection": {
-              "type": "keyword"
-            },
-            "country_code": {
               "type": "keyword"
             },
             "env": {
@@ -11763,34 +11356,13 @@
             "etag": {
               "type": "keyword"
             },
-            "exception": {
-              "type": "keyword"
-            },
             "generation": {
-              "type": "keyword"
-            },
-            "git_rev": {
               "type": "keyword"
             },
             "hostname": {
               "type": "keyword"
             },
-            "id": {
-              "type": "keyword"
-            },
             "implementation": {
-              "type": "keyword"
-            },
-            "in_eu": {
-              "type": "boolean"
-            },
-            "ip": {
-              "type": "keyword"
-            },
-            "lang": {
-              "type": "keyword"
-            },
-            "level": {
               "type": "keyword"
             },
             "major": {
@@ -11805,22 +11377,7 @@
             "name": {
               "type": "keyword"
             },
-            "outcome": {
-              "type": "keyword"
-            },
             "patchlevel": {
-              "type": "keyword"
-            },
-            "pool": {
-              "type": "keyword"
-            },
-            "result": {
-              "type": "keyword"
-            },
-            "shipping_country": {
-              "type": "keyword"
-            },
-            "state": {
               "type": "keyword"
             },
             "status": {
@@ -11830,12 +11387,6 @@
               "type": "keyword"
             },
             "type": {
-              "type": "keyword"
-            },
-            "u": {
-              "type": "keyword"
-            },
-            "uri": {
               "type": "keyword"
             },
             "version": {
@@ -11918,9 +11469,6 @@
               }
             }
           }
-        },
-        "logback_events": {
-          "type": "long"
         },
         "message": {
           "norms": false,
@@ -12047,7 +11595,7 @@
                     "avg": {
                       "properties": {
                         "ms": {
-                          "type": "float"
+                          "type": "long"
                         }
                       }
                     }
@@ -12067,7 +11615,7 @@
                 "arrayBuffers": {
                   "properties": {
                     "bytes": {
-                      "type": "float"
+                      "type": "long"
                     }
                   }
                 },
@@ -12364,32 +11912,6 @@
               "type": "keyword"
             }
           }
-        },
-        "order": {
-          "properties": {
-            "count": {
-              "type": "long"
-            },
-            "sum": {
-              "type": "long"
-            }
-          }
-        },
-        "order_count_counter": {
-          "type": "long"
-        },
-        "order_per_country": {
-          "properties": {
-            "count": {
-              "type": "long"
-            },
-            "sum": {
-              "type": "long"
-            }
-          }
-        },
-        "order_value_counter": {
-          "type": "long"
         },
         "organization": {
           "properties": {
@@ -12901,21 +12423,6 @@
             }
           }
         },
-        "process_cpu_usage": {
-          "type": "float"
-        },
-        "process_files_max": {
-          "type": "long"
-        },
-        "process_files_open": {
-          "type": "long"
-        },
-        "process_start_time": {
-          "type": "float"
-        },
-        "process_uptime": {
-          "type": "float"
-        },
         "processor": {
           "properties": {
             "event": {
@@ -13222,7 +12729,7 @@
                 "allocations": {
                   "properties": {
                     "total": {
-                      "type": "float"
+                      "type": "long"
                     }
                   }
                 },
@@ -14123,15 +13630,6 @@
             }
           }
         },
-        "system_cpu_count": {
-          "type": "long"
-        },
-        "system_cpu_usage": {
-          "type": "float"
-        },
-        "system_load_average_1m": {
-          "type": "float"
-        },
         "tags": {
           "ignore_above": 1024,
           "type": "keyword"
@@ -14558,24 +14056,6 @@
               "type": "keyword"
             }
           }
-        },
-        "tomcat_sessions_active_current": {
-          "type": "long"
-        },
-        "tomcat_sessions_active_max": {
-          "type": "long"
-        },
-        "tomcat_sessions_alive_max": {
-          "type": "long"
-        },
-        "tomcat_sessions_created": {
-          "type": "long"
-        },
-        "tomcat_sessions_expired": {
-          "type": "long"
-        },
-        "tomcat_sessions_rejected": {
-          "type": "long"
         },
         "trace": {
           "dynamic": "false",
@@ -15289,13 +14769,14 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "blocks": {
           "read_only_allow_delete": "false"
         },
         "codec": "best_compression",
         "lifecycle": {
           "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-metric"
+          "rollover_alias": "apm-7.14.0-metric"
         },
         "mapping": {
           "total_fields": {
@@ -15305,6 +14786,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "1",
         "number_of_shards": "1",
+        "priority": "100",
         "refresh_interval": "5s"
       }
     }
@@ -15315,15 +14797,15 @@
   "type": "index",
   "value": {
     "aliases": {
-      "apm-8.0.0-span": {
+      "apm-7.14.0-span": {
         "is_write_index": true
       }
     },
-    "index": "apm-8.0.0-span-000008",
+    "index": "apm-7.14.0-span-000001",
     "mappings": {
       "_meta": {
         "beat": "apm",
-        "version": "8.0.0"
+        "version": "7.14.0"
       },
       "date_detection": false,
       "dynamic_templates": [
@@ -15469,8 +14951,8 @@
               "type": "keyword"
             },
             "hostname": {
-              "path": "agent.name",
-              "type": "alias"
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "id": {
               "ignore_above": 1024,
@@ -17242,12 +16724,6 @@
         "labels": {
           "dynamic": "true",
           "properties": {
-            "city": {
-              "type": "keyword"
-            },
-            "country_code": {
-              "type": "keyword"
-            },
             "events_encoded": {
               "scaling_factor": 1000000,
               "type": "scaled_float"
@@ -17265,21 +16741,6 @@
               "type": "scaled_float"
             },
             "foo": {
-              "type": "keyword"
-            },
-            "git_rev": {
-              "type": "keyword"
-            },
-            "in_eu": {
-              "type": "boolean"
-            },
-            "ip": {
-              "type": "keyword"
-            },
-            "lang": {
-              "type": "keyword"
-            },
-            "plugin": {
               "type": "keyword"
             },
             "productId": {
@@ -18939,25 +18400,6 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "composite": {
-              "dynamic": "false",
-              "properties": {
-                "compression_strategy": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "count": {
-                  "type": "long"
-                },
-                "sum": {
-                  "properties": {
-                    "us": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "db": {
               "dynamic": "false",
               "properties": {
@@ -20426,10 +19868,14 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
+        "blocks": {
+          "read_only_allow_delete": "false"
+        },
         "codec": "best_compression",
         "lifecycle": {
           "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-span"
+          "rollover_alias": "apm-7.14.0-span"
         },
         "mapping": {
           "total_fields": {
@@ -20439,6 +19885,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "1",
         "number_of_shards": "1",
+        "priority": "100",
         "refresh_interval": "5s"
       }
     }
@@ -20449,15 +19896,15 @@
   "type": "index",
   "value": {
     "aliases": {
-      "apm-8.0.0-transaction": {
+      "apm-7.14.0-transaction": {
         "is_write_index": true
       }
     },
-    "index": "apm-8.0.0-transaction-000002",
+    "index": "apm-7.14.0-transaction-000001",
     "mappings": {
       "_meta": {
         "beat": "apm",
-        "version": "8.0.0"
+        "version": "7.14.0"
       },
       "date_detection": false,
       "dynamic_templates": [
@@ -20603,8 +20050,8 @@
               "type": "keyword"
             },
             "hostname": {
-              "path": "agent.name",
-              "type": "alias"
+              "ignore_above": 1024,
+              "type": "keyword"
             },
             "id": {
               "ignore_above": 1024,
@@ -22376,13 +21823,7 @@
         "labels": {
           "dynamic": "true",
           "properties": {
-            "city": {
-              "type": "keyword"
-            },
             "company": {
-              "type": "keyword"
-            },
-            "country_code": {
               "type": "keyword"
             },
             "customer_email": {
@@ -22397,25 +21838,10 @@
             "foo": {
               "type": "keyword"
             },
-            "git_rev": {
-              "type": "keyword"
-            },
-            "in_eu": {
-              "type": "boolean"
-            },
-            "ip": {
-              "type": "keyword"
-            },
-            "lang": {
-              "type": "keyword"
-            },
             "lorem": {
               "type": "keyword"
             },
             "multi-line": {
-              "type": "keyword"
-            },
-            "plugin": {
               "type": "keyword"
             },
             "request_id": {
@@ -22423,13 +21849,6 @@
             },
             "served_from_cache": {
               "type": "keyword"
-            },
-            "session_id": {
-              "type": "keyword"
-            },
-            "session_seq": {
-              "scaling_factor": 1000000,
-              "type": "scaled_float"
             },
             "this-is-a-very-long-tag-name-without-any-spaces": {
               "type": "keyword"
@@ -24091,25 +23510,6 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "composite": {
-              "dynamic": "false",
-              "properties": {
-                "compression_strategy": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "count": {
-                  "type": "long"
-                },
-                "sum": {
-                  "properties": {
-                    "us": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "db": {
               "dynamic": "false",
               "properties": {
@@ -24964,14 +24364,6 @@
                       "scaling_factor": 1000000,
                       "type": "scaled_float"
                     },
-                    "firstContentfulPaint": {
-                      "scaling_factor": 1000000,
-                      "type": "scaled_float"
-                    },
-                    "largestContentfulPaint": {
-                      "scaling_factor": 1000000,
-                      "type": "scaled_float"
-                    },
                     "timeToFirstByte": {
                       "scaling_factor": 1000000,
                       "type": "scaled_float"
@@ -25666,10 +25058,14 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
+        "blocks": {
+          "read_only_allow_delete": "false"
+        },
         "codec": "best_compression",
         "lifecycle": {
           "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-transaction"
+          "rollover_alias": "apm-7.14.0-transaction"
         },
         "mapping": {
           "total_fields": {
@@ -25679,6 +25075,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "1",
         "number_of_shards": "1",
+        "priority": "100",
         "refresh_interval": "5s"
       }
     }
