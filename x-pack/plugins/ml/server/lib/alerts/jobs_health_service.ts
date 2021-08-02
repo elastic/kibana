@@ -168,7 +168,8 @@ export function jobsHealthServiceProvider(
     async getDelayedDataReport(
       jobIds: string[],
       timeInterval: string | null,
-      previousStartedAt: Date | null
+      previousStartedAt: Date | null,
+      docsCount: number | null
     ): Promise<any> {
       const currentTimestamp = Date.now();
 
@@ -187,6 +188,26 @@ export function jobsHealthServiceProvider(
         latestMs: currentTimestamp,
         event: 'delayed_data',
       });
+
+      if (docsCount) {
+        // Filter out annotations based on the docs count parameter
+        for (const jobAnnotationsKey in annotations) {
+          if (annotations.hasOwnProperty(jobAnnotationsKey)) {
+            const jobAnnotations = annotations[jobAnnotationsKey];
+            const matchedAnnotations = jobAnnotations.filter((v) => {
+              const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
+              const missedDocsCount = match ? parseInt(match[1], 10) : 0;
+              return missedDocsCount >= docsCount;
+            });
+
+            if (matchedAnnotations.length === 0) {
+              delete annotations[jobAnnotationsKey];
+            } else {
+              annotations[jobAnnotationsKey] = matchedAnnotations;
+            }
+          }
+        }
+      }
 
       return annotations;
     },
@@ -267,14 +288,15 @@ export function jobsHealthServiceProvider(
         const response = await this.getDelayedDataReport(
           jobIds,
           config.delayedData.timeInterval,
-          previousStartedAt
+          previousStartedAt,
+          config.delayedData.docsCount
         );
 
         if (isPopulatedObject(response)) {
           const jobsCount = Object.keys(response).length;
 
           results.push({
-            name: HEALTH_CHECK_NAMES.datafeed.name,
+            name: HEALTH_CHECK_NAMES.delayedData.name,
             context: {
               results: Object.keys(response).map((v) => ({ job_id: v })),
               message: i18n.translate(

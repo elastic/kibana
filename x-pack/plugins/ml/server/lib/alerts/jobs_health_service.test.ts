@@ -94,13 +94,29 @@ describe('JobsHealthService', () => {
 
   const annotationService = ({
     getAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
-      return Promise.resolve(
-        jobIds.map((j) => {
+      return Promise.resolve({
+        annotations: jobIds.reduce((acc, jobId) => {
           return {
-            [j]: {},
+            ...acc,
+            [jobId]: [
+              {
+                annotation: `Datafeed has missed ${
+                  jobId === 'test_job_01' ? 11 : 8
+                } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
+                create_time: 1627653905143,
+                create_username: '_xpack',
+                timestamp: 1627653000000,
+                end_timestamp: 1627653300000,
+                job_id: jobId,
+                modified_time: 1627660295141,
+                modified_username: '_xpack',
+                type: 'annotation',
+                event: 'delayed_data',
+              },
+            ],
           };
-        })
-      );
+        }, {}),
+      });
     }),
   } as unknown) as jest.Mocked<AnnotationService>;
 
@@ -117,10 +133,15 @@ describe('JobsHealthService', () => {
     logger
   );
 
-  beforeEach(() => {});
+  let dateNowSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => 1487076708000);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
+    dateNowSpy.mockRestore();
   });
 
   test('returns empty results when no jobs provided', async () => {
@@ -175,6 +196,48 @@ describe('JobsHealthService', () => {
     expect(executionResult).toEqual([]);
   });
 
+  test('takes into account delayed data params', async () => {
+    const executionResult = await jobHealthService.getTestsResults(
+      'testRule_04',
+      {
+        testsConfig: {
+          delayedData: {
+            enabled: true,
+            docsCount: 10,
+            timeInterval: '10m',
+          },
+          behindRealtime: { enabled: false, timeInterval: null },
+          mml: { enabled: false },
+          datafeed: { enabled: false },
+          errorMessages: { enabled: false },
+        },
+        includeJobs: {
+          jobIds: [],
+          groupIds: ['test_group'],
+        },
+        excludeJobs: {
+          jobIds: ['test_job_03'],
+          groupIds: [],
+        },
+      },
+      null
+    );
+
+    expect(executionResult).toEqual([
+      {
+        name: 'Data delay has occurred',
+        context: {
+          results: [
+            {
+              job_id: 'test_job_01',
+            },
+          ],
+          message: '1 job is suffering from delayed data.',
+        },
+      },
+    ]);
+  });
+
   test('returns results based on provided selection', async () => {
     const executionResult = await jobHealthService.getTestsResults(
       'testRule_03',
@@ -204,6 +267,14 @@ describe('JobsHealthService', () => {
       datafeed_id: 'test_datafeed_01,test_datafeed_02',
     });
     expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
+    expect(annotationService.getAnnotations).toHaveBeenCalledWith({
+      jobIds: ['test_job_01', 'test_job_02'],
+      maxAnnotations: 10,
+      event: 'delayed_data',
+      earliestMs: null,
+      latestMs: 1487076708000,
+    });
+
     expect(executionResult).toEqual([
       {
         name: 'Datafeed is not started',
@@ -231,6 +302,20 @@ describe('JobsHealthService', () => {
           ],
           message:
             '1 job reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
+        },
+      },
+      {
+        name: 'Data delay has occurred',
+        context: {
+          results: [
+            {
+              job_id: 'test_job_01',
+            },
+            {
+              job_id: 'test_job_02',
+            },
+          ],
+          message: '2 jobs are suffering from delayed data.',
         },
       },
     ]);
