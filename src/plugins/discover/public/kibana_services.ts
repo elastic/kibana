@@ -101,7 +101,7 @@ export {
   IIndexPattern,
   IndexPattern,
   indexPatterns,
-  IFieldType,
+  IndexPatternField,
   ISearchSource,
   EsQuerySortValue,
   SortDirection,

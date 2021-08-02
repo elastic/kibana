@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, defaults, mergeWith, compact } from 'lodash';
-import $ from 'jquery';
-import moment, { Moment } from 'moment-timezone';
-
-import { TimefilterContract } from 'src/plugins/data/public';
-import { IUiSettingsClient } from 'kibana/public';
+import moment from 'moment-timezone';
+import { Position, AxisSpec } from '@elastic/charts';
+import type { TimefilterContract } from 'src/plugins/data/public';
+import type { IUiSettingsClient } from 'kibana/public';
 
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from './xaxis_formatter';
-import { Series } from './timelion_request_handler';
+import { tickFormatters } from './tick_formatters';
 
-export interface Axis {
+import type { Series } from './timelion_request_handler';
+
+export interface IAxis {
   delta?: number;
   max?: number;
   min?: number;
@@ -30,87 +30,26 @@ export interface Axis {
   tickLength: number;
   timezone: string;
   tickDecimals?: number;
-  tickFormatter: ((val: number) => string) | ((val: number, axis: Axis) => string);
-  tickGenerator?(axis: Axis): number[];
-  units?: { type: string };
+  tickFormatter: (val: number) => string;
+  tickGenerator?(axis: IAxis): number[];
+  units?: { type: string; prefix: string; suffix: string };
+  domain?: {
+    min?: number;
+    max?: number;
+  };
+  position?: Position;
+  axisLabel?: string;
 }
 
-interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
+export const validateLegendPositionValue = (position: string) => /^(n|s)(e|w)$/s.test(position);
 
-export const ACTIVE_CURSOR = 'ACTIVE_CURSOR_TIMELION';
-export const eventBus = $({});
-
-const colors = [
-  '#01A4A4',
-  '#C66',
-  '#D0D102',
-  '#616161',
-  '#00A1CB',
-  '#32742C',
-  '#F18D05',
-  '#113F8C',
-  '#61AE24',
-  '#D70060',
-];
-
-const SERIES_ID_ATTR = 'data-series-id';
-
-function buildSeriesData(chart: Series[], options: jquery.flot.plotOptions) {
-  const seriesData = chart.map((series: Series, seriesIndex: number) => {
-    const newSeries: Series = cloneDeep(
-      defaults(series, {
-        shadowSize: 0,
-        lines: {
-          lineWidth: 3,
-        },
-      })
-    );
-
-    newSeries._id = seriesIndex;
-
-    if (series.color) {
-      const span = document.createElement('span');
-      span.style.color = series.color;
-      newSeries.color = span.style.color;
-    }
-
-    if (series._hide) {
-      newSeries.data = [];
-      newSeries.stack = false;
-      newSeries.label = `(hidden) ${series.label}`;
-    }
-
-    if (series._global) {
-      mergeWith(options, series._global, (objVal, srcVal) => {
-        // This is kind of gross, it means that you can't replace a global value with a null
-        // best you can do is an empty string. Deal with it.
-        if (objVal == null) {
-          return srcVal;
-        }
-        if (srcVal == null) {
-          return objVal;
-        }
-      });
-    }
-
-    return newSeries;
-  });
-
-  return compact(seriesData);
-}
-
-function buildOptions(
+export const createTickFormat = (
   intervalValue: string,
   timefilter: TimefilterContract,
-  uiSettings: IUiSettingsClient,
-  clientWidth = 0,
-  showGrid?: boolean
-) {
+  uiSettings: IUiSettingsClient
+) => {
   // Get the X-axis tick format
-  const time: TimeRangeBounds = timefilter.getBounds();
+  const time = timefilter.getBounds();
   const interval = calculateInterval(
     (time.min && time.min.valueOf()) || 0,
     (time.max && time.max.valueOf()) || 0,
@@ -120,61 +59,75 @@ function buildOptions(
   );
   const format = xaxisFormatterProvider(uiSettings)(interval);
 
-  const tickLetterWidth = 7;
-  const tickPadding = 45;
+  return (val: number) => moment(val).format(format);
+};
 
-  const options = {
-    xaxis: {
-      mode: 'time',
-      tickLength: 5,
-      timezone: 'browser',
-      // Calculate how many ticks can fit on the axis
-      ticks: Math.floor(clientWidth / (format.length * tickLetterWidth + tickPadding)),
-      // Use moment to format ticks so we get timezone correction
-      tickFormatter: (val: number) => moment(val).format(format),
-    },
-    selection: {
-      mode: 'x',
-      color: '#ccc',
-    },
-    crosshair: {
-      mode: 'x',
-      color: '#C66',
-      lineWidth: 2,
-    },
-    colors,
-    grid: {
-      show: showGrid,
-      borderWidth: 0,
-      borderColor: null,
-      margin: 10,
-      hoverable: true,
-      autoHighlight: false,
-    },
-    legend: {
-      backgroundColor: 'rgb(255,255,255,0)',
-      position: 'nw',
-      labelBoxBorderColor: 'rgb(255,255,255,0)',
-      labelFormatter(label: string, series: { _id: number }) {
-        const wrapperSpan = document.createElement('span');
-        const labelSpan = document.createElement('span');
-        const numberSpan = document.createElement('span');
+/** While we support 2 versions of the timeline, we need this adapter. **/
+export const MAIN_GROUP_ID = 1;
 
-        wrapperSpan.setAttribute('class', 'ngLegendValue');
-        wrapperSpan.setAttribute(SERIES_ID_ATTR, `${series._id}`);
+export const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
+  (({
+    ...domain,
+    padding: 50,
+    paddingUnit: 'pixel',
+  } as unknown) as AxisSpec['domain']);
 
-        labelSpan.appendChild(document.createTextNode(label));
-        numberSpan.setAttribute('class', 'ngLegendValueNumber');
+const adaptYaxisParams = (yaxis: IAxis) => {
+  const y = { ...yaxis };
 
-        wrapperSpan.appendChild(labelSpan);
-        wrapperSpan.appendChild(numberSpan);
+  if (y.units) {
+    const formatters = tickFormatters(y);
+    y.tickFormatter = formatters[y.units.type as keyof typeof formatters];
+  } else if (yaxis.tickDecimals) {
+    y.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
+  }
 
-        return wrapperSpan.outerHTML;
-      },
-    },
-  } as jquery.flot.plotOptions & { yaxes?: Axis[] };
+  return {
+    title: y.axisLabel,
+    position: y.position,
+    tickFormat: y.tickFormatter,
+    domain: withStaticPadding({
+      fit: y.min === undefined && y.max === undefined,
+      min: y.min,
+      max: y.max,
+    }),
+  };
+};
 
-  return options;
-}
+const extractYAxisForSeries = (series: Series) => {
+  const yaxis = (series._global?.yaxes ?? []).reduce(
+    (acc: IAxis, item: IAxis) => ({
+      ...acc,
+      ...item,
+    }),
+    {}
+  );
 
-export { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors };
+  if (Object.keys(yaxis).length) {
+    return adaptYaxisParams(yaxis);
+  }
+};
+
+export const extractAllYAxis = (series: Series[]) => {
+  return series.reduce((acc, data, index) => {
+    const yaxis = extractYAxisForSeries(data);
+    const groupId = `${data.yaxis ? data.yaxis : MAIN_GROUP_ID}`;
+
+    if (acc.every((axis) => axis.groupId !== groupId)) {
+      acc.push({
+        groupId,
+        domain: withStaticPadding({
+          fit: false,
+        }),
+        id: (yaxis?.position || Position.Left) + index,
+        position: Position.Left,
+        ...yaxis,
+      });
+    } else if (yaxis) {
+      const axisOptionIndex = acc.findIndex((axis) => axis.groupId === groupId);
+      acc[axisOptionIndex] = { ...acc[axisOptionIndex], ...yaxis };
+    }
+
+    return acc;
+  }, [] as Array<Partial<AxisSpec>>);
+};
