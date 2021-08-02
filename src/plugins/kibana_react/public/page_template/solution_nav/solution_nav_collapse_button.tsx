@@ -48,8 +48,10 @@ export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<Kiba
     <EuiButtonIcon
       className={classes}
       iconType={isCollapsed ? 'menuRight' : 'menuLeft'}
+      display={isCollapsed ? 'empty' : 'fill'}
+      color={isCollapsed ? 'text' : 'ghost'}
       size="s"
-      color="text"
+      // color="text"
       aria-label={isCollapsed ? openLabel : collapseLabel}
       title={isCollapsed ? openLabel : collapseLabel}
       {...rest}
