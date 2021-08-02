@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { MemoryProtection } from './policy_forms/protections/memory';
+import { BehaviorProtection } from './policy_forms/protections/behavior';
 import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
@@ -29,6 +30,13 @@ const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.memory',
   {
     defaultMessage: 'Memory',
+  }
+);
+
+const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.behavior',
+  {
+    defaultMessage: 'Behavior',
   }
 );
 
@@ -59,6 +67,12 @@ export const PolicyDetailsForm = memo(() => {
         <MemoryProtection />
       ) : (
         <LockedPolicyCard title={LOCKED_CARD_MEMORY_TITLE} />
+      )}
+      <EuiSpacer size="m" />
+      {isPlatinumPlus ? (
+        <BehaviorProtection />
+      ) : (
+        <LockedPolicyCard title={LOCKED_CARD_BEHAVIOR_TITLE} />
       )}
       <EuiSpacer size="l" />
 

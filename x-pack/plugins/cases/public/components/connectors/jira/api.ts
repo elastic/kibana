@@ -7,9 +7,8 @@
 
 import { HttpSetup } from 'kibana/public';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import { getExecuteConnectorUrl } from '../../../../common/utils/connectors_api';
 import { IssueTypes, Fields, Issues, Issue } from './types';
-
-export const BASE_ACTION_API_PATH = '/api/actions';
 
 export interface GetIssueTypesProps {
   http: HttpSetup;
@@ -18,15 +17,12 @@ export interface GetIssueTypesProps {
 }
 
 export async function getIssueTypes({ http, signal, connectorId }: GetIssueTypesProps) {
-  return http.post<ActionTypeExecutorResult<IssueTypes>>(
-    `${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`,
-    {
-      body: JSON.stringify({
-        params: { subAction: 'issueTypes', subActionParams: {} },
-      }),
-      signal,
-    }
-  );
+  return http.post<ActionTypeExecutorResult<IssueTypes>>(getExecuteConnectorUrl(connectorId), {
+    body: JSON.stringify({
+      params: { subAction: 'issueTypes', subActionParams: {} },
+    }),
+    signal,
+  });
 }
 
 export interface GetFieldsByIssueTypeProps {
@@ -42,7 +38,7 @@ export async function getFieldsByIssueType({
   connectorId,
   id,
 }: GetFieldsByIssueTypeProps): Promise<ActionTypeExecutorResult<Fields>> {
-  return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return http.post(getExecuteConnectorUrl(connectorId), {
     body: JSON.stringify({
       params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
     }),
@@ -63,7 +59,7 @@ export async function getIssues({
   connectorId,
   title,
 }: GetIssuesTypeProps): Promise<ActionTypeExecutorResult<Issues>> {
-  return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return http.post(getExecuteConnectorUrl(connectorId), {
     body: JSON.stringify({
       params: { subAction: 'issues', subActionParams: { title } },
     }),
@@ -84,7 +80,7 @@ export async function getIssue({
   connectorId,
   id,
 }: GetIssueTypeProps): Promise<ActionTypeExecutorResult<Issue>> {
-  return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return http.post(getExecuteConnectorUrl(connectorId), {
     body: JSON.stringify({
       params: { subAction: 'issue', subActionParams: { id } },
     }),
