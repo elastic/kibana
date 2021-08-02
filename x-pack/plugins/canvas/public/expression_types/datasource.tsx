@@ -22,19 +22,16 @@ type TemplateFn = (
   handlers: ExpressionFormHandlers
 ) => void;
 
-export type DatasourceProps = any;
-// export type DatasourceProps = {
-//   template?: TemplateFn;
-//   image?: string;
-// } & BaseFormProps;
+export type DatasourceProps = {
+  template?: TemplateFn;
+  image?: string;
+} & BaseFormProps;
 
-type DatasourceWrapperProps = any;
-
-// interface DatasourceWrapperProps {
-//   handlers: ExpressionFormHandlers;
-//   spec: any;
-//   datasourceProps: DatasourceProps;
-// }
+interface DatasourceWrapperProps {
+  handlers: ExpressionFormHandlers;
+  spec: Datasource;
+  datasourceProps: DatasourceProps;
+}
 
 const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (props) => {
   const domNodeRef = useRef<HTMLElement>();
