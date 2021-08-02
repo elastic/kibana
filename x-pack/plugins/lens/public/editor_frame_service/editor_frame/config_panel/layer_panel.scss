@@ -1,3 +1,5 @@
+@import '../../../mixins';
+
 .lnsLayerPanel {
   margin-bottom: $euiSizeS;
 
@@ -132,12 +134,7 @@
   width: 100%;
 
   &:focus {
+    @include passDownFocusRing('.lnsLayerPanel__triggerTextLabel');
     background-color: transparent;
-    animation: none !important; // sass-lint:disable-line no-important
-  }
-
-  &:focus .lnsLayerPanel__triggerTextLabel,
-  &:focus-within .lnsLayerPanel__triggerTextLabel {
-    background-color: transparentize($euiColorVis1, .9);
   }
 }
