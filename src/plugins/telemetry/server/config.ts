@@ -9,6 +9,7 @@
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
 import { PluginConfigDescriptor } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
 import { TELEMETRY_ENDPOINT } from '../common/constants';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
@@ -72,4 +73,50 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
     sendUsageFrom: true,
     sendUsageTo: true,
   },
+  deprecations: () => [
+    (rawConfig, fromPath, addDeprecation) => {
+      const telemetryConfig: TelemetryConfigType = rawConfig[fromPath];
+      const unset: Array<{ path: string }> = [];
+      const endpointConfigPaths = ['url', 'optInStatusUrl'] as const;
+      let useStaging = telemetryConfig.sendUsageTo === 'staging' ? true : false;
+
+      for (const configPath of endpointConfigPaths) {
+        const configValue = telemetryConfig[configPath];
+        const fullConfigPath = `telemetry.${configPath}`;
+        if (typeof configValue !== 'undefined') {
+          unset.push({ path: fullConfigPath });
+
+          if (/telemetry-staging\.elastic\.co/i.test(configValue)) {
+            useStaging = true;
+          }
+
+          addDeprecation({
+            message: i18n.translate('telemetry.config.url.deprecationMessage', {
+              defaultMessage:
+                '"{configPath}" has been deprecated. Use "telemetry.sendUsageTo: staging" to send usage to the staging telemetry cluster.',
+              values: { configPath: fullConfigPath },
+            }),
+            correctiveActions: {
+              manualSteps: [
+                i18n.translate('telemetry.config.url.deprecationManualStep1', {
+                  defaultMessage: 'Remove "{configPath}" from your Kibana configuration',
+                  values: { configPath: fullConfigPath },
+                }),
+                i18n.translate('telemetry.config.url.deprecationManualStep2', {
+                  defaultMessage:
+                    'To send usage to staging, add "telemetry.sendUsageTo: staging" to your Kibana configuration.',
+                  values: { configPath: fullConfigPath },
+                }),
+              ],
+            },
+          });
+        }
+      }
+
+      return {
+        set: [{ path: 'telemetry.sendUsageTo', value: useStaging ? 'staging' : 'prod' }],
+        unset,
+      };
+    },
+  ],
 };

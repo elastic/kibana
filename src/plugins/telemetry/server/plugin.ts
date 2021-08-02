@@ -117,8 +117,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getTelemetryUrl: async () => {
-        const config = await config$.pipe(take(1)).toPromise();
-        return new URL(config.url);
+        const { sendUsageTo } = await config$.pipe(take(1)).toPromise();
+        const telemetryUrl = getTelemetryChannelEndpoint({ env: sendUsageTo, channelName: 'main' });
+
+        return new URL(telemetryUrl);
       },
     };
   }
