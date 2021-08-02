@@ -105,8 +105,12 @@ export const createDetectionIndex = async (
     });
   }
   // Check if the old legacy siem signals template exists and remove it
-  if (await esClient.indices.existsTemplate({ name: index })) {
+  try {
     await esClient.indices.deleteTemplate({ name: index });
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      throw err;
+    }
   }
   await addAliasesToIndices({ esClient, index, aadIndexAliasName, spaceId });
   const indexExists = await getIndexExists(esClient, index);
@@ -151,10 +155,10 @@ export const addAliasesToIndices = async ({
         ...signalExtraFields,
         ...fieldAliases,
         ...getRbacRequiredFields(spaceId),
-        _meta: {
-          version: currentVersion,
-          [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
-        },
+      },
+      _meta: {
+        version: currentVersion,
+        [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
       },
     };
     await esClient.indices.putMapping({
