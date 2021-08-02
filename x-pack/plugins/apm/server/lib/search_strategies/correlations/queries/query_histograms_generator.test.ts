@@ -14,7 +14,12 @@ import { asyncSearchServiceStateProvider } from '../async_search_service_state';
 
 import { fetchTransactionDurationHistograms } from './query_histograms_generator';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 const expectations = [1, 3, 5];
 const ranges = [{ to: 1 }, { from: 1, to: 3 }, { from: 3, to: 5 }, { from: 5 }];
 const fractions = [1, 2, 4, 5];

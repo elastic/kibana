@@ -14,7 +14,12 @@ import {
   getTransactionDurationHistogramRequest,
 } from './query_histogram';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 const interval = 100;
 
 describe('query_histogram', () => {
@@ -54,7 +59,9 @@ describe('query_histogram', () => {
           },
           size: 0,
         },
-        index: 'apm-*',
+        index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });

@@ -43,6 +43,7 @@ export const asyncSearchServiceProvider = (
       params = {
         ...searchServiceParams,
         index: indices['apm_oss.transactionIndices'],
+        includeFrozen,
       };
 
       // 95th percentile to be displayed as a marker in the log log chart

@@ -20,6 +20,7 @@ import {
 import { hasPrefixToInclude } from '../utils';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { getRequestBase } from './get_request_base';
 import { Field } from './query_field_value_pairs';
 
 export const shouldBeExcluded = (fieldName: string) => {
@@ -34,7 +35,7 @@ export const shouldBeExcluded = (fieldName: string) => {
 export const getRandomDocsRequest = (
   params: SearchServiceFetchParams
 ): estypes.SearchRequest => ({
-  index: params.index,
+  ...getRequestBase(params),
   body: {
     fields: ['*'],
     _source: false,

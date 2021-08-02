@@ -14,7 +14,12 @@ import {
   getTransactionDurationPercentilesRequest,
 } from './query_percentiles';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 
 describe('query_percentiles', () => {
   describe('getTransactionDurationPercentilesRequest', () => {
@@ -57,6 +62,8 @@ describe('query_percentiles', () => {
           track_total_hits: true,
         },
         index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });

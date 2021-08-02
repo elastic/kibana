@@ -13,13 +13,14 @@ import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldn
 import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { getRequestBase } from './get_request_base';
 
 const HISTOGRAM_INTERVALS = 1000;
 
 export const getHistogramIntervalRequest = (
   params: SearchServiceFetchParams
 ): estypes.SearchRequest => ({
-  index: params.index,
+  ...getRequestBase(params),
   body: {
     query: getQueryWithParams({ params }),
     size: 0,

@@ -13,6 +13,7 @@ import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldn
 import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { getRequestBase } from './get_request_base';
 
 export interface HistogramItem {
   key: number;
@@ -88,7 +89,7 @@ export const getTransactionDurationCorrelationRequest = (
     },
   };
   return {
-    index: params.index,
+    ...getRequestBase(params),
     body,
   };
 };

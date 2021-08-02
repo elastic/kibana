@@ -15,6 +15,7 @@ import type { AsyncSearchServiceState } from '../async_search_service_state';
 import { TERMS_SIZE } from '../constants';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { getRequestBase } from './get_request_base';
 
 interface FieldValuePair {
   field: string;
@@ -28,7 +29,7 @@ export const getTermsAggRequest = (
   params: SearchServiceFetchParams,
   fieldName: string
 ): estypes.SearchRequest => ({
-  index: params.index,
+  ...getRequestBase(params),
   body: {
     query: getQueryWithParams({ params }),
     size: 0,

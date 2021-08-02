@@ -14,7 +14,12 @@ import {
   getHistogramIntervalRequest,
 } from './query_histogram_range_steps';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 
 describe('query_histogram_range_steps', () => {
   describe('getHistogramIntervalRequest', () => {
@@ -58,6 +63,8 @@ describe('query_histogram_range_steps', () => {
           size: 0,
         },
         index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });

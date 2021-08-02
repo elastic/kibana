@@ -14,7 +14,12 @@ import {
   getTransactionDurationRangesRequest,
 } from './query_ranges';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 const rangeSteps = [1, 3, 5];
 
 describe('query_ranges', () => {
@@ -74,6 +79,8 @@ describe('query_ranges', () => {
           size: 0,
         },
         index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });

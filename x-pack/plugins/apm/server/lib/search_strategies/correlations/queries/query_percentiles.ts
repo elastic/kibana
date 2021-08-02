@@ -13,6 +13,7 @@ import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldn
 import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { getRequestBase } from './get_request_base';
 import { SIGNIFICANT_VALUE_DIGITS } from '../constants';
 
 export interface HistogramItem {
@@ -36,7 +37,7 @@ export const getTransactionDurationPercentilesRequest = (
   const query = getQueryWithParams({ params, fieldName, fieldValue });
 
   return {
-    index: params.index,
+    ...getRequestBase(params),
     body: {
       track_total_hits: true,
       query,
