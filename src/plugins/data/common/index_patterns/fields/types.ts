@@ -9,7 +9,7 @@ import { IndexPatternFieldBase } from '@kbn/es-query';
 import { FieldSpec, IndexPattern } from '../..';
 
 /**
- * @deprecated Use {@link IndexPatternField} or {@link FieldSpec} instead
+ * @deprecated Use {@link IndexPatternField}
  * @removeBy 8.0
  */
 export interface IFieldType extends IndexPatternFieldBase {
