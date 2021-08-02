@@ -11,7 +11,6 @@ import type { IBasePath, IRouter, Logger } from 'src/core/server';
 import type { ElasticsearchConnectionStatus } from '../../common';
 import type { ConfigType } from '../config';
 import { defineEnrollRoutes } from './enroll';
-import { defineViewRoutes } from './views';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -26,5 +25,4 @@ export interface RouteDefinitionParams {
 
 export function defineRoutes(params: RouteDefinitionParams) {
   defineEnrollRoutes(params);
-  defineViewRoutes(params);
 }
