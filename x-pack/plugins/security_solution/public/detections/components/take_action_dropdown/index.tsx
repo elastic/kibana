@@ -8,8 +8,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-import { indexOf } from 'lodash';
 
+import { find, get } from 'lodash/fp';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
 import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
@@ -27,6 +27,7 @@ import { addToCaseActionItem } from './helpers'; */
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { CHANGE_ALERT_STATUS } from './translations';
+import { getFieldValue } from '../host_isolation/helpers';
 
 export const TakeActionDropdown = React.memo(
   ({
@@ -60,9 +61,29 @@ export const TakeActionDropdown = React.memo(
     const insertTimelineHook = useInsertTimeline;
     */
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const isEvent = useMemo(() => ecsData && indexOf(ecsData.event?.kind, 'event') !== -1, [
-      ecsData,
+
+    const eventKind = useMemo(
+      () => getFieldValue({ category: 'event', field: 'event.kind' }, detailsData),
+      [detailsData]
+    );
+
+    const alertIds = useMemo(() => find({ category: '_id', field: '_id' }, detailsData)?.values, [
+      detailsData,
     ]);
+
+    const alertId = get(0, alertIds);
+
+    const ruleId = useMemo(
+      () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, detailsData),
+      [detailsData]
+    );
+
+    const alertStatus = useMemo(
+      () => getFieldValue({ category: 'signal', field: 'signal.status' }, detailsData),
+      [detailsData]
+    );
+
+    const isEvent = eventKind === 'event';
 
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
@@ -105,12 +126,6 @@ export const TakeActionDropdown = React.memo(
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 
-    const ruleId = useMemo(
-      (): string | null =>
-        (ecsData?.signal?.rule && ecsData.signal.rule.id && ecsData.signal.rule.id[0]) ?? null,
-      [ecsData]
-    );
-
     const handleOnAddEventFilterClick = useCallback(() => {
       onAddEventFilterClick();
       setIsPopoverOpen(false);
@@ -121,15 +136,17 @@ export const TakeActionDropdown = React.memo(
     });
 
     const { statusActions } = useAlertsActions({
-      ecsRowData: ecsData,
+      alertStatus,
+      eventId: alertId,
       timelineId,
       closePopover: closePopoverAndFlyout,
     });
 
     const { investigateInTimelineAction } = useInvestigateInTimeline({
-      ecsRowData: ecsData ?? null,
+      ecsRowData: ecsData,
       nonEcsRowData: nonEcsData ?? [],
       onInvestigateInTimelineAlertClick: closePopoverHandler,
+      alertIds,
     });
 
     const alertsActionItems = useMemo(

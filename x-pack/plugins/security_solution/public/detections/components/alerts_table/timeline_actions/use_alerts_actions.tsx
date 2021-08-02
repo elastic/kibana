@@ -14,7 +14,6 @@ import { timelineActions } from '../../../../timelines/store/timeline';
 import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter_group';
 import { updateAlertStatusAction } from '../actions';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
-import { Ecs } from '../../../../../common/ecs';
 import * as i18nCommon from '../../../../common/translations';
 import * as i18n from '../translations';
 
@@ -26,21 +25,17 @@ import {
 import { useUserData } from '../../user_info';
 
 interface Props {
-  ecsRowData: Ecs | null | undefined;
-  timelineId: string;
+  alertStatus?: string;
   closePopover: () => void;
+  eventId?: string;
+  timelineId: string;
 }
 
-export const useAlertsActions = ({ closePopover, ecsRowData, timelineId }: Props) => {
+export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineId }: Props) => {
   const dispatch = useDispatch();
   const [, dispatchToaster] = useStateToaster();
-  const eventId = ecsRowData?._id;
 
   const { addWarning } = useAppToasts();
-
-  const alertStatus = useMemo(() => {
-    return ecsRowData?.signal?.status && (ecsRowData.signal.status[0] as Status);
-  }, [ecsRowData]);
 
   const [{ canUserCRUD, hasIndexMaintenance, hasIndexUpdateDelete }] = useUserData();
 

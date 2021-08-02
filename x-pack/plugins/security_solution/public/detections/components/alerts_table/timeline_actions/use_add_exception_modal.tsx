@@ -14,28 +14,30 @@ import {
   DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
 } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { inputsModel } from '../../../../common/store';
+import { useFetchEcsAlertsData } from './use_fetch_ecs_alerts_data';
 
 interface UseExceptionModalProps {
-  ecsData: Ecs | null | undefined;
+  eventId: string;
+  isEcsRowDataExists?: boolean;
+  ruleIndex: string[] | null | undefined;
   refetch?: inputsModel.Refetch;
   timelineId: string;
 }
 interface UseExceptionModal {
-  alertStatus: Status | undefined;
+  alertsEcsData: Ecs[] | null;
   exceptionModalType: ExceptionListType | null;
-  ruleId: string | null;
-  ruleName: string;
-  ruleIndices: string[];
   onAddExceptionTypeClick: (type: ExceptionListType) => void;
   onAddExceptionCancel: () => void;
   onAddExceptionConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
+  ruleIndices: string[];
 }
 
 export const useExceptionModal = ({
-  ecsData,
+  eventId,
+  isEcsRowDataExists,
+  ruleIndex,
   refetch,
   timelineId,
 }: UseExceptionModalProps): UseExceptionModal => {
@@ -44,34 +46,15 @@ export const useExceptionModal = ({
   // TODO: Steph/ueba remove when past experimental
   const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
 
-  const ruleId = useMemo(
-    (): string | null =>
-      (ecsData?.signal?.rule && ecsData.signal.rule.id && ecsData.signal.rule.id[0]) ?? null,
-    [ecsData]
-  );
-  const ruleName = useMemo(
-    (): string =>
-      (ecsData?.signal?.rule && ecsData.signal.rule.name && ecsData.signal.rule.name[0]) ?? '',
-    [ecsData]
-  );
-
   const ruleIndices = useMemo((): string[] => {
-    if (
-      ecsData?.signal?.rule &&
-      ecsData.signal.rule.index &&
-      ecsData.signal.rule.index.length > 0
-    ) {
-      return ecsData?.signal.rule.index;
+    if (ruleIndex != null) {
+      return ruleIndex;
     } else {
       return uebaEnabled
         ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
         : DEFAULT_INDEX_PATTERN;
     }
-  }, [ecsData, uebaEnabled]);
-
-  const alertStatus = useMemo(() => {
-    return ecsData?.signal?.status && (ecsData?.signal.status[0] as Status);
-  }, [ecsData]);
+  }, [ruleIndex, uebaEnabled]);
 
   const onAddExceptionTypeClick = useCallback((exceptionListType: ExceptionListType): void => {
     setOpenAddExceptionModal(exceptionListType);
@@ -91,14 +74,19 @@ export const useExceptionModal = ({
     [refetch, timelineId]
   );
 
+  const shouldFetchAlertsEcsData = !isEcsRowDataExists && eventId != null;
+  const alertIds = useMemo(() => [eventId], [eventId]);
+  const { alertsEcsData } = useFetchEcsAlertsData({
+    alertIds,
+    shouldFetchAlertsEcsData,
+  });
+
   return {
-    alertStatus,
+    alertsEcsData,
     exceptionModalType,
-    ruleId,
-    ruleName,
-    ruleIndices,
     onAddExceptionTypeClick,
     onAddExceptionCancel,
     onAddExceptionConfirm,
+    ruleIndices,
   };
 };

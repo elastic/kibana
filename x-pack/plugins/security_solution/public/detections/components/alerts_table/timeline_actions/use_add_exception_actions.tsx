@@ -10,8 +10,6 @@ import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getOr } from 'lodash/fp';
 import { Ecs } from '../../../../../common/ecs';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { inputsModel } from '../../../../common/store';
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 

@@ -1,0 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { useEffect, useState, useRef } from 'react';
+import { SearchResponse } from 'elasticsearch';
+import {
+  buildAlertsQuery,
+  formatAlertToEcsSignal,
+} from '../../../../cases/components/case_view/helpers';
+import { Ecs } from '../../../../../common/ecs';
+
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
+import { KibanaServices } from '../../../../common/lib/kibana';
+
+export const useFetchEcsAlertsData = ({
+  alertIds,
+  shouldFetchAlertsEcsData,
+  onError,
+}: {
+  alertIds?: string[] | null | undefined;
+  shouldFetchAlertsEcsData?: boolean;
+  onError?: (e: Error) => void;
+}): { isLoading: boolean | null; alertsEcsData: Ecs[] | null } => {
+  const [isLoading, setIsLoading] = useState<boolean | null>(null);
+  const [alertsEcsData, setAlertEcsData] = useState<Ecs[] | null>(null);
+
+  useEffect(() => {
+    const isSubscribed = true;
+
+    const fetchAlert = async () => {
+      try {
+        setIsLoading(true);
+        const alertResponse = await KibanaServices.get().http.fetch<
+          SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
+        >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+          method: 'POST',
+          body: JSON.stringify(buildAlertsQuery(alertIds ?? [])),
+        });
+        setAlertEcsData(
+          alertResponse?.hits.hits.reduce<Ecs[]>(
+            (acc, { _id, _index, _source }) => [
+              ...acc,
+              {
+                ...formatAlertToEcsSignal(_source as {}),
+                _id,
+                _index,
+                timestamp: _source['@timestamp'],
+              },
+            ],
+            []
+          ) ?? []
+        );
+      } catch (e) {
+        if (isSubscribed) {
+          if (onError) {
+            onError(e);
+          }
+        }
+      }
+      setIsLoading(false);
+    };
+
+    if (shouldFetchAlertsEcsData) {
+      fetchAlert();
+    }
+
+    // return (): void => {
+    //   isSubscribed = false;
+    //   abortCtrlRef.current.abort();
+    // };
+  }, [alertIds, onError, shouldFetchAlertsEcsData]);
+
+  return {
+    isLoading,
+    alertsEcsData,
+  };
+};

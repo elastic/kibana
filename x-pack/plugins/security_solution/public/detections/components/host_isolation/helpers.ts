@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { find, some } from 'lodash/fp';
+import { find } from 'lodash/fp';
 
 import type { TimelineEventsDetailsItem } from '../../../../common';
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { find, get } from 'lodash/fp';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../../common';
 import type { Ecs } from '../../../../../common/ecs';
@@ -14,6 +15,8 @@ import { useExceptionModal } from '../../../../detections/components/alerts_tabl
 import { AddExceptionModalWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
+import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -25,7 +28,6 @@ interface EventDetailsFooterProps {
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
-  isAlert: boolean;
   isHostIsolationPanelOpen: boolean;
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
@@ -37,23 +39,50 @@ export const EventDetailsFooter = React.memo(
     detailsData,
     expandedEvent,
     handleOnEventClosed,
-    isAlert,
     isHostIsolationPanelOpen,
     loadingEventDetails,
     onAddIsolationStatusClick,
     timelineId,
   }: EventDetailsFooterProps) => {
+    const ruleId = useMemo(
+      () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, detailsData),
+      [detailsData]
+    );
+    const ruleName = useMemo(
+      () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
+      [detailsData]
+    );
+    const ruleIndex = useMemo(
+      () => find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values,
+      [detailsData]
+    );
+    const alertStatus = useMemo(
+      () => getFieldValue({ category: 'signal', field: 'signal.status' }, detailsData),
+      [detailsData]
+    ) as Status;
+
+    const eventId =
+      expandedEvent?.eventId ??
+      useMemo(() => getFieldValue({ category: '_id', field: '_id' }, detailsData), [detailsData]);
+    const indexName = useMemo(
+      () => getFieldValue({ category: '_index', field: '_index' }, detailsData),
+      [detailsData]
+    );
+    const timestamp = useMemo(
+      () => getFieldValue({ category: 'base', field: 'timestamp' }, detailsData),
+      [detailsData]
+    );
+
     const {
-      alertStatus,
+      alertsEcsData,
       exceptionModalType,
-      ruleId,
-      ruleName,
-      ruleIndices,
       onAddExceptionTypeClick,
       onAddExceptionCancel,
       onAddExceptionConfirm,
+      ruleIndices,
     } = useExceptionModal({
-      ecsData: expandedEvent?.ecsData,
+      eventId,
+      ruleIndex,
       refetch: expandedEvent?.refetch,
       timelineId,
     });
@@ -62,6 +91,8 @@ export const EventDetailsFooter = React.memo(
       isAddEventFilterModalOpen,
       onAddEventFilterClick,
     } = useEventFilterModal();
+
+    const ecsData = get(0, alertsEcsData);
     return (
       <>
         <EuiFlyoutFooter>
@@ -86,20 +117,26 @@ export const EventDetailsFooter = React.memo(
         {/* This is still wrong to do render flyout/modal inside of the flyout
         We need to completely refactor the EventDetails  component to be correct
       */}
-        {exceptionModalType != null && ruleId != null && expandedEvent?.ecsData != null && (
+        {exceptionModalType != null && ruleId != null && eventId != null && (
           <AddExceptionModalWrapper
+            alertStatus={alertStatus}
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
             exceptionListType={exceptionModalType}
-            ecsData={expandedEvent?.ecsData}
+            eventId={eventId}
             onCancel={onAddExceptionCancel}
             onConfirm={onAddExceptionConfirm}
-            alertStatus={alertStatus}
           />
         )}
-        {isAddEventFilterModalOpen && expandedEvent?.ecsData != null && (
-          <EventFiltersModal data={expandedEvent?.ecsData} onCancel={closeAddEventFilterModal} />
+        {isAddEventFilterModalOpen && (ecsData != null || expandedEvent?.ecsData != null) && (
+          <EventFiltersModal
+            ecsData={expandedEvent?.ecsData ?? ecsData!}
+            eventId={eventId}
+            indexName={indexName}
+            timestamp={timestamp}
+            onCancel={closeAddEventFilterModal}
+          />
         )}
       </>
     );

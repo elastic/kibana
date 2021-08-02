@@ -10,6 +10,7 @@ import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
+
 import {
   ACTION_INVESTIGATE_IN_TIMELINE,
   ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
@@ -17,11 +18,10 @@ import {
 import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 
 interface InvestigateInTimelineActionProps {
-  ecsRowData: Ecs | null;
-  nonEcsRowData: TimelineNonEcsData[];
+  ecsRowData?: Ecs | Ecs[] | null;
+  nonEcsRowData?: TimelineNonEcsData[];
   ariaLabel?: string;
   alertIds?: string[];
-  fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
   buttonType?: 'text' | 'icon';
   onInvestigateInTimelineAlertClick?: () => void;
 }
@@ -30,7 +30,6 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
   alertIds,
   ecsRowData,
-  fetchEcsAlertsData,
   nonEcsRowData,
   buttonType,
   onInvestigateInTimelineAlertClick,
@@ -39,7 +38,6 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     ecsRowData,
     nonEcsRowData,
     alertIds,
-    fetchEcsAlertsData,
     onInvestigateInTimelineAlertClick,
   });
 

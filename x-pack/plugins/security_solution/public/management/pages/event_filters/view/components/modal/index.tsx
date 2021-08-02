@@ -31,7 +31,10 @@ import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
 
 export interface EventFiltersModalProps {
-  data: Ecs;
+  ecsData: Ecs;
+  eventId: string;
+  indexName: string;
+  timestamp: string;
   onCancel(): void;
 }
 
@@ -60,132 +63,134 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(({ data, onCancel }) => {
-  useEventFiltersNotification();
-  const [enrichedData, setEnrichedData] = useState<Ecs | null>();
-  const {
-    data: { search },
-  } = useKibana().services;
-  const dispatch = useDispatch<Dispatch<AppAction>>();
-  const formHasError = useEventFiltersSelector(getFormHasError);
-  const creationInProgress = useEventFiltersSelector(isCreationInProgress);
-  const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
-  const isMounted = useRef(false);
+export const EventFiltersModal: React.FC<EventFiltersModalProps> = memo(
+  ({ ecsData, eventId, indexName, onCancel }) => {
+    useEventFiltersNotification();
+    const [enrichedData, setEnrichedData] = useState<Ecs | null>();
+    const {
+      data: { search },
+    } = useKibana().services;
+    const dispatch = useDispatch<Dispatch<AppAction>>();
+    const formHasError = useEventFiltersSelector(getFormHasError);
+    const creationInProgress = useEventFiltersSelector(isCreationInProgress);
+    const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
+    const isMounted = useRef(false);
 
-  // Enrich the event with missing ECS data from ES source
-  useEffect(() => {
-    isMounted.current = true;
+    // Enrich the event with missing ECS data from ES source
+    useEffect(() => {
+      isMounted.current = true;
 
-    const enrichEvent = async () => {
-      if (!data._index) return;
-      const searchResponse = await search
-        .search({
-          params: {
-            index: data._index,
-            body: {
-              query: {
-                match: {
-                  _id: data._id,
+      const enrichEvent = async () => {
+        if (!indexName) return;
+        const searchResponse = await search
+          .search({
+            params: {
+              index: indexName,
+              body: {
+                query: {
+                  match: {
+                    _id: eventId,
+                  },
                 },
               },
             },
+          })
+          .toPromise();
+
+        if (!isMounted.current) return;
+
+        setEnrichedData({
+          ...ecsData,
+          host: {
+            ...ecsData.host,
+            os: {
+              ...(ecsData?.host?.os || {}),
+              name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.name],
+            },
           },
-        })
-        .toPromise();
+        });
+      };
 
-      if (!isMounted.current) return;
+      enrichEvent();
 
-      setEnrichedData({
-        ...data,
-        host: {
-          ...data.host,
-          os: {
-            ...(data?.host?.os || {}),
-            name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.name],
+      return () => {
+        dispatch({
+          type: 'eventFiltersFormStateChanged',
+          payload: {
+            type: 'UninitialisedResourceState',
           },
-        },
-      });
-    };
+        });
+        isMounted.current = false;
+      };
 
-    enrichEvent();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    return () => {
-      dispatch({
-        type: 'eventFiltersFormStateChanged',
-        payload: {
-          type: 'UninitialisedResourceState',
-        },
-      });
-      isMounted.current = false;
-    };
+    // Initialize the store with the enriched event to allow render the form
+    useEffect(() => {
+      if (enrichedData) {
+        dispatch({
+          type: 'eventFiltersInitForm',
+          payload: { entry: getInitialExceptionFromEvent(enrichedData) },
+        });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [enrichedData]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    useEffect(() => {
+      if (creationSuccessful) {
+        onCancel();
+        dispatch({
+          type: 'eventFiltersFormStateChanged',
+          payload: {
+            type: 'UninitialisedResourceState',
+          },
+        });
+      }
+    }, [creationSuccessful, onCancel, dispatch]);
 
-  // Initialize the store with the enriched event to allow render the form
-  useEffect(() => {
-    if (enrichedData) {
-      dispatch({
-        type: 'eventFiltersInitForm',
-        payload: { entry: getInitialExceptionFromEvent(enrichedData) },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enrichedData]);
-
-  useEffect(() => {
-    if (creationSuccessful) {
+    const handleOnCancel = useCallback(() => {
+      if (creationInProgress) return;
       onCancel();
-      dispatch({
-        type: 'eventFiltersFormStateChanged',
-        payload: {
-          type: 'UninitialisedResourceState',
-        },
-      });
-    }
-  }, [creationSuccessful, onCancel, dispatch]);
+    }, [creationInProgress, onCancel]);
 
-  const handleOnCancel = useCallback(() => {
-    if (creationInProgress) return;
-    onCancel();
-  }, [creationInProgress, onCancel]);
+    const confirmButtonMemo = useMemo(
+      () => (
+        <EuiButton
+          data-test-subj="add-exception-confirm-button"
+          fill
+          disabled={formHasError || creationInProgress}
+          onClick={() => {
+            dispatch({ type: 'eventFiltersCreateStart' });
+          }}
+          isLoading={creationInProgress}
+        >
+          {ACTIONS_CONFIRM}
+        </EuiButton>
+      ),
+      [dispatch, formHasError, creationInProgress]
+    );
 
-  const confirmButtonMemo = useMemo(
-    () => (
-      <EuiButton
-        data-test-subj="add-exception-confirm-button"
-        fill
-        disabled={formHasError || creationInProgress}
-        onClick={() => {
-          dispatch({ type: 'eventFiltersCreateStart' });
-        }}
-        isLoading={creationInProgress}
-      >
-        {ACTIONS_CONFIRM}
-      </EuiButton>
-    ),
-    [dispatch, formHasError, creationInProgress]
-  );
+    return (
+      <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
+        <ModalHeader>
+          <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
+          <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
+        </ModalHeader>
 
-  return (
-    <Modal onClose={handleOnCancel} data-test-subj="add-exception-modal">
-      <ModalHeader>
-        <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
-        <ModalHeaderSubtitle>{MODAL_SUBTITLE}</ModalHeaderSubtitle>
-      </ModalHeader>
+        <ModalBodySection>
+          <EventFiltersForm />
+        </ModalBodySection>
 
-      <ModalBodySection>
-        <EventFiltersForm />
-      </ModalBodySection>
-
-      <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
-          {ACTIONS_CANCEL}
-        </EuiButtonEmpty>
-        {confirmButtonMemo}
-      </EuiModalFooter>
-    </Modal>
-  );
-});
+        <EuiModalFooter>
+          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
+            {ACTIONS_CANCEL}
+          </EuiButtonEmpty>
+          {confirmButtonMemo}
+        </EuiModalFooter>
+      </Modal>
+    );
+  }
+);
 
 EventFiltersModal.displayName = 'EventFiltersModal';

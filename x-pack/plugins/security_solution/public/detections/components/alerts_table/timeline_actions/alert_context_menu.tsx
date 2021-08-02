@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { indexOf } from 'lodash';
 
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { get } from 'lodash/fp';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -51,6 +52,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
+  const ruleId = get(0, ecsRowData?.signal?.rule?.id);
+  const ruleName = get(0, ecsRowData?.signal?.rule?.name);
+  const alertStatus = get(0, ecsRowData?.signal?.status);
+
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
   }, [isPopoverOpen]);
@@ -75,16 +80,15 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   }, [disabled, onButtonClick, ariaLabel]);
 
   const {
-    alertStatus,
     exceptionModalType,
-    ruleId,
-    ruleName,
-    ruleIndices,
     onAddExceptionCancel,
     onAddExceptionConfirm,
     onAddExceptionTypeClick,
+    ruleIndices,
   } = useExceptionModal({
-    ecsData: ecsRowData,
+    eventId: ecsRowData?._id,
+    isEcsRowDataExists: ecsRowData == null,
+    ruleIndex: ecsRowData?.signal?.rule?.index,
     refetch,
     timelineId,
   });
@@ -158,7 +162,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           ruleId={ruleId}
           ruleIndices={ruleIndices}
           exceptionListType={exceptionModalType}
-          ecsData={ecsRowData}
+          eventId={ecsRowData?._id}
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
           alertStatus={alertStatus}
@@ -184,7 +188,7 @@ type AddExceptionModalWrapperProps = Omit<
   AddExceptionModalProps,
   'alertData' | 'isAlertDataLoading'
 > & {
-  ecsData: Ecs;
+  eventId?: string;
 };
 
 /**
@@ -197,7 +201,7 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
   ruleId,
   ruleIndices,
   exceptionListType,
-  ecsData,
+  eventId,
   onCancel,
   onConfirm,
   alertStatus,
@@ -206,7 +210,7 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
-    query: buildGetAlertByIdQuery(ecsData?._id),
+    query: buildGetAlertByIdQuery(eventId),
     indexName: signalIndexName,
   });
 

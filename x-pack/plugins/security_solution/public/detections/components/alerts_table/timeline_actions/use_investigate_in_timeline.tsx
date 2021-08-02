@@ -8,6 +8,7 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../common/lib/kibana';
+
 import { TimelineId } from '../../../../../common/types/timeline';
 import { Ecs } from '../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
@@ -16,13 +17,12 @@ import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
-import { getEventType } from '../../../../timelines/components/timeline/body/helpers';
+import { useFetchEcsAlertsData } from './use_fetch_ecs_alerts_data';
 
 interface UseInvestigateInTimelineActionProps {
-  ecsRowData: Ecs | null;
-  nonEcsRowData: TimelineNonEcsData[];
-  alertIds?: string[];
-  fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
+  ecsRowData?: Ecs | Ecs[] | null;
+  nonEcsRowData?: TimelineNonEcsData[];
+  alertIds?: string[] | null | undefined;
   onInvestigateInTimelineAlertClick?: () => void;
 }
 
@@ -30,7 +30,6 @@ export const useInvestigateInTimeline = ({
   ecsRowData,
   nonEcsRowData,
   alertIds,
-  fetchEcsAlertsData,
   onInvestigateInTimelineAlertClick,
 }: UseInvestigateInTimelineActionProps) => {
   const {
@@ -64,51 +63,52 @@ export const useInvestigateInTimeline = ({
     [dispatch, updateTimelineIsLoading]
   );
 
+  const showInvestigateInTimelineAction = alertIds != null;
+  const shouldFetchAlertsEcsData = ecsRowData == null && alertIds != null;
+  const { isLoading: isFetchingAlertEcs, alertsEcsData } = useFetchEcsAlertsData({
+    alertIds,
+    shouldFetchAlertsEcsData,
+  });
+
   const investigateInTimelineAlertClick = useCallback(async () => {
     if (onInvestigateInTimelineAlertClick) {
       onInvestigateInTimelineAlertClick();
     }
-    try {
-      if (ecsRowData != null) {
-        await sendAlertToTimelineAction({
-          createTimeline,
-          ecsData: ecsRowData,
-          nonEcsData: nonEcsRowData,
-          searchStrategyClient,
-          updateTimelineIsLoading,
-        });
-      }
-      if (ecsRowData == null && fetchEcsAlertsData) {
-        const alertsEcsData = await fetchEcsAlertsData(alertIds);
-        await sendAlertToTimelineAction({
-          createTimeline,
-          ecsData: alertsEcsData,
-          nonEcsData: nonEcsRowData,
-          searchStrategyClient,
-          updateTimelineIsLoading,
-        });
-      }
-    } catch {
-      // TODO show a toaster that something went wrong
+    if (alertsEcsData != null) {
+      await sendAlertToTimelineAction({
+        createTimeline,
+        ecsData: alertsEcsData,
+        nonEcsData: nonEcsRowData ?? [],
+        searchStrategyClient,
+        updateTimelineIsLoading,
+      });
+    }
+
+    if (ecsRowData != null) {
+      await sendAlertToTimelineAction({
+        createTimeline,
+        ecsData: ecsRowData,
+        nonEcsData: nonEcsRowData ?? [],
+        searchStrategyClient,
+        updateTimelineIsLoading,
+      });
     }
   }, [
-    alertIds,
+    alertsEcsData,
     createTimeline,
     ecsRowData,
-    fetchEcsAlertsData,
     nonEcsRowData,
     onInvestigateInTimelineAlertClick,
     searchStrategyClient,
     updateTimelineIsLoading,
   ]);
-  const eventType = ecsRowData != null ? getEventType(ecsRowData) : null;
-  const showInvestigateInTimelineAction = eventType === 'signal' && ecsRowData != null;
 
   const investigateInTimelineAction = showInvestigateInTimelineAction
     ? [
         {
           name: ACTION_INVESTIGATE_IN_TIMELINE,
           onClick: investigateInTimelineAlertClick,
+          disabled: isFetchingAlertEcs,
         },
       ]
     : [];
