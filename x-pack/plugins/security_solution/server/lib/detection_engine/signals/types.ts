@@ -239,6 +239,7 @@ export interface Signal {
   };
   original_time?: string;
   original_event?: SearchTypes;
+  reason?: string;
   status: Status;
   threshold_result?: ThresholdResult;
   original_signal?: SearchTypes;
