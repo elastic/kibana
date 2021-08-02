@@ -490,11 +490,11 @@ Reporting::
 * Relax save requirement for CSV reports {kibana-pull}99313[#99313]
 * Kibana Application Privileges for Reporting {kibana-pull}94966[#94966]
 Security::
-* Create API keys with metadata {kibana-pull}100682[#100682]
+* Adds support for creating API Keys with custom metadata {kibana-pull}100682[#100682]
 * Role Management: improve editing experience for DLS queries {kibana-pull}99977[#99977]
-* Simplify deleting spaces {kibana-pull}99960[#99960]
+* Simplify the process for deleting a space {kibana-pull}99960[#99960]
 * Use `vega-interpreter` to safely evaluate Vega expressions {kibana-pull}98832[#98832]
-* Handle session timeout and user activity {kibana-pull}98461[#98461]
+* Improves session timeout handling and activity tracking {kibana-pull}98461[#98461]
 Sharing::
 * Locator docs {kibana-pull}103129[#103129]
 * Enable actions on Lens Embeddable {kibana-pull}102038[#102038]
