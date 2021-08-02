@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectsClient } from 'kibana/server';
+import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { ShortUrlData } from 'src/plugins/share/common/url_service/short_urls/types';
 import { LEGACY_SHORT_URL_LOCATOR_ID } from '../legacy_short_url_locator';
@@ -98,7 +98,7 @@ const createAttributes = <P extends SerializableState = SerializableState>(
 
 export interface SavedObjectShortUrlStorageDependencies {
   savedObjectType: string;
-  savedObjects: SavedObjectsClient;
+  savedObjects: SavedObjectsClientContract;
 }
 
 export class SavedObjectShortUrlStorage implements ShortUrlStorage {

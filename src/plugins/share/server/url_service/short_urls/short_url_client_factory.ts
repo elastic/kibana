@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClient } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import type { IShortUrlClientFactory } from '../../../common/url_service';
 import { ServerShortUrlClient } from './short_url_client';
 import { SavedObjectShortUrlStorage } from './storage/saved_object_short_url_storage';
@@ -22,7 +22,7 @@ export interface ServerShortUrlClientFactoryDependencies {
 }
 
 export interface ServerShortUrlClientFactoryCreateParams {
-  savedObjects: SavedObjectsClient;
+  savedObjects: SavedObjectsClientContract;
 }
 
 export class ServerShortUrlClientFactory

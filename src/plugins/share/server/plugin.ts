@@ -14,6 +14,7 @@ import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
 import { ServerUrlService, ServerShortUrlClientFactory } from './url_service';
+import { registerUrlServiceRoutes } from './url_service/http/register_url_service_routes';
 
 /** @public */
 export interface SharePluginSetup {
@@ -46,7 +47,11 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       }),
     });
 
-    createRoutes(core, this.initializerContext.logger.get());
+    const router = core.http.createRouter();
+
+    createRoutes(core, router, this.initializerContext.logger.get());
+    registerUrlServiceRoutes(router, this.url);
+
     core.savedObjects.registerType(url);
     core.uiSettings.register({
       [CSV_SEPARATOR_SETTING]: {
