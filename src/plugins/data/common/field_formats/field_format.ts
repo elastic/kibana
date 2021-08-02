@@ -30,6 +30,18 @@ export abstract class FieldFormat {
    * @public
    */
   static id: string;
+
+  /**
+   * Hidden field formats can only be accessed directly by id,
+   * They won't appear in field format editor UI,
+   * But they can be accessed and used from code internally.
+   *
+   * @property {boolean} -  Is this a hidden field format
+   * @static
+   * @public
+   */
+  static hidden: boolean;
+
   /**
    * @property {string} -  Field Format Title
    * @static

@@ -6,7 +6,7 @@
 # 2.0.
 #
 
-curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
+curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
      -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
      -H 'kbn-xsrf: true' \
      -H 'Content-Type: application/json' \

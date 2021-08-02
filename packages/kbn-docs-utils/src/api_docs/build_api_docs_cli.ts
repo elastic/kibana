@@ -13,11 +13,19 @@ import { REPO_ROOT, run, CiStatsReporter, createFlagError } from '@kbn/dev-utils
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, ApiStats, MissingApiItemMap, PluginApi, TypeKind } from './types';
+import {
+  ApiDeclaration,
+  ApiStats,
+  MissingApiItemMap,
+  PluginApi,
+  ReferencedDeprecationsByPlugin,
+  TypeKind,
+} from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
-import { writeDeprecationDoc } from './mdx/write_deprecations_doc';
+import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
+import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -87,7 +95,11 @@ export function runBuildApiDocsCli() {
 
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
-        const pluginStats = collectApiStatsForPlugin(pluginApi, missingApiItems);
+        const pluginStats = collectApiStatsForPlugin(
+          pluginApi,
+          missingApiItems,
+          referencedDeprecations
+        );
 
         reporter.metrics([
           {
@@ -113,7 +125,7 @@ export function runBuildApiDocsCli() {
           {
             id,
             group: 'References to deprecated APIs',
-            value: referencedDeprecations[id] ? referencedDeprecations[id].length : 0,
+            value: pluginStats.deprecatedAPIsReferencedCount,
           },
         ]);
 
@@ -121,7 +133,7 @@ export function runBuildApiDocsCli() {
           `https://github.com/elastic/kibana/tree/master/${d.source.path}#L${d.source.lineNumber}`;
 
         if (collectReferences && pluginFilter === plugin.manifest.id) {
-          if (referencedDeprecations[id] && referencedDeprecations[id].length > 0) {
+          if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
             log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
             // eslint-disable-next-line no-console
             console.table(referencedDeprecations[id]);
@@ -147,7 +159,7 @@ export function runBuildApiDocsCli() {
           const passesAllChecks =
             pluginStats.isAnyType.length === 0 &&
             pluginStats.missingComments.length === 0 &&
-            referencedDeprecations[id].length === 0 &&
+            pluginStats.deprecatedAPIsReferencedCount === 0 &&
             (!missingApiItems[id] || Object.keys(missingApiItems[id]).length === 0);
 
           log.info(`--- Plugin '${id}' ${passesAllChecks ? ` passes all checks ----` : '----`'}`);
@@ -196,7 +208,8 @@ export function runBuildApiDocsCli() {
         if (pluginStats.apiCount > 0) {
           writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
         }
-        writeDeprecationDoc(outputFolder, referencedDeprecations, log);
+        writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+        writeDeprecationDocByApi(outputFolder, referencedDeprecations, log);
       });
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);
@@ -230,11 +243,16 @@ function getTsProject(repoPath: string) {
   return project;
 }
 
-function collectApiStatsForPlugin(doc: PluginApi, missingApiItems: MissingApiItemMap): ApiStats {
+function collectApiStatsForPlugin(
+  doc: PluginApi,
+  missingApiItems: MissingApiItemMap,
+  deprecations: ReferencedDeprecationsByPlugin
+): ApiStats {
   const stats: ApiStats = {
     missingComments: [],
     isAnyType: [],
     noReferences: [],
+    deprecatedAPIsReferencedCount: 0,
     apiCount: countApiForPlugin(doc),
     missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
   };
@@ -247,6 +265,7 @@ function collectApiStatsForPlugin(doc: PluginApi, missingApiItems: MissingApiIte
   Object.values(doc.common).forEach((def) => {
     collectStatsForApi(def, stats, doc);
   });
+  stats.deprecatedAPIsReferencedCount = deprecations[doc.id] ? deprecations[doc.id].length : 0;
   return stats;
 }
 

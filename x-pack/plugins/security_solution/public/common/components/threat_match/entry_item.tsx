@@ -10,7 +10,8 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import { IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IndexPatternFieldBase } from '@kbn/es-query';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
@@ -40,7 +41,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   onChange,
 }): JSX.Element => {
   const handleFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: IndexPatternFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },
@@ -48,7 +49,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   );
 
   const handleThreatFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: IndexPatternFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnThreatFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },

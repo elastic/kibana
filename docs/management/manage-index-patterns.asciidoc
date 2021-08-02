@@ -48,7 +48,7 @@ The script must match the field *Type*, or the script fails.
 +
 For information on how to create runtime fields in *Discover*, refer to <<add-field-in-discover,Add a field>>.
 +
-For information on how to create runtime fields in *Lens*, refer to <<add-fields-in-lens,Add fields>>.
+For information on how to create runtime fields in *Lens*, refer to <<change-the-fields,Change the fields list>>.
 
 [float]
 [[runtime-field-examples]]

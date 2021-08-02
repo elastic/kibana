@@ -150,7 +150,7 @@ export class UptimePlugin
         });
         if (
           clientPluginsStart.triggersActionsUi &&
-          !clientPluginsStart.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
+          !clientPluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)
         ) {
           observabilityRuleTypeRegistry.register(alertInitializer);
         }
@@ -163,9 +163,9 @@ export class UptimePlugin
         });
         if (
           clientPluginsStart.triggersActionsUi &&
-          !clientPluginsStart.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
+          !clientPluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)
         ) {
-          plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
+          plugins.triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
         }
       });
     });
