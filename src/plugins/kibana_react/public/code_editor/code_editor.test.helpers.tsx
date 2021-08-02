@@ -8,8 +8,6 @@
 import React, { useEffect, KeyboardEventHandler } from 'react';
 import { monaco } from '@kbn/monaco';
 
-import { keyCodes } from './code_editor';
-
 function createEditorInstance() {
   const keyDownListeners: any[] = [];
   const didShowListeners: any[] = [];
@@ -46,7 +44,7 @@ function createEditorInstance() {
         keyDownListeners.forEach((listener) => listener(e));
 
         // Close the suggestions when hitting the ESC key
-        if (e.keyCode === keyCodes.ESCAPE && areSuggestionsVisible) {
+        if (e.keyCode === monaco.KeyCode.Escape && areSuggestionsVisible) {
           editorInstance.__helpers__.hideSuggestions();
         }
       }) as KeyboardEventHandler,
