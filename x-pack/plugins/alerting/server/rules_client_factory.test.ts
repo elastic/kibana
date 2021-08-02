@@ -7,7 +7,7 @@
 
 import { Request } from '@hapi/hapi';
 import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
-import { alertTypeRegistryMock } from './alert_type_registry.mock';
+import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { KibanaRequest } from '../../../../src/core/server';
 import {
@@ -44,7 +44,7 @@ const alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMoc
 const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
   taskManager: taskManagerMock.createStart(),
-  alertTypeRegistry: alertTypeRegistryMock.create(),
+  ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
@@ -119,7 +119,7 @@ test('creates an alerts client with proper constructor arguments when security i
     actionsAuthorization,
     logger: rulesClientFactoryParams.logger,
     taskManager: rulesClientFactoryParams.taskManager,
-    alertTypeRegistry: rulesClientFactoryParams.alertTypeRegistry,
+    ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
     spaceId: 'default',
     namespace: 'default',
     getUserName: expect.any(Function),
@@ -158,7 +158,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     actionsAuthorization,
     logger: rulesClientFactoryParams.logger,
     taskManager: rulesClientFactoryParams.taskManager,
-    alertTypeRegistry: rulesClientFactoryParams.alertTypeRegistry,
+    ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
     spaceId: 'default',
     namespace: 'default',
     getUserName: expect.any(Function),

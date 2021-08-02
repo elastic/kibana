@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', async () => {
-        expectSnapshot(response.body.items.length).toMatchInline(`135`);
+        expectSnapshot(response.body.items.length).toMatchInline(`111`);
       });
 
       it('returns the correct buckets', async () => {
@@ -60,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1735,
+            "averageResponseTime": 1663,
             "impact": 0,
             "key": Object {
               "service.name": "opbeans-java",
@@ -75,16 +75,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
-            "averageResponseTime": 553058.519181586,
+            "averageResponseTime": 131831.268456376,
             "impact": 100,
             "key": Object {
               "service.name": "kibana",
-              "transaction.name": "POST /api/apm/settings/agent-configuration/search",
+              "transaction.name": "markAvailableTasksAsClaimed",
             },
             "serviceName": "kibana",
-            "transactionName": "POST /api/apm/settings/agent-configuration/search",
-            "transactionType": "request",
-            "transactionsPerMinute": 5.4,
+            "transactionName": "markAvailableTasksAsClaimed",
+            "transactionType": "taskManager markAvailableTasksAsClaimed",
+            "transactionsPerMinute": 39.7333333333333,
           }
         `);
 
@@ -95,20 +95,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "transaction.name": "DispatcherServlet#doPost",
             },
             Object {
-              "service.name": "opbeans-java",
-              "transaction.name": "APIRestController#product",
+              "service.name": "opbeans-node",
+              "transaction.name": "POST /api/orders",
             },
             Object {
-              "service.name": "opbeans-python",
-              "transaction.name": "GET opbeans.views.stats",
+              "service.name": "kibana",
+              "transaction.name": "GET /translations/?.json",
             },
             Object {
-              "service.name": "opbeans-python",
-              "transaction.name": "GET opbeans.views.orders",
+              "service.name": "kibana",
+              "transaction.name": "GET /ui/#",
             },
             Object {
               "service.name": "opbeans-node",
-              "transaction.name": "GET /api/products/:id",
+              "transaction.name": "GET /api/orders/:id",
             },
           ]
         `);

@@ -14,7 +14,6 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { Direction } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import { TimelineTabs } from '../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,

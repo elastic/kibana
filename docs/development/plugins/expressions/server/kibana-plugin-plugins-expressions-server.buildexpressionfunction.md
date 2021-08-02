@@ -13,7 +13,7 @@ Note that to preserve type safety and ensure no args are missing, all required a
 ```typescript
 export declare function buildExpressionFunction<FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition>(fnName: InferFunctionDefinition<FnDef>['name'], 
 initialArgs: {
-    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[];
+    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[] | ExpressionAstExpression | ExpressionAstExpression[];
 }): ExpressionAstFunctionBuilder<FnDef>;
 ```
 
@@ -22,7 +22,7 @@ initialArgs: {
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  fnName | <code>InferFunctionDefinition&lt;FnDef&gt;['name']</code> |  |
-|  initialArgs | <code>{</code><br/><code>    [K in keyof FunctionArgs&lt;FnDef&gt;]: FunctionArgs&lt;FnDef&gt;[K] &#124; ExpressionAstExpressionBuilder &#124; ExpressionAstExpressionBuilder[];</code><br/><code>}</code> |  |
+|  initialArgs | <code>{</code><br/><code>    [K in keyof FunctionArgs&lt;FnDef&gt;]: FunctionArgs&lt;FnDef&gt;[K] &#124; ExpressionAstExpressionBuilder &#124; ExpressionAstExpressionBuilder[] &#124; ExpressionAstExpression &#124; ExpressionAstExpression[];</code><br/><code>}</code> |  |
 
 <b>Returns:</b>
 

@@ -12,7 +12,8 @@ import { EuiBasicTable, EuiButton, EuiFieldText, EuiFormRow, EuiSpacer } from '@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor } from '../default';
+import { DefaultFormatEditor } from '../default/default';
+import { formatId } from './constants';
 
 export interface StaticLookupFormatEditorFormatParams {
   lookupEntries: Array<{ key: string; value: string }>;
@@ -26,7 +27,7 @@ interface StaticLookupItem {
 }
 
 export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFormatEditorFormatParams> {
-  static formatId = 'static_lookup';
+  static formatId = formatId;
   onLookupChange = (newLookupParams: { value?: string; key?: string }, index: number) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
     lookupEntries[index] = {
