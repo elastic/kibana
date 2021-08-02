@@ -100,6 +100,10 @@ export default ({ getService }: FtrProviderContext) => {
       const signalsOpen = await getOpenSignals(supertest, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(1);
       const signal = signalsOpen.hits.hits[0];
+      if (!signal._source) {
+        return expect(signal._source).to.be.ok();
+      }
+
       expect(signal._source).eql({
         '@timestamp': signal._source['@timestamp'],
         actual: [1],
