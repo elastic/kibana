@@ -9,15 +9,7 @@ import { ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
-import {
-  Ancestor,
-  BaseSignalHit,
-  SignalHit,
-  SignalSourceHit,
-  SimpleHit,
-  ThresholdResult,
-  WrappedSignalHit,
-} from '../../../signals/types';
+import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import { getValidDateFromDoc, isWrappedSignalHit } from '../../../signals/utils';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
@@ -29,25 +21,55 @@ import { isWrappedRACAlert } from '../../utils';
  * signal's `signal.parents` array.
  * @param doc The parent signal or event
  */
-export const buildParent = (doc: BaseSignalHit): Ancestor => {
-  if (doc._source?.signal != null) {
-    return {
-      rule: doc._source?.signal.rule.id,
-      id: doc._id,
-      type: 'signal',
-      index: doc._index,
-      // We first look for signal.depth and use that if it exists. If it doesn't exist, this should be a pre-7.10 signal
-      // and should have signal.parent.depth instead. signal.parent.depth in this case is treated as equivalent to signal.depth.
-      depth: doc._source?.signal.depth ?? doc._source?.signal.parent?.depth ?? 1,
-    };
-  } else {
-    return {
-      id: doc._id,
-      type: 'event',
-      index: doc._index,
-      depth: 0,
-    };
+export const buildParent = (doc: SimpleHit): Ancestor => {
+  const docs = [doc];
+  if (isWrappedSignalHit(docs, true)) {
+    const _doc = docs[0];
+    if (_doc._source?.signal != null) {
+      return {
+        rule: _doc._source?.signal.rule.id,
+        id: _doc._id,
+        type: 'signal',
+        index: _doc._index,
+        // We first look for signal.depth and use that if it exists. If it doesn't exist, this should be a pre-7.10 signal
+        // and should have signal.parent.depth instead. signal.parent.depth in this case is treated as equivalent to signal.depth.
+        depth: _doc._source?.signal.depth ?? _doc._source?.signal.parent?.depth ?? 1,
+      };
+    } else {
+      return {
+        id: _doc._id,
+        type: 'event',
+        index: _doc._index,
+        depth: 0,
+      };
+    }
+  } else if (isWrappedRACAlert(docs, false)) {
+    // TODO: note that this only works for RAC alerts... should we handle pre-RAC signals?
+    const _doc = docs[0];
+    if (_doc._source['kibana.alert.id'] != null) {
+      return {
+        rule: _doc._source['kibana.alert.rule.id'] as string,
+        id: _doc._id,
+        type: 'signal',
+        index: _doc._index,
+        depth: _doc._source['kibana.alert.depth'] as number,
+      };
+    } else {
+      return {
+        id: _doc._id,
+        type: 'event',
+        index: _doc._index,
+        depth: 0,
+      };
+    }
   }
+
+  return {
+    id: '',
+    type: '',
+    index: '',
+    depth: 0,
+  };
 };
 
 /**
@@ -55,14 +77,37 @@ export const buildParent = (doc: BaseSignalHit): Ancestor => {
  * creating an array of N+1 ancestors.
  * @param doc The parent signal/event for which to extend the ancestry.
  */
-export const buildAncestors = (doc: BaseSignalHit): Ancestor[] => {
-  const newAncestor = buildParent(doc);
-  const existingAncestors = doc._source?.signal?.ancestors;
-  if (existingAncestors != null) {
-    return [...existingAncestors, newAncestor];
-  } else {
-    return [newAncestor];
+export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
+  const docs = [doc];
+  if (isWrappedSignalHit(docs, true)) {
+    const _doc = docs[0];
+    const newAncestor = buildParent(_doc);
+    if (newAncestor != null) {
+      const existingAncestors = _doc._source?.signal?.ancestors;
+      if (existingAncestors != null) {
+        return [...existingAncestors, newAncestor];
+      } else {
+        return [newAncestor];
+      }
+    } else {
+      return [];
+    }
+  } else if (isWrappedRACAlert(docs, false)) {
+    const _doc = docs[0];
+    const newAncestor = buildParent(_doc);
+    if (newAncestor != null) {
+      const existingAncestors = _doc._source['kibana.alert.ancestors'] as Ancestor[];
+      if (existingAncestors != null) {
+        return [...existingAncestors, newAncestor];
+      } else {
+        return [newAncestor];
+      }
+    } else {
+      return [];
+    }
   }
+
+  return [];
 };
 
 /**
@@ -71,55 +116,63 @@ export const buildAncestors = (doc: BaseSignalHit): Ancestor[] => {
  * is our "signal object" then we don't want to remove it.
  * @param doc The source index doc to a signal.
  */
-export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
-  invariant(doc._source, '_source field not found');
-  const { signal, ...noSignal } = doc._source;
-  if (signal == null || isEventTypeSignal(doc)) {
-    return doc;
-  } else {
-    return {
-      ...doc,
-      _source: { ...noSignal },
-    };
+export const removeClashes = (doc: SimpleHit) => {
+  const docs = [doc];
+  if (isWrappedSignalHit(docs, false)) {
+    const _doc = docs[0];
+    invariant(_doc._source, '_source field not found');
+    const { signal, ...noSignal } = _doc._source;
+    if (signal == null || isEventTypeSignal(_doc)) {
+      return _doc;
+    } else {
+      return {
+        ..._doc,
+        _source: { ...noSignal },
+      };
+    }
   }
+  return docs[0];
 };
 
 /**
- * Builds the `signal.*` fields that are common across all signals.
- * @param docs The parent signals/events of the new signal to be built.
- * @param rule The rule that is generating the new signal.
+ * Builds the `kibana.alert.*` fields that are common across all alerts.
+ * @param docs The parent alerts/events of the new alert to be built.
+ * @param rule The rule that is generating the new alert.
  */
-export const buildAlert = (doc: SignalSourceHit, rule: RulesSchema) => {
-  const removedClashes = removeClashes(doc);
-  const parent = buildParent(removedClashes);
-  const ancestors = buildAncestors(removedClashes);
-  const immutable = doc._source?.signal?.rule.immutable ? 'true' : 'false';
-
-  const source = doc._source as SignalHit;
-  const signal = source?.signal;
-  const signalRule = signal?.rule;
+export const buildAlert = (docs: SimpleHit[], rule: RulesSchema): RACAlert => {
+  const removedClashes = docs.map(removeClashes);
+  const parents = removedClashes.map(buildParent).filter((parent) => parent != null) as Ancestor[];
+  const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
+  const ancestors = removedClashes.reduce(
+    (acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)),
+    []
+  );
+  const _rule = isWrappedSignalHit(docs, true)
+    ? docs[0]._source?.signal?.rule
+    : ((docs[0]._source as RACAlert)['kibana.alert.rule'] as RulesSchema);
 
   return {
+    '@timestamp': new Date().toISOString(),
     'kibana.alert.ancestors': ancestors as object[],
     [ALERT_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS]: 'open',
-    'kibana.alert.depth': parent.depth,
-    'kibana.alert.rule.false_positives': signalRule?.false_positives ?? [],
-    'kibana.alert.rule.id': rule.id,
-    'kibana.alert.rule.immutable': immutable,
-    'kibana.alert.rule.index': signalRule?.index ?? [],
-    'kibana.alert.rule.language': signalRule?.language ?? 'kuery',
-    'kibana.alert.rule.max_signals': signalRule?.max_signals ?? DEFAULT_MAX_SIGNALS,
-    'kibana.alert.rule.query': signalRule?.query ?? '*:*',
-    'kibana.alert.rule.saved_id': signalRule?.saved_id ?? '',
-    'kibana.alert.rule.threat_index': signalRule?.threat_index,
-    'kibana.alert.rule.threat_indicator_path': signalRule?.threat_indicator_path,
-    'kibana.alert.rule.threat_language': signalRule?.threat_language,
+    'kibana.alert.depth': depth,
+    'kibana.alert.rule.false_positives': _rule?.false_positives ?? [],
+    'kibana.alert.rule.id': _rule.id,
+    'kibana.alert.rule.immutable': _rule.immutable ? 'true' : 'false',
+    'kibana.alert.rule.index': _rule.index ?? [],
+    'kibana.alert.rule.language': _rule.language ?? 'kuery',
+    'kibana.alert.rule.max_signals': _rule.max_signals ?? DEFAULT_MAX_SIGNALS,
+    'kibana.alert.rule.query': _rule.query ?? '*:*',
+    'kibana.alert.rule.saved_id': _rule.saved_id ?? '',
+    'kibana.alert.rule.threat_index': _rule.threat_index,
+    'kibana.alert.rule.threat_indicator_path': _rule.threat_indicator_path,
+    'kibana.alert.rule.threat_language': _rule.threat_language,
     'kibana.alert.rule.threat_mapping.field': '', // TODO
     'kibana.alert.rule.threat_mapping.value': '', // TODO
     'kibana.alert.rule.threat_mapping.type': '', // TODO
-    'kibana.alert.rule.threshold.field': signalRule?.threshold?.field,
-    'kibana.alert.rule.threshold.value': signalRule?.threshold?.value,
+    'kibana.alert.rule.threshold.field': _rule.threshold?.field,
+    'kibana.alert.rule.threshold.value': _rule.threshold?.value,
     'kibana.alert.rule.threshold.cardinality.field': '', // TODO
     'kibana.alert.rule.threshold.cardinality.value': 0, // TODO
   };
