@@ -17,6 +17,7 @@ import {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectReference,
+  SavedObjectsResolveResponse,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
@@ -70,6 +71,9 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   isPreconfigured: boolean;
 }
 
+export type ResolvedActionResult = ActionResult &
+  Partial<Omit<SavedObjectsResolveResponse, 'saved_object'>>;
+
 export interface PreConfiguredAction<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
@@ -77,7 +81,7 @@ export interface PreConfiguredAction<
   secrets: Secrets;
 }
 
-export interface FindActionResult extends ActionResult {
+export interface FindActionResult extends ResolvedActionResult {
   referencedByCount: number;
 }
 

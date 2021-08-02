@@ -25,6 +25,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
 import {
   ActionResult,
+  ResolvedActionResult,
   FindActionResult,
   RawAction,
   PreConfiguredAction,
@@ -181,7 +182,7 @@ export class ActionsClient {
   /**
    * Update action
    */
-  public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
+  public async update({ id, action }: UpdateOptions): Promise<ResolvedActionResult> {
     try {
       await this.authorization.ensureAuthorized('update');
 
@@ -211,8 +212,8 @@ export class ActionsClient {
     }
     const {
       saved_object: { attributes, references, version },
+      ...resolveResponse
     } = await this.unsecuredSavedObjectsClient.resolve<RawAction>('action', id);
-    // TODO: How to handle `resolveResponse` here
 
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
@@ -258,19 +259,14 @@ export class ActionsClient {
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
+      ...this.handleResolveResponse(resolveResponse),
     };
   }
 
   /**
    * Get an action
    */
-  public async get({
-    id,
-  }: {
-    id: string;
-  }): Promise<
-    ActionResult & { resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'> }
-  > {
+  public async get({ id }: { id: string }): Promise<ResolvedActionResult> {
     try {
       await this.authorization.ensureAuthorized('get');
     } catch (error) {
@@ -308,8 +304,6 @@ export class ActionsClient {
       ...resolveResponse
     } = await this.unsecuredSavedObjectsClient.resolve<RawAction>('action', id);
 
-    // TODO: How to handle `resolveResponse` here
-
     this.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.GET,
@@ -324,8 +318,14 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
-      resolveResponse,
+      ...this.handleResolveResponse(resolveResponse),
     };
+  }
+
+  private handleResolveResponse(
+    resolveResponse: Omit<SavedObjectsResolveResponse, 'saved_object'>
+  ): Partial<Omit<SavedObjectsResolveResponse, 'saved_object'>> {
+    return resolveResponse.outcome === 'exactMatch' ? {} : resolveResponse;
   }
 
   /**
@@ -360,7 +360,7 @@ export class ActionsClient {
     ).map(({ saved_object: action, ...resolveResponse }) => {
       return {
         ...actionFromSavedObject(action),
-        resolveResponse,
+        ...this.handleResolveResponse(resolveResponse),
       };
     });
 
@@ -429,6 +429,10 @@ export class ActionsClient {
     ];
 
     const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
+    // The SavedObjectsClient currently does not offer a bulkResolve function. This is ok for now
+    // since the only usage of ActionsClient.getBulk is the RulesClient, which stores actions SO
+    // IDs inside its references array, so all actions SO IDs should be up to date, negating the
+    // need for a bulk resolve.
     const bulkGetResult = await this.unsecuredSavedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
 
     bulkGetResult.saved_objects.forEach(({ id, error }) => {

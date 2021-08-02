@@ -531,16 +531,19 @@ describe('create()', () => {
 describe('get()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to get the type of action', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'type',
-        attributes: {
-          name: 'my name',
-          actionTypeId: 'my-action-type',
-          isMissingSecrets: false,
-          config: {},
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'my name',
+            actionTypeId: 'my-action-type',
+            isMissingSecrets: false,
+            config: {},
+          },
+          references: [],
         },
-        references: [],
+        outcome: 'exactMatch',
       });
 
       await actionsClient.get({ id: '1' });
@@ -581,16 +584,19 @@ describe('get()', () => {
     });
 
     test('throws when user is not authorised to get the type of action', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'type',
-        attributes: {
-          name: 'my name',
-          actionTypeId: 'my-action-type',
-          isMissingSecrets: false,
-          config: {},
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'my name',
+            actionTypeId: 'my-action-type',
+            isMissingSecrets: false,
+            config: {},
+          },
+          references: [],
         },
-        references: [],
+        outcome: 'exactMatch',
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -645,16 +651,19 @@ describe('get()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when getting a connector', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'type',
-        attributes: {
-          name: 'my name',
-          actionTypeId: 'my-action-type',
-          isMissingSecrets: false,
-          config: {},
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'my name',
+            actionTypeId: 'my-action-type',
+            isMissingSecrets: false,
+            config: {},
+          },
+          references: [],
         },
-        references: [],
+        outcome: 'exactMatch',
       });
 
       await actionsClient.get({ id: '1' });
@@ -671,16 +680,19 @@ describe('get()', () => {
     });
 
     test('logs audit event when not authorised to get a connector', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'type',
-        attributes: {
-          name: 'my name',
-          actionTypeId: 'my-action-type',
-          isMissingSecrets: false,
-          config: {},
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'my name',
+            actionTypeId: 'my-action-type',
+            isMissingSecrets: false,
+            config: {},
+          },
+          references: [],
         },
-        references: [],
+        outcome: 'exactMatch',
       });
 
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
@@ -700,20 +712,77 @@ describe('get()', () => {
     });
   });
 
-  test('calls unsecuredSavedObjectsClient with id', async () => {
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'type',
-      attributes: {},
-      references: [],
+  test('calls unsecuredSavedObjectsClient with id and handles exactMatch outcome', async () => {
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'type',
+        attributes: {},
+        references: [],
+      },
+      outcome: 'exactMatch',
     });
     const result = await actionsClient.get({ id: '1' });
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
     });
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        "1",
+      ]
+    `);
+  });
+
+  test('calls unsecuredSavedObjectsClient with id and handles aliasMatch outcome', async () => {
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'type',
+        attributes: {},
+        references: [],
+      },
+      outcome: 'aliasMatch',
+      aliasTargetId: '2',
+    });
+    const result = await actionsClient.get({ id: '1' });
+    expect(result).toEqual({
+      id: '1',
+      isPreconfigured: false,
+      outcome: 'aliasMatch',
+      aliasTargetId: '2',
+    });
+    expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        "1",
+      ]
+    `);
+  });
+
+  test('calls unsecuredSavedObjectsClient with id and handles conflict outcome', async () => {
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'type',
+        attributes: {},
+        references: [],
+      },
+      outcome: 'conflict',
+      aliasTargetId: '2',
+    });
+    const result = await actionsClient.get({ id: '1' });
+    expect(result).toEqual({
+      id: '1',
+      isPreconfigured: false,
+      outcome: 'conflict',
+      aliasTargetId: '2',
+    });
+    expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         "1",
@@ -755,7 +824,7 @@ describe('get()', () => {
       isPreconfigured: true,
       name: 'test',
     });
-    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.resolve).not.toHaveBeenCalled();
   });
 });
 
@@ -819,6 +888,20 @@ describe('getAll()', () => {
     }
 
     test('ensures user is authorised to get the type of action', async () => {
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+          references: [],
+        },
+        outcome: 'exactMatch',
+      });
       await getAllOperation();
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
     });
@@ -857,6 +940,21 @@ describe('getAll()', () => {
             references: [],
           },
         ],
+      });
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            isMissingSecrets: false,
+            config: {
+              foo: 'bar',
+            },
+          },
+          references: [],
+        },
+        outcome: 'exactMatch',
       });
       scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
         // @ts-expect-error not full search response
@@ -898,7 +996,7 @@ describe('getAll()', () => {
     });
   });
 
-  test('calls unsecuredSavedObjectsClient with parameters', async () => {
+  test('calls unsecuredSavedObjectsClient with parameters and handles all resolve outcomes', async () => {
     const expectedResult = {
       total: 1,
       per_page: 10,
@@ -917,14 +1015,85 @@ describe('getAll()', () => {
           score: 1,
           references: [],
         },
+        {
+          id: '2',
+          type: 'type',
+          attributes: {
+            name: 'test again',
+            isMissingSecrets: false,
+            config: {},
+          },
+          score: 0,
+          references: [],
+        },
+        {
+          id: '3',
+          type: 'type',
+          attributes: {
+            name: 'test finally',
+            isMissingSecrets: false,
+            config: {
+              foo: 'baz',
+            },
+          },
+          score: 2,
+          references: [],
+        },
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'type',
+        attributes: {
+          name: 'test',
+          isMissingSecrets: false,
+          config: {
+            foo: 'bar',
+          },
+        },
+        references: [],
+      },
+      outcome: 'exactMatch',
+    });
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '2',
+        type: 'type',
+        attributes: {
+          name: 'test again',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      },
+      outcome: 'aliasMatch',
+      aliasTargetId: '10',
+    });
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '3',
+        type: 'type',
+        attributes: {
+          name: 'test finally',
+          isMissingSecrets: false,
+          config: {
+            foo: 'baz',
+          },
+        },
+        references: [],
+      },
+      outcome: 'conflict',
+      aliasTargetId: '20',
+    });
     scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
       // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           '1': { doc_count: 6 },
+          '2': { doc_count: 24 },
+          '3': { doc_count: 1 },
           testPreconfigured: { doc_count: 2 },
         },
       })
@@ -971,6 +1140,28 @@ describe('getAll()', () => {
         isPreconfigured: true,
         name: 'test',
         referencedByCount: 2,
+      },
+      {
+        id: '2',
+        isPreconfigured: false,
+        name: 'test again',
+        config: {},
+        isMissingSecrets: false,
+        referencedByCount: 24,
+        outcome: 'aliasMatch',
+        aliasTargetId: '10',
+      },
+      {
+        id: '3',
+        isPreconfigured: false,
+        name: 'test finally',
+        config: {
+          foo: 'baz',
+        },
+        isMissingSecrets: false,
+        referencedByCount: 1,
+        outcome: 'conflict',
+        aliasTargetId: '20',
       },
     ]);
   });
@@ -1263,14 +1454,17 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: false,
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+        },
+        references: [],
       },
-      references: [],
+      outcome: 'exactMatch',
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
@@ -1346,21 +1540,24 @@ describe('update()', () => {
     });
   });
 
-  test('updates an action with all given properties', async () => {
+  test('updates an action with all given properties and handles exactMatch outcome', async () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       executor,
     });
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: false,
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+        },
+        references: [],
       },
-      references: [],
+      outcome: 'exactMatch',
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
@@ -1408,8 +1605,162 @@ describe('update()', () => {
         },
       ]
     `);
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        "my-action",
+      ]
+    `);
+  });
+
+  test('updates an action with all given properties and handles aliasMatch outcome', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+        },
+        references: [],
+      },
+      outcome: 'aliasMatch',
+      aliasTargetId: '2',
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    const result = await actionsClient.update({
+      id: 'my-action',
+      action: {
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+    });
+    expect(result).toEqual({
+      id: 'my-action',
+      isPreconfigured: false,
+      actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
+      name: 'my name',
+      config: {},
+      outcome: 'aliasMatch',
+      aliasTargetId: '2',
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        Object {
+          "actionTypeId": "my-action-type",
+          "config": Object {},
+          "isMissingSecrets": false,
+          "name": "my name",
+          "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
+          "references": Array [],
+        },
+      ]
+    `);
+    expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        "my-action",
+      ]
+    `);
+  });
+
+  test('updates an action with all given properties and handles conflict outcome', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+        },
+        references: [],
+      },
+      outcome: 'conflict',
+      aliasTargetId: '2',
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    const result = await actionsClient.update({
+      id: 'my-action',
+      action: {
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+    });
+    expect(result).toEqual({
+      id: 'my-action',
+      isPreconfigured: false,
+      actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
+      name: 'my name',
+      config: {},
+      outcome: 'conflict',
+      aliasTargetId: '2',
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        Object {
+          "actionTypeId": "my-action-type",
+          "config": Object {},
+          "isMissingSecrets": false,
+          "name": "my name",
+          "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
+          "references": Array [],
+        },
+      ]
+    `);
+    expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         "my-action",
@@ -1424,14 +1775,17 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: true,
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: true,
+        },
+        references: [],
       },
-      references: [],
+      outcome: 'exactMatch',
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
@@ -1493,13 +1847,16 @@ describe('update()', () => {
       },
       executor,
     });
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: 'my-action',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: 'my-action',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+        },
+        references: [],
       },
-      references: [],
+      outcome: 'exactMatch',
     });
     await expect(
       actionsClient.update({
@@ -1522,13 +1879,16 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: 'my-action',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: 'my-action',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+        },
+        references: [],
       },
-      references: [],
+      outcome: 'exactMatch',
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
@@ -1604,13 +1964,16 @@ describe('update()', () => {
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
       throw new Error('Fail');
     });
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+        },
+        references: [],
       },
-      references: [],
+      outcome: 'exactMatch',
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
@@ -1639,7 +2002,7 @@ describe('update()', () => {
 
 describe('execute()', () => {
   describe('authorization', () => {
-    test('ensures user is authorised to excecute actions', async () => {
+    test('ensures user is authorised to execute actions', async () => {
       await actionsClient.execute({
         actionId: 'action-id',
         params: {
