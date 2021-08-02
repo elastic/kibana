@@ -10,11 +10,10 @@ import { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
-import { getValidDateFromDoc, isWrappedSignalHit } from '../../../signals/utils';
+import { getValidDateFromDoc, isWrappedRACAlert, isWrappedSignalHit } from '../../../signals/utils';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import { RACAlert } from '../../types';
-import { isWrappedRACAlert } from '../../utils';
 
 /**
  * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child
@@ -22,43 +21,40 @@ import { isWrappedRACAlert } from '../../utils';
  * @param doc The parent signal or event
  */
 export const buildParent = (doc: SimpleHit): Ancestor => {
-  const docs = [doc];
-  if (isWrappedSignalHit(docs, true)) {
-    const _doc = docs[0];
-    if (_doc._source?.signal != null) {
+  if (isWrappedSignalHit(doc)) {
+    if (doc._source?.signal != null) {
       return {
-        rule: _doc._source?.signal.rule.id,
-        id: _doc._id,
+        rule: doc._source?.signal.rule.id,
+        id: doc._id,
         type: 'signal',
-        index: _doc._index,
+        index: doc._index,
         // We first look for signal.depth and use that if it exists. If it doesn't exist, this should be a pre-7.10 signal
         // and should have signal.parent.depth instead. signal.parent.depth in this case is treated as equivalent to signal.depth.
-        depth: _doc._source?.signal.depth ?? _doc._source?.signal.parent?.depth ?? 1,
+        depth: doc._source?.signal.depth ?? doc._source?.signal.parent?.depth ?? 1,
       };
     } else {
       return {
-        id: _doc._id,
+        id: doc._id,
         type: 'event',
-        index: _doc._index,
+        index: doc._index,
         depth: 0,
       };
     }
-  } else if (isWrappedRACAlert(docs, false)) {
+  } else if (isWrappedRACAlert(doc)) {
     // TODO: note that this only works for RAC alerts... should we handle pre-RAC signals?
-    const _doc = docs[0];
-    if (_doc._source['kibana.alert.id'] != null) {
+    if (doc._source['kibana.alert.id'] != null) {
       return {
-        rule: _doc._source['kibana.alert.rule.id'] as string,
-        id: _doc._id,
+        rule: doc._source['kibana.alert.rule.id'] as string,
+        id: doc._id,
         type: 'signal',
-        index: _doc._index,
-        depth: _doc._source['kibana.alert.depth'] as number,
+        index: doc._index,
+        depth: doc._source['kibana.alert.depth'] as number,
       };
     } else {
       return {
-        id: _doc._id,
+        id: doc._id,
         type: 'event',
-        index: _doc._index,
+        index: doc._index,
         depth: 0,
       };
     }
@@ -78,12 +74,10 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  * @param doc The parent signal/event for which to extend the ancestry.
  */
 export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
-  const docs = [doc];
-  if (isWrappedSignalHit(docs, true)) {
-    const _doc = docs[0];
-    const newAncestor = buildParent(_doc);
+  if (isWrappedSignalHit(doc)) {
+    const newAncestor = buildParent(doc);
     if (newAncestor != null) {
-      const existingAncestors = _doc._source?.signal?.ancestors;
+      const existingAncestors = doc._source?.signal?.ancestors;
       if (existingAncestors != null) {
         return [...existingAncestors, newAncestor];
       } else {
@@ -92,11 +86,10 @@ export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
     } else {
       return [];
     }
-  } else if (isWrappedRACAlert(docs, false)) {
-    const _doc = docs[0];
-    const newAncestor = buildParent(_doc);
+  } else if (isWrappedRACAlert(doc)) {
+    const newAncestor = buildParent(doc);
     if (newAncestor != null) {
-      const existingAncestors = _doc._source['kibana.alert.ancestors'] as Ancestor[];
+      const existingAncestors = doc._source['kibana.alert.ancestors'] as Ancestor[];
       if (existingAncestors != null) {
         return [...existingAncestors, newAncestor];
       } else {
@@ -117,21 +110,19 @@ export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
  * @param doc The source index doc to a signal.
  */
 export const removeClashes = (doc: SimpleHit) => {
-  const docs = [doc];
-  if (isWrappedSignalHit(docs, false)) {
-    const _doc = docs[0];
-    invariant(_doc._source, '_source field not found');
-    const { signal, ...noSignal } = _doc._source;
-    if (signal == null || isEventTypeSignal(_doc)) {
-      return _doc;
+  if (isWrappedSignalHit(doc)) {
+    invariant(doc._source, '_source field not found');
+    const { signal, ...noSignal } = doc._source;
+    if (signal == null || isEventTypeSignal(doc)) {
+      return doc;
     } else {
       return {
-        ..._doc,
+        ...doc,
         _source: { ...noSignal },
       };
     }
   }
-  return docs[0];
+  return doc;
 };
 
 /**
@@ -147,7 +138,7 @@ export const buildAlert = (docs: SimpleHit[], rule: RulesSchema): RACAlert => {
     (acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)),
     []
   );
-  const _rule = isWrappedSignalHit(docs, true)
+  const _rule = isWrappedSignalHit(docs[0])
     ? docs[0]._source?.signal?.rule
     : ((docs[0]._source as RACAlert)['kibana.alert.rule'] as RulesSchema);
 

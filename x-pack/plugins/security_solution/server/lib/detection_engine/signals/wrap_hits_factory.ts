@@ -38,5 +38,5 @@ export const wrapHitsFactory = ({
     },
   ]);
 
-  return filterDuplicateSignals(ruleSO.id, wrappedDocs, false);
+  return filterDuplicateSignals(ruleSO.id, wrappedDocs);
 };

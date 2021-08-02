@@ -40,6 +40,7 @@ import {
   BaseSignalHit,
   SignalSourceHit,
   SimpleHit,
+  WrappedEventHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { ShardError } from '../../types';
@@ -53,6 +54,8 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
+import { WrappedRACAlert } from '../rule_types/types';
+import { SearchTypes } from '../../../../common/detection_engine/types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -930,9 +933,24 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
     .join(' OR ');
 };
 
-export const isWrappedSignalHit = (
-  signals: SimpleHit[],
-  isRuleRegistryEnabled: boolean
-): signals is WrappedSignalHit[] => {
-  return !isRuleRegistryEnabled;
+export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
+  return !isWrappedSignalHit(event) && !isWrappedRACAlert(event);
+};
+
+export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
+  return (event as WrappedSignalHit)._source.signal != null;
+};
+
+export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
+  return (event as WrappedRACAlert)._source['kibana.rac.alert.id'] != null;
+};
+
+export const getF = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
+  if (isWrappedRACAlert(event)) {
+    return event._source[field.replace('signal', 'kibana.alert')] as T; // TODO: handle special cases
+  } else if (isWrappedSignalHit(event)) {
+    return event._source[field] as T;
+  } else if (isWrappedEventHit(event)) {
+    return event._source[field] as T;
+  }
 };

@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { isWrappedRACAlert } from '../rule_types/utils';
-import { Ancestor, SimpleHit } from './types';
-import { isWrappedSignalHit } from './utils';
+import { WrappedRACAlert } from '../rule_types/types';
+import { Ancestor, SimpleHit, WrappedSignalHit } from './types';
+import { isWrappedRACAlert, isWrappedSignalHit } from './utils';
 
-export const filterDuplicateSignals = (
-  ruleId: string,
-  signals: SimpleHit[],
-  isRuleRegistryEnabled: boolean
-) => {
-  if (isWrappedSignalHit(signals, isRuleRegistryEnabled)) {
-    return signals.filter(
+export const filterDuplicateSignals = (ruleId: string, signals: SimpleHit[]) => {
+  if (isWrappedSignalHit(signals[0])) {
+    return (signals as WrappedSignalHit[]).filter(
       (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
     );
-  } else if (isWrappedRACAlert(signals, isRuleRegistryEnabled)) {
-    return signals.filter(
+  } else if (isWrappedRACAlert(signals[0])) {
+    return (signals as WrappedRACAlert[]).filter(
       (doc) =>
         !(doc._source['kibana.alert.ancestors'] as Ancestor[]).some(
           (ancestor) => ancestor.rule === ruleId
