@@ -35,10 +35,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-          "lineNumber": 35
-        },
+        "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
         "deprecated": false,
         "children": [
           {
@@ -51,10 +48,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -73,10 +67,7 @@
                     "text": "IUiSettingsClient"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 41
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -93,10 +84,7 @@
             "signature": [
               "() => any[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 98
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -111,10 +99,7 @@
             "signature": [
               "() => any[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 102
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -129,10 +114,7 @@
             "signature": [
               "() => any[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 107
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -148,10 +130,7 @@
               "() => ",
               "PartitionedFilters"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 112
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -168,10 +147,7 @@
               "Observable",
               "<void>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 116
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -188,10 +164,7 @@
               "Observable",
               "<void>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 120
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -206,10 +179,7 @@
             "signature": [
               "(filters: any, pinFilterStatus?: boolean) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 126
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -222,10 +192,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 127
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -239,10 +206,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 128
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -259,10 +223,7 @@
             "signature": [
               "(newFilters: any[], pinFilterStatus?: boolean) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 154
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -275,10 +236,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 155
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -292,10 +250,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 156
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -314,10 +269,7 @@
             "signature": [
               "(newGlobalFilters: any[]) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 173
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -330,10 +282,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 173
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -352,10 +301,7 @@
             "signature": [
               "(newAppFilters: any[]) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 190
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -368,10 +314,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 190
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -388,10 +331,7 @@
             "signature": [
               "(filter: any) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 201
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -404,10 +344,7 @@
                 "signature": [
                   "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 201
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -424,10 +361,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 213
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -444,10 +378,7 @@
               "FilterStateStore",
               ", shouldOverrideStore?: boolean) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 217
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -460,10 +391,7 @@
                 "signature": [
                   "any[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 218
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -477,10 +405,7 @@
                 "signature": [
                   "FilterStateStore"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 219
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -494,10 +419,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 220
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -514,10 +436,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 232
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false
           },
           {
@@ -530,10 +449,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 235
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false
           },
           {
@@ -554,10 +470,7 @@
               },
               ", collector: unknown) => {}"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 237
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -579,10 +492,7 @@
                   },
                   "; }"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/persistable_state.ts",
-                  "lineNumber": 54
-                },
+                "path": "src/plugins/data/common/query/persistable_state.ts",
                 "deprecated": false
               },
               {
@@ -595,10 +505,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/persistable_state.ts",
-                  "lineNumber": 54
-                },
+                "path": "src/plugins/data/common/query/persistable_state.ts",
                 "deprecated": false
               }
             ]
@@ -613,10 +520,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 240
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false
           },
           {
@@ -629,10 +533,7 @@
             "signature": [
               "() => {}"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 242
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -647,10 +548,7 @@
         "tags": [],
         "label": "TimeHistory",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/data/public/query/timefilter/time_history.ts",
         "deprecated": false,
         "children": [
           {
@@ -663,10 +561,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/data/public/query/timefilter/time_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -686,10 +581,7 @@
                   },
                   "<any, void>"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-                  "lineNumber": 18
-                },
+                "path": "src/plugins/data/public/query/timefilter/time_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -714,10 +606,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/public/query/timefilter/time_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -736,10 +625,7 @@
                     "text": "TimeRange"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-                  "lineNumber": 29
-                },
+                "path": "src/plugins/data/public/query/timefilter/time_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -764,10 +650,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/data/public/query/timefilter/time_history.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -893,10 +776,7 @@
           "FilterStateStore",
           " | undefined; query?: boolean | undefined; }) => () => void"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
         "deprecated": false,
         "children": [
           {
@@ -995,10 +875,7 @@
               },
               "; }>; }, \"state$\" | \"timefilter\" | \"filterManager\" | \"queryString\">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1021,10 +898,7 @@
               },
               "<S>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1035,10 +909,7 @@
             "tags": [],
             "label": "syncConfig",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -1051,10 +922,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 32
-                },
+                "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false
               },
               {
@@ -1067,10 +935,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 33
-                },
+                "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false
               },
               {
@@ -1085,10 +950,7 @@
                   "FilterStateStore",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 34
-                },
+                "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false
               },
               {
@@ -1101,10 +963,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 35
-                },
+                "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false
               }
             ]
@@ -1138,10 +997,7 @@
             "text": "SavedQueryService"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
-          "lineNumber": 21
-        },
+        "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -1162,10 +1018,7 @@
               },
               ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1191,10 +1044,7 @@
           },
           " | undefined; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
-          "lineNumber": 31
-        },
+        "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
         "deprecated": false,
         "children": [
           {
@@ -1207,10 +1057,7 @@
             "signature": [
               "any[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1224,10 +1071,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -1263,10 +1107,7 @@
           },
           ", values: any, operation: string, index: string) => any[]"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
-          "lineNumber": 67
-        },
+        "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
         "deprecated": false,
         "children": [
           {
@@ -1287,10 +1128,7 @@
                 "text": "FilterManager"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
-              "lineNumber": 68
-            },
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1313,10 +1151,7 @@
                 "text": "IFieldType"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
-              "lineNumber": 69
-            },
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1332,10 +1167,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
-              "lineNumber": 70
-            },
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1351,10 +1183,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
-              "lineNumber": 71
-            },
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1370,10 +1199,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
-              "lineNumber": 72
-            },
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1397,10 +1223,7 @@
           "QueryLanguage",
           "; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/lib/get_default_query.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/public/query/lib/get_default_query.ts",
         "deprecated": false,
         "children": [
           {
@@ -1413,10 +1236,7 @@
             "signature": [
               "QueryLanguage"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/lib/get_default_query.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/data/public/query/lib/get_default_query.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1442,10 +1262,7 @@
           },
           "[]) => string"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
         "deprecated": false,
         "children": [
           {
@@ -1458,10 +1275,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1482,10 +1296,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1599,10 +1410,7 @@
           },
           ") => { stop: () => void; hasInheritedQueryFromUrl: boolean; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-          "lineNumber": 26
-        },
+        "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -1701,10 +1509,7 @@
               },
               "; }>; }, \"state$\" | \"timefilter\" | \"filterManager\" | \"queryString\">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1726,10 +1531,7 @@
                 "text": "IKbnUrlStateStorage"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1748,10 +1550,7 @@
         "description": [
           "\nAll query state service state"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/types.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/data/public/query/state_sync/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1771,10 +1570,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           },
           {
@@ -1794,10 +1590,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           },
           {
@@ -1810,10 +1603,7 @@
             "signature": [
               "any[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           },
           {
@@ -1826,10 +1616,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           }
         ],
@@ -1852,10 +1639,7 @@
           },
           " extends QueryStateChangePartial"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/types.ts",
-          "lineNumber": 25
-        },
+        "path": "src/plugins/data/public/query/state_sync/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1868,10 +1652,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           },
           {
@@ -1884,10 +1665,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           }
         ],
@@ -1900,10 +1678,7 @@
         "tags": [],
         "label": "SavedQuery",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/data/public/query/saved_query/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1913,10 +1688,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false
           },
           {
@@ -1929,10 +1701,7 @@
             "signature": [
               "SavedQueryAttributes"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false
           }
         ],
@@ -1945,10 +1714,7 @@
         "tags": [],
         "label": "SavedQueryService",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 28
-        },
+        "path": "src/plugins/data/public/query/saved_query/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1971,15 +1737,13 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.SavedQueryService.saveQuery.$1",
+                "id": "def-public.attributes",
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
@@ -1987,43 +1751,23 @@
                 "signature": [
                   "SavedQueryAttributes"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 30
-                },
-                "deprecated": false,
-                "isRequired": true
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.SavedQueryService.saveQuery.$2.config",
+                "id": "def-public.config",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 31
-                },
-                "deprecated": false,
-                "children": [
-                  {
-                    "parentPluginId": "data",
-                    "id": "def-public.SavedQueryService.saveQuery.$2.config.overwrite",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "overwrite",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/public/query/saved_query/types.ts",
-                      "lineNumber": 31
-                    },
-                    "deprecated": false
-                  }
-                ]
+                "signature": [
+                  "{ overwrite: boolean; } | undefined"
+                ],
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false
               }
-            ],
-            "returnComment": []
+            ]
           },
           {
             "parentPluginId": "data",
@@ -2043,13 +1787,10 @@
               },
               "[]>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "data",
@@ -2069,15 +1810,13 @@
               },
               "[]; }>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.SavedQueryService.findSavedQueries.$1",
+                "id": "def-public.searchText",
                 "type": "string",
                 "tags": [],
                 "label": "searchText",
@@ -2085,16 +1824,12 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 35
-                },
-                "deprecated": false,
-                "isRequired": false
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.SavedQueryService.findSavedQueries.$2",
+                "id": "def-public.perPage",
                 "type": "number",
                 "tags": [],
                 "label": "perPage",
@@ -2102,16 +1837,12 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 36
-                },
-                "deprecated": false,
-                "isRequired": false
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.SavedQueryService.findSavedQueries.$3",
+                "id": "def-public.activePage",
                 "type": "number",
                 "tags": [],
                 "label": "activePage",
@@ -2119,15 +1850,10 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 37
-                },
-                "deprecated": false,
-                "isRequired": false
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false
               }
-            ],
-            "returnComment": []
+            ]
           },
           {
             "parentPluginId": "data",
@@ -2147,31 +1873,21 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.SavedQueryService.getSavedQuery.$1",
+                "id": "def-public.id",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 39
-                },
-                "deprecated": false,
-                "isRequired": true
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false
               }
-            ],
-            "returnComment": []
+            ]
           },
           {
             "parentPluginId": "data",
@@ -2183,31 +1899,21 @@
             "signature": [
               "(id: string) => Promise<{}>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.SavedQueryService.deleteSavedQuery.$1",
+                "id": "def-public.id",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 40
-                },
-                "deprecated": false,
-                "isRequired": true
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false
               }
-            ],
-            "returnComment": []
+            ]
           },
           {
             "parentPluginId": "data",
@@ -2219,13 +1925,10 @@
             "signature": [
               "() => Promise<number>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -2243,13 +1946,8 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/lib/auto_refresh_loop.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/data/public/query/timefilter/lib/auto_refresh_loop.ts",
         "deprecated": false,
-        "returnComment": [],
-        "children": [],
         "initialIsOpen": false
       },
       {
@@ -2269,10 +1967,7 @@
           },
           " | { from: moment.Moment; to: moment.Moment; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/types.ts",
-          "lineNumber": 19
-        },
+        "path": "src/plugins/data/public/query/timefilter/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2342,10 +2037,7 @@
           "DslQuery",
           "[]; filter: any[]; should: never[]; must_not: any[]; }; }; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/query_service.ts",
-          "lineNumber": 104
-        },
+        "path": "src/plugins/data/public/query/query_service.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2374,10 +2066,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/public/query/saved_query/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2513,10 +2202,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/timefilter.ts",
-          "lineNumber": 242
-        },
+        "path": "src/plugins/data/public/query/timefilter/timefilter.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2546,10 +2232,7 @@
           },
           "[]; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-          "lineNumber": 47
-        },
+        "path": "src/plugins/data/public/query/timefilter/time_history.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2592,10 +2275,7 @@
             "text": "TimeRangeBounds"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
         "children": [
           {
@@ -2614,10 +2294,7 @@
                 "text": "TimeRange"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2631,10 +2308,7 @@
             "signature": [
               "CalculateBoundsOptions"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2667,10 +2341,7 @@
             "text": "TimeRange"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 27
-        },
+        "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
         "children": [
           {
@@ -2689,10 +2360,7 @@
                 "text": "TimeRange"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2703,10 +2371,7 @@
             "tags": [],
             "label": "{ forceNow }",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "children": [
               {
@@ -2719,10 +2384,7 @@
                 "signature": [
                   "Date | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 29
-                },
+                "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false
               }
             ]
@@ -2757,10 +2419,7 @@
           },
           ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => any"
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 38
-        },
+        "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
         "children": [
           {
@@ -2780,10 +2439,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -2803,10 +2459,7 @@
                 "text": "TimeRange"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2817,10 +2470,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "children": [
               {
@@ -2833,10 +2483,7 @@
                 "signature": [
                   "Date | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 41
-                },
+                "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false
               },
               {
@@ -2849,10 +2496,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 41
-                },
+                "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false
               }
             ]
@@ -2871,10 +2515,7 @@
         "signature": [
           "(x: unknown) => x is any"
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/is_query.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/query/is_query.ts",
         "deprecated": false,
         "children": [
           {
@@ -2887,10 +2528,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/is_query.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/data/common/query/is_query.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2915,10 +2553,7 @@
             "text": "TimeRange"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
         "deprecated": false,
         "children": [
           {
@@ -2931,10 +2566,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2951,10 +2583,7 @@
         "tags": [],
         "label": "RefreshInterval",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2964,10 +2593,7 @@
             "tags": [],
             "label": "pause",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false
           },
           {
@@ -2977,10 +2603,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false
           }
         ],
@@ -2993,10 +2616,7 @@
         "tags": [],
         "label": "TimeRangeBounds",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3009,10 +2629,7 @@
             "signature": [
               "moment.Moment | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false
           },
           {
@@ -3025,10 +2642,7 @@
             "signature": [
               "moment.Moment | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false
           }
         ],
@@ -3047,10 +2661,7 @@
         "signature": [
           "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

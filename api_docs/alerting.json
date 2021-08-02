@@ -27,56 +27,8 @@
           "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
           "JsonObject"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
         "deprecated": false,
-        "returnComment": [
-          "A URL that is meant to be relative to your application id, or a state object that your application uses to render\nthe rule. This information is intended to be used with cores NavigateToApp function, along with the application id that was\noriginally registered to {@link PluginSetupContract.registerNavigation}."
-        ],
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-public.alert",
-            "type": "Object",
-            "tags": [],
-            "label": "alert",
-            "description": [],
-            "signature": [
-              "{ enabled: boolean; id: string; name: string; params: never; actions: ",
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertAction",
-                "text": "AlertAction"
-              },
-              "[]; throttle: string | null; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.IntervalSchedule",
-                "text": "IntervalSchedule"
-              },
-              "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertExecutionStatus",
-                "text": "AlertExecutionStatus"
-              },
-              "; }"
-            ],
-            "source": {
-              "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
-              "lineNumber": 20
-            },
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       }
     ],
@@ -88,10 +40,7 @@
       "tags": [],
       "label": "PluginSetupContract",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/alerting/public/plugin.ts",
-        "lineNumber": 14
-      },
+      "path": "x-pack/plugins/alerting/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -116,53 +65,37 @@
             },
             ") => void"
           ],
-          "source": {
-            "path": "x-pack/plugins/alerting/public/plugin.ts",
-            "lineNumber": 30
-          },
+          "path": "x-pack/plugins/alerting/public/plugin.ts",
           "deprecated": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "alerting",
-              "id": "def-public.PluginSetupContract.registerNavigation.$1",
+              "id": "def-public.applicationId",
               "type": "string",
               "tags": [],
               "label": "applicationId",
               "description": [
                 "The application id that the user should be navigated to, to view a particular alert in a custom way."
               ],
-              "signature": [
-                "string"
-              ],
-              "source": {
-                "path": "x-pack/plugins/alerting/public/plugin.ts",
-                "lineNumber": 31
-              },
-              "deprecated": false,
-              "isRequired": true
+              "path": "x-pack/plugins/alerting/public/plugin.ts",
+              "deprecated": false
             },
             {
               "parentPluginId": "alerting",
-              "id": "def-public.PluginSetupContract.registerNavigation.$2",
+              "id": "def-public.ruleType",
               "type": "string",
               "tags": [],
               "label": "ruleType",
               "description": [
                 "The rule type that has been registered with Alerting.Server.PluginSetupContract.registerType. If\nno such rule with that id exists, a warning is output to the console log. It used to throw an error, but that was temporarily moved\nbecause it was causing flaky test failures with https://github.com/elastic/kibana/issues/59229 and needs to be\ninvestigated more."
               ],
-              "signature": [
-                "string"
-              ],
-              "source": {
-                "path": "x-pack/plugins/alerting/public/plugin.ts",
-                "lineNumber": 32
-              },
-              "deprecated": false,
-              "isRequired": true
+              "path": "x-pack/plugins/alerting/public/plugin.ts",
+              "deprecated": false
             },
             {
               "parentPluginId": "alerting",
-              "id": "def-public.PluginSetupContract.registerNavigation.$3",
+              "id": "def-public.handler",
               "type": "Function",
               "tags": [],
               "label": "handler",
@@ -170,23 +103,21 @@
                 "The navigation handler should return either a relative URL, or a state object. This information can be used,\nin conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details."
               ],
               "signature": [
+                "(alert: Pick<",
                 {
                   "pluginId": "alerting",
-                  "scope": "public",
+                  "scope": "common",
                   "docId": "kibAlertingPluginApi",
-                  "section": "def-public.AlertNavigationHandler",
-                  "text": "AlertNavigationHandler"
-                }
+                  "section": "def-common.Alert",
+                  "text": "Alert"
+                },
+                "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
+                "JsonObject"
               ],
-              "source": {
-                "path": "x-pack/plugins/alerting/public/plugin.ts",
-                "lineNumber": 33
-              },
-              "deprecated": false,
-              "isRequired": true
+              "path": "x-pack/plugins/alerting/public/plugin.ts",
+              "deprecated": false
             }
-          ],
-          "returnComment": []
+          ]
         },
         {
           "parentPluginId": "alerting",
@@ -208,34 +139,25 @@
             },
             ") => void"
           ],
-          "source": {
-            "path": "x-pack/plugins/alerting/public/plugin.ts",
-            "lineNumber": 46
-          },
+          "path": "x-pack/plugins/alerting/public/plugin.ts",
           "deprecated": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "alerting",
-              "id": "def-public.PluginSetupContract.registerDefaultNavigation.$1",
+              "id": "def-public.applicationId",
               "type": "string",
               "tags": [],
               "label": "applicationId",
               "description": [
                 "The application id that the user should be navigated to, to view a particular alert in a custom way."
               ],
-              "signature": [
-                "string"
-              ],
-              "source": {
-                "path": "x-pack/plugins/alerting/public/plugin.ts",
-                "lineNumber": 46
-              },
-              "deprecated": false,
-              "isRequired": true
+              "path": "x-pack/plugins/alerting/public/plugin.ts",
+              "deprecated": false
             },
             {
               "parentPluginId": "alerting",
-              "id": "def-public.PluginSetupContract.registerDefaultNavigation.$2",
+              "id": "def-public.handler",
               "type": "Function",
               "tags": [],
               "label": "handler",
@@ -243,23 +165,21 @@
                 "The navigation handler should return either a relative URL, or a state object. This information can be used,\nin conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details."
               ],
               "signature": [
+                "(alert: Pick<",
                 {
                   "pluginId": "alerting",
-                  "scope": "public",
+                  "scope": "common",
                   "docId": "kibAlertingPluginApi",
-                  "section": "def-public.AlertNavigationHandler",
-                  "text": "AlertNavigationHandler"
-                }
+                  "section": "def-common.Alert",
+                  "text": "Alert"
+                },
+                "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
+                "JsonObject"
               ],
-              "source": {
-                "path": "x-pack/plugins/alerting/public/plugin.ts",
-                "lineNumber": 46
-              },
-              "deprecated": false,
-              "isRequired": true
+              "path": "x-pack/plugins/alerting/public/plugin.ts",
+              "deprecated": false
             }
-          ],
-          "returnComment": []
+          ]
         }
       ],
       "lifecycle": "setup",
@@ -272,10 +192,7 @@
       "tags": [],
       "label": "PluginStartContract",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/alerting/public/plugin.ts",
-        "lineNumber": 48
-      },
+      "path": "x-pack/plugins/alerting/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -304,31 +221,21 @@
             },
             " | undefined>"
           ],
-          "source": {
-            "path": "x-pack/plugins/alerting/public/plugin.ts",
-            "lineNumber": 49
-          },
+          "path": "x-pack/plugins/alerting/public/plugin.ts",
           "deprecated": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "alerting",
-              "id": "def-public.PluginStartContract.getNavigation.$1",
+              "id": "def-public.alertId",
               "type": "string",
               "tags": [],
               "label": "alertId",
               "description": [],
-              "signature": [
-                "string"
-              ],
-              "source": {
-                "path": "x-pack/plugins/alerting/public/plugin.ts",
-                "lineNumber": 49
-              },
-              "deprecated": false,
-              "isRequired": true
+              "path": "x-pack/plugins/alerting/public/plugin.ts",
+              "deprecated": false
             }
-          ],
-          "returnComment": []
+          ]
         }
       ],
       "lifecycle": "start",
@@ -344,10 +251,7 @@
         "tags": [],
         "label": "AlertingAuthorization",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-          "lineNumber": 78
-        },
+        "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
         "deprecated": false,
         "children": [
           {
@@ -360,10 +264,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 88
-            },
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
             "children": [
               {
@@ -376,10 +277,7 @@
                 "signature": [
                   "ConstructorOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 88
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -396,10 +294,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 147
-            },
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -440,10 +335,7 @@
               "RegistryAlertTypeWithAuth",
               ">; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 155
-            },
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
             "children": [
               {
@@ -456,10 +348,7 @@
                 "signature": [
                   "readonly string[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 156
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -489,10 +378,7 @@
                   },
                   ")[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 157
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -512,10 +398,7 @@
                     "text": "AlertingAuthorizationEntity"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 158
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -534,10 +417,7 @@
               "EnsureAuthorizedOpts",
               ") => Promise<void>"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 172
-            },
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
             "children": [
               {
@@ -550,10 +430,7 @@
                 "signature": [
                   "EnsureAuthorizedOpts"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 172
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -584,10 +461,7 @@
               "JsonObject",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; logSuccessfulAuthorization: () => void; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 277
-            },
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
             "children": [
               {
@@ -606,10 +480,7 @@
                     "text": "AlertingAuthorizationEntity"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 278
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -623,10 +494,7 @@
                 "signature": [
                   "AlertingAuthorizationFilterOpts"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 279
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -671,10 +539,7 @@
               "RegistryAlertTypeWithAuth",
               ">>"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 359
-            },
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
             "children": [
               {
@@ -689,10 +554,7 @@
                   "RegistryRuleType",
                   ">"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 360
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -722,10 +584,7 @@
                   },
                   ")[]"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 361
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -745,10 +604,7 @@
                     "text": "AlertingAuthorizationEntity"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 362
-                },
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -772,10 +628,7 @@
           "ElasticsearchError",
           ") => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
-          "lineNumber": 37
-        },
+        "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
         "deprecated": false,
         "children": [
           {
@@ -788,10 +641,7 @@
             "signature": [
               "ElasticsearchError"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -809,10 +659,7 @@
         "signature": [
           "(duration: string) => number"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "children": [
           {
@@ -825,10 +672,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -855,10 +699,7 @@
           },
           "<ActionGroupIds>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/alerting/common/alert_type.ts",
         "deprecated": false,
         "children": [
           {
@@ -871,10 +712,7 @@
             "signature": [
               "ActionGroupIds"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -884,10 +722,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           }
         ],
@@ -910,10 +745,7 @@
           },
           "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 80
-        },
+        "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -923,10 +755,7 @@
             "tags": [],
             "label": "alertId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 87
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -939,10 +768,7 @@
             "signature": [
               "Date"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 88
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -955,10 +781,7 @@
             "signature": [
               "Date | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 89
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -978,10 +801,7 @@
               },
               "<InstanceState, InstanceContext, ActionGroupIds>"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 90
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -994,10 +814,7 @@
             "signature": [
               "Params"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 91
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1010,10 +827,7 @@
             "signature": [
               "State"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 92
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1034,10 +848,7 @@
               },
               "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"throttle\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 93
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1047,10 +858,7 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 94
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1063,10 +871,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 95
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1076,10 +881,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 96
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1092,10 +894,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 97
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1108,10 +907,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 98
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1124,10 +920,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 99
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           }
         ],
@@ -1140,10 +933,7 @@
         "tags": [],
         "label": "AlertingApiRequestHandlerContext",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 46
-        },
+        "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1163,13 +953,10 @@
                 "text": "RulesClient"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 47
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "alerting",
@@ -1183,10 +970,7 @@
               "RegistryRuleType",
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 48
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -1209,13 +993,10 @@
               },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "alerting",
@@ -1227,13 +1008,10 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -1245,10 +1023,7 @@
         "tags": [],
         "label": "AlertingPlugin",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 232
-        },
+        "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1267,10 +1042,7 @@
                 "text": "PluginSetupContract"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 233
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1289,10 +1061,7 @@
                 "text": "PluginStartContract"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 234
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           }
         ],
@@ -1316,10 +1085,7 @@
           "<InstanceState, InstanceContext, ActionGroupIds> extends ",
           "Services"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 70
-        },
+        "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1334,31 +1100,21 @@
               "AlertInstance",
               "<InstanceState, InstanceContext, ActionGroupIds>, \"getState\" | \"replaceState\" | \"scheduleActions\" | \"scheduleActionsWithSubGroup\">"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "alerting",
-                "id": "def-server.AlertServices.alertInstanceFactory.$1",
+                "id": "def-server.id",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/types.ts",
-                  "lineNumber": 76
-                },
-                "deprecated": false,
-                "isRequired": true
+                "path": "x-pack/plugins/alerting/server/types.ts",
+                "deprecated": false
               }
-            ],
-            "returnComment": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1380,10 +1136,7 @@
           },
           "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 120
-        },
+        "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1393,10 +1146,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 129
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1406,10 +1156,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 130
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1424,10 +1171,7 @@
               "AlertTypeParamsValidator",
               "<Params> | undefined; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 131
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1447,10 +1191,7 @@
               },
               "<ActionGroupIds>[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 134
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1463,10 +1204,7 @@
             "signature": [
               "ActionGroupIds"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 135
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1486,10 +1224,7 @@
               },
               "<RecoveryActionGroupId> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 136
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1518,10 +1253,7 @@
               },
               "<ActionGroupIds, RecoveryActionGroupId>>) => Promise<void | State>"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 137
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1542,10 +1274,7 @@
                   },
                   "<Params, State, InstanceState, InstanceContext, ActionGroupIds>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/types.ts",
-                  "lineNumber": 114
-                },
+                "path": "x-pack/plugins/alerting/server/types.ts",
                 "deprecated": false
               }
             ]
@@ -1557,10 +1286,7 @@
             "tags": [],
             "label": "producer",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 148
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1597,10 +1323,7 @@
               },
               "[] | undefined; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 149
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1613,10 +1336,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 154
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1639,10 +1359,7 @@
               "SavedObjectReference",
               "[]) => Params; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 155
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -1652,10 +1369,7 @@
             "tags": [],
             "label": "isExportable",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 159
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           }
         ],
@@ -1678,10 +1392,7 @@
           },
           "<Params>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-          "lineNumber": 141
-        },
+        "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
         "deprecated": false,
         "children": [
           {
@@ -1691,10 +1402,7 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-              "lineNumber": 142
-            },
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
             "deprecated": false
           },
           {
@@ -1704,10 +1412,7 @@
             "tags": [],
             "label": "perPage",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-              "lineNumber": 143
-            },
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
             "deprecated": false
           },
           {
@@ -1717,10 +1422,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-              "lineNumber": 144
-            },
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
             "deprecated": false
           },
           {
@@ -1741,10 +1443,7 @@
               },
               "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
-              "lineNumber": 145
-            },
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
             "deprecated": false
           }
         ],
@@ -1757,10 +1456,7 @@
         "tags": [],
         "label": "PluginSetupContract",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 87
-        },
+        "path": "x-pack/plugins/alerting/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -1781,10 +1477,7 @@
               },
               "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>) => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 88
-            },
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -1804,10 +1497,7 @@
                   },
                   "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 97
-                },
+                "path": "x-pack/plugins/alerting/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1824,10 +1514,7 @@
         "tags": [],
         "label": "PluginStartContract",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 109
-        },
+        "path": "x-pack/plugins/alerting/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -1842,10 +1529,7 @@
               "RegistryRuleType",
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 110
-            },
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -1876,10 +1560,7 @@
               },
               ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"aggregate\" | \"enable\" | \"disable\" | \"muteAll\" | \"getAlertState\" | \"getAlertInstanceSummary\" | \"updateApiKey\" | \"unmuteAll\" | \"muteInstance\" | \"unmuteInstance\" | \"listAlertTypes\">"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 111
-            },
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -1899,10 +1580,7 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 111
-                },
+                "path": "x-pack/plugins/alerting/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1935,10 +1613,7 @@
               },
               ", \"ensureAuthorized\" | \"getSpaceId\" | \"getAugmentedRuleTypesWithAuthorization\" | \"getFindAuthorizationFilter\" | \"filterByRuleTypeAuthorization\">"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 112
-            },
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -1958,10 +1633,7 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 113
-                },
+                "path": "x-pack/plugins/alerting/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1986,13 +1658,10 @@
               },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 115
-            },
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -2014,10 +1683,7 @@
           },
           "<Params>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 102
-        },
+        "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2031,10 +1697,7 @@
               "SavedObjectReference",
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 103
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           },
           {
@@ -2047,10 +1710,7 @@
             "signature": [
               "Params"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 104
-            },
+            "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
           }
         ],
@@ -2065,10 +1725,7 @@
         "tags": [],
         "label": "AlertingAuthorizationEntity",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2079,10 +1736,7 @@
         "tags": [],
         "label": "AlertingAuthorizationFilterType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization_kuery.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization_kuery.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2093,10 +1747,7 @@
         "tags": [],
         "label": "ReadOperations",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-          "lineNumber": 30
-        },
+        "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2107,10 +1758,7 @@
         "tags": [],
         "label": "WriteOperations",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-          "lineNumber": 37
-        },
+        "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2142,10 +1790,7 @@
           },
           "<infer groups>> ? groups : never"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 31
-        },
+        "path": "x-pack/plugins/alerting/common/alert_type.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2159,10 +1804,7 @@
         "signature": [
           "SavedObjectAttributes"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 40
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2176,10 +1818,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-          "lineNumber": 28
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2193,10 +1832,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2210,10 +1846,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2227,10 +1860,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2244,10 +1874,7 @@
         "signature": [
           "10"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/config.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2277,10 +1904,7 @@
           },
           "<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"apiKey\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 192
-        },
+        "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2300,10 +1924,7 @@
           "AlertInstance",
           "<State, Context, ActionGroupIds>; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/alert_instance/alert_instance.ts",
-          "lineNumber": 30
-        },
+        "path": "x-pack/plugins/alerting/server/alert_instance/alert_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2375,10 +1996,7 @@
           "RegistryAlertTypeWithAuth",
           ">>; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/index.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/alerting/server/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2422,10 +2040,7 @@
           },
           "<RecoveryActionGroupId>>]"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
-          "lineNumber": 30
-        },
+        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
         "children": [
           {
@@ -2445,10 +2060,7 @@
               },
               "<RecoveryActionGroupId> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -2466,10 +2078,7 @@
         "signature": [
           "(duration: string) => number"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-          "lineNumber": 30
-        },
+        "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "children": [
           {
@@ -2482,10 +2091,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2503,10 +2109,7 @@
         "signature": [
           "(duration: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-          "lineNumber": 34
-        },
+        "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "children": [
           {
@@ -2519,10 +2122,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2540,10 +2140,7 @@
         "signature": [
           "(actionGroup: string, actionTypeId: string) => boolean"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
         "deprecated": false,
         "children": [
           {
@@ -2556,10 +2153,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2573,10 +2167,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2594,10 +2185,7 @@
         "signature": [
           "(duration: string) => number"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "children": [
           {
@@ -2610,10 +2198,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2631,10 +2216,7 @@
         "signature": [
           "(duration: string) => string | undefined"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-          "lineNumber": 39
-        },
+        "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "children": [
           {
@@ -2647,10 +2229,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
-              "lineNumber": 39
-            },
+            "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2668,10 +2247,7 @@
         "signature": [
           "(notifyWhen: string) => string | undefined"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
         "deprecated": false,
         "children": [
           {
@@ -2684,10 +2260,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2714,10 +2287,7 @@
           },
           "<ActionGroupIds>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/alerting/common/alert_type.ts",
         "deprecated": false,
         "children": [
           {
@@ -2730,10 +2300,7 @@
             "signature": [
               "ActionGroupIds"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -2743,10 +2310,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           }
         ],
@@ -2759,10 +2323,7 @@
         "tags": [],
         "label": "ActionVariable",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 121
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "children": [
           {
@@ -2772,10 +2333,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 122
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2785,10 +2343,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 123
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2801,10 +2356,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 124
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2817,10 +2369,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 125
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           }
         ],
@@ -2843,10 +2392,7 @@
           },
           "<Params>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 54
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "children": [
           {
@@ -2856,10 +2402,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2869,10 +2412,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2882,10 +2422,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2898,10 +2435,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 58
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2911,10 +2445,7 @@
             "tags": [],
             "label": "alertTypeId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 59
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2924,10 +2455,7 @@
             "tags": [],
             "label": "consumer",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 60
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2946,10 +2474,7 @@
                 "text": "IntervalSchedule"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 61
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2969,10 +2494,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 62
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -2985,10 +2507,7 @@
             "signature": [
               "Params"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 63
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3001,10 +2520,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 64
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3017,10 +2533,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 65
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3033,10 +2546,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 66
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3049,10 +2559,7 @@
             "signature": [
               "Date"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 67
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3065,10 +2572,7 @@
             "signature": [
               "Date"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 68
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3081,10 +2585,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 69
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3097,10 +2598,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 70
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3113,10 +2611,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 71
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3129,10 +2624,7 @@
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 72
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3142,10 +2634,7 @@
             "tags": [],
             "label": "muteAll",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 73
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3158,10 +2647,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 74
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3180,10 +2666,7 @@
                 "text": "AlertExecutionStatus"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           }
         ],
@@ -3196,10 +2679,7 @@
         "tags": [],
         "label": "AlertAction",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 43
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "children": [
           {
@@ -3209,10 +2689,7 @@
             "tags": [],
             "label": "group",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3222,10 +2699,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3235,10 +2709,7 @@
             "tags": [],
             "label": "actionTypeId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 46
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3251,10 +2722,7 @@
             "signature": [
               "SavedObjectAttributes"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 47
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           }
         ],
@@ -3267,10 +2735,7 @@
         "tags": [],
         "label": "AlertAggregations",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 50
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "children": [
           {
@@ -3283,10 +2748,7 @@
             "signature": [
               "{ [status: string]: number; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 51
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           }
         ],
@@ -3299,10 +2761,7 @@
         "tags": [],
         "label": "AlertExecutionStatus",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 31
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "children": [
           {
@@ -3315,10 +2774,7 @@
             "signature": [
               "\"unknown\" | \"error\" | \"pending\" | \"ok\" | \"active\""
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3331,10 +2787,7 @@
             "signature": [
               "Date"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3355,10 +2808,7 @@
               },
               "; message: string; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           }
         ],
@@ -3371,10 +2821,7 @@
         "tags": [],
         "label": "AlertingFrameworkHealth",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -3384,10 +2831,7 @@
             "tags": [],
             "label": "isSufficientlySecure",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/index.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/alerting/common/index.ts",
             "deprecated": false
           },
           {
@@ -3397,10 +2841,7 @@
             "tags": [],
             "label": "hasPermanentEncryptionKey",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/index.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/alerting/common/index.ts",
             "deprecated": false
           },
           {
@@ -3419,10 +2860,7 @@
                 "text": "AlertsHealth"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/index.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/alerting/common/index.ts",
             "deprecated": false
           }
         ],
@@ -3435,10 +2873,7 @@
         "tags": [],
         "label": "AlertInstanceStatus",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-          "lineNumber": 28
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
         "deprecated": false,
         "children": [
           {
@@ -3451,10 +2886,7 @@
             "signature": [
               "\"OK\" | \"Active\""
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3464,10 +2896,7 @@
             "tags": [],
             "label": "muted",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3480,10 +2909,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3496,10 +2922,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3512,10 +2935,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           }
         ],
@@ -3528,10 +2948,7 @@
         "tags": [],
         "label": "AlertInstanceSummary",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
         "deprecated": false,
         "children": [
           {
@@ -3541,10 +2958,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 12
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3554,10 +2968,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 13
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3570,10 +2981,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3583,10 +2991,7 @@
             "tags": [],
             "label": "alertTypeId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3596,10 +3001,7 @@
             "tags": [],
             "label": "consumer",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3609,10 +3011,7 @@
             "tags": [],
             "label": "muteAll",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3625,10 +3024,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3638,10 +3034,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3651,10 +3044,7 @@
             "tags": [],
             "label": "statusStartDate",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3664,10 +3054,7 @@
             "tags": [],
             "label": "statusEndDate",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3680,10 +3067,7 @@
             "signature": [
               "\"OK\" | \"Active\" | \"Error\""
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3696,10 +3080,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3712,10 +3093,7 @@
             "signature": [
               "{ date: string; message: string; }[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           },
           {
@@ -3736,10 +3114,7 @@
               },
               "; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
             "deprecated": false
           }
         ],
@@ -3752,10 +3127,7 @@
         "tags": [],
         "label": "AlertsHealth",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 106
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "children": [
           {
@@ -3776,10 +3148,7 @@
               },
               "; timestamp: string; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 107
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3800,10 +3169,7 @@
               },
               "; timestamp: string; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 111
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           },
           {
@@ -3824,10 +3190,7 @@
               },
               "; timestamp: string; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 115
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           }
         ],
@@ -3840,10 +3203,7 @@
         "tags": [],
         "label": "AlertStateNavigation",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
         "deprecated": false,
         "children": [
           {
@@ -3856,10 +3216,7 @@
             "signature": [
               "JsonObject"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-              "lineNumber": 13
-            },
+            "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
             "deprecated": false
           }
         ],
@@ -3882,10 +3239,7 @@
           },
           "<ActionGroupIds, RecoveryActionGroupId>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/alerting/common/alert_type.ts",
         "deprecated": false,
         "children": [
           {
@@ -3895,10 +3249,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -3908,10 +3259,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -3931,10 +3279,7 @@
               },
               "<ActionGroupIds>[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -3954,10 +3299,7 @@
               },
               "<RecoveryActionGroupId>"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -3970,10 +3312,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -3986,10 +3325,7 @@
             "signature": [
               "ActionGroupIds"
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -3999,10 +3335,7 @@
             "tags": [],
             "label": "producer",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -4015,10 +3348,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           },
           {
@@ -4028,10 +3358,7 @@
             "tags": [],
             "label": "isExportable",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/alerting/common/alert_type.ts",
             "deprecated": false
           }
         ],
@@ -4044,10 +3371,7 @@
         "tags": [],
         "label": "AlertUrlNavigation",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-          "lineNumber": 9
-        },
+        "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
         "deprecated": false,
         "children": [
           {
@@ -4057,10 +3381,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-              "lineNumber": 10
-            },
+            "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
             "deprecated": false
           }
         ],
@@ -4084,10 +3405,7 @@
           " extends ",
           "SavedObjectAttributes"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "children": [
           {
@@ -4097,10 +3415,7 @@
             "tags": [],
             "label": "interval",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/common/alert.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
           }
         ],
@@ -4115,10 +3430,7 @@
         "tags": [],
         "label": "AlertExecutionStatusErrorReasons",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4129,10 +3441,7 @@
         "tags": [],
         "label": "HealthStatus",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 100
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4164,10 +3473,7 @@
           },
           "<infer groups>> ? groups : never"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 31
-        },
+        "path": "x-pack/plugins/alerting/common/alert_type.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4185,10 +3491,7 @@
           "SavedObjectAttributeSingle",
           "[] | null | undefined"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 41
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4202,10 +3505,7 @@
         "signature": [
           "SavedObjectAttributes"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 40
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4219,10 +3519,7 @@
         "signature": [
           "\"unknown\" | \"error\" | \"pending\" | \"ok\" | \"active\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4236,10 +3533,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-          "lineNumber": 28
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4253,10 +3547,7 @@
         "signature": [
           "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4270,10 +3561,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4287,10 +3575,7 @@
         "signature": [
           "\"OK\" | \"Active\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-          "lineNumber": 9
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4318,10 +3603,7 @@
             "text": "AlertStateNavigation"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4335,10 +3617,7 @@
         "signature": [
           "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4352,10 +3631,7 @@
         "signature": [
           "\"alerts\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 30
-        },
+        "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4369,10 +3645,7 @@
         "signature": [
           "\"OK\" | \"Active\" | \"Error\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4386,10 +3659,7 @@
         "signature": [
           "{ alertId: string; } & { spaceId?: string | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
-          "lineNumber": 28
-        },
+        "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4403,10 +3673,7 @@
         "signature": [
           "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4420,10 +3687,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4437,10 +3701,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4454,10 +3715,7 @@
         "signature": [
           "\"/api/alerting\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 28
-        },
+        "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4471,10 +3729,7 @@
         "signature": [
           "\"default\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4488,10 +3743,7 @@
         "signature": [
           "\"/internal/alerting\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 29
-        },
+        "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4505,10 +3757,7 @@
         "signature": [
           "\"/api/alerts\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 27
-        },
+        "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4522,10 +3771,7 @@
         "signature": [
           "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-          "lineNumber": 34
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4539,10 +3785,7 @@
         "signature": [
           "\"recovered\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4556,10 +3799,7 @@
         "signature": [
           "RecoveryActionGroupId | \"recovered\""
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4597,10 +3837,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 78
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4622,10 +3859,7 @@
           },
           "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"enabled\" | \"name\" | \"actions\" | \"throttle\" | \"tags\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 80
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4647,10 +3881,7 @@
           },
           "<RecoveryActionGroupId> ? never : ActionGroupIds"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4666,10 +3897,7 @@
         "signature": [
           "readonly [\"ok\", \"active\", \"error\", \"pending\", \"unknown\"]"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4692,10 +3920,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4748,10 +3973,7 @@
           "Type",
           "<Date, string, unknown>]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4765,10 +3987,7 @@
         "signature": [
           "Map<string, string[]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4803,10 +4022,7 @@
           "Type",
           "<Date, string, unknown>; }>]>; }>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-          "lineNumber": 30
-        },
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4820,10 +4036,7 @@
         "signature": [
           "{ readonly id: \"recovered\"; readonly name: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
