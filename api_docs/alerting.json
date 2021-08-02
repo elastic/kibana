@@ -289,7 +289,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-          "lineNumber": 76
+          "lineNumber": 78
         },
         "deprecated": false,
         "children": [
@@ -305,7 +305,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 86
+              "lineNumber": 88
             },
             "deprecated": false,
             "children": [
@@ -314,14 +314,14 @@
                 "id": "def-server.AlertingAuthorization.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    ruleTypeRegistry,\n    request,\n    authorization,\n    features,\n    auditLogger,\n    getSpace,\n    exemptConsumerIds,\n  }",
+                "label": "{\n    ruleTypeRegistry,\n    request,\n    authorization,\n    features,\n    auditLogger,\n    getSpace,\n    getSpaceId,\n    exemptConsumerIds,\n  }",
                 "description": [],
                 "signature": [
                   "ConstructorOptions"
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 86
+                  "lineNumber": 88
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -337,11 +337,11 @@
             "label": "getSpaceId",
             "description": [],
             "signature": [
-              "() => Promise<string | undefined>"
+              "() => string | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 144
+              "lineNumber": 147
             },
             "deprecated": false,
             "children": [],
@@ -385,7 +385,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 152
+              "lineNumber": 155
             },
             "deprecated": false,
             "children": [
@@ -401,7 +401,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 153
+                  "lineNumber": 156
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -434,7 +434,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 154
+                  "lineNumber": 157
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -457,7 +457,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 155
+                  "lineNumber": 158
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -479,7 +479,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 169
+              "lineNumber": 172
             },
             "deprecated": false,
             "children": [
@@ -495,7 +495,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 169
+                  "lineNumber": 172
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -529,7 +529,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 274
+              "lineNumber": 277
             },
             "deprecated": false,
             "children": [
@@ -551,7 +551,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 275
+                  "lineNumber": 278
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -568,7 +568,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 276
+                  "lineNumber": 279
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -616,7 +616,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-              "lineNumber": 354
+              "lineNumber": 359
             },
             "deprecated": false,
             "children": [
@@ -634,7 +634,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 355
+                  "lineNumber": 360
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -667,7 +667,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 356
+                  "lineNumber": 361
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -690,7 +690,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-                  "lineNumber": 357
+                  "lineNumber": 362
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2006,7 +2006,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2034,7 +2034,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-          "lineNumber": 29
+          "lineNumber": 30
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2048,7 +2048,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
-          "lineNumber": 36
+          "lineNumber": 37
         },
         "deprecated": false,
         "initialIsOpen": false
