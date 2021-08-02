@@ -7,11 +7,10 @@
 
 import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { LayerType } from '../types';
+import { layerTypes } from '../types';
 import { axisConfig, YConfig } from './axis_config';
 import type { SeriesType } from './series_type';
-
-export type LayerType = 'data' | 'threshold';
-export const layerTypes: Record<string, LayerType> = { DATA: 'data', THRESHOLD: 'threshold' };
 
 export interface XYLayerConfig {
   hide?: boolean;

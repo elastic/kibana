@@ -39,6 +39,10 @@ export function generateFormula(
   operationDefinitionMap: Record<string, GenericOperationDefinition> | undefined
 ) {
   if ('references' in previousColumn) {
+    if (previousColumn?.operationType === 'static_value' && previousColumn?.params) {
+      previousFormula += (previousColumn.params as OperationParams).value;
+      return previousFormula;
+    }
     const metric = layer.columns[previousColumn.references[0]];
     if (metric && 'sourceField' in metric && metric.dataType === 'number') {
       const fieldName = getSafeFieldName(metric);

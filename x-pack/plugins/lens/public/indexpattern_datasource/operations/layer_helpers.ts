@@ -397,6 +397,7 @@ export function replaceColumn({
     if (previousDefinition.input === 'managedReference') {
       // If the transition is incomplete, leave the managed state until it's finished.
       tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+
       const hypotheticalLayer = insertNewColumn({
         layer: tempLayer,
         columnId,

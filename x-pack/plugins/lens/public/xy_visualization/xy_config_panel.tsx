@@ -787,6 +787,7 @@ const IconSelect = ({
       }}
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
+      compressed
     />
   );
 };
@@ -878,6 +879,7 @@ const ThresholdPanel = (
           showInput
           min={1}
           max={50}
+          compressed
         />
       </EuiFormRow>
       <EuiFormRow

@@ -52,6 +52,7 @@ export function LayerPanel(
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
     isFullscreen: boolean;
+    onEmptyDimensionAdd: (columnId: string) => void;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -117,7 +118,7 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
-  const { groups } = useMemo(
+  const { groups, supportStaticValue } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -460,10 +461,11 @@ export function LayerPanel(
                       layerDatasource={layerDatasource}
                       layerDatasourceDropProps={layerDatasourceDropProps}
                       onClick={(id) => {
+                        props.onEmptyDimensionAdd(id);
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
-                          isNew: true,
+                          isNew: !supportStaticValue,
                         });
                       }}
                       onDrop={onDrop}
@@ -533,6 +535,7 @@ export function LayerPanel(
                   toggleFullscreen,
                   isFullscreen,
                   setState: updateDataLayerState,
+                  supportStaticValue: Boolean(supportStaticValue),
                 }}
               />
             )}

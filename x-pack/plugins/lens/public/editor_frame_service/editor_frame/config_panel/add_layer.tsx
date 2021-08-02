@@ -17,18 +17,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Visualization } from '../../../types';
+import { FramePublicAPI, Visualization } from '../../../types';
 
 interface AddLayerButtonProps {
   visualization: Visualization;
   visualizationState: unknown;
   onAddLayerClick: (layerType: string) => void;
+  layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
 
 export function AddLayerButton({
   visualization,
   visualizationState,
   onAddLayerClick,
+  layersMeta,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -36,7 +38,7 @@ export function AddLayerButton({
   if (!hasMultipleLayers) {
     return null;
   }
-  const layerTypes = visualization.getLayerTypes?.(visualizationState);
+  const layerTypes = visualization.getLayerTypes?.(visualizationState, layersMeta);
   if (layerTypes?.length === 1) {
     return (
       <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">

@@ -174,11 +174,14 @@ export interface Datasource<T = unknown, P = unknown> {
   removeColumn: (props: { prevState: T; layerId: string; columnId: string }) => T;
   initializeDimension?: (
     state: T,
-    columnId: string,
     layerId: string,
-    label: string,
-    dataType: string,
-    staticValue?: unknown
+    value: {
+      columnId: string;
+      label: string;
+      dataType: string;
+      staticValue?: unknown;
+      groupId: string;
+    }
   ) => T;
 
   renderDataPanel: (
@@ -320,6 +323,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
+  supportStaticValue: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -605,7 +609,8 @@ export interface Visualization<T = unknown> {
 
   /** Retrieve a list of supported layer types with initialization data */
   getLayerTypes: (
-    state: T
+    state: T,
+    frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
   ) => Array<{
     type: string;
     label: string;
@@ -620,6 +625,7 @@ export interface Visualization<T = unknown> {
       staticValue: unknown;
     }>;
   }>;
+  getLayerType: (state: T, layerId: string) => string;
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 

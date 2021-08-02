@@ -111,6 +111,10 @@ export function LayerPanels(
                 typeof newDatasourceState === 'function'
                   ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
                   : newDatasourceState;
+              const updatedVisualizationState =
+                typeof newVisualizationState === 'function'
+                  ? newVisualizationState(prevState.visualization.state)
+                  : newVisualizationState;
               return {
                 ...prevState,
                 datasourceStates: {
@@ -122,7 +126,7 @@ export function LayerPanels(
                 },
                 visualization: {
                   ...prevState.visualization,
-                  state: newVisualizationState,
+                  state: updatedVisualizationState,
                 },
                 stagedPreview: undefined,
               };
@@ -166,6 +170,15 @@ export function LayerPanels(
                 layerId,
                 layerIds.length
               ) === 'clear'
+            }
+            onEmptyDimensionAdd={(columnId: string) =>
+              addMaybeDefaultThreshold({
+                ...props,
+                layerId,
+                layerType: activeVisualization.getLayerType(visualizationState, layerId),
+                columnId,
+                updateAll,
+              })
             }
             onRemoveLayer={() => {
               dispatchLens(
@@ -216,6 +229,7 @@ export function LayerPanels(
       <AddLayerButton
         visualization={activeVisualization}
         visualizationState={visualizationState}
+        layersMeta={props.framePublicAPI}
         onAddLayerClick={(layerType) => {
           const id = generateId();
           dispatchLens(
@@ -232,9 +246,60 @@ export function LayerPanels(
                 }),
             })
           );
+
+          addMaybeDefaultThreshold({ ...props, layerId: id, layerType, updateAll });
           setNextFocusedLayerId(id);
         }}
       />
     </EuiForm>
   );
+}
+
+function addMaybeDefaultThreshold({
+  activeVisualization,
+  visualizationState,
+  framePublicAPI,
+  layerType,
+  activeDatasourceId,
+  datasourceMap,
+  updateAll,
+  layerId,
+  columnId,
+}: ConfigPanelWrapperProps & {
+  activeDatasourceId: string;
+  activeVisualization: Visualization;
+  layerId: string;
+  layerType: string;
+  columnId?: string;
+  updateAll: (
+    datasourceId: string,
+    newDatasourceState: unknown,
+    newVisualizationState: unknown
+  ) => void;
+}) {
+  const layerInfo = activeVisualization
+    .getLayerTypes(visualizationState, framePublicAPI)
+    .find(({ type }) => type === layerType);
+  if (layerInfo?.initialDimensions && datasourceMap[activeDatasourceId]?.initializeDimension) {
+    // pick the first available dimension
+    const [info] = layerInfo.initialDimensions;
+    updateAll(
+      activeDatasourceId,
+      (currentState: unknown) => {
+        return datasourceMap[activeDatasourceId].initializeDimension?.(currentState, layerId, {
+          ...info,
+          columnId: columnId || info.columnId,
+        });
+      },
+      (currentState: unknown) => {
+        return activeVisualization.setDimension({
+          groupId: info.groupId,
+          layerId,
+          columnId: columnId || info.columnId,
+          prevState: currentState,
+          frame: framePublicAPI,
+        });
+      }
+    );
+  }
 }
