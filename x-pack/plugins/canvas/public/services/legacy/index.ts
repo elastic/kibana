@@ -13,7 +13,6 @@ import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
 import { searchServiceFactory } from './search';
 import { labsServiceFactory } from './labs';
-import { reportingServiceFactory } from './reporting';
 
 export { SearchService } from './search';
 export { NavLinkService } from './nav_link';
@@ -77,7 +76,6 @@ export const services = {
   expressions: new CanvasServiceProvider(expressionsServiceFactory),
   navLink: new CanvasServiceProvider(navLinkServiceFactory),
   search: new CanvasServiceProvider(searchServiceFactory),
-  reporting: new CanvasServiceProvider(reportingServiceFactory),
   labs: new CanvasServiceProvider(labsServiceFactory),
 };
 
@@ -88,7 +86,6 @@ export interface CanvasServices {
   expressions: ServiceFromProvider<typeof services.expressions>;
   navLink: ServiceFromProvider<typeof services.navLink>;
   search: ServiceFromProvider<typeof services.search>;
-  reporting: ServiceFromProvider<typeof services.reporting>;
   labs: ServiceFromProvider<typeof services.labs>;
 }
 
@@ -115,5 +112,4 @@ export const {
   navLink: navLinkService,
   expressions: expressionsService,
   search: searchService,
-  reporting: reportingService,
 } = services;
