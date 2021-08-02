@@ -275,6 +275,9 @@ return (
 );
 ```
 
+6. https://github.com/elastic/kibana/pull/107099#issuecomment-891147792[Generate staging data and test your page's behavior with the
+different outcomes.]
+
 NOTE: Reminder, don't forget to add unit tests and functional tests!
 
 [[sharing-saved-objects-step-4]]
@@ -404,24 +407,31 @@ they are actually looking for.
 
 *Outcome 1*
 
-If an object was converted in the Default space, then you tried to resolve it with its ID, you would have an `'exactMatch'`:
+When you resolve an object with its current ID, the outcome is an `'exactMatch'`:
 
 image::images/sharing-saved-objects-faq-resolve-outcomes-1.png["Sharing Saved Objects resolve outcome 1 (exactMatch)"]
 
+This can happen in the Default space _and_ in non-Default spaces.
+
 *Outcome 2*
 
-If an object was converted in a non-Default space, then you tried to resolve it with its old ID, you would have an `'aliasMatch'`:
+When you resolve an object with its old ID (the ID of its alias), the outcome is an `'aliasMatch'`:
 
 image::images/sharing-saved-objects-faq-resolve-outcomes-2.png["Sharing Saved Objects resolve outcome 2 (aliasMatch)"]
 
+This outcome can only happen in non-Default spaces.
+
 *Outcome 3*
 
-If two objects were converted in the Default space and a non-Default space, _then_ you shared one from the Default space to a non-Default
-space, _then_ you tried to resolve it in the non-Default space with its old ID, you would have a `'conflict'`:
+The third outcome is an edge case that is a combination of the others. If you resolve an object ID and two objects are found -- one as an
+exact match, the other as an alias match -- the outcome is a `'conflict'`:
 
 image::images/sharing-saved-objects-faq-resolve-outcomes-3.png["Sharing Saved Objects resolve outcome 3 (conflict)"]
 
-This last scenario is contrived, and we actually have controls in place to prevent this from happening when you share, import, or copy
+We actually have controls in place to prevent this scenario from happening when you share, import, or copy
 objects. However, this scenario _could_ still happen in a few different situations, if objects are created a certain way or if a user
 tampers with an object's raw ES document. Since we can't 100% rule out this scenario, we must handle it gracefully, but we do expect this
 will be a rare occurrence.
+
+It is important to note that when a `'conflict'` occurs, the object that is returned is the "most correct" match -- the one with the ID that
+exactly matches.
