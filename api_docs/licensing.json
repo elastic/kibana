@@ -1007,8 +1007,8 @@
             {
               "plugin": "reporting",
               "link": {
-                "path": "x-pack/plugins/reporting/public/management/report_listing.tsx",
-                "lineNumber": 44
+                "path": "x-pack/plugins/reporting/public/management/index.ts",
+                "lineNumber": 20
               }
             },
             {

@@ -1,5 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-dev-utils"
 PKG_REQUIRE_NAME = "@kbn/dev-utils"
@@ -41,21 +42,18 @@ NPM_MODULE_EXTRA_FILES = [
   "tooling_log/package.json"
 ]
 
-SRC_DEPS = [
-  "//packages/kbn-expect",
+RUNTIME_DEPS = [
   "//packages/kbn-std",
   "//packages/kbn-utils",
   "@npm//@babel/core",
   "@npm//axios",
   "@npm//chalk",
-  "@npm//chance",
   "@npm//cheerio",
   "@npm//dedent",
   "@npm//execa",
   "@npm//exit-hook",
   "@npm//getopts",
   "@npm//globby",
-  "@npm//jest-styled-components",
   "@npm//load-json-file",
   "@npm//markdown-it",
   "@npm//moment",
@@ -63,13 +61,19 @@ SRC_DEPS = [
   "@npm//rxjs",
   "@npm//tar",
   "@npm//tree-kill",
-  "@npm//tslib",
-  "@npm//typescript",
   "@npm//vinyl",
   "@npm//yauzl"
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-std",
+  "//packages/kbn-utils",
+  "@npm//axios",
+  "@npm//execa",
+  "@npm//exit-hook",
+  "@npm//getopts",
+  "@npm//rxjs",
+  "@npm//tree-kill",
   "@npm//@types/babel__core",
   "@npm//@types/cheerio",
   "@npm//@types/dedent",
@@ -85,7 +89,11 @@ TYPES_DEPS = [
   "@npm//@types/yauzl"
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
 
 ts_config(
   name = "tsconfig",
@@ -96,14 +104,15 @@ ts_config(
 )
 
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
-  incremental = True,
-  out_dir = "target",
+  emit_declaration_only = True,
+  incremental = False,
+  out_dir = "target_types",
   source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
@@ -112,7 +121,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":tsc"],
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
