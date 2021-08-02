@@ -5,12 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { useRef } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-const COMMA_SEPARATOR_RE = /(\d)(?=(\d{3})+(?!\d))/g;
+export function useBehaviorSubject<T>(props: T): BehaviorSubject<T> {
+  const ref = useRef<BehaviorSubject<T> | null>(null);
 
-/**
- * Converts a number to a string and adds commas
- * as thousands separators
- */
-export const formatNumWithCommas = (input: number) =>
-  String(input).replace(COMMA_SEPARATOR_RE, '$1,');
+  if (ref.current === null) {
+    ref.current = new BehaviorSubject(props);
+  }
+
+  return ref.current;
+}
