@@ -13,6 +13,7 @@ import {
 } from '../../../../../../src/plugins/presentation_util/public';
 
 import { workpadServiceFactory } from './workpad';
+import { navLinkServiceFactory } from './nav_link';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
 import { CanvasPluginServices } from '..';
@@ -27,6 +28,7 @@ export const pluginServiceProviders: PluginServiceProviders<
   KibanaPluginServiceParams<CanvasStartDeps>
 > = {
   workpad: new PluginServiceProvider(workpadServiceFactory),
+  navLink: new PluginServiceProvider(navLinkServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),
   platform: new PluginServiceProvider(platformServiceFactory),
 };
