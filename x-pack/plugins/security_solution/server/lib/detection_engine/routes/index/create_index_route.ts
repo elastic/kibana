@@ -112,7 +112,19 @@ export const createDetectionIndex = async (
       throw err;
     }
   }
-  await addAliasesToIndices({ esClient, index, aadIndexAliasName, spaceId });
+  await addFieldAliasesToIndices({ esClient, index, spaceId });
+  // The internal user is used here because Elasticsearch requires the PUT alias requestor to have 'manage' permissions
+  // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
+  // and not .alerts-security.alerts (the alias). From the security solution perspective, a user that has manage permissions
+  // for .siem-signals should be allowed to add this alias. If the call to addFieldAliasesToIndices above succeeds, then
+  // we assume they are allowed to add this alias.
+  await context.core.elasticsearch.client.asInternalUser.indices.putAlias({
+    index: `${index}-*`,
+    name: aadIndexAliasName,
+    body: {
+      is_write_index: false,
+    },
+  });
   const indexExists = await getIndexExists(esClient, index);
   if (indexExists) {
     const indexVersion = await getIndexVersion(esClient, index);
@@ -124,25 +136,15 @@ export const createDetectionIndex = async (
   }
 };
 
-export const addAliasesToIndices = async ({
+const addFieldAliasesToIndices = async ({
   esClient,
   index,
-  aadIndexAliasName,
   spaceId,
 }: {
   esClient: ElasticsearchClient;
   index: string;
-  aadIndexAliasName: string;
   spaceId: string;
 }) => {
-  await esClient.indices.putAlias({
-    index: `${index}-*`,
-    name: aadIndexAliasName,
-    body: {
-      is_write_index: false,
-    },
-  });
-
   const { body: indexMappings } = await esClient.indices.get({ index });
   // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
   // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals

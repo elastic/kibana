@@ -25,6 +25,15 @@ import aadFieldConversion from './signal_aad_mapping.json';
   release
 */
 export const SIGNALS_TEMPLATE_VERSION = 55;
+/**
+  @constant
+  @type {number}
+  @description This value represents the version of the field aliases that map the new field names
+  used for alerts-as-data to the old signal.* field names. If any .siem-signals-<space id> indices
+  have an aliases_version less than this value, the detections UI will call create_index_route and
+  and go through the index update process. Increment this number if making changes to the field
+  aliases we use to make signals forwards-compatible.
+*/
 export const SIGNALS_FIELD_ALIASES_VERSION = 1;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 export const ALIAS_VERSION_FIELD = 'aliases_version';
