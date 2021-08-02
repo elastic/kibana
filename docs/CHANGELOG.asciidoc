@@ -635,7 +635,7 @@ Reporting::
 * Adds `handleSIGHUP: false` to puppeteer LaunchOptions {kibana-pull}104992[#104992]
 Security::
 * Fixes of the `ja-JP.json not found` error {kibana-pull}105023[#105023]
-* Load FLS suggestions on-demand {kibana-pull}98681[#98681]
+* Role management: load field-level security suggestions on-demand {kibana-pull}98681[#98681]
 Uptime::
 * Fixes mobile synthetics image clipping {kibana-pull}106128[#106128]
 * Define color for XHR timings in waterfall chart {kibana-pull}105817[#105817]
