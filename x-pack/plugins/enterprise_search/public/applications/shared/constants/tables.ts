@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-.wsLicenseBadge__text {
-  color: $euiColorGhost;
-}
+import { i18n } from '@kbn/i18n';
+
+export const ACTIONS_HEADER = i18n.translate('xpack.enterpriseSearch.actionsHeader', {
+  defaultMessage: 'Actions',
+});
