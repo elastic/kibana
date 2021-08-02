@@ -93,18 +93,18 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
           addDeprecation({
             message: i18n.translate('telemetry.config.url.deprecationMessage', {
               defaultMessage:
-                '"{configPath}" has been deprecated. Use "telemetry.sendUsageTo: staging" to send usage to the staging telemetry cluster.',
+                '"{{configPath}}" has been deprecated. Set "telemetry.sendUsageTo: staging" to the Kibana configurations to send usage to the staging telemetry cluster.',
               values: { configPath: fullConfigPath },
             }),
             correctiveActions: {
               manualSteps: [
                 i18n.translate('telemetry.config.url.deprecationManualStep1', {
-                  defaultMessage: 'Remove "{configPath}" from your Kibana configuration',
+                  defaultMessage: 'Remove "{{configPath}}" from the Kibana configuration',
                   values: { configPath: fullConfigPath },
                 }),
                 i18n.translate('telemetry.config.url.deprecationManualStep2', {
                   defaultMessage:
-                    'To send usage to staging, add "telemetry.sendUsageTo: staging" to your Kibana configuration.',
+                    'To send usage to staging, add "telemetry.sendUsageTo: staging" to the Kibana configuration.',
                   values: { configPath: fullConfigPath },
                 }),
               ],
