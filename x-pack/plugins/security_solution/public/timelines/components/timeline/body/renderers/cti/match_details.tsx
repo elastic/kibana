@@ -16,6 +16,7 @@ import { HorizontalSpacer } from './helpers';
 interface MatchDetailsProps {
   contextId: string;
   eventId: string;
+  isDraggable?: boolean;
   sourceField: string;
   sourceValue: string;
 }
@@ -23,6 +24,7 @@ interface MatchDetailsProps {
 export const MatchDetails: React.FC<MatchDetailsProps> = ({
   contextId,
   eventId,
+  isDraggable,
   sourceField,
   sourceValue,
 }) => (
@@ -40,6 +42,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         data-test-subj="threat-match-details-source-field"
         eventId={eventId}
         field={INDICATOR_MATCHED_FIELD}
+        isDraggable={isDraggable}
         value={sourceField}
       />
     </EuiFlexItem>
@@ -57,6 +60,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         data-test-subj="threat-match-details-source-value"
         eventId={eventId}
         field={sourceField}
+        isDraggable={isDraggable}
         value={sourceValue}
       />
     </EuiFlexItem>

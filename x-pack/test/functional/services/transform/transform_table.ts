@@ -37,6 +37,11 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
             .find('.euiTableCellContent')
             .text()
             .trim(),
+          type: $tr
+            .findTestSubject('transformListColumnType')
+            .find('.euiTableCellContent')
+            .text()
+            .trim(),
           status: $tr
             .findTestSubject('transformListColumnStatus')
             .find('.euiTableCellContent')
@@ -190,38 +195,54 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async assertTransformExpandedRow() {
-      await testSubjects.click('transformListRowDetailsToggle');
+    public async ensureDetailsOpen() {
+      await retry.tryForTime(30 * 1000, async () => {
+        if (!(await testSubjects.exists('transformExpandedRowTabbedContent'))) {
+          await testSubjects.click('transformListRowDetailsToggle');
+          await testSubjects.existOrFail('transformExpandedRowTabbedContent', { timeout: 1000 });
+        }
+      });
+    }
 
-      // The expanded row should show the details tab content by default
-      await testSubjects.existOrFail('transformDetailsTab');
-      await testSubjects.existOrFail('~transformDetailsTabContent');
+    public async ensureDetailsClosed() {
+      await retry.tryForTime(30 * 1000, async () => {
+        if (await testSubjects.exists('transformExpandedRowTabbedContent')) {
+          await testSubjects.click('transformListRowDetailsToggle');
+          await testSubjects.missingOrFail('transformExpandedRowTabbedContent', { timeout: 1000 });
+        }
+      });
+    }
+
+    public async switchToExpandedRowTab(tabSubject: string, contentSubject: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.click(tabSubject);
+        await testSubjects.existOrFail(contentSubject, { timeout: 1000 });
+      });
+    }
+
+    public async assertTransformExpandedRow() {
+      await this.ensureDetailsOpen();
+      await retry.tryForTime(30 * 1000, async () => {
+        // The expanded row should show the details tab content by default
+        await testSubjects.existOrFail('transformDetailsTab', { timeout: 1000 });
+        await testSubjects.existOrFail('~transformDetailsTabContent', { timeout: 1000 });
+      });
 
       // Walk through the rest of the tabs and check if the corresponding content shows up
-      await testSubjects.existOrFail('transformJsonTab');
-      await testSubjects.click('transformJsonTab');
-      await testSubjects.existOrFail('~transformJsonTabContent');
-
-      await testSubjects.existOrFail('transformMessagesTab');
-      await testSubjects.click('transformMessagesTab');
-      await testSubjects.existOrFail('~transformMessagesTabContent');
-
-      await testSubjects.existOrFail('transformPreviewTab');
-      await testSubjects.click('transformPreviewTab');
-      await testSubjects.existOrFail('~transformPivotPreview');
+      await this.switchToExpandedRowTab('transformJsonTab', '~transformJsonTabContent');
+      await this.switchToExpandedRowTab('transformMessagesTab', '~transformMessagesTabContent');
+      await this.switchToExpandedRowTab('transformPreviewTab', '~transformPivotPreview');
     }
 
     public async assertTransformExpandedRowMessages(expectedText: string) {
-      await testSubjects.click('transformListRowDetailsToggle');
+      await this.ensureDetailsOpen();
 
       // The expanded row should show the details tab content by default
       await testSubjects.existOrFail('transformDetailsTab');
       await testSubjects.existOrFail('~transformDetailsTabContent');
 
       // Click on the messages tab and assert the messages
-      await testSubjects.existOrFail('transformMessagesTab');
-      await testSubjects.click('transformMessagesTab');
-      await testSubjects.existOrFail('~transformMessagesTabContent');
+      await this.switchToExpandedRowTab('transformMessagesTab', '~transformMessagesTabContent');
       await retry.tryForTime(30 * 1000, async () => {
         const actualText = await testSubjects.getVisibleText('~transformMessagesTabContent');
         expect(actualText.toLowerCase()).to.contain(
