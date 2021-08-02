@@ -80,7 +80,7 @@ export function hitsToGeoJson(
   const tmpGeometriesAccumulator: Geometry[] = [];
 
   for (let i = 0; i < hits.length; i++) {
-    const properties = flattenHit(hits[i]);
+    const properties = { ...flattenHit(hits[i]) };
 
     tmpGeometriesAccumulator.length = 0; // truncate accumulator
 
