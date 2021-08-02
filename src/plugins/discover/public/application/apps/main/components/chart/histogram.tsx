@@ -108,7 +108,7 @@ export function DiscoverHistogram({
   }
 
   const formatXValue = (val: string) => {
-    const xAxisFormat = chartData!.xAxisFormat.params!.pattern;
+    const xAxisFormat = chartData.xAxisFormat.params!.pattern;
     return moment(val).format(xAxisFormat);
   };
 
