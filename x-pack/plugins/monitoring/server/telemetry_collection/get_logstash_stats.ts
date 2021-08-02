@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
@@ -116,18 +115,18 @@ export interface LogstashProcessOptions {
  * @param {Object} plugins - plugin information keyed by cluster UUIDs to count the unique plugins
  */
 export function processStatsResults(
-  results: SearchResponse<LogstashStats>,
+  results: estypes.SearchResponse<LogstashStats>,
   { clusters, allEphemeralIds, versions, plugins }: LogstashProcessOptions
 ) {
   const currHits = results?.hits?.hits || [];
   currHits.forEach((hit) => {
-    const clusterUuid = hit._source.cluster_uuid;
+    const clusterUuid = hit._source!.cluster_uuid;
     if (clusters[clusterUuid] === undefined) {
       clusters[clusterUuid] = getLogstashBaseStats();
       versions[clusterUuid] = new Map();
       plugins[clusterUuid] = new Map();
     }
-    const logstashStats = hit._source.logstash_stats;
+    const logstashStats = hit._source?.logstash_stats;
     const clusterStats = clusters[clusterUuid].cluster_stats;
 
     if (clusterStats !== undefined && logstashStats !== undefined) {
@@ -139,7 +138,7 @@ export function processStatsResults(
       clusters[clusterUuid].versions = mapToList(a, 'version');
 
       // Internal Collection has no agent field, so default to 'internal_collection'
-      let thisCollectionType = hit._source.agent?.type;
+      let thisCollectionType = hit._source?.agent?.type;
       if (thisCollectionType === undefined) {
         thisCollectionType = 'internal_collection';
       }
@@ -176,7 +175,7 @@ export function processStatsResults(
  * @param {Object} plugins - plugin information keyed by cluster UUIDs to count the unique plugins
  */
 export function processLogstashStateResults(
-  results: SearchResponse<LogstashState>,
+  results: estypes.SearchResponse<LogstashState>,
   clusterUuid: string,
   { clusters, plugins }: LogstashProcessOptions
 ) {
@@ -185,7 +184,7 @@ export function processLogstashStateResults(
   const pipelineStats = clusters[clusterUuid].cluster_stats?.pipelines;
 
   currHits.forEach((hit) => {
-    const thisLogstashStatePipeline = hit._source.logstash_state?.pipeline;
+    const thisLogstashStatePipeline = hit._source?.logstash_state?.pipeline;
 
     if (pipelineStats !== undefined && thisLogstashStatePipeline !== undefined) {
       pipelineStats.count = (pipelineStats.count || 0) + 1;
@@ -301,7 +300,7 @@ export async function fetchLogstashStats(
     },
   };
 
-  const { body: results } = await callCluster.search(params, {
+  const { body: results } = await callCluster.search<LogstashStats>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },
@@ -310,7 +309,7 @@ export async function fetchLogstashStats(
 
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processStatsResults(results as SearchResponse<LogstashStats>, options);
+    processStatsResults(results, options);
 
     if (hitsLength === HITS_SIZE) {
       // call recursively
@@ -362,7 +361,7 @@ export async function fetchLogstashState(
     },
   };
 
-  const { body: results } = await callCluster.search<SearchResponse<LogstashState>>(params, {
+  const { body: results } = await callCluster.search<LogstashState>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },
@@ -371,7 +370,7 @@ export async function fetchLogstashState(
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processLogstashStateResults(results as SearchResponse<LogstashState>, clusterUuid, options);
+    processLogstashStateResults(results, clusterUuid, options);
 
     if (hitsLength === HITS_SIZE) {
       // call recursively

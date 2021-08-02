@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { isPlainObject } from 'lodash';
 import { IndexPattern } from '../../index_patterns/index_patterns';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
@@ -18,7 +18,7 @@ export interface TabifyDocsOptions {
 }
 
 export function flattenHit(
-  hit: SearchResponse<unknown>['hits']['hits'][0],
+  hit: estypes.SearchHit,
   indexPattern?: IndexPattern,
   params?: TabifyDocsOptions
 ) {
@@ -58,7 +58,7 @@ export function flattenHit(
     }
   }
 
-  flatten(hit.fields);
+  flatten(hit.fields || {});
   if (params?.source !== false && hit._source) {
     flatten(hit._source as Record<string, any>);
   }
@@ -72,7 +72,7 @@ export function flattenHit(
 }
 
 export const tabifyDocs = (
-  esResponse: SearchResponse<unknown>,
+  esResponse: estypes.SearchResponse<unknown>,
   index?: IndexPattern,
   params: TabifyDocsOptions = {}
 ): Datatable => {

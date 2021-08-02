@@ -615,9 +615,9 @@ export class TaskRunner<
           };
         },
         (err: ElasticsearchError) => {
-          const message = `Executing Alert "${alertId}" has resulted in Error: ${getEsErrorMessage(
-            err
-          )}`;
+          const message = `Executing Alert ${spaceId}:${
+            this.alertType.id
+          }:${alertId} has resulted in Error: ${getEsErrorMessage(err)}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
             this.logger.debug(message);
           } else {
