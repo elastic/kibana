@@ -32,15 +32,20 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
       );
     }, [headerBackComponent, title]);
 
+    const description = useMemo(() => {
+      return <span data-test-subj="header-panel-subtitle">{subtitle}</span>;
+    }, [subtitle]);
+
     return (
       <EuiPageTemplate
         pageHeader={{
           pageTitle: header,
-          description: subtitle,
+          description,
           children: actions,
           bottomBorder: true,
         }}
         restrictWidth={false}
+        {...otherProps}
       >
         {children}
 
