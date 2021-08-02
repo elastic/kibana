@@ -83,7 +83,7 @@ export function SearchBar({
   showTimeComparison = false,
   showTransactionTypeSelector = false,
 }: Props) {
-  const { isSmall, isMedium, isLarge, isXl, isXXL } = useBreakPoints();
+  const { isSmall, isMedium, isLarge, isXl, isXXXL } = useBreakPoints();
 
   if (hidden) {
     return null;
@@ -95,7 +95,7 @@ export function SearchBar({
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
-        direction={isXXL ? 'row' : 'column'}
+        direction={isXXXL ? 'row' : 'column'}
       >
         <EuiFlexItem>
           <EuiFlexGroup
@@ -116,7 +116,7 @@ export function SearchBar({
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={showTimeComparison && !isXXL}>
+        <EuiFlexItem grow={showTimeComparison && !isXXXL}>
           <EuiFlexGroup
             direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
             justifyContent={isXl ? 'flexEnd' : undefined}
@@ -124,7 +124,7 @@ export function SearchBar({
             responsive={false}
           >
             {showTimeComparison && (
-              <EuiFlexItem grow={isXXL} style={{ minWidth: 300 }}>
+              <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
                 <TimeComparison />
               </EuiFlexItem>
             )}
