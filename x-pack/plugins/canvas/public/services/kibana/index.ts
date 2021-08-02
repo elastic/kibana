@@ -14,6 +14,7 @@ import {
 
 import { CanvasPluginServices } from '..';
 import { CanvasStartDeps } from '../../plugin';
+import { customElementServiceFactory } from './custom_element';
 import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
 import { navLinkServiceFactory } from './nav_link';
@@ -22,8 +23,9 @@ import { platformServiceFactory } from './platform';
 import { reportingServiceFactory } from './reporting';
 import { workpadServiceFactory } from './workpad';
 
-export { expressionsServiceFactory } from './expressions';
+export { customElementServiceFactory } from './custom_element';
 export { embeddablesServiceFactory } from './embeddables';
+export { expressionsServiceFactory } from './expressions';
 export { notifyServiceFactory } from './notify';
 export { platformServiceFactory } from './platform';
 export { reportingServiceFactory } from './reporting';
@@ -33,9 +35,10 @@ export const pluginServiceProviders: PluginServiceProviders<
   CanvasPluginServices,
   KibanaPluginServiceParams<CanvasStartDeps>
 > = {
+  customElement: new PluginServiceProvider(customElementServiceFactory),
+  embeddables: new PluginServiceProvider(embeddablesServiceFactory),
   expressions: new PluginServiceProvider(expressionsServiceFactory),
   navLink: new PluginServiceProvider(navLinkServiceFactory),
-  embeddables: new PluginServiceProvider(embeddablesServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),
   platform: new PluginServiceProvider(platformServiceFactory),
   reporting: new PluginServiceProvider(reportingServiceFactory),
