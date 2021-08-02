@@ -10,7 +10,6 @@ import { BaseParams, BasePayload } from '../../types';
 
 interface BaseParamsPNG {
   layout: LayoutParams;
-  forceNow?: string;
   relativeUrl: string;
 }
 
@@ -18,4 +17,6 @@ interface BaseParamsPNG {
 export type JobParamsPNG = BaseParamsPNG & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
-export type TaskPayloadPNG = BaseParamsPNG & BasePayload;
+export interface TaskPayloadPNG extends BaseParamsPNG, BasePayload {
+  forceNow: string;
+}

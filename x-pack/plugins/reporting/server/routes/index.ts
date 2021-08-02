@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { ReportingCore } from '../core';
 import { LevelLogger as Logger } from '../lib';
 import { registerDeprecationsRoutes } from './deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
-import { ReportingCore } from '../core';
+import { registerSchedulingRoutes } from './schedules';
 
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDeprecationsRoutes(reporting, logger);
   registerDiagnosticRoutes(reporting, logger);
   registerJobGenerationRoutes(reporting, logger);
   registerJobInfoRoutes(reporting);
+  registerSchedulingRoutes(reporting, logger);
 }
 
 export interface ReportingRequestPre {
@@ -25,3 +27,7 @@ export interface ReportingRequestPre {
   };
   user: string;
 }
+
+export const handleUnavailable = (res: any) => {
+  return res.custom({ statusCode: 503, body: 'Not Available' });
+};

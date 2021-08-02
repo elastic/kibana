@@ -63,6 +63,7 @@ export interface BasePayload extends BaseParams {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
+  forceNow?: string;
 }
 
 export interface ReportSource {

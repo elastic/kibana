@@ -6,13 +6,14 @@
  */
 
 import { omitBy } from 'lodash';
+import { DeserializedHeaders } from '.';
 import {
   KBN_SCREENSHOT_HEADER_BLOCK_LIST,
   KBN_SCREENSHOT_HEADER_BLOCK_LIST_STARTS_WITH_PATTERN,
 } from '../../../common/constants';
 
-export const omitBlockedHeaders = (decryptedHeaders: Record<string, string>) => {
-  const filteredHeaders: Record<string, string> = omitBy(
+export const omitBlockedHeaders = (decryptedHeaders: DeserializedHeaders) => {
+  const filteredHeaders: DeserializedHeaders = omitBy(
     decryptedHeaders,
     (_value, header: string) =>
       header &&
