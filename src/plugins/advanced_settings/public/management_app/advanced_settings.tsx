@@ -14,6 +14,7 @@ import { parse } from 'query-string';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
+import { KibanaContextProvider } from '../../../kibana_react/public';
 import {
   IUiSettingsClient,
   DocLinksStart,
@@ -257,20 +258,22 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
         <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 
-        <Form
-          settings={this.groupedSettings}
-          visibleSettings={filteredSettings}
-          categories={this.categories}
-          categoryCounts={this.categoryCounts}
-          clearQuery={this.clearQuery}
-          save={this.saveConfig}
-          showNoResultsMessage={!footerQueryMatched}
-          enableSaving={this.props.enableSaving}
-          dockLinks={this.props.dockLinks}
-          toasts={this.props.toasts}
-          trackUiMetric={this.props.trackUiMetric}
-          queryText={query.text}
-        />
+        <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
+          <Form
+            settings={this.groupedSettings}
+            visibleSettings={filteredSettings}
+            categories={this.categories}
+            categoryCounts={this.categoryCounts}
+            clearQuery={this.clearQuery}
+            save={this.saveConfig}
+            showNoResultsMessage={!footerQueryMatched}
+            enableSaving={this.props.enableSaving}
+            dockLinks={this.props.dockLinks}
+            toasts={this.props.toasts}
+            trackUiMetric={this.props.trackUiMetric}
+            queryText={query.text}
+          />
+        </KibanaContextProvider>
         <PageFooter
           toasts={this.props.toasts}
           query={query}

@@ -9,17 +9,12 @@
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
 
-import 'brace/theme/textmate';
-import 'brace/mode/markdown';
-import 'brace/mode/json';
-
 import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
   EuiColorPicker,
   EuiScreenReaderOnly,
-  EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -34,9 +29,12 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiToolTip,
+  keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { XJsonLang } from '@kbn/monaco';
+import { CodeEditor, MarkdownLang } from '../../../../../kibana_react/public';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
 import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
@@ -291,7 +289,22 @@ export class Field extends PureComponent<FieldProps> {
       case 'json':
         return (
           <div data-test-subj={`advancedSetting-editField-${name}`}>
-            <EuiCodeEditor
+            <CodeEditor
+              {...a11yProps}
+              data-test-subj={`advancedSetting-editField-${name}-editor`}
+              value={currentValue}
+              onChange={this.onCodeEditorChange}
+              languageId={type === 'markdown' ? MarkdownLang.ID : XJsonLang.ID}
+              height={150} // TODO: build auto height
+              options={{
+                readOnly: isOverridden || !enableSaving,
+                fontSize: 12,
+                lineNumbers: 'off',
+                folding: false,
+                tabSize: 2,
+              }}
+            />
+            {/* <EuiCodeEditor
               {...a11yProps}
               name={`advancedSetting-editField-${name}-editor`}
               mode={type}
@@ -311,7 +324,7 @@ export class Field extends PureComponent<FieldProps> {
                 $blockScrolling: Infinity,
               }}
               showGutter={false}
-            />
+            /> */}
           </div>
         );
       case 'image':

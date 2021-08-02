@@ -12,13 +12,15 @@ import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
 import { UiSettingsType } from '../../../../../../core/public';
-import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
+import {
+  notificationServiceMock,
+  docLinksServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../../../core/public/mocks';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';
-
-jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
-jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
 const defaults = {
   requiresPageReload: false,
@@ -326,15 +328,19 @@ describe('Field', () => {
     const setup = () => {
       const Wrapper = (props: Record<string, any>) => (
         <I18nProvider>
-          <Field
-            setting={setting}
-            clearChange={clearChange}
-            handleChange={handleChange}
-            enableSaving={true}
-            toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
-            {...props}
-          />
+          <KibanaContextProvider
+            services={{ uiSettings: uiSettingsServiceMock.createStartContract() }}
+          >
+            <Field
+              setting={setting}
+              clearChange={clearChange}
+              handleChange={handleChange}
+              enableSaving={true}
+              toasts={notificationServiceMock.createStartContract().toasts}
+              dockLinks={docLinksServiceMock.createStartContract().links}
+              {...props}
+            />
+          </KibanaContextProvider>
         </I18nProvider>
       );
       const wrapper = mount(<Wrapper />);
