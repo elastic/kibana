@@ -13970,9 +13970,4 @@ if the field is switched, and then switched back to the previous field {kib-pull
 * Fixes maps for reporting (#15272) {kib-pull}15358[#15358]
 * Stops creation of nested search source per postflightrequest {kib-pull}20373[#20373]
 * Moves inspector code from Vis to embeddable visualize handler {kib-pull}24112[#24112]
-<<<<<<< HEAD
 * Removes inspector from Vis {kib-pull}24112[#24112]
-=======
-* Removes inspector from Vis {kib-pull}24112[#24112]
-////////////////////////
->>>>>>> adade40f341 (Update docs/CHANGELOG.asciidoc)
