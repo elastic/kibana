@@ -56,6 +56,60 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-public.getTemplateDetailsLink",
+        "type": "Function",
+        "tags": [],
+        "label": "getTemplateDetailsLink",
+        "description": [],
+        "signature": [
+          "(name: string, isLegacy?: boolean | undefined) => string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.getTemplateDetailsLink.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+              "lineNumber": 10
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.getTemplateDetailsLink.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLegacy",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/index_management/public/application/services/routing.ts",
+              "lineNumber": 10
+            },
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
