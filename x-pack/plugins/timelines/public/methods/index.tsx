@@ -16,6 +16,7 @@ import type {
   LoadingPanelProps,
   FieldBrowserWrappedProps,
 } from '../components';
+import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 
 const TimelineLazy = lazy(() => import('../components'));
 export const getTGridLazy = (
@@ -65,6 +66,15 @@ export const getFieldsBrowserLazy = (
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <FieldsBrowserLazy {...props} store={store} />
+    </Suspense>
+  );
+};
+
+const AddToCaseLazy = lazy(() => import('../components/actions/timeline/cases/add_to_case_action'));
+export const getAddToCaseLazy = (props: AddToCaseActionProps) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <AddToCaseLazy {...props} />
     </Suspense>
   );
 };

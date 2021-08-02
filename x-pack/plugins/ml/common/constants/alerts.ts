@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
   ANOMALY_DETECTION: 'xpack.ml.anomaly_detection_alert',
@@ -20,8 +21,26 @@ export const TOP_N_BUCKETS_COUNT = 1;
 
 export const ALL_JOBS_SELECTION = '*';
 
-export const HEALTH_CHECK_NAMES = {
+export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, string> = {
   datafeed: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedCheckName', {
     defaultMessage: 'Datafeed is not started',
+  }),
+  mml: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckName', {
+    defaultMessage: 'Model memory limit reached',
+  }),
+  errorMessages: i18n.translate(
+    'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesCheckName',
+    {
+      defaultMessage: 'There are errors in the job messages',
+    }
+  ),
+  behindRealtime: i18n.translate(
+    'xpack.ml.alertTypes.jobsHealthAlertingRule.behindRealtimeCheckName',
+    {
+      defaultMessage: 'Job is running behind real-time',
+    }
+  ),
+  delayedData: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataCheckName', {
+    defaultMessage: 'Data delay has occurred',
   }),
 };

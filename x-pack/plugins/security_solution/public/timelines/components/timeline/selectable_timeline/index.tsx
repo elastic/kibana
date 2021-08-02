@@ -204,7 +204,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       incremental: true,
       append: (
         <StyledEuiFilterButton
-          size="l"
           data-test-subj="only-favorites-toggle"
           hasActiveFilters={onlyFavorites}
           onClick={handleOnToggleOnlyFavorites}

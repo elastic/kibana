@@ -199,7 +199,6 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
               defaultMessage="A dictionary of additional HTTP headers to send. By default the client will set the User-Agent header to identify itself."
             />
           }
-          data-test-subj="syntheticsRequestHeaders"
         >
           <HeaderField
             contentMode={
@@ -216,6 +215,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 }),
               [handleInputChange]
             )}
+            data-test-subj="syntheticsRequestHeaders"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -388,7 +388,6 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
               defaultMessage="A list of expected response headers."
             />
           }
-          data-test-subj="syntheticsResponseHeaders"
         >
           <HeaderField
             defaultValue={fields[ConfigKeys.RESPONSE_HEADERS_CHECK]}
@@ -400,6 +399,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 }),
               [handleInputChange]
             )}
+            data-test-subj="syntheticsResponseHeaders"
           />
         </EuiFormRow>
         <EuiFormRow
