@@ -29,10 +29,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -68,10 +65,7 @@
           },
           ">)[]"
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/public/expression_renderers/index.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_repeat_image/public/expression_renderers/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -87,10 +81,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "src/plugins/expression_repeat_image/public/plugin.ts",
-        "lineNumber": 23
-      },
+      "path": "src/plugins/expression_repeat_image/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -117,10 +108,7 @@
         "signature": [
           "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
-          "lineNumber": 67
-        },
+        "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -135,10 +123,7 @@
         "tags": [],
         "label": "NodeDimensions",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-          "lineNumber": 18
-        },
+        "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -148,10 +133,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -161,10 +143,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false
           }
         ],
@@ -177,10 +156,7 @@
         "tags": [],
         "label": "RepeatImageRendererConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -190,10 +166,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -203,10 +176,7 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -216,10 +186,7 @@
             "tags": [],
             "label": "emptyImage",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -229,10 +196,7 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -242,10 +206,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
             "deprecated": false
           }
         ],
@@ -258,10 +219,7 @@
         "tags": [],
         "label": "Return",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
         "deprecated": false,
         "children": [
           {
@@ -271,10 +229,7 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -284,10 +239,7 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -297,10 +249,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -310,10 +259,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -326,10 +272,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -348,10 +291,7 @@
         "signature": [
           "\"`base64`\""
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/constants.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -365,10 +305,7 @@
         "signature": [
           "\"_context_\""
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/constants.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -416,10 +353,7 @@
           "SerializableState",
           ">>"
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-          "lineNumber": 25
-        },
+        "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -440,10 +374,7 @@
           },
           "[]"
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/expression_functions/index.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_repeat_image/common/expression_functions/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -457,10 +388,7 @@
         "signature": [
           "\"top\" | \"bottom\" | \"left\" | \"right\""
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -474,10 +402,7 @@
         "signature": [
           "\"expressionRepeatImage\""
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -491,10 +416,7 @@
         "signature": [
           "\"expressionRepeatImage\""
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/constants.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -508,10 +430,7 @@
         "signature": [
           "\"URL\""
         ],
-        "source": {
-          "path": "src/plugins/expression_repeat_image/common/constants.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

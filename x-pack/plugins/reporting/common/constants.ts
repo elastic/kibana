@@ -111,6 +111,11 @@ export enum JOB_STATUSES {
 export const REPORT_TABLE_ID = 'reportJobListing';
 export const REPORT_TABLE_ROW_ID = 'reportJobRow';
 
+// Job params require a `version` field as of 7.15.0. For older jobs set with
+// automation that have no version value in the job params, we assume the
+// intended version is 7.14.0
+export const UNVERSIONED_VERSION = '7.14.0';
+
 // hacky endpoint: download CSV without queueing a report
 // FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
 export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;

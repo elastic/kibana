@@ -17,13 +17,17 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
     return privileges;
   }, []);
 
-export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) => {
+export const registerPrivilegesRoute = ({
+  router,
+  config,
+  lib: { handleEsError },
+}: RouteDependencies) => {
   router.get(
     {
       path: addBasePath('/component_templates/privileges'),
       validate: false,
     },
-    async (ctx, req, res) => {
+    async (context, request, response) => {
       const privilegesResult: Privileges = {
         hasAllPrivileges: true,
         missingPrivileges: {
@@ -33,38 +37,28 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
 
       // Skip the privileges check if security is not enabled
       if (!config.isSecurityEnabled()) {
-        return res.ok({ body: privilegesResult });
+        return response.ok({ body: privilegesResult });
       }
 
-      const {
-        core: {
-          elasticsearch: {
-            legacy: { client },
-          },
-        },
-      } = ctx;
+      const { client } = context.core.elasticsearch;
 
       try {
-        const { has_all_requested: hasAllPrivileges, cluster } = await client.callAsCurrentUser(
-          'transport.request',
-          {
-            path: '/_security/user/_has_privileges',
-            method: 'POST',
-            body: {
-              cluster: ['manage_index_templates'],
-            },
-          }
-        );
+        const {
+          body: { has_all_requested: hasAllPrivileges, cluster },
+        } = await client.asCurrentUser.security.hasPrivileges({
+          body: {
+            cluster: ['manage_index_templates'],
+          },
+        });
 
         if (!hasAllPrivileges) {
           privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
         }
 
         privilegesResult.hasAllPrivileges = hasAllPrivileges;
-
-        return res.ok({ body: privilegesResult });
-      } catch (e) {
-        throw e;
+        return response.ok({ body: privilegesResult });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );
