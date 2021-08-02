@@ -13,6 +13,7 @@ Object {
     },
     "mappings": Object {
       "_meta": Object {
+        "aliases_version": 1,
         "version": 55,
       },
       "dynamic": false,
