@@ -76,7 +76,7 @@
               },
               "<{}, { dashboardConfig: ",
               "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>) => {}"
+              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>) => {}"
             ],
             "source": {
               "path": "src/plugins/kibana_legacy/public/plugin.ts",
@@ -101,7 +101,7 @@
                   },
                   "<{}, { dashboardConfig: ",
                   "DashboardConfig",
-                  "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>"
+                  "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>"
                 ],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/plugin.ts",
@@ -131,7 +131,7 @@
               },
               ") => { dashboardConfig: ",
               "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
             ],
             "source": {
               "path": "src/plugins/kibana_legacy/public/plugin.ts",
@@ -167,477 +167,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaLegacy",
-        "id": "def-public.ToastNotifications",
-        "type": "Class",
-        "tags": [],
-        "label": "ToastNotifications",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.list",
-            "type": "Array",
-            "tags": [],
-            "label": "list",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 12
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 16
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "toasts",
-                "description": [],
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastsApi",
-                    "text": "ToastsApi"
-                  },
-                  ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 16
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.onChange",
-            "type": "Function",
-            "tags": [],
-            "label": "onChange",
-            "description": [],
-            "signature": [
-              "(callback: () => void) => void"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 26
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.onChange.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "callback",
-                "description": [],
-                "signature": [
-                  "() => void"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 26
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.add",
-            "type": "Function",
-            "tags": [],
-            "label": "add",
-            "description": [],
-            "signature": [
-              "(toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 30
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.add.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "toastOrTitle",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 30
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.remove",
-            "type": "Function",
-            "tags": [],
-            "label": "remove",
-            "description": [],
-            "signature": [
-              "(toast: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              ") => void"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 31
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.remove.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "toast",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 31
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.addSuccess",
-            "type": "Function",
-            "tags": [],
-            "label": "addSuccess",
-            "description": [],
-            "signature": [
-              "(toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 32
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.addSuccess.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "toastOrTitle",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 32
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.addWarning",
-            "type": "Function",
-            "tags": [],
-            "label": "addWarning",
-            "description": [],
-            "signature": [
-              "(toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 33
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.addWarning.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "toastOrTitle",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 33
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.addDanger",
-            "type": "Function",
-            "tags": [],
-            "label": "addDanger",
-            "description": [],
-            "signature": [
-              "(toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 34
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.addDanger.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "toastOrTitle",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 34
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.ToastNotifications.addError",
-            "type": "Function",
-            "tags": [],
-            "label": "addError",
-            "description": [],
-            "signature": [
-              "(error: Error, options: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 35
-            },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.addError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  "Error"
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 35
-                },
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.ToastNotifications.addError.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ErrorToastOptions",
-                    "text": "ErrorToastOptions"
-                  }
-                ],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 35
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -653,7 +182,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-          "lineNumber": 136
+          "lineNumber": 141
         },
         "deprecated": false,
         "children": [
@@ -669,7 +198,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 136
+              "lineNumber": 141
             },
             "deprecated": false,
             "isRequired": true
@@ -780,51 +309,6 @@
       },
       {
         "parentPluginId": "kibanaLegacy",
-        "id": "def-public.addSystemApiHeader",
-        "type": "Function",
-        "tags": [
-          "return"
-        ],
-        "label": "addSystemApiHeader",
-        "description": [
-          "\nAdds a custom header designating request as system API"
-        ],
-        "signature": [
-          "(originalHeaders: Record<string, string>) => { \"kbn-system-request\": boolean; }"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/utils/system_api.ts",
-          "lineNumber": 19
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.addSystemApiHeader.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "originalHeaders",
-            "description": [
-              "Object representing set of headers"
-            ],
-            "signature": [
-              "Record<string, string>"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/utils/system_api.ts",
-              "lineNumber": 19
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "Object representing set of headers, with system API header added in"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaLegacy",
         "id": "def-public.configureAppAngularModule",
         "type": "Function",
         "tags": [],
@@ -849,7 +333,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-          "lineNumber": 62
+          "lineNumber": 67
         },
         "deprecated": false,
         "children": [
@@ -865,7 +349,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 63
+              "lineNumber": 68
             },
             "deprecated": false,
             "isRequired": true
@@ -879,7 +363,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 64
+              "lineNumber": 69
             },
             "deprecated": false,
             "children": [
@@ -901,7 +385,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-                  "lineNumber": 65
+                  "lineNumber": 70
                 },
                 "deprecated": false
               },
@@ -921,7 +405,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-                  "lineNumber": 66
+                  "lineNumber": 71
                 },
                 "deprecated": false
               }
@@ -939,7 +423,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 71
+              "lineNumber": 76
             },
             "deprecated": false,
             "isRequired": true
@@ -958,7 +442,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 72
+              "lineNumber": 77
             },
             "deprecated": false,
             "isRequired": false
@@ -1190,25 +674,6 @@
       },
       {
         "parentPluginId": "kibanaLegacy",
-        "id": "def-public.initAngularBootstrap",
-        "type": "Function",
-        "tags": [],
-        "label": "initAngularBootstrap",
-        "description": [],
-        "signature": [
-          "() => void"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular_bootstrap/index.ts",
-          "lineNumber": 15
-        },
-        "deprecated": false,
-        "returnComment": [],
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaLegacy",
         "id": "def-public.isAngularHttpError",
         "type": "Function",
         "tags": [],
@@ -1242,51 +707,6 @@
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaLegacy",
-        "id": "def-public.isSystemApiRequest",
-        "type": "Function",
-        "tags": [
-          "return"
-        ],
-        "label": "isSystemApiRequest",
-        "description": [
-          "\nReturns true if request is a system API request; false otherwise\n"
-        ],
-        "signature": [
-          "(request: angular.IRequestConfig) => boolean | undefined"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/utils/system_api.ts",
-          "lineNumber": 35
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.isSystemApiRequest.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [
-              "Object Request object created by $http service"
-            ],
-            "signature": [
-              "angular.IRequestConfig"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/utils/system_api.ts",
-              "lineNumber": 35
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "true if request is a system API request; false otherwise"
-        ],
         "initialIsOpen": false
       },
       {
@@ -1415,60 +835,6 @@
         },
         "deprecated": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaLegacy",
-        "id": "def-public.PromiseServiceCreator",
-        "type": "Function",
-        "tags": [],
-        "label": "PromiseServiceCreator",
-        "description": [],
-        "signature": [
-          "($q: unknown, $timeout: unknown) => (fn: unknown) => unknown"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.PromiseServiceCreator.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "$q",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
-              "lineNumber": 9
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
-            "id": "def-public.PromiseServiceCreator.$2",
-            "type": "Unknown",
-            "tags": [],
-            "label": "$timeout",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
-              "lineNumber": 9
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1914,7 +1280,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/plugin.ts",
-          "lineNumber": 45
+          "lineNumber": 53
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1929,11 +1295,11 @@
         "signature": [
           "{ dashboardConfig: ",
           "DashboardConfig",
-          "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+          "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/plugin.ts",
-          "lineNumber": 46
+          "lineNumber": 54
         },
         "deprecated": false,
         "initialIsOpen": false
