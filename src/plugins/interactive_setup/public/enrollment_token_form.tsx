@@ -72,9 +72,9 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
       const decoded = decodeEnrollmentToken(values.token);
       if (decoded) {
         await Promise.all([
-          http.post('/internal/interactive_setup/enroll/kibana', {
+          http.post('/internal/interactive_setup/enroll', {
             body: JSON.stringify({
-              hosts: decoded.adr,
+              hosts: decoded.adr.map((host) => `https://${host}`),
               apiKey: decoded.key,
               caFingerprint: decoded.fgr,
             }),

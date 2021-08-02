@@ -24,14 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { useForm, ValidationErrors } from './use_form';
-import { getFingerprint } from './get_fingerprint';
 import { useHttp } from './use_http';
 
 export interface ManualConfigurationFormValues {
   host: string;
   username: string;
   password: string;
-  caFingerprint: string;
+  caCert: string;
 }
 
 export interface ManualConfigurationFormProps {
@@ -42,10 +41,10 @@ export interface ManualConfigurationFormProps {
 
 export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormProps> = ({
   defaultValues = {
-    host: 'localhost:9200',
-    username: 'elastic',
+    host: 'https://localhost:9200',
+    username: 'kibana_system',
     password: '',
-    caFingerprint: '',
+    caCert: '',
   },
   onCancel,
   onSuccess,
@@ -61,6 +60,20 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
         errors.host = i18n.translate('interactiveSetup.manualConfigurationForm.hostRequiredError', {
           defaultMessage: 'Enter an address.',
         });
+      } else {
+        try {
+          const url = new URL(values.host);
+          if (!url.protocol || !url.hostname || !url.port) {
+            throw new Error();
+          }
+        } catch (error) {
+          errors.host = i18n.translate(
+            'interactiveSetup.manualConfigurationForm.hostInvalidError',
+            {
+              defaultMessage: 'Enter a valid address including protocol and port number.',
+            }
+          );
+        }
       }
 
       if (!values.username) {
@@ -68,6 +81,13 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           'interactiveSetup.manualConfigurationForm.usernameRequiredError',
           {
             defaultMessage: 'Enter a username.',
+          }
+        );
+      } else if (values.username === 'elastic') {
+        errors.username = i18n.translate(
+          'interactiveSetup.manualConfigurationForm.usernameRequiredError',
+          {
+            defaultMessage: "Superuser 'elastic' can't be used as Kibana system user.",
           }
         );
       }
@@ -81,11 +101,11 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
         );
       }
 
-      if (!values.caFingerprint) {
-        errors.caFingerprint = i18n.translate(
-          'interactiveSetup.manualConfigurationForm.caFingerprintRequiredError',
+      if (!values.caCert) {
+        errors.caCert = i18n.translate(
+          'interactiveSetup.manualConfigurationForm.caCertRequiredError',
           {
-            defaultMessage: 'Enter a CA certificate.',
+            defaultMessage: 'Upload a CA certificate.',
           }
         );
       }
@@ -93,15 +113,26 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
       return errors;
     },
     onSubmit: async (values) => {
-      await http.post('/internal/interactive_setup/enroll/kibana', {
-        body: JSON.stringify({
-          hosts: [values.host],
-          username: values.username,
-          password: values.password,
-          caFingerprint: values.caFingerprint,
-        }),
-      });
-      onSuccess?.();
+      try {
+        await http.post('/internal/interactive_setup/configure', {
+          body: JSON.stringify({
+            hosts: [values.host],
+            username: values.username,
+            password: values.password,
+            caCert: values.caCert,
+          }),
+        });
+        onSuccess?.();
+      } catch (error) {
+        if (error.body?.message.includes('self signed certificate in certificate chain')) {
+          form.setError('caCert', 'CA did not match Elasticsearch cluster');
+        } else if (error.body?.message.includes('unable to authenticate user')) {
+          form.setError('username', 'unable to authenticate user');
+          form.setError('password', 'unable to authenticate user');
+        } else {
+          throw error;
+        }
+      }
     },
   });
 
@@ -123,11 +154,16 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           name="host"
           value={form.values.host}
           isInvalid={form.touched.host && !!form.errors.host}
+          onBlur={(event) => {
+            if (!form.touched.host || !form.errors.host) {
+              form.setValue('host', resolveAddress(event.target.value));
+            }
+          }}
         />
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('interactiveSetup.manualConfigurationForm.usernameLabel', {
-          defaultMessage: 'Admin username',
+          defaultMessage: 'Kibana system username',
         })}
         error={form.errors.username}
         isInvalid={form.touched.username && !!form.errors.username}
@@ -140,7 +176,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('interactiveSetup.manualConfigurationForm.passwordLabel', {
-          defaultMessage: 'Admin password',
+          defaultMessage: 'Kibana system password',
         })}
         error={form.errors.password}
         isInvalid={form.touched.password && !!form.errors.password}
@@ -156,29 +192,27 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
         label={i18n.translate('interactiveSetup.manualConfigurationForm.caLabel', {
           defaultMessage: 'Elasticsearch certificate authority',
         })}
-        error={form.errors.caFingerprint}
-        isInvalid={form.touched.caFingerprint && !!form.errors.caFingerprint}
+        error={form.errors.caCert}
+        isInvalid={form.touched.caCert && !!form.errors.caCert}
       >
         <EuiFilePicker
-          name="caFingerprint"
-          isInvalid={form.touched.caFingerprint && !!form.errors.caFingerprint}
+          name="caCert"
+          isInvalid={form.touched.caCert && !!form.errors.caCert}
           accept=".pem,.crt,.cert"
           onChange={async (files) => {
+            form.setTouched('caCert');
             if (!files || !files.length) {
-              form.setValue('caFingerprint', '');
+              form.setValue('caCert', '');
               return;
             }
             if (files[0].type !== 'application/x-x509-ca-cert') {
-              form.setError(
-                'caFingerprint',
-                'Invalid certificate, upload x509 CA cert in PEM format'
-              );
+              form.setError('caCert', 'Invalid certificate, upload x509 CA cert in PEM format');
               return;
             }
             const cert = await readFile(files[0]);
-            const hash = await getFingerprint(cert);
-            form.setValue('caFingerprint', hash);
+            form.setValue('caCert', new TextDecoder().decode(cert));
           }}
+          disabled={!form.values.host.startsWith('https://')}
         />
       </EuiFormRow>
 
@@ -210,6 +244,15 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
     </EuiForm>
   );
 };
+
+function resolveAddress(address: string, defaults = { protocol: 'https://', port: 9200 }) {
+  const match = address.match(/^([a-z]+:\/\/)?([^:]+)(:([0-9]+))?/i);
+  if (match) {
+    const [input, protocol = defaults.protocol, hostname, , port = defaults.port] = match;
+    return address.replace(input, `${protocol}${hostname}:${port}`);
+  }
+  return address;
+}
 
 function readFile(file: File) {
   return new Promise<ArrayBuffer>((resolve, reject) => {
