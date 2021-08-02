@@ -36,7 +36,13 @@ export const JsonView = React.memo<Props>(({ data }) => {
 
   return (
     <EuiCodeEditorContainer>
-      <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+      <EuiCodeBlock
+        language="json"
+        fontSize="m"
+        paddingSize="m"
+        isCopyable
+        data-test-subj="jsonView"
+      >
         {value}
       </EuiCodeBlock>
     </EuiCodeEditorContainer>

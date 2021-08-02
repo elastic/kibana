@@ -170,6 +170,7 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
       name: i18n.ACTION_IN_PROGRESS_ALERT,
       disabled: disabledInProgressAlertAction,
       onClick: inProgressAlertActionClick,
+      [`data-test-subj`]: 'in-progress-alert-status',
     };
   }, [disabledInProgressAlertAction, inProgressAlertActionClick]);
 
@@ -179,6 +180,7 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
       name: i18n.ACTION_CLOSE_ALERT,
       disabled: disabledCloseAlertAction,
       onClick: closeAlertActionClick,
+      [`data-test-subj`]: 'close-alert-status',
     };
   }, [disabledCloseAlertAction, closeAlertActionClick]);
 
@@ -188,6 +190,7 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
       name: i18n.ACTION_OPEN_ALERT,
       disabled: disabledOpenAlertAction,
       onClick: openAlertActionOnClick,
+      [`data-test-subj`]: 'open-alert-status',
     };
   }, [disabledOpenAlertAction, openAlertActionOnClick]);
 
