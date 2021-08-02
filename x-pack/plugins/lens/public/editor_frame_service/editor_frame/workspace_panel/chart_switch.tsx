@@ -370,7 +370,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                                   'xpack.lens.chartSwitch.dataLossDescription',
                                   {
                                     defaultMessage:
-                                      'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
+                                      'Selecting this visualization type will result in a partial loss of currently applied configuration selections.',
                                   }
                                 )}
                                 iconProps={{
@@ -439,8 +439,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem>
-              {i18n.translate('xpack.lens.configPanel.chartType', {
-                defaultMessage: 'Chart type',
+              {i18n.translate('xpack.lens.configPanel.visualizationType', {
+                defaultMessage: 'Visualization type',
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
