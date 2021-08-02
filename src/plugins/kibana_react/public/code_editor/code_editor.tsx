@@ -148,9 +148,7 @@ export const CodeEditor: React.FC<Props> = ({
   /* eslint-enable  @typescript-eslint/naming-convention */
 
   const _updateDimensions = useCallback(() => {
-    if (_editor.current) {
-      _editor.current.layout();
-    }
+    _editor.current?.layout();
   }, []);
 
   const startEditing = useCallback(() => {
@@ -236,9 +234,7 @@ export const CodeEditor: React.FC<Props> = ({
         return;
       }
 
-      if (editorWillMount) {
-        editorWillMount();
-      }
+      editorWillMount?.();
 
       monaco.languages.onLanguage(languageId, () => {
         if (suggestionProvider) {
@@ -303,9 +299,7 @@ export const CodeEditor: React.FC<Props> = ({
         });
       }
 
-      if (editorDidMount) {
-        editorDidMount(editor);
-      }
+      editorDidMount?.(editor);
     },
     [editorDidMount]
   );
