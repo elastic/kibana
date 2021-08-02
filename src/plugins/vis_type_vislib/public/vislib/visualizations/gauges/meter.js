@@ -10,7 +10,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 
 import { getHeatmapColors } from '../../../../../charts/public';
-import { UI_SETTINGS } from '../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../field_formats/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const arcAngles = {

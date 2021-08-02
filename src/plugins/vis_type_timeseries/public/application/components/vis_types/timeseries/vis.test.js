@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import TimeseriesVisualization from './vis';
 import { setFieldFormats } from '../../../../services';
-import { UI_SETTINGS } from '../../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../../field_formats/common';
 import { getFieldFormatsRegistry } from '../../../../../../data/public/test_utils';
 
 describe('TimeseriesVisualization', () => {

@@ -13,7 +13,7 @@ import { isColorDark } from '@elastic/eui';
 
 import { PointSeries } from './_point_series';
 import { getHeatmapColors } from '../../../../../../plugins/charts/public';
-import { UI_SETTINGS } from '../../../../../../plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../plugins/field_formats/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const defaults = {
