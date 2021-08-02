@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-// a temporary file to remove circular deps in TS code between platform & data plugin
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { esKuery } from '../../../plugins/data/server';
+import { Subject } from 'rxjs';
+import { PointerEvent } from '@elastic/charts';
+
+export const activeCursor$ = new Subject<PointerEvent>();

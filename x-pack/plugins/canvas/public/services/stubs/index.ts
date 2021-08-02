@@ -15,15 +15,18 @@ import {
 
 import { CanvasPluginServices } from '..';
 import { workpadServiceFactory } from './workpad';
+import { navLinkServiceFactory } from './nav_link';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
 
 export { workpadServiceFactory } from './workpad';
+export { navLinkServiceFactory } from './nav_link';
 export { notifyServiceFactory } from './notify';
 export { platformServiceFactory } from './platform';
 
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
   workpad: new PluginServiceProvider(workpadServiceFactory),
+  navLink: new PluginServiceProvider(navLinkServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),
   platform: new PluginServiceProvider(platformServiceFactory),
 };
