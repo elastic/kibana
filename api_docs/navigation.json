@@ -43,10 +43,7 @@
           },
           ", object, object>"
         ],
-        "source": {
-          "path": "src/plugins/navigation/public/plugin.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/navigation/public/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -59,10 +56,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/plugin.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -82,10 +76,7 @@
                   },
                   "<object>"
                 ],
-                "source": {
-                  "path": "src/plugins/navigation/public/plugin.ts",
-                  "lineNumber": 21
-                },
+                "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -117,10 +108,7 @@
                 "text": "NavigationPublicPluginSetup"
               }
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/plugin.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -140,10 +128,7 @@
                   },
                   "<object, unknown>"
                 ],
-                "source": {
-                  "path": "src/plugins/navigation/public/plugin.ts",
-                  "lineNumber": 23
-                },
+                "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -177,10 +162,7 @@
                 "text": "NavigationPublicPluginStart"
               }
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/plugin.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -199,10 +181,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/navigation/public/plugin.ts",
-                  "lineNumber": 32
-                },
+                "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -216,10 +195,7 @@
                 "signature": [
                   "NavigationPluginStartDependencies"
                 ],
-                "source": {
-                  "path": "src/plugins/navigation/public/plugin.ts",
-                  "lineNumber": 33
-                },
+                "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -236,10 +212,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/plugin.ts",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -267,10 +240,7 @@
           },
           ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
         ],
-        "source": {
-          "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
-          "lineNumber": 64
-        },
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
         "children": [
           {
@@ -289,10 +259,7 @@
                 "text": "TopNavMenuProps"
               }
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
-              "lineNumber": 64
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -309,10 +276,7 @@
         "tags": [],
         "label": "TopNavMenuData",
         "description": [],
-        "source": {
-          "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
         "deprecated": false,
         "children": [
           {
@@ -325,10 +289,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -338,10 +299,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -354,10 +312,7 @@
             "signature": [
               "(anchorElement: HTMLElement) => void"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -371,10 +326,7 @@
                 "signature": [
                   "HTMLElement"
                 ],
-                "source": {
-                  "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-                  "lineNumber": 11
-                },
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
                 "deprecated": false
               }
             ]
@@ -389,10 +341,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -405,10 +354,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -421,10 +367,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -437,10 +380,7 @@
             "signature": [
               "boolean | (() => boolean) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -453,10 +393,7 @@
             "signature": [
               "string | (() => string | undefined) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -469,10 +406,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -485,10 +419,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -501,10 +432,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           },
           {
@@ -517,10 +445,7 @@
             "signature": [
               "\"left\" | \"right\" | undefined"
             ],
-            "source": {
-              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
           }
         ],
@@ -652,10 +577,7 @@
           },
           "<HTMLElement> | undefined) => void) | undefined; }"
         ],
-        "source": {
-          "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -668,10 +590,7 @@
       "tags": [],
       "label": "NavigationPublicPluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/navigation/public/types.ts",
-        "lineNumber": 12
-      },
+      "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -686,10 +605,7 @@
             "RegisteredTopNavMenuData",
             ") => void"
           ],
-          "source": {
-            "path": "src/plugins/navigation/public/types.ts",
-            "lineNumber": 13
-          },
+          "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -703,10 +619,7 @@
               "signature": [
                 "RegisteredTopNavMenuData"
               ],
-              "source": {
-                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_extensions_registry.ts",
-                "lineNumber": 20
-              },
+              "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_extensions_registry.ts",
               "deprecated": false
             }
           ]
@@ -722,10 +635,7 @@
       "tags": [],
       "label": "NavigationPublicPluginStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/navigation/public/types.ts",
-        "lineNumber": 16
-      },
+      "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -746,10 +656,7 @@
             },
             ">; }"
           ],
-          "source": {
-            "path": "src/plugins/navigation/public/types.ts",
-            "lineNumber": 17
-          },
+          "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false
         }
       ],
