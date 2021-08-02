@@ -5,25 +5,43 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/common-utils';
 import { DocValueFields } from '../../../../../../common/search_strategy';
 
 export const buildTimelineDetailsQuery = (
   indexName: string,
   id: string,
-  docValueFields: DocValueFields[]
-) => ({
-  allowNoIndices: true,
-  index: indexName,
-  ignoreUnavailable: true,
-  body: {
-    docvalue_fields: docValueFields,
-    query: {
-      terms: {
-        _id: [id],
-      },
+  docValueFields: DocValueFields[],
+  authFilter?: JsonObject
+) => {
+  const basicFilter = {
+    terms: {
+      _id: [id],
     },
-    fields: [{ field: '*', include_unmapped: true }],
-    _source: true,
-  },
-  size: 1,
-});
+  };
+  const query =
+    authFilter != null
+      ? {
+          bool: {
+            filter: [basicFilter, authFilter],
+          },
+        }
+      : {
+          terms: {
+            _id: [id],
+          },
+        };
+
+  return {
+    allowNoIndices: true,
+    index: indexName,
+    ignoreUnavailable: true,
+    body: {
+      docvalue_fields: docValueFields,
+      query,
+      fields: [{ field: '*', include_unmapped: true }],
+      _source: true,
+    },
+    size: 1,
+  };
+};

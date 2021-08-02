@@ -8,11 +8,14 @@
 import React, { memo } from 'react';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
+import { useBreadcrumbs } from '../../../../../hooks';
 
 import { NoPackagePolicies } from './no_package_policies';
 import { PackagePoliciesTable } from './package_policies_table';
 
 export const PackagePoliciesView = memo<{ agentPolicy: AgentPolicy }>(({ agentPolicy }) => {
+  useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
+
   if (agentPolicy.package_policies.length === 0) {
     return <NoPackagePolicies policyId={agentPolicy.id} />;
   }

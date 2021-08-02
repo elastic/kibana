@@ -38,6 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/ml_embeddables_in_dashboard'),
       require.resolve('./apps/remote_clusters'),
       require.resolve('./apps/reporting'),
+      require.resolve('./apps/enterprise_search'),
     ],
 
     pageObjects,
