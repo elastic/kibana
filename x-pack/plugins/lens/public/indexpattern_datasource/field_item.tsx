@@ -44,7 +44,6 @@ import {
   ES_FIELD_TYPES,
   Filter,
   esQuery,
-  IIndexPattern,
 } from '../../../../../src/plugins/data/public';
 import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
@@ -169,7 +168,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
-            indexPattern as IIndexPattern,
+            indexPattern,
             query,
             filters,
             esQuery.getEsQueryConfig(core.uiSettings)

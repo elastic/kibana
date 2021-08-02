@@ -84,6 +84,9 @@ function getPutPreconfiguredPackagesMock() {
       references: [],
     };
   });
+
+  soClient.delete.mockResolvedValue({});
+
   return soClient;
 }
 
@@ -239,7 +242,7 @@ describe('policy preconfiguration', () => {
     );
   });
 
-  it('should return nonFatalErrors', async () => {
+  it('should not create a policy if we are not able to add packages ', async () => {
     const soClient = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const policies: PreconfiguredAgentPolicy[] = [
@@ -256,17 +259,21 @@ describe('policy preconfiguration', () => {
       },
     ];
 
-    const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
-      esClient,
-      policies,
-      [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
-      mockDefaultOutput
-    );
+    let error;
+    try {
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        policies,
+        [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
+        mockDefaultOutput
+      );
+    } catch (err) {
+      error = err;
+    }
 
-    expect(nonFatalErrors.length).toBe(1);
-    expect(nonFatalErrors[0].agentPolicy).toEqual({ name: 'Test policy' });
-    expect(nonFatalErrors[0].error.message).toEqual(
+    expect(error).toBeDefined();
+    expect(error.message).toEqual(
       'Test policy could not be added. test_package is not installed, add test_package to `xpack.fleet.packages` or remove it from Test package.'
     );
   });
