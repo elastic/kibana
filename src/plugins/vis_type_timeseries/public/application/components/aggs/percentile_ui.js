@@ -48,7 +48,7 @@ export class Percentiles extends Component {
   }
 
   renderRow = (row, i, items) => {
-    const defaults = { value: '', percentile: '', shade: '', color: '' };
+    const defaults = { value: '', percentile: '', shade: '', color: '#68BC00' };
     const model = { ...defaults, ...row };
     const { panel, seriesId } = this.props;
     const flexItemStyle = { minWidth: 100 };

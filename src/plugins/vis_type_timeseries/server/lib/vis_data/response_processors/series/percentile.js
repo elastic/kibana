@@ -38,7 +38,10 @@ export function percentile(resp, panel, series, meta, extractFields) {
         if (percentile.mode === 'band') {
           results.push({
             id,
-            color: series.split_mode === 'everything' ? percentile.color : split.color,
+            color:
+              series.split_mode === 'everything' && percentile.color
+                ? percentile.color
+                : split.color,
             label: split.label,
             data,
             lines: {
@@ -60,7 +63,10 @@ export function percentile(resp, panel, series, meta, extractFields) {
           const decoration = getDefaultDecoration(series);
           results.push({
             id,
-            color: series.split_mode === 'everything' ? percentile.color : split.color,
+            color:
+              series.split_mode === 'everything' && percentile.color
+                ? percentile.color
+                : split.color,
             label: `(${percentileValue}) ${split.label}`,
             data,
             ...decoration,

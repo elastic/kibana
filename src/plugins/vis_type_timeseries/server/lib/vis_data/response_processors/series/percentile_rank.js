@@ -35,7 +35,10 @@ export function percentileRank(resp, panel, series, meta, extractFields) {
           data,
           id: `${split.id}:${percentileRank}:${index}`,
           label: `(${percentileRank || 0}) ${split.label}`,
-          color: series.split_mode === 'everything' ? metric.colors[index] : split.color,
+          color:
+            series.split_mode === 'everything' && metric.colors
+              ? metric.colors[index]
+              : split.color,
           ...getDefaultDecoration(series),
         });
       });
