@@ -10,6 +10,9 @@
 
 Review important information about the {kib} 7.x releases.
 
+// Best practices:
+// * When there are changes to kibana.yml settings, include the links to the new settings.
+
 * <<release-notes-7.14.0>>
 * <<release-notes-7.13.4>>
 * <<release-notes-7.13.3>>
