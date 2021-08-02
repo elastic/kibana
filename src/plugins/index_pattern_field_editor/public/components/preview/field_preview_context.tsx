@@ -288,8 +288,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
               message: i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
                 {
-                  defaultMessage:
-                    'Error previewing the field as the document provided was not found.',
+                  defaultMessage: 'Document ID not found',
                 }
               ),
             },
