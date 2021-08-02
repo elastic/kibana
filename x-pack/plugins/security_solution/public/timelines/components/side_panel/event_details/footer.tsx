@@ -9,22 +9,20 @@ import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find, get } from 'lodash/fp';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
-import type { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../../common';
-import type { Ecs } from '../../../../../common/ecs';
+import type { TimelineEventsDetailsItem } from '../../../../../common';
 import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
 import { AddExceptionModalWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { useFetchEcsAlertsData } from '../../../../detections/components/alerts_table/timeline_actions/use_fetch_ecs_alerts_data';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   expandedEvent: {
     eventId: string;
     indexName: string;
-    ecsData?: Ecs;
-    nonEcsData?: TimelineNonEcsData[];
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
@@ -64,24 +62,16 @@ export const EventDetailsFooter = React.memo(
     const eventId =
       expandedEvent?.eventId ??
       useMemo(() => getFieldValue({ category: '_id', field: '_id' }, detailsData), [detailsData]);
-    const indexName = useMemo(
-      () => getFieldValue({ category: '_index', field: '_index' }, detailsData),
-      [detailsData]
-    );
-    const timestamp = useMemo(
-      () => getFieldValue({ category: 'base', field: 'timestamp' }, detailsData),
-      [detailsData]
-    );
+
+    const eventIds = useMemo(() => [eventId], [eventId]);
 
     const {
-      alertsEcsData,
       exceptionModalType,
       onAddExceptionTypeClick,
       onAddExceptionCancel,
       onAddExceptionConfirm,
       ruleIndices,
     } = useExceptionModal({
-      eventId,
       ruleIndex,
       refetch: expandedEvent?.refetch,
       timelineId,
@@ -92,6 +82,11 @@ export const EventDetailsFooter = React.memo(
       onAddEventFilterClick,
     } = useEventFilterModal();
 
+    const { alertsEcsData } = useFetchEcsAlertsData({
+      alertIds: eventIds,
+      shouldFetchAlertsEcsData: eventId != null,
+    });
+
     const ecsData = get(0, alertsEcsData);
     return (
       <>
@@ -100,11 +95,9 @@ export const EventDetailsFooter = React.memo(
             <EuiFlexItem grow={false}>
               <TakeActionDropdown
                 detailsData={detailsData}
-                ecsData={expandedEvent?.ecsData}
                 handleOnEventClosed={handleOnEventClosed}
                 isHostIsolationPanelOpen={isHostIsolationPanelOpen}
                 loadingEventDetails={loadingEventDetails}
-                nonEcsData={expandedEvent?.nonEcsData}
                 onAddEventFilterClick={onAddEventFilterClick}
                 onAddExceptionTypeClick={onAddExceptionTypeClick}
                 onAddIsolationStatusClick={onAddIsolationStatusClick}
@@ -129,14 +122,8 @@ export const EventDetailsFooter = React.memo(
             onConfirm={onAddExceptionConfirm}
           />
         )}
-        {isAddEventFilterModalOpen && (ecsData != null || expandedEvent?.ecsData != null) && (
-          <EventFiltersModal
-            ecsData={expandedEvent?.ecsData ?? ecsData!}
-            eventId={eventId}
-            indexName={indexName}
-            timestamp={timestamp}
-            onCancel={closeAddEventFilterModal}
-          />
+        {isAddEventFilterModalOpen && ecsData != null && (
+          <EventFiltersModal data={ecsData} onCancel={closeAddEventFilterModal} />
         )}
       </>
     );

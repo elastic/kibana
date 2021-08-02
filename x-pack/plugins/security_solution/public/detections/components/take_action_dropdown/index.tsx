@@ -13,7 +13,6 @@ import { find, get } from 'lodash/fp';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
 import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
-import { Ecs } from '../../../../common/ecs';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
@@ -28,6 +27,7 @@ import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { CHANGE_ALERT_STATUS } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
+import type { Ecs } from '../../../../common/ecs';
 
 export const TakeActionDropdown = React.memo(
   ({
@@ -62,28 +62,43 @@ export const TakeActionDropdown = React.memo(
     */
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    const eventKind = useMemo(
-      () => getFieldValue({ category: 'event', field: 'event.kind' }, detailsData),
-      [detailsData]
-    );
-
     const alertIds = useMemo(() => find({ category: '_id', field: '_id' }, detailsData)?.values, [
       detailsData,
     ]);
 
     const alertId = get(0, alertIds);
 
-    const ruleId = useMemo(
-      () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, detailsData),
-      [detailsData]
-    );
-
     const alertStatus = useMemo(
       () => getFieldValue({ category: 'signal', field: 'signal.status' }, detailsData),
       [detailsData]
     );
 
+    const eventKind = useMemo(
+      () => getFieldValue({ category: 'event', field: 'event.kind' }, detailsData),
+      [detailsData]
+    );
+
+    const ruleId = useMemo(
+      () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, detailsData),
+      [detailsData]
+    );
+
     const isEvent = eventKind === 'event';
+
+    const isEndpointAlert = useMemo((): boolean => {
+      if (detailsData == null) {
+        return false;
+      }
+
+      const eventModules = find(
+        { category: 'signal', field: 'signal.original_event.module' },
+        detailsData
+      )?.values;
+      const kinds = find({ category: 'signal', field: 'signal.original_event.kind' }, detailsData)
+        ?.values;
+
+      return !!(eventModules?.includes('endpoint') && kinds?.includes('alert'));
+    }, [detailsData]);
 
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
@@ -122,7 +137,7 @@ export const TakeActionDropdown = React.memo(
     );
 
     const exceptionActions = useExceptionActions({
-      ecsData,
+      isEndpointAlert,
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 
@@ -143,10 +158,9 @@ export const TakeActionDropdown = React.memo(
     });
 
     const { investigateInTimelineAction } = useInvestigateInTimeline({
-      ecsRowData: ecsData,
-      nonEcsRowData: nonEcsData ?? [],
-      onInvestigateInTimelineAlertClick: closePopoverHandler,
       alertIds,
+      ecsRowData: ecsData,
+      onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
     const alertsActionItems = useMemo(

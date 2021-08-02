@@ -27,7 +27,7 @@ import { useUserData } from '../../user_info';
 interface Props {
   alertStatus?: string;
   closePopover: () => void;
-  eventId?: string;
+  eventId: string | null | undefined;
   timelineId: string;
 }
 

@@ -8,7 +8,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Ecs } from '../../../../../common/ecs';
 import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
@@ -16,17 +15,13 @@ import {
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { inputsModel } from '../../../../common/store';
-import { useFetchEcsAlertsData } from './use_fetch_ecs_alerts_data';
 
 interface UseExceptionModalProps {
-  eventId: string;
-  isEcsRowDataExists?: boolean;
   ruleIndex: string[] | null | undefined;
   refetch?: inputsModel.Refetch;
   timelineId: string;
 }
 interface UseExceptionModal {
-  alertsEcsData: Ecs[] | null;
   exceptionModalType: ExceptionListType | null;
   onAddExceptionTypeClick: (type: ExceptionListType) => void;
   onAddExceptionCancel: () => void;
@@ -35,8 +30,6 @@ interface UseExceptionModal {
 }
 
 export const useExceptionModal = ({
-  eventId,
-  isEcsRowDataExists,
   ruleIndex,
   refetch,
   timelineId,
@@ -74,15 +67,7 @@ export const useExceptionModal = ({
     [refetch, timelineId]
   );
 
-  const shouldFetchAlertsEcsData = !isEcsRowDataExists && eventId != null;
-  const alertIds = useMemo(() => [eventId], [eventId]);
-  const { alertsEcsData } = useFetchEcsAlertsData({
-    alertIds,
-    shouldFetchAlertsEcsData,
-  });
-
   return {
-    alertsEcsData,
     exceptionModalType,
     onAddExceptionTypeClick,
     onAddExceptionCancel,

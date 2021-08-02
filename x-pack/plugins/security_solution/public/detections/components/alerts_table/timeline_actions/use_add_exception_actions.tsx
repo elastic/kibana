@@ -8,8 +8,6 @@
 import { useCallback, useMemo } from 'react';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import { getOr } from 'lodash/fp';
-import { Ecs } from '../../../../../common/ecs';
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 
@@ -20,12 +18,12 @@ interface UseExceptionActions {
 }
 
 interface UseExceptionActionProps {
-  ecsData?: Ecs;
+  isEndpointAlert: boolean;
   onAddExceptionTypeClick: (type: ExceptionListType) => void;
 }
 
 export const useExceptionActions = ({
-  ecsData,
+  isEndpointAlert,
   onAddExceptionTypeClick,
 }: UseExceptionActionProps): UseExceptionActions[] => {
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
@@ -37,17 +35,6 @@ export const useExceptionActions = ({
   const handleEndpointExceptionModal = useCallback(() => {
     onAddExceptionTypeClick('endpoint');
   }, [onAddExceptionTypeClick]);
-
-  const isEndpointAlert = useMemo((): boolean => {
-    if (ecsData == null) {
-      return false;
-    }
-
-    const eventModules = getOr([], 'signal.original_event.module', ecsData);
-    const kinds = getOr([], 'signal.original_event.kind', ecsData);
-
-    return eventModules.includes('endpoint') && kinds.includes('alert');
-  }, [ecsData]);
 
   const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
   const disabledAddException = !canUserCRUD || !hasIndexWrite;

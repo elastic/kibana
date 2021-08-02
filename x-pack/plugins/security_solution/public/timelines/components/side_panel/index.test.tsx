@@ -20,8 +20,6 @@ import { createStore, State } from '../../../common/store';
 import { DetailsPanel } from './index';
 import { TimelineExpandedDetail, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
-import { TimelineNonEcsData } from '../../../../common';
-import { Ecs } from '../../../../common/ecs';
 
 describe('Details Panel Component', () => {
   const state: State = { ...mockGlobalState };
@@ -36,7 +34,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const hostExpandedDetail = {
+  const hostExpandedDetail: TimelineExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'hostDetail',
       params: {
@@ -45,7 +43,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const networkExpandedDetail = {
+  const networkExpandedDetail: TimelineExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'networkDetail',
       params: {
@@ -55,15 +53,12 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventExpandedDetail = {
+  const eventExpandedDetail: TimelineExpandedDetail = {
     [TimelineTabs.query]: {
       panelView: 'eventDetail',
       params: {
         eventId: 'my-id',
         indexName: 'my-index',
-        ecsData: {} as Ecs,
-        nonEcsData: [] as TimelineNonEcsData[],
-        refetch: jest.fn(),
       },
     },
   };
@@ -106,7 +101,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:EventDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = eventExpandedDetail as TimelineExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = eventExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
@@ -144,7 +139,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:HostDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = (hostExpandedDetail as unknown) as TimelineExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = hostExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
@@ -161,7 +156,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:NetworkDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = (networkExpandedDetail as unknown) as TimelineExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = networkExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 

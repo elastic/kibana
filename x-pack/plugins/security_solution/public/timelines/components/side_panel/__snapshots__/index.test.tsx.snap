@@ -43,11 +43,8 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     docValueFields={Array []}
     expandedEvent={
       Object {
-        "ecsData": Object {},
         "eventId": "my-id",
         "indexName": "my-index",
-        "nonEcsData": Array [],
-        "refetch": [MockFunction],
       }
     }
     handleOnEventClosed={[Function]}
@@ -135,11 +132,8 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       detailsData={null}
       event={
         Object {
-          "ecsData": Object {},
           "eventId": "my-id",
           "indexName": "my-index",
-          "nonEcsData": Array [],
-          "refetch": [MockFunction],
         }
       }
       isAlert={false}
@@ -267,7 +261,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 50px;
+  padding: 16px;
 }
 
 <EuiFlyout
@@ -291,11 +285,8 @@ Array [
         docValueFields={Array []}
         expandedEvent={
           Object {
-            "ecsData": Object {},
             "eventId": "my-id",
             "indexName": "my-index",
-            "nonEcsData": Array [],
-            "refetch": [MockFunction],
           }
         }
         handleOnEventClosed={[Function]}
@@ -360,11 +351,8 @@ Array [
                     detailsData={null}
                     event={
                       Object {
-                        "ecsData": Object {},
                         "eventId": "my-id",
                         "indexName": "my-index",
-                        "nonEcsData": Array [],
-                        "refetch": [MockFunction],
                       }
                     }
                     isAlert={false}
@@ -470,15 +458,11 @@ Array [
           detailsData={null}
           expandedEvent={
             Object {
-              "ecsData": Object {},
               "eventId": "my-id",
               "indexName": "my-index",
-              "nonEcsData": Array [],
-              "refetch": [MockFunction],
             }
           }
           handleOnEventClosed={[Function]}
-          isAlert={false}
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
@@ -502,15 +486,12 @@ Array [
                     >
                       <Memo()
                         detailsData={null}
-                        ecsData={Object {}}
                         handleOnEventClosed={[Function]}
                         isHostIsolationPanelOpen={false}
                         loadingEventDetails={true}
-                        nonEcsData={Array []}
                         onAddEventFilterClick={[Function]}
                         onAddExceptionTypeClick={[Function]}
                         onAddIsolationStatusClick={[Function]}
-                        refetch={[MockFunction]}
                         timelineId="test"
                       />
                     </div>
@@ -546,7 +527,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 50px;
+  padding: 16px;
 }
 
 <div
@@ -564,11 +545,8 @@ Array [
       docValueFields={Array []}
       expandedEvent={
         Object {
-          "ecsData": Object {},
           "eventId": "my-id",
           "indexName": "my-index",
-          "nonEcsData": Array [],
-          "refetch": [MockFunction],
         }
       }
       handleOnEventClosed={[Function]}
@@ -633,11 +611,8 @@ Array [
                   detailsData={null}
                   event={
                     Object {
-                      "ecsData": Object {},
                       "eventId": "my-id",
                       "indexName": "my-index",
-                      "nonEcsData": Array [],
-                      "refetch": [MockFunction],
                     }
                   }
                   isAlert={false}
@@ -743,15 +718,11 @@ Array [
         detailsData={null}
         expandedEvent={
           Object {
-            "ecsData": Object {},
             "eventId": "my-id",
             "indexName": "my-index",
-            "nonEcsData": Array [],
-            "refetch": [MockFunction],
           }
         }
         handleOnEventClosed={[Function]}
-        isAlert={false}
         isHostIsolationPanelOpen={false}
         loadingEventDetails={true}
         onAddIsolationStatusClick={[Function]}
@@ -775,15 +746,12 @@ Array [
                   >
                     <Memo()
                       detailsData={null}
-                      ecsData={Object {}}
                       handleOnEventClosed={[Function]}
                       isHostIsolationPanelOpen={false}
                       loadingEventDetails={true}
-                      nonEcsData={Array []}
                       onAddEventFilterClick={[Function]}
                       onAddExceptionTypeClick={[Function]}
                       onAddIsolationStatusClick={[Function]}
-                      refetch={[MockFunction]}
                       timelineId="test"
                     />
                   </div>

@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { indexOf } from 'lodash';
 
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-import { get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -32,6 +32,7 @@ import { useExceptionModal } from './use_add_exception_modal';
 import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { useEventFilterAction } from './use_event_filter_action';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -54,7 +55,21 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const ruleId = get(0, ecsRowData?.signal?.rule?.id);
   const ruleName = get(0, ecsRowData?.signal?.rule?.name);
-  const alertStatus = get(0, ecsRowData?.signal?.status);
+
+  const alertStatus = get(0, ecsRowData?.signal?.status) as Status;
+
+  const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
+
+  const isEndpointAlert = useMemo((): boolean => {
+    if (ecsRowData == null) {
+      return false;
+    }
+
+    const eventModules = getOr([], 'signal.original_event.module', ecsRowData);
+    const kinds = getOr([], 'signal.original_event.kind', ecsRowData);
+
+    return eventModules.includes('endpoint') && kinds.includes('alert');
+  }, [ecsRowData]);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -86,8 +101,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     onAddExceptionTypeClick,
     ruleIndices,
   } = useExceptionModal({
-    eventId: ecsRowData?._id,
-    isEcsRowDataExists: ecsRowData == null,
     ruleIndex: ecsRowData?.signal?.rule?.index,
     refetch,
     timelineId,
@@ -100,7 +113,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   } = useEventFilterModal();
 
   const { statusActions } = useAlertsActions({
-    ecsRowData,
+    alertStatus,
+    eventId: ecsRowData?._id,
     timelineId,
     closePopover,
   });
@@ -118,10 +132,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closePopover();
   }, [closePopover, onAddEventFilterClick]);
 
-  const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
-
   const exceptionActions = useExceptionActions({
-    ecsData: ecsRowData,
+    isEndpointAlert,
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
 
@@ -156,19 +168,22 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           </EuiPopover>
         </EventsTdContent>
       </div>
-      {exceptionModalType != null && ruleId != null && ecsRowData != null && (
-        <AddExceptionModalWrapper
-          ruleName={ruleName}
-          ruleId={ruleId}
-          ruleIndices={ruleIndices}
-          exceptionListType={exceptionModalType}
-          eventId={ecsRowData?._id}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={alertStatus}
-          onRuleChange={onRuleChange}
-        />
-      )}
+      {exceptionModalType != null &&
+        ruleId != null &&
+        ruleName != null &&
+        ecsRowData?._id != null && (
+          <AddExceptionModalWrapper
+            ruleName={ruleName}
+            ruleId={ruleId}
+            ruleIndices={ruleIndices}
+            exceptionListType={exceptionModalType}
+            eventId={ecsRowData?._id}
+            onCancel={onAddExceptionCancel}
+            onConfirm={onAddExceptionConfirm}
+            alertStatus={alertStatus}
+            onRuleChange={onRuleChange}
+          />
+        )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersModal data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}

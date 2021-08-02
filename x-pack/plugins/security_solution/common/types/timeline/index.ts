@@ -21,8 +21,7 @@ import {
 } from '../../detection_engine/schemas/common/schemas';
 import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
-import { Direction, Maybe, TimelineNonEcsData } from '../../search_strategy';
-import { Ecs } from '../../ecs';
+import { Direction, Maybe } from '../../search_strategy';
 
 export * from './actions';
 export * from './cells';
@@ -470,8 +469,6 @@ export type TimelineExpandedEventType =
       params?: {
         eventId: string;
         indexName: string;
-        ecsData?: Ecs;
-        nonEcsData?: TimelineNonEcsData[];
         refetch?: () => void;
       };
     }
