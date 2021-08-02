@@ -21,9 +21,9 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
     >
       <Suspense
         fallback={
-          <div>
-            ...loading...
-          </div>
+          <EuiLoadingSpinner
+            size="xl"
+          />
         }
       >
         <lazy />

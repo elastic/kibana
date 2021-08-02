@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
-import { EuiLink, EuiButton } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 interface Props {
   goToCreate: () => void;
   canSaveIndexPattern: boolean;
@@ -39,7 +39,7 @@ export const EmptyIndexPatternPrompt = ({
     >
       <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
         <EuiFlexItem grow={1} className="inpEmptyIndexPatternPrompt__illustration">
-          <Suspense fallback={<div>...loading...</div>}>
+          <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
             <Illustration />
           </Suspense>
         </EuiFlexItem>
