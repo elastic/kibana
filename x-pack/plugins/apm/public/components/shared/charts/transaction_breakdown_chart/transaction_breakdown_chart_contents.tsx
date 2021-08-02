@@ -73,6 +73,7 @@ export function TransactionBreakdownChartContents({
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
         <Settings
+          tooltip={{ stickTo: 'center' }}
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           showLegend
           showLegendExtra

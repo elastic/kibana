@@ -115,6 +115,7 @@ export function TimeseriesChart({
     >
       <Chart ref={chartRef} id={id}>
         <Settings
+          tooltip={{ stickTo: 'center' }}
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           theme={{
             ...chartTheme,
