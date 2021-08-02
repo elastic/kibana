@@ -12,7 +12,7 @@ export class DetectionsPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly pageObjects = this.ctx.getPageObjects(['header']);
+  private readonly headerPageObjects = this.ctx.getPageObject('header');
 
   async navigateHome(): Promise<void> {
     await this.navigateToDetectionsPage();
@@ -20,7 +20,7 @@ export class DetectionsPageObject extends FtrService {
 
   async navigateToAlerts(): Promise<void> {
     await this.navigateToDetectionsPage('alerts');
-    await this.pageObjects.header.waitUntilLoadingHasFinished();
+    await this.headerPageObjects.waitUntilLoadingHasFinished();
   }
 
   async navigateToRules(): Promise<void> {
