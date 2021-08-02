@@ -32,6 +32,13 @@ interface EventDetailsFooterProps {
   timelineId: string;
 }
 
+interface AddExceptionModalWrapperData {
+  alertStatus: Status;
+  eventId: string;
+  ruleId: string;
+  ruleName: string;
+}
+
 export const EventDetailsFooter = React.memo(
   ({
     detailsData,
@@ -42,28 +49,32 @@ export const EventDetailsFooter = React.memo(
     onAddIsolationStatusClick,
     timelineId,
   }: EventDetailsFooterProps) => {
-    const ruleId = useMemo(
-      () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, detailsData),
-      [detailsData]
-    );
-    const ruleName = useMemo(
-      () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
-      [detailsData]
-    );
     const ruleIndex = useMemo(
       () => find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values,
       [detailsData]
     );
-    const alertStatus = useMemo(
-      () => getFieldValue({ category: 'signal', field: 'signal.status' }, detailsData),
+
+    const addExceptionModalWrapperData = useMemo(
+      () =>
+        [
+          { category: 'signal', field: 'signal.rule.id', name: 'ruleId' },
+          { category: 'signal', field: 'signal.rule.name', name: 'ruleName' },
+          { category: 'signal', field: 'signal.status', name: 'alertStatus' },
+          { category: '_id', field: '_id', name: 'eventId' },
+        ].reduce<AddExceptionModalWrapperData>(
+          (acc, curr) => ({
+            ...acc,
+            [curr.name]: getFieldValue(
+              { category: 'signal', field: 'signal.rule.id' },
+              detailsData
+            ),
+          }),
+          {} as AddExceptionModalWrapperData
+        ),
       [detailsData]
-    ) as Status;
+    );
 
-    const eventId =
-      expandedEvent?.eventId ??
-      useMemo(() => getFieldValue({ category: '_id', field: '_id' }, detailsData), [detailsData]);
-
-    const eventIds = useMemo(() => [eventId], [eventId]);
+    const eventIds = useMemo(() => [expandedEvent?.eventId], [expandedEvent?.eventId]);
 
     const {
       exceptionModalType,
@@ -84,7 +95,7 @@ export const EventDetailsFooter = React.memo(
 
     const { alertsEcsData } = useFetchEcsAlertsData({
       alertIds: eventIds,
-      skip: eventId == null,
+      skip: expandedEvent?.eventId == null,
     });
 
     const ecsData = get(0, alertsEcsData);
@@ -110,18 +121,17 @@ export const EventDetailsFooter = React.memo(
         {/* This is still wrong to do render flyout/modal inside of the flyout
         We need to completely refactor the EventDetails  component to be correct
       */}
-        {exceptionModalType != null && ruleId != null && eventId != null && (
-          <AddExceptionModalWrapper
-            alertStatus={alertStatus}
-            ruleName={ruleName}
-            ruleId={ruleId}
-            ruleIndices={ruleIndices}
-            exceptionListType={exceptionModalType}
-            eventId={eventId}
-            onCancel={onAddExceptionCancel}
-            onConfirm={onAddExceptionConfirm}
-          />
-        )}
+        {exceptionModalType != null &&
+          addExceptionModalWrapperData.ruleId != null &&
+          addExceptionModalWrapperData.eventId != null && (
+            <AddExceptionModalWrapper
+              {...addExceptionModalWrapperData}
+              ruleIndices={ruleIndices}
+              exceptionListType={exceptionModalType}
+              onCancel={onAddExceptionCancel}
+              onConfirm={onAddExceptionConfirm}
+            />
+          )}
         {isAddEventFilterModalOpen && ecsData != null && (
           <EventFiltersModal data={ecsData} onCancel={closeAddEventFilterModal} />
         )}
