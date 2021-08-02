@@ -22,7 +22,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -226,7 +226,7 @@ export function ServiceOverviewTransactionsTable() {
       <EuiFlexItem>
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
-            <ServiceOverviewTableContainer
+            <OverviewTableContainer
               isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable
@@ -252,7 +252,7 @@ export function ServiceOverviewTransactionsTable() {
                   });
                 }}
               />
-            </ServiceOverviewTableContainer>
+            </OverviewTableContainer>
           </TableFetchWrapper>
         </EuiFlexItem>
       </EuiFlexItem>
