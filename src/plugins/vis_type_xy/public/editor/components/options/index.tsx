@@ -23,6 +23,11 @@ export const PointSeriesOptions = (
   >
 ) => <PointSeriesOptionsLazy {...props} />;
 
-export const MetricsAxisOptions = (props: ValidationVisOptionsProps<VisParams>) => (
-  <MetricsAxisOptionsLazy {...props} />
-);
+export const MetricsAxisOptions = (
+  props: ValidationVisOptionsProps<
+    VisParams,
+    {
+      showElasticChartsOptions: boolean;
+    }
+  >
+) => <MetricsAxisOptionsLazy {...props} />;

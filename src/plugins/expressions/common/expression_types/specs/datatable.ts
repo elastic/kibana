@@ -70,6 +70,10 @@ export interface DatatableColumnMeta {
    */
   index?: string;
   /**
+   * names the domain this column represents
+   */
+  dimensionName?: string;
+  /**
    * serialized field format
    */
   params?: SerializedFieldFormat;
