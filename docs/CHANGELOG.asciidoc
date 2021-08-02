@@ -122,40 +122,6 @@ When you upgrade to 7.14.0, {kib} automatically uses the new terminology. No act
 *Details* +
 The alerts authorization client has been refactored to be more generic. {kib} uses the existing alerting feature privilege model to provide `all` and `read` privileges to `rules` and `alerts`. 
 
-There are no changes to the rules role-based access control (RBAC).
-
-The following changes were made:
-
-* Updated alerting feature privilege builder to include `entity` in the feature privilege string. Allowed entities are `rule` and `alert`.
-
-* Added ability to specify `exemptConsumers` in authorization client to handle the alerting use case where `alerts` was a special consumer ID with special handling.
-
-* Updated terminology in the `AlertsAuthorization` class to reflect the changed rule terminology.
-
-* Updated authorization filter builder to return EsQuery or KQL.
-
-* Updated authorization filter to allow specified field names.
-
-* `getAlertingAuthorizationWithRequest` is now exposed through alerting plugin start, which allows other plugins to use it.
-
-* `AlertsAuthorization` is now `AlertingAuthorization`.
-
-The formatting for the following recorded audit events was changed:
-
-* Audit event types now use `alerting_ prefix` instead of `alerts_ prefix`:
-
-** `alerts_authorization_failure` is now `alerting_authorization_failure`
-
-** `alerts_unscoped_authorization_failure` is now `alerting_unscoped_authorization_failure`
-
-** `alerts_authorization_success` is now `alerting_authorization_success`
-
-* Audit events have been updated to reflect the new alerting terminology:
-
-** `alerts` are now `rules`. For example, the audit event `user Authorized to create a ".index-threshold" alert by "app"` is now `user Authorized to create a ".index-threshold" rule by "app"`.
-
-** `alert instances` are now `alert`. For example, audit events for `muteInstance` and `unmuteInstance` operations now reference `muteAlert` and `unmuteAlert`.
-
 For more information, refer to {kibana-pull}99078[#99078].
 
 *Impact* +
