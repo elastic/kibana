@@ -12,6 +12,8 @@ import {
   CrawlerDataFromServer,
   CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationStep,
+  CrawlRequestFromServer,
+  CrawlRequest,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -48,11 +50,30 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
   return clientPayload;
 }
 
+export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer): CrawlRequest {
+  const {
+    id,
+    status,
+    created_at: createdAt,
+    began_at: beganAt,
+    completed_at: completedAt,
+  } = crawlRequest;
+
+  return {
+    id,
+    status,
+    createdAt,
+    beganAt,
+    completedAt,
+  };
+}
+
 export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
-  const { domains } = payload;
+  const { domains, crawl_requests: crawlRequests } = payload;
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
+    crawlRequests: crawlRequests.map((crawlRequest) => crawlRequestServerToClient(crawlRequest)),
   };
 }
 

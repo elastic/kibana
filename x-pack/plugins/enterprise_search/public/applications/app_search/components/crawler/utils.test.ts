@@ -12,12 +12,17 @@ import {
   CrawlerDomainFromServer,
   CrawlerDomainValidationStep,
   CrawlerDomainValidationResultFromServer,
+  CrawlRequestFromServer,
+  CrawlerStatus,
+  CrawlerData,
+  CrawlRequest,
 } from './types';
 
 import {
   crawlerDomainServerToClient,
   crawlerDataServerToClient,
   crawlDomainValidationToResult,
+  crawlRequestServerToClient,
 } from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -68,38 +73,102 @@ describe('crawlerDomainServerToClient', () => {
   });
 });
 
+describe('crawlRequestServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const id = '507f1f77bcf86cd799439011';
+
+    const defaultServerPayload: CrawlRequestFromServer = {
+      id,
+      status: CrawlerStatus.Pending,
+      created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      began_at: null,
+      completed_at: null,
+    };
+
+    const defaultClientPayload: CrawlRequest = {
+      id,
+      status: CrawlerStatus.Pending,
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+    };
+
+    expect(crawlRequestServerToClient(defaultServerPayload)).toStrictEqual(defaultClientPayload);
+    expect(
+      crawlRequestServerToClient({
+        ...defaultServerPayload,
+        began_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, beganAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+    expect(
+      crawlRequestServerToClient({
+        ...defaultServerPayload,
+        completed_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, completedAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+  });
+});
+
 describe('crawlerDataServerToClient', () => {
-  it('converts all domains from the server form to their client form', () => {
-    const domains: CrawlerDomainFromServer[] = [
-      {
-        id: 'x',
-        name: 'moviedatabase.com',
-        document_count: 13,
-        created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
-        sitemaps: [],
-        entry_points: [],
-        crawl_rules: [],
-        default_crawl_rule: DEFAULT_CRAWL_RULE,
-      },
-      {
-        id: 'y',
-        name: 'swiftype.com',
-        last_visited_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
-        document_count: 40,
-        created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
-        sitemaps: [],
-        entry_points: [],
-        crawl_rules: [],
-      },
-    ];
+  let output: CrawlerData;
 
-    const output = crawlerDataServerToClient({
+  const domains: CrawlerDomainFromServer[] = [
+    {
+      id: 'x',
+      name: 'moviedatabase.com',
+      document_count: 13,
+      created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      sitemaps: [],
+      entry_points: [],
+      crawl_rules: [],
+      default_crawl_rule: DEFAULT_CRAWL_RULE,
+    },
+    {
+      id: 'y',
+      name: 'swiftype.com',
+      last_visited_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      document_count: 40,
+      created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      sitemaps: [],
+      entry_points: [],
+      crawl_rules: [],
+    },
+  ];
+
+  const crawlRequests: CrawlRequestFromServer[] = [
+    {
+      id: 'a',
+      status: CrawlerStatus.Canceled,
+      created_at: 'Mon, 31 Aug 2020 11:00:00 +0000',
+      began_at: 'Mon, 31 Aug 2020 12:00:00 +0000',
+      completed_at: 'Mon, 31 Aug 2020 13:00:00 +0000',
+    },
+    {
+      id: 'b',
+      status: CrawlerStatus.Success,
+      created_at: 'Mon, 31 Aug 2020 14:00:00 +0000',
+      began_at: 'Mon, 31 Aug 2020 15:00:00 +0000',
+      completed_at: 'Mon, 31 Aug 2020 16:00:00 +0000',
+    },
+  ];
+
+  beforeAll(() => {
+    output = crawlerDataServerToClient({
       domains,
+      crawl_requests: crawlRequests,
     });
+  });
 
+  it('converts all domains from the server form to their client form', () => {
     expect(output.domains).toHaveLength(2);
     expect(output.domains[0]).toEqual(crawlerDomainServerToClient(domains[0]));
     expect(output.domains[1]).toEqual(crawlerDomainServerToClient(domains[1]));
+  });
+
+  it('converts all crawl requests from the server form to their client form', () => {
+    expect(output.crawlRequests).toHaveLength(2);
+    expect(output.crawlRequests[0]).toEqual(crawlRequestServerToClient(crawlRequests[0]));
+    expect(output.crawlRequests[1]).toEqual(crawlRequestServerToClient(crawlRequests[1]));
   });
 });
 
