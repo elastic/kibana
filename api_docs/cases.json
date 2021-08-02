@@ -673,7 +673,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/public/components/configure_cases/index.tsx",
-          "lineNumber": 51
+          "lineNumber": 52
         },
         "deprecated": false,
         "children": [
@@ -686,7 +686,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/cases/public/components/configure_cases/index.tsx",
-              "lineNumber": 52
+              "lineNumber": 53
             },
             "deprecated": false
           }
@@ -1838,6 +1838,52 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.getAllConnectorsUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAllConnectorsUrl",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "() => string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
+          "lineNumber": 38
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "All connectors endpoint"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.getAllConnectorTypesUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getAllConnectorTypesUrl",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "() => string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
+          "lineNumber": 18
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "Connector types endpoint"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.getCaseCommentDetailsUrl",
         "type": "Function",
         "tags": [],
@@ -2127,6 +2173,70 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.getCreateConnectorUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getCreateConnectorUrl",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "() => string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
+          "lineNumber": 32
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "Create connector endpoint"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.getExecuteConnectorUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getExecuteConnectorUrl",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "(connectorId: string) => string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
+          "lineNumber": 25
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.getExecuteConnectorUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Execute connector endpoint"
+        ],
         "initialIsOpen": false
       },
       {
@@ -4748,9 +4858,6 @@
         "tags": [],
         "label": "ACTION_TYPES_URL",
         "description": [],
-        "signature": [
-          "\"/api/actions/connector_types\""
-        ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
           "lineNumber": 63
@@ -7893,6 +8000,20 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CONNECTORS_URL",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTORS_URL",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/cases/common/constants.ts",
+          "lineNumber": 64
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.ConnectorServiceNowITSMTypeFields",
         "type": "Type",
         "tags": [],
@@ -8103,7 +8224,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 89
+          "lineNumber": 91
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -8515,7 +8636,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 75
+          "lineNumber": 77
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -8532,7 +8653,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 96
+          "lineNumber": 98
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -8549,7 +8670,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 95
+          "lineNumber": 97
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -8566,7 +8687,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 76
+          "lineNumber": 78
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -8585,7 +8706,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 102
+          "lineNumber": 104
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -8676,7 +8797,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 84
+          "lineNumber": 86
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -9177,7 +9298,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 64
+          "lineNumber": 66
         },
         "deprecated": false,
         "initialIsOpen": false
