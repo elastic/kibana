@@ -134,7 +134,7 @@ describe('<CodeEditor />', () => {
       expect((getHint().props() as any).className).toContain('isInactive');
 
       findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
-        keyCode: keyCodes.ESCAPE,
+        keyCode: monaco.KeyCode.Escape,
       });
 
       expect((getHint().props() as any).className).not.toContain('isInactive');
@@ -152,7 +152,7 @@ describe('<CodeEditor />', () => {
 
       // Hitting the ESC key with the suggestions visible
       findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
-        keyCode: keyCodes.ESCAPE,
+        keyCode: monaco.KeyCode.Escape,
       });
 
       expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(false);
@@ -162,7 +162,7 @@ describe('<CodeEditor />', () => {
 
       // Hitting a second time the ESC key should now show the hint
       findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
-        keyCode: keyCodes.ESCAPE,
+        keyCode: monaco.KeyCode.Escape,
       });
 
       expect((getHint().props() as any).className).not.toContain('isInactive');

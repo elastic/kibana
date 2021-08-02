@@ -25,7 +25,6 @@ import './editor.scss';
 
 export enum keyCodes {
   ENTER = 13,
-  ESCAPE = 9,
 }
 
 export interface Props {
@@ -176,7 +175,7 @@ export const CodeEditor: React.FC<Props> = ({
       const textbox = ev.target;
       textbox.tabIndex = -1;
 
-      if (ev.keyCode === keyCodes.ESCAPE) {
+      if (ev.keyCode === monaco.KeyCode.Escape) {
         // If the autocompletion context menu is open then we want to let ESCAPE close it but
         // **not** exit out of editing mode.
         if (!isSuggestionMenuOpen.current) {
