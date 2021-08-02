@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'> & {
+export declare type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' | 'register'> & {
     deserialize: FormatFactory;
 };
 ```
