@@ -28,6 +28,11 @@ jobs:
       - name: Install Actions
         run: npm install --production --prefix ./actions
 
+      - name: Fix Version Label Gaps
+        uses: ./actions/fix-version-gaps
+        with:
+          github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
+
       - name: Run Backport
         uses: ./actions/backport
         with:

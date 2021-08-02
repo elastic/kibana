@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from 'kibana/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { isEmpty } from 'lodash/fp';
 import { ExceptionListClient } from '../../../../../lists/server';
 
 import {
@@ -27,7 +29,38 @@ import {
   osFromExceptionItem,
   updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
-import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+import {
+  TrustedAppNotFoundError,
+  TrustedAppVersionConflictError,
+  TrustedAppPolicyNotExistsError,
+} from './errors';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { PackagePolicy } from '../../../../../fleet/common';
+
+const getNonExistingPoliciesFromTrustedApp = async (
+  savedObjectClient: SavedObjectsClientContract,
+  packagePolicyClient: PackagePolicyServiceInterface,
+  trustedApp: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest
+): Promise<PackagePolicy[]> => {
+  if (
+    !trustedApp.effectScope ||
+    trustedApp.effectScope.type === 'global' ||
+    (trustedApp.effectScope.type === 'policy' && isEmpty(trustedApp.effectScope.policies))
+  ) {
+    return [];
+  }
+
+  const policies = await packagePolicyClient.getByIDs(
+    savedObjectClient,
+    trustedApp.effectScope.policies
+  );
+
+  if (!policies) {
+    return [];
+  }
+
+  return policies.filter((policy) => policy.version === undefined);
+};
 
 export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
@@ -90,13 +123,25 @@ export const getTrustedAppsList = async (
 
 export const createTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
+  savedObjectClient: SavedObjectsClientContract,
+  packagePolicyClient: PackagePolicyServiceInterface,
   newTrustedApp: PostTrustedAppCreateRequest
 ): Promise<PostTrustedAppCreateResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 
-  // Validate update TA entry - error if not valid
-  // TODO: implement validations
+  const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
+    savedObjectClient,
+    packagePolicyClient,
+    newTrustedApp
+  );
+
+  if (!isEmpty(unexistingPolicies)) {
+    throw new TrustedAppPolicyNotExistsError(
+      newTrustedApp.name,
+      unexistingPolicies.map((policy) => policy.id)
+    );
+  }
 
   const createdTrustedAppExceptionItem = await exceptionsListClient.createExceptionListItem(
     newTrustedAppToCreateExceptionListItemOptions(newTrustedApp)
@@ -107,6 +152,8 @@ export const createTrustedApp = async (
 
 export const updateTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
+  savedObjectClient: SavedObjectsClientContract,
+  packagePolicyClient: PackagePolicyServiceInterface,
   id: string,
   updatedTrustedApp: PutTrustedAppUpdateRequest
 ): Promise<PutTrustedAppUpdateResponse> => {
@@ -120,8 +167,18 @@ export const updateTrustedApp = async (
     throw new TrustedAppNotFoundError(id);
   }
 
-  // Validate update TA entry - error if not valid
-  // TODO: implement validations
+  const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
+    savedObjectClient,
+    packagePolicyClient,
+    updatedTrustedApp
+  );
+
+  if (!isEmpty(unexistingPolicies)) {
+    throw new TrustedAppPolicyNotExistsError(
+      updatedTrustedApp.name,
+      unexistingPolicies.map((policy) => policy.id)
+    );
+  }
 
   let updatedTrustedAppExceptionItem: ExceptionListItemSchema | null;
 

@@ -134,7 +134,8 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
   core.savedObjects.registerType({
     name: SAVED_OBJECT_WITH_MIGRATION_TYPE,
     hidden: false,
-    namespaceType: 'single',
+    namespaceType: 'multiple-isolated', // in data.json, we simulate that existing objects were created with `namespaceType: 'single'`
+    convertToMultiNamespaceTypeVersion: '8.0.0', // in this version we convert from a single-namespace type to a "share-capable" multi-namespace isolated type
     mappings: {
       properties: {
         nonEncryptedAttribute: {
@@ -150,11 +151,13 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
     },
     migrations: {
       // in this version we migrated a non encrypted field and type didnt change
-      '7.8.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedTypePre790>(
-        function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+      '7.8.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedTypePre790>({
+        isMigrationNeededPredicate: function shouldBeMigrated(
+          doc
+        ): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
           return true;
         },
-        (
+        migration: (
           doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
         ): SavedObjectUnsanitizedDoc<MigratedTypePre790> => {
           const {
@@ -169,15 +172,17 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
           };
         },
         // type hasn't changed as the field we're updating is not an encrypted one
-        typePriorTo790,
-        typePriorTo790
-      ),
+        inputType: typePriorTo790,
+        migratedType: typePriorTo790,
+      }),
       // in this version we encrypted an existing non encrypted field
-      '7.9.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedType>(
-        function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+      '7.9.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedType>({
+        isMigrationNeededPredicate: function shouldBeMigrated(
+          doc
+        ): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
           return true;
         },
-        (
+        migration: (
           doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
         ): SavedObjectUnsanitizedDoc<MigratedType> => {
           const {
@@ -193,8 +198,20 @@ function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSet
             },
           };
         },
-        typePriorTo790
-      ),
+        inputType: typePriorTo790,
+      }),
+
+      // NOTE FOR MAINTAINERS: do not add any more migrations before 8.0.0 unless you regenerate the test data for two of the objects in
+      // data.json: '362828f0-eef2-11eb-9073-11359682300a' and '36448a90-eef2-11eb-9073-11359682300a. These are used in the test cases 'for
+      // a saved object that does not need to be migrated before it is converted'.
+
+      // This empty migration is necessary to ensure that the saved object is decrypted with its old descriptor/ and re-encrypted with its
+      // new descriptor, if necessary. This is included because the saved object is being converted to `namespaceType: 'multiple-isolated'`
+      // in 8.0.0 (see the `convertToMultiNamespaceTypeVersion` field in the saved object type registration process).
+      '8.0.0': deps.encryptedSavedObjects.createMigration<MigratedType, MigratedType>({
+        isMigrationNeededPredicate: (doc): doc is SavedObjectUnsanitizedDoc<MigratedType> => true,
+        migration: (doc) => doc, // no-op
+      }),
     },
   });
 }

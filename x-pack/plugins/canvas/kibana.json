@@ -11,6 +11,8 @@
       "data",
       "embeddable",
       "expressionError",
+      "expressionImage",
+      "expressionMetric",
       "expressionRepeatImage",
       "expressionRevealImage",
       "expressionShape",

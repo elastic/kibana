@@ -55,16 +55,6 @@ export const RendererStrings = {
         defaultMessage: 'Renders an embeddable Saved Object from other parts of Kibana',
       }),
   },
-  image: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.image.displayName', {
-        defaultMessage: 'Image',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.image.helpDescription', {
-        defaultMessage: 'Render an image',
-      }),
-  },
   markdown: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.markdown.displayName', {
@@ -77,16 +67,6 @@ export const RendererStrings = {
           HTML,
           MARKDOWN,
         },
-      }),
-  },
-  metric: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.metric.displayName', {
-        defaultMessage: 'Metric',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.metric.helpDescription', {
-        defaultMessage: 'Render a number over a label',
       }),
   },
   pie: {

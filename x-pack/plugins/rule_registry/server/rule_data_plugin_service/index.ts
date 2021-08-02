@@ -6,6 +6,8 @@
  */
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
 import { estypes } from '@elastic/elasticsearch';
+import { ValidFeatureId } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { get, isEmpty } from 'lodash';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
@@ -20,7 +22,6 @@ import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../
 import { RuleDataClient } from '../rule_data_client';
 import { RuleDataWriteDisabledError } from './errors';
 import { incrementIndexName } from './utils';
-import { ValidFeatureId } from '../utils/rbac';
 
 const BOOTSTRAP_TIMEOUT = 60000;
 

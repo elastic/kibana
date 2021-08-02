@@ -63,7 +63,7 @@ describe('OverviewEmpty', () => {
           fill: false,
           label: 'Add Endpoint Security',
           onClick: undefined,
-          url: `#/integrations/endpoint-${endpointPackageVersion}/add-integration`,
+          url: `/integrations/endpoint-${endpointPackageVersion}/add-integration`,
         },
       });
     });

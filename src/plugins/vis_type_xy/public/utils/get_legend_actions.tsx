@@ -66,6 +66,9 @@ export const getLegendActions = (
 
     const Button = (
       <div
+        tabIndex={0}
+        role="button"
+        aria-pressed="false"
         style={{
           display: 'flex',
           justifyContent: 'center',
@@ -75,7 +78,7 @@ export const getLegendActions = (
           marginRight: 4,
         }}
         data-test-subj={`legend-${name}`}
-        onKeyPress={() => undefined}
+        onKeyPress={() => setPopoverOpen(!popoverOpen)}
         onClick={() => setPopoverOpen(!popoverOpen)}
       >
         <EuiIcon size="s" type="boxesVertical" />

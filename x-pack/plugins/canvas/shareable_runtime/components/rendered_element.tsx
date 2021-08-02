@@ -8,6 +8,7 @@
 import React, { FC, PureComponent } from 'react';
 // @ts-expect-error untyped library
 import Style from 'style-it';
+import { AnyExpressionFunctionDefinition } from '../../../../../src/plugins/expressions';
 import { Positionable } from '../../public/components/positionable/positionable';
 // @ts-expect-error untyped local
 import { elementToShape } from '../../public/components/workpad_page/utils';
@@ -34,7 +35,7 @@ export interface Props {
    * The Expression function that evaluates the state of the Element and renders
    * it to the Page.
    */
-  fn: AnyRendererSpec;
+  fn: AnyRendererSpec | ReturnType<AnyExpressionFunctionDefinition['fn']>;
 }
 
 /**
@@ -64,7 +65,7 @@ export class RenderedElementComponent extends PureComponent<Props> {
 
     try {
       fn.render(this.ref.current, value.value, createHandlers());
-    } catch (e) {
+    } catch (e: any) {
       // eslint-disable-next-line no-console
       console.log(as, e.message);
     }

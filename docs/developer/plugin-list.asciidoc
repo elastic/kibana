@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target_node/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -74,6 +74,14 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 |{kib-repo}blob/{branch}/src/plugins/expression_error/README.md[expressionError]
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
+
+
+|{kib-repo}blob/{branch}/src/plugins/expression_image/README.md[expressionImage]
+|Expression Image plugin adds an image renderer to the expression plugin. The renderer will display the given image.
+
+
+|{kib-repo}blob/{branch}/src/plugins/expression_metric/README.md[expressionMetric]
+|Expression Metric plugin adds a metric renderer and function to the expression plugin.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
