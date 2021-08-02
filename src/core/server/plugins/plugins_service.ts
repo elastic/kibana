@@ -86,6 +86,9 @@ export interface PluginsServiceDiscoverDeps {
   environment: InternalEnvironmentServicePreboot;
 }
 
+const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
+const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
+
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
@@ -333,6 +336,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           throw new Error(
             `Plugin bundle with id "${requiredBundleId}" is required by plugin "${pluginName}" and expected to have "${plugin.manifest.type}" type, but its type is "${requiredPlugin.manifest.type}".`
           );
+        }
+      }
+
+      // validate that OSS plugins do not have required dependencies on X-Pack plugins
+      if (OSS_PATH_REGEX.test(plugin.path)) {
+        for (const id of [...plugin.requiredPlugins, ...plugin.requiredBundles]) {
+          const requiredPlugin = pluginEnableStatuses.get(id);
+          if (requiredPlugin && XPACK_PATH_REGEX.test(requiredPlugin.plugin.path)) {
+            throw new Error(
+              `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${pluginName}", which is prohibited.`
+            );
+          }
         }
       }
 
