@@ -13,7 +13,7 @@
   ],
   "optionalPlugins": ["usageCollection"],
   "requiredBundles": ["kibanaUtils", "discover"],
-  "extraPublicDirs": ["common/constants"],
+  "extraPublicDirs": ["common/constants", "common/prepare_log_table", "common/expression_functions"],
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"

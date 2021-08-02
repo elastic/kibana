@@ -32,10 +32,7 @@
         "signature": [
           "\"/api/rollup\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/index.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/rollup/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -49,10 +46,7 @@
         "signature": [
           "\"rollups:enableIndexPatterns\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/index.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/rollup/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -66,10 +60,7 @@
         "signature": [
           "\"app_load\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -83,10 +74,7 @@
         "signature": [
           "\"rollup_jobs\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -100,10 +88,7 @@
         "signature": [
           "\"detail_panel_histogram_tab_click\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -117,10 +102,7 @@
         "signature": [
           "\"detail_panel_json_tab_click\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -134,10 +116,7 @@
         "signature": [
           "\"detail_panel_metrics_tab_click\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -151,10 +130,7 @@
         "signature": [
           "\"detail_panel_summary_tab_click\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -168,10 +144,7 @@
         "signature": [
           "\"detail_panel_terms_tab_click\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -185,10 +158,7 @@
         "signature": [
           "\"job_create\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -202,10 +172,7 @@
         "signature": [
           "\"job_delete\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -219,10 +186,7 @@
         "signature": [
           "\"job_delete_many\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -236,10 +200,7 @@
         "signature": [
           "\"job_start\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -253,10 +214,7 @@
         "signature": [
           "\"job_start_many\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -270,10 +228,7 @@
         "signature": [
           "\"job_stop\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -287,10 +242,7 @@
         "signature": [
           "\"job_stop_many\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -304,10 +256,7 @@
         "signature": [
           "\"show_details_click\""
         ],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -320,10 +269,7 @@
         "tags": [],
         "label": "PLUGIN",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/rollup/common/index.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/rollup/common/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -333,10 +279,7 @@
             "tags": [],
             "label": "ID",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/rollup/common/index.ts",
-              "lineNumber": 13
-            },
+            "path": "x-pack/plugins/rollup/common/index.ts",
             "deprecated": false
           },
           {
@@ -349,10 +292,7 @@
             "signature": [
               "\"basic\""
             ],
-            "source": {
-              "path": "x-pack/plugins/rollup/common/index.ts",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/rollup/common/index.ts",
             "deprecated": false
           }
         ],

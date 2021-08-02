@@ -10,13 +10,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import { IndexPatternFieldBase } from '@kbn/es-query';
 
 import { filterFieldToList } from '../filter_field_to_list';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType } from '../../../../../../../src/plugins/data/common';
-type IFieldType = any;
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { HttpStart } from 'kibana/public';
@@ -34,7 +31,7 @@ interface AutocompleteFieldListsProps {
   onChange: (arg: ListSchema) => void;
   placeholder: string;
   rowLabel?: string;
-  selectedField: IFieldType | undefined;
+  selectedField: IndexPatternFieldBase | undefined;
   selectedValue: string | undefined;
 }
 

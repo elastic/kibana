@@ -10,6 +10,7 @@ import { Query } from '../filters';
 import { fromKueryExpression, toElasticsearchQuery, nodeTypes, KueryNode } from '../kuery';
 import { IndexPatternBase } from './types';
 
+/** @internal */
 export function buildQueryFromKuery(
   indexPattern: IndexPatternBase | undefined,
   queries: Query[] = [],

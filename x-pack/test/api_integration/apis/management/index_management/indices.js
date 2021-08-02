@@ -56,13 +56,17 @@ export default function ({ getService }) {
         const index = await createIndex();
 
         // Make sure the index is open
-        const [cat1] = await catIndex(index);
+        const {
+          body: [cat1],
+        } = await catIndex(index);
         expect(cat1.status).to.be('open');
 
         await closeIndex(index).expect(200);
 
         // Make sure the index has been closed
-        const [cat2] = await catIndex(index);
+        const {
+          body: [cat2],
+        } = await catIndex(index);
         expect(cat2.status).to.be('close');
       });
     });
@@ -78,13 +82,17 @@ export default function ({ getService }) {
         await closeIndex(index);
 
         // Make sure the index is closed
-        const [cat1] = await catIndex(index);
+        const {
+          body: [cat1],
+        } = await catIndex(index);
         expect(cat1.status).to.be('close');
 
         await openIndex(index).expect(200);
 
         // Make sure the index is opened
-        const [cat2] = await catIndex(index);
+        const {
+          body: [cat2],
+        } = await catIndex(index);
         expect(cat2.status).to.be('open');
       });
     });
@@ -93,12 +101,12 @@ export default function ({ getService }) {
       it('should delete an index', async () => {
         const index = await createIndex();
 
-        const indices1 = await catIndex(undefined, 'i');
+        const { body: indices1 } = await catIndex(undefined, 'i');
         expect(indices1.map((index) => index.i)).to.contain(index);
 
         await deleteIndex([index]).expect(200);
 
-        const indices2 = await catIndex(undefined, 'i');
+        const { body: indices2 } = await catIndex(undefined, 'i');
         expect(indices2.map((index) => index.i)).not.to.contain(index);
       });
 
@@ -112,12 +120,16 @@ export default function ({ getService }) {
       it('should flush an index', async () => {
         const index = await createIndex();
 
-        const { indices: indices1 } = await indexStats(index, 'flush');
+        const {
+          body: { indices: indices1 },
+        } = await indexStats(index, 'flush');
         expect(indices1[index].total.flush.total).to.be(0);
 
         await flushIndex(index).expect(200);
 
-        const { indices: indices2 } = await indexStats(index, 'flush');
+        const {
+          body: { indices: indices2 },
+        } = await indexStats(index, 'flush');
         expect(indices2[index].total.flush.total).to.be(1);
       });
     });
@@ -126,12 +138,16 @@ export default function ({ getService }) {
       it('should refresh an index', async () => {
         const index = await createIndex();
 
-        const { indices: indices1 } = await indexStats(index, 'refresh');
+        const {
+          body: { indices: indices1 },
+        } = await indexStats(index, 'refresh');
         const previousRefreshes = indices1[index].total.refresh.total;
 
         await refreshIndex(index).expect(200);
 
-        const { indices: indices2 } = await indexStats(index, 'refresh');
+        const {
+          body: { indices: indices2 },
+        } = await indexStats(index, 'refresh');
         expect(indices2[index].total.refresh.total).to.be(previousRefreshes + 1);
       });
     });
@@ -153,12 +169,16 @@ export default function ({ getService }) {
         const index = await createIndex();
         // "sth" correspond to search throttling. Frozen indices are normal indices
         // with search throttling turned on.
-        const [cat1] = await catIndex(index, 'sth');
+        const {
+          body: [cat1],
+        } = await catIndex(index, 'sth');
         expect(cat1.sth).to.be('false');
 
         await freeze(index).expect(200);
 
-        const [cat2] = await catIndex(index, 'sth');
+        const {
+          body: [cat2],
+        } = await catIndex(index, 'sth');
         expect(cat2.sth).to.be('true');
       });
     });
@@ -168,11 +188,15 @@ export default function ({ getService }) {
         const index = await createIndex();
 
         await freeze(index).expect(200);
-        const [cat1] = await catIndex(index, 'sth');
+        const {
+          body: [cat1],
+        } = await catIndex(index, 'sth');
         expect(cat1.sth).to.be('true');
 
         await unfreeze(index).expect(200);
-        const [cat2] = await catIndex(index, 'sth');
+        const {
+          body: [cat2],
+        } = await catIndex(index, 'sth');
         expect(cat2.sth).to.be('false');
       });
     });

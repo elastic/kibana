@@ -11,9 +11,10 @@ import React, { Fragment } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, defaultState } from '../default';
+import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
+import { formatId } from './constants';
 
 interface StringFormatEditorFormatParams {
   transform: string;
@@ -25,7 +26,7 @@ interface TransformOptions {
 }
 
 export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFormatParams> {
-  static formatId = 'string';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [

@@ -14,6 +14,10 @@ import { Filter, Query } from '../filters';
 import { IndexPatternBase } from './types';
 import { KueryQueryOptions } from '../kuery';
 
+/**
+ * Configurations to be used while constructing an ES query.
+ * @public
+ */
 export type EsQueryConfig = KueryQueryOptions & {
   allowLeadingWildcards: boolean;
   queryStringOptions: Record<string, any>;
@@ -33,6 +37,8 @@ function removeMatchAll<T>(filters: T[]) {
  * @param config - an objects with query:allowLeadingWildcards and query:queryString:options UI
  * settings in form of { allowLeadingWildcards, queryStringOptions }
  * config contains dateformat:tz
+ *
+ * @public
  */
 export function buildEsQuery(
   indexPattern: IndexPatternBase | undefined,
@@ -47,7 +53,7 @@ export function buildEsQuery(
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const validQueries = queries.filter((query) => has(query, 'query'));
+  const validQueries = queries.filter((query: any) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(
     indexPattern,

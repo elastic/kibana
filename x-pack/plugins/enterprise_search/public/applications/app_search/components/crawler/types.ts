@@ -65,3 +65,39 @@ export interface CrawlerData {
 export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
 }
+
+export interface CrawlerDomainValidationResultFromServer {
+  valid: boolean;
+  results: Array<{
+    name: string;
+    result: 'ok' | 'warning' | 'failure';
+    comment: string;
+  }>;
+}
+
+export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'invalid';
+
+export interface CrawlerDomainValidationStep {
+  state: CrawlerDomainValidationStepState;
+  blockingFailure?: boolean;
+  message?: string;
+}
+
+interface CrawlerDomainValidationState {
+  initialValidation: CrawlerDomainValidationStep;
+  networkConnectivity: CrawlerDomainValidationStep;
+  indexingRestrictions: CrawlerDomainValidationStep;
+  contentVerification: CrawlerDomainValidationStep;
+}
+
+export interface CrawlerDomainValidationResult {
+  steps: CrawlerDomainValidationState;
+}
+
+export type CrawlerDomainValidationResultChange = Partial<CrawlerDomainValidationState>;
+
+export type CrawlerDomainValidationStepName =
+  | 'initialValidation'
+  | 'networkConnectivity'
+  | 'indexingRestrictions'
+  | 'contentVerification';

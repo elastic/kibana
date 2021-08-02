@@ -28,16 +28,10 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
-import { CoreStart } from '../../../../../src/core/public';
-import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
-import { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
 
-interface ReportingExampleAppDeps {
+interface ReportingExampleAppProps {
   basename: string;
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
   screenshotMode: ScreenshotModePluginSetup;
 }
@@ -46,11 +40,9 @@ const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
 
 export const ReportingExampleApp = ({
   basename,
-  notifications,
-  http,
   reporting,
   screenshotMode,
-}: ReportingExampleAppDeps) => {
+}: ReportingExampleAppProps) => {
   const { getDefaultLayoutSelectors } = reporting;
 
   // Context Menu
@@ -74,7 +66,7 @@ export const ReportingExampleApp = ({
       });
   });
 
-  const getPDFJobParamsDefault = (): JobParamsPDF => {
+  const getPDFJobParamsDefault = () => {
     return {
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,

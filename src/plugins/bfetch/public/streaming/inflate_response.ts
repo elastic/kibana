@@ -7,9 +7,10 @@
  */
 
 import { unzlibSync, strFromU8 } from 'fflate';
+import { toByteArray } from 'base64-js';
 
 export function inflateResponse<Result extends object>(response: string) {
-  const buff = Buffer.from(response, 'base64');
+  const buff = toByteArray(response);
   const unzip = unzlibSync(buff);
   return strFromU8(unzip);
 }

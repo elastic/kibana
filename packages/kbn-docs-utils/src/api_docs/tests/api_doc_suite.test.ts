@@ -100,6 +100,7 @@ beforeAll(() => {
 
   const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
   const pluginStats: ApiStats = {
+    deprecatedAPIsReferencedCount: 0,
     missingComments: [],
     isAnyType: [],
     noReferences: [],
@@ -152,9 +153,7 @@ it('const exported from common folder is correct', () => {
   const fooConst = doc.common.find((c) => c.label === 'commonFoo');
   expect(fooConst).toBeDefined();
 
-  expect(fooConst!.source.path.replace(Path.sep, '/')).toContain(
-    'src/plugin_a/common/foo/index.ts'
-  );
+  expect(fooConst!.path.replace(Path.sep, '/')).toContain('src/plugin_a/common/foo/index.ts');
   expect(fooConst!.signature![0]).toBe('"COMMON VAR!"');
 });
 
