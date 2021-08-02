@@ -14,6 +14,7 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
+import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { DomainsTable } from './components/domains_table';
 import { CrawlerOverview } from './crawler_overview';
 
@@ -43,7 +44,7 @@ describe('CrawlerOverview', () => {
   it('renders', () => {
     expect(wrapper.find(DomainsTable)).toHaveLength(1);
 
-    // TODO test for CrawlRequestsTable after it is built in a future PR
+    expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
 
     expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
 
