@@ -8,100 +8,18 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { mockBrowserFields, TestProviders } from '../../../../mock';
-import { Header } from './header';
+import { Search } from './search';
 
 const timelineId = 'test';
 
-describe('Header', () => {
-  test('it renders the field browser title', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="field-browser-title"]').first().text()).toEqual('Fields');
-  });
-
-  test('it renders the Reset Fields button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="reset-fields"]').first().text()).toEqual('Reset Fields');
-  });
-
-  test('it invokes onUpdateColumns when the user clicks the Reset Fields button', () => {
-    const onUpdateColumns = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={onUpdateColumns}
-          searchInput=""
-          timelineId={timelineId}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(onUpdateColumns).toBeCalled();
-  });
-
-  test('it invokes onOutsideClick when the user clicks the Reset Fields button', () => {
-    const onOutsideClick = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={onOutsideClick}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(onOutsideClick).toBeCalled();
-  });
-
+describe('Search', () => {
   test('it renders the field search input with the expected placeholder text when the searchInput prop is empty', () => {
     const wrapper = mount(
       <TestProviders>
-        <Header
+        <Search
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
-          onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           timelineId={timelineId}
         />
@@ -118,12 +36,10 @@ describe('Header', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Header
+        <Search
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
-          onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput={searchInput}
           timelineId={timelineId}
         />
@@ -136,12 +52,10 @@ describe('Header', () => {
   test('it renders the field search input with a spinner when isSearching is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <Header
+        <Search
           filteredBrowserFields={mockBrowserFields}
           isSearching={true}
-          onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           timelineId={timelineId}
         />
@@ -156,12 +70,10 @@ describe('Header', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Header
+        <Search
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
-          onOutsideClick={jest.fn()}
           onSearchInputChange={onSearchInputChange}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           timelineId={timelineId}
         />
@@ -180,12 +92,10 @@ describe('Header', () => {
   test('it returns the expected categories count when filteredBrowserFields is empty', () => {
     const wrapper = mount(
       <TestProviders>
-        <Header
+        <Search
           filteredBrowserFields={{}}
           isSearching={false}
-          onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           timelineId={timelineId}
         />
@@ -200,12 +110,10 @@ describe('Header', () => {
   test('it returns the expected categories count when filteredBrowserFields is NOT empty', () => {
     const wrapper = mount(
       <TestProviders>
-        <Header
+        <Search
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
-          onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           timelineId={timelineId}
         />
@@ -220,12 +128,10 @@ describe('Header', () => {
   test('it returns the expected fields count when filteredBrowserFields is empty', () => {
     const wrapper = mount(
       <TestProviders>
-        <Header
+        <Search
           filteredBrowserFields={{}}
           isSearching={false}
-          onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           timelineId={timelineId}
         />
@@ -238,12 +144,10 @@ describe('Header', () => {
   test('it returns the expected fields count when filteredBrowserFields is NOT empty', () => {
     const wrapper = mount(
       <TestProviders>
-        <Header
+        <Search
           filteredBrowserFields={mockBrowserFields}
           isSearching={false}
-          onOutsideClick={jest.fn()}
           onSearchInputChange={jest.fn()}
-          onUpdateColumns={jest.fn()}
           searchInput=""
           timelineId={timelineId}
         />
