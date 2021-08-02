@@ -16,13 +16,13 @@ import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { SearchBar } from '../../shared/search_bar';
 import { BackendLatencyChart } from './backend_latency_chart';
 import { BackendInventoryTitle } from '../../routing/home';
 import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
 import { BackendThroughputChart } from './backend_throughput_chart';
 import { BackendErrorRateChart } from './backend_error_rate_chart';
+import { BackendDetailTemplate } from '../../routing/templates/backend_detail_template';
 
 export function BackendDetailOverview() {
   const {
@@ -47,8 +47,8 @@ export function BackendDetailOverview() {
   ]);
 
   return (
-    <ApmMainTemplate pageTitle={backendName}>
-      <ApmBackendContextProvider>
+    <ApmBackendContextProvider>
+      <BackendDetailTemplate title={backendName}>
         <SearchBar showTimeComparison />
         <ChartPointerEventContextProvider>
           <EuiFlexGroup direction="row" gutterSize="s">
@@ -95,7 +95,7 @@ export function BackendDetailOverview() {
         </ChartPointerEventContextProvider>
         <EuiSpacer size="m" />
         <BackendDetailDependenciesTable />
-      </ApmBackendContextProvider>
-    </ApmMainTemplate>
+      </BackendDetailTemplate>
+    </ApmBackendContextProvider>
   );
 }
