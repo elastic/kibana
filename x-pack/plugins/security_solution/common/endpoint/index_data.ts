@@ -10,6 +10,7 @@ import seedrandom from 'seedrandom';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
+import { cloneDeep, merge } from 'lodash';
 import { EndpointDocGenerator, Event, TreeOptions } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
@@ -34,6 +35,8 @@ import { FleetActionGenerator } from './data_generators/fleet_action_generator';
 const fleetAgentGenerator = new FleetAgentGenerator();
 const fleetActionGenerator = new FleetActionGenerator();
 
+export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
+
 export async function indexHostsAndAlerts(
   client: Client,
   kbnClient: KbnClient,
@@ -47,9 +50,14 @@ export async function indexHostsAndAlerts(
   alertsPerHost: number,
   fleet: boolean,
   options: TreeOptions = {}
-) {
+): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
+  const response: IndexedHostsAndAlertsResponse = {
+    hosts: [],
+    policies: [],
+    agents: [],
+  };
 
   // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
   if (fleet) {
@@ -61,7 +69,7 @@ export async function indexHostsAndAlerts(
 
   for (let i = 0; i < numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
-    await indexHostDocs({
+    const indexedHosts = await indexHostDocs({
       numDocs,
       client,
       kbnClient,
@@ -72,6 +80,9 @@ export async function indexHostsAndAlerts(
       enrollFleet: fleet,
       generator,
     });
+
+    merge(response, indexedHosts);
+
     await indexAlerts({
       client,
       eventIndex,
@@ -90,12 +101,19 @@ export async function indexHostsAndAlerts(
   // Waiting 5 seconds allows the indices to refresh automatically and
   // the documents become available in API/integration tests.
   await delay(5000);
+
+  return response;
 }
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+interface IndexedHostsResponse {
+  hosts: HostMetadata[];
+  policies: Array<CreatePackagePolicyResponse['item']>;
+  agents: FleetServerAgent[];
+}
 async function indexHostDocs({
   numDocs,
   client,
@@ -116,10 +134,15 @@ async function indexHostDocs({
   policyResponseIndex: string;
   enrollFleet: boolean;
   generator: EndpointDocGenerator;
-}) {
+}): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
   const kibanaVersion = await fetchKibanaVersion(kbnClient);
+  const response: IndexedHostsResponse = {
+    hosts: [],
+    policies: [],
+    agents: [],
+  };
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
   let enrolledAgent: undefined | estypes.SearchHit<FleetServerAgent>;
@@ -144,6 +167,8 @@ async function indexHostDocs({
           appliedPolicyName,
           epmEndpointPackage.version
         );
+
+        response.policies.push(realPolicies[appliedPolicyId]);
       }
 
       // If we did not yet enroll an agent for this Host, do it now that we have good policy id
@@ -156,6 +181,8 @@ async function indexHostDocs({
           realPolicies[appliedPolicyId].policy_id,
           kibanaVersion
         );
+
+        response.agents.push(enrolledAgent);
       }
       // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
       hostMetadata = {
@@ -188,6 +215,7 @@ async function indexHostDocs({
       body: hostMetadata,
       op_type: 'create',
     });
+
     await client.index({
       index: policyResponseIndex,
       body: generator.generatePolicyResponse({
@@ -196,7 +224,13 @@ async function indexHostDocs({
       }),
       op_type: 'create',
     });
+
+    // Clone the hostMetadata document to ensure that no shared state (as a result of using the
+    // generator) is returned across docs
+    response.hosts.push(cloneDeep(hostMetadata));
   }
+
+  return response;
 }
 
 async function indexAlerts({
