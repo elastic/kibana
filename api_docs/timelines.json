@@ -15,7 +15,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/public/components/drag_and_drop/helpers.ts",
-          "lineNumber": 160
+          "lineNumber": 159
         },
         "deprecated": false,
         "children": [
@@ -31,7 +31,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/public/components/drag_and_drop/helpers.ts",
-              "lineNumber": 160
+              "lineNumber": 159
             },
             "deprecated": false,
             "isRequired": true
@@ -605,7 +605,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/public/components/drag_and_drop/helpers.ts",
-          "lineNumber": 210
+          "lineNumber": 209
         },
         "deprecated": false,
         "children": [
@@ -621,7 +621,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/public/components/drag_and_drop/helpers.ts",
-              "lineNumber": 210
+              "lineNumber": 209
             },
             "deprecated": false,
             "isRequired": true
@@ -1258,7 +1258,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/public/store/t_grid/reducer.ts",
-          "lineNumber": 53
+          "lineNumber": 55
         },
         "deprecated": false,
         "returnComment": [],
@@ -1820,9 +1820,7 @@
             "section": "def-common.ColumnHeaderOptions",
             "text": "ColumnHeaderOptions"
           },
-          "[]; filters?: ",
-          "Filter",
-          "[] | undefined; title: string; id: string; sort: ",
+          "[]; filters?: any[] | undefined; title: string; id: string; sort: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1830,7 +1828,15 @@
             "section": "def-common.SortColumnTimeline",
             "text": "SortColumnTimeline"
           },
-          "[]; version: string | null; isLoading: boolean; savedObjectId: string | null; dateRange: { start: string; end: string; }; deletedEventIds: string[]; excludedRowRendererIds: ",
+          "[]; version: string | null; isLoading: boolean; dateRange: { start: string; end: string; }; savedObjectId: string | null; dataProviders: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.DataProvider",
+            "text": "DataProvider"
+          },
+          "[]; deletedEventIds: string[]; excludedRowRendererIds: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1866,7 +1872,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-          "lineNumber": 82
+          "lineNumber": 84
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1919,7 +1925,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/timelines/public/types.ts",
-        "lineNumber": 23
+        "lineNumber": 27
       },
       "deprecated": false,
       "children": [
@@ -1936,7 +1942,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 24
+            "lineNumber": 28
           },
           "deprecated": false,
           "returnComment": [],
@@ -1960,7 +1966,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 25
+            "lineNumber": 29
           },
           "deprecated": false,
           "returnComment": [],
@@ -1977,7 +1983,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/timelines/public/types.ts",
-                "lineNumber": 26
+                "lineNumber": 30
               },
               "deprecated": false
             }
@@ -1995,7 +2001,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 29
+            "lineNumber": 33
           },
           "deprecated": false,
           "returnComment": [],
@@ -2017,7 +2023,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 30
+            "lineNumber": 34
           },
           "deprecated": false,
           "returnComment": [],
@@ -2034,7 +2040,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/timelines/public/types.ts",
-                "lineNumber": 30
+                "lineNumber": 34
               },
               "deprecated": false
             }
@@ -2056,7 +2062,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 31
+            "lineNumber": 35
           },
           "deprecated": false,
           "returnComment": [],
@@ -2073,7 +2079,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/timelines/public/types.ts",
-                "lineNumber": 31
+                "lineNumber": 35
               },
               "deprecated": false
             }
@@ -2095,7 +2101,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 32
+            "lineNumber": 36
           },
           "deprecated": false,
           "returnComment": [],
@@ -2114,7 +2120,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/timelines/public/types.ts",
-                "lineNumber": 32
+                "lineNumber": 36
               },
               "deprecated": false
             }
@@ -2135,7 +2141,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 33
+            "lineNumber": 37
           },
           "deprecated": false,
           "returnComment": [],
@@ -2155,7 +2161,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 34
+            "lineNumber": 38
           },
           "deprecated": false,
           "returnComment": [],
@@ -2176,7 +2182,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 35
+            "lineNumber": 39
           },
           "deprecated": false,
           "returnComment": [],
@@ -2198,7 +2204,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 38
+            "lineNumber": 42
           },
           "deprecated": false,
           "returnComment": [],
@@ -2218,7 +2224,46 @@
               ],
               "source": {
                 "path": "x-pack/plugins/timelines/public/types.ts",
-                "lineNumber": 38
+                "lineNumber": 42
+              },
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "timelines",
+          "id": "def-public.TimelinesUIStart.getAddToCaseAction",
+          "type": "Function",
+          "tags": [],
+          "label": "getAddToCaseAction",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "AddToCaseActionProps",
+            ") => React.ReactElement<",
+            "AddToCaseActionProps",
+            ">"
+          ],
+          "source": {
+            "path": "x-pack/plugins/timelines/public/types.ts",
+            "lineNumber": 43
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "timelines",
+              "id": "def-public.props",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "AddToCaseActionProps"
+              ],
+              "source": {
+                "path": "x-pack/plugins/timelines/public/types.ts",
+                "lineNumber": 43
               },
               "deprecated": false
             }
@@ -2245,7 +2290,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/timelines/server/types.ts",
-        "lineNumber": 12
+        "lineNumber": 13
       },
       "deprecated": false,
       "children": [],
@@ -2261,7 +2306,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/timelines/server/types.ts",
-        "lineNumber": 14
+        "lineNumber": 15
       },
       "deprecated": false,
       "children": [],
@@ -6219,7 +6264,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 80
+          "lineNumber": 84
         },
         "deprecated": false,
         "children": [
@@ -6235,7 +6280,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 81
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -6251,7 +6296,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 82
+              "lineNumber": 86
             },
             "deprecated": false
           },
@@ -6267,7 +6312,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 83
+              "lineNumber": 87
             },
             "deprecated": false
           },
@@ -6283,7 +6328,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 84
+              "lineNumber": 88
             },
             "deprecated": false
           },
@@ -6299,7 +6344,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 85
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -6315,7 +6360,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 86
+              "lineNumber": 90
             },
             "deprecated": false
           },
@@ -6331,7 +6376,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 87
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -6347,7 +6392,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 88
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -6363,7 +6408,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 89
+              "lineNumber": 93
             },
             "deprecated": false
           },
@@ -6379,7 +6424,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 90
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -6395,7 +6440,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 91
+              "lineNumber": 95
             },
             "deprecated": false
           }
@@ -6947,7 +6992,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 106
+          "lineNumber": 110
         },
         "deprecated": false,
         "children": [
@@ -6963,7 +7008,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 107
+              "lineNumber": 111
             },
             "deprecated": false
           },
@@ -6979,7 +7024,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 108
+              "lineNumber": 112
             },
             "deprecated": false
           },
@@ -6995,7 +7040,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 109
+              "lineNumber": 113
             },
             "deprecated": false
           },
@@ -7011,7 +7056,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 110
+              "lineNumber": 114
             },
             "deprecated": false
           },
@@ -7027,7 +7072,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 111
+              "lineNumber": 115
             },
             "deprecated": false
           },
@@ -7050,7 +7095,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 112
+              "lineNumber": 116
             },
             "deprecated": false
           },
@@ -7073,7 +7118,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 113
+              "lineNumber": 117
             },
             "deprecated": false
           },
@@ -7096,7 +7141,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 114
+              "lineNumber": 118
             },
             "deprecated": false
           }
@@ -7277,7 +7322,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 163
+          "lineNumber": 167
         },
         "deprecated": false,
         "children": [
@@ -7293,7 +7338,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 164
+              "lineNumber": 168
             },
             "deprecated": false
           },
@@ -7309,7 +7354,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 165
+              "lineNumber": 169
             },
             "deprecated": false
           }
@@ -7440,7 +7485,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 117
+          "lineNumber": 121
         },
         "deprecated": false,
         "children": [
@@ -7456,7 +7501,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 118
+              "lineNumber": 122
             },
             "deprecated": false
           },
@@ -7472,7 +7517,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 119
+              "lineNumber": 123
             },
             "deprecated": false
           },
@@ -7488,7 +7533,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 120
+              "lineNumber": 124
             },
             "deprecated": false
           },
@@ -7504,7 +7549,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 121
+              "lineNumber": 125
             },
             "deprecated": false
           },
@@ -7520,7 +7565,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 122
+              "lineNumber": 126
             },
             "deprecated": false
           }
@@ -8183,7 +8228,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 125
+          "lineNumber": 129
         },
         "deprecated": false,
         "children": [
@@ -8199,7 +8244,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 126
+              "lineNumber": 130
             },
             "deprecated": false
           },
@@ -8215,7 +8260,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 127
+              "lineNumber": 131
             },
             "deprecated": false
           },
@@ -8231,7 +8276,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 128
+              "lineNumber": 132
             },
             "deprecated": false
           },
@@ -8247,7 +8292,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 129
+              "lineNumber": 133
             },
             "deprecated": false
           },
@@ -8263,7 +8308,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 130
+              "lineNumber": 134
             },
             "deprecated": false
           },
@@ -8279,7 +8324,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 131
+              "lineNumber": 135
             },
             "deprecated": false
           },
@@ -8295,7 +8340,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 132
+              "lineNumber": 136
             },
             "deprecated": false
           },
@@ -8311,7 +8356,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 133
+              "lineNumber": 137
             },
             "deprecated": false
           },
@@ -8327,7 +8372,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 134
+              "lineNumber": 138
             },
             "deprecated": false
           },
@@ -8343,7 +8388,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 135
+              "lineNumber": 139
             },
             "deprecated": false
           },
@@ -8359,7 +8404,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 136
+              "lineNumber": 140
             },
             "deprecated": false
           }
@@ -8567,7 +8612,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 139
+          "lineNumber": 143
         },
         "deprecated": false,
         "children": [
@@ -8583,7 +8628,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 140
+              "lineNumber": 144
             },
             "deprecated": false
           },
@@ -8606,7 +8651,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 141
+              "lineNumber": 145
             },
             "deprecated": false
           },
@@ -8622,7 +8667,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 142
+              "lineNumber": 146
             },
             "deprecated": false
           },
@@ -8638,7 +8683,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 143
+              "lineNumber": 147
             },
             "deprecated": false
           },
@@ -8654,7 +8699,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 144
+              "lineNumber": 148
             },
             "deprecated": false
           },
@@ -8670,7 +8715,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 145
+              "lineNumber": 149
             },
             "deprecated": false
           },
@@ -8686,7 +8731,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 146
+              "lineNumber": 150
             },
             "deprecated": false
           }
@@ -9621,7 +9666,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 158
+          "lineNumber": 162
         },
         "deprecated": false,
         "children": [
@@ -9637,7 +9682,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 159
+              "lineNumber": 163
             },
             "deprecated": false
           },
@@ -9653,7 +9698,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 160
+              "lineNumber": 164
             },
             "deprecated": false
           }
@@ -9976,7 +10021,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 94
+          "lineNumber": 98
         },
         "deprecated": false,
         "children": [
@@ -9992,7 +10037,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 95
+              "lineNumber": 99
             },
             "deprecated": false
           },
@@ -10008,7 +10053,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 97
+              "lineNumber": 101
             },
             "deprecated": false
           },
@@ -10024,7 +10069,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 99
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -10040,7 +10085,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 101
+              "lineNumber": 105
             },
             "deprecated": false
           },
@@ -10056,7 +10101,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 103
+              "lineNumber": 107
             },
             "deprecated": false
           }
@@ -10309,7 +10354,7 @@
             "label": "renderRow",
             "description": [],
             "signature": [
-              "({ browserFields, data, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
+              "({ browserFields, data, isDraggable, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
               {
                 "pluginId": "timelines",
                 "scope": "common",
@@ -10319,7 +10364,7 @@
               },
               ">>>; data: ",
               "Ecs",
-              "; timelineId: string; }) => React.ReactNode"
+              "; isDraggable: boolean; timelineId: string; }) => React.ReactNode"
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
@@ -10346,7 +10391,7 @@
                   },
                   ">>>; data: ",
                   "Ecs",
-                  "; timelineId: string; }"
+                  "; isDraggable: boolean; timelineId: string; }"
                 ],
                 "source": {
                   "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
@@ -10420,7 +10465,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 149
+          "lineNumber": 153
         },
         "deprecated": false,
         "children": [
@@ -10443,7 +10488,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 150
+              "lineNumber": 154
             },
             "deprecated": false
           }
@@ -10498,7 +10543,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 153
+          "lineNumber": 157
         },
         "deprecated": false,
         "children": [
@@ -10521,7 +10566,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 154
+              "lineNumber": 158
             },
             "deprecated": false
           },
@@ -10537,7 +10582,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 155
+              "lineNumber": 159
             },
             "deprecated": false
           }
@@ -10797,7 +10842,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 168
+          "lineNumber": 172
         },
         "deprecated": false,
         "children": [
@@ -10813,7 +10858,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 169
+              "lineNumber": 173
             },
             "deprecated": false
           },
@@ -10829,7 +10874,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 170
+              "lineNumber": 174
             },
             "deprecated": false
           }
@@ -10845,7 +10890,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-          "lineNumber": 13
+          "lineNumber": 15
         },
         "deprecated": false,
         "children": [
@@ -10867,7 +10912,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 14
+              "lineNumber": 16
             },
             "deprecated": false
           },
@@ -10889,7 +10934,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 15
+              "lineNumber": 17
             },
             "deprecated": false
           }
@@ -10927,7 +10972,7 @@
             "section": "def-common.TimelineEventsAllRequestOptions",
             "text": "TimelineEventsAllRequestOptions"
           },
-          ", \"id\" | \"sort\" | \"fields\" | \"language\" | \"timerange\" | \"defaultIndex\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"fieldRequested\" | \"excludeEcsData\">"
+          ", \"id\" | \"sort\" | \"fields\" | \"timerange\" | \"language\" | \"defaultIndex\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"alertConsumers\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
@@ -11146,7 +11191,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-          "lineNumber": 37
+          "lineNumber": 39
         },
         "deprecated": false,
         "children": [
@@ -11162,7 +11207,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 38
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -11178,7 +11223,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 39
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -11194,7 +11239,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -11210,7 +11255,24 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 41
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEventsAllRequestOptions.authFilter",
+            "type": "Object",
+            "tags": [],
+            "label": "authFilter",
+            "description": [],
+            "signature": [
+              "JsonObject",
+              " | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+              "lineNumber": 44
             },
             "deprecated": false
           }
@@ -11244,7 +11306,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-          "lineNumber": 30
+          "lineNumber": 32
         },
         "deprecated": false,
         "children": [
@@ -11267,7 +11329,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 31
+              "lineNumber": 33
             },
             "deprecated": false
           },
@@ -11280,7 +11342,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 32
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -11296,7 +11358,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 33
+              "lineNumber": 35
             },
             "deprecated": false
           },
@@ -11319,7 +11381,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 34
+              "lineNumber": 36
             },
             "deprecated": false
           }
@@ -11335,7 +11397,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-          "lineNumber": 12
+          "lineNumber": 14
         },
         "deprecated": false,
         "children": [
@@ -11351,7 +11413,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 13
+              "lineNumber": 15
             },
             "deprecated": false
           },
@@ -11367,7 +11429,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 14
+              "lineNumber": 16
             },
             "deprecated": false
           },
@@ -11380,7 +11442,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 15
+              "lineNumber": 17
             },
             "deprecated": false
           },
@@ -11396,7 +11458,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 16
+              "lineNumber": 18
             },
             "deprecated": false
           },
@@ -11412,7 +11474,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 18
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -11425,7 +11487,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 19
+              "lineNumber": 21
             },
             "deprecated": false
           }
@@ -11459,7 +11521,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-          "lineNumber": 27
+          "lineNumber": 29
         },
         "deprecated": false,
         "children": [
@@ -11472,7 +11534,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 29
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -11485,7 +11547,24 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 30
+              "lineNumber": 32
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEventsDetailsRequestOptions.authFilter",
+            "type": "Object",
+            "tags": [],
+            "label": "authFilter",
+            "description": [],
+            "signature": [
+              "JsonObject",
+              " | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+              "lineNumber": 33
             },
             "deprecated": false
           }
@@ -11519,7 +11598,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-          "lineNumber": 22
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -11542,7 +11621,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 23
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -11565,7 +11644,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-              "lineNumber": 24
+              "lineNumber": 26
             },
             "deprecated": false
           }
@@ -11595,7 +11674,7 @@
             "section": "def-common.TimelineRequestBasicOptions",
             "text": "TimelineRequestBasicOptions"
           },
-          ", \"id\" | \"params\" | \"defaultIndex\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\">"
+          ", \"id\" | \"params\" | \"defaultIndex\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"alertConsumers\">"
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
@@ -11732,7 +11811,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 173
+          "lineNumber": 177
         },
         "deprecated": false,
         "children": [
@@ -11755,7 +11834,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 174
+              "lineNumber": 178
             },
             "deprecated": false
           },
@@ -11778,7 +11857,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 175
+              "lineNumber": 179
             },
             "deprecated": false
           },
@@ -11794,7 +11873,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 176
+              "lineNumber": 180
             },
             "deprecated": false
           },
@@ -11817,7 +11896,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 177
+              "lineNumber": 181
             },
             "deprecated": false
           },
@@ -11833,7 +11912,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 178
+              "lineNumber": 182
             },
             "deprecated": false
           },
@@ -11856,7 +11935,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 179
+              "lineNumber": 183
             },
             "deprecated": false
           },
@@ -11879,7 +11958,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 180
+              "lineNumber": 184
             },
             "deprecated": false
           },
@@ -11895,7 +11974,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 181
+              "lineNumber": 185
             },
             "deprecated": false
           },
@@ -11918,7 +11997,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 182
+              "lineNumber": 186
             },
             "deprecated": false
           },
@@ -11934,7 +12013,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 183
+              "lineNumber": 187
             },
             "deprecated": false
           },
@@ -11950,7 +12029,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 184
+              "lineNumber": 188
             },
             "deprecated": false
           },
@@ -11966,7 +12045,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 185
+              "lineNumber": 189
             },
             "deprecated": false
           },
@@ -11982,7 +12061,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 186
+              "lineNumber": 190
             },
             "deprecated": false
           },
@@ -12005,7 +12084,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 187
+              "lineNumber": 191
             },
             "deprecated": false
           },
@@ -12028,7 +12107,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 188
+              "lineNumber": 192
             },
             "deprecated": false
           },
@@ -12044,7 +12123,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 189
+              "lineNumber": 193
             },
             "deprecated": false
           },
@@ -12067,7 +12146,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 190
+              "lineNumber": 194
             },
             "deprecated": false
           },
@@ -12090,7 +12169,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 191
+              "lineNumber": 195
             },
             "deprecated": false
           }
@@ -12106,7 +12185,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-          "lineNumber": 18
+          "lineNumber": 20
         },
         "deprecated": false,
         "children": [
@@ -12119,7 +12198,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 19
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -12135,7 +12214,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 20
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -12158,7 +12237,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 21
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -12174,7 +12253,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 22
+              "lineNumber": 24
             },
             "deprecated": false
           }
@@ -12312,7 +12391,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-          "lineNumber": 25
+          "lineNumber": 27
         },
         "deprecated": false,
         "children": [
@@ -12325,7 +12404,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 26
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -12341,7 +12420,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-              "lineNumber": 27
+              "lineNumber": 29
             },
             "deprecated": false
           }
@@ -12467,8 +12546,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
-              "[] | undefined"
+              "any[] | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
@@ -12687,7 +12765,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 38
+          "lineNumber": 40
         },
         "deprecated": false,
         "children": [
@@ -12709,7 +12787,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 39
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -12737,7 +12815,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -12753,7 +12831,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -12770,7 +12848,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 42
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -12793,7 +12871,47 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 43
+              "lineNumber": 45
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineRequestBasicOptions.entityType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "entityType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.EntityType",
+                "text": "EntityType"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
+              "lineNumber": 46
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineRequestBasicOptions.alertConsumers",
+            "type": "Array",
+            "tags": [],
+            "label": "alertConsumers",
+            "description": [],
+            "signature": [
+              "ALERTS_CONSUMERS",
+              "[] | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
+              "lineNumber": 47
             },
             "deprecated": false
           }
@@ -12826,7 +12944,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 50
+          "lineNumber": 54
         },
         "deprecated": false,
         "children": [
@@ -12842,7 +12960,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 52
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -12865,7 +12983,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 53
+              "lineNumber": 57
             },
             "deprecated": false
           }
@@ -12899,7 +13017,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 46
+          "lineNumber": 50
         },
         "deprecated": false,
         "children": [
@@ -12912,7 +13030,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-              "lineNumber": 47
+              "lineNumber": 51
             },
             "deprecated": false
           }
@@ -13642,6 +13760,20 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-common.EntityType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EntityType",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-common.FlowDirection",
         "type": "Enum",
         "tags": [],
@@ -13649,7 +13781,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 194
+          "lineNumber": 198
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -15481,7 +15613,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 36
+          "lineNumber": 38
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -15787,7 +15919,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 68
+          "lineNumber": 72
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -15868,7 +16000,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-          "lineNumber": 56
+          "lineNumber": 60
         },
         "deprecated": false,
         "initialIsOpen": false
