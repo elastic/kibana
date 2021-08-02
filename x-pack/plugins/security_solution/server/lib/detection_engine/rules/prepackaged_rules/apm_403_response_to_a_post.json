@@ -7,7 +7,8 @@
     "Security scans and tests may result in these errors. Misconfigured or buggy applications may produce large numbers of these errors. If the source is unexpected, the user unauthorized, or the request unusual, these may indicate suspicious or malicious activity."
   ],
   "index": [
-    "apm-*-transaction*"
+    "apm-*-transaction*",
+    "traces-apm*"
   ],
   "language": "kuery",
   "license": "Elastic License v2",
@@ -25,5 +26,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

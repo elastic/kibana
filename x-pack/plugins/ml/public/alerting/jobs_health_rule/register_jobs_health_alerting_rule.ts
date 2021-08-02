@@ -11,12 +11,13 @@ import { TriggersAndActionsUIPublicPluginSetup } from '../../../../triggers_acti
 import { PluginSetupContract as AlertingSetup } from '../../../../alerting/public';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 
 export function registerJobsHealthAlertingRule(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
   alerting?: AlertingSetup
 ) {
-  triggersActionsUi.alertTypeRegistry.register({
+  triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     description: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.description', {
       defaultMessage: 'Alert when anomaly detection jobs experience operational issues.',
@@ -42,10 +43,9 @@ export function registerJobsHealthAlertingRule(
         );
       }
 
-      if (
-        alertParams.testsConfig &&
-        Object.values(alertParams.testsConfig).every((v) => v?.enabled === false)
-      ) {
+      const resultTestConfig = getResultJobsHealthRuleConfig(alertParams.testsConfig);
+
+      if (Object.values(resultTestConfig).every((v) => v?.enabled === false)) {
         validationResult.errors.testsConfig.push(
           i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.errorMessage', {
             defaultMessage: 'At least one health check must be enabled.',
@@ -61,7 +61,14 @@ export function registerJobsHealthAlertingRule(
       {
         defaultMessage: `Anomaly detection jobs health check result:
 \\{\\{context.message\\}\\}
-- Job IDs: \\{\\{context.jobIds\\}\\}
+\\{\\{#context.results\\}\\}
+  Job ID: \\{\\{job_id\\}\\}
+  \\{\\{#datafeed_id\\}\\}Datafeed ID: \\{\\{datafeed_id\\}\\}  \\{\\{/datafeed_id\\}\\}
+  \\{\\{#datafeed_state\\}\\}Datafeed state: \\{\\{datafeed_state\\}\\}  \\{\\{/datafeed_state\\}\\}
+  \\{\\{#memory_status\\}\\}Memory status: \\{\\{memory_status\\}\\}  \\{\\{/memory_status\\}\\}
+  \\{\\{#log_time\\}\\}Memory logging time: \\{\\{log_time\\}\\}  \\{\\{/log_time\\}\\}
+  \\{\\{#failed_category_count\\}\\}Failed category count: \\{\\{failed_category_count\\}\\}  \\{\\{/failed_category_count\\}\\}
+\\{\\{/context.results\\}\\}
 `,
       }
     ),

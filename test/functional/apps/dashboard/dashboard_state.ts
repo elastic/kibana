@@ -279,6 +279,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let originalPieSliceStyle = '';
 
         before(async () => {
+          await queryBar.clearQuery();
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await enableNewChartLibraryDebug();
           originalPieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);

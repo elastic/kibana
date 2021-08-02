@@ -7,19 +7,14 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { deserializeFieldFormat } from './utils/deserialize';
 import { baseFormattersPublic } from './constants';
-import { DataPublicPluginStart, fieldFormats } from '..';
+import { fieldFormats } from '..';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
   const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
   const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
   fieldFormatsRegistry.init(getConfig, {}, baseFormattersPublic);
-
-  fieldFormatsRegistry.deserialize = deserializeFieldFormat.bind(
-    fieldFormatsRegistry as DataPublicPluginStart['fieldFormats']
-  );
 
   return fieldFormatsRegistry;
 };

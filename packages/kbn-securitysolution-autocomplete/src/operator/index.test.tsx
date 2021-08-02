@@ -160,13 +160,8 @@ describe('operator', () => {
         operator={isOperator}
         placeholder="Placeholder text"
         selectedField={{
-          aggregatable: false,
-          count: 0,
-          esTypes: ['text'],
           name: 'nestedField',
-          readFromDocValues: false,
           scripted: false,
-          searchable: true,
           subType: { nested: { path: 'nestedField' } },
           type: 'nested',
         }}

@@ -6,7 +6,7 @@
  */
 
 import { Request } from '@hapi/hapi';
-import { alertTypeRegistryMock } from './alert_type_registry.mock';
+import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { KibanaRequest } from '../../../../src/core/server';
 import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { securityMock } from '../../security/server/mocks';
@@ -27,8 +27,9 @@ const securityPluginSetup = securityMock.createSetup();
 const securityPluginStart = securityMock.createStart();
 
 const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> = {
-  alertTypeRegistry: alertTypeRegistryMock.create(),
+  ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpace: jest.fn(),
+  getSpaceId: jest.fn(),
   features,
 };
 
@@ -69,10 +70,11 @@ test('creates an alerting authorization client with proper constructor arguments
   expect(AlertingAuthorization).toHaveBeenCalledWith({
     request,
     authorization: securityPluginStart.authz,
-    alertTypeRegistry: alertingAuthorizationClientFactoryParams.alertTypeRegistry,
+    ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
     features: alertingAuthorizationClientFactoryParams.features,
     auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
+    getSpaceId: expect.any(Function),
     exemptConsumerIds: [],
   });
 
@@ -96,10 +98,11 @@ test('creates an alerting authorization client with proper constructor arguments
   expect(AlertingAuthorization).toHaveBeenCalledWith({
     request,
     authorization: securityPluginStart.authz,
-    alertTypeRegistry: alertingAuthorizationClientFactoryParams.alertTypeRegistry,
+    ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
     features: alertingAuthorizationClientFactoryParams.features,
     auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
+    getSpaceId: expect.any(Function),
     exemptConsumerIds: ['exemptConsumerA', 'exemptConsumerB'],
   });
 
@@ -118,10 +121,11 @@ test('creates an alerting authorization client with proper constructor arguments
   const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
   expect(AlertingAuthorization).toHaveBeenCalledWith({
     request,
-    alertTypeRegistry: alertingAuthorizationClientFactoryParams.alertTypeRegistry,
+    ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
     features: alertingAuthorizationClientFactoryParams.features,
     auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
+    getSpaceId: expect.any(Function),
     exemptConsumerIds: [],
   });
 

@@ -41,11 +41,9 @@ const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thContent ${className}`,
 }))<{ textAlign?: string; width?: number }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  position: relative;
-  top: 3px;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
@@ -79,7 +77,7 @@ export const columns: Array<
       defaultMessage: 'Triggered',
     }),
     id: ALERT_START,
-    initialWidth: 116,
+    initialWidth: 176,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -104,7 +102,6 @@ export const columns: Array<
     }),
     linkField: '*',
     id: RULE_NAME,
-    initialWidth: 400,
   },
 ];
 
@@ -123,7 +120,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const leadingControlColumns = [
     {
       id: 'expand',
-      width: 40,
+      width: 20,
       headerCellRender: () => {
         return (
           <EventsThContent>
@@ -152,7 +149,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     },
     {
       id: 'view_in_app',
-      width: 40,
+      width: 20,
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
