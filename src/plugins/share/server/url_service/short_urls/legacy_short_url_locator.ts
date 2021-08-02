@@ -9,14 +9,17 @@
 import type { SerializableState } from 'src/plugins/kibana_utils/common';
 import type { KibanaLocation, LocatorDefinition } from '../../../common/url_service';
 
-export interface RelativePathLocatorParams extends SerializableState {
+export const LEGACY_SHORT_URL_LOCATOR_ID = 'LEGACY_SHORT_URL_LOCATOR';
+
+export interface LegacyShortUrlLocatorParams extends SerializableState {
   url: string;
 }
 
-export class RelativePathLocatorDefinition implements LocatorDefinition<RelativePathLocatorParams> {
-  public readonly id = 'RELATIVE_PATH_LOCATOR';
+export class LegacyShortUrlLocatorDefinition
+  implements LocatorDefinition<LegacyShortUrlLocatorParams> {
+  public readonly id = LEGACY_SHORT_URL_LOCATOR_ID;
 
-  public async getLocation(params: RelativePathLocatorParams): Promise<KibanaLocation> {
+  public async getLocation(params: LegacyShortUrlLocatorParams): Promise<KibanaLocation> {
     const { url } = params;
 
     const match = url.match(/^.*\/app\/([^\/#]+)(.+)$/);

@@ -9,11 +9,20 @@
 import { SavedObject, SavedObjectsClient } from 'kibana/server';
 import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { ShortUrlData } from 'src/plugins/share/common/url_service/short_urls/types';
+import { LEGACY_SHORT_URL_LOCATOR_ID } from '../legacy_short_url_locator';
 import { ShortUrlStorage } from '../types';
 
 export type ShortUrlSavedObject = SavedObject<ShortUrlSavedObjectAttributes>;
 
-export interface ShortUrlSavedObjectAttributesBase {
+/**
+ * Fields that stored in the short url saved object.
+ */
+export interface ShortUrlSavedObjectAttributes {
+  /**
+   * The slug of the short URL, the part after the `/` in the URL.
+   */
+  readonly slug?: string;
+
   /**
    * Number of times the short URL has been resolved.
    */
@@ -28,9 +37,12 @@ export interface ShortUrlSavedObjectAttributesBase {
    * The timestamp when the short URL was created.
    */
   readonly createDate: number;
-}
 
-export interface ShortUrlSavedObjectAttributesV1 extends ShortUrlSavedObjectAttributesBase {
+  /**
+   * Serialized locator state.
+   */
+  readonly locatorJSON: string;
+
   /**
    * Legacy field - was used in old short URL versions. This field will
    * be removed in the future by a migration.
@@ -40,34 +52,12 @@ export interface ShortUrlSavedObjectAttributesV1 extends ShortUrlSavedObjectAttr
   readonly url: string;
 }
 
-/**
- * Fields that stored in the short url saved object.
- */
-export interface ShortUrlSavedObjectAttributesV2 extends ShortUrlSavedObjectAttributesBase {
-  /**
-   * The slug of the short URL, the part after the `/` in the URL.
-   */
-  readonly slug: string;
-
-  /**
-   * Serialized locator state.
-   */
-  readonly locatorJSON: string;
-}
-
-export type ShortUrlSavedObjectAttributes =
-  | ShortUrlSavedObjectAttributesV1
-  | ShortUrlSavedObjectAttributesV2;
-
-const isShortUrlV1 = (x: ShortUrlSavedObjectAttributes): x is ShortUrlSavedObjectAttributesV1 =>
-  typeof (x as ShortUrlSavedObjectAttributesV1).url === 'string';
-
 const createShortUrlData = <P extends SerializableState = SerializableState>(
   savedObject: ShortUrlSavedObject
 ): ShortUrlData<P> => {
   const attributes = savedObject.attributes;
 
-  if (isShortUrlV1(attributes)) {
+  if (!!attributes.url) {
     const { url, ...rest } = attributes;
     const state = ({ url } as unknown) as P;
 
@@ -75,7 +65,7 @@ const createShortUrlData = <P extends SerializableState = SerializableState>(
       id: savedObject.id,
       slug: savedObject.id,
       locator: {
-        id: 'FILL_THIS_IN',
+        id: LEGACY_SHORT_URL_LOCATOR_ID,
         version: 'FILL_THIS_IN',
         state,
       },
@@ -100,6 +90,7 @@ const createAttributes = <P extends SerializableState = SerializableState>(
   const attributes: ShortUrlSavedObjectAttributes = {
     ...rest,
     locatorJSON: JSON.stringify(locator),
+    url: '',
   };
 
   return attributes;
