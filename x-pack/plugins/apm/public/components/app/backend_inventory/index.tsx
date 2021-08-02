@@ -7,7 +7,13 @@
 
 import React from 'react';
 import { SearchBar } from '../../shared/search_bar';
+import { BackendInventoryDependenciesTable } from './backend_inventory_dependencies_table';
 
 export function BackendInventory() {
-  return <SearchBar showTimeComparison />;
+  return (
+    <>
+      <SearchBar showTimeComparison />
+      <BackendInventoryDependenciesTable />
+    </>
+  );
 }
