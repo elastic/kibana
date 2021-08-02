@@ -1378,8 +1378,7 @@
               "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
             ],
             "signature": [
-              "Filter",
-              "[] | undefined"
+              "any[] | undefined"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/locator.ts",
@@ -1390,15 +1389,14 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardAppLocatorParams.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              "Query",
-              " | undefined"
+              "any"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/locator.ts",
@@ -1747,8 +1745,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
-              "[]"
+              "any[]"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/types.ts",
@@ -1772,12 +1769,12 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainerInput.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "{ query: string | { [key: string]: any; }; language: string; }"
+              "any"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/types.ts",
@@ -2231,8 +2228,7 @@
             "label": "getQuery",
             "description": [],
             "signature": [
-              "() => ",
-              "Query"
+              "() => any"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
@@ -2250,9 +2246,7 @@
             "label": "getFilters",
             "description": [],
             "signature": [
-              "() => ",
-              "Filter",
-              "[]"
+              "() => any[]"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
@@ -2394,8 +2388,7 @@
               "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
             ],
             "signature": [
-              "Filter",
-              "[] | undefined"
+              "any[] | undefined"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
@@ -2406,15 +2399,14 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardUrlGeneratorState.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              "Query",
-              " | undefined"
+              "any"
             ],
             "source": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
