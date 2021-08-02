@@ -9,7 +9,6 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, AppUpdater } from '../../../../../../src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../../plugin';
 import { embeddablesServiceFactory } from './embeddables';
-import { expressionsServiceFactory } from './expressions';
 import { searchServiceFactory } from './search';
 import { labsServiceFactory } from './labs';
 
@@ -71,7 +70,6 @@ export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? 
 
 export const services = {
   embeddables: new CanvasServiceProvider(embeddablesServiceFactory),
-  expressions: new CanvasServiceProvider(expressionsServiceFactory),
   search: new CanvasServiceProvider(searchServiceFactory),
   labs: new CanvasServiceProvider(labsServiceFactory),
 };
@@ -80,12 +78,11 @@ export type CanvasServiceProviders = typeof services;
 
 export interface CanvasServices {
   embeddables: ServiceFromProvider<typeof services.embeddables>;
-  expressions: ServiceFromProvider<typeof services.expressions>;
   search: ServiceFromProvider<typeof services.search>;
   labs: ServiceFromProvider<typeof services.labs>;
 }
 
-export const startServices = async (
+export const startLegacyServices = async (
   coreSetup: CoreSetup,
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
@@ -103,8 +100,4 @@ export const stopServices = () => {
   Object.values(services).forEach((provider) => provider.stop());
 };
 
-export const {
-  embeddables: embeddableService,
-  expressions: expressionsService,
-  search: searchService,
-} = services;
+export const { embeddables: embeddableService, search: searchService } = services;
