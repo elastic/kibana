@@ -443,7 +443,7 @@ Platform::
 * Log at different levels based on the state {kibana-pull}101751[#101751]
 * Create expressions function to get UI settings {kibana-pull}101317[#101317]
 * Remove external "Launch App Search" button {kibana-pull}100815[#100815]
-* Adds capacity estimation to the TM health endpoint {kibana-pull}100475[#100475]
+* Adds capacity estimation to the Task Manager health endpoint {kibana-pull}100475[#100475]
 * Adds support for setting multiple variables to varSet {kibana-pull}100458[#100458]
 * Formula overall functions {kibana-pull}99461[#99461]
 * Formula editor {kibana-pull}99297[#99297]
