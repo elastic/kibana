@@ -6,6 +6,7 @@
  */
 
 export { ReportDocument } from '../../../common/types';
-export { Report } from './report';
-export { ReportingStore } from './store';
 export { IlmPolicyManager } from './ilm_policy_manager';
+export { Report } from './report';
+export { ReportFailedFields, ReportingStore, ReportProcessingFields } from './report_store';
+export { SchedulingStore } from './schedule_store';

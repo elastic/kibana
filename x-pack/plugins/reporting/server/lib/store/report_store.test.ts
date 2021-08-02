@@ -15,7 +15,7 @@ import {
   createMockReportingCore,
 } from '../../test_helpers';
 import { Report, ReportDocument } from './report';
-import { ReportingStore } from './store';
+import { ReportingStore } from './report_store';
 
 const { createApiResponse } = elasticsearchServiceMock;
 

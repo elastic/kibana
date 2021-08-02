@@ -20,8 +20,13 @@ import { CancellationToken } from '../../../common';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { BasePayload, RunTaskFn } from '../../types';
-import { Report, ReportDocument, ReportingStore } from '../store';
-import { ReportFailedFields, ReportProcessingFields } from '../store/store';
+import {
+  Report,
+  ReportDocument,
+  ReportFailedFields,
+  ReportingStore,
+  ReportProcessingFields,
+} from '../store';
 import {
   ReportingTask,
   ReportingTaskStatus,
@@ -96,9 +101,9 @@ export class ExecuteReportTask implements ReportingTask {
     if (this.store) {
       return this.store;
     }
-    const { store } = await this.reporting.getPluginStartDeps();
-    this.store = store;
-    return store;
+    const { reportStore } = await this.reporting.getPluginStartDeps();
+    this.store = reportStore;
+    return reportStore;
   }
 
   private getTaskManagerStart() {

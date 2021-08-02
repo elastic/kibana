@@ -42,9 +42,9 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
-    const [createJob, store] = await Promise.all([
+    const [createJob, [store]] = await Promise.all([
       exportType.createJobFnFactory(reporting, logger.clone([exportType.id])),
-      reporting.getStore(),
+      reporting.getStores(),
     ]);
 
     jobParams.version = checkParamsVersion(jobParams, logger);

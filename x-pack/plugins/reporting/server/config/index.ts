@@ -9,6 +9,7 @@ import { PluginConfigDescriptor } from 'kibana/server';
 import { get } from 'lodash';
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
+export { ScheduleIntervalSchema, ScheduleIntervalSchemaType } from './scheduling';
 export { registerUiSettings } from './ui_settings';
 export { ConfigSchema, ReportingConfigType };
 

@@ -56,9 +56,9 @@ export class MonitorReportsTask implements ReportingTask {
     if (this.store) {
       return this.store;
     }
-    const { store } = await this.reporting.getPluginStartDeps();
-    this.store = store;
-    return store;
+    const { reportStore } = await this.reporting.getPluginStartDeps();
+    this.store = reportStore;
+    return reportStore;
   }
 
   public async init(taskManager: TaskManagerStartContract) {

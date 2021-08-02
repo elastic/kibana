@@ -50,14 +50,16 @@ describe('Enqueue Job', () => {
     });
     mockReporting = await createMockReportingCore(createMockConfigSchema());
     mockReporting.getExportTypesRegistry = () => mockExportTypesRegistry;
-    mockReporting.getStore = () =>
-      Promise.resolve(({
-        addReport: jest
-          .fn()
-          .mockImplementation(
-            (report) => new Report({ ...report, _index: '.reporting-foo-index-234' })
-          ),
-      } as unknown) as ReportingStore);
+    mockReporting.getStores = () =>
+      Promise.resolve(([
+        {
+          addReport: jest
+            .fn()
+            .mockImplementation(
+              (report) => new Report({ ...report, _index: '.reporting-foo-index-234' })
+            ),
+        },
+      ] as unknown) as [ReportingStore, any]);
 
     const scheduleMock = jest.fn().mockImplementation(() => ({
       id: '123-great-id',

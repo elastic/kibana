@@ -22,7 +22,7 @@ export const checkIlmMigrationStatus = async ({
     return 'policy-not-found';
   }
 
-  const store = await reportingCore.getStore();
+  const [store] = await reportingCore.getStores();
   const indexPattern = store.getReportingIndexPattern();
 
   const { body: reportingIndicesSettings } = await elasticsearchClient.indices.getSettings({

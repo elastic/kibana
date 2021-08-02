@@ -30,7 +30,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         core: { elasticsearch },
       } = ctx;
 
-      const store = await reporting.getStore();
+      const [store] = await reporting.getStores();
 
       try {
         const { body } = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
@@ -96,7 +96,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   router.put(
     { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
     authzWrapper(async ({ core: { elasticsearch } }, req, res) => {
-      const store = await reporting.getStore();
+      const [store] = await reporting.getStores();
       const {
         client: { asCurrentUser: client },
       } = elasticsearch;

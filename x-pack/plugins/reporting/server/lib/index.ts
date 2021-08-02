@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { ReportingUser } from '../types';
+
 export { checkLicense } from './check_license';
 export { checkParamsVersion } from './check_params_version';
 export { cryptoFactory } from './crypto';
 export { ExportTypesRegistry, getExportTypesRegistry } from './export_types_registry';
 export { LevelLogger } from './level_logger';
 export { statuses } from './statuses';
-export { ReportingStore, IlmPolicyManager } from './store';
+export { IlmPolicyManager, ReportingStore, SchedulingStore } from './store';
 export { startTrace } from './trace';
+
+export const getUsername = (user: ReportingUser) => (user ? user.username : false);

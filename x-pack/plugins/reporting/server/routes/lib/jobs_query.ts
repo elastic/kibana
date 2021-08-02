@@ -11,8 +11,9 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
-import { ReportingCore } from '../../';
+import { ReportingCore } from '../..';
 import { JobContent, ReportApiJSON, ReportDocument, ReportSource } from '../../../common/types';
+import { getUsername } from '../../lib';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
@@ -20,7 +21,6 @@ import { ReportingUser } from '../../types';
 type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
 
 const defaultSize = 10;
-const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
 function getSearchBody(body: SearchRequest['body']): SearchRequest['body'] {
   return {
@@ -37,7 +37,7 @@ export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> 
   payload?: Pick<ReportSource['payload'], 'title'>;
 };
 
-interface JobsQueryFactory {
+export interface JobsQueryFactory {
   list(
     jobTypes: string[],
     user: ReportingUser,
@@ -64,7 +64,6 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
   ): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
-
       return await callback(client);
     } catch (error) {
       if (error instanceof ResponseError && [401, 403, 404].includes(error.statusCode)) {

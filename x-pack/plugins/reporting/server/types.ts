@@ -115,3 +115,5 @@ export interface ReportingRequestHandlerContext {
  * @internal
  */
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
+
+export { ScheduleIntervalSchemaType } from './config';

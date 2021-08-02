@@ -30,7 +30,7 @@ import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factor
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
-import { ReportingStore } from './lib/store';
+import { ReportingStore, SchedulingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter } from './types';
 
@@ -48,7 +48,8 @@ export interface ReportingInternalSetup {
 
 export interface ReportingInternalStart {
   browserDriverFactory: HeadlessChromiumDriverFactory;
-  store: ReportingStore;
+  reportStore: ReportingStore;
+  scheduleStore: SchedulingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
@@ -223,8 +224,9 @@ export class ReportingCore {
     return await this.executeTask.scheduleTask(report);
   }
 
-  public async getStore() {
-    return (await this.getPluginStartDeps()).store;
+  public async getStores(): Promise<[ReportingStore, SchedulingStore]> {
+    const deps = await this.getPluginStartDeps();
+    return [deps.reportStore, deps.scheduleStore];
   }
 
   public async getLicenseInfo() {
@@ -258,9 +260,9 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
+  public async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
+    return savedObjects.getScopedClient(request);
   }
 
   public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
@@ -270,7 +272,7 @@ export class ReportingCore {
   }
 
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService; // FIXME: 'spacesService' is deprecated
     if (spacesService) {
       const spaceId = spacesService?.getSpaceId(request);
 

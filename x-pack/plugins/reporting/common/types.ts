@@ -98,6 +98,7 @@ export interface ReportDocument extends ReportDocumentHead {
 
 export interface BaseParams {
   layout?: LayoutParams;
+  forceNow?: string;
   objectType: string;
   title: string;
   browserTimezone: string; // to format dates in the user's time zone

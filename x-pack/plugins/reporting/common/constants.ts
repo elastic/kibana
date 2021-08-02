@@ -83,6 +83,9 @@ export const LICENSE_TYPE_GOLD = 'gold';
 export const LICENSE_TYPE_PLATINUM = 'platinum';
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise';
 
+// Scheduled reports
+export const SCHEDULED_REPORTS_SAVED_OBJECT_TYPE = 'scheduled-report';
+
 // Routes
 export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
 export const API_BASE_GENERATE = `${API_BASE_URL}/generate`;

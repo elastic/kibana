@@ -9,16 +9,13 @@ import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/api/types'
 import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
-import { JobStatus } from '../../../common/types';
-
 import { ILM_POLICY_NAME } from '../../../common/constants';
-
+import { JobStatus } from '../../../common/types';
 import { ReportTaskParams } from '../tasks';
-
-import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
+import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
-import { IlmPolicyManager } from './ilm_policy_manager';
+import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
 
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance
@@ -103,7 +100,7 @@ export class ReportingStore {
 
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
-    this.logger = logger.clone(['store']);
+    this.logger = logger.clone(['report_store']);
   }
 
   private async getClient() {

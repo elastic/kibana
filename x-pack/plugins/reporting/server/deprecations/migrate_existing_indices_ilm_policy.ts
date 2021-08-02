@@ -19,7 +19,7 @@ export const getDeprecationsInfo = async (
   { esClient }: GetDeprecationsContext,
   { reportingCore }: ExtraDependencies
 ): Promise<DeprecationsDetails[]> => {
-  const store = await reportingCore.getStore();
+  const [store] = await reportingCore.getStores();
   const indexPattern = store.getReportingIndexPattern();
 
   const migrationStatus = await deprecations.checkIlmMigrationStatus({

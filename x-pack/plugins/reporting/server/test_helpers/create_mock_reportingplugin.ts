@@ -55,7 +55,7 @@ export const createMockPluginStart = (
   mockReportingCore: ReportingCore | undefined,
   startMock?: any
 ): ReportingInternalStart => {
-  const store = mockReportingCore
+  const reportStore = mockReportingCore
     ? new ReportingStore(mockReportingCore, logger)
     : createMockReportingStore();
 
@@ -65,7 +65,7 @@ export const createMockPluginStart = (
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
     data: startMock.data || dataPluginMock.createStartContract(),
-    store,
+    reportStore,
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
       ensureScheduled: jest.fn(),

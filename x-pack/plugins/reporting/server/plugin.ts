@@ -11,9 +11,9 @@ import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { LevelLogger, ReportingStore } from './lib';
+import { LevelLogger, ReportingStore, SchedulingStore } from './lib';
 import { registerRoutes } from './routes';
-import { setFieldFormats } from './services';
+import { setFieldFormats, setupScheduledReportSavedObjects } from './services';
 import type {
   ReportingRequestHandlerContext,
   ReportingSetup,
@@ -46,6 +46,8 @@ export class ReportingPlugin
       }
     });
 
+    setupScheduledReportSavedObjects(core.savedObjects); // register scheduled report saved object
+
     const { http } = core;
     const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
 
@@ -65,10 +67,7 @@ export class ReportingPlugin
     });
 
     registerUiSettings(core);
-    registerDeprecations({
-      core,
-      reportingCore,
-    });
+    registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins);
     registerRoutes(reportingCore, this.logger);
 
@@ -98,13 +97,15 @@ export class ReportingPlugin
       await reportingCore.pluginSetsUp();
 
       const browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
-      const store = new ReportingStore(reportingCore, this.logger);
+      const reportStore = new ReportingStore(reportingCore, this.logger);
+      const scheduleStore = new SchedulingStore(reportingCore, this.logger);
 
       await reportingCore.pluginStart({
         browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
-        store,
+        reportStore,
+        scheduleStore,
         esClient: core.elasticsearch.client,
         data: plugins.data,
         taskManager: plugins.taskManager,
@@ -112,7 +113,7 @@ export class ReportingPlugin
       });
 
       // Note: this must be called after ReportingCore.pluginStart
-      await store.start();
+      await reportStore.start();
 
       this.logger.debug('Start complete');
     })().catch((e) => {
