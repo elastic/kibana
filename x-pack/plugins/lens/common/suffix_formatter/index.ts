@@ -31,6 +31,7 @@ export const unitSuffixesLong: Record<TimeScaleUnit, string> = {
 export function getSuffixFormatter(formatFactory: FormatFactory): FieldFormatInstanceType {
   return class SuffixFormatter extends FieldFormat {
     static id = 'suffix';
+    static hidden = true; // Don't want this format to appear in index pattern editor
     static title = i18n.translate('xpack.lens.fieldFormats.suffix.title', {
       defaultMessage: 'Suffix',
     });

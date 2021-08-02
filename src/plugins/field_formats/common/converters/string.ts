@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import escape from 'lodash/escape';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS, HtmlContextTypeConvert } from '../types';
@@ -94,7 +94,9 @@ export class StringFormat extends FieldFormat {
 
   private base64Decode(val: string) {
     try {
-      return Buffer.from(val, 'base64').toString('utf8');
+      if (window && window.atob) return window.atob(val);
+      // referencing from `global` tricks webpack to not include `Buffer` polyfill into this bundle
+      return global.Buffer.from(val, 'base64').toString('utf8');
     } catch (e) {
       return asPrettyString(val);
     }
