@@ -76,6 +76,27 @@ describe('FieldFormatsRegistry', () => {
       expect(registeredFieldFormatters.get(StringFormat.id)).toBe(StringFormat);
       expect(registeredFieldFormatters.get(PercentFormat.id)).toBeUndefined();
     });
+
+    test('should throw if registering a formatter with existing id ', () => {
+      fieldFormatsRegistry.register([BoolFormat]);
+
+      expect(() => fieldFormatsRegistry.register([BoolFormat])).toThrowErrorMatchingInlineSnapshot(
+        `"Failed to register field format with id \\"boolean\\" as it already has been registered"`
+      );
+    });
+  });
+
+  describe('has', () => {
+    test('should provide an public "has" method', () => {
+      expect(fieldFormatsRegistry.has).toBeDefined();
+      expect(typeof fieldFormatsRegistry.has).toBe('function');
+    });
+
+    test('should check if field format registered', () => {
+      fieldFormatsRegistry.register([StringFormat]);
+      expect(fieldFormatsRegistry.has(StringFormat.id)).toBe(true);
+      expect(fieldFormatsRegistry.has(BoolFormat.id)).toBe(false);
+    });
   });
 
   describe('getType', () => {

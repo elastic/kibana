@@ -23,7 +23,6 @@ import {
 import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   ActionProps,
   CellValueElementProps,
