@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { Ast } from '@kbn/interpreter/common';
 import {
   ExpressionAstExpression,
   ExpressionValue,
@@ -19,8 +20,9 @@ import { ArgType, Arg, ArgTypeDef } from '../../expression_types/types';
 import { AssetType, CanvasElement, ExpressionContext } from '../../../types';
 
 interface FunctionFormProps {
+  name: string;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Arg[];
+  args: Record<string, Array<string | Ast>>;
   argType: ArgType;
   argTypeDef: ArgTypeDef;
   filterGroups: string[];

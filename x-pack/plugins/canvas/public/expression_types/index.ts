@@ -11,7 +11,8 @@ export { datasourceRegistry } from './datasource_registry';
 export { Transform } from './transform';
 export { transformRegistry } from './transform_registry';
 
-export { Model, modelRegistry } from './model';
+export { Model } from './model';
+export { modelRegistry } from './model_registry';
 
 export { View } from './view';
 export { viewRegistry } from './view_registry';

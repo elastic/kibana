@@ -8,3 +8,9 @@
 import { View, Model, Transform, Datasource } from '../../expression_types/types';
 
 export type ExpressionType = View | Model | Transform | Datasource;
+
+export interface ExpressionContext {
+  state: 'ready' | 'pending' | 'error';
+  value: ExpressionType;
+  error: null | string;
+}

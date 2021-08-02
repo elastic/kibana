@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Ast } from '@kbn/interpreter/common';
 import {
   ExpressionAstExpression,
   ExpressionValue,
@@ -33,11 +34,13 @@ import { getAssets } from '../../state/selectors/assets';
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
 import { Arg, ArgType, ArgTypeDef } from '../../expression_types/types';
-import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
+import { State, CanvasElement, AssetType } from '../../../types';
+import { ExpressionContext } from './types';
 
 interface FunctionFormProps {
+  name: string;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Arg[];
+  args: Record<string, Array<string | Ast>>;
   argType: ArgType;
   argTypeDef: ArgTypeDef;
   expressionIndex: number;

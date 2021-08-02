@@ -25,6 +25,7 @@ type TemplateFn = (
 export type DatasourceProps = {
   template?: TemplateFn;
   image?: string;
+  requiresContext?: boolean;
 } & BaseFormProps;
 
 interface DatasourceWrapperProps {
@@ -67,6 +68,7 @@ const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (prop
 export class Datasource extends BaseForm {
   template: TemplateFn | React.FC;
   image?: string;
+  requiresContext?: boolean = false;
 
   constructor(props: DatasourceProps) {
     super(props);

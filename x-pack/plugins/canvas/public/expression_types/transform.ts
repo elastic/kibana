@@ -10,6 +10,8 @@ import { FunctionForm, FunctionFormProps } from './function_form';
 export type TransformProps = { requiresContext: boolean } & FunctionFormProps;
 
 export class Transform extends FunctionForm {
+  requiresContext?: boolean;
+
   constructor(props: TransformProps) {
     super(props);
     const { requiresContext } = props;
