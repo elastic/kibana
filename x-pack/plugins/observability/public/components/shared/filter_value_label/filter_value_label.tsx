@@ -28,7 +28,7 @@ export function buildFilterLabel({
   const filter =
     value instanceof Array && value.length > 1
       ? esFilters.buildPhrasesFilter(indexField, value, indexPattern)
-      : esFilters.buildPhraseFilter(indexField, value, indexPattern);
+      : esFilters.buildPhraseFilter(indexField, value as string, indexPattern);
 
   filter.meta.type = value instanceof Array && value.length > 1 ? 'phrases' : 'phrase';
 
