@@ -74,3 +74,30 @@ export interface CrawlerDomainValidationResultFromServer {
     comment: string;
   }>;
 }
+
+export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'invalid';
+
+export interface CrawlerDomainValidationStep {
+  state: CrawlerDomainValidationStepState;
+  blockingFailure?: boolean;
+  message?: string;
+}
+
+interface CrawlerDomainValidationState {
+  initialValidation: CrawlerDomainValidationStep;
+  networkConnectivity: CrawlerDomainValidationStep;
+  indexingRestrictions: CrawlerDomainValidationStep;
+  contentVerification: CrawlerDomainValidationStep;
+}
+
+export interface CrawlerDomainValidationResult {
+  steps: CrawlerDomainValidationState;
+}
+
+export type CrawlerDomainValidationResultChange = Partial<CrawlerDomainValidationState>;
+
+export type CrawlerDomainValidationStepName =
+  | 'initialValidation'
+  | 'networkConnectivity'
+  | 'indexingRestrictions'
+  | 'contentVerification';
