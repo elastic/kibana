@@ -15,12 +15,23 @@ import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_object
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 
-export async function createStaticIndexPattern(
-  setup: Setup,
-  config: APMRouteHandlerResources['config'],
-  savedObjectsClient: InternalSavedObjectsClient,
-  spaceId: string | undefined
-): Promise<boolean> {
+type ApmIndexPatternAttributes = typeof apmIndexPattern.attributes & {
+  title: string;
+};
+
+export async function createStaticIndexPattern({
+  setup,
+  config,
+  savedObjectsClient,
+  spaceId,
+  overwrite = false,
+}: {
+  setup: Setup;
+  config: APMRouteHandlerResources['config'];
+  savedObjectsClient: InternalSavedObjectsClient;
+  spaceId?: string;
+  overwrite?: boolean;
+}): Promise<boolean> {
   return withApmSpan('create_static_index_pattern', async () => {
     // don't autocreate APM index pattern if it's been disabled via the config
     if (!config['xpack.apm.autocreateApmIndexPattern']) {
@@ -34,8 +45,31 @@ export async function createStaticIndexPattern(
       return false;
     }
 
+    const apmIndexPatternTitle = getApmIndexPatternTitle(config);
+
+    if (!overwrite) {
+      try {
+        const {
+          attributes: { title: existingApmIndexPatternTitle },
+        }: {
+          attributes: ApmIndexPatternAttributes;
+        } = await savedObjectsClient.get(
+          'index-pattern',
+          APM_STATIC_INDEX_PATTERN_ID
+        );
+        // if the existing index pattern does not matches the new one, force an update
+        if (existingApmIndexPatternTitle !== apmIndexPatternTitle) {
+          overwrite = true;
+        }
+      } catch (e) {
+        // if the index pattern (saved object) is not found, then we can continue with creation
+        if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+          throw e;
+        }
+      }
+    }
+
     try {
-      const apmIndexPatternTitle = getApmIndexPatternTitle(config);
       await withApmSpan('create_index_pattern_saved_object', () =>
         savedObjectsClient.create(
           'index-pattern',
@@ -45,7 +79,7 @@ export async function createStaticIndexPattern(
           },
           {
             id: APM_STATIC_INDEX_PATTERN_ID,
-            overwrite: false,
+            overwrite,
             namespace: spaceId,
           }
         )

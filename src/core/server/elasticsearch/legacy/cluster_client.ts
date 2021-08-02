@@ -147,6 +147,13 @@ export class LegacyClusterClient implements ILegacyClusterClient {
   ) => {
     this.assertIsNotClosed();
 
+    if (this.config.serviceAccountToken) {
+      clientParams.headers = {
+        ...clientParams.headers,
+        authorization: `Bearer ${this.config.serviceAccountToken}`,
+      };
+    }
+
     return await (callAPI.bind(null, this.client) as LegacyAPICaller)(
       endpoint,
       clientParams,

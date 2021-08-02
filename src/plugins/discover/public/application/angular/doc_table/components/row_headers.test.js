@@ -19,6 +19,7 @@ import { setScopedHistory, setServices, setDocViewsRegistry } from '../../../../
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
+import { initAngularBootstrap } from '../../../../../../kibana_legacy/public/angular_bootstrap';
 import { getInnerAngularModule } from '../../get_inner_angular';
 import { createBrowserHistory } from 'history';
 
@@ -41,6 +42,9 @@ describe('Doc Table', () => {
   // Stub out a minimal mapping of 4 fields
   let mapping;
 
+  beforeAll(async () => {
+    await initAngularBootstrap();
+  });
   beforeAll(() => setScopedHistory(createBrowserHistory()));
   beforeEach(() => {
     angular.element.prototype.slice = jest.fn(function (index) {

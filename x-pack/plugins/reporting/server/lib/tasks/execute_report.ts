@@ -135,9 +135,8 @@ export class ExecuteReportTask implements ReportingTask {
 
     const m = moment();
 
-    // check if job has exceeded maxAttempts (stored in job params) and somehow hasn't been marked as failed yet
-    // NOTE: the max attempts value comes from the stored document, so changing the capture.maxAttempts config setting does not affect existing pending reports
-    const maxAttempts = task.max_attempts;
+    // check if job has exceeded the configured maxAttempts
+    const maxAttempts = this.config.capture.maxAttempts;
     if (report.attempts >= maxAttempts) {
       const err = new Error(`Max attempts reached (${maxAttempts}). Queue timeout reached.`);
       await this._failJob(report, err);
@@ -153,6 +152,7 @@ export class ExecuteReportTask implements ReportingTask {
       kibana_name: this.kibanaName,
       browser_type: this.config.capture.browser.type,
       attempts: report.attempts + 1,
+      max_attempts: maxAttempts,
       started_at: startTime,
       timeout: queueTimeout,
       process_expiration: expirationTime,
@@ -195,7 +195,7 @@ export class ExecuteReportTask implements ReportingTask {
     const completedTime = moment().toISOString();
     const doc: ReportFailedFields = {
       completed_at: completedTime,
-      output: docOutput,
+      output: docOutput ?? null,
     };
 
     return await store.setReportFailed(report, doc);
@@ -306,11 +306,14 @@ export class ExecuteReportTask implements ReportingTask {
           }
 
           if (!report) {
+            this.reporting.untrackReport(jobId);
             errorLogger(this.logger, `Job ${jobId} could not be claimed. Exiting...`);
             return;
           }
 
-          const { jobtype: jobType, attempts, max_attempts: maxAttempts } = report;
+          const { jobtype: jobType, attempts } = report;
+          const maxAttempts = this.config.capture.maxAttempts;
+
           this.logger.debug(
             `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
           );

@@ -213,6 +213,7 @@ export class Execution<
       },
       isSyncColorsEnabled: () => execution.params.syncColors,
       ...(execution.params as any).extraContext,
+      getExecutionContext: () => execution.params.executionContext,
     };
 
     this.result = this.input$.pipe(
@@ -280,12 +281,17 @@ export class Execution<
    * because in legacy interpreter it was set to `null` by default.
    */
   public start(
-    input: Input = null as any
+    input: Input = null as any,
+    isSubExpression?: boolean
   ): Observable<ExecutionResult<Output | ExpressionValueError>> {
     if (this.hasStarted) throw new Error('Execution already started.');
     this.hasStarted = true;
     this.input = input;
     this.state.transitions.start();
+
+    if (!isSubExpression) {
+      this.context.inspectorAdapters.requests?.reset();
+    }
 
     if (isObservable<Input>(input)) {
       input.subscribe(this.input$);
@@ -534,7 +540,7 @@ export class Execution<
         );
         this.childExecutions.push(execution);
 
-        return execution.start(input);
+        return execution.start(input, true);
       case 'string':
       case 'number':
       case 'null':

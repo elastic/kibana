@@ -18,6 +18,7 @@ const simulationPackage = 'org.kibanaLoadTest.simulation';
 const simulationFIleExtension = '.scala';
 const gatlingProjectRootPath: string =
   process.env.GATLING_PROJECT_PATH || resolve(REPO_ROOT, '../kibana-load-testing');
+const puppeteerProjectRootPath: string = resolve(gatlingProjectRootPath, 'puppeteer');
 const simulationEntry: string = process.env.GATLING_SIMULATIONS || 'branch.DemoJourney';
 
 if (!Fs.existsSync(gatlingProjectRootPath)) {
@@ -52,6 +53,15 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
+    await procs.run('node build/index.js', {
+      cmd: 'node',
+      args: ['build/index.js'],
+      cwd: puppeteerProjectRootPath,
+      env: {
+        ...process.env,
+      },
+      wait: true,
+    });
     for (let i = 0; i < simulationClasses.length; i++) {
       await procs.run('gatling: test', {
         cmd: 'mvn',

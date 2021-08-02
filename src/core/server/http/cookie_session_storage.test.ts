@@ -18,6 +18,7 @@ import { KibanaRequest } from './router';
 import { Env } from '../config';
 
 import { contextServiceMock } from '../context/context_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { httpServerMock } from './http_server.mocks';
@@ -34,6 +35,7 @@ const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 
 configService.atPath.mockImplementation((path) => {

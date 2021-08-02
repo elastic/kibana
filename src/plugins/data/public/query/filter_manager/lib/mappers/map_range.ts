@@ -7,14 +7,9 @@
  */
 
 import { get, hasIn } from 'lodash';
-import {
-  FilterValueFormatter,
-  RangeFilter,
-  isScriptedRangeFilter,
-  isRangeFilter,
-  Filter,
-  FILTERS,
-} from '../../../../../common';
+import { RangeFilter, isScriptedRangeFilter, isRangeFilter, Filter, FILTERS } from '@kbn/es-query';
+
+import { FilterValueFormatter } from '../../../../../common';
 
 const getFormattedValueFn = (left: any, right: any) => {
   return (formatter?: FilterValueFormatter) => {

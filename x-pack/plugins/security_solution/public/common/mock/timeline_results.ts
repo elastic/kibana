@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
+import { FilterStateStore } from '../../../../../../src/plugins/data/common';
 
 import {
   TimelineId,

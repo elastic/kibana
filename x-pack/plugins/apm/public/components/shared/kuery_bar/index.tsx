@@ -8,14 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   esKuery,
-  IIndexPattern,
+  IndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
@@ -28,16 +29,17 @@ interface State {
   isLoadingSuggestions: boolean;
 }
 
-function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
+function convertKueryToEsQuery(kuery: string, indexPattern: IndexPattern) {
   const ast = esKuery.fromKueryExpression(kuery);
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
 export function KueryBar(props: { prepend?: React.ReactNode | string }) {
-  const { groupId, serviceName } = useParams<{
-    groupId?: string;
-    serviceName?: string;
-  }>();
+  const { path } = useApmParams('/*');
+
+  const serviceName = 'serviceName' in path ? path.serviceName : undefined;
+  const groupId = 'groupId' in path ? path.groupId : undefined;
+
   const history = useHistory();
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -101,6 +103,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
           selectionStart,
           selectionEnd: selectionStart,
           useTimeRange: true,
+          method: 'terms_agg',
         })) || []
       )
         .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
@@ -122,7 +125,10 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
     }
 
     try {
-      const res = convertKueryToEsQuery(inputValue, indexPattern);
+      const res = convertKueryToEsQuery(
+        inputValue,
+        indexPattern as IndexPattern
+      );
       if (!res) {
         return;
       }

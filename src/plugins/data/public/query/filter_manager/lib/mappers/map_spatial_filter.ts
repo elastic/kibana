@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FILTERS } from '../../../../../common';
+import { Filter, FILTERS } from '@kbn/es-query';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
 export const mapSpatialFilter = (filter: Filter) => {

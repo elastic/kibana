@@ -22,12 +22,8 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
-
-interface Props {
-  serviceName: string;
-}
 
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 const INITIAL_STATE = {
@@ -45,7 +41,7 @@ const DEFAULT_SORT = {
   field: 'impact' as const,
 };
 
-export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
+export function ServiceOverviewTransactionsTable() {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -60,7 +56,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
 
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
   const {
     urlParams: {
       start,
@@ -230,7 +226,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       <EuiFlexItem>
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
-            <ServiceOverviewTableContainer
+            <OverviewTableContainer
               isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable
@@ -256,7 +252,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
                   });
                 }}
               />
-            </ServiceOverviewTableContainer>
+            </OverviewTableContainer>
           </TableFetchWrapper>
         </EuiFlexItem>
       </EuiFlexItem>

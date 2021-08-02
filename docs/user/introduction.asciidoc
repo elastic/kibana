@@ -59,7 +59,7 @@ and everything you need to visualize and analyze your data.
 
 To access all of {kib} features, use the main menu.
 Open this menu by clicking the
-menu icon. To keep the main menu visible at all times, click *Dock navigation*.
+menu icon.
 For a quick reference of all {kib} features, refer to <<whats-the-right-app,What’s the right app for you?>>
 
 [role="screenshot"]
@@ -81,10 +81,6 @@ that it ran in, trace the transaction, and check the overall service availabilit
 * Designed for security analysts, {security-guide}/es-overview.html[*Elastic Security*] provides an overview of
 the events and alerts from your environment.  Elastic Security helps you defend
 your organization from threats before damage and loss occur.
-+
-[role="screenshot"]
-image::siem/images/detections-ui.png[Detections view in Elastic Security]
-
 
 [float]
 [[visualize-and-analyze]]
@@ -165,7 +161,7 @@ guided processes for administering all things Elastic Stack,
 including data, indices, clusters, alerts, and security.
 
 [role="screenshot"]
-image::images/intro-management.png[Index Management view in Stack Management]
+image::images/stack-management.png[Index Management view in Stack Management]
 
 [float]
 ==== Manage your data, indices, and clusters
@@ -206,7 +202,7 @@ image::images/rules-and-connectors.png[Rules and Connectors view]
 === Organize your work in spaces
 
 Want to share {kib}’s goodness with other people or teams without overwhelming them? You can do so
-with <<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and indices.
+with <<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and index patterns.
 Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
 so you can tailor it to your specific needs without impacting others.
 
@@ -234,15 +230,15 @@ For example, roles with no access to an app will not have access to its alerts.
 ==== Control feature visibility
 
 You can take spaces one step further and control which features are visible
-within each space. For example, you might hide **Dev Tools** in your "Executive"
-space or show **Stack Monitoring** only in your "Admin" space.
+within each space. For example, you might hide **Dev Tools** in your "Marketing"
+space or show **Stack Monitoring** only in your "Engineering" space.
 
 Controlling feature visibility is not a security feature. To secure access
 to specific features on a per-user basis, you must configure
 <<xpack-security-authorization,{kib} Security>>.
 
 [role="screenshot"]
-image::images/features-control.png[Features Controls view]
+image::spaces/images/edit-space-feature-visibility.png[Features Controls view]
 
 [float]
 [[intro-kibana-Security]]
@@ -260,7 +256,7 @@ see <<security-settings-kb,Security settings in {kib}>>.
 allowing you to login using {es}’s built-in realms, or by your own single sign-on provider.
 
 [role="screenshot"]
-image::images/login-screen.png[Login page]
+image::security/images/kibana-login.png[Login page]
 
 [float]
 ==== Secure access
@@ -281,7 +277,7 @@ while analysts or executives might have *Dashboard* and *Canvas* with read-only 
 levels, or you can automate role creation via our <<role-management-api,API>>.
 
 [role="screenshot"]
-image::images/roles-and-privileges.png[{kib privileges}]
+image::spaces/images/spaces-roles.png[{kib privileges}]
 
 [float]
 ==== Audit access
@@ -429,7 +425,7 @@ the <<get-started,{kib} Quick start>>.
 |<<xpack-graph, Graph>>
 
 |Share your data
-|<<dashboard, Dashboard>>, <<canvas, Canvas>>
+|<<dashboard, Dashboard>>, <<canvas, Canvas>>, <<discover,Discover>>
 
 2+|*Administer your Kibana instance*
 

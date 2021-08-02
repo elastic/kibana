@@ -28,6 +28,7 @@ export const tutorialProvider = ({
   indexPatternTitle,
   indices,
   cloud,
+  isFleetPluginEnabled,
 }: {
   isEnabled: boolean;
   indexPatternTitle: string;
@@ -39,6 +40,7 @@ export const tutorialProvider = ({
     sourcemapIndices: string;
     onboardingIndices: string;
   };
+  isFleetPluginEnabled: boolean;
 }) => () => {
   const savedObjects = [
     {
@@ -104,7 +106,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     euiIconType: 'apmApp',
     artifacts,
     customStatusCheckName: 'apm_fleet_server_status_check',
-    onPrem: onPremInstructions(indices),
+    onPrem: onPremInstructions({ ...indices, isFleetPluginEnabled }),
     elasticCloud: createElasticCloudInstructions(cloud),
     previewImagePath: '/plugins/apm/assets/apm.png',
     savedObjects,

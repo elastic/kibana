@@ -10,11 +10,16 @@ import { take } from 'rxjs/operators';
 import { Logger } from '../logging';
 import { IConfigService } from '../config';
 import { CoreContext } from '../core_context';
-import { InternalHttpServiceSetup } from '../http';
+import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
+
+interface PrebootDeps {
+  http: InternalHttpServicePreboot;
+  pluginPaths: string[];
+}
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -45,7 +50,24 @@ export class I18nService {
     this.configService = coreContext.configService;
   }
 
+  public async preboot({ pluginPaths, http }: PrebootDeps) {
+    const { locale } = await this.initTranslations(pluginPaths);
+    http.registerRoutes('', (router) => registerRoutes({ router, locale }));
+  }
+
   public async setup({ pluginPaths, http }: SetupDeps): Promise<I18nServiceSetup> {
+    const { locale, translationFiles } = await this.initTranslations(pluginPaths);
+
+    const router = http.createRouter('');
+    registerRoutes({ router, locale });
+
+    return {
+      getLocale: () => locale,
+      getTranslationFiles: () => translationFiles,
+    };
+  }
+
+  private async initTranslations(pluginPaths: string[]) {
     const i18nConfig = await this.configService
       .atPath<I18nConfigType>(i18nConfigDef.path)
       .pipe(take(1))
@@ -59,12 +81,6 @@ export class I18nService {
     this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
     await initTranslations(locale, translationFiles);
 
-    const router = http.createRouter('');
-    registerRoutes({ router, locale });
-
-    return {
-      getLocale: () => locale,
-      getTranslationFiles: () => translationFiles,
-    };
+    return { locale, translationFiles };
   }
 }

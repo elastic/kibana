@@ -367,11 +367,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.rac.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
+            ],
             "kibana.rac.alert.producer": Array [
               "apm",
             ],
             "kibana.rac.alert.status": Array [
               "open",
+            ],
+            "kibana.space_ids": Array [
+              "default",
             ],
             "processor.event": Array [
               "transaction",
@@ -437,11 +443,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.rac.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
+            ],
             "kibana.rac.alert.producer": Array [
               "apm",
             ],
             "kibana.rac.alert.status": Array [
               "open",
+            ],
+            "kibana.space_ids": Array [
+              "default",
             ],
             "processor.event": Array [
               "transaction",
@@ -541,11 +553,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.rac.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
+            "kibana.rac.alert.owner": Array [
+              "apm",
+            ],
             "kibana.rac.alert.producer": Array [
               "apm",
             ],
             "kibana.rac.alert.status": Array [
               "closed",
+            ],
+            "kibana.space_ids": Array [
+              "default",
             ],
             "processor.event": Array [
               "transaction",

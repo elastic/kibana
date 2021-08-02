@@ -152,7 +152,7 @@ export const Layout = React.memo(
                           gutterSize="m"
                         >
                           <Toolbar nodeType={nodeType} currentTime={currentTime} />
-                          <EuiFlexItem grow={false}>
+                          <EuiFlexItem grow={false} className="eui-hideFor--s eui-hideFor--xs">
                             <IntervalLabel intervalAsString={intervalAsString} />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>

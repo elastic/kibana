@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(removeEmptyCoordinates(errorRate).length).to.be.greaterThan(0);
         expectSnapshot(errorRate).toMatch();
 
-        expectSnapshot(roundNumber(impact)).toMatchInline(`"93.93"`);
+        expectSnapshot(roundNumber(impact)).toMatchInline(`"45.25"`);
       });
 
       it('returns the correct data for latency aggregation 99th percentile', async () => {
@@ -280,8 +280,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const currentPeriodFirstItem = currentPeriodItems[0];
           const previousPeriodFirstItem = previousPeriodItems[0];
 
-          expectSnapshot(roundNumber(currentPeriodFirstItem.impact)).toMatchInline(`"21.75"`);
-          expectSnapshot(roundNumber(previousPeriodFirstItem.impact)).toMatchInline(`"96.94"`);
+          expectSnapshot(roundNumber(currentPeriodFirstItem.impact)).toMatchInline(`"41.24"`);
+          expectSnapshot(roundNumber(previousPeriodFirstItem.impact)).toMatchInline(`"51.40"`);
         });
       });
     }

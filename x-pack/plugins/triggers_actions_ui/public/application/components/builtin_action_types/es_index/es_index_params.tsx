@@ -43,6 +43,7 @@ export const IndexParamsFields = ({
     ALERT_HISTORY_PREFIX,
     ''
   );
+  const [isActionConnectorChanged, setIsActionConnectorChanged] = useState<boolean>(false);
 
   const getDocumentToIndex = (doc: Array<Record<string, any>> | undefined) =>
     doc && doc.length > 0 ? ((doc[0] as unknown) as string) : undefined;
@@ -67,11 +68,12 @@ export const IndexParamsFields = ({
       setUsePreconfiguredSchema(true);
       editAction('documents', [JSON.stringify(AlertHistoryDocumentTemplate)], index);
       setDocumentToIndex(JSON.stringify(AlertHistoryDocumentTemplate));
-    } else {
+    } else if (isActionConnectorChanged) {
       setUsePreconfiguredSchema(false);
       editAction('documents', undefined, index);
       setDocumentToIndex(undefined);
     }
+    setIsActionConnectorChanged(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector?.id]);
 

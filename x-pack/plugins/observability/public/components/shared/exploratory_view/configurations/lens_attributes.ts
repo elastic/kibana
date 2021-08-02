@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
+
 import {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -30,17 +31,17 @@ import {
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
-  FieldLabels,
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
   TERMS_COLUMN,
   REPORT_METRIC_FIELD,
   RECORDS_FIELD,
   RECORDS_PERCENTAGE_FIELD,
+  ReportTypes,
 } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
 import { PersistableFilter } from '../../../../../../lens/common';
-import { parseAbsoluteDate } from '../series_date_picker/date_range_picker';
+import { parseAbsoluteDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
 function getLayerReferenceName(layerId: string) {
@@ -74,14 +75,6 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
       timeScale = currField?.timeScale;
       columnLabel = currField?.label;
     }
-  } else if (metricOptions?.[0].field || metricOptions?.[0].id) {
-    const firstMetricOption = metricOptions?.[0];
-
-    selectedMetricField = firstMetricOption.field || firstMetricOption.id;
-    columnType = firstMetricOption.columnType;
-    columnFilters = firstMetricOption.columnFilters;
-    timeScale = firstMetricOption.timeScale;
-    columnLabel = firstMetricOption.label;
   }
 
   return { fieldName: selectedMetricField!, columnType, columnFilters, timeScale, columnLabel };
@@ -96,7 +89,9 @@ export interface LayerConfig {
   reportDefinitions: URLReportDefinition;
   time: { to: string; from: string };
   indexPattern: IndexPattern;
-  selectedMetricField?: string;
+  selectedMetricField: string;
+  color: string;
+  name: string;
 }
 
 export class LensAttributes {
@@ -125,17 +120,19 @@ export class LensAttributes {
   getBreakdownColumn({
     sourceField,
     layerId,
+    labels,
     indexPattern,
   }: {
     sourceField: string;
     layerId: string;
+    labels: Record<string, string>;
     indexPattern: IndexPattern;
   }): TermsIndexPatternColumn {
     const fieldMeta = indexPattern.getFieldByName(sourceField);
 
     return {
       sourceField,
-      label: `Top values of ${FieldLabels[sourceField]}`,
+      label: `Top values of ${labels[sourceField]}`,
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
@@ -304,6 +301,7 @@ export class LensAttributes {
         layerId,
         indexPattern: layerConfig.indexPattern,
         sourceField: layerConfig.breakdown || layerConfig.seriesConfig.breakdownFields[0],
+        labels: layerConfig.seriesConfig.labels,
       });
     }
 
@@ -344,7 +342,7 @@ export class LensAttributes {
 
     if (fieldName === RECORDS_FIELD || columnType === FILTER_RECORDS) {
       return this.getRecordsColumn(
-        columnLabel || label,
+        label || columnLabel,
         colIndex !== undefined ? columnFilters?.[colIndex] : undefined,
         timeScale
       );
@@ -433,6 +431,8 @@ export class LensAttributes {
     if (yAxisColumns.length === 1) {
       return lensColumns;
     }
+
+    // starting from 1 index since 0 column is used as main column
     for (let i = 1; i < yAxisColumns.length; i++) {
       const { sourceField, operationType, label } = yAxisColumns[i];
 
@@ -467,14 +467,15 @@ export class LensAttributes {
   getLayerFilters(layerConfig: LayerConfig, totalLayers: number) {
     const {
       filters,
-      time: { from, to },
+      time,
       seriesConfig: { baseFilters: layerFilters, reportType },
     } = layerConfig;
     let baseFilters = '';
-    if (reportType !== 'kpi-over-time' && totalLayers > 1) {
+
+    if (reportType !== ReportTypes.KPI && totalLayers > 1 && time) {
       // for kpi over time, we don't need to add time range filters
       // since those are essentially plotted along the x-axis
-      baseFilters += `@timestamp >= ${from} and @timestamp <= ${to}`;
+      baseFilters += `@timestamp >= ${time.from} and @timestamp <= ${time.to}`;
     }
 
     layerFilters?.forEach((filter: PersistableFilter | ExistsFilter) => {
@@ -530,7 +531,11 @@ export class LensAttributes {
   }
 
   getTimeShift(mainLayerConfig: LayerConfig, layerConfig: LayerConfig, index: number) {
-    if (index === 0 || mainLayerConfig.seriesConfig.reportType !== 'kpi-over-time') {
+    if (
+      index === 0 ||
+      mainLayerConfig.seriesConfig.reportType !== ReportTypes.KPI ||
+      !layerConfig.time
+    ) {
       return null;
     }
 
@@ -542,11 +547,14 @@ export class LensAttributes {
       time: { from },
     } = layerConfig;
 
-    const inDays = parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'days');
+    const inDays = Math.abs(parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'days'));
     if (inDays > 1) {
       return inDays + 'd';
     }
-    const inHours = parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'hours');
+    const inHours = Math.abs(parseAbsoluteDate(mainFrom).diff(parseAbsoluteDate(from), 'hours'));
+    if (inHours === 0) {
+      return null;
+    }
     return inHours + 'h';
   }
 
@@ -555,16 +563,27 @@ export class LensAttributes {
     const layerConfigs = this.layerConfigs;
 
     layerConfigs.forEach((layerConfig, index) => {
-      const { breakdown } = layerConfig;
+      const { breakdown, seriesConfig } = layerConfig;
 
       const layerId = `layer${index}`;
       const columnFilter = this.getLayerFilters(layerConfig, layerConfigs.length);
       const timeShift = this.getTimeShift(this.layerConfigs[0], layerConfig, index);
       const mainYAxis = this.getMainYAxis(layerConfig, layerId, columnFilter);
+
+      const { sourceField } = seriesConfig.xAxisColumn;
+
+      let label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;
+
+      if (layerConfig.seriesConfig.reportType !== ReportTypes.CORE_WEB_VITAL && layerConfig.name) {
+        label = layerConfig.name;
+      }
+
       layers[layerId] = {
         columnOrder: [
           `x-axis-column-${layerId}`,
-          ...(breakdown ? [`breakdown-column-${layerId}`] : []),
+          ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN
+            ? [`breakdown-column-${layerId}`]
+            : []),
           `y-axis-column-${layerId}`,
           ...Object.keys(this.getChildYAxises(layerConfig, layerId, columnFilter)),
         ],
@@ -572,17 +591,18 @@ export class LensAttributes {
           [`x-axis-column-${layerId}`]: this.getXAxis(layerConfig, layerId),
           [`y-axis-column-${layerId}`]: {
             ...mainYAxis,
-            label: timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label,
+            label,
             filter: { query: columnFilter, language: 'kuery' },
             ...(timeShift ? { timeShift } : {}),
           },
-          ...(breakdown && breakdown !== USE_BREAK_DOWN_COLUMN
+          ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN
             ? // do nothing since this will be used a x axis source
               {
                 [`breakdown-column-${layerId}`]: this.getBreakdownColumn({
                   layerId,
                   sourceField: breakdown,
                   indexPattern: layerConfig.indexPattern,
+                  labels: layerConfig.seriesConfig.labels,
                 }),
               }
             : {}),
@@ -614,10 +634,13 @@ export class LensAttributes {
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
         palette: layerConfig.seriesConfig.palette,
         yConfig: layerConfig.seriesConfig.yConfig || [
-          { forAccessor: `y-axis-column-layer${index}` },
+          { forAccessor: `y-axis-column-layer${index}`, color: layerConfig.color },
         ],
         xAccessor: `x-axis-column-layer${index}`,
-        ...(layerConfig.breakdown ? { splitAccessor: `breakdown-column-layer${index}` } : {}),
+        ...(layerConfig.breakdown &&
+        layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
+          ? { splitAccessor: `breakdown-column-layer${index}` }
+          : {}),
       })),
       ...(this.layerConfigs[0].seriesConfig.yTitle
         ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
@@ -625,7 +648,7 @@ export class LensAttributes {
     };
   }
 
-  getJSON(): TypedLensByValueInput['attributes'] {
+  getJSON(refresh?: number): TypedLensByValueInput['attributes'] {
     const uniqueIndexPatternsIds = Array.from(
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );
@@ -634,7 +657,7 @@ export class LensAttributes {
 
     return {
       title: 'Prefilled from exploratory view app',
-      description: '',
+      description: String(refresh),
       visualizationType: 'lnsXY',
       references: [
         ...uniqueIndexPatternsIds.map((patternId) => ({

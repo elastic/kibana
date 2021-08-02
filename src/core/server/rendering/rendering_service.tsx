@@ -16,100 +16,130 @@ import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
   IRenderOptions,
+  RenderingPrebootDeps,
   RenderingSetupDeps,
+  InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
+import { KibanaRequest, LegacyRequest } from '../http';
+import { IUiSettingsClient } from '../ui_settings';
+
+type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
 
 /** @internal */
 export class RenderingService {
   constructor(private readonly coreContext: CoreContext) {}
+
+  public async preboot({
+    http,
+    uiPlugins,
+  }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
+    http.registerRoutes('', (router) => {
+      registerBootstrapRoute({
+        router,
+        renderer: bootstrapRendererFactory({
+          uiPlugins,
+          serverBasePath: http.basePath.serverBasePath,
+          packageInfo: this.coreContext.env.packageInfo,
+          auth: http.auth,
+        }),
+      });
+    });
+
+    return {
+      render: this.render.bind(this, { http, uiPlugins }),
+    };
+  }
 
   public async setup({
     http,
     status,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
-    const router = http.createRouter('');
-
-    const bootstrapRenderer = bootstrapRendererFactory({
-      uiPlugins,
-      serverBasePath: http.basePath.serverBasePath,
-      packageInfo: this.coreContext.env.packageInfo,
-      auth: http.auth,
+    registerBootstrapRoute({
+      router: http.createRouter(''),
+      renderer: bootstrapRendererFactory({
+        uiPlugins,
+        serverBasePath: http.basePath.serverBasePath,
+        packageInfo: this.coreContext.env.packageInfo,
+        auth: http.auth,
+      }),
     });
-    registerBootstrapRoute({ router, renderer: bootstrapRenderer });
 
     return {
-      render: async (
-        request,
-        uiSettings,
-        { includeUserSettings = true, vars }: IRenderOptions = {}
-      ) => {
-        const env = {
-          mode: this.coreContext.env.mode,
-          packageInfo: this.coreContext.env.packageInfo,
-        };
-        const buildNum = env.packageInfo.buildNum;
-        const basePath = http.basePath.get(request);
-        const { serverBasePath, publicBaseUrl } = http.basePath;
-        const settings = {
-          defaults: uiSettings.getRegistered(),
-          user: includeUserSettings ? await uiSettings.getUserProvided() : {},
-        };
+      render: this.render.bind(this, { http, uiPlugins, status }),
+    };
+  }
 
-        const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
-        const themeVersion = getSettingValue('theme:version', settings, String);
+  private async render(
+    { http, uiPlugins, status }: RenderOptions,
+    request: KibanaRequest | LegacyRequest,
+    uiSettings: IUiSettingsClient,
+    { includeUserSettings = true, vars }: IRenderOptions = {}
+  ) {
+    const env = {
+      mode: this.coreContext.env.mode,
+      packageInfo: this.coreContext.env.packageInfo,
+    };
+    const buildNum = env.packageInfo.buildNum;
+    const basePath = http.basePath.get(request);
+    const { serverBasePath, publicBaseUrl } = http.basePath;
+    const settings = {
+      defaults: uiSettings.getRegistered() ?? {},
+      user: includeUserSettings ? await uiSettings.getUserProvided() : {},
+    };
 
-        const stylesheetPaths = getStylesheetPaths({
-          darkMode,
-          themeVersion,
-          basePath: serverBasePath,
-          buildNum,
-        });
+    const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    const themeVersion = getSettingValue('theme:version', settings, String);
 
-        const metadata: RenderingMetadata = {
-          strictCsp: http.csp.strict,
-          uiPublicUrl: `${basePath}/ui`,
-          bootstrapScriptUrl: `${basePath}/bootstrap.js`,
-          i18n: i18n.translate,
-          locale: i18n.getLocale(),
-          darkMode,
-          stylesheetPaths,
-          themeVersion,
-          injectedMetadata: {
-            version: env.packageInfo.version,
-            buildNumber: env.packageInfo.buildNum,
-            branch: env.packageInfo.branch,
-            basePath,
-            serverBasePath,
-            publicBaseUrl,
-            env,
-            anonymousStatusPage: status.isStatusPageAnonymous(),
-            i18n: {
-              translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
-            },
-            csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
-            externalUrl: http.externalUrl,
-            vars: vars ?? {},
-            uiPlugins: await Promise.all(
-              [...uiPlugins.public].map(async ([id, plugin]) => ({
-                id,
-                plugin,
-                config: await getUiConfig(uiPlugins, id),
-              }))
-            ),
-            legacyMetadata: {
-              uiSettings: settings,
-            },
-          },
-        };
+    const stylesheetPaths = getStylesheetPaths({
+      darkMode,
+      themeVersion,
+      basePath: serverBasePath,
+      buildNum,
+    });
 
-        return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
+    const metadata: RenderingMetadata = {
+      strictCsp: http.csp.strict,
+      uiPublicUrl: `${basePath}/ui`,
+      bootstrapScriptUrl: `${basePath}/bootstrap.js`,
+      i18n: i18n.translate,
+      locale: i18n.getLocale(),
+      darkMode,
+      stylesheetPaths,
+      themeVersion,
+      injectedMetadata: {
+        version: env.packageInfo.version,
+        buildNumber: env.packageInfo.buildNum,
+        branch: env.packageInfo.branch,
+        basePath,
+        serverBasePath,
+        publicBaseUrl,
+        env,
+        anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
+        i18n: {
+          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+        },
+        csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
+        externalUrl: http.externalUrl,
+        vars: vars ?? {},
+        uiPlugins: await Promise.all(
+          [...uiPlugins.public].map(async ([id, plugin]) => ({
+            id,
+            plugin,
+            config: await getUiConfig(uiPlugins, id),
+          }))
+        ),
+        legacyMetadata: {
+          uiSettings: settings,
+        },
       },
     };
+
+    return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
   }
 
   public async stop() {}

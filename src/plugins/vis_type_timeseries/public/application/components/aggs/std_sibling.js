@@ -27,6 +27,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const StandardSiblingAggUi = (props) => {
   const { siblings, intl, fields, indexPattern } = props;
@@ -147,7 +148,7 @@ const StandardSiblingAggUi = (props) => {
               onChange={handleSelectChange('field')}
               exclude={[METRIC_TYPES.PERCENTILE, METRIC_TYPES.TOP_HIT]}
               metrics={siblings}
-              fields={fields[indexPattern]}
+              fields={fields[getIndexPatternKey(indexPattern)]}
               metric={model}
               value={model.field}
             />

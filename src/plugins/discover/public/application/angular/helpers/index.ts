@@ -8,3 +8,4 @@
 
 export { formatRow, formatTopLevelObject } from './row_formatter';
 export { handleSourceColumnState } from './state_helpers';
+export { PromiseServiceCreator } from './promises';

@@ -91,7 +91,12 @@ export const query = async (
     return {
       series: groupings.buckets.map((bucket) => {
         const keys = Object.values(bucket.key);
-        return convertHistogramBucketsToTimeseries(keys, options, bucket.histogram.buckets);
+        return convertHistogramBucketsToTimeseries(
+          keys,
+          options,
+          bucket.histogram.buckets,
+          bucketSize * 1000
+        );
       }),
       info: {
         afterKey: returnAfterKey ? afterKey : null,
@@ -108,7 +113,8 @@ export const query = async (
         convertHistogramBucketsToTimeseries(
           ['*'],
           options,
-          response.aggregations.histogram.buckets
+          response.aggregations.histogram.buckets,
+          bucketSize * 1000
         ),
       ],
       info: {

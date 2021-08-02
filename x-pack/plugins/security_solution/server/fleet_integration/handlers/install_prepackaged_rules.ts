@@ -22,6 +22,8 @@ export interface InstallPrepackagedRulesProps {
   securityStart: SecurityPluginStart;
   alerts: AlertsStartContract;
   maxTimelineImportExportSize: number;
+  prebuiltRulesFromFileSystem: boolean;
+  prebuiltRulesFromSavedObjects: boolean;
   exceptionsClient: ExceptionListClient;
 }
 
@@ -37,6 +39,8 @@ export const installPrepackagedRules = async ({
   securityStart,
   alerts,
   maxTimelineImportExportSize,
+  prebuiltRulesFromFileSystem,
+  prebuiltRulesFromSavedObjects,
   exceptionsClient,
 }: InstallPrepackagedRulesProps): Promise<void> => {
   // prep for detection rules creation
@@ -67,9 +71,11 @@ export const installPrepackagedRules = async ({
       // @ts-expect-error
       context,
       appClient,
-      alerts.getAlertsClientWithRequest(request),
+      alerts.getRulesClientWithRequest(request),
       frameworkRequest,
       maxTimelineImportExportSize,
+      prebuiltRulesFromFileSystem,
+      prebuiltRulesFromSavedObjects,
       exceptionsClient
     );
   } catch (err) {

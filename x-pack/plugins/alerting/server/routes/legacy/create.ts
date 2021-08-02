@@ -63,12 +63,12 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = context.alerting.getRulesClient();
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
         try {
-          const alertRes: SanitizedAlert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>(
+          const alertRes: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
             {
               data: { ...alert, notifyWhen },
               options: { id: params?.id },

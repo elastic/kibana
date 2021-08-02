@@ -95,11 +95,5 @@ describe('dropdownControl', () => {
           ?.value
       ).toHaveProperty('column', 'price');
     });
-
-    it('sets column to undefined if no args are provided', () => {
-      expect(
-        fn(testTable, {}, {} as ExecutionContext<Adapters, SerializableState>)?.value
-      ).toHaveProperty('column', undefined);
-    });
   });
 });

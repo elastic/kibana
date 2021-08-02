@@ -9,12 +9,18 @@ import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
-import { useSeriesStorage } from './use_series_storage';
+import {
+  AllSeries,
+  allSeriesKey,
+  convertAllShortSeries,
+  useSeriesStorage,
+} from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { SeriesUrl, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
 import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
+import { useTheme } from '../../../../hooks/use_theme';
 
 export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
   return Object.entries(reportDefinitions ?? {})
@@ -28,41 +34,56 @@ export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitio
 };
 
 export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null => {
-  const { allSeriesIds, allSeries } = useSeriesStorage();
+  const { storage, autoApply, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
   const { indexPatterns } = useAppIndexPatternContext();
 
+  const theme = useTheme();
+
   return useMemo(() => {
-    if (isEmpty(indexPatterns) || isEmpty(allSeriesIds)) {
+    if (isEmpty(indexPatterns) || isEmpty(allSeries) || !reportType) {
       return null;
     }
 
+    const allSeriesT: AllSeries = autoApply
+      ? allSeries
+      : convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+
     const layerConfigs: LayerConfig[] = [];
 
-    allSeriesIds.forEach((seriesIdT) => {
-      const seriesT = allSeries[seriesIdT];
-      const indexPattern = indexPatterns?.[seriesT?.dataType];
-      if (indexPattern && seriesT.reportType && !isEmpty(seriesT.reportDefinitions)) {
+    allSeriesT.forEach((series, seriesIndex) => {
+      const indexPattern = indexPatterns?.[series?.dataType];
+
+      if (
+        indexPattern &&
+        !isEmpty(series.reportDefinitions) &&
+        !series.hidden &&
+        series.selectedMetricField
+      ) {
         const seriesConfig = getDefaultConfigs({
-          reportType: seriesT.reportType,
-          dataType: seriesT.dataType,
+          reportType,
           indexPattern,
+          dataType: series.dataType,
         });
 
-        const filters: UrlFilter[] = (seriesT.filters ?? []).concat(
-          getFiltersFromDefs(seriesT.reportDefinitions)
+        const filters: UrlFilter[] = (series.filters ?? []).concat(
+          getFiltersFromDefs(series.reportDefinitions)
         );
+
+        const color = `euiColorVis${seriesIndex}`;
 
         layerConfigs.push({
           filters,
           indexPattern,
           seriesConfig,
-          time: seriesT.time,
-          breakdown: seriesT.breakdown,
-          seriesType: seriesT.seriesType,
-          operationType: seriesT.operationType,
-          reportDefinitions: seriesT.reportDefinitions ?? {},
-          selectedMetricField: seriesT.selectedMetricField,
+          time: series.time,
+          name: series.name,
+          breakdown: series.breakdown,
+          seriesType: series.seriesType,
+          operationType: series.operationType,
+          reportDefinitions: series.reportDefinitions ?? {},
+          selectedMetricField: series.selectedMetricField,
+          color: series.color ?? ((theme.eui as unknown) as Record<string, string>)[color],
         });
       }
     });
@@ -73,6 +94,6 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
     const lensAttributes = new LensAttributes(layerConfigs);
 
-    return lensAttributes.getJSON();
-  }, [indexPatterns, allSeriesIds, allSeries]);
+    return lensAttributes.getJSON(lastRefresh);
+  }, [indexPatterns, allSeries, reportType, autoApply, storage, theme, lastRefresh]);
 };

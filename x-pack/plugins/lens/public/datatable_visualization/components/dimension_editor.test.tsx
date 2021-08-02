@@ -14,8 +14,8 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { TableDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { PalettePanelContainer } from './palette_panel_container';
 import { act } from 'react-dom/test-utils';
+import { PalettePanelContainer } from '../../shared_components';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;

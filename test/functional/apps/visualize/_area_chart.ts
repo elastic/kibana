@@ -94,6 +94,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visChart.waitForVisualization();
     });
 
+    // Should be removed when this issue is closed https://github.com/elastic/kibana/issues/103209
+    it('should show/hide a deprecation warning depending on the library selected', async () => {
+      await PageObjects.visualize.getDeprecationWarningStatus();
+    });
+
     it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });

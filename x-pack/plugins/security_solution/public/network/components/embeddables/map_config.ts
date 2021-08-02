@@ -61,6 +61,21 @@ export const SUM_OF_DESTINATION_BYTES = 'sum_of_destination.bytes';
 export const SUM_OF_CLIENT_BYTES = 'sum_of_client.bytes';
 export const SUM_OF_SERVER_BYTES = 'sum_of_server.bytes';
 
+const APM_LAYER_FIELD_MAPPING = {
+  source: {
+    metricField: 'client.bytes',
+    geoField: 'client.geo.location',
+    tooltipProperties: Object.keys(clientFieldMappings),
+    label: i18n.CLIENT_LAYER,
+  },
+  destination: {
+    metricField: 'server.bytes',
+    geoField: 'server.geo.location',
+    tooltipProperties: Object.keys(serverFieldMappings),
+    label: i18n.SERVER_LAYER,
+  },
+};
+
 // Mapping to fields for creating specific layers for a given index pattern
 // e.g. The apm-* index pattern needs layers for client/server instead of source/destination
 export const lmc: LayerMappingCollection = {
@@ -78,20 +93,8 @@ export const lmc: LayerMappingCollection = {
       label: i18n.DESTINATION_LAYER,
     },
   },
-  'apm-*': {
-    source: {
-      metricField: 'client.bytes',
-      geoField: 'client.geo.location',
-      tooltipProperties: Object.keys(clientFieldMappings),
-      label: i18n.CLIENT_LAYER,
-    },
-    destination: {
-      metricField: 'server.bytes',
-      geoField: 'server.geo.location',
-      tooltipProperties: Object.keys(serverFieldMappings),
-      label: i18n.SERVER_LAYER,
-    },
-  },
+  'apm-*': APM_LAYER_FIELD_MAPPING,
+  'traces-apm*,logs-apm*,metrics-apm*,apm-*': APM_LAYER_FIELD_MAPPING,
 };
 
 /**

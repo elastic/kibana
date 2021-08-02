@@ -53,7 +53,7 @@ export const SetupGuideLayout: React.FC<Props> = ({
   const cloudDeploymentLink = cloud.deploymentUrl || '';
 
   return (
-    <EuiPage className="setupGuide">
+    <EuiPage className="setupGuide" data-test-subj="setupGuide">
       <EuiPageSideBar className="setupGuide__sidebar">
         <EuiText color="subdued" size="s">
           <strong>{SETUP_GUIDE_TITLE}</strong>

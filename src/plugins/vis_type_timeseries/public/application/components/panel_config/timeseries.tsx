@@ -208,6 +208,7 @@ export class TimeseriesPanelConfig extends Component<
                       this.props.onChange({ filter });
                     }}
                     indexPatterns={[model.index_pattern]}
+                    data-test-subj="panelFilterQueryBar"
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -442,6 +443,7 @@ export class TimeseriesPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.ANNOTATIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.ANNOTATIONS)}
+            data-test-subj="timeSeriesEditorAnnotationsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.timeseries.annotationsTab.annotationsButtonLabel"

@@ -427,6 +427,38 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.totalDocuments).to.eql(425);
       });
+
+      it('should allow filtering on a runtime field other than the field in use', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ exists: { field: 'runtime_string_field' } }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            fieldName: 'runtime_number_field',
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
+          topValues: {
+            buckets: [
+              {
+                count: 4634,
+                key: 5,
+              },
+            ],
+          },
+          histogram: { buckets: [] },
+        });
+      });
     });
 
     describe('histogram', () => {

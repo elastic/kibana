@@ -70,6 +70,7 @@ export const getThreatList = async ({
         listItemIndex: listClient.getListItemIndex(),
       }),
     },
+    track_total_hits: false,
     ignore_unavailable: true,
     index,
     size: calculatedPerPage,
@@ -101,9 +102,9 @@ export const getSortWithTieBreaker = ({
     }
   } else {
     if (sortField != null) {
-      return [{ [sortField]: ascOrDesc, '@timestamp': 'asc' }];
+      return [{ [sortField]: ascOrDesc, '@timestamp': 'desc' }];
     } else {
-      return [{ '@timestamp': 'asc' }];
+      return [{ '@timestamp': 'desc' }];
     }
   }
 };

@@ -339,6 +339,14 @@ describe('Execution', () => {
       });
       expect(execution.inspectorAdapters).toBe(inspectorAdapters);
     });
+
+    test('it should reset the request adapter only on startup', async () => {
+      const inspectorAdapters = { requests: { reset: jest.fn() } };
+      await run('add val={add 5 | access "value"}', {
+        inspectorAdapters,
+      });
+      expect(inspectorAdapters.requests.reset).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('expression abortion', () => {

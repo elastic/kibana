@@ -158,6 +158,17 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         },
       },
     ];
+    actionItems.push({
+      disabled: this.props.isEditButtonDisabled,
+      name: EDIT_LAYER_SETTINGS_LABEL,
+      icon: <EuiIcon type="pencil" size="m" />,
+      'data-test-subj': 'layerSettingsButton',
+      toolTipContent: null,
+      onClick: () => {
+        this._closePopover();
+        this.props.openLayerSettings();
+      },
+    });
 
     if (!this.props.isReadOnly) {
       if (this.state.supportsFeatureEditing) {
@@ -186,17 +197,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           },
         });
       }
-      actionItems.push({
-        disabled: this.props.isEditButtonDisabled,
-        name: EDIT_LAYER_SETTINGS_LABEL,
-        icon: <EuiIcon type="pencil" size="m" />,
-        'data-test-subj': 'layerSettingsButton',
-        toolTipContent: null,
-        onClick: () => {
-          this._closePopover();
-          this.props.openLayerSettings();
-        },
-      });
       actionItems.push({
         name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
           defaultMessage: 'Clone layer',

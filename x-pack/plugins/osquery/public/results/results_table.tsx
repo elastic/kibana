@@ -14,6 +14,8 @@ import {
   EuiDataGridColumn,
   EuiLink,
   EuiLoadingContent,
+  EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
@@ -37,17 +39,16 @@ interface ResultsTableComponentProps {
   selectedAgent?: string;
   agentIds?: string[];
   endDate?: string;
-  isLive?: boolean;
   startDate?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   actionId,
   agentIds,
-  isLive,
   startDate,
   endDate,
 }) => {
+  const [isLive, setIsLive] = useState(true);
   const {
     // @ts-expect-error update types
     data: { aggregations },
@@ -60,13 +61,13 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     sortField: '@timestamp',
     isLive,
   });
-
+  const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const { getUrlForApp } = useKibana().services.application;
 
   const getFleetAppUrl = useCallback(
     (agentId) =>
       getUrlForApp('fleet', {
-        path: `#` + pagePathGetters.agent_details({ agentId }),
+        path: `#` + pagePathGetters.agent_details({ agentId })[1],
       }),
     [getUrlForApp]
   );
@@ -216,29 +217,56 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [actionId, endDate, startDate]
   );
 
-  if (!aggregations.totalResponded) {
+  useEffect(
+    () =>
+      setIsLive(() => {
+        if (!agentIds?.length || expired) return false;
+
+        const uniqueAgentsRepliedCount =
+          // @ts-expect-error-type
+          allResultsData?.rawResponse.aggregations?.unique_agents.value ?? 0;
+
+        return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
+      }),
+    [
+      agentIds?.length,
+      aggregations.failed,
+      // @ts-expect-error-type
+      allResultsData?.rawResponse.aggregations?.unique_agents.value,
+      expired,
+    ]
+  );
+
+  if (!isFetched) {
     return <EuiLoadingContent lines={5} />;
   }
 
-  if (aggregations.totalResponded && isFetched && !allResultsData?.edges.length) {
-    return <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />;
-  }
-
   return (
-    // @ts-expect-error update types
-    <DataContext.Provider value={allResultsData?.edges}>
-      <EuiDataGrid
-        aria-label="Osquery results"
-        columns={columns}
-        columnVisibility={columnVisibility}
-        rowCount={allResultsData?.totalCount ?? 0}
-        renderCellValue={renderCellValue}
-        sorting={tableSorting}
-        pagination={tablePagination}
-        height="500px"
-        toolbarVisibility={toolbarVisibility}
-      />
-    </DataContext.Provider>
+    <>
+      {isLive && <EuiProgress color="primary" size="xs" />}
+
+      {isFetched && !allResultsData?.edges.length ? (
+        <>
+          <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
+          <EuiSpacer />
+        </>
+      ) : (
+        // @ts-expect-error update types
+        <DataContext.Provider value={allResultsData?.edges}>
+          <EuiDataGrid
+            aria-label="Osquery results"
+            columns={columns}
+            columnVisibility={columnVisibility}
+            rowCount={allResultsData?.totalCount ?? 0}
+            renderCellValue={renderCellValue}
+            sorting={tableSorting}
+            pagination={tablePagination}
+            height="500px"
+            toolbarVisibility={toolbarVisibility}
+          />
+        </DataContext.Provider>
+      )}
+    </>
   );
 };
 

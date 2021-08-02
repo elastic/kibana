@@ -27,6 +27,31 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.post(
+    {
+      path: '/api/app_search/engines/{name}/crawler/domains',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        body: schema.object({
+          name: schema.string(),
+          entry_points: schema.arrayOf(
+            schema.object({
+              value: schema.string(),
+            })
+          ),
+        }),
+        query: schema.object({
+          respond_with: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains',
+    })
+  );
+
   router.delete(
     {
       path: '/api/app_search/engines/{name}/crawler/domains/{id}',
@@ -42,6 +67,21 @@ export function registerCrawlerRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v0/engines/:name/crawler/domains/:id',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/app_search/crawler/validate_url',
+      validate: {
+        body: schema.object({
+          url: schema.string(),
+          checks: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/crawler/validate_url',
     })
   );
 }

@@ -9,7 +9,6 @@ import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -33,9 +32,8 @@ const ShiftedEuiText = euiStyled(EuiText)`
 `;
 
 export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
-  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, serviceName } = useApmServiceContext();
 
   if (!hasValidMlLicense || !mlJobId) {
     return null;

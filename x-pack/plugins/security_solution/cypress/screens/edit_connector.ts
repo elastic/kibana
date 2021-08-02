@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connectorIds } from '../objects/case';
+import { getConnectorIds } from '../objects/case';
 
 export const CONNECTOR_RESILIENT = `[data-test-subj="connector-fields-resilient"]`;
 
@@ -17,14 +17,16 @@ export const SELECT_INCIDENT_TYPE = `[data-test-subj="incidentTypeComboBox"] inp
 
 export const SELECT_ISSUE_TYPE = `[data-test-subj="issueTypeSelect"]`;
 
-export const SELECT_JIRA = `[data-test-subj="dropdown-connector-${connectorIds.jira}"]`;
+export const SELECT_JIRA = `[data-test-subj="dropdown-connector-${getConnectorIds().jira}"]`;
 
 export const SELECT_PRIORITY = `[data-test-subj="prioritySelect"]`;
 
-export const SELECT_RESILIENT = `[data-test-subj="dropdown-connector-${connectorIds.resilient}"]`;
+export const SELECT_RESILIENT = `[data-test-subj="dropdown-connector-${
+  getConnectorIds().resilient
+}"]`;
 
 export const SELECT_SEVERITY = `[data-test-subj="severitySelect"]`;
 
-export const SELECT_SN = `[data-test-subj="dropdown-connector-${connectorIds.sn}"]`;
+export const SELECT_SN = `[data-test-subj="dropdown-connector-${getConnectorIds().sn}"]`;
 
 export const SELECT_URGENCY = `[data-test-subj="urgencySelect"]`;

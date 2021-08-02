@@ -4,21 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
-import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../alerting/server';
+import { AlertTypeWithExecutor, LifecycleAlertService } from '../../../../rule_registry/server';
+import { AlertInstanceContext } from '../../../../alerting/common';
 
-export type UptimeAlertTypeParam = Record<string, any>;
-export type UptimeAlertTypeState = Record<string, any>;
-export type UptimeAlertTypeFactory<ActionGroupIds extends string> = (
+/**
+ * Because all of our types are presumably going to list the `producer` as `'uptime'`,
+ * we should just omit this field from the returned value to simplify the returned alert type.
+ *
+ * When we register all the alerts we can inject this field.
+ */
+export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = AlertTypeWithExecutor<
+  Record<string, any>,
+  AlertInstanceContext,
+  {
+    alertWithLifecycle: LifecycleAlertService<AlertInstanceContext, TActionGroupIds>;
+  }
+>;
+
+export type UptimeAlertTypeFactory<TActionGroupIds extends string> = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins
-) => AlertType<
-  UptimeAlertTypeParam,
-  UptimeAlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  ActionGroupIds
->;
+) => DefaultUptimeAlertInstance<TActionGroupIds>;

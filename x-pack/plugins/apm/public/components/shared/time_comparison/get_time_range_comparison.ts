@@ -60,14 +60,17 @@ export function getTimeRangeComparison({
   const endEpoch = endMoment.valueOf();
 
   let diff: number;
+  let offset: string;
 
   switch (comparisonType) {
     case TimeRangeComparisonType.DayBefore:
       diff = oneDayInMilliseconds;
+      offset = '1d';
       break;
 
     case TimeRangeComparisonType.WeekBefore:
       diff = oneWeekInMilliseconds;
+      offset = '1w';
       break;
 
     case TimeRangeComparisonType.PeriodBefore:
@@ -77,6 +80,7 @@ export function getTimeRangeComparison({
         unitOfTime: 'milliseconds',
         precise: true,
       });
+      offset = `${diff}ms`;
       break;
 
     default:
@@ -86,5 +90,6 @@ export function getTimeRangeComparison({
   return {
     comparisonStart: new Date(startEpoch - diff).toISOString(),
     comparisonEnd: new Date(endEpoch - diff).toISOString(),
+    offset,
   };
 }

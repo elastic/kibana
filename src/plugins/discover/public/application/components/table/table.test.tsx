@@ -334,6 +334,33 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
             },
           },
         },
+        {
+          name: 'city',
+          displayName: 'city',
+          type: 'keyword',
+          isMapped: true,
+          readFromDocValues: true,
+          searchable: true,
+          shortDotsEnable: false,
+          scripted: false,
+          filterable: false,
+        },
+        {
+          name: 'city.raw',
+          displayName: 'city.raw',
+          type: 'string',
+          isMapped: true,
+          spec: {
+            subType: {
+              multi: {
+                parent: 'city',
+              },
+            },
+          },
+          shortDotsEnable: false,
+          scripted: false,
+          filterable: false,
+        },
       ],
     },
     metaFields: ['_index', '_type', '_score', '_id'],
@@ -380,6 +407,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       customer_first_name: 'Betty',
       'customer_first_name.keyword': 'Betty',
       'customer_first_name.nickname': 'Betsy',
+      'city.raw': 'Los Angeles',
     },
   };
   const props = {
@@ -417,6 +445,8 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
         .length
     ).toBe(1);
+
+    expect(findTestSubject(component, 'tableDocViewRow-city.raw').length).toBe(1);
   });
 
   it('does not render multifield rows if showMultiFields flag is not set', () => {
@@ -449,5 +479,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
         .length
     ).toBe(0);
+
+    expect(findTestSubject(component, 'tableDocViewRow-city.raw').length).toBe(1);
   });
 });

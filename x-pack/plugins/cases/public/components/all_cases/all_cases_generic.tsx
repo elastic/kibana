@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiProgress } from '@elastic/eui';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { difference, head, isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import classnames from 'classnames';
@@ -113,6 +112,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     );
 
     const filterRefetch = useRef<() => void>();
+    const tableRef = useRef<EuiBasicTable>();
     const setFilterRefetch = useCallback(
       (refetchFilter: () => void) => {
         filterRefetch.current = refetchFilter;
@@ -182,10 +182,13 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
         ) {
           setQueryParams({ sortField: SortFieldCase.createdAt });
         }
+
+        setSelectedCases([]);
+        tableRef.current?.setSelection([]);
         setFilters(newFilterOptions);
         refreshCases(false);
       },
-      [refreshCases, setQueryParams, setFilters]
+      [setSelectedCases, setFilters, refreshCases, setQueryParams]
     );
 
     const showActions = userCanCrud && !isSelectorView;
@@ -319,6 +322,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
             selection={euiBasicTableSelectionProps}
             showActions={showActions}
             sorting={sorting}
+            tableRef={tableRef}
             tableRowProps={tableRowProps}
             userCanCrud={userCanCrud}
           />

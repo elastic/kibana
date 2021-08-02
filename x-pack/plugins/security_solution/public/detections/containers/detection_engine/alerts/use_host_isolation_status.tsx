@@ -7,9 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getHostMetadata } from './api';
-import { ISOLATION_STATUS_FAILURE, ISOLATION_PENDING_FAILURE } from './translations';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 import { HostStatus } from '../../../../../common/endpoint/types';
@@ -17,7 +15,7 @@ import { HostStatus } from '../../../../../common/endpoint/types';
 interface HostIsolationStatusResponse {
   loading: boolean;
   isIsolated: boolean;
-  agentStatus: HostStatus;
+  agentStatus: HostStatus | undefined;
   pendingIsolation: number;
   pendingUnisolation: number;
 }
@@ -30,12 +28,10 @@ export const useHostIsolationStatus = ({
   agentId: string;
 }): HostIsolationStatusResponse => {
   const [isIsolated, setIsIsolated] = useState<boolean>(false);
-  const [agentStatus, setAgentStatus] = useState<HostStatus>(HostStatus.UNHEALTHY);
+  const [agentStatus, setAgentStatus] = useState<HostStatus>();
   const [pendingIsolation, setPendingIsolation] = useState(0);
   const [pendingUnisolation, setPendingUnisolation] = useState(0);
   const [loading, setLoading] = useState(false);
-
-  const { addError } = useAppToasts();
 
   useEffect(() => {
     const abortCtrl = new AbortController();
@@ -55,7 +51,10 @@ export const useHostIsolationStatus = ({
         if (error.name === 'AbortError') {
           return;
         }
-        addError(error.message, { title: ISOLATION_STATUS_FAILURE });
+
+        if (isMounted && error.body.statusCode === 404) {
+          setAgentStatus(HostStatus.UNENROLLED);
+        }
       }
 
       try {
@@ -65,7 +64,8 @@ export const useHostIsolationStatus = ({
           setPendingUnisolation(data[0].pending_actions?.unisolate ?? 0);
         }
       } catch (error) {
-        addError(error.message, { title: ISOLATION_PENDING_FAILURE });
+        // silently catch non-user initiated error
+        return;
       }
 
       if (isMounted) {
@@ -87,6 +87,6 @@ export const useHostIsolationStatus = ({
       isMounted = false;
       abortCtrl.abort();
     };
-  }, [addError, agentId]);
+  }, [agentId]);
   return { loading, isIsolated, agentStatus, pendingIsolation, pendingUnisolation };
 };

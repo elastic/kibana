@@ -42,12 +42,12 @@ describe('EndpointList store concerns', () => {
         loading: false,
         error: undefined,
         endpointDetails: {
-          flyoutView: undefined,
           activityLog: {
             paging: {
               disabled: false,
               page: 1,
               pageSize: 50,
+              isInvalidDateRange: false,
             },
             logData: { type: 'UninitialisedResourceState' },
           },
