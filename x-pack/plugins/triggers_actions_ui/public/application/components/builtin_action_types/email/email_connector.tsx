@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -16,6 +16,8 @@ import {
   EuiFormRow,
   EuiTitle,
   EuiSpacer,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,6 +51,23 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     password !== undefined && errors.password !== undefined && errors.password.length > 0;
   const isUserInvalid: boolean =
     user !== undefined && errors.user !== undefined && errors.user.length > 0;
+
+  const authOptions = [
+    {
+      label: 'Basic Auth',
+      'data-test-subj': 'titanOption',
+      key: 'basic',
+    },
+    {
+      label: 'OAuth 2.0',
+      key: 'oauth2',
+    },
+  ] as Array<EuiComboBoxOptionOption<unknown>>;
+  const [selectedOptions, setSelected] = useState([authOptions[0]]);
+  const onChange = (selectedOptionsList: Array<EuiComboBoxOptionOption<unknown>>) => {
+    // We should only get back either 0 or 1 options.
+    setSelected(selectedOptionsList);
+  };
   return (
     <>
       <EuiFlexGroup>
@@ -214,6 +233,27 @@ export const EmailActionConnectorFields: React.FunctionComponent<
       </EuiFlexGroup>
       {hasAuth ? (
         <>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            id="emailUser"
+            fullWidth
+            error={errors.user}
+            isInvalid={isUserInvalid}
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+              {
+                defaultMessage: 'Authorization type',
+              }
+            )}
+          >
+            <EuiComboBox
+              placeholder="Select one or more options"
+              options={authOptions}
+              singleSelection={{ asPlainText: true }}
+              selectedOptions={selectedOptions}
+              onChange={onChange}
+            />
+          </EuiFormRow>
           {getEncryptedFieldNotifyLabel(
             !action.id,
             2,
@@ -226,70 +266,172 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               }
             )
           )}
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFormRow
-                id="emailUser"
-                fullWidth
-                error={errors.user}
-                isInvalid={isUserInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
-                  {
-                    defaultMessage: 'Username',
-                  }
-                )}
-              >
-                <EuiFieldText
+          {selectedOptions[0].key === 'basic' ? (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFormRow
+                  id="emailUser"
                   fullWidth
+                  error={errors.user}
                   isInvalid={isUserInvalid}
-                  name="user"
-                  readOnly={readOnly}
-                  value={user || ''}
-                  data-test-subj="emailUserInput"
-                  onChange={(e) => {
-                    editActionSecrets('user', nullableString(e.target.value));
-                  }}
-                  onBlur={() => {
-                    if (!user) {
-                      editActionSecrets('user', '');
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                    {
+                      defaultMessage: 'Username',
                     }
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                id="emailPassword"
-                fullWidth
-                error={errors.password}
-                isInvalid={isPasswordInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
-                  {
-                    defaultMessage: 'Password',
-                  }
-                )}
-              >
-                <EuiFieldPassword
+                  )}
+                >
+                  <EuiFieldText
+                    fullWidth
+                    isInvalid={isUserInvalid}
+                    name="user"
+                    readOnly={readOnly}
+                    value={user || ''}
+                    data-test-subj="emailUserInput"
+                    onChange={(e) => {
+                      editActionSecrets('user', nullableString(e.target.value));
+                    }}
+                    onBlur={() => {
+                      if (!user) {
+                        editActionSecrets('user', '');
+                      }
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id="emailPassword"
                   fullWidth
-                  readOnly={readOnly}
+                  error={errors.password}
                   isInvalid={isPasswordInvalid}
-                  name="password"
-                  value={password || ''}
-                  data-test-subj="emailPasswordInput"
-                  onChange={(e) => {
-                    editActionSecrets('password', nullableString(e.target.value));
-                  }}
-                  onBlur={() => {
-                    if (!password) {
-                      editActionSecrets('password', '');
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                    {
+                      defaultMessage: 'Password',
                     }
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                  )}
+                >
+                  <EuiFieldPassword
+                    fullWidth
+                    readOnly={readOnly}
+                    isInvalid={isPasswordInvalid}
+                    name="password"
+                    value={password || ''}
+                    data-test-subj="emailPasswordInput"
+                    onChange={(e) => {
+                      editActionSecrets('password', nullableString(e.target.value));
+                    }}
+                    onBlur={() => {
+                      if (!password) {
+                        editActionSecrets('password', '');
+                      }
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
+          {selectedOptions[0].key === 'oauth2' ? (
+            <>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    id="emailUser"
+                    fullWidth
+                    error={errors.user}
+                    isInvalid={isUserInvalid}
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                      {
+                        defaultMessage: 'Client ID',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      isInvalid={isUserInvalid}
+                      name="user"
+                      readOnly={readOnly}
+                      value={user || ''}
+                      data-test-subj="emailUserInput"
+                      onChange={(e) => {
+                        editActionSecrets('user', nullableString(e.target.value));
+                      }}
+                      onBlur={() => {
+                        if (!user) {
+                          editActionSecrets('user', '');
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    id="emailPassword"
+                    fullWidth
+                    error={errors.password}
+                    isInvalid={isPasswordInvalid}
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                      {
+                        defaultMessage: 'Client secret',
+                      }
+                    )}
+                  >
+                    <EuiFieldPassword
+                      fullWidth
+                      readOnly={readOnly}
+                      isInvalid={isPasswordInvalid}
+                      name="password"
+                      value={password || ''}
+                      data-test-subj="emailPasswordInput"
+                      onChange={(e) => {
+                        editActionSecrets('password', nullableString(e.target.value));
+                      }}
+                      onBlur={() => {
+                        if (!password) {
+                          editActionSecrets('password', '');
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    id="emailUser"
+                    fullWidth
+                    error={errors.user}
+                    isInvalid={isUserInvalid}
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                      {
+                        defaultMessage: 'Grant Type',
+                      }
+                    )}
+                  >
+                    <EuiComboBox
+                      placeholder="Select one or more options"
+                      options={[
+                        {
+                          label: 'Authorization Code',
+                        },
+                      ]}
+                      singleSelection={{ asPlainText: true }}
+                      selectedOptions={[
+                        {
+                          label: 'Authorization Code',
+                        },
+                      ]}
+                      onChange={() => {}}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : null}
         </>
       ) : null}
     </>
