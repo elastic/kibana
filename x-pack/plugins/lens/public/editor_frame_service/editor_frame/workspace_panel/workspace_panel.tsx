@@ -58,6 +58,8 @@ import {
   updateVisualizationState,
   updateDatasourceState,
   setSaveable,
+  useLensSelector,
+  selectExternalContextSearch,
 } from '../../../state_management';
 
 export interface WorkspacePanelProps {
@@ -432,22 +434,8 @@ export const VisualizationWrapper = ({
   application: ApplicationStart;
   activeDatasourceId: string | null;
 }) => {
-  const context: ExecutionContextSearch = useMemo(
-    () => ({
-      query: framePublicAPI.query,
-      timeRange: {
-        from: framePublicAPI.dateRange.fromDate,
-        to: framePublicAPI.dateRange.toDate,
-      },
-      filters: framePublicAPI.filters,
-    }),
-    [
-      framePublicAPI.query,
-      framePublicAPI.dateRange.fromDate,
-      framePublicAPI.dateRange.toDate,
-      framePublicAPI.filters,
-    ]
-  );
+  const context: ExecutionContextSearch = useLensSelector(selectExternalContextSearch);
+  const searchSessionId = useLensSelector((state) => state.lens.searchSessionId);
 
   const dispatchLens = useLensDispatch();
 
@@ -639,7 +627,7 @@ export const VisualizationWrapper = ({
         padding="m"
         expression={expression!}
         searchContext={context}
-        searchSessionId={framePublicAPI.searchSessionId}
+        searchSessionId={searchSessionId}
         onEvent={onEvent}
         onData$={onData$}
         renderMode="edit"

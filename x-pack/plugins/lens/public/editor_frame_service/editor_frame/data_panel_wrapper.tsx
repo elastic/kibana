@@ -10,7 +10,6 @@ import './data_panel_wrapper.scss';
 import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { createSelector } from '@reduxjs/toolkit';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import { StateSetter, DatasourceDataPanelProps, DatasourceMap } from '../../types';
@@ -19,9 +18,9 @@ import {
   switchDatasource,
   useLensDispatch,
   updateDatasourceState,
-  LensState,
   useLensSelector,
   setState,
+  selectExternalContext,
 } from '../../state_management';
 import { initializeDatasources } from './state_helpers';
 
@@ -37,23 +36,13 @@ interface DataPanelWrapperProps {
   plugins: { uiActions: UiActionsStart };
 }
 
-const getExternals = createSelector(
-  (state: LensState) => state.lens,
-  ({ resolvedDateRange, query, filters, datasourceStates, activeDatasourceId }) => ({
-    dateRange: resolvedDateRange,
-    query,
-    filters,
-    datasourceStates,
-    activeDatasourceId,
-  })
-);
-
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const { activeDatasource } = props;
 
-  const { filters, query, dateRange, datasourceStates, activeDatasourceId } = useLensSelector(
-    getExternals
-  );
+  const externalContext = useLensSelector(selectExternalContext);
+  const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
+  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+
   const dispatchLens = useLensDispatch();
   const setDatasourceState: StateSetter<unknown> = useMemo(() => {
     return (updater) => {
@@ -88,13 +77,11 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   }, [datasourceStates, activeDatasourceId, props.datasourceMap, dispatchLens]);
 
   const datasourceProps: DatasourceDataPanelProps = {
+    ...externalContext,
     dragDropContext: useContext(DragContext),
     state: props.datasourceState,
     setState: setDatasourceState,
     core: props.core,
-    filters,
-    query,
-    dateRange,
     showNoDataPopover: props.showNoDataPopover,
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,

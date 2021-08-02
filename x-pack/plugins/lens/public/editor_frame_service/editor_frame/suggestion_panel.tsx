@@ -44,8 +44,10 @@ import { getMissingIndexPattern, validateDatasourceAndVisualization } from './st
 import {
   PreviewState,
   rollbackSuggestion,
+  selectExternalContextSearch,
   submitSuggestion,
   useLensDispatch,
+  useLensSelector,
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -278,23 +280,14 @@ export function SuggestionPanel({
     ]
   );
 
-  const context: ExecutionContextSearch = useMemo(
-    () => ({
-      query: frame.query,
-      timeRange: {
-        from: frame.dateRange.fromDate,
-        to: frame.dateRange.toDate,
-      },
-      filters: frame.filters,
-    }),
-    [frame.query, frame.dateRange.fromDate, frame.dateRange.toDate, frame.filters]
-  );
+  const context: ExecutionContextSearch = useLensSelector(selectExternalContextSearch);
+  const searchSessionId = useLensSelector((state) => state.lens.searchSessionId);
 
   const contextRef = useRef<ExecutionContextSearch>(context);
   contextRef.current = context;
 
-  const sessionIdRef = useRef<string>(frame.searchSessionId);
-  sessionIdRef.current = frame.searchSessionId;
+  const sessionIdRef = useRef<string>(searchSessionId);
+  sessionIdRef.current = searchSessionId;
 
   const AutoRefreshExpressionRenderer = useMemo(() => {
     return (props: ReactExpressionRendererProps) => (
