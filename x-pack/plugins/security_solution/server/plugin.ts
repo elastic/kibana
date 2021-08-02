@@ -92,6 +92,7 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
+import { EndpointMetadataService } from './endpoint/services/metadata';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -390,11 +391,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher.start(licenseService);
     }
 
+    const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
+
     this.endpointAppContextService.start({
       agentService: plugins.fleet?.agentService,
       packageService: plugins.fleet?.packageService,
       packagePolicyService: plugins.fleet?.packagePolicyService,
       agentPolicyService: plugins.fleet?.agentPolicyService,
+      endpointMetadataService: new EndpointMetadataService(
+        core.savedObjects,
+        plugins.fleet?.agentService!,
+        plugins.fleet?.agentPolicyService!,
+        logger
+      ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
@@ -403,16 +412,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       logger,
       manifestManager,
       registerIngestCallback,
-      savedObjectsStart: core.savedObjects,
       licenseService,
-      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
+      exceptionListsClient: exceptionListClient,
     });
 
     this.telemetryEventsSender.start(
       core,
       plugins.telemetry,
       plugins.taskManager,
-      this.endpointAppContextService
+      this.endpointAppContextService,
+      exceptionListClient
     );
     return {};
   }

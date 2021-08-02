@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaResponseFactory } from 'kibana/server';
 
 import { xpackMocks } from '../../../fixtures';
-import {
-  loggingSystemMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
+import { loggingSystemMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -100,7 +96,6 @@ const TRUSTED_APP: TrustedApp = {
 };
 
 const packagePolicyClient = createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
-const savedObjectClient = savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClientContract>;
 
 describe('handlers', () => {
   beforeEach(() => {
@@ -116,7 +111,6 @@ describe('handlers', () => {
     };
 
     context.service.getPackagePolicyService = () => packagePolicyClient;
-    context.service.getScopedSavedObjectsClient = () => savedObjectClient;
 
     // Ensure that `logFactory.get()` always returns the same instance for the same given prefix
     const instances = new Map<string, ReturnType<typeof context.logFactory.get>>();
