@@ -121,8 +121,8 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       async ({ client, mlClient, request, response, jobSavedObjectService }) => {
         try {
           const { clearJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
-          const { jobId } = request.body;
-          const resp = await clearJobAuditMessages(jobId);
+          const { jobId, notificationIndices } = request.body;
+          const resp = await clearJobAuditMessages(jobId, notificationIndices);
 
           return response.ok({
             body: resp,
