@@ -26,7 +26,7 @@ export const isFilterPinned = (filter: Filter) => {
  *
  * @public
  */
-export const isFilterDisabled = (filter: Filter): boolean => has(filter, 'meta.disabled');
+export const isFilterDisabled = (filter: Filter): boolean => get(filter, 'meta.disabled', false);
 
 /**
  *
