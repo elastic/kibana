@@ -24,6 +24,10 @@
   .kbnPageTemplate__pageSideBar:hover & {
     transition-delay: $euiAnimSpeedSlow * 2;
   }
+
+  &:not(&-isCollapsed) {
+    background-color: $euiColorEmptyShade !important; // Override all states
+  }
 }
 
 // Make the button take up the entire area of the collapsed navigation
