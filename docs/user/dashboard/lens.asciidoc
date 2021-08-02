@@ -385,10 +385,12 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
 ====
 
-//[discrete]
-//[[when-do-i-use-runtime-fields-vs-formula]]
-//.*When do I use runtime fields vs. formula?*
-//[%collapsible]
-//====
-//
-//====
+[discrete]
+[[when-do-i-use-runtime-fields-vs-formula]]
+.*When do I use runtime fields vs. formula?*
+[%collapsible]
+====
+Use runtime fields to format, concatenate, and extract document-level fields. Runtime fields work across all of {kib} and are best used for smaller computations without compromising performance.
+
+Use formulas to change metrics and data that are aggregations, such as {es} aggregations, time shifts, and filters. Formulas apply only to *Lens* panels and are computationally intensive.
+====
