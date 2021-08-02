@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+export interface BaseFormProps {
+  name: string;
+  displayName?: string;
+  help?: string;
+}
+
 export class BaseForm {
-  constructor(props) {
+  name: string;
+  displayName: string;
+  help: string;
+
+  constructor(props: BaseFormProps) {
     if (!props.name) {
       throw new Error('Expression specs require a name property');
     }

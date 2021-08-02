@@ -11,7 +11,6 @@ import {
   ExpressionAstExpression,
   ExpressionValue,
 } from '../../../../../../src/plugins/expressions';
-// @ts-expect-error unconverted lib
 import { findExpressionType } from '../../lib/find_expression_type';
 import { getId } from '../../lib/get_id';
 // @ts-expect-error unconverted action function

@@ -6,11 +6,12 @@
  */
 
 import { pick } from 'lodash';
-import { Registry } from '@kbn/interpreter/common';
-import { FunctionForm } from './function_form';
+import { FunctionForm, FunctionFormProps } from './function_form';
+
+export type TransformProps = { requiresContext: boolean } & FunctionFormProps;
 
 export class Transform extends FunctionForm {
-  constructor(props) {
+  constructor(props: TransformProps) {
     super(props);
 
     const propNames = ['requiresContext'];
@@ -21,11 +22,3 @@ export class Transform extends FunctionForm {
     Object.assign(this, defaultProps, pick(props, propNames));
   }
 }
-
-class TransformRegistry extends Registry {
-  wrapper(obj) {
-    return new Transform(obj);
-  }
-}
-
-export const transformRegistry = new TransformRegistry();

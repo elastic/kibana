@@ -6,7 +6,8 @@
  */
 
 export { Datasource, datasourceRegistry } from './datasource';
-export { Transform, transformRegistry } from './transform';
+export { Transform } from './transform';
+export { transformRegistry } from './transform_registry';
 export { Model, modelRegistry } from './model';
 export { View, viewRegistry } from './view';
 export { ArgType, argTypeRegistry } from './arg_type';

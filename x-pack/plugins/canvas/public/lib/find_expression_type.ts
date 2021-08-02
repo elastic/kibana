@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-//import { datasourceRegistry } from '../expression_types/datasource';
-import { transformRegistry } from '../expression_types/transform';
+import { transformRegistry } from '../expression_types/transform_registry';
 import { modelRegistry } from '../expression_types/model';
 import { viewRegistry } from '../expression_types/view';
+import { ArgType } from '../expression_types/types';
 
-const expressionTypes = ['view', 'model', 'transform', 'datasource'];
+const expressionTypes: ArgType[] = ['view', 'model', 'transform', 'datasource'];
 
-export function findExpressionType(name, type) {
+export function findExpressionType(name: string, type?: ArgType | null) {
   const checkTypes = expressionTypes.filter(
     (expressionType) => type == null || expressionType === type
   );
@@ -28,7 +28,7 @@ export function findExpressionType(name, type) {
         return !expression ? acc : acc.concat(expression);
       case 'transform':
         expression = transformRegistry.get(name);
-        return !expression ? acc : acc.concat(expression);
+        return !expression ? acc : acc.concat(expression as any);
       default:
         return acc;
     }

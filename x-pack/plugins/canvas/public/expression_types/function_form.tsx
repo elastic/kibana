@@ -5,25 +5,53 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common';
+import { Ast, fromExpression } from '@kbn/interpreter/common';
 import { ArgAddPopover } from '../components/arg_add_popover';
 import { SidebarSection } from '../components/sidebar/sidebar_section';
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
-import { BaseForm } from './base_form';
+import { BaseForm, BaseFormProps } from './base_form';
 import { Arg } from './arg';
+import { ArgType, ArgTypeDef } from './types';
+
+export interface FunctionFormOwnProps {
+  args?: Arg[];
+  resolve: (...args: any[]) => any;
+  argType: ArgType;
+  expressionIndex: number;
+  onValueAdd: (argName: string, argValue: Arg) => () => void;
+  onValueChange: (argName: string, argIndex: number) => (value: Arg) => void;
+  onValueRemove: (argName: string, argIndex: number) => () => void;
+}
+
+export interface DataArg {
+  arg: Arg;
+  argValues?: string[] | Ast[];
+  skipRender?: boolean;
+  label?: 'string';
+}
+
+export interface RenderArgData {
+  argTypeDef?: ArgTypeDef;
+  args: Arg[] | null;
+}
+
+export type FunctionFormProps = FunctionFormOwnProps & BaseFormProps;
 
 export class FunctionForm extends BaseForm {
-  constructor(props) {
+  args: Arg[];
+  resolve: (...args: any[]) => any;
+
+  constructor(props: FunctionFormProps) {
     super({ ...props });
 
     this.args = props.args || [];
     this.resolve = props.resolve || (() => ({}));
   }
 
-  renderArg(props, dataArg) {
+  renderArg(props: FunctionFormProps, dataArg: DataArg) {
     const { onValueRemove, onValueChange, ...passedProps } = props;
     const { arg, argValues, skipRender, label } = dataArg;
     const { argType, expressionIndex } = passedProps;
@@ -32,8 +60,7 @@ export class FunctionForm extends BaseForm {
     if (!arg || skipRender) {
       return null;
     }
-
-    const renderArgWithProps = (argValue, valueIndex) =>
+    const renderArgWithProps = (argValue: Arg, valueIndex: number) =>
       arg.render({
         key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
         ...passedProps,
@@ -55,7 +82,7 @@ export class FunctionForm extends BaseForm {
   }
 
   // TODO: Argument adding isn't very good, we should improve this UI
-  getAddableArg(props, dataArg) {
+  getAddableArg(props: FunctionFormProps, dataArg: DataArg) {
     const { onValueAdd } = props;
     const { arg, argValues, skipRender } = dataArg;
 
@@ -72,25 +99,25 @@ export class FunctionForm extends BaseForm {
     return { arg, onValueAdd: onValueAdd(arg.name, value) };
   }
 
-  resolveArg() {
+  resolveArg(...args: unknown[]) {
     // basically a no-op placeholder
     return {};
   }
 
-  render(data = {}) {
+  render(data: RenderArgData = { args: null }) {
     const { args, argTypeDef } = data;
 
     // Don't instaniate these until render time, to give the registries a chance to populate.
     const argInstances = this.args.map((argSpec) => new Arg(argSpec));
 
-    if (!isPlainObject(args)) {
+    if (args === null || !isPlainObject(args)) {
       throw new Error(`Form "${this.name}" expects "args" object`);
     }
 
     // get a mapping of arg values from the expression and from the renderable's schema
     const argNames = uniq(argInstances.map((arg) => arg.name).concat(Object.keys(args)));
     const dataArgs = argNames.map((argName) => {
-      const arg = argInstances.find((arg) => arg.name === argName);
+      const arg = argInstances.find((argument) => argument.name === argName);
 
       // if arg is not multi, only preserve the last value found
       // otherwise, leave the value alone (including if the arg is not defined)
@@ -116,13 +143,13 @@ export class FunctionForm extends BaseForm {
 
       return (
         <SidebarSection>
-          <SidebarSectionTitle title={argTypeDef.displayName} tip={argTypeDef.help}>
+          <SidebarSectionTitle title={argTypeDef?.displayName} tip={argTypeDef?.help}>
             {addableArgs.length === 0 ? null : <ArgAddPopover options={addableArgs} />}
           </SidebarSectionTitle>
           {argumentForms}
         </SidebarSection>
       );
-    } catch (e) {
+    } catch (e: any) {
       return (
         <EuiCallOut color="danger" iconType="cross" title="Expression rendering error">
           <p>{e.message}</p>
