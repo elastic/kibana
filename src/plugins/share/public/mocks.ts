@@ -45,6 +45,7 @@ const createStartContract = (): Start => {
 const createLocator = <T extends SerializableState = SerializableState>(): jest.Mocked<
   LocatorPublic<T>
 > => ({
+  id: 'MOCK_LOCATOR',
   getLocation: jest.fn(),
   getUrl: jest.fn(),
   useUrl: jest.fn(),

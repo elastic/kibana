@@ -31,12 +31,14 @@ export interface LocatorDependencies {
 }
 
 export class Locator<P extends SerializableState> implements LocatorPublic<P> {
+  public readonly id: string;
   public readonly migrations: PersistableState<P>['migrations'];
 
   constructor(
     public readonly definition: LocatorDefinition<P>,
     protected readonly deps: LocatorDependencies
   ) {
+    this.id = definition.id;
     this.migrations = definition.migrations || {};
   }
 

@@ -51,6 +51,8 @@ export interface LocatorDefinition<P extends SerializableState>
  * Public interface of a registered locator.
  */
 export interface LocatorPublic<P extends SerializableState> extends PersistableState<P> {
+  readonly id: string;
+
   /**
    * Returns a reference to a Kibana client-side location.
    *
