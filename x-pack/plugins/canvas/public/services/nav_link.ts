@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-.wsLicenseBadge__text {
-  color: $euiColorGhost;
+export interface CanvasNavLinkService {
+  updatePath: (path: string) => void;
 }

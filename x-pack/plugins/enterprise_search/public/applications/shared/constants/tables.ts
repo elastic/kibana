@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { NavLinkService } from '../nav_link';
+import { i18n } from '@kbn/i18n';
 
-const noop = (..._args: any[]): any => {};
-
-export const navLinkService: NavLinkService = {
-  updatePath: noop,
-};
+export const ACTIONS_HEADER = i18n.translate('xpack.enterpriseSearch.actionsHeader', {
+  defaultMessage: 'Actions',
+});
