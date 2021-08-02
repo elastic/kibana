@@ -4,6 +4,7 @@
     "index": ".alerts-observability-apm",
     "id": "NoxgpHkBqbdrfX07MqXV",
     "source": {
+      "event.kind" : "signal",
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
@@ -20,6 +21,7 @@
     "index": ".alerts-observability-apm",
     "id": "space1alert",
     "source": {
+      "event.kind" : "signal",
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
@@ -36,6 +38,7 @@
     "index": ".alerts-observability-apm",
     "id": "space2alert",
     "source": {
+      "event.kind" : "signal",
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
@@ -52,8 +55,26 @@
     "index": ".alerts-security.alerts",
     "id": "020202",
     "source": {
+      "event.kind" : "signal",
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "siem.signals",
+      "message": "hello world security",
+      "kibana.rac.alert.owner": "siem",
+      "kibana.rac.alert.status": "open",
+      "kibana.space_ids": ["space1", "space2"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-security.alerts",
+    "id": "020204",
+    "source": {
+      "event.kind" : "signal",
+      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "rule.id": "siem.customRule",
       "message": "hello world security",
       "kibana.rac.alert.owner": "siem",
       "kibana.rac.alert.status": "open",

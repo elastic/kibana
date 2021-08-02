@@ -16,3 +16,8 @@ export enum TimelineEventsQueries {
   kpi = 'eventsKpi',
   lastEventTime = 'eventsLastEventTime',
 }
+
+export enum EntityType {
+  ALERTS = 'alerts',
+  EVENTS = 'events',
+}

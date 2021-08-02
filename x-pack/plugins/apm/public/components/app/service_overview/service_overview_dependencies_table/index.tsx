@@ -15,9 +15,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
@@ -29,14 +26,14 @@ import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/off
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { unit } from '../../../../utils/style';
-import { AgentIcon } from '../../../shared/agent_icon';
+import { BackendLink } from '../../../shared/backend_link';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
-import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
-import { SpanIcon } from '../../../shared/span_icon';
+import { ServiceLink } from '../../../shared/service_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
@@ -100,9 +97,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     urlParams: { start, end, environment, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
-  const {
-    query: { rangeFrom, rangeTo, kuery },
-  } = useApmParams('/services/:serviceName/overview');
+  const { query } = useApmParams('/services/:serviceName/overview');
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -110,8 +105,6 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     comparisonEnabled,
     comparisonType,
   });
-
-  const apmRouter = useApmRouter();
 
   const columns: Array<EuiBasicTableColumn<ServiceDependencyPeriods>> = [
     {
@@ -127,37 +120,26 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <TruncateWithTooltip
             text={item.name}
             content={
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  {item.type === 'service' ? (
-                    <AgentIcon agentName={item.agentName} />
-                  ) : (
-                    <SpanIcon type={item.spanType} subType={item.spanSubtype} />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {item.type === 'service' ? (
-                    <ServiceOverviewLink
-                      serviceName={item.serviceName}
-                      environment={getNextEnvironmentUrlParam({
-                        requestedEnvironment: item.environment,
-                        currentEnvironmentUrlParam: environment,
-                      })}
-                    >
-                      {item.name}
-                    </ServiceOverviewLink>
-                  ) : (
-                    <EuiLink
-                      href={apmRouter.link('/backends/:backendName/overview', {
-                        path: { backendName: item.name },
-                        query: { rangeFrom, rangeTo, kuery, environment },
-                      })}
-                    >
-                      {item.name}
-                    </EuiLink>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              item.type === 'service' ? (
+                <ServiceLink
+                  agentName={item.agentName}
+                  query={{
+                    ...query,
+                    environment: getNextEnvironmentUrlParam({
+                      requestedEnvironment: item.environment,
+                      currentEnvironmentUrlParam: query.environment,
+                    }),
+                  }}
+                  serviceName={item.serviceName}
+                />
+              ) : (
+                <BackendLink
+                  backendName={item.name}
+                  query={query}
+                  subtype={item.spanSubtype}
+                  type={item.spanType}
+                />
+              )
             }
           />
         );

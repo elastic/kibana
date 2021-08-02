@@ -15,6 +15,6 @@ export const plugin = () => {
 
 export { IndexManagementPluginSetup } from './types';
 
-export { getIndexListUri } from './application/services/routing';
+export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
 
 export type { Index } from '../common';
