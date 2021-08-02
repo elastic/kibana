@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "declarationDir": "./target_types",
-    "outDir": "./target_node",
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "incremental": false,
+    "outDir": "./target_types",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-es-query/src",
     "types": [
