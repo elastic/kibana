@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { REPORT_TABLE_ID } from '../../../../plugins/reporting/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -37,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // to reset the data after deletion testing
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
       await pageObjects.common.navigateToApp('reporting');
-      await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });
+      await testSubjects.existOrFail(REPORT_TABLE_ID, { timeout: 200000 });
     });
 
     after(async () => {
@@ -52,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Confirm single report deletion works', async () => {
       log.debug('Checking for reports.');
       await retry.try(async () => {
-        await testSubjects.click('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
+        await testSubjects.click('checkboxSelectRow-krb7arhe164k0763b50bjm29');
       });
       const deleteButton = await testSubjects.find('deleteReportButton');
       await retry.waitFor('delete button to become enabled', async () => {
@@ -62,7 +63,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.exists('confirmModalBodyText');
       await testSubjects.click('confirmModalConfirmButton');
       await retry.try(async () => {
-        await testSubjects.waitForDeleted('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
+        await testSubjects.waitForDeleted('checkboxSelectRow-krb7arhe164k0763b50bjm29');
       });
     });
 
@@ -71,16 +72,84 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const previousButton = await testSubjects.find('pagination-button-previous');
       expect(await previousButton.getAttribute('disabled')).to.be('true');
 
-      await testSubjects.find('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3'); // find first row of page 1
+      await testSubjects.find('checkboxSelectRow-krb7arhe164k0763b50bjm29'); // find first row of page 1
 
       await testSubjects.click('pagination-button-1'); // click page 2
-      await testSubjects.find('checkboxSelectRow-k9a9uc4x0gpe1457b16wthc8'); // wait for first row of page 2
+      await testSubjects.find('checkboxSelectRow-kraz0qle154g0763b569zz83'); // wait for first row of page 2
 
       await testSubjects.click('pagination-button-2'); // click page 3
       await testSubjects.find('checkboxSelectRow-k9a9p1840gpe1457b1ghfxw5'); // wait for first row of page 3
 
       // previous CAN be clicked
       expect(await previousButton.getAttribute('disabled')).to.be(null);
+    });
+
+    it('Displays types of report jobs', async () => {
+      const list = await pageObjects.reporting.getManagementList();
+      expectSnapshot(list).toMatchInline(`
+        Array [
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 10:29 PMtest_user",
+            "report": "Automated reportsearch",
+            "status": "Completed at 2021-07-19 @ 10:29 PMSee report info for warnings.",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:47 PMtest_user",
+            "report": "Discover search [2021-07-19T11:47:35.995-07:00]search",
+            "status": "Completed at 2021-07-19 @ 06:47 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:46 PMtest_user",
+            "report": "Discover search [2021-07-19T11:46:00.132-07:00]search",
+            "status": "Completed at 2021-07-19 @ 06:46 PMSee report info for warnings.",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:44 PMtest_user",
+            "report": "Discover search [2021-07-19T11:44:48.670-07:00]search",
+            "status": "Completed at 2021-07-19 @ 06:44 PMSee report info for warnings.",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Pending at 2021-07-19 @ 06:41 PMWaiting for job to be processed.",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Failed at 2021-07-19 @ 06:43 PMSee report info for error details.",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Completed at 2021-07-19 @ 06:41 PMSee report info for warnings.",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Completed at 2021-07-19 @ 06:39 PMSee report info for warnings.",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Completed at 2021-07-19 @ 06:39 PM",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
+            "report": "[Flights] Global Flight Dashboarddashboard",
+            "status": "Completed at 2021-07-19 @ 06:38 PM",
+          },
+        ]
+      `);
     });
   });
 };
