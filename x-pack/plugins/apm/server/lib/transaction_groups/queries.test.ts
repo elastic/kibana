@@ -32,4 +32,18 @@ describe('transaction group queries', () => {
 
     expect(allParams).toMatchSnapshot();
   });
+  it('fetches metrics top traces', async () => {
+    mock = await inspectSearchParams((setup) =>
+      topTransactionGroupsFetcher(
+        {
+          searchAggregatedTransactions: true,
+        },
+        setup
+      )
+    );
+
+    const allParams = mock.spy.mock.calls.map((call) => call[1]);
+
+    expect(allParams).toMatchSnapshot();
+  });
 });
