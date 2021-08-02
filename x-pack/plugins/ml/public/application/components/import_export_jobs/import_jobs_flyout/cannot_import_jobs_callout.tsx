@@ -76,7 +76,7 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
             )}
             {missingFilters.length > 0 && (
               <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex"
+                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingFilters"
                 defaultMessage="Missing {num, plural, one {filter} other {filters}}: {filters}"
                 values={{ num: missingFilters.length, filters: missingFilters.join(',') }}
               />
