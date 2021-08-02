@@ -12,12 +12,15 @@ import { useActions, useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DOCS_PREFIX } from '../../routes';
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
 import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
+import { AddDomainForm } from './components/add_domain/add_domain_form';
+import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { DomainsTable } from './components/domains_table';
 import { CRAWLER_TITLE } from './constants';
@@ -38,22 +41,59 @@ export const CrawlerOverview: React.FC = () => {
       pageHeader={{ pageTitle: CRAWLER_TITLE }}
       isLoading={dataLoading}
     >
-      <EuiFlexGroup direction="row" alignItems="stretch">
-        <EuiFlexItem>
+      {domains.length > 0 ? (
+        <>
+          <EuiFlexGroup direction="row" alignItems="stretch">
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3>
+                  {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTitle', {
+                    defaultMessage: 'Domains',
+                  })}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AddDomainFlyout />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <DomainsTable />
+        </>
+      ) : (
+        <>
           <EuiTitle size="s">
             <h3>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTitle', {
-                defaultMessage: 'Domains',
+              {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.empty.title', {
+                defaultMessage: 'Add a domain to get started',
               })}
             </h3>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AddDomainFlyout />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <DomainsTable />
+          <EuiText>
+            <p>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.empty.description', {
+                defaultMessage:
+                  "Easily index your website's content. To get started, enter your domain name, provide optional entry points and crawl rules, and we will handle the rest.",
+              })}{' '}
+              <EuiLink external target="_blank" href={`${DOCS_PREFIX}/web-crawler.html`}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.crawler.empty.crawlerDocumentationLinkDescription',
+                  {
+                    defaultMessage: 'Learn more about the web crawler',
+                  }
+                )}
+              </EuiLink>
+            </p>
+          </EuiText>
+          <AddDomainForm />
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <AddDomainFormSubmitButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
       {(crawlRequests.length > 0 || domains.length > 0) && (
         <>
           <EuiSpacer size="xl" />

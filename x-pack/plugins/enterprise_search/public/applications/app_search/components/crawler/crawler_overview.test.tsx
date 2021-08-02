@@ -14,6 +14,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
+import { AddDomainForm } from './components/add_domain/add_domain_form';
+import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { DomainsTable } from './components/domains_table';
 import { CrawlerOverview } from './crawler_overview';
@@ -94,15 +96,15 @@ describe('CrawlerOverview', () => {
     expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
   });
 
-  // TODO update below line to 'hides the domain and crawl request tables when there are no domains, and no crawl requests' after empty state is added
-  it('shows domain table and hides the crawl request table when there are no domains, and no crawl requests', () => {
+  it('hides the domain and crawl request tables when there are no domains, and no crawl requests', () => {
     setMockValues({ ...mockValues, domains: [], crawlRequests: [] });
 
     const wrapper = shallow(<CrawlerOverview />);
 
-    // expect(wrapper.find(AddDomainForm)).toHaveLength(1); // TODO uncomment this after empty state is added
-    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1); // TODO this should be 0 after empty state is added
-    expect(wrapper.find(DomainsTable)).toHaveLength(1); // TODO this should be 0 after empty state is added
+    expect(wrapper.find(AddDomainForm)).toHaveLength(1);
+    expect(wrapper.find(AddDomainFormSubmitButton)).toHaveLength(1);
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(0);
+    expect(wrapper.find(DomainsTable)).toHaveLength(0);
     expect(wrapper.find(CrawlRequestsTable)).toHaveLength(0);
   });
 
@@ -111,21 +113,22 @@ describe('CrawlerOverview', () => {
 
     const wrapper = shallow(<CrawlerOverview />);
 
-    // expect(wrapper.find(AddDomainForm)).toHaveLength(0); // TODO uncomment this after empty state is added
+    expect(wrapper.find(AddDomainForm)).toHaveLength(0);
+    expect(wrapper.find(AddDomainFormSubmitButton)).toHaveLength(0);
     expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
     expect(wrapper.find(DomainsTable)).toHaveLength(1);
     expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
   });
 
-  // TODO update below line to 'hides the domain table and shows the crawl request tables when there are crawl requests but no domains' after empty state is added
-  it('shows the domain and the crawl request tables when there are crawl requests, but no domains', () => {
+  it('hides the domain table and shows the crawl request tables when there are crawl requests but no domains', () => {
     setMockValues({ ...mockValues, domains: [] });
 
     const wrapper = shallow(<CrawlerOverview />);
 
-    // expect(wrapper.find(AddDomainForm)).toHaveLength(1); // TODO uncomment this after empty state is added
-    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1); // TODO this should be 0 after empty state is added
-    expect(wrapper.find(DomainsTable)).toHaveLength(1); // TODO this should be 0 after empty state is added
+    expect(wrapper.find(AddDomainForm)).toHaveLength(1);
+    expect(wrapper.find(AddDomainFormSubmitButton)).toHaveLength(1);
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(0);
+    expect(wrapper.find(DomainsTable)).toHaveLength(0);
     expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
   });
 
@@ -134,7 +137,8 @@ describe('CrawlerOverview', () => {
 
     const wrapper = shallow(<CrawlerOverview />);
 
-    // expect(wrapper.find(AddDomainForm)).toHaveLength(0); // TODO uncomment this after empty state is added
+    expect(wrapper.find(AddDomainForm)).toHaveLength(0);
+    expect(wrapper.find(AddDomainFormSubmitButton)).toHaveLength(0);
     expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
     expect(wrapper.find(DomainsTable)).toHaveLength(1);
     expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
