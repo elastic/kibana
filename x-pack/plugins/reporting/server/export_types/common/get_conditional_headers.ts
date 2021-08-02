@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ReportingConfig } from '../../';
-import { ConditionalHeaders } from './';
+import { ConditionalHeaders, DeserializedHeaders } from '.';
+import { ReportingConfig } from '../..';
 
 export const getConditionalHeaders = (
   config: ReportingConfig,
-  filteredHeaders: Record<string, string>
+  filteredHeaders: DeserializedHeaders
 ) => {
   const { kbnConfig } = config;
   const [hostname, port, basePath, protocol] = [

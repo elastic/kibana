@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
-import { ROUTE_TAG_CAN_REDIRECT } from '../../../security/server';
+import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
+import { ROUTE_TAG_CAN_REDIRECT } from '../../../security/server';
 import { API_BASE_URL } from '../../common/constants';
+import { handleUnavailable } from './';
 import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from './lib/jobs_query';
 import { deleteJobResponseHandler, downloadJobResponseHandler } from './lib/job_response_handler';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
-
-const handleUnavailable = (res: any) => {
-  return res.custom({ statusCode: 503, body: 'Not Available' });
-};
 
 export function registerJobInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
