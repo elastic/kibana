@@ -84,6 +84,7 @@ export {
   axisExtentConfig,
   layerConfig,
   xyChart,
+  labelsOrientationConfig,
 } from '../../common/expressions';
 
 export type XYChartRenderProps = XYChartProps & {
@@ -170,7 +171,7 @@ export const getXyChartRenderer = (dependencies: {
 });
 
 function getValueLabelsStyling(isHorizontal: boolean) {
-  const VALUE_LABELS_MAX_FONTSIZE = 15;
+  const VALUE_LABELS_MAX_FONTSIZE = 12;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
   const VALUE_LABELS_VERTICAL_OFFSET = -10;
   const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
@@ -178,7 +179,7 @@ function getValueLabelsStyling(isHorizontal: boolean) {
   return {
     displayValue: {
       fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-      fill: { textInverted: true, textBorder: 2 },
+      fill: { textContrast: true, textInverted: false, textBorder: 0 },
       alignment: isHorizontal
         ? {
             vertical: VerticalAlignment.Middle,
@@ -292,6 +293,12 @@ export function XYChart({
     yRight: true,
   };
 
+  const labelsOrientation = args.labelsOrientation || {
+    x: 0,
+    yLeft: 0,
+    yRight: 0,
+  };
+
   const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
 
   const chartHasMoreThanOneBarSeries =
@@ -333,6 +340,10 @@ export function XYChart({
           groupId === 'right'
             ? tickLabelsVisibilitySettings?.yRight
             : tickLabelsVisibilitySettings?.yLeft,
+        rotation:
+          groupId === 'right'
+            ? args.labelsOrientation?.yRight || 0
+            : args.labelsOrientation?.yLeft || 0,
       },
       axisTitle: {
         visible:
@@ -531,6 +542,7 @@ export function XYChart({
         style={{
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
+            rotation: labelsOrientation?.x,
           },
           axisTitle: {
             visible: axisTitlesVisibilitySettings.x,
@@ -609,7 +621,7 @@ export function XYChart({
               for (const column of table.columns) {
                 const record = newRow[column.id];
                 if (
-                  record &&
+                  record != null &&
                   // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
                   (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
                 ) {
@@ -785,9 +797,12 @@ export function XYChart({
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
                   showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
+                  isValueContainedInElement: false,
                   isAlternatingValueLabel: false,
-                  isValueContainedInElement: true,
-                  overflowConstraints: [LabelOverflowConstraint.ChartEdges],
+                  overflowConstraints: [
+                    LabelOverflowConstraint.ChartEdges,
+                    LabelOverflowConstraint.BarGeometry,
+                  ],
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;

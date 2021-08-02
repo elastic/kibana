@@ -5,44 +5,47 @@
  * 2.0.
  */
 
-import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { ErrorCountAlertTrigger } from '.';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import {
-  mockApmPluginContextValue,
-  MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import React, { useState } from 'react';
+import { AlertParams, ErrorCountAlertTrigger } from '.';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+
+const KibanaReactContext = createKibanaReactContext(({
+  notifications: { toasts: { add: () => {} } },
+} as unknown) as Partial<CoreStart>);
 
 export default {
-  title: 'app/ErrorCountAlertTrigger',
+  title: 'alerting/ErrorCountAlertTrigger',
   component: ErrorCountAlertTrigger,
   decorators: [
     (Story: React.ComponentClass) => (
-      <MockApmPluginContextWrapper
-        value={(mockApmPluginContextValue as unknown) as ApmPluginContextValue}
-      >
-        <MemoryRouter>
-          <div style={{ width: 400 }}>
-            <Story />
-          </div>
-        </MemoryRouter>
-      </MockApmPluginContextWrapper>
+      <KibanaReactContext.Provider>
+        <div style={{ width: 400 }}>
+          <Story />
+        </div>
+      </KibanaReactContext.Provider>
     ),
   ],
 };
 
 export function Example() {
-  const params = {
+  const [params, setParams] = useState<AlertParams>({
+    serviceName: 'testServiceName',
+    environment: 'testEnvironment',
     threshold: 2,
-    window: '5m',
-  };
+    windowSize: 5,
+    windowUnit: 'm',
+  });
+
+  function setAlertParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
 
   return (
     <ErrorCountAlertTrigger
-      alertParams={params as any}
-      setAlertParams={() => undefined}
-      setAlertProperty={() => undefined}
+      alertParams={params}
+      setAlertParams={setAlertParams}
+      setAlertProperty={() => {}}
     />
   );
 }

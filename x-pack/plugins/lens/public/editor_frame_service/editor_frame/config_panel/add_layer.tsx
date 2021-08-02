@@ -49,7 +49,7 @@ export function AddLayerButton({
           })}
           content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
             defaultMessage:
-              'Use multiple layers to combine chart types or visualize different index patterns.',
+              'Use multiple layers to combine visualization types or visualize different index patterns.',
           })}
           position="bottom"
         >

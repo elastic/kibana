@@ -20,7 +20,6 @@ import {
   EuiTablePagination,
   EuiTableRow,
   EuiTableRowCell,
-  EuiText,
   Pager,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
@@ -30,25 +29,23 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
 import moment from 'moment';
-import { ApplicationStart } from 'kibana/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { getIndexListUri } from '../../../../../../index_management/public';
 import { PolicyFromES } from '../../../../../common/types';
+import { useKibana } from '../../../../shared_imports';
 import { getPolicyEditPath } from '../../../services/navigation';
 import { sortTable } from '../../../services';
 import { trackUiMetric } from '../../../services/ui_metric';
 
 import { UIM_EDIT_CLICK } from '../../../constants';
+import { TableColumn } from '../index';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
 import { ConfirmDelete } from './confirm_delete';
+import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
 
-type PolicyProperty = Extract<
-  keyof PolicyFromES,
-  'version' | 'name' | 'linkedIndices' | 'modified_date'
->;
-const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
+const COLUMNS: Array<[TableColumn, { label: string; width: number }]> = [
   [
     'name',
     {
@@ -59,12 +56,24 @@ const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
     },
   ],
   [
-    'linkedIndices',
+    'indices',
     {
       label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader', {
         defaultMessage: 'Linked indices',
       }),
       width: 120,
+    },
+  ],
+  [
+    'indexTemplates',
+    {
+      label: i18n.translate(
+        'xpack.indexLifecycleMgmt.policyTable.headers.linkedIndexTemplatesHeader',
+        {
+          defaultMessage: 'Linked index templates',
+        }
+      ),
+      width: 160,
     },
   ],
   [
@@ -77,7 +86,7 @@ const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
     },
   ],
   [
-    'modified_date',
+    'modifiedDate',
     {
       label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader', {
         defaultMessage: 'Modified date',
@@ -90,26 +99,26 @@ const COLUMNS: Array<[PolicyProperty, { label: string; width: number }]> = [
 interface Props {
   policies: PolicyFromES[];
   totalNumber: number;
-  navigateToApp: ApplicationStart['navigateToApp'];
   setConfirmModal: (modal: ReactElement | null) => void;
   handleDelete: () => void;
-  history: RouteComponentProps['history'];
 }
 export const TableContent: React.FunctionComponent<Props> = ({
   policies,
   totalNumber,
-  navigateToApp,
   setConfirmModal,
   handleDelete,
-  history,
 }) => {
   const [popoverPolicy, setPopoverPolicy] = useState<string>();
-  const [sort, setSort] = useState<{ sortField: PolicyProperty; isSortAscending: boolean }>({
+  const [sort, setSort] = useState<{ sortField: TableColumn; isSortAscending: boolean }>({
     sortField: 'name',
     isSortAscending: true,
   });
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(0);
+  const history = useHistory();
+  const {
+    services: { navigateToApp },
+  } = useKibana();
 
   let sortedPolicies = sortTable(policies, sort.sortField, sort.isSortAscending);
   const pager = new Pager(totalNumber, pageSize, currentPage);
@@ -131,7 +140,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
     }
   };
 
-  const onSort = (column: PolicyProperty) => {
+  const onSort = (column: TableColumn) => {
     const newIsSortAscending = sort.sortField === column ? !sort.isSortAscending : true;
     setSort({ sortField: column, isSortAscending: newIsSortAscending });
   };
@@ -162,7 +171,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
   );
 
   const buildActionPanelTree = (policy: PolicyFromES): EuiContextMenuPanelDescriptor[] => {
-    const hasLinkedIndices = Boolean(policy.linkedIndices && policy.linkedIndices.length);
+    const hasLinkedIndices = Boolean(policy.indices && policy.indices.length);
 
     const viewIndicesLabel = i18n.translate(
       'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
@@ -227,7 +236,11 @@ export const TableContent: React.FunctionComponent<Props> = ({
     return [panelTree];
   };
 
-  const renderRowCell = (fieldName: string, value: string | number | string[]): ReactNode => {
+  const renderRowCell = (
+    fieldName: string,
+    value: string | number | string[],
+    policy?: PolicyFromES
+  ): ReactNode => {
     if (fieldName === 'name') {
       return (
         <EuiLink
@@ -239,13 +252,21 @@ export const TableContent: React.FunctionComponent<Props> = ({
           {value}
         </EuiLink>
       );
-    } else if (fieldName === 'linkedIndices') {
-      return (
-        <EuiText>
-          <b>{value ? (value as string[]).length : '0'}</b>
-        </EuiText>
+    } else if (fieldName === 'indices') {
+      return value ? (value as string[]).length : '0';
+    } else if (fieldName === 'indexTemplates' && policy) {
+      return value && (value as string[]).length > 0 ? (
+        <EuiButtonEmpty
+          flush="left"
+          data-test-subj="viewIndexTemplates"
+          onClick={() => setConfirmModal(renderIndexTemplatesFlyout(policy))}
+        >
+          {(value as string[]).length}
+        </EuiButtonEmpty>
+      ) : (
+        '0'
       );
-    } else if (fieldName === 'modified_date' && value) {
+    } else if (fieldName === 'modifiedDate' && value) {
       return moment(value).format('YYYY-MM-DD HH:mm:ss');
     }
     return value;
@@ -279,7 +300,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
             className={'policyTable__content--' + fieldName}
             width={width}
           >
-            {renderRowCell(fieldName, value)}
+            {renderRowCell(fieldName, value, policy)}
           </EuiTableRowCell>
         );
       }
@@ -322,7 +343,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
   const rows = sortedPolicies.map((policy) => {
     const { name } = policy;
     return (
-      <EuiTableRow data-test-subj="policyTableRow" key={`${name}-row`}>
+      <EuiTableRow data-test-subj={`policyTableRow-${name}`} key={`${name}-row`}>
         {renderRowCells(policy)}
       </EuiTableRow>
     );
@@ -340,6 +361,17 @@ export const TableContent: React.FunctionComponent<Props> = ({
         policyToDelete={policy}
         callback={handleDelete}
         onCancel={() => {
+          setConfirmModal(null);
+        }}
+      />
+    );
+  };
+
+  const renderIndexTemplatesFlyout = (policy: PolicyFromES): ReactElement => {
+    return (
+      <IndexTemplatesFlyout
+        policy={policy}
+        close={() => {
           setConfirmModal(null);
         }}
       />

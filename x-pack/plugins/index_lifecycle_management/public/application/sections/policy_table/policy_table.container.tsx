@@ -6,26 +6,17 @@
  */
 
 import React, { useEffect } from 'react';
-import { ApplicationStart } from 'kibana/public';
-import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PolicyTable as PresentationComponent } from './policy_table';
 import { useKibana } from '../../../shared_imports';
 import { useLoadPoliciesList } from '../../services/api';
 
-interface Props {
-  navigateToApp: ApplicationStart['navigateToApp'];
-}
-
-export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> = ({
-  navigateToApp,
-  history,
-}) => {
+export const PolicyTable: React.FunctionComponent = () => {
   const {
     services: { breadcrumbService },
   } = useKibana();
-  const { data: policies, isLoading, error, resendRequest } = useLoadPoliciesList(true);
+  const { data: policies, isLoading, error, resendRequest } = useLoadPoliciesList();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('policies');
@@ -77,12 +68,5 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
     );
   }
 
-  return (
-    <PresentationComponent
-      policies={policies || []}
-      history={history}
-      navigateToApp={navigateToApp}
-      updatePolicies={resendRequest}
-    />
-  );
+  return <PresentationComponent policies={policies || []} updatePolicies={resendRequest} />;
 };
