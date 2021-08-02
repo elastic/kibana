@@ -25,7 +25,14 @@ import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
-import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
+import {
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  DatasourceMap,
+  VisualizationMap,
+} from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import {
   ReactExpressionRendererProps,
@@ -45,7 +52,7 @@ const MAX_SUGGESTIONS_DISPLAYED = 5;
 
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
@@ -54,7 +61,7 @@ export interface SuggestionPanelProps {
     }
   >;
   activeVisualizationId: string | null;
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   visualizationState: unknown;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;

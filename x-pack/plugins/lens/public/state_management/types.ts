@@ -13,7 +13,7 @@ import { Document } from '../persistence';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { DateRange } from '../../common';
 import { LensAppServices } from '../app_plugin/types';
-import { Datasource, Visualization } from '../types';
+import { DatasourceMap, VisualizationMap } from '../types';
 
 export interface PreviewState {
   visualization: {
@@ -56,8 +56,8 @@ export interface LensState {
 
 export interface LensStoreDeps {
   lensServices: LensAppServices;
-  datasourceMap: Record<string, Datasource>;
-  visualizationMap: Record<string, Visualization>;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   initialContext?: VisualizeFieldContext;
   embeddableEditorIncomingState?: EmbeddableEditorState;
 }
