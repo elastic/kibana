@@ -39,7 +39,9 @@ describe('ContentSection', () => {
   });
 
   it('sets heading level for personal dashboard', () => {
-    const wrapper = shallow(<ContentSection {...props} isPersonal title="foo" description="bar" />);
+    const wrapper = shallow(
+      <ContentSection {...props} isOrganization={false} title="foo" description="bar" />
+    );
     const header = wrapper.find(ViewContentHeader);
 
     expect(header.prop('headingLevel')).toEqual(2);

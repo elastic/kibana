@@ -14,7 +14,7 @@ import { ViewContentHeader } from '../view_content_header';
 
 interface ContentSectionProps {
   children: React.ReactNode;
-  isPersonal?: boolean;
+  isOrganization?: boolean;
   className?: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -26,7 +26,7 @@ interface ContentSectionProps {
 
 export const ContentSection: React.FC<ContentSectionProps> = ({
   children,
-  isPersonal,
+  isOrganization = true,
   className = '',
   title,
   description,
@@ -39,7 +39,7 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
       <>
         <ViewContentHeader
           title={title}
-          headingLevel={isPersonal ? 2 : 3}
+          headingLevel={isOrganization ? 3 : 2}
           titleSize="s"
           description={description}
           action={action}
