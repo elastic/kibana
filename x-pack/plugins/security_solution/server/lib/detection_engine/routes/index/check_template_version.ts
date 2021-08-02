@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { ElasticsearchClient } from 'src/core/server';
 import { isOutdated } from '../../migrations/helpers';
-import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
+import {
+  ALIAS_VERSION_FIELD,
+  SIGNALS_FIELD_ALIASES_VERSION,
+  SIGNALS_TEMPLATE_VERSION,
+} from './get_signals_template';
 
-// TODO: update this to check both legacy and component templates
 export const getTemplateVersion = async ({
   alias,
   esClient,
@@ -35,4 +39,15 @@ export const templateNeedsUpdate = async ({
   const templateVersion = await getTemplateVersion({ alias, esClient });
 
   return isOutdated({ current: templateVersion, target: SIGNALS_TEMPLATE_VERSION });
+};
+
+export const fieldAliasesOutdated = async (esClient: ElasticsearchClient, index: string) => {
+  const { body: indexMappings } = await esClient.indices.get({ index });
+  for (const [_, mapping] of Object.entries(indexMappings)) {
+    const aliasesVersion = get(mapping.mappings?._meta, ALIAS_VERSION_FIELD) ?? 0;
+    if (aliasesVersion < SIGNALS_FIELD_ALIASES_VERSION) {
+      return true;
+    }
+  }
+  return false;
 };

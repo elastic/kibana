@@ -25,7 +25,9 @@ import aadFieldConversion from './signal_aad_mapping.json';
   release
 */
 export const SIGNALS_TEMPLATE_VERSION = 55;
+export const SIGNALS_FIELD_ALIASES_VERSION = 1;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
+export const ALIAS_VERSION_FIELD = 'aliases_version';
 
 export const getSignalsTemplate = (index: string, spaceId: string, aadIndexAliasName: string) => {
   const fieldAliases = createSignalsFieldAliases();
@@ -74,6 +76,7 @@ export const getSignalsTemplate = (index: string, spaceId: string, aadIndexAlias
         },
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
+          [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
         },
       },
     },

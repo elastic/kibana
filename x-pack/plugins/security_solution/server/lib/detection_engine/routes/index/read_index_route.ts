@@ -15,6 +15,7 @@ import { buildSiemResponse } from '../utils';
 import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
+import { fieldAliasesOutdated } from './check_template_version';
 
 export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.get(
@@ -44,12 +45,14 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
 
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
+          let aliasesOutdated: boolean | null = null;
           try {
             const indexVersion = await getIndexVersion(esClient, index);
             mappingOutdated = isOutdated({
               current: indexVersion,
               target: SIGNALS_TEMPLATE_VERSION,
             });
+            aliasesOutdated = await fieldAliasesOutdated(esClient, index);
           } catch (err) {
             const error = transformError(err);
             // Some users may not have the view_index_metadata permission necessary to check the index mapping version
@@ -64,7 +67,7 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
           return response.ok({
             body: {
               name: ruleRegistryEnabled ? DEFAULT_ALERTS_INDEX : index,
-              index_mapping_outdated: mappingOutdated,
+              index_mapping_outdated: mappingOutdated || aliasesOutdated,
             },
           });
         } else {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 import {
@@ -26,6 +27,8 @@ import {
   getSignalsTemplate,
   getRbacRequiredFields,
   SIGNALS_TEMPLATE_VERSION,
+  SIGNALS_FIELD_ALIASES_VERSION,
+  ALIAS_VERSION_FIELD,
 } from './get_signals_template';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
@@ -136,20 +139,28 @@ export const addAliasesToIndices = async ({
     },
   });
 
+  const { body: indexMappings } = await esClient.indices.get({ index });
   // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
   // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
   // mapping) or else this call will fail and not update ANY signals indices
   const fieldAliases = createSignalsFieldAliases();
-  const newMapping = {
-    properties: {
-      ...signalExtraFields,
-      ...fieldAliases,
-      ...getRbacRequiredFields(spaceId),
-    },
-  };
-  await esClient.indices.putMapping({
-    index: `${index}-*`,
-    body: newMapping,
-    allow_no_indices: true,
-  } as estypes.IndicesPutMappingRequest);
+  for (const [indexName, mapping] of Object.entries(indexMappings)) {
+    const currentVersion: number | undefined = get(mapping.mappings?._meta, 'version');
+    const newMapping = {
+      properties: {
+        ...signalExtraFields,
+        ...fieldAliases,
+        ...getRbacRequiredFields(spaceId),
+        _meta: {
+          version: currentVersion,
+          [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
+        },
+      },
+    };
+    await esClient.indices.putMapping({
+      index: indexName,
+      body: newMapping,
+      allow_no_indices: true,
+    } as estypes.IndicesPutMappingRequest);
+  }
 };
