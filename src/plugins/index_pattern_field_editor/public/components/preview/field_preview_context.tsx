@@ -357,7 +357,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     if (error) {
       const fallBackError = {
         message: i18n.translate('indexPatternFieldEditor.fieldPreview.defaultErrorTitle', {
-          defaultMessage: 'Error executing the script.',
+          defaultMessage: 'Unable to run the provided script',
         }),
       };
 
