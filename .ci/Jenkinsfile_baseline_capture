@@ -35,7 +35,6 @@ kibanaPipeline(timeoutMinutes: 210) {
               kibanaPipeline.withCiTaskQueue([parallel: 2]) {
                 catchErrors {
                   tasks([
-                    kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh'),
                     kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh'),
                     kibanaPipeline.scriptTask('Check Public API Docs', 'test/scripts/checks/baseline_plugin_public_api_docs.sh'),
                   ])

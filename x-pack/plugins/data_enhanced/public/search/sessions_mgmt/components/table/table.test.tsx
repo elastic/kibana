@@ -91,6 +91,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -123,6 +124,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -132,7 +134,7 @@ describe('Background Search Session Management Table', () => {
       expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "App",
-          "Namevery background search ",
+          "Namevery background search  ",
           "# Searches0",
           "StatusExpired",
           "Created2 Dec, 2020, 00:19:32",
@@ -166,6 +168,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -199,6 +202,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );

@@ -25,6 +25,7 @@ export interface UsageStats {
    */
   'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
+  'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
   'visualization:visualize:legacyChartsLibrary': boolean;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
