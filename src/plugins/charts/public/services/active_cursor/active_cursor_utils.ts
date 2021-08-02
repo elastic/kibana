@@ -9,6 +9,7 @@ import { uniq } from 'lodash';
 
 import type { Datatable } from '../../../../expressions';
 import type { ActiveCursorSyncOption, DateHistogramSyncOption } from './types';
+import { ActiveCursorPayload } from './types';
 
 function isDateHistogramSyncOption(
   syncOption?: ActiveCursorSyncOption
@@ -17,9 +18,11 @@ function isDateHistogramSyncOption(
 }
 
 const parseDatatable = (dataTables: Datatable[]) => {
-  const isDateHistogram = dataTables.every((dataTable) =>
-    dataTable.columns.find((c) => Boolean(c.meta.sourceParams?.appliedTimeRange))
-  );
+  const isDateHistogram =
+    Boolean(dataTables.length) &&
+    dataTables.every((dataTable) =>
+      dataTable.columns.find((c) => Boolean(c.meta.sourceParams?.appliedTimeRange))
+    );
 
   const accessors = uniq(
     dataTables
@@ -36,10 +39,11 @@ const parseDatatable = (dataTables: Datatable[]) => {
 };
 
 /** @internal **/
-export const parseSyncOptions = (syncOptions: ActiveCursorSyncOption) =>
+export const parseSyncOptions = (
+  syncOptions: ActiveCursorSyncOption
+): Partial<ActiveCursorPayload> =>
   isDateHistogramSyncOption(syncOptions)
     ? {
         isDateHistogram: syncOptions.isDateHistogram,
-        accessors: undefined,
       }
     : parseDatatable(syncOptions.datatables);
