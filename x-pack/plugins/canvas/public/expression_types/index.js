@@ -11,7 +11,9 @@ export { Transform } from './transform';
 export { transformRegistry } from './transform_registry';
 
 export { Model, modelRegistry } from './model';
-export { View, viewRegistry } from './view';
+
+export { View } from './view';
+export { viewRegistry } from './view_registry';
 
 export { ArgType } from './arg_type';
 export { argTypeRegistry } from './arg_type_registry';

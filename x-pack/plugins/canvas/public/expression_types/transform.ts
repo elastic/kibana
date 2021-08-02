@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import { FunctionForm, FunctionFormProps } from './function_form';
 
 export type TransformProps = { requiresContext: boolean } & FunctionFormProps;
@@ -13,12 +12,11 @@ export type TransformProps = { requiresContext: boolean } & FunctionFormProps;
 export class Transform extends FunctionForm {
   constructor(props: TransformProps) {
     super(props);
-
-    const propNames = ['requiresContext'];
+    const { requiresContext } = props;
     const defaultProps = {
       requiresContext: true,
     };
 
-    Object.assign(this, defaultProps, pick(props, propNames));
+    Object.assign(this, defaultProps, { requiresContext });
   }
 }

@@ -30,7 +30,7 @@ export interface FunctionFormOwnProps {
 
 export interface DataArg {
   arg: Arg | undefined;
-  argValues?: Array<string | Ast | undefined>;
+  argValues?: Array<string | Ast | null>;
   skipRender?: boolean;
   label?: 'string';
 }
@@ -62,13 +62,13 @@ export class FunctionForm extends BaseForm {
     if (!arg || skipRender) {
       return null;
     }
-    const renderArgWithProps = (argValue: string | Ast | undefined, valueIndex: number) =>
+    const renderArgWithProps = (argValue: string | Ast | null, valueIndex: number) =>
       arg.render({
         key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
         ...passedProps,
         label,
         valueIndex,
-        argValue,
+        argValue: argValue ?? null,
         onValueChange: onValueChange(arg.name, valueIndex),
         onValueRemove: onValueRemove(arg.name, valueIndex),
       });
@@ -76,7 +76,7 @@ export class FunctionForm extends BaseForm {
     // render the argument's template, wrapped in a remove control
     // if the argument is required but not included, render the control anyway
     if (!argValues && arg.required) {
-      return renderArgWithProps({ type: undefined, value: '' }, 0);
+      return renderArgWithProps(null, 0);
     }
 
     // render all included argument controls
@@ -123,7 +123,7 @@ export class FunctionForm extends BaseForm {
       // if arg is not multi, only preserve the last value found
       // otherwise, leave the value alone (including if the arg is not defined)
       const isMulti = arg && arg.multi;
-      const argValues = args[argName] && !isMulti ? [last(args[argName])] : args[argName];
+      const argValues = args[argName] && !isMulti ? [last(args[argName]) ?? null] : args[argName];
 
       return { arg, argValues };
     });

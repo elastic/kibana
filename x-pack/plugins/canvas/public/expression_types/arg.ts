@@ -6,7 +6,6 @@
  */
 
 import { createElement } from 'react';
-import { pick } from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 // @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
@@ -21,13 +20,14 @@ interface ArtOwnProps {
   types?: string[];
   default?: string | null;
   resolve?: (...args: any[]) => any;
-  options?: string[];
+  options?: {
+    include: string[];
+  };
 }
-
 export type ArgProps = ArtOwnProps & FunctionFormProps;
 
 export interface DataArg {
-  argValue?: string | Ast;
+  argValue?: string | Ast | null;
   skipRender?: boolean;
   label?: 'string';
   valueIndex: number;
@@ -43,7 +43,9 @@ export class Arg {
   types?: string[];
   default?: string | null;
   resolve?: (...args: any[]) => any;
-  options?: string[];
+  options?: {
+    include: string[];
+  };
   name: string = '';
   displayName?: string;
   help?: string;
@@ -67,22 +69,20 @@ export class Arg {
       resolve: () => ({}),
     };
 
-    const viewOverrides = {
-      argType,
-      ...pick(props, [
-        'name',
-        'displayName',
-        'help',
-        'multi',
-        'required',
-        'types',
-        'default',
-        'resolve',
-        'options',
-      ]),
-    };
+    const { name, displayName, help, multi, types, options } = props;
 
-    Object.assign(this, defaultProps, argType, viewOverrides);
+    Object.assign(this, defaultProps, argType, {
+      name,
+      displayName,
+      help,
+      multi,
+      require,
+      types,
+      default: props.default,
+      resolve: props.resolve,
+      required: props.required,
+      options,
+    });
   }
 
   // TODO: Document what these otherProps are. Maybe make them named arguments?

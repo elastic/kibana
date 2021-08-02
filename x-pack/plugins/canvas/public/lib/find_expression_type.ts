@@ -7,7 +7,7 @@
 
 import { transformRegistry } from '../expression_types/transform_registry';
 import { modelRegistry } from '../expression_types/model';
-import { viewRegistry } from '../expression_types/view';
+import { viewRegistry } from '../expression_types/view_registry';
 import { ArgType } from '../expression_types/types';
 
 const expressionTypes: ArgType[] = ['view', 'model', 'transform', 'datasource'];
@@ -22,7 +22,7 @@ export function findExpressionType(name: string, type?: ArgType | null) {
     switch (checkType) {
       case 'view':
         expression = viewRegistry.get(name);
-        return !expression ? acc : acc.concat(expression);
+        return !expression ? acc : acc.concat(expression as any);
       case 'model':
         expression = modelRegistry.get(name);
         return !expression ? acc : acc.concat(expression);

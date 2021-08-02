@@ -6,33 +6,34 @@
  */
 
 import { pick } from 'lodash';
-import { Registry } from '@kbn/interpreter/common';
-import { FunctionForm } from './function_form';
+import { FunctionForm, FunctionFormProps } from './function_form';
+import { Arg } from './types';
+
+interface ViewOwnProps {
+  modelArgs: string[] | Arg[];
+  requiresContext?: boolean;
+  default?: string;
+  resolveArgValue?: boolean;
+}
+
+export type ViewProps = ViewOwnProps & FunctionFormProps;
 
 export class View extends FunctionForm {
-  constructor(props) {
-    super(props);
+  modelArgs: string[] | Arg[] = [];
+  requiresContext?: boolean;
 
-    const propNames = ['help', 'modelArgs', 'requiresContext'];
+  constructor(props: ViewProps) {
+    super(props);
+    const { help, modelArgs, requiresContext } = props;
     const defaultProps = {
       help: `Element: ${props.name}`,
       requiresContext: true,
     };
 
-    Object.assign(this, defaultProps, pick(props, propNames));
-
-    this.modelArgs = this.modelArgs || [];
+    Object.assign(this, defaultProps, { help, modelArgs: modelArgs || [], requiresContext });
 
     if (!Array.isArray(this.modelArgs)) {
       throw new Error(`${this.name} element is invalid, modelArgs must be an array`);
     }
   }
 }
-
-class ViewRegistry extends Registry {
-  wrapper(obj) {
-    return new View(obj);
-  }
-}
-
-export const viewRegistry = new ViewRegistry();
