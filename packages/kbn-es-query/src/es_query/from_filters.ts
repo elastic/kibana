@@ -43,6 +43,14 @@ const translateToQuery = (filter: Filter) => {
   return filter;
 };
 
+/**
+ * @param filters
+ * @param indexPattern
+ * @param ignoreFilterIfFieldNotInIndex by default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them any way.
+ * @returns An EQL query
+ *
+ * @public
+ */
 export const buildQueryFromFilters = (
   filters: Filter[] = [],
   indexPattern: IndexPatternBase | undefined,
