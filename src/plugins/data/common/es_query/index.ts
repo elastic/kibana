@@ -73,346 +73,346 @@ import {
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isFilter = oldIsFilter;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isFilterDisabled = oldIsFilterDisabled;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const disableFilter = oldDisableFilter;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const fromKueryExpression = oldFromKueryExpression;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const toElasticsearchQuery = oldToElasticsearchQuery;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const nodeTypes = oldNodeTypes;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildEsQuery = oldBuildEsQuery;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildQueryFromFilters = oldBuildQueryFromFilters;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const luceneStringToDsl = oldLuceneStringToDsl;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const decorateQuery = olddecorateQuery;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const getPhraseFilterField = oldgetPhraseFilterField;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const getPhraseFilterValue = oldgetPhraseFilterValue;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isFilterPinned = oldIsFilterPinned;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const nodeBuilder = oldNodeBuilder;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isFilters = oldIsFilters;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const uniqFilters = oldUniqFilters;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const onlyDisabledFiltersChanged = oldOnlyDisabledFiltersChanged;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isExistsFilter = oldIsExistsFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isMatchAllFilter = oldIsMatchAllFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isGeoBoundingBoxFilter = oldIsGeoBoundingBoxFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isGeoPolygonFilter = oldIsGeoPolygonFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isMissingFilter = oldIsMissingFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isPhraseFilter = oldIsPhraseFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isPhrasesFilter = oldIsPhrasesFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isRangeFilter = oldIsRangeFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const isQueryStringFilter = oldIsQueryStringFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildQueryFilter = oldBuildQueryFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildPhrasesFilter = oldBuildPhrasesFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildPhraseFilter = oldBuildPhraseFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildRangeFilter = oldBuildRangeFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildCustomFilter = oldBuildCustomFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildFilter = oldBuildFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildEmptyFilter = oldBuildEmptyFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const buildExistsFilter = oldBuildExistsFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const toggleFilterNegated = oldtoggleFilterNegated;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const enableFilter = oldEnableFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const pinFilter = oldPinFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const toggleFilterDisabled = oldToggleFilterDisabled;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const compareFilters = oldCompareFilters;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const dedupFilters = oldDedupFilters;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const COMPARE_ALL_OPTIONS = OLD_COMPARE_ALL_OPTIONS;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const FILTERS = oldFILTERS;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type Filter = oldFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type RangeFilterMeta = oldRangeFilterMeta;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type RangeFilterParams = oldRangeFilterParams;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type ExistsFilter = oldExistsFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type GeoPolygonFilter = oldGeoPolygonFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type PhrasesFilter = oldPhrasesFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type PhraseFilter = oldPhraseFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type MatchAllFilter = oldMatchAllFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type CustomFilter = oldCustomFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type MissingFilter = oldMissingFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type RangeFilter = oldRangeFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type GeoBoundingBoxFilter = oldGeoBoundingBoxFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type KueryNode = oldKueryNode;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type FilterMeta = oldFilterMeta;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type IFieldSubType = oldIFieldSubType;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 type EsQueryConfig = oldEsQueryConfig;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 
 export {

@@ -20,7 +20,7 @@ export * from './exports';
 /**
  *
  * @deprecated Use data plugin interface instead
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 
 export { IndexPatternAttributes } from './types';

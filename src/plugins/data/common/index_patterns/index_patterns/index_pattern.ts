@@ -53,7 +53,7 @@ export class IndexPattern implements IIndexPattern {
   public timeFieldName: string | undefined;
   /**
    * @deprecated Used by time range index patterns
-   * @removeBy 8.0
+   * @removeBy 8.1
    *
    */
   public intervalName: string | undefined;
@@ -242,7 +242,7 @@ export class IndexPattern implements IIndexPattern {
    * @param fieldType
    * @param lang
    * @deprecated use runtime field instead
-   * @removeBy 8.0
+   * @removeBy 8.1
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -269,7 +269,7 @@ export class IndexPattern implements IIndexPattern {
    * Remove scripted field from field list
    * @param fieldName
    * @deprecated use runtime field instead
-   * @removeBy 8.0
+   * @removeBy 8.1
    */
 
   removeScriptedField(fieldName: string) {
@@ -282,7 +282,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    *
    * @deprecated use runtime field instead
-   * @removeBy 8.0
+   * @removeBy 8.1
    */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
@@ -291,7 +291,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    *
    * @deprecated use runtime field instead
-   * @removeBy 8.0
+   * @removeBy 8.1
    */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];

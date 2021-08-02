@@ -71,29 +71,29 @@ import {
 
 /**
  * @deprecated  This import will be removed.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const changeTimeFilter = oldChangeTimeFilter;
 /**
  * @deprecated  This import will be removed.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const mapAndFlattenFilters = oldMapAndFlattenFilters;
 /**
  * @deprecated  This import will be removed.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const extractTimeFilter = oldExtractTimeFilter;
 /**
  * @deprecated  This import will be removed.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const convertRangeFilterToTimeRangeString = oldConvertRangeFilterToTimeRangeString;
 
 /**
  * Filter helpers namespace:
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 export const esFilters = {
   FilterLabel,
@@ -157,7 +157,7 @@ export {
 
 /**
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 export const esKuery = {
   nodeTypes,
@@ -167,7 +167,7 @@ export const esKuery = {
 
 /**
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 export const esQuery = {
   buildEsQuery,

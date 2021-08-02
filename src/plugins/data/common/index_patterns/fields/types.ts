@@ -10,7 +10,7 @@ import { FieldSpec, IndexPattern } from '../..';
 
 /**
  * @deprecated Use {@link IndexPatternField}
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 export interface IFieldType extends IndexPatternFieldBase {
   count?: number;
