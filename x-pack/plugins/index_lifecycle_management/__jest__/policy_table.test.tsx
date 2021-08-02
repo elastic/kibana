@@ -14,7 +14,6 @@ import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import {
   fatalErrorsServiceMock,
   injectedMetadataServiceMock,
-  scopedHistoryMock,
 } from '../../../../src/core/public/mocks';
 import { HttpService } from '../../../../src/core/public/http';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
@@ -23,6 +22,7 @@ import { PolicyFromES } from '../common/types';
 import { PolicyTable } from '../public/application/sections/policy_table/policy_table';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
+import { KibanaContextProvider } from '../public/shared_imports';
 
 initHttp(
   new HttpService().setup({
@@ -36,12 +36,25 @@ initUiMetric(usageCollectionPluginMock.createSetupContract());
 const testDate = '2020-07-21T14:16:58.666Z';
 const testDateFormatted = moment(testDate).format('YYYY-MM-DD HH:mm:ss');
 
-const policies: PolicyFromES[] = [];
-for (let i = 0; i < 105; i++) {
+const testPolicy = {
+  version: 0,
+  modifiedDate: testDate,
+  indices: [`index1`],
+  indexTemplates: [`indexTemplate1`, `indexTemplate2`, `indexTemplate3`, `indexTemplate4`],
+  name: `testy0`,
+  policy: {
+    name: `testy0`,
+    phases: {},
+  },
+};
+
+const policies: PolicyFromES[] = [testPolicy];
+for (let i = 1; i < 105; i++) {
   policies.push({
     version: i,
-    modifiedDate: i === 0 ? testDate : moment().subtract(i, 'days').toISOString(),
+    modifiedDate: moment().subtract(i, 'days').toISOString(),
     indices: i % 2 === 0 ? [`index${i}`] : [],
+    indexTemplates: i % 2 === 0 ? [`indexTemplate${i}`] : [],
     name: `testy${i}`,
     policy: {
       name: `testy${i}`,
@@ -49,7 +62,14 @@ for (let i = 0; i < 105; i++) {
     },
   });
 }
-jest.mock('');
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    createHref: jest.fn(),
+  }),
+}));
+
 let component: ReactElement;
 
 const snapshot = (rendered: string[]) => {
@@ -88,24 +108,14 @@ const openContextMenu = (buttonIndex: number) => {
 describe('policy table', () => {
   beforeEach(() => {
     component = (
-      <PolicyTable
-        policies={policies}
-        history={scopedHistoryMock.create()}
-        navigateToApp={jest.fn()}
-        updatePolicies={jest.fn()}
-      />
+      <KibanaContextProvider services={{ getUrlForApp: () => '' }}>
+        <PolicyTable policies={policies} updatePolicies={jest.fn()} />
+      </KibanaContextProvider>
     );
   });
 
   test('should show empty state when there are not any policies', () => {
-    component = (
-      <PolicyTable
-        policies={[]}
-        history={scopedHistoryMock.create()}
-        navigateToApp={jest.fn()}
-        updatePolicies={jest.fn()}
-      />
-    );
+    component = <PolicyTable policies={[]} updatePolicies={jest.fn()} />;
     const rendered = mountWithIntl(component);
     mountedSnapshot(rendered);
   });
@@ -147,6 +157,9 @@ describe('policy table', () => {
   test('should sort when linked indices header is clicked', () => {
     testSort('indices');
   });
+  test('should sort when linked index templates header is clicked', () => {
+    testSort('indexTemplates');
+  });
   test('should have proper actions in context menu when there are linked indices', () => {
     const rendered = openContextMenu(0);
     const buttons = rendered.find('button.euiContextMenuItem');
@@ -180,9 +193,21 @@ describe('policy table', () => {
   });
   test('displays policy properties', () => {
     const rendered = mountWithIntl(component);
-    const firstRow = findTestSubject(rendered, 'policyTableRow').at(0).text();
-    const version = 0;
-    const numberOfIndices = 1;
-    expect(firstRow).toBe(`testy0${numberOfIndices}${version}${testDateFormatted}Actions`);
+    const firstRow = findTestSubject(rendered, 'policyTableRow-testy0').text();
+    const numberOfIndices = testPolicy.indices.length;
+    const numberOfIndexTemplates = testPolicy.indexTemplates.length;
+    expect(firstRow).toBe(
+      `testy0${numberOfIndices}${numberOfIndexTemplates}${testPolicy.version}${testDateFormatted}Actions`
+    );
+  });
+  test('opens a flyout with index templates', () => {
+    const rendered = mountWithIntl(component);
+    const indexTemplatesButton = findTestSubject(rendered, 'viewIndexTemplates').at(0);
+    indexTemplatesButton.simulate('click');
+    rendered.update();
+    const flyoutTitle = findTestSubject(rendered, 'indexTemplatesFlyoutHeader').text();
+    expect(flyoutTitle).toContain('testy0');
+    const indexTemplatesLinks = findTestSubject(rendered, 'indexTemplateLink');
+    expect(indexTemplatesLinks.length).toBe(testPolicy.indexTemplates.length);
   });
 });
