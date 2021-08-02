@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export * from '../legacy/stubs';
-
 import {
   PluginServiceProviders,
   PluginServiceProvider,

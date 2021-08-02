@@ -13,8 +13,6 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { PluginServiceRegistry } from '../../../../../src/plugins/presentation_util/public';
 import { pluginServices, CanvasPluginServices } from '../../public/services';
 import { pluginServiceProviders, StorybookParams } from '../../public/services/storybook';
-import { LegacyServicesProvider } from '../../public/services/legacy';
-import { startServices } from '../../public/services/legacy/stubs';
 
 export const servicesContextDecorator = (): DecoratorFn => {
   const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices, StorybookParams>(
@@ -37,9 +35,4 @@ export const servicesContextDecorator = (): DecoratorFn => {
       </I18nProvider>
     );
   };
-};
-
-export const legacyContextDecorator = () => {
-  startServices();
-  return (story: Function) => <LegacyServicesProvider>{story()}</LegacyServicesProvider>;
 };

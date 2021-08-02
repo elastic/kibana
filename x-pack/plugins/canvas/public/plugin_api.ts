@@ -11,7 +11,11 @@ import {
   AnyExpressionRenderDefinition,
   AnyRendererFactory,
 } from '../types';
-import { ElementFactory } from '../types';
+import {
+  ElementFactory,
+  ExpressionFunctionDefinitionFactory,
+  ExpressionFunctionDefinitionFactoryParams,
+} from '../types';
 import { ExpressionsSetup } from '../../../../src/plugins/expressions/public';
 
 type SpecPromiseFn<T extends any> = () => Promise<T[]>;
@@ -25,6 +29,10 @@ export interface CanvasApi {
   addFunctions: AddSpecsToRegistry<
     (() => AnyExpressionFunctionDefinition) | AnyExpressionFunctionDefinition
   >;
+  addFunctionFactories: <StartDeps extends {}>(
+    factories: Array<ExpressionFunctionDefinitionFactory<StartDeps, any>>,
+    params: ExpressionFunctionDefinitionFactoryParams<StartDeps>
+  ) => void;
   addModelUIs: AddToRegistry<any>;
   addRenderers: AddSpecsToRegistry<AnyRendererFactory>;
   addTagUIs: AddToRegistry<any>;
@@ -74,6 +82,11 @@ export function getPluginApi(
     addFunctions: (fns) => {
       fns.forEach((fn) => {
         expressionsPluginSetup.registerFunction(fn);
+      });
+    },
+    addFunctionFactories: (factories, params) => {
+      factories.forEach((factory) => {
+        expressionsPluginSetup.registerFunction(factory(params));
       });
     },
     addTypes: (types) => {

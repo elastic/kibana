@@ -27,9 +27,6 @@ import { help as demodata } from './dict/demodata';
 import { help as doFn } from './dict/do';
 import { help as dropdownControl } from './dict/dropdown_control';
 import { help as eq } from './dict/eq';
-import { help as escount } from './dict/escount';
-import { help as esdocs } from './dict/esdocs';
-import { help as essql } from './dict/essql';
 import { help as exactly } from './dict/exactly';
 import { help as filterrows } from './dict/filterrows';
 import { help as filters } from './dict/filters';
@@ -74,12 +71,12 @@ import { help as to } from './dict/to';
 import { help as urlparam } from './dict/urlparam';
 
 /**
- * This type defines an entry in the `FunctionHelpMap`.  It uses 
- * an `ExpressionFunction` to infer its `Arguments` in order to strongly-type that 
+ * This type defines an entry in the `FunctionHelpMap`.  It uses
+ * an `ExpressionFunction` to infer its `Arguments` in order to strongly-type that
  * entry.
- * 
+ *
  * For example:
- * 
+ *
 ```
    interface Arguments {
      bar: string;
@@ -182,9 +179,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   do: doFn,
   dropdownControl,
   eq,
-  escount,
-  esdocs,
-  essql,
   exactly,
   filterrows,
   filters,

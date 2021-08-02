@@ -32,12 +32,7 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import {
-  startLegacyServices,
-  services,
-  LegacyServicesProvider,
-  CanvasPluginServices,
-} from './services';
+import { CanvasPluginServices } from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
@@ -73,15 +68,13 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
       <ServicesContextProvider>
-        <LegacyServicesProvider providers={services}>
-          <presentationUtil.ContextProvider>
-            <I18nProvider>
-              <Provider store={canvasStore}>
-                <App />
-              </Provider>
-            </I18nProvider>
-          </presentationUtil.ContextProvider>
-        </LegacyServicesProvider>
+        <presentationUtil.ContextProvider>
+          <I18nProvider>
+            <Provider store={canvasStore}>
+              <App />
+            </Provider>
+          </I18nProvider>
+        </presentationUtil.ContextProvider>
       </ServicesContextProvider>
     </KibanaContextProvider>,
     element
@@ -101,7 +94,6 @@ export const initializeCanvas = async (
   appUpdater: BehaviorSubject<AppUpdater>,
   pluginServices: PluginServices<CanvasPluginServices>
 ) => {
-  await startLegacyServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
   const { expressions } = pluginServices.getServices();
 
   // Adding these functions here instead of in plugin.ts.

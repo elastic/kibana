@@ -10,17 +10,9 @@ import { functions as externalFunctions } from '../external';
 import { location } from './location';
 import { markdown } from './markdown';
 import { urlparam } from './urlparam';
-import { escount } from './escount';
-import { esdocs } from './esdocs';
-import { essql } from './essql';
+import { escountFactory } from './escount';
+import { esdocsFactory } from './esdocs';
+import { essqlFactory } from './essql';
 
-export const functions = [
-  location,
-  markdown,
-  urlparam,
-  escount,
-  esdocs,
-  essql,
-  ...commonFunctions,
-  ...externalFunctions,
-];
+export const functions = [location, markdown, urlparam, ...commonFunctions, ...externalFunctions];
+export const factories = [escountFactory, essqlFactory, esdocsFactory];

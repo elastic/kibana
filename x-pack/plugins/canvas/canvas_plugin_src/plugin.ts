@@ -7,12 +7,14 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+
 import { CanvasSetup } from '../public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 
-import { functions } from './functions/browser';
+import { functions, factories } from './functions/browser';
 import { typeFunctions } from './expression_types';
 import { renderFunctions, renderFunctionFactories } from './renderers';
 interface SetupDeps {
@@ -20,6 +22,7 @@ interface SetupDeps {
 }
 
 export interface StartDeps {
+  data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   inspector: InspectorStart;
@@ -37,9 +40,10 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
 
     plugins.canvas.addRenderers(renderFunctions);
 
-    core.getStartServices().then(([coreStart, depsStart]) => {
+    core.getStartServices().then(([coreStart, startPlugins]) => {
+      plugins.canvas.addFunctionFactories(factories, { coreStart, startPlugins });
       plugins.canvas.addRenderers(
-        renderFunctionFactories.map((factory: any) => factory(coreStart, depsStart))
+        renderFunctionFactories.map((factory: any) => factory(coreStart, startPlugins))
       );
     });
 

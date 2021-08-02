@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export * from './legacy';
-
 import { PluginServices } from '../../../../../src/plugins/presentation_util/public';
 
 import { CanvasCustomElementService } from './custom_element';

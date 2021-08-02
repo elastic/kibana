@@ -9,6 +9,7 @@ export * from '../../../../src/plugins/expressions/common';
 export * from './assets';
 export * from './canvas';
 export * from './elements';
+export * from './expressions';
 export * from './filters';
 export * from './functions';
 export * from './renderers';
