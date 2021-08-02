@@ -2,23 +2,15 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [RangeFilterParams](./kibana-plugin-plugins-data-public.rangefilterparams.md)
 
-## RangeFilterParams interface
+## RangeFilterParams type
+
+> Warning: This API is now obsolete.
+> 
+> Please import from the package kbn/es-query directly. This import will be removed in v8.0.0.
+> 
 
 <b>Signature:</b>
 
 ```typescript
-export interface RangeFilterParams 
+declare type RangeFilterParams = oldRangeFilterParams;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [format](./kibana-plugin-plugins-data-public.rangefilterparams.format.md) | <code>string</code> |  |
-|  [from](./kibana-plugin-plugins-data-public.rangefilterparams.from.md) | <code>number &#124; string</code> |  |
-|  [gt](./kibana-plugin-plugins-data-public.rangefilterparams.gt.md) | <code>number &#124; string</code> |  |
-|  [gte](./kibana-plugin-plugins-data-public.rangefilterparams.gte.md) | <code>number &#124; string</code> |  |
-|  [lt](./kibana-plugin-plugins-data-public.rangefilterparams.lt.md) | <code>number &#124; string</code> |  |
-|  [lte](./kibana-plugin-plugins-data-public.rangefilterparams.lte.md) | <code>number &#124; string</code> |  |
-|  [to](./kibana-plugin-plugins-data-public.rangefilterparams.to.md) | <code>number &#124; string</code> |  |
-

@@ -69,10 +69,12 @@ import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { wrapSequencesFactory } from './wrap_sequences_factory';
 import { ConfigType } from '../../../config';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export const signalRulesAlertType = ({
   logger,
   eventsTelemetry,
+  experimentalFeatures,
   version,
   ml,
   lists,
@@ -80,6 +82,7 @@ export const signalRulesAlertType = ({
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
@@ -153,7 +156,12 @@ export const signalRulesAlertType = ({
         if (!isMachineLearningParams(params)) {
           const index = params.index;
           const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
-          const inputIndices = await getInputIndex(services, version, index);
+          const inputIndices = await getInputIndex({
+            services,
+            version,
+            index,
+            experimentalFeatures,
+          });
           const [privileges, timestampFieldCaps] = await Promise.all([
             checkPrivileges(services, inputIndices),
             services.scopedClusterClient.asCurrentUser.fieldCaps({
@@ -268,6 +276,7 @@ export const signalRulesAlertType = ({
               rule: thresholdRuleSO,
               tuple,
               exceptionItems,
+              experimentalFeatures,
               services,
               version,
               logger,
@@ -285,6 +294,7 @@ export const signalRulesAlertType = ({
               tuple,
               listClient,
               exceptionItems,
+              experimentalFeatures,
               services,
               version,
               searchAfterSize,
@@ -303,6 +313,7 @@ export const signalRulesAlertType = ({
               tuple,
               listClient,
               exceptionItems,
+              experimentalFeatures,
               services,
               version,
               searchAfterSize,
@@ -320,6 +331,7 @@ export const signalRulesAlertType = ({
               rule: eqlRuleSO,
               tuple,
               exceptionItems,
+              experimentalFeatures,
               services,
               version,
               searchAfterSize,

@@ -13,7 +13,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import 'brace';
 import 'brace/mode/json';
-import '@elastic/ui-ace/ui-ace';
 
 // required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
@@ -28,6 +27,7 @@ import {
   ToastsStart,
   OverlayStart,
   AppMountParameters,
+  IUiSettingsClient,
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
@@ -75,6 +75,7 @@ export interface GraphDependencies {
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  uiSettings: IUiSettingsClient;
 }
 
 export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {
@@ -119,7 +120,7 @@ const mainTemplate = (basePath: string) => `<div ng-view class="gphAppWrapper">
 
 const moduleName = 'app/graph';
 
-const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap', 'ui.ace'];
+const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap'];
 
 function mountGraphApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');

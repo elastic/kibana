@@ -200,12 +200,21 @@ describe('Executor', () => {
       });
     });
 
-    describe('.migrate', () => {
+    describe('.getAllMigrations', () => {
+      test('returns list of all registered migrations', () => {
+        const migrations = executor.getAllMigrations();
+        expect(migrations).toMatchSnapshot();
+      });
+    });
+
+    describe('.migrateToLatest', () => {
       test('calls migrate function for every expression function in expression', () => {
-        executor.migrate(
-          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
-          '7.10.0'
-        );
+        executor.migrateToLatest({
+          state: parseExpression(
+            'foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'
+          ),
+          version: '7.10.0',
+        });
         expect(migrateFn).toBeCalledTimes(5);
       });
     });

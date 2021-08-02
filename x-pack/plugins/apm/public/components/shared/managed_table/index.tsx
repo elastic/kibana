@@ -19,7 +19,7 @@ export interface ITableColumn<T> {
   field?: string;
   dataType?: string;
   align?: string;
-  width?: string | number;
+  width?: string;
   sortable?: boolean;
   render?: (value: any, item: T) => unknown;
 }

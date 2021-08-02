@@ -14,5 +14,5 @@ Retreive fields directly from \_source (legacy behavior)
 <b>Signature:</b>
 
 ```typescript
-fieldsFromSource?: NameList;
+fieldsFromSource?: estypes.Fields;
 ```

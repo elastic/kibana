@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
-  Logger,
-  SavedObjectsServiceStart,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { KibanaRequest, Logger } from 'src/core/server';
 import { ExceptionListClient } from '../../../lists/server';
 import {
   CasesClient,
@@ -36,6 +31,8 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
+import { EndpointMetadataService } from './services/metadata';
+import { EndpointAppContentServicesNotStartedError } from './errors';
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<
@@ -44,13 +41,13 @@ export type EndpointAppContextServiceStartContract = Partial<
   >
 > & {
   logger: Logger;
+  endpointMetadataService: EndpointMetadataService;
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
   security: SecurityPluginStart;
   alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
-  savedObjectsStart: SavedObjectsServiceStart;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
@@ -65,12 +62,11 @@ export class EndpointAppContextService {
   private manifestManager: ManifestManager | undefined;
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
-  private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private config: ConfigType | undefined;
   private license: LicenseService | undefined;
   public security: SecurityPluginStart | undefined;
   private cases: CasesPluginStartContract | undefined;
-
+  private endpointMetadataService: EndpointMetadataService | undefined;
   private experimentalFeatures: ExperimentalFeatures | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
@@ -78,12 +74,11 @@ export class EndpointAppContextService {
     this.packagePolicyService = dependencies.packagePolicyService;
     this.agentPolicyService = dependencies.agentPolicyService;
     this.manifestManager = dependencies.manifestManager;
-    this.savedObjectsStart = dependencies.savedObjectsStart;
     this.config = dependencies.config;
     this.license = dependencies.licenseService;
     this.security = dependencies.security;
     this.cases = dependencies.cases;
-
+    this.endpointMetadataService = dependencies.endpointMetadataService;
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
@@ -94,6 +89,8 @@ export class EndpointAppContextService {
           this.manifestManager,
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
+          dependencies.config.prebuiltRulesFromFileSystem,
+          dependencies.config.prebuiltRulesFromSavedObjects,
           dependencies.security,
           dependencies.alerting,
           dependencies.licenseService,
@@ -114,6 +111,13 @@ export class EndpointAppContextService {
     return this.experimentalFeatures;
   }
 
+  public getEndpointMetadataService(): EndpointMetadataService {
+    if (!this.endpointMetadataService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.endpointMetadataService;
+  }
+
   public getAgentService(): AgentService | undefined {
     return this.agentService;
   }
@@ -130,23 +134,16 @@ export class EndpointAppContextService {
     return this.manifestManager;
   }
 
-  public getScopedSavedObjectsClient(req: KibanaRequest): SavedObjectsClientContract {
-    if (!this.savedObjectsStart) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
-    }
-    return this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
-  }
-
   public getLicenseService(): LicenseService {
     if (!this.license) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+      throw new EndpointAppContentServicesNotStartedError();
     }
     return this.license;
   }
 
   public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
     if (!this.cases) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+      throw new EndpointAppContentServicesNotStartedError();
     }
     return this.cases.getCasesClientWithRequest(req);
   }

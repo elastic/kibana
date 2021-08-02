@@ -16,10 +16,13 @@ import { AlertInstance } from '../../../alerting/server';
 import { AlertTypeWithExecutor } from '../types';
 import { createLifecycleExecutor } from './create_lifecycle_executor';
 
-export type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
+export type LifecycleAlertService<
+  TAlertInstanceContext extends Record<string, unknown>,
+  TActionGroupIds extends string = string
+> = (alert: {
   id: string;
   fields: Record<string, unknown>;
-}) => AlertInstance<AlertInstanceState, TAlertInstanceContext, string>;
+}) => AlertInstance<AlertInstanceState, TAlertInstanceContext, TActionGroupIds>;
 
 export const createLifecycleRuleTypeFactory = ({
   logger,

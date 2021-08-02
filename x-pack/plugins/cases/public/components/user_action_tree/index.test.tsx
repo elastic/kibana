@@ -429,7 +429,7 @@ describe(`UserActionTree`, () => {
       );
       await waitFor(() => {
         expect(
-          wrapper.find(`[data-test-subj="endpoint-action"]`).first().prop('timelineIcon')
+          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
         ).toBe('lock');
       });
     });
@@ -448,7 +448,7 @@ describe(`UserActionTree`, () => {
       );
       await waitFor(() => {
         expect(
-          wrapper.find(`[data-test-subj="endpoint-action"]`).first().prop('timelineIcon')
+          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
         ).toBe('lockOpen');
       });
     });

@@ -12,7 +12,7 @@ import { get } from 'lodash';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import {
   encode,
-  elasticOutline,
+  getElasticOutline,
   isValidHttpUrl,
   resolveFromArgs,
 } from '../../../../../../../src/plugins/presentation_util/public';
@@ -168,13 +168,16 @@ class ImageUpload extends React.Component {
   }
 }
 
-export const imageUpload = () => ({
-  name: 'imageUpload',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelp(),
-  resolveArgValue: true,
-  template: templateFromReactComponent(ImageUpload),
-  resolve({ args }) {
-    return { dataurl: resolveFromArgs(args, elasticOutline) };
-  },
-});
+export const imageUpload = () => {
+  return {
+    name: 'imageUpload',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelp(),
+    resolveArgValue: true,
+    template: templateFromReactComponent(ImageUpload),
+    resolve: async ({ args }) => {
+      const { elasticOutline } = await getElasticOutline();
+      return { dataurl: resolveFromArgs(args, elasticOutline) };
+    },
+  };
+};

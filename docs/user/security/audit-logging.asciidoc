@@ -14,16 +14,24 @@ by cluster-wide privileges. For more information on enabling audit logging in
 
 [IMPORTANT]
 ============================================================================
-Audit logs are **disabled** by default. To enable this functionality, you must
-set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
+Kibana offers two audit logs: a **deprecated** legacy audit logger, and a new
+ECS-compliant audit logger. We strongly advise using the <<xpack-security-ecs-audit-logging, ECS audit logger>>,
+as the legacy audit logger will be removed in an upcoming version.
 ============================================================================
 
-The current version of the audit logger uses the standard {kib} logging output,
+[NOTE]
+============================================================================
+Audit logs are **disabled** by default. To enable this functionality, you must
+set `xpack.security.audit.enabled` to `true` in `kibana.yml`, and configure
+an <<audit-logging-settings, appender>> to write the audit log to a location of your choosing.
+============================================================================
+
+The legacy audit logger uses the standard {kib} logging output,
 which can be configured in `kibana.yml`. For more information, refer to <<settings>>.
-The audit logger uses a separate logger and can be configured using
+The <<xpack-security-ecs-audit-logging, ECS audit logger>> uses a separate logger and can be configured using
 the options in <<audit-logging-settings>>. 
 
-==== Audit event types
+==== Legacy audit event types
 
 When you are auditing security events, each request can generate multiple audit
 events. The following is a list of the events that can be generated:
@@ -42,7 +50,7 @@ events. The following is a list of the events that can be generated:
 ============================================================================
 The following events are only logged if the ECS audit logger is enabled.
 For information on how to configure `xpack.security.audit.appender`, refer to
-<<ecs-audit-logging-settings>>.
+<<audit-logging-settings>>.
 ============================================================================
 
 Refer to the table of events that can be logged for auditing purposes. 

@@ -9,10 +9,13 @@
 import { registerBundleRoutesMock } from './core_app.test.mocks';
 
 import { mockCoreContext } from '../core_context.mock';
-import { coreMock } from '../mocks';
+import { coreMock, httpServerMock } from '../mocks';
 import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
 import type { UiPlugins } from '../plugins';
+import { PluginType } from '../plugins';
 import { CoreApp } from './core_app';
+import { mockRouter } from '../http/router/router.mock';
+import { RequestHandlerContext } from 'kibana/server';
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),
@@ -23,11 +26,23 @@ const emptyPlugins = (): UiPlugins => ({
 describe('CoreApp', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
   let coreApp: CoreApp;
+  let internalCorePreboot: ReturnType<typeof coreMock.createInternalPreboot>;
+  let prebootHTTPResourcesRegistrar: ReturnType<typeof httpResourcesMock.createRegistrar>;
   let internalCoreSetup: ReturnType<typeof coreMock.createInternalSetup>;
   let httpResourcesRegistrar: ReturnType<typeof httpResourcesMock.createRegistrar>;
 
   beforeEach(() => {
     coreContext = mockCoreContext.create();
+
+    internalCorePreboot = coreMock.createInternalPreboot();
+    internalCorePreboot.http.registerRoutes.mockImplementation((path, callback) =>
+      callback(mockRouter.create())
+    );
+    prebootHTTPResourcesRegistrar = httpResourcesMock.createRegistrar();
+    internalCorePreboot.httpResources.createRegistrar.mockReturnValue(
+      prebootHTTPResourcesRegistrar
+    );
+
     internalCoreSetup = coreMock.createInternalSetup();
     httpResourcesRegistrar = httpResourcesMock.createRegistrar();
     internalCoreSetup.httpResources.createRegistrar.mockReturnValue(httpResourcesRegistrar);
@@ -72,6 +87,60 @@ describe('CoreApp', () => {
     });
   });
 
+  describe('#preboot', () => {
+    let prebootUIPlugins: UiPlugins;
+    beforeEach(() => {
+      prebootUIPlugins = emptyPlugins();
+      prebootUIPlugins.public.set('some-plugin', {
+        type: PluginType.preboot,
+        configPath: 'some-plugin',
+        id: 'some-plugin',
+        optionalPlugins: [],
+        requiredBundles: [],
+        requiredPlugins: [],
+      });
+    });
+    it('calls `registerBundleRoutes` with the correct options', () => {
+      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+
+      expect(registerBundleRoutesMock).toHaveBeenCalledTimes(1);
+      expect(registerBundleRoutesMock).toHaveBeenCalledWith({
+        uiPlugins: prebootUIPlugins,
+        router: expect.any(Object),
+        packageInfo: coreContext.env.packageInfo,
+        serverBasePath: internalCorePreboot.http.basePath.serverBasePath,
+      });
+    });
+
+    it('does not call `registerBundleRoutes` if there are no `preboot` UI plugins', () => {
+      coreApp.preboot(internalCorePreboot, emptyPlugins());
+
+      expect(registerBundleRoutesMock).not.toHaveBeenCalled();
+    });
+
+    it('main route handles core app rendering', () => {
+      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+
+      expect(prebootHTTPResourcesRegistrar.register).toHaveBeenCalledWith(
+        {
+          path: '/{path*}',
+          validate: expect.any(Object),
+        },
+        expect.any(Function)
+      );
+
+      const [[, handler]] = prebootHTTPResourcesRegistrar.register.mock.calls;
+      const mockResponseFactory = httpResourcesMock.createResponseFactory();
+      handler(
+        ({} as unknown) as RequestHandlerContext,
+        httpServerMock.createKibanaRequest(),
+        mockResponseFactory
+      );
+
+      expect(mockResponseFactory.renderAnonymousCoreApp).toHaveBeenCalled();
+    });
+  });
+
   describe('`/app/{id}/{any*}` route', () => {
     it('is registered with the correct parameters', () => {
       coreApp.setup(internalCoreSetup, emptyPlugins());
@@ -89,7 +158,7 @@ describe('CoreApp', () => {
     });
   });
 
-  it('calls `registerBundleRoutes` with the correct options', () => {
+  it('`setup` calls `registerBundleRoutes` with the correct options', () => {
     const uiPlugins = emptyPlugins();
     coreApp.setup(internalCoreSetup, uiPlugins);
 

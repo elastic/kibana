@@ -36,6 +36,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 10,
       });
       plugin = new AlertingPlugin(context);
 
@@ -61,7 +62,7 @@ describe('Alerting Plugin', () => {
 
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleAlertType: AlertType<never, never, never, never, 'default'> = {
+      const sampleAlertType: AlertType<never, never, never, never, never, 'default'> = {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
@@ -112,7 +113,7 @@ describe('Alerting Plugin', () => {
   });
 
   describe('start()', () => {
-    describe('getAlertsClientWithRequest()', () => {
+    describe('getRulesClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
@@ -122,6 +123,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -146,7 +148,7 @@ describe('Alerting Plugin', () => {
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
         expect(() =>
-          startContract.getAlertsClientWithRequest({} as KibanaRequest)
+          startContract.getRulesClientWithRequest({} as KibanaRequest)
         ).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
@@ -161,6 +163,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -201,7 +204,7 @@ describe('Alerting Plugin', () => {
           },
           getSavedObjectsClient: jest.fn(),
         } as unknown) as KibanaRequest;
-        startContract.getAlertsClientWithRequest(fakeRequest);
+        startContract.getRulesClientWithRequest(fakeRequest);
       });
     });
 
@@ -214,6 +217,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       });
       const plugin = new AlertingPlugin(context);
 

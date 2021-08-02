@@ -12,12 +12,10 @@ import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction } from '../../../../common/search_strategy';
-// eslint-disable-next-line no-duplicate-imports
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -41,7 +39,8 @@ import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
+import { LastUpdatedAt } from '../..';
+import { AlertCount, SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
 import * as i18n from './translations';
 import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
@@ -49,7 +48,7 @@ import { InspectButtonContainer } from '../../inspect';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
-const COMPACT_HEADER_HEIGHT = EVENTS_VIEWER_HEADER_HEIGHT - UTILITY_BAR_HEIGHT; // px
+const COMPACT_HEADER_HEIGHT = 36; // px
 
 const UtilityBar = styled.div`
   height: ${UTILITY_BAR_HEIGHT}px;
@@ -176,7 +175,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);
+  const unit = useMemo(() => (n: number) => i18n.ALERTS_UNIT(n), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
   );
@@ -257,12 +256,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   );
 
   const subtitle = useMemo(
-    () =>
-      `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${
-        unit && unit(totalCountMinusDeleted)
-      }`,
+    () => `${totalCountMinusDeleted.toLocaleString()} ${unit && unit(totalCountMinusDeleted)}`,
     [totalCountMinusDeleted, unit]
   );
+
+  const additionalControls = useMemo(() => <AlertCount>{subtitle}</AlertCount>, [subtitle]);
 
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
     deletedEventIds,
@@ -295,8 +293,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               id={!resolverIsShowing(graphEventId) ? id : undefined}
               inspect={inspect}
               loading={loading}
-              height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
-              subtitle={utilityBar ? undefined : subtitle}
+              height={
+                headerFilterGroup == null ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT
+              }
+              subtitle={utilityBar}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
             >
               {HeaderSectionContent}
@@ -308,10 +308,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
+              <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+                <UpdatedFlexItem grow={false} show={!loading}>
+                  <LastUpdatedAt updatedAt={updatedAt} />
+                </UpdatedFlexItem>
+              </EuiFlexGroup>
+
               <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     activePage={pageInfo.activePage}
+                    additionalControls={additionalControls}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
                     id={id}
@@ -331,7 +338,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   <Footer
                     activePage={pageInfo.activePage}
                     data-test-subj="events-viewer-footer"
-                    updatedAt={updatedAt}
                     height={footerHeight}
                     id={id}
                     isLive={isLive}

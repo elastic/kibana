@@ -31,7 +31,7 @@ describe('perform_bulk_action', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
     performBulkActionRoute(server.router, ml);
@@ -45,14 +45,14 @@ describe('perform_bulk_action', () => {
     });
 
     it("returns 200 when provided filter query doesn't match any rules", async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({ success: true, rules_count: 0 });
     });
 
     it('returns 400 when provided filter query matches too many rules', async () => {
-      clients.alertsClient.find.mockResolvedValue(
+      clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({ data: [], total: Infinity })
       );
       const response = await server.inject(getBulkActionRequest(), context);
@@ -64,14 +64,14 @@ describe('perform_bulk_action', () => {
     });
 
     it('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting!.getRulesClient = jest.fn();
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     it('catches error if disable throws error', async () => {
-      clients.alertsClient.disable.mockImplementation(async () => {
+      clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getBulkActionRequest(), context);

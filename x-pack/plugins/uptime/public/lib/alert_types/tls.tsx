@@ -6,14 +6,19 @@
  */
 
 import React from 'react';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { TlsTranslations } from './translations';
+import { TlsTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
+
+import { CERTIFICATES_ROUTE } from '../../../common/constants/ui';
 
 const { defaultActionMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
-export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): AlertTypeModel => ({
+export const initTlsAlertType: AlertTypeInitializer = ({
+  core,
+  plugins,
+}): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
@@ -26,4 +31,8 @@ export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): Alert
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   requiresAppContext: false,
+  format: ({ fields }) => ({
+    reason: fields.reason,
+    link: `/app/uptime${CERTIFICATES_ROUTE}`,
+  }),
 });

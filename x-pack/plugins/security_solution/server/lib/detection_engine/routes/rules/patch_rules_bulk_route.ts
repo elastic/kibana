@@ -46,10 +46,10 @@ export const patchRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -123,7 +123,7 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ alertsClient, ruleId, id });
+            const existingRule = await readRules({ rulesClient, ruleId, id });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
@@ -131,7 +131,7 @@ export const patchRulesBulkRoute = (
 
             const rule = await patchRules({
               rule: existingRule,
-              alertsClient,
+              rulesClient,
               author,
               buildingBlockType,
               description,
@@ -182,7 +182,7 @@ export const patchRulesBulkRoute = (
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: rule.id,
-                alertsClient,
+                rulesClient,
                 savedObjectsClient,
                 enabled: rule.enabled,
                 actions,

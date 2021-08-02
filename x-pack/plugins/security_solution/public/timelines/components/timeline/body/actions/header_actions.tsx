@@ -29,14 +29,13 @@ import {
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
-import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import { EventsTh, EventsThContent } from '../../styles';
 import { EventsSelect } from '../column_headers/events_select';
 import * as i18n from '../column_headers/translations';
 import { timelineActions } from '../../../../store/timeline';
 import { isFullScreen } from '../column_headers';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 const SortingColumnsContainer = styled.div`
   button {
@@ -52,6 +51,11 @@ const SortingColumnsContainer = styled.div`
   }
 `;
 
+const ActionsContainer = styled.div`
+  align-items: center;
+  display: flex;
+`;
+
 const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   width,
   browserFields,
@@ -65,6 +69,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   tabType,
   timelineId,
 }) => {
+  const { timelines: timelinesUi } = useKibana().services;
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
@@ -111,35 +116,36 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   const sortedColumns = useMemo(
     () => ({
       onSort: onSortColumns,
-      columns: sort.map<{ id: string; direction: 'asc' | 'desc' }>(
-        ({ columnId, sortDirection }) => ({
+      columns:
+        sort?.map<{ id: string; direction: 'asc' | 'desc' }>(({ columnId, sortDirection }) => ({
           id: columnId,
           direction: sortDirection as 'asc' | 'desc',
-        })
-      ),
+        })) ?? [],
     }),
     [onSortColumns, sort]
   );
   const displayValues = useMemo(
-    () => columnHeaders.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.displayAsText ?? ch.id }), {}),
+    () =>
+      columnHeaders?.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.displayAsText ?? ch.id }), {}) ??
+      {},
     [columnHeaders]
   );
 
   const myColumns = useMemo(
     () =>
-      columnHeaders.map(({ aggregatable, displayAsText, id, type }) => ({
+      columnHeaders?.map(({ aggregatable, displayAsText, id, type }) => ({
         id,
         isSortable: aggregatable,
         displayAsText,
         schema: type,
-      })),
+      })) ?? [],
     [columnHeaders]
   );
 
   const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
   return (
-    <>
+    <ActionsContainer>
       {showSelectAllCheckbox && (
         <EventsTh role="checkbox">
           <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
@@ -154,14 +160,11 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       )}
 
       <EventsTh role="button">
-        <StatefulFieldsBrowser
-          browserFields={browserFields}
-          columnHeaders={columnHeaders}
-          data-test-subj="field-browser"
-          height={FIELD_BROWSER_HEIGHT}
-          timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
-        />
+        {timelinesUi.getFieldBrowser({
+          browserFields,
+          columnHeaders,
+          timelineId,
+        })}
       </EventsTh>
 
       <EventsTh role="button">
@@ -210,10 +213,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
           </EventsThContent>
         </EventsTh>
       )}
-    </>
+    </ActionsContainer>
   );
 };
-
 HeaderActionsComponent.displayName = 'HeaderActionsComponent';
 
 export const HeaderActions = React.memo(HeaderActionsComponent);

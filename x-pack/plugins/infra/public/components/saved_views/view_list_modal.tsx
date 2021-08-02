@@ -58,7 +58,7 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
   }, [views, currentView]);
 
   return (
-    <EuiModal onClose={close}>
+    <EuiModal onClose={close} data-test-subj="savedViews-loadModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -83,7 +83,9 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
           {(list, search) => (
             <>
               {search}
-              <div style={{ marginTop: 20 }}>{list}</div>
+              <div style={{ marginTop: 20 }} data-test-subj="savedViews-loadList">
+                {list}
+              </div>
             </>
           )}
         </EuiSelectable>

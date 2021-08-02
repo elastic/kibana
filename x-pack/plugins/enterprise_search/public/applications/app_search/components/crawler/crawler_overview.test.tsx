@@ -13,6 +13,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
 import { DomainsTable } from './components/domains_table';
 import { CrawlerOverview } from './crawler_overview';
 
@@ -44,7 +45,7 @@ describe('CrawlerOverview', () => {
 
     // TODO test for CrawlRequestsTable after it is built in a future PR
 
-    // TODO test for AddDomainForm after it is built in a future PR
+    expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
 
     // TODO test for empty state after it is built in a future PR
   });

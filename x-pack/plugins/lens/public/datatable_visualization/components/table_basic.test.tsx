@@ -11,11 +11,12 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EuiDataGrid } from '@elastic/eui';
 import { IAggType, IFieldFormat } from 'src/plugins/data/public';
+import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
-import { LensMultiTable } from '../../types';
-import { DatatableProps } from '../expression';
+import { LensMultiTable } from '../../../common';
+import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { IUiSettingsClient } from 'kibana/public';
 
@@ -357,6 +358,7 @@ describe('DatatableComponent', () => {
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
+    expect(component.find(VisualizationContainer)).toHaveLength(1);
     expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
   });
 

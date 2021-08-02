@@ -209,7 +209,7 @@ describe('EventsViewer', () => {
           <StatefulEventsViewer {...testProps} />
         </TestProviders>
       );
-      expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
+      expect(wrapper.find(`[data-test-subj="field-browser"]`).first().exists()).toBe(true);
     });
 
     test('it renders the footer containing the pagination', () => {

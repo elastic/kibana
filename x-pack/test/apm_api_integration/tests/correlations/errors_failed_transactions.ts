@@ -58,11 +58,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns significant terms', () => {
         const { significantTerms } = response.body;
-        expect(significantTerms).to.have.length(2);
+        expect(significantTerms.length).to.be.greaterThan(0);
+
         const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
         expectSnapshot(sortedFieldNames).toMatchInline(`
           Array [
-            "user_agent.name",
             "user_agent.name",
           ]
         `);
@@ -72,7 +72,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { significantTerms } = response.body;
         expectSnapshot(significantTerms.map((term) => term.timeseries.length)).toMatchInline(`
           Array [
-            31,
             31,
           ]
         `);

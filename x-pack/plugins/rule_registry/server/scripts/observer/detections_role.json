@@ -6,13 +6,7 @@
   "kibana": [
     {
       "feature": {
-        "ml": ["read"],
-        "monitoring": ["all"],
-        "apm": ["minimal_read", "alerts_all"],
-        "ruleRegistry": ["all"],
-        "actions": ["read"],
-        "builtInAlerts": ["all"],
-        "alerting": ["all"]
+        "apm": ["read", "alerts_all"]
       },
       "spaces": ["*"]
     }

@@ -7,6 +7,7 @@
 
 import { shuffle, range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { fetchTransactionDurationFieldCandidates } from './query_field_candidates';
 import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
 import { fetchTransactionDurationPercentiles } from './query_percentiles';
@@ -16,6 +17,7 @@ import { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
 import type {
   AsyncSearchProviderProgress,
   SearchServiceParams,
+  SearchServiceFetchParams,
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
 import { computeExpectationsAndRanges } from './utils/aggregation_utils';
@@ -28,11 +30,14 @@ const currentTimeAsString = () => new Date().toISOString();
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
-  params: SearchServiceParams
+  getApmIndices: () => Promise<ApmIndicesConfig>,
+  searchServiceParams: SearchServiceParams,
+  includeFrozen: boolean
 ) => {
   let isCancelled = false;
   let isRunning = true;
   let error: Error;
+  let ccsWarning = false;
   const log: string[] = [];
   const logMessage = (message: string) =>
     log.push(`${currentTimeAsString()}: ${message}`);
@@ -63,7 +68,15 @@ export const asyncSearchServiceProvider = (
   };
 
   const fetchCorrelations = async () => {
+    let params: SearchServiceFetchParams | undefined;
+
     try {
+      const indices = await getApmIndices();
+      params = {
+        ...searchServiceParams,
+        index: indices['apm_oss.transactionIndices'],
+      };
+
       // 95th percentile to be displayed as a marker in the log log chart
       const {
         totalDocs,
@@ -172,7 +185,7 @@ export const asyncSearchServiceProvider = (
 
       async function* fetchTransactionDurationHistograms() {
         for (const item of shuffle(fieldValuePairs)) {
-          if (item === undefined || isCancelled) {
+          if (params === undefined || item === undefined || isCancelled) {
             isRunning = false;
             return;
           }
@@ -222,10 +235,15 @@ export const asyncSearchServiceProvider = (
               yield undefined;
             }
           } catch (e) {
-            // don't fail the whole process for individual correlation queries, just add the error to the internal log.
+            // don't fail the whole process for individual correlation queries,
+            // just add the error to the internal log and check if we'd want to set the
+            // cross-cluster search compatibility warning to true.
             logMessage(
               `Failed to fetch correlation/kstest for '${item.field}/${item.value}'`
             );
+            if (params?.index.includes(':')) {
+              ccsWarning = true;
+            }
             yield undefined;
           }
         }
@@ -247,6 +265,10 @@ export const asyncSearchServiceProvider = (
       error = e;
     }
 
+    if (error !== undefined && params?.index.includes(':')) {
+      ccsWarning = true;
+    }
+
     isRunning = false;
   };
 
@@ -256,6 +278,7 @@ export const asyncSearchServiceProvider = (
     const sortedValues = values.sort((a, b) => b.correlation - a.correlation);
 
     return {
+      ccsWarning,
       error,
       log,
       isRunning,

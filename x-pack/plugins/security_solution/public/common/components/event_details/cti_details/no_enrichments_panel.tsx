@@ -35,9 +35,9 @@ const NoEnrichmentsPanelView: React.FC<{
 NoEnrichmentsPanelView.displayName = 'NoEnrichmentsPanelView';
 
 export const NoEnrichmentsPanel: React.FC<{
-  existingEnrichmentsCount: number;
-  investigationEnrichmentsCount: number;
-}> = ({ existingEnrichmentsCount, investigationEnrichmentsCount }) => {
+  isIndicatorMatchesPresent: boolean;
+  isInvestigationTimeEnrichmentsPresent: boolean;
+}> = ({ isIndicatorMatchesPresent, isInvestigationTimeEnrichmentsPresent }) => {
   const threatIntelDocsUrl = `${
     useKibana().services.docLinks.links.filebeat.base
   }/filebeat-module-threatintel.html`;
@@ -50,7 +50,7 @@ export const NoEnrichmentsPanel: React.FC<{
     </>
   );
 
-  if (existingEnrichmentsCount === 0 && investigationEnrichmentsCount === 0) {
+  if (!isIndicatorMatchesPresent && !isInvestigationTimeEnrichmentsPresent) {
     return (
       <NoEnrichmentsPanelView
         title={<h2>{i18n.NO_ENRICHMENTS_FOUND_TITLE}</h2>}
@@ -61,7 +61,7 @@ export const NoEnrichmentsPanel: React.FC<{
         }
       />
     );
-  } else if (existingEnrichmentsCount === 0) {
+  } else if (!isIndicatorMatchesPresent) {
     return (
       <>
         <EuiHorizontalRule margin="s" />
@@ -75,7 +75,7 @@ export const NoEnrichmentsPanel: React.FC<{
         />
       </>
     );
-  } else if (investigationEnrichmentsCount === 0) {
+  } else if (!isInvestigationTimeEnrichmentsPresent) {
     return (
       <>
         <EuiHorizontalRule margin="s" />

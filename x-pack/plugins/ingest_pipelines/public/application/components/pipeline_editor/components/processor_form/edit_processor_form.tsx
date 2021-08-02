@@ -196,6 +196,11 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
             {tabs.map((tab) => (
               <EuiTab
                 onClick={async () => {
+                  // No need to do anything if user clicks the already active tab
+                  if (tab.id === activeTab) {
+                    return;
+                  }
+
                   if (tab.id === 'output') {
                     await handleSubmit(false);
                   } else {

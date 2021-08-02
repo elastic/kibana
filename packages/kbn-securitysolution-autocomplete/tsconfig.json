@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "incremental": true,
+    "declarationDir": "./target_types",
+    "outDir": "target_node",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-securitysolution-autocomplete/src",
+    "rootDir": "src",
+    "types": ["jest", "node", "resize-observer-polyfill"]
+  },
+  "include": ["src/**/*"]
+}

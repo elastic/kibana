@@ -9,29 +9,25 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
-import { Duration } from 'moment';
 import moment from 'moment';
 import { CoreStart } from 'kibana/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { TableText } from '../';
-import { OnActionClick, OnActionComplete, OnActionDismiss } from './types';
+import { IClickActionDescriptor } from '../';
+import { OnActionDismiss } from './types';
+import { UISession } from '../../types';
+import extendSessionIcon from '../../icons/extend_session.svg';
 
 interface ExtendButtonProps {
-  id: string;
-  name: string;
-  expires: string | null;
-  extendBy: Duration;
+  searchSession: UISession;
   api: SearchSessionsMgmtAPI;
-  overlays: CoreStart['overlays'];
-  onActionClick: OnActionClick;
-  onActionComplete: OnActionComplete;
 }
 
 const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnActionDismiss }) => {
-  const { id, name, expires, api, extendBy, onActionComplete, onActionDismiss } = props;
+  const { searchSession, api, onActionDismiss } = props;
+  const { id, name, expires } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
-  const extendByDuration = moment.duration(extendBy);
+  const extendByDuration = moment.duration(api.getExtendByDuration());
 
   const newExpiration = moment(expires).add(extendByDuration);
 
@@ -61,7 +57,6 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
         await api.sendExtend(id, `${newExpiration.toISOString()}`);
         setIsLoading(false);
         onActionDismiss();
-        onActionComplete();
       }}
       confirmButtonText={confirm}
       confirmButtonDisabled={isLoading}
@@ -74,24 +69,21 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
   );
 };
 
-export const ExtendButton = (props: ExtendButtonProps) => {
-  const { overlays, onActionClick } = props;
-
-  return (
-    <>
-      <TableText
-        onClick={() => {
-          onActionClick();
-          const ref = overlays.openModal(
-            toMountPoint(<ExtendConfirm onActionDismiss={() => ref?.close()} {...props} />)
-          );
-        }}
-      >
-        <FormattedMessage
-          id="xpack.data.mgmt.searchSessions.actionExtend"
-          defaultMessage="Extend"
-        />
-      </TableText>
-    </>
-  );
-};
+export const createExtendActionDescriptor = (
+  api: SearchSessionsMgmtAPI,
+  uiSession: UISession,
+  core: CoreStart
+): IClickActionDescriptor => ({
+  iconType: extendSessionIcon,
+  label: (
+    <FormattedMessage id="xpack.data.mgmt.searchSessions.actionExtend" defaultMessage="Extend" />
+  ),
+  onClick: async () => {
+    const ref = core.overlays.openModal(
+      toMountPoint(
+        <ExtendConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />
+      )
+    );
+    await ref.onClose;
+  },
+});
