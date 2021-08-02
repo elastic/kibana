@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { CanvasServiceFactory } from '.';
-import {
-  ExpressionsService,
-  serializeProvider,
-} from '../../../../../../src/plugins/expressions/common';
-import { API_ROUTE_FUNCTIONS } from '../../../common/lib/constants';
+import { CoreSetup } from '../../../../src/core/public';
+import { serializeProvider } from '../../../../src/plugins/expressions/common';
+import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 
-export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService> = async (
+import { CanvasSetupDeps } from './plugin';
+
+// TODO: clintandrewhall - This is getting refactored shortly.  https://github.com/elastic/kibana/issues/105675
+export const setupExpressions = async ({
   coreSetup,
-  coreStart,
   setupPlugins,
-  startPlugins
-) => {
+}: {
+  coreSetup: CoreSetup;
+  setupPlugins: CanvasSetupDeps;
+}) => {
   const { expressions, bfetch } = setupPlugins;
 
   let cached: Promise<void> | null = null;
+
   const loadServerFunctionWrappers = async () => {
     if (!cached) {
       cached = (async () => {
@@ -51,6 +53,4 @@ export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService>
   };
 
   await loadServerFunctionWrappers();
-
-  return setupPlugins.expressions.fork();
 };

@@ -6,49 +6,62 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { omitBy, isNil } from 'lodash';
+// @ts-expect-error Untyped library
 import Style from 'style-it';
+
+import { ExpressionRenderer } from 'src/plugins/expressions';
 import { getType } from '@kbn/interpreter/common';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
+// @ts-expect-error Untyped local
 import { ElementShareContainer } from '../element_share_container';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
+import { RendererHandlers } from '../../../types';
+import { Renderable } from '../../../canvas_plugin_src/functions/common/render';
 
-const isLoading = (renderable, state) => !state || !renderable;
+export interface Props {
+  renderable: Renderable | null;
+  renderFunction: ExpressionRenderer<any> | null;
+  height: number;
+  width: number;
+  handlers: RendererHandlers;
+  backgroundColor: string;
+  selectElement: () => void;
+  state: string;
+}
 
-const isNotValidForRendering = (renderable, renderFunction) =>
-  renderable && getType(renderable) !== 'render' && !renderFunction;
-
-const isNotValidExpression = (renderable, renderFunction, state) =>
-  state === 'error' || // The renderable has an error
-  getType(renderable) !== 'render' || // The renderable isn't, well, renderable
-  !renderFunction; // We can't find an element in the registry for this
-
-export const ElementContent = (props) => {
+export const ElementContent = (props: Props) => {
   const { renderable, renderFunction, width, height, handlers, backgroundColor, state } = props;
   const { onComplete } = handlers;
 
-  if (isLoading(renderable, state)) {
+  if (!state || !renderable) {
     return <Loading backgroundColor={backgroundColor} />;
   }
 
   // renderable is available, but no matching element is found, render invalid
-  if (isNotValidForRendering(renderable, renderFunction)) {
+  if (renderable && getType(renderable) !== 'render' && !renderFunction) {
     return <InvalidElementType {...props} renderableType={renderable?.as} />;
   }
 
   // error state, render invalid expression notice
-  if (isNotValidExpression(renderable, renderFunction, state)) {
+  if (
+    state === 'error' || // The renderable has an error
+    getType(renderable) !== 'render' || // The renderable isn't, well, renderable
+    !renderFunction // We can't find an element in the registry for this
+  ) {
     return <InvalidExpression {...props} />;
   }
+
+  const containerStyle = omitBy(renderable.containerStyle, isNil);
 
   return Style.it(
     renderable.css,
     <div
       // TODO: 'canvas__element' was added for BWC, It can be removed after a while
       className={'canvas__element canvasElement'}
-      style={{ ...renderable.containerStyle, width, height }}
+      style={{ ...containerStyle, width, height }}
       data-test-subj="canvasWorkpadPageElementContent"
     >
       <ElementShareContainer
@@ -69,25 +82,4 @@ export const ElementContent = (props) => {
       </ElementShareContainer>
     </div>
   );
-};
-
-ElementContent.propTypes = {
-  renderable: PropTypes.shape({
-    css: PropTypes.string,
-    value: PropTypes.object,
-  }),
-  renderFunction: PropTypes.shape({
-    name: PropTypes.string,
-    render: PropTypes.func,
-    reuseDomNode: PropTypes.bool,
-  }),
-  size: PropTypes.object,
-  handlers: PropTypes.shape({
-    setFilter: PropTypes.func.isRequired,
-    getFilter: PropTypes.func.isRequired,
-    done: PropTypes.func.isRequired,
-    onComplete: PropTypes.func.isRequired, // local, not passed through
-  }).isRequired,
-  state: PropTypes.string,
-  backgroundColor: PropTypes.string,
 };
