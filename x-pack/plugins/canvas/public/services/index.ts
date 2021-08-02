@@ -12,11 +12,13 @@ import { CanvasWorkpadService } from './workpad';
 import { CanvasNavLinkService } from './nav_link';
 import { CanvasNotifyService } from './notify';
 import { CanvasPlatformService } from './platform';
+import { CanvasReportingService } from './reporting';
 
 export interface CanvasPluginServices {
   workpad: CanvasWorkpadService;
   notify: CanvasNotifyService;
   platform: CanvasPlatformService;
+  reporting: CanvasReportingService;
   navLink: CanvasNavLinkService;
 }
 
@@ -26,3 +28,4 @@ export const useWorkpadService = () => (() => pluginServices.getHooks().workpad.
 export const useNavLinkService = () => (() => pluginServices.getHooks().navLink.useService())();
 export const useNotifyService = () => (() => pluginServices.getHooks().notify.useService())();
 export const usePlatformService = () => (() => pluginServices.getHooks().platform.useService())();
+export const useReportingService = () => (() => pluginServices.getHooks().reporting.useService())();
