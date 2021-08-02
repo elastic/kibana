@@ -75,7 +75,7 @@ describe('<FieldEditor />', () => {
 
   beforeEach(async () => {
     onChange = jest.fn();
-    httpRequestsMockHelpers.setFieldPreviewResponse({ message: 'TODO: set by Jest test' });
+    httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
   });
 
   test('initial state should have "set custom label", "set value" and "set format" turned off', async () => {
