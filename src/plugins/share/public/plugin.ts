@@ -85,6 +85,19 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         });
         return url;
       },
+      shortUrls: {
+        get: () => ({
+          create: async () => {
+            throw new Error('Not implemented');
+          },
+          get: async () => {
+            throw new Error('Not implemented');
+          },
+          delete: async () => {
+            throw new Error('Not implemented');
+          },
+        }),
+      },
     });
 
     const redirectManager = new RedirectManager({

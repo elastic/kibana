@@ -18,6 +18,19 @@ const url = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
+  shortUrls: {
+    get: () => ({
+      create: async () => {
+        throw new Error('Not implemented');
+      },
+      get: async () => {
+        throw new Error('Not implemented');
+      },
+      delete: async () => {
+        throw new Error('Not implemented');
+      },
+    }),
+  },
 });
 
 const createSetupContract = (): Setup => {

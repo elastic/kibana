@@ -10,6 +10,17 @@ import { SerializableState, VersionedState } from 'src/plugins/kibana_utils/comm
 import { LocatorPublic } from '../locators';
 
 /**
+ * A factory for Short URL Service. We need this factory as the dependency
+ * injection is different between the server and the client. On the server,
+ * the Short URL Service needs a saved object client scoped to the current
+ * request and the current Kibana version. On the client, the Short URL Service
+ * needs no dependencies.
+ */
+export interface IShortUrlClientFactory<D> {
+  get(dependencies: D): IShortUrlClient;
+}
+
+/**
  * CRUD-like API for short URLs.
  */
 export interface IShortUrlClient {

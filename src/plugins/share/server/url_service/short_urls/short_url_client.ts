@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SerializableState } from 'src/plugins/kibana_utils/common';
-import { IShortUrlClient, ShortUrl, ShortUrlCreateParams } from '../../../common/url_service';
-import { ShortUrlStorage } from './types';
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { IShortUrlClient, ShortUrl, ShortUrlCreateParams } from '../../../common/url_service';
+import type { ShortUrlStorage } from './types';
 
 /**
  * Dependencies of the Short URL Client.
@@ -28,17 +28,35 @@ export interface ServerShortUrlClientDependencies {
 export class ServerShortUrlClient implements IShortUrlClient {
   constructor(private readonly dependencies: ServerShortUrlClientDependencies) {}
 
-  public create<P extends SerializableState>(
-    params: ShortUrlCreateParams<P>
-  ): Promise<ShortUrl<P>> {
+  public async create<P extends SerializableState>({
+    locator,
+    params,
+    slug = '',
+  }: ShortUrlCreateParams<P>): Promise<ShortUrl<P>> {
+    const { storage, currentVersion } = this.dependencies;
+    const now = Date.now();
+    const data = await storage.create({
+      accessCount: 0,
+      accessDate: now,
+      createDate: now,
+      slug,
+      locator: {
+        id: locator.id,
+        version: currentVersion,
+        state: params,
+      },
+    });
+
+    return {
+      data,
+    };
+  }
+
+  public async delete(slug: string): Promise<boolean> {
     throw new Error('not implemented');
   }
 
-  public delete(slug: string): Promise<boolean> {
-    throw new Error('not implemented');
-  }
-
-  public get(slug: string): Promise<ShortUrl> {
+  public async get(slug: string): Promise<ShortUrl> {
     throw new Error('not implemented');
   }
 }

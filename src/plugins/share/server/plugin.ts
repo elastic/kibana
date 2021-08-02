@@ -13,21 +13,25 @@ import { createRoutes } from './routes/create_routes';
 import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
+import { ServerUrlService, ServerShortUrlClientFactory } from './url_service';
 
 /** @public */
 export interface SharePluginSetup {
-  url: UrlService;
+  url: ServerUrlService;
 }
 
 /** @public */
 export interface SharePluginStart {
-  url: UrlService;
+  url: ServerUrlService;
 }
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
-  private url?: UrlService;
+  private url?: ServerUrlService;
+  private version: string;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.version = initializerContext.env.packageInfo.version;
+  }
 
   public setup(core: CoreSetup) {
     this.url = new UrlService({
@@ -37,6 +41,9 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       getUrl: async () => {
         throw new Error('Locator .getUrl() currently is not supported on the server.');
       },
+      shortUrls: new ServerShortUrlClientFactory({
+        currentVersion: this.version,
+      }),
     });
 
     createRoutes(core, this.initializerContext.logger.get());
