@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { NavLinkService } from '../nav_link';
-
-const noop = (..._args: any[]): any => {};
-
-export const navLinkService: NavLinkService = {
-  updatePath: noop,
-};
+export interface CanvasNavLinkService {
+  updatePath: (path: string) => void;
+}
