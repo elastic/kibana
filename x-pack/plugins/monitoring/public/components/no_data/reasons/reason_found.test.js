@@ -58,7 +58,7 @@ describe('ReasonFound', () => {
           data: 'false',
           context: 'fakeContext',
         }}
-        enabled={enabler}
+        enabler={enabler}
       />
     );
     expect(component).toMatchSnapshot();
