@@ -120,6 +120,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         }
       }
       index={0}
+      isNewLibrary={false}
       onValueAxisPositionChanged={[MockFunction]}
       setMultipleValidity={[MockFunction]}
       setParamByIndex={[MockFunction]}
@@ -228,6 +229,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         }
       }
       index={1}
+      isNewLibrary={false}
       onValueAxisPositionChanged={[MockFunction]}
       setMultipleValidity={[MockFunction]}
       setParamByIndex={[MockFunction]}
