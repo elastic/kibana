@@ -337,7 +337,7 @@ export const EditPackagePolicyForm = memo<{
     packagePolicy.package?.name ?? '',
     'package-policy-edit-tabs'
   );
-  const tabsViews = extensionTabsView?.tabs ?? [];
+  const tabsViews = extensionTabsView?.tabs;
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
@@ -345,7 +345,7 @@ export const EditPackagePolicyForm = memo<{
     cancelUrl,
     agentPolicy,
     packageInfo,
-    tabs: tabsViews.length
+    tabs: tabsViews?.length
       ? [
           {
             title: i18n.translate('xpack.fleet.editPackagePolicy.settingsTabName', {
@@ -398,18 +398,18 @@ export const EditPackagePolicyForm = memo<{
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
-                {selectedTab === 0 ? (
-                  <extensionView.Component
-                    policy={originalPackagePolicy}
-                    newPolicy={packagePolicy}
-                    onChange={handleExtensionViewOnChange}
-                  />
-                ) : (
+                {selectedTab > 0 && tabsViews ? (
                   React.createElement(tabsViews[selectedTab - 1].Component, {
                     policy: originalPackagePolicy,
                     newPolicy: packagePolicy,
                     onChange: handleExtensionViewOnChange,
                   })
+                ) : (
+                  <extensionView.Component
+                    policy={originalPackagePolicy}
+                    newPolicy={packagePolicy}
+                    onChange={handleExtensionViewOnChange}
+                  />
                 )}
               </ExtensionWrapper>
             )}
@@ -426,6 +426,7 @@ export const EditPackagePolicyForm = memo<{
       extensionView,
       handleExtensionViewOnChange,
       selectedTab,
+      tabsViews,
     ]
   );
 
