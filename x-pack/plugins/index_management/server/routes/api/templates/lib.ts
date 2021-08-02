@@ -35,7 +35,7 @@ export const saveTemplate = async ({
   template: TemplateDeserialized;
   client: IScopedClusterClient;
   isLegacy?: boolean;
-  include_type_name?: string;
+  include_type_name?: boolean;
 }) => {
   const serializedTemplate = isLegacy
     ? serializeLegacyTemplate(template)

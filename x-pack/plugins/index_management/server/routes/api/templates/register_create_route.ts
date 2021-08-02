@@ -58,7 +58,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
           template,
           client,
           isLegacy,
-          include_type_name,
+          include_type_name: include_type_name === 'true',
         });
 
         return response.ok({ body: responseBody });
