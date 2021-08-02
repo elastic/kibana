@@ -99,7 +99,7 @@ export function SearchBar({
       >
         <EuiFlexItem>
           <EuiFlexGroup
-            direction={isSmall ? 'columnReverse' : 'row'}
+            direction={isLarge ? 'columnReverse' : 'row'}
             gutterSize="s"
             responsive={false}
           >
