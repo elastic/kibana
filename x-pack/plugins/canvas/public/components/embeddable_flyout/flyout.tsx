@@ -74,11 +74,14 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   );
 
   const onSelect = useCallback(
-    (id: string, type: string) => {
+    (id: string, type: string, isByValueEnabled?: boolean): void => {
       const partialElement = {
         expression: `markdown "Could not find embeddable for type ${type}" | render`,
       };
-      if (allowedEmbeddables[type]) {
+
+      if (isByValueEnabled) {
+        partialElement.expression = `embeddable id="${id}" type="${type}" | render`;
+      } else if (allowedEmbeddables[type]) {
         partialElement.expression = allowedEmbeddables[type](id);
       }
 
