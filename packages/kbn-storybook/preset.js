@@ -7,7 +7,7 @@
  */
 
 // eslint-disable-next-line
-const webpackConfig = require('./target_node/webpack.config').default;
+const webpackConfig = require('./target_node/webpack.config');
 
 module.exports = {
   managerEntries: (entry = []) => {
