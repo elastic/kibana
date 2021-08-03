@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * This test file references connector_id and connector.id. The connector_id is a field within the external_service
+ * object. It holds the action connector's id that was used to push the case to the external service. The connector.id
+ * field also holds an action connector's id. This id is the currently configured connector for the case. The next
+ * time the case is pushed it will use this connector to push the case. The connector_id can be different from the
+ * connector.id.
+ */
+
 import {
   CaseAttributes,
   CaseConnector,
@@ -20,10 +28,9 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { CONNECTOR_ID_REFERENCE_NAME } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
-import { getNoneCaseConnector } from '../../common';
+import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 import { CasesService } from '.';
 import {
   createESJiraConnector,
@@ -303,7 +310,7 @@ describe('CasesService', () => {
         `);
       });
 
-      it('builds references for connector_id, connector.id, and includes the existing references', async () => {
+      it('builds references for external service connector id, case connector id, and includes the existing references', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
           Promise.resolve({} as SavedObjectsUpdateResponse<ESCaseAttributes>)
         );

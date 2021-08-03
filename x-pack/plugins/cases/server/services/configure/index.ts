@@ -13,14 +13,13 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
-import { SavedObjectFindOptionsKueryNode } from '../../common';
+import { SavedObjectFindOptionsKueryNode, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CasesConfigureAttributes,
   CasesConfigurePatch,
 } from '../../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { CONNECTOR_ID_REFERENCE_NAME } from '..';
 import {
   transformFieldsToESModel,
   transformESConnectorToExternalModel,

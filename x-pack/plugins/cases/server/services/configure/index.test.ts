@@ -22,12 +22,11 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { CONNECTOR_ID_REFERENCE_NAME } from '..';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { CaseConfigureService } from '.';
 import { ESCasesConfigureAttributes } from './types';
-import { getNoneCaseConnector } from '../../common';
+import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 import { createESJiraConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
 
 const basicConfigFields = {

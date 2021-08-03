@@ -6,11 +6,8 @@
  */
 
 import { SavedObject, SavedObjectReference } from 'kibana/server';
-import {
-  CONNECTOR_ID_REFERENCE_NAME,
-  ESConnectorFields,
-  PUSH_CONNECTOR_ID_REFERENCE_NAME,
-} from '.';
+import { ESConnectorFields } from '.';
+import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common';
 import {
   CaseConnector,
   CaseFullExternalService,

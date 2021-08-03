@@ -10,8 +10,11 @@
 import { noneConnectorId } from '../../../common';
 import { SavedObjectReference } from '../../../../../../src/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { getNoneCaseConnector } from '../../common';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../services';
+import {
+  getNoneCaseConnector,
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+} from '../../common';
 
 export const transformConnectorIdToReference = (connector?: {
   id?: string;

@@ -12,8 +12,7 @@ import {
   ConnectorTypes,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common';
-import { getNoneCaseConnector } from '../../common';
-import { CONNECTOR_ID_REFERENCE_NAME } from '../../services';
+import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 import { ESCaseConnectorWithId } from '../../services/test_utils';
 import { ESCasesConfigureAttributes } from '../../services/configure/types';
 import { configureConnectorIdMigration } from './configuration';

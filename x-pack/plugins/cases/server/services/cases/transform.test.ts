@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '..';
 import {
   createCaseSavedObjectResponse,
   createESJiraConnector,
@@ -19,7 +18,11 @@ import {
 } from './transform';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { ConnectorTypes } from '../../../common';
-import { getNoneCaseConnector } from '../../common';
+import {
+  getNoneCaseConnector,
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+} from '../../common';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
