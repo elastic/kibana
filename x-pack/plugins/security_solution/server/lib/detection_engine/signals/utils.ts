@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { createHash } from 'crypto';
+import { chunk, get, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
-import { chunk, isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -946,12 +946,11 @@ export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert =>
 };
 
 export const getF = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
-  const sourceField = `_source.${field}`;
   if (isWrappedRACAlert(event)) {
-    return event._source[sourceField.replace('signal', 'kibana.alert')] as T; // TODO: handle special cases
+    return event._source, field.replace('signal', 'kibana.alert') as T; // TODO: handle special cases
   } else if (isWrappedSignalHit(event)) {
-    return event._source[sourceField] as T;
+    return get(event._source, field) as T;
   } else if (isWrappedEventHit(event)) {
-    return event._source[sourceField] as T;
+    return get(event._source, field) as T;
   }
 };

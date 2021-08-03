@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sampleDocNoSortId } from '../../../signals/__mocks__/es_results';
+import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
 import { flatten } from './flatten';
 import {
   buildAlert,
@@ -14,41 +14,33 @@ import {
   additionalAlertFields,
   removeClashes,
 } from './build_alert';
-import { Ancestor, BaseSignalHit, SignalSourceHit } from '../../../signals/types';
+import { Ancestor, SignalSourceHit } from '../../../signals/types';
 import {
   getRulesSchemaMock,
   ANCHOR_DATE,
 } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import { SIGNALS_TEMPLATE_VERSION } from '../../../routes/index/get_signals_template';
-import { RACAlert } from '../../types';
+
+type SignalDoc = SignalSourceHit & {
+  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+};
 
 describe('buildAlert', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('it builds a signal as expected without original_event if event does not exist', () => {
-    const sampleDoc: SignalSourceHit & {
-      _source: Required<SignalSourceHit>['_source'];
-    } = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    const doc: SignalSourceHit & {
-      _source: Required<SignalSourceHit>['_source']
-    } = {
-      ...sampleDoc,
-      _source: {
-        ...sampleDoc._source,
-        '@timestamp': new Date().toISOString(),
-      },
-    };
+  test('it builds an alert as expected without original_event if event does not exist', () => {
+    const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
     const rule = getRulesSchemaMock();
-    const signal = {
+    const alert = {
       ...buildAlert([doc], rule),
       ...additionalAlertFields(doc),
     };
-    const expected: RACAlert = {
-      '@timestamp': new Date().toISOString(),
+    const timestamp = alert['@timestamp'];
+    const expected = {
+      '@timestamp': timestamp,
       'kibana.alert.ancestors': [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -59,6 +51,7 @@ describe('buildAlert', () => {
       ],
       'kibana.alert.original_time': '2020-04-20T21:27:45.000Z',
       'kibana.alert.status': 'open',
+      'kibana.alert.workflow_status': 'open',
       ...flatten('kibana.alert.rule', {
         author: [],
         id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
@@ -70,7 +63,6 @@ describe('buildAlert', () => {
         false_positives: ['false positive 1', 'false positive 2'],
         from: 'now-6m',
         immutable: false,
-        index: '',
         name: 'Query with a rule id',
         query: 'user.name: root or user.name: admin',
         references: ['test 1', 'test 2'],
@@ -97,11 +89,11 @@ describe('buildAlert', () => {
       }),
       'kibana.alert.depth': 1,
     };
-    expect(signal).toEqual(expected);
+    expect(alert).toEqual(expected);
   });
 
-  test('it builds a signal as expected with original_event if is present', () => {
-    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+  test('it builds an alert as expected with original_event if is present', () => {
+    const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -109,21 +101,14 @@ describe('buildAlert', () => {
       module: 'system',
     };
     const rule = getRulesSchemaMock();
-    const signal = {
+    const alert = {
       ...buildAlert([doc], rule),
       ...additionalAlertFields(doc),
     };
-    const expected: RACAlert = {
-      _meta: {
-        version: SIGNALS_TEMPLATE_VERSION,
-      },
-      parent: {
-        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
-        type: 'event',
-        index: 'myFakeSignalIndex',
-        depth: 0,
-      },
-      parents: [
+    const timestamp = alert['@timestamp'];
+    const expected = {
+      '@timestamp': timestamp,
+      'kibana.alert.ancestors': [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
           type: 'event',
@@ -131,23 +116,16 @@ describe('buildAlert', () => {
           depth: 0,
         },
       ],
-      ancestors: [
-        {
-          id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
-          type: 'event',
-          index: 'myFakeSignalIndex',
-          depth: 0,
-        },
-      ],
-      original_time: '2020-04-20T21:27:45.000Z',
-      original_event: {
+      'kibana.alert.original_time': '2020-04-20T21:27:45.000Z',
+      'kibana.alert.original_event': {
         action: 'socket_opened',
         dataset: 'socket',
         kind: 'event',
         module: 'system',
       },
-      status: 'open',
-      rule: {
+      'kibana.alert.status': 'open',
+      'kibana.alert.workflow_status': 'open',
+      ...flatten('kibana.alert.rule', {
         author: [],
         id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
@@ -181,32 +159,32 @@ describe('buildAlert', () => {
         rule_id: 'query-rule-id',
         interval: '5m',
         exceptions_list: getListArrayMock(),
-      },
-      depth: 1,
+      }),
+      'kibana.alert.depth': 1,
     };
-    expect(signal).toEqual(expected);
+    expect(alert).toEqual(expected);
   });
 
-  test('it builds a ancestor correctly if the parent does not exist', () => {
-    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+  test('it builds an ancestor correctly if the parent does not exist', () => {
+    const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
       kind: 'event',
       module: 'system',
     };
-    const signal = buildParent(doc);
+    const parent = buildParent(doc);
     const expected: Ancestor = {
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
       type: 'event',
       index: 'myFakeSignalIndex',
       depth: 0,
     };
-    expect(signal).toEqual(expected);
+    expect(parent).toEqual(expected);
   });
 
-  test('it builds a ancestor correctly if the parent does exist', () => {
-    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+  test('it builds an ancestor correctly if the parent does exist', () => {
+    const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -235,7 +213,7 @@ describe('buildAlert', () => {
         id: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
       },
     };
-    const signal = buildParent(doc);
+    const parent = buildParent(doc);
     const expected: Ancestor = {
       rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -243,18 +221,25 @@ describe('buildAlert', () => {
       index: 'myFakeSignalIndex',
       depth: 1,
     };
-    expect(signal).toEqual(expected);
+    expect(parent).toEqual(expected);
   });
 
-  test('it builds a signal ancestor correctly if the parent does not exist', () => {
-    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+  test('it builds an alert ancestor correctly if the parent does not exist', () => {
+    const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    const doc: SignalDoc = {
+      ...sampleDoc,
+      _source: {
+        ...sampleDoc._source,
+        '@timestamp': new Date().toISOString(),
+      },
+    };
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
       kind: 'event',
       module: 'system',
     };
-    const signal = buildAncestors(doc);
+    const ancestor = buildAncestors(doc);
     const expected: Ancestor[] = [
       {
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -263,11 +248,18 @@ describe('buildAlert', () => {
         depth: 0,
       },
     ];
-    expect(signal).toEqual(expected);
+    expect(ancestor).toEqual(expected);
   });
 
-  test('it builds a signal ancestor correctly if the parent does exist', () => {
-    const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+  test('it builds an alert ancestor correctly if the parent does exist', () => {
+    const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+    const doc: SignalDoc = {
+      ...sampleDoc,
+      _source: {
+        ...sampleDoc._source,
+        '@timestamp': new Date().toISOString(),
+      },
+    };
     doc._source.event = {
       action: 'socket_opened',
       dataset: 'socket',
@@ -296,7 +288,7 @@ describe('buildAlert', () => {
       },
       depth: 1,
     };
-    const signal = buildAncestors(doc);
+    const ancestors = buildAncestors(doc);
     const expected: Ancestor[] = [
       {
         id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
@@ -312,63 +304,93 @@ describe('buildAlert', () => {
         depth: 1,
       },
     ];
-    expect(signal).toEqual(expected);
+    expect(ancestors).toEqual(expected);
   });
 
   describe('removeClashes', () => {
     test('it will call renameClashes with a regular doc and not mutate it if it does not have a signal clash', () => {
-      const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const doc: SignalDoc = {
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          '@timestamp': new Date().toISOString(),
+        },
+      };
       const output = removeClashes(doc);
       expect(output).toBe(doc); // reference check
     });
 
     test('it will call renameClashes with a regular doc and not change anything', () => {
-      const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const doc: SignalDoc = {
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          '@timestamp': new Date().toISOString(),
+        },
+      };
       const output = removeClashes(doc);
       expect(output).toEqual(doc); // deep equal check
     });
 
     test('it will remove a "signal" numeric clash', () => {
-      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
       const doc = ({
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: 127,
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown) as SignalDoc;
       const output = removeClashes(doc);
-      expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
+      const timestamp = output._source['@timestamp'];
+      expect(output).toEqual({
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          '@timestamp': timestamp,
+        },
+      });
     });
 
     test('it will remove a "signal" object clash', () => {
-      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
       const doc = ({
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { child_1: { child_2: 'Test nesting' } },
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown) as SignalDoc;
       const output = removeClashes(doc);
-      expect(output).toEqual(sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'));
+      const timestamp = output._source['@timestamp'];
+      expect(output).toEqual({
+        ...sampleDoc,
+        _source: {
+          ...sampleDoc._source,
+          '@timestamp': timestamp,
+        },
+      });
     });
 
     test('it will not remove a "signal" if that is signal is one of our signals', () => {
-      const sampleDoc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      const sampleDoc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
       const doc = ({
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { rule: { id: '123' } },
         },
-      } as unknown) as BaseSignalHit;
+      } as unknown) as SignalDoc;
       const output = removeClashes(doc);
+      const timestamp = output._source['@timestamp'];
       const expected = {
-        ...sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'),
+        ...sampleDoc,
         _source: {
-          ...sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71')._source,
+          ...sampleDoc._source,
           signal: { rule: { id: '123' } },
+          '@timestamp': timestamp,
         },
       };
       expect(output).toEqual(expected);

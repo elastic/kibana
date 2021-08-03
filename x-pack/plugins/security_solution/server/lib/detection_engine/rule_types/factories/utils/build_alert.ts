@@ -6,10 +6,9 @@
  */
 
 import { ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
-import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
+import { Ancestor, BaseSignalHit, SimpleHit } from '../../../signals/types';
 import {
   getF,
   getValidDateFromDoc,
@@ -17,8 +16,8 @@ import {
   isWrappedSignalHit,
 } from '../../../signals/utils';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import { RACAlert } from '../../types';
+import { flatten } from './flatten';
 
 /**
  * Takes an event document and extracts the information needed for the corresponding entry in the child
@@ -26,7 +25,7 @@ import { RACAlert } from '../../types';
  * @param doc The parent event
  */
 export const buildParent = (doc: SimpleHit): Ancestor => {
-  const isSignal = isWrappedSignalHit(doc) || isWrappedRACAlert(doc);
+  const isSignal: boolean = isWrappedSignalHit(doc) || isWrappedRACAlert(doc);
   const parent: Ancestor = {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
@@ -93,35 +92,14 @@ export const buildAlert = (docs: SimpleHit[], rule: RulesSchema): RACAlert => {
     []
   );
 
-  return {
+  return ({
     '@timestamp': new Date().toISOString(),
-    'kibana.alert.ancestors': ancestors as object[],
+    'kibana.alert.ancestors': ancestors,
     [ALERT_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS]: 'open',
     'kibana.alert.depth': depth,
-    'kibana.alert.rule.false_positives': rule.false_positives ?? [],
-    'kibana.alert.rule.id': rule.id,
-    'kibana.alert.rule.immutable': rule.immutable ? 'true' : 'false',
-    'kibana.alert.rule.index': rule.index ?? [],
-    'kibana.alert.rule.language': rule.language ?? 'kuery',
-    'kibana.alert.rule.max_signals': rule.max_signals ?? DEFAULT_MAX_SIGNALS,
-    'kibana.alert.rule.query': rule.query ?? '*:*',
-    'kibana.alert.rule.saved_id': rule.saved_id ?? '',
-    'kibana.alert.rule.threat_index': rule.threat_index,
-    'kibana.alert.rule.threat_indicator_path': rule.threat_indicator_path,
-    'kibana.alert.rule.threat_language': rule.threat_language,
-    'kibana.alert.rule.threat_mapping.field': '', // TODO
-    'kibana.alert.rule.threat_mapping.value': '', // TODO
-    'kibana.alert.rule.threat_mapping.type': '', // TODO
-    'kibana.alert.rule.threshold.field': rule.threshold?.field,
-    'kibana.alert.rule.threshold.value': rule.threshold?.value,
-    'kibana.alert.rule.threshold.cardinality.field': '', // TODO
-    'kibana.alert.rule.threshold.cardinality.value': 0, // TODO
-  };
-};
-
-const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is ThresholdResult => {
-  return typeof thresholdResult === 'object';
+    ...flatten('kibana.alert.rule', rule),
+  } as unknown) as RACAlert;
 };
 
 /**
@@ -130,17 +108,16 @@ const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is Thr
  * @param doc The parent signal/event of the new signal to be built.
  */
 export const additionalAlertFields = (doc: BaseSignalHit) => {
-  const thresholdResult = doc._source?.threshold_result;
-  if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
-    throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
-  }
   const originalTime = getValidDateFromDoc({
     doc,
     timestampOverride: undefined,
   });
-  return {
+  const additionalFields: Record<string, unknown> = {
     'kibana.alert.original_time': originalTime != null ? originalTime.toISOString() : undefined,
-    'kibana.alert.original_event': doc._source?.event ?? undefined,
-    'kibana.alert.threshold_result': thresholdResult,
   };
+  const event = doc._source?.event;
+  if (event != null) {
+    additionalFields['kibana.alert.original_event'] = event;
+  }
+  return additionalFields;
 };
