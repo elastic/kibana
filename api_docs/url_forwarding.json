@@ -217,19 +217,23 @@
             ],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "urlForwarding",
-                "id": "def-public.legacyPath",
+                "id": "def-public.ForwardDefinition.rewritePath.$1",
                 "type": "string",
                 "tags": [],
                 "label": "legacyPath",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
