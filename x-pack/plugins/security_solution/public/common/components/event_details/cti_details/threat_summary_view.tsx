@@ -6,7 +6,7 @@
  */
 
 import styled from 'styled-components';
-import { get } from 'lodash';
+import { get } from 'lodash/fp';
 import React, { Fragment } from 'react';
 import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
 
