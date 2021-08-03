@@ -184,33 +184,33 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiText
+          color="subdued"
+          size="xs"
+          textAlign="center"
+        >
+          <FormattedMessage
+            defaultMessage="Some indices may be hidden. Try to {link} anyway."
+            id="indexPatternEditor.createIndexPattern.emptyState.createAnyway"
+            values={
+              Object {
+                "link": <EuiLink
+                  data-test-subj="createAnyway"
+                  onClick={[Function]}
+                >
+                  <FormattedMessage
+                    defaultMessage="create an index pattern"
+                    id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
+        </EuiText>
       </div>
     </EuiPageContentBody>
-    <EuiSpacer />
-    <EuiText
-      color="subdued"
-      size="xs"
-      textAlign="center"
-    >
-      <FormattedMessage
-        defaultMessage="Some indices may be hidden. Try to {link} anyway."
-        id="indexPatternEditor.createIndexPattern.emptyState.createAnyway"
-        values={
-          Object {
-            "link": <EuiLink
-              data-test-subj="createAnyway"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="create an index pattern"
-                id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
-                values={Object {}}
-              />
-            </EuiLink>,
-          }
-        }
-      />
-    </EuiText>
   </EuiPageContent>
 </Fragment>
 `;

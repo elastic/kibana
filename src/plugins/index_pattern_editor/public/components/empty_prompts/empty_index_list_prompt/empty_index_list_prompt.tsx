@@ -200,10 +200,10 @@ export const EmptyIndexListPrompt = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer />
+            {canSaveIndexPattern && createAnywayLink}
           </div>
         </EuiPageContentBody>
-        <EuiSpacer />
-        {canSaveIndexPattern && createAnywayLink}
       </EuiPageContent>
     </>
   );
