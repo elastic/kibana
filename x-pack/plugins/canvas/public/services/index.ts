@@ -10,6 +10,7 @@ export * from './legacy';
 import { PluginServices } from '../../../../../src/plugins/presentation_util/public';
 import { CanvasExpressionsService } from './expressions';
 import { CanvasNavLinkService } from './nav_link';
+import { CanvasEmbeddablesService } from './embeddables';
 import { CanvasNotifyService } from './notify';
 import { CanvasPlatformService } from './platform';
 import { CanvasReportingService } from './reporting';
@@ -18,6 +19,7 @@ import { CanvasWorkpadService } from './workpad';
 export interface CanvasPluginServices {
   expressions: CanvasExpressionsService;
   navLink: CanvasNavLinkService;
+  embeddables: CanvasEmbeddablesService;
   notify: CanvasNotifyService;
   platform: CanvasPlatformService;
   reporting: CanvasReportingService;
@@ -29,6 +31,8 @@ export const pluginServices = new PluginServices<CanvasPluginServices>();
 export const useExpressionsService = () =>
   (() => pluginServices.getHooks().expressions.useService())();
 export const useNavLinkService = () => (() => pluginServices.getHooks().navLink.useService())();
+export const useEmbeddablesService = () =>
+  (() => pluginServices.getHooks().embeddables.useService())();
 export const useNotifyService = () => (() => pluginServices.getHooks().notify.useService())();
 export const usePlatformService = () => (() => pluginServices.getHooks().platform.useService())();
 export const useReportingService = () => (() => pluginServices.getHooks().reporting.useService())();
