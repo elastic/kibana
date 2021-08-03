@@ -20,7 +20,7 @@ import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../common/utils/formatters';
 import { SeverityBadge } from './severity_badge';
 import { TopAlert } from '.';
-import { decorateResponse } from './decorate_response';
+import { parseAlert } from './parse_alert';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
 const getMappedNonEcsValue = ({
@@ -95,11 +95,7 @@ export const getRenderCellValue = ({
         return <SeverityBadge severityLevel={value ?? undefined} />;
       case RULE_NAME:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
+        const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
 
         return (
           // NOTE: EuiLink automatically renders links using a <button>

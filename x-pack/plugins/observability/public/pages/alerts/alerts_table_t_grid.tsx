@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY_LEVEL,
@@ -25,8 +25,8 @@ import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { decorateResponse } from './decorate_response';
 import { LazyAlertsFlyout } from '../..';
+import { parseAlert } from './parse_alert';
 
 interface AlertsTableTGridProps {
   indexName: string;
@@ -117,6 +117,10 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
 
+  const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
+    observabilityRuleTypeRegistry,
+  ]);
+
   const leadingControlColumns = [
     {
       id: 'expand',
@@ -132,11 +136,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       },
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
+        const alert = parseObservabilityAlert(dataFieldEs);
         return (
           <EuiButtonIcon
             size="s"
@@ -153,11 +153,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
+        const alert = parseObservabilityAlert(dataFieldEs);
         return (
           <EuiButtonIcon
             size="s"
