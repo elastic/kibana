@@ -23,9 +23,9 @@ import {
 } from '@elastic/eui';
 
 // @ts-expect-error
-import { SeriesEditor } from '../../series_editor';
+import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
-import { IndexPattern } from '../../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import { ColorRules } from '../color_rules';
 import { YesNo } from '../yes_no';
 import { QueryBarWrapper } from '../query_bar_wrapper';

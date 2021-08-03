@@ -19,7 +19,7 @@ import type { SanitizedFieldType, IndexPatternValue } from '../../../../common/t
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
 // @ts-ignore
-import { isFieldEnabled } from '../lib/check_ui_restrictions';
+import { isFieldEnabled } from '../../lib/check_ui_restrictions';
 import { PanelModelContext } from '../../contexts/panel_model_context';
 import { USE_KIBANA_INDEXES_KEY } from '../../../../common/constants';
 

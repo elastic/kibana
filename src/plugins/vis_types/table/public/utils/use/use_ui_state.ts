@@ -10,7 +10,7 @@ import { debounce, isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PersistedState } from 'src/plugins/visualizations/public';
 
-import { ColumnWidthData, TableVisUiState, TableVisUseUiStateProps } from '../../../types';
+import { ColumnWidthData, TableVisUiState, TableVisUseUiStateProps } from '../../types';
 
 const defaultSort = {
   columnIndex: null,

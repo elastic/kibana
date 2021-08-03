@@ -9,9 +9,9 @@
 import { IFieldFormatsRegistry } from '../../../../../../data/common';
 
 import { getPoint } from './_get_point';
-import { setFormatService } from '../../../../services';
+import { setFormatService } from '../../../services';
 import { Aspect } from './point_series';
-import { Table, Row, Column } from '../../../types';
+import { Table, Row, Column } from '../../types';
 
 describe('getPoint', function () {
   let deserialize: IFieldFormatsRegistry['deserialize'];

@@ -16,11 +16,11 @@ import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 import { PersistedState } from '../../../../../../visualizations/public';
 import { IInterpreterRenderHandlers } from '../../../../../../expressions/public';
 
-import { getDataActions } from '../../../../services';
+import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
-import { BasicVislibParams } from '../../../../types';
+import { BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
   vislibVis: any;

@@ -26,9 +26,9 @@ import {
 } from '@elastic/eui';
 
 // @ts-expect-error not typed yet
-import { SeriesEditor } from '../../series_editor';
+import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
-import { IndexPattern } from '../../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import { AnnotationsEditor } from '../annotations_editor';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorPicker } from '../color_picker';

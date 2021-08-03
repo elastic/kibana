@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getCoreStart, getDataStart } from '../../../services';
+import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
 import type { SanitizedFieldType, IndexPatternValue } from '../../../common/types';
 import { getIndexPatternKey } from '../../../common/index_patterns_utils';

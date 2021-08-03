@@ -11,9 +11,9 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { createVegaVisualization } from '../../vega_visualization';
-import { VegaVisualizationDependencies } from '../../plugin';
-import { VegaParser } from '../../data_model/vega_parser';
+import { createVegaVisualization } from '../vega_visualization';
+import { VegaVisualizationDependencies } from '../plugin';
+import { VegaParser } from '../data_model/vega_parser';
 
 import './vega_vis.scss';
 

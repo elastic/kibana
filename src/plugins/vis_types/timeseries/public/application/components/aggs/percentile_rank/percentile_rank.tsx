@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AggSelect } from '../agg_select';
 import { FieldSelect } from '../field_select';
 // @ts-ignore
-import { createChangeHandler } from '../lib/create_change_handler';
+import { createChangeHandler } from '../../lib/create_change_handler';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { createNumberHandler } from '../../lib/create_number_handler';
 

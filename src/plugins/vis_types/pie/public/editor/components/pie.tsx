@@ -30,10 +30,10 @@ import {
 import { VisEditorOptionsProps } from '../../../../../visualizations/public';
 import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../../charts/public';
-import { DEFAULT_PERCENT_DECIMALS } from '../../../../common';
-import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../../types';
-import { getLabelPositions, getValuesFormats } from '../../collections';
-import { getLegendPositions } from '../../positions';
+import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
+import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
+import { getLabelPositions, getValuesFormats } from '../collections';
+import { getLegendPositions } from '../positions';
 
 export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
 

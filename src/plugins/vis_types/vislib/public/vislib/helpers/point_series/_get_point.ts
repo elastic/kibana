@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getFormatService } from '../../../../services';
+import { getFormatService } from '../../../services';
 import { Aspect } from './point_series';
-import { Table, Row } from '../../../types';
+import { Table, Row } from '../../types';
 
 type RowValue = number | string | object | 'NaN';
 interface Raw {

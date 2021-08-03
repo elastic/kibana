@@ -10,7 +10,7 @@ import React, { HTMLAttributes } from 'react';
 // @ts-ignore
 import { aggToComponent } from '../lib/agg_to_component';
 // @ts-ignore
-import { isMetricEnabled } from '../lib/check_ui_restrictions';
+import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 import type { Metric, Panel, Series } from '../../../../common/types';

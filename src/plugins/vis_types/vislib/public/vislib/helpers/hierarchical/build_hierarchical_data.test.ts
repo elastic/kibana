@@ -7,7 +7,7 @@
  */
 import type { Dimensions, Dimension } from '../../../../../../vis_types/pie/public';
 import { buildHierarchicalData } from './build_hierarchical_data';
-import { Table, TableParent } from '../../../types';
+import { Table, TableParent } from '../../types';
 
 function tableVisResponseHandler(table: Table, dimensions: Dimensions) {
   const converted: {

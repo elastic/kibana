@@ -28,16 +28,16 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
-import { FieldSelect } from '../../aggs/field_select';
+import { FieldSelect } from '../aggs/field_select';
 // @ts-expect-error not typed yet
-import { SeriesEditor } from '../../series_editor';
+import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
-import { IndexPattern } from '../../index_pattern';
-import { YesNo } from '../../yes_no';
+import { IndexPattern } from '../index_pattern';
+import { YesNo } from '../yes_no';
 
-import { QueryBarWrapper } from '../../query_bar_wrapper';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { VisDataContext } from '../../../contexts/vis_data_context';
+import { VisDataContext } from '../../contexts/vis_data_context';
 import { BUCKET_TYPES } from '../../../../common/enums';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';

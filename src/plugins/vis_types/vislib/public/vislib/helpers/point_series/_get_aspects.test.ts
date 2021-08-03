@@ -10,7 +10,7 @@ import type { Dimension, Dimensions } from '../../../../../../vis_types/xy/publi
 
 import { getAspects } from './_get_aspects';
 import { Aspect } from './point_series';
-import { Table, Row } from '../../../types';
+import { Table, Row } from '../../types';
 
 describe('getAspects', function () {
   let table: Table;

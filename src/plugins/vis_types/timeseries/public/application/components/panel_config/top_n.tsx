@@ -26,9 +26,9 @@ import {
 } from '@elastic/eui';
 
 // @ts-expect-error not typed yet
-import { SeriesEditor } from '../../series_editor';
+import { SeriesEditor } from '../series_editor';
 // @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
-import { IndexPattern } from '../../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import { ColorRules } from '../color_rules';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';

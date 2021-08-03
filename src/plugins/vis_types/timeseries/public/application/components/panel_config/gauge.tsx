@@ -28,15 +28,15 @@ import {
 import type { Writable } from '@kbn/utility-types';
 
 // @ts-ignore
-import { SeriesEditor } from '../../series_editor';
+import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
-import { IndexPattern } from '../../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { ColorRules } from '../../color_rules';
-import { ColorPicker } from '../../color_picker';
-import { QueryBarWrapper } from '../../query_bar_wrapper';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { YesNo } from '../../yes_no';
+import { YesNo } from '../yes_no';
 
 import { limitOfSeries } from '../../../../common/ui_restrictions';
 import { PANEL_TYPES } from '../../../../common/enums';

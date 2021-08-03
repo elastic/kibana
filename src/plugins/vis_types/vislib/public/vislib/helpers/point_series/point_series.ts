@@ -17,7 +17,7 @@ import { initYAxis } from './_init_y_axis';
 import { initXAxis } from './_init_x_axis';
 import { orderedDateAxis } from './_ordered_date_axis';
 import { Serie } from './_add_to_siri';
-import { Column, Table } from '../../../types';
+import { Column, Table } from '../../types';
 
 export interface Aspect {
   accessor: Column['id'];

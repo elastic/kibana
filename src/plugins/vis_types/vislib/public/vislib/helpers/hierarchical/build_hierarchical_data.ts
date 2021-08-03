@@ -7,8 +7,8 @@
  */
 
 import { toArray } from 'lodash';
-import { getFormatService } from '../../../../services';
-import { Table } from '../../../types';
+import { getFormatService } from '../../../services';
+import { Table } from '../../types';
 import type { Dimensions } from '../../../../../../vis_types/pie/public';
 
 interface Slice {

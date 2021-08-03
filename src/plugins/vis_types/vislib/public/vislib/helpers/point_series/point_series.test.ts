@@ -11,8 +11,8 @@ import _ from 'lodash';
 import type { Dimensions } from '../../../../../../vis_types/xy/public';
 
 import { buildPointSeriesData } from './point_series';
-import { Table, Column } from '../../../types';
-import { setFormatService } from '../../../../services';
+import { Table, Column } from '../../types';
+import { setFormatService } from '../../../services';
 import { Serie } from './_add_to_siri';
 
 describe('pointSeriesChartDataFromTable', function () {
