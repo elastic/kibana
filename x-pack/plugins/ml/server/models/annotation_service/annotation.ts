@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 
+import { estypes } from '@elastic/elasticsearch';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import {
@@ -48,7 +49,6 @@ export interface IndexAnnotationArgs {
   detectorIndex?: number;
   entities?: any[];
   event?: Annotation['event'];
-  sort?: Array<Record<string, { order: 'asc' | 'desc' }>>;
 }
 
 export interface AggTerm {
@@ -120,7 +120,6 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     detectorIndex,
     entities,
     event,
-    sort,
   }: IndexAnnotationArgs): Promise<GetResponse> {
     const obj: GetResponse = {
       success: true,
@@ -296,7 +295,6 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
         },
         ...(fields ? { aggs } : {}),
       },
-      ...(sort ? sort : {}),
     };
 
     try {
@@ -344,6 +342,79 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     }
   }
 
+  /**
+   * Fetches the latest delayed data annotation per job.
+   * @param jobIds
+   */
+  async function getDelayedDataAnnotations({
+    jobIds,
+    earliestMs,
+  }: {
+    jobIds: string[];
+    earliestMs?: number;
+  }): Promise<Annotation[]> {
+    const params: estypes.SearchRequest = {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            ...(earliestMs
+              ? {
+                  must: [
+                    {
+                      range: {
+                        end_timestamp: {
+                          gte: earliestMs,
+                        },
+                      },
+                    },
+                  ],
+                }
+              : {}),
+            filter: [
+              {
+                term: { event: { value: 'delayed_data' } },
+              },
+              { terms: { job_id: jobIds } },
+            ],
+          },
+        },
+        aggs: {
+          by_job: {
+            terms: { field: 'job_id', size: jobIds.length },
+            aggs: {
+              latest_delayed: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      modified_time: {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const { body } = await asInternalUser.search<Annotation>(params);
+
+    const annotations = (body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
+      key: string;
+      doc_count: number;
+      latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
+    }>).buckets.map((bucket) => {
+      return bucket.latest_delayed.hits.hits[0]._source!;
+    });
+
+    return annotations;
+  }
+
   async function deleteAnnotation(id: string) {
     const params: DeleteParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -359,6 +430,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     getAnnotations,
     indexAnnotation,
     deleteAnnotation,
+    getDelayedDataAnnotations,
   };
 }
 

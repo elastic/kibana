@@ -16,10 +16,11 @@ import {
 } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
 import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
-import { DatafeedStats, JobId } from '../../../common/types/anomaly_detection_jobs';
+import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import { GetGuards } from '../../shared_services/shared_services';
 import {
   AnomalyDetectionJobsHealthAlertContext,
+  DelayedDataResponse,
   MmlTestResponse,
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
@@ -27,8 +28,6 @@ import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { isPopulatedObject } from '../../../common';
-import { Annotations } from '../../../common/types/annotations';
 
 interface TestResult {
   name: string;
@@ -171,10 +170,10 @@ export function jobsHealthServiceProvider(
       timeInterval: string | null,
       previousStartedAt: Date | null,
       docsCount: number | null
-    ): Promise<Record<JobId, Annotations>> {
+    ): Promise<DelayedDataResponse[]> {
       const currentTimestamp = Date.now();
 
-      let earliestMs = null;
+      let earliestMs;
 
       if (timeInterval) {
         earliestMs = currentTimestamp - parseInterval(timeInterval)!.asMilliseconds();
@@ -182,34 +181,26 @@ export function jobsHealthServiceProvider(
         earliestMs = previousStartedAt.getTime();
       }
 
-      // Take the latest annotation about delayed data
-      const { annotations } = await annotationService.getAnnotations({
-        jobIds,
-        maxAnnotations: 1,
-        earliestMs,
-        latestMs: currentTimestamp,
-        event: 'delayed_data',
-        sort: [{ modified_time: { order: 'desc' } }],
+      let annotations: DelayedDataResponse[] = (
+        await annotationService.getDelayedDataAnnotations({
+          jobIds,
+          earliestMs,
+        })
+      ).map<DelayedDataResponse>((v) => {
+        const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
+        const missedDocsCount = match ? parseInt(match[1], 10) : 0;
+        return {
+          annotation: v.annotation,
+          end_timestamp: v.end_timestamp,
+          missed_docs_count: missedDocsCount,
+          job_id: v.job_id,
+        };
       });
 
       if (docsCount) {
-        // Filter out annotations based on the docs count parameter
-        for (const jobAnnotationsKey in annotations) {
-          if (annotations.hasOwnProperty(jobAnnotationsKey)) {
-            const jobAnnotations = annotations[jobAnnotationsKey];
-            const matchedAnnotations = jobAnnotations.filter((v) => {
-              const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
-              const missedDocsCount = match ? parseInt(match[1], 10) : 0;
-              return missedDocsCount >= docsCount;
-            });
-
-            if (matchedAnnotations.length === 0) {
-              delete annotations[jobAnnotationsKey];
-            } else {
-              annotations[jobAnnotationsKey] = matchedAnnotations;
-            }
-          }
-        }
+        annotations = annotations.filter(
+          ({ missed_docs_count: missedDocsCount }) => missedDocsCount >= docsCount
+        );
       }
 
       return annotations;
@@ -295,19 +286,17 @@ export function jobsHealthServiceProvider(
           config.delayedData.docsCount
         );
 
-        if (isPopulatedObject(response)) {
-          const jobsCount = Object.keys(response).length;
-
+        if (response.length > 0) {
           results.push({
             name: HEALTH_CHECK_NAMES.delayedData.name,
             context: {
-              results: Object.keys(response).map((v) => ({ job_id: v })),
+              results: response,
               message: i18n.translate(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage',
                 {
                   defaultMessage:
                     '{jobsCount, plural, one {# job is} other {# jobs are}} suffering from delayed data.',
-                  values: { jobsCount },
+                  values: { jobsCount: response.length },
                 }
               ),
             },

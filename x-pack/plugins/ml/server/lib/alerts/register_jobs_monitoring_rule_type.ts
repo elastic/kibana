@@ -44,6 +44,12 @@ export interface NotStartedDatafeedResponse {
 
 export interface DelayedDataResponse {
   job_id: string;
+  /** Annotation string */
+  annotation: string;
+  /** Number of missed documents */
+  missed_docs_count: number;
+  /** Timestamp of the latest closed bucket with missing docs */
+  end_timestamp?: number;
 }
 
 export type AnomalyDetectionJobHealthResult =
