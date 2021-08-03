@@ -14,21 +14,29 @@ import {
 } from '../../../../../../src/plugins/presentation_util/public';
 
 import { CanvasPluginServices } from '..';
-import { workpadServiceFactory } from './workpad';
+import { embeddablesServiceFactory } from './embeddables';
+import { expressionsServiceFactory } from './expressions';
 import { navLinkServiceFactory } from './nav_link';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
+import { reportingServiceFactory } from './reporting';
+import { workpadServiceFactory } from './workpad';
 
-export { workpadServiceFactory } from './workpad';
+export { expressionsServiceFactory } from './expressions';
 export { navLinkServiceFactory } from './nav_link';
 export { notifyServiceFactory } from './notify';
 export { platformServiceFactory } from './platform';
+export { reportingServiceFactory } from './reporting';
+export { workpadServiceFactory } from './workpad';
 
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
-  workpad: new PluginServiceProvider(workpadServiceFactory),
+  embeddables: new PluginServiceProvider(embeddablesServiceFactory),
+  expressions: new PluginServiceProvider(expressionsServiceFactory),
   navLink: new PluginServiceProvider(navLinkServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),
   platform: new PluginServiceProvider(platformServiceFactory),
+  reporting: new PluginServiceProvider(reportingServiceFactory),
+  workpad: new PluginServiceProvider(workpadServiceFactory),
 };
 
 export const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices>(
