@@ -14,31 +14,24 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerDeleteRoute({ router, lib }: RouteDependencies) {
+export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/delete'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const body = req.body as typeof bodySchema.type;
-      const { indices = [] } = body;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indices = [] } = request.body as typeof bodySchema.type;
 
       const params = {
-        expandWildcards: 'none',
+        expand_wildcards: 'none',
         format: 'json',
         index: indices,
       };
 
       try {
-        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.delete', params);
-        return res.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        await client.asCurrentUser.indices.delete(params);
+        return response.ok();
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

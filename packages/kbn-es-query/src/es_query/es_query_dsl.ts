@@ -43,6 +43,9 @@ export interface DslTermQuery {
   term: Record<string, string>;
 }
 
+/**
+ * @public
+ */
 export type DslQuery =
   | DslRangeQuery
   | DslMatchQuery
@@ -50,5 +53,6 @@ export type DslQuery =
   | DslMatchAllQuery
   | DslTermQuery;
 
+/** @internal */
 export const isEsQueryString = (query: any): query is DslQueryStringQuery =>
   has(query, 'query_string.query');

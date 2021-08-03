@@ -106,6 +106,36 @@ exports[`policy table should show empty state when there are not any policies 1`
 </div>
 `;
 
+exports[`policy table should sort when linked index templates header is clicked 1`] = `
+Array [
+  "testy1",
+  "testy3",
+  "testy5",
+  "testy7",
+  "testy9",
+  "testy11",
+  "testy13",
+  "testy15",
+  "testy17",
+  "testy19",
+]
+`;
+
+exports[`policy table should sort when linked index templates header is clicked 2`] = `
+Array [
+  "testy0",
+  "testy104",
+  "testy102",
+  "testy100",
+  "testy98",
+  "testy96",
+  "testy94",
+  "testy92",
+  "testy90",
+  "testy88",
+]
+`;
+
 exports[`policy table should sort when linked indices header is clicked 1`] = `
 Array [
   "testy1",

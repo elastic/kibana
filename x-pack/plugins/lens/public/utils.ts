@@ -13,7 +13,7 @@ import { SavedObjectReference } from 'kibana/public';
 import { Filter, Query } from 'src/plugins/data/public';
 import { uniq } from 'lodash';
 import { Document } from './persistence/saved_object_store';
-import { Datasource } from './types';
+import { Datasource, DatasourceMap } from './types';
 import { extractFilterReferences } from './persistence';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
@@ -55,10 +55,7 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
   return firstDatasourceFromDoc || null;
 }
 
-export const getInitialDatasourceId = (
-  datasourceMap: Record<string, Datasource>,
-  doc?: Document
-) => {
+export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Document) => {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
 
