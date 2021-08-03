@@ -404,82 +404,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         `);
 
-        const now = new Date().getTime();
-
-        const { body: topAlerts, status: topAlertStatus } = await supertest
-          .get(
-            format({
-              pathname: '/api/observability/rules/alerts/top',
-              query: {
-                start: new Date(now - 30 * 60 * 1000).toISOString(),
-                end: new Date(now).toISOString(),
-                status: 'all',
-              },
-            })
-          )
-          .set('kbn-xsrf', 'foo');
-
-        expect(topAlertStatus).to.eql(200);
-
-        expect(topAlerts.length).to.be.greaterThan(0);
-
-        expectSnapshot(omit(topAlerts[0], exclude)).toMatchInline(`
-          Object {
-            "event.action": Array [
-              "open",
-            ],
-            "event.kind": Array [
-              "signal",
-            ],
-            "kibana.rac.alert.duration.us": Array [
-              0,
-            ],
-            "kibana.rac.alert.evaluation.threshold": Array [
-              30,
-            ],
-            "kibana.rac.alert.evaluation.value": Array [
-              50,
-            ],
-            "kibana.rac.alert.id": Array [
-              "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
-            ],
-            "kibana.rac.alert.owner": Array [
-              "apm",
-            ],
-            "kibana.rac.alert.producer": Array [
-              "apm",
-            ],
-            "kibana.rac.alert.status": Array [
-              "open",
-            ],
-            "kibana.space_ids": Array [
-              "default",
-            ],
-            "processor.event": Array [
-              "transaction",
-            ],
-            "rule.category": Array [
-              "Transaction error rate threshold",
-            ],
-            "rule.id": Array [
-              "apm.transaction_error_rate",
-            ],
-            "rule.name": Array [
-              "Transaction error rate threshold | opbeans-go",
-            ],
-            "service.name": Array [
-              "opbeans-go",
-            ],
-            "tags": Array [
-              "apm",
-              "service.name:opbeans-go",
-            ],
-            "transaction.type": Array [
-              "request",
-            ],
-          }
-        `);
-
         await es.bulk({
           index: APM_TRANSACTION_INDEX_NAME,
           body: [
@@ -589,28 +513,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
           }
         `);
-
-        const {
-          body: topAlertsAfterRecovery,
-          status: topAlertStatusAfterRecovery,
-        } = await supertest
-          .get(
-            format({
-              pathname: '/api/observability/rules/alerts/top',
-              query: {
-                start: new Date(now - 30 * 60 * 1000).toISOString(),
-                end: new Date().toISOString(),
-                status: 'all',
-              },
-            })
-          )
-          .set('kbn-xsrf', 'foo');
-
-        expect(topAlertStatusAfterRecovery).to.eql(200);
-
-        expect(topAlertsAfterRecovery.length).to.be(1);
-
-        expect(topAlertsAfterRecovery[0]['kibana.rac.alert.status']?.[0]).to.be('closed');
       });
     });
   });
