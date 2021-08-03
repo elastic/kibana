@@ -14,9 +14,6 @@ export const MARKDOWN_SYNTAX_HELP = i18n.translate(
   }
 );
 
-export const MARKDOWN = i18n.translate('xpack.securitySolution.markdownEditor.markdown', {
-  defaultMessage: 'Markdown',
-});
 export const PREVIEW = i18n.translate('xpack.securitySolution.markdownEditor.preview', {
   defaultMessage: 'Preview',
 });

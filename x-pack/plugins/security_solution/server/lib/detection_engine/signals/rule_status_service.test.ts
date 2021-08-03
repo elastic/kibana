@@ -13,6 +13,7 @@ import {
   MAX_RULE_STATUSES,
 } from './rule_status_service';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from './__mocks__/es_results';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
 const expectIsoDateString = expect.stringMatching(/2.*Z$/);
 const buildStatuses = (n: number) =>
@@ -25,9 +26,11 @@ const buildStatuses = (n: number) =>
 
 describe('buildRuleStatusAttributes', () => {
   it('generates a new date on each call', async () => {
-    const { statusDate } = buildRuleStatusAttributes('going to run');
+    const { statusDate } = buildRuleStatusAttributes(RuleExecutionStatus['going to run']);
     await new Promise((resolve) => setTimeout(resolve, 10)); // ensure time has passed
-    const { statusDate: statusDate2 } = buildRuleStatusAttributes('going to run');
+    const { statusDate: statusDate2 } = buildRuleStatusAttributes(
+      RuleExecutionStatus['going to run']
+    );
 
     expect(statusDate).toEqual(expectIsoDateString);
     expect(statusDate2).toEqual(expectIsoDateString);
@@ -35,7 +38,7 @@ describe('buildRuleStatusAttributes', () => {
   });
 
   it('returns a status and statusDate if "going to run"', () => {
-    const result = buildRuleStatusAttributes('going to run');
+    const result = buildRuleStatusAttributes(RuleExecutionStatus['going to run']);
     expect(result).toEqual({
       status: 'going to run',
       statusDate: expectIsoDateString,
@@ -43,7 +46,7 @@ describe('buildRuleStatusAttributes', () => {
   });
 
   it('returns success fields if "success"', () => {
-    const result = buildRuleStatusAttributes('succeeded', 'success message');
+    const result = buildRuleStatusAttributes(RuleExecutionStatus.succeeded, 'success message');
     expect(result).toEqual({
       status: 'succeeded',
       statusDate: expectIsoDateString,
@@ -56,7 +59,7 @@ describe('buildRuleStatusAttributes', () => {
 
   it('returns warning fields if "warning"', () => {
     const result = buildRuleStatusAttributes(
-      'warning',
+      RuleExecutionStatus.warning,
       'some indices missing timestamp override field'
     );
     expect(result).toEqual({
@@ -70,7 +73,7 @@ describe('buildRuleStatusAttributes', () => {
   });
 
   it('returns failure fields if "failed"', () => {
-    const result = buildRuleStatusAttributes('failed', 'failure message');
+    const result = buildRuleStatusAttributes(RuleExecutionStatus.failed, 'failure message');
     expect(result).toEqual({
       status: 'failed',
       statusDate: expectIsoDateString,
