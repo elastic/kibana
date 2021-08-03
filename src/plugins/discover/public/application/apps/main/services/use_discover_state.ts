@@ -29,7 +29,6 @@ import { SortPairArr } from '../../../angular/doc_table/lib/get_sort';
 export function useDiscoverState({
   services,
   history,
-  initialIndexPattern,
   initialSavedSearch,
 }: {
   services: DiscoverServices;
@@ -38,18 +37,11 @@ export function useDiscoverState({
   initialIndexPattern: IndexPattern;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns } = services;
-  const [indexPattern, setIndexPattern] = useState(initialIndexPattern);
-  const [savedSearch, setSavedSearch] = useState(initialSavedSearch);
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const timefilter = data.query.timefilter.timefilter;
 
-  useEffect(() => {
-    const initializeIndexPatternAndSavedSearch = () => {
-      setIndexPattern(initialIndexPattern);
-      setSavedSearch(initialSavedSearch);
-    };
-    initializeIndexPatternAndSavedSearch();
-  }, [initialSavedSearch, initialIndexPattern]);
+  const indexPattern = initialSavedSearch.searchSource.getField('index')!;
+  const savedSearch = initialSavedSearch;
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -132,12 +124,16 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
+        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
+        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
+
         reset();
+        /**
         const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
 
         if (nextIndexPattern) {
           setIndexPattern(nextIndexPattern.loaded);
-        }
+        } **/
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
@@ -146,7 +142,17 @@ export function useDiscoverState({
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [config, indexPatterns, appStateContainer, setState, state, refetch$, data$, reset]);
+  }, [
+    config,
+    indexPatterns,
+    appStateContainer,
+    setState,
+    state,
+    refetch$,
+    data$,
+    reset,
+    savedSearch.searchSource,
+  ]);
 
   const resetSavedSearch = useCallback(
     async (id?: string) => {
@@ -159,11 +165,8 @@ export function useDiscoverState({
       });
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
-      if (savedSearch.id !== newSavedSearch.id) {
-        setSavedSearch(newSavedSearch);
-      }
     },
-    [services, indexPattern, config, data, stateContainer, savedSearch.id]
+    [services, indexPattern, config, data, stateContainer]
   );
 
   /**
@@ -198,6 +201,19 @@ export function useDiscoverState({
     },
     [refetch$, searchSessionManager]
   );
+
+  useEffect(() => {
+    if (!initialSavedSearch) {
+      return;
+    }
+    const newAppState = getStateDefaults({
+      config,
+      data,
+      savedSearch: initialSavedSearch,
+    });
+    stateContainer.replaceUrlAppState(newAppState);
+    setState(newAppState);
+  }, [config, data, initialSavedSearch, reset, stateContainer]);
 
   /**
    * Initial data fetching, also triggered when index pattern changes

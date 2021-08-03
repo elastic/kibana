@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/target/types/public';
-import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
+import { IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { getState } from './services/discover_state';
@@ -57,7 +57,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   } = services;
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
+  const indexPattern = savedSearch?.searchSource?.getField('index');
   const [indexPatternList, setIndexPatternList] = useState<
     Array<SavedObject<IndexPatternAttributes>>
   >(opts.indexPatternList);
@@ -69,6 +69,9 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
 
     async function loadSavedSearch() {
       const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
+      if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
+        loadedSavedSearch.searchSource.setField('index', indexPattern);
+      }
       setSavedSearch(loadedSavedSearch);
       if (savedSearchId) {
         chrome.recentlyAccessed.add(
@@ -76,9 +79,6 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
           loadedSavedSearch.title,
           loadedSavedSearch.id
         );
-        if (loadedSavedSearch) {
-          setIndexPattern(loadedSavedSearch.searchSource.getField('index'));
-        }
       }
     }
 
@@ -91,6 +91,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     data.indexPatterns,
     history,
     id,
+    indexPattern,
     indexPatternList.length,
     props.opts,
     savedSearch,
@@ -100,7 +101,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
 
   useEffect(() => {
     async function loadDefaultOrCurrentIndexPattern() {
-      if (!savedSearch || id) {
+      if (!savedSearch) {
         return;
       }
       await data.indexPatterns.ensureDefaultIndexPattern();
@@ -113,10 +114,11 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
         savedSearch?.searchSource,
         toastNotifications
       );
-      setIndexPattern(indexPatternData);
+      savedSearch.searchSource.setField('index', indexPatternData);
       if (indexPatternList.length === 0) {
         setIndexPatternList(ipList);
       }
+      return indexPatternData;
     }
 
     try {

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { History } from 'history';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
@@ -52,16 +52,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { services, history, navigateTo, indexPatternList } = props.opts;
   const { chrome, docLinks, uiSettings: config, data } = services;
 
-  const [initialSavedSearch, setInitialSavedSearch] = useState<SavedSearch>(props.opts.savedSearch);
-  const [initialIndexPattern, setInitialIndexPattern] = useState<IndexPattern>(props.indexPattern);
-
-  useEffect(() => {
-    setInitialSavedSearch(props.opts.savedSearch);
-  }, [props.opts.savedSearch]);
-
-  useEffect(() => {
-    setInitialIndexPattern(props.indexPattern);
-  }, [props.indexPattern]);
+  const initialSavedSearch = props.opts.savedSearch;
+  const initialIndexPattern = props.indexPattern;
 
   /**
    * State related logic
