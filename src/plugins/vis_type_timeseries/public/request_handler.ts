@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IExecutionContextContainer } from 'src/core/public';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES } from '../common/constants';
@@ -19,7 +19,7 @@ interface MetricsRequestHandlerParams {
   uiState: Record<string, any>;
   visParams: TimeseriesVisParams;
   searchSessionId?: string;
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 }
 
 export const metricsRequestHandler = async ({

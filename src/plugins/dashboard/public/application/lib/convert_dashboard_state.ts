@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import type { IExecutionContextContainer } from 'src/core/public';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
@@ -41,7 +41,7 @@ interface StateToDashboardContainerInputProps {
   query: DashboardBuildContext['query'];
   incomingEmbeddable?: EmbeddablePackageState;
   dashboardCapabilities: DashboardBuildContext['dashboardCapabilities'];
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 }
 
 interface StateToRawDashboardStateProps {

@@ -12,34 +12,6 @@ import {
 } from './execution_context_container';
 
 describe('KibanaExecutionContext', () => {
-  describe('constructor', () => {
-    it('allows context to define parent explicitly', () => {
-      const parentContext: KibanaExecutionContext = {
-        type: 'parent-type',
-        name: 'parent-name',
-        id: '44',
-        description: 'parent-descripton',
-      };
-      const parentContainer = new ExecutionContextContainer(parentContext);
-
-      const context: KibanaExecutionContext = {
-        type: 'test-type',
-        name: 'test-name',
-        id: '42',
-        description: 'test-descripton',
-        parent: {
-          type: 'custom-parent-type',
-          name: 'custom-parent-name',
-          id: '41',
-          description: 'custom-parent-descripton',
-        },
-      };
-
-      const value = new ExecutionContextContainer(context, parentContainer).toJSON();
-      expect(value).toEqual(context);
-    });
-  });
-
   describe('toHeader', () => {
     it('returns an escaped string representation of provided execution context', () => {
       const context: KibanaExecutionContext = {
@@ -64,19 +36,19 @@ describe('KibanaExecutionContext', () => {
         id: '41',
         description: 'parent-descripton',
       };
-      const parentContainer = new ExecutionContextContainer(parentContext);
 
       const context: KibanaExecutionContext = {
         type: 'test-type',
         name: 'test-name',
         id: '42',
         description: 'test-descripton',
+        parent: parentContext,
       };
 
-      const value = new ExecutionContextContainer(context, parentContainer).toHeader();
+      const value = new ExecutionContextContainer(context).toHeader();
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "x-kbn-context": "%7B%22parent%22%3A%7B%22type%22%3A%22parent-type%22%2C%22name%22%3A%22parent-name%22%2C%22id%22%3A%2241%22%2C%22description%22%3A%22parent-descripton%22%7D%2C%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22description%22%3A%22test-descripton%22%7D",
+          "x-kbn-context": "%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22description%22%3A%22test-descripton%22%2C%22parent%22%3A%7B%22type%22%3A%22parent-type%22%2C%22name%22%3A%22parent-name%22%2C%22id%22%3A%2241%22%2C%22description%22%3A%22parent-descripton%22%7D%7D",
         }
       `);
     });
@@ -131,30 +103,30 @@ describe('KibanaExecutionContext', () => {
     });
 
     it('returns JSON representation when the parent context if provided', () => {
-      const context: KibanaExecutionContext = {
-        type: 'test-type',
-        name: 'test-name',
-        id: '42',
-        description: 'test-descripton',
-      };
-
       const parentAContext: KibanaExecutionContext = {
         type: 'parent-a-type',
         name: 'parent-a-name',
         id: '40',
         description: 'parent-a-descripton',
       };
-      const parentAContainer = new ExecutionContextContainer(parentAContext);
 
       const parentBContext: KibanaExecutionContext = {
         type: 'parent-b-type',
         name: 'parent-b-name',
         id: '41',
         description: 'parent-b-descripton',
+        parent: parentAContext,
       };
-      const parentBContainer = new ExecutionContextContainer(parentBContext, parentAContainer);
 
-      const value = new ExecutionContextContainer(context, parentBContainer).toJSON();
+      const context: KibanaExecutionContext = {
+        type: 'test-type',
+        name: 'test-name',
+        id: '42',
+        description: 'test-descripton',
+        parent: parentBContext,
+      };
+
+      const value = new ExecutionContextContainer(context).toJSON();
       expect(value).toEqual({
         ...context,
         parent: {

@@ -8,7 +8,9 @@
 
 /** @public */
 
-export interface KibanaExecutionContext {
+// use type to make it compatible with SerializableState
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type KibanaExecutionContext = {
   /**
    * Kibana application initated an operation.
    * */
@@ -23,4 +25,4 @@ export interface KibanaExecutionContext {
   readonly url?: string;
   /** a context that spawned the current context. */
   parent?: KibanaExecutionContext;
-}
+};

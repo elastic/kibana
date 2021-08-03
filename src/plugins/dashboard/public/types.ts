@@ -14,7 +14,7 @@ import type {
   ChromeStart,
   IUiSettingsClient,
   PluginInitializerContext,
-  IExecutionContextContainer,
+  KibanaExecutionContext,
 } from 'kibana/public';
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
@@ -86,7 +86,7 @@ export interface DashboardContainerInput extends ContainerInput {
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -132,7 +132,7 @@ export type DashboardBuildContext = Pick<
   dispatchDashboardStateChange: Dispatch<AnyAction>;
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 };
 
 export interface DashboardOptions {

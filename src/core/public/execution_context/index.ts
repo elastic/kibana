@@ -7,6 +7,5 @@
  */
 
 export type { KibanaExecutionContext } from '../../types';
-export { ExecutionContextService } from './execution_context_service';
-export type { ExecutionContextServiceStart } from './execution_context_service';
+export { ExecutionContextContainer } from './execution_context_container';
 export type { IExecutionContextContainer } from './execution_context_container';

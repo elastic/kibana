@@ -233,12 +233,13 @@ describe('Fetch', () => {
       const executionContainerMock = executionContextServiceMock.createContainer();
       executionContainerMock.toHeader.mockReturnValueOnce({ 'x-kbn-context': 'value' });
       await fetchInstance.fetch('/my/path', {
-        context: executionContainerMock,
+        context: {} as any,
       });
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'x-kbn-context': 'value',
       });
+      expect(executionContainerMock.toHeader).toHaveBeenCalledTimes(1);
     });
 
     // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.

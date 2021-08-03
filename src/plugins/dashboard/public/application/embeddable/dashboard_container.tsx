@@ -11,7 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient, IExecutionContextContainer } from 'src/core/public';
+import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 
 import { UiActionsStart } from '../../services/ui_actions';
@@ -68,7 +68,7 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 }
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
