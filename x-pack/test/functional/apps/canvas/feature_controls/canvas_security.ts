@@ -136,8 +136,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('global_canvas_read_role');
-        await security.user.delete('global_canvas_read_user');
+        await PageObjects.security.forceLogout();
+        await Promise.all([
+          security.role.delete('global_canvas_read_role'),
+          security.user.delete('global_canvas_read_user'),
+        ]);
       });
 
       it('shows canvas navlink', async () => {
@@ -203,6 +206,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login(
           'no_canvas_privileges_user',
           'no_canvas_privileges_user-password',
@@ -213,8 +217,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('no_canvas_privileges_role');
-        await security.user.delete('no_canvas_privileges_user');
+        await PageObjects.security.forceLogout();
+        await Promise.all([
+          security.role.delete('no_canvas_privileges_role'),
+          security.user.delete('no_canvas_privileges_user'),
+        ]);
       });
 
       it(`returns a 403`, async () => {
