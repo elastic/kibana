@@ -164,13 +164,7 @@ export const getXyVisualization = ({
     };
   },
 
-  getSuggestions: ({ state, ...rest }) =>
-    getSuggestions({
-      ...rest,
-      state: state
-        ? { ...state, layers: state ? getLayersByType(state, layerTypes.DATA) : [] }
-        : undefined,
-    }),
+  getSuggestions,
 
   initialize(addNewLayer, state) {
     return (
