@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterMeta, FILTERS } from './types';
+import { FieldFilter, Filter, FilterMeta, FILTERS } from './types';
 import { getPhraseScript } from './phrase_filter';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 
@@ -19,20 +19,35 @@ export type PhrasesFilter = Filter & {
   meta: PhrasesFilterMeta;
 };
 
-export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
+/**
+ * @param filter
+ * @returns `true` if a filter is a `PhrasesFilter`
+ *
+ * @public
+ */
+export const isPhrasesFilter = (filter: FieldFilter): filter is PhrasesFilter =>
   filter?.meta?.type === FILTERS.PHRASES;
 
+/** @internal */
 export const getPhrasesFilterField = (filter: PhrasesFilter) => {
   // Phrases is a newer filter type that has always been created via a constructor that ensures
   // `meta.key` is set to the field name
   return filter.meta.key;
 };
 
-// Creates a filter where the given field matches one or more of the given values
-// params should be an array of values
+/**
+ * Creates a filter where the given field matches one or more of the given values
+ * params should be an array of values
+ * @param field
+ * @param params
+ * @param indexPattern
+ * @returns
+ *
+ * @public
+ */
 export const buildPhrasesFilter = (
   field: IndexPatternFieldBase,
-  params: any[],
+  params: string[],
   indexPattern: IndexPatternBase
 ) => {
   const index = indexPattern.id;
@@ -41,11 +56,11 @@ export const buildPhrasesFilter = (
 
   let should;
   if (field.scripted) {
-    should = params.map((v: any) => ({
+    should = params.map((v) => ({
       script: getPhraseScript(field, v),
     }));
   } else {
-    should = params.map((v: any) => ({
+    should = params.map((v) => ({
       match_phrase: {
         [field.name]: v,
       },

@@ -49,7 +49,7 @@ export function buildBasicApiDeclaration({
     label: apiName,
     description: getCommentsFromNode(node),
     signature: getSignature(node, plugins, log),
-    source: getSourceForNode(node),
+    path: getSourceForNode(node),
     deprecated,
     removeBy: removeByTag ? removeByTag.getComment() : undefined,
   };

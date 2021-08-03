@@ -23,7 +23,7 @@ type PropsPDF = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption'> &
  * This is not planned to expand, as work is to be done on moving the export-type implementations out of Reporting
  * Related Discuss issue: https://github.com/elastic/kibana/issues/101422
  */
-export function getSharedComponents(core: CoreSetup) {
+export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClient) {
   return {
     ReportingPanelPDF(props: PropsPDF) {
       return (
@@ -31,8 +31,9 @@ export function getSharedComponents(core: CoreSetup) {
           layoutOption={props.layoutOption}
           requiresSavedState={false}
           reportType={PDF_REPORT_TYPE}
-          apiClient={new ReportingAPIClient(core.http)}
+          apiClient={apiClient}
           toasts={core.notifications.toasts}
+          uiSettings={core.uiSettings}
           {...props}
         />
       );
