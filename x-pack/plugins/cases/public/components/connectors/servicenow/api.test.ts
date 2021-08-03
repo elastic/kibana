@@ -31,7 +31,7 @@ describe('ServiceNow API', () => {
       });
 
       expect(res).toEqual(choicesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"getChoices","subActionParams":{"fields":["priority"]}}}',
         signal: abortCtrl.signal,
       });

@@ -28,17 +28,24 @@ import {
   nonExistingPolicies,
   patterns,
   searchBarQuery,
-  isTransformEnabled,
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
   getActivityLogData,
   getActivityLogDataPaging,
   getLastLoadedActivityLogData,
   detailsData,
-  getEndpointDetailsFlyoutView,
   getIsEndpointPackageInfoUninitialized,
+  getIsOnEndpointDetailsActivityLog,
+  getMetadataTransformStats,
+  isMetadataTransformStatsLoading,
 } from './selectors';
-import { AgentIdsPendingActions, EndpointState, PolicyIds } from '../types';
+import {
+  AgentIdsPendingActions,
+  EndpointState,
+  PolicyIds,
+  TransformStats,
+  TransformStatsResponse,
+} from '../types';
 import {
   sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
@@ -64,7 +71,8 @@ import { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
+import { getIsInvalidDateRange } from '../utils';
+import { TRANSFORM_STATS_URL } from '../../../../../common/constants';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -179,7 +187,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
 
       // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
+      if (patterns(getState()).length === 0) {
         try {
           const indexPatterns = await fetchIndexPatterns();
           if (indexPatterns !== undefined) {
@@ -369,7 +377,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
-      getEndpointDetailsFlyoutView(getState()) === EndpointDetailsTabsTypes.activityLog
+      getIsOnEndpointDetailsActivityLog(getState())
     ) {
       // call the activity log api
       dispatch({
@@ -400,21 +408,50 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     }
 
     // page activity log API
-    if (action.type === 'appRequestedEndpointActivityLog' && hasSelectedEndpoint(getState())) {
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        // ts error to be fixed when AsyncResourceState is refactored (#830)
-        // @ts-expect-error
-        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
-      });
-
+    if (
+      action.type === 'endpointDetailsActivityLogUpdatePaging' &&
+      hasSelectedEndpoint(getState())
+    ) {
       try {
-        const { page, pageSize } = getActivityLogDataPaging(getState());
+        const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(
+          getState()
+        );
+        // don't page when paging is disabled or when date ranges are invalid
+        if (disabled) {
+          return;
+        }
+        if (getIsInvalidDateRange({ startDate, endDate })) {
+          dispatch({
+            type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+            payload: {
+              isInvalidDateRange: true,
+            },
+          });
+          return;
+        }
+
+        dispatch({
+          type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+          payload: {
+            isInvalidDateRange: false,
+          },
+        });
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          // ts error to be fixed when AsyncResourceState is refactored (#830)
+          // @ts-expect-error
+          payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+        });
         const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
           agent_id: selectedAgent(getState()),
         });
         const activityLog = await coreStart.http.get<ActivityLog>(route, {
-          query: { page, page_size: pageSize },
+          query: {
+            page,
+            page_size: pageSize,
+            start_date: startDate,
+            end_date: endDate,
+          },
         });
 
         const lastLoadedLogData = getLastLoadedActivityLogData(getState());
@@ -428,6 +465,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           const updatedLogData = {
             page: activityLog.page,
             pageSize: activityLog.pageSize,
+            startDate: activityLog.startDate,
+            endDate: activityLog.endDate,
             data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
           };
           dispatch({
@@ -439,8 +478,10 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
               type: 'endpointDetailsActivityLogUpdatePaging',
               payload: {
                 disabled: true,
-                page: activityLog.page - 1,
+                page: activityLog.page > 1 ? activityLog.page - 1 : 1,
                 pageSize: activityLog.pageSize,
+                startDate: activityLog.startDate,
+                endDate: activityLog.endDate,
               },
             });
           }
@@ -462,6 +503,10 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (action.type === 'endpointIsolationRequest') {
       return handleIsolateEndpointHost(store, action);
     }
+
+    if (action.type === 'loadMetadataTransformStats') {
+      return handleLoadMetadataTransformStats(coreStart.http, store);
+    }
   };
 };
 
@@ -475,13 +520,17 @@ const getAgentAndPoliciesForEndpointsList = async (
   }
 
   // Create an array of unique policy IDs that are not yet known to be non-existing.
-  const policyIdsToCheck = Array.from(
-    new Set(
-      hosts
-        .filter((host) => !currentNonExistingPolicies[host.metadata.Endpoint.policy.applied.id])
-        .map((host) => host.metadata.Endpoint.policy.applied.id)
-    )
-  );
+  const policyIdsToCheck = [
+    ...new Set(
+      hosts.reduce((acc: string[], host) => {
+        const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
+        if (!currentNonExistingPolicies[appliedPolicyId]) {
+          acc.push(appliedPolicyId);
+        }
+        return acc;
+      }, [])
+    ),
+  ];
 
   if (policyIdsToCheck.length === 0) {
     return;
@@ -680,3 +729,35 @@ const loadEndpointsPendingActions = async ({
     logError(error);
   }
 };
+
+export async function handleLoadMetadataTransformStats(http: HttpStart, store: EndpointPageStore) {
+  const { getState, dispatch } = store;
+
+  if (!http || !getState || !dispatch) {
+    return;
+  }
+
+  const state = getState();
+  if (isMetadataTransformStatsLoading(state)) return;
+
+  dispatch({
+    type: 'metadataTransformStatsChanged',
+    // ts error to be fixed when AsyncResourceState is refactored (#830)
+    // @ts-expect-error
+    payload: createLoadingResourceState<TransformStats[]>(getMetadataTransformStats(state)),
+  });
+
+  try {
+    const transformStatsResponse: TransformStatsResponse = await http.get(TRANSFORM_STATS_URL);
+
+    dispatch({
+      type: 'metadataTransformStatsChanged',
+      payload: createLoadedResourceState<TransformStats[]>(transformStatsResponse.transforms),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'metadataTransformStatsChanged',
+      payload: createFailedResourceState<TransformStats[]>(error),
+    });
+  }
+}

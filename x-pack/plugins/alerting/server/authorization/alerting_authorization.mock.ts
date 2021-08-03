@@ -16,12 +16,14 @@ const createAlertingAuthorizationMock = () => {
     ensureAuthorized: jest.fn(),
     filterByRuleTypeAuthorization: jest.fn(),
     getFindAuthorizationFilter: jest.fn(),
+    getAugmentedRuleTypesWithAuthorization: jest.fn(),
+    getSpaceId: jest.fn(),
   };
   return mocked;
 };
 
 export const alertingAuthorizationMock: {
-  create: () => AlertingAuthorizationMock;
+  create: () => jest.Mocked<PublicMethodsOf<AlertingAuthorization>>;
 } = {
   create: createAlertingAuthorizationMock,
 };

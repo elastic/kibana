@@ -28,11 +28,11 @@ import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
-import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
+import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
-import { CUSTOM_LOGS_INTEGRATION_NAME, FLEET_BASE_PATH } from './constants';
+import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
 import { createPackageSearchProvider } from './search_provider';
@@ -104,6 +104,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     core.application.register({
       id: INTEGRATIONS_PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
+      appRoute: '/app/integrations',
       title: i18n.translate('xpack.fleet.integrationsAppTitle', {
         defaultMessage: 'Integrations',
       }),
@@ -137,6 +138,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       title: i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' }),
       order: 9020,
       euiIconType: 'logoElastic',
+      appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
           CoreStart,
@@ -183,14 +185,14 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       deps.home.featureCatalogue.register({
         id: 'fleet',
         title: i18n.translate('xpack.fleet.featureCatalogueTitle', {
-          defaultMessage: 'Add Elastic Agent',
+          defaultMessage: 'Add Elastic Agent integrations',
         }),
         description: i18n.translate('xpack.fleet.featureCatalogueDescription', {
-          defaultMessage: 'Add and manage your fleet of Elastic Agents and integrations.',
+          defaultMessage: 'Add and manage integrations with Elastic Agent',
         }),
         icon: 'indexManagementApp',
         showOnHomePage: true,
-        path: FLEET_BASE_PATH,
+        path: INTEGRATIONS_BASE_PATH,
         category: FeatureCatalogueCategory.DATA,
         order: 510,
       });
@@ -223,7 +225,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
             if (permissionsResponse?.success) {
               return core.http
-                .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
+                .post<PostFleetSetupResponse>(setupRouteService.getSetupPath())
                 .then(({ isInitialized }) =>
                   isInitialized
                     ? Promise.resolve(true)

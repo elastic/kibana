@@ -33,7 +33,7 @@ const EditSavedQueryPageComponent = () => {
   const updateSavedQueryMutation = useUpdateSavedQuery({ savedQueryId });
   const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
 
-  useBreadcrumbs('saved_query_edit', { savedQueryId: savedQueryDetails?.attributes?.id ?? '' });
+  useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.id ?? '' });
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
     setIsDeleteModalVisible(false);

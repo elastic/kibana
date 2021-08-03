@@ -18,6 +18,7 @@ export interface TimelineRefetchProps {
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
   refetch: inputsModel.Refetch;
+  skip?: boolean;
 }
 
 const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
@@ -26,12 +27,15 @@ const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
   inspect,
   loading,
   refetch,
+  skip,
 }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(inputsActions.setQuery({ id, inputId, inspect, loading, refetch }));
-  }, [dispatch, id, inputId, loading, refetch, inspect]);
+    if (!skip) {
+      dispatch(inputsActions.setQuery({ id, inputId, inspect, loading, refetch }));
+    }
+  }, [dispatch, id, inputId, loading, refetch, inspect, skip]);
 
   return null;
 };

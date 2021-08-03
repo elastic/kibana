@@ -9,12 +9,14 @@ import { IRouter } from '../../../../../src/core/server';
 import { initActionRoutes } from './action';
 import { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { initSavedQueryRoutes } from './saved_query';
+import { initStatusRoutes } from './status';
 import { initPackRoutes } from './pack';
 
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
   const config = context.config();
 
   initActionRoutes(router, context);
+  initStatusRoutes(router, context);
 
   if (config.packs) {
     initPackRoutes(router);

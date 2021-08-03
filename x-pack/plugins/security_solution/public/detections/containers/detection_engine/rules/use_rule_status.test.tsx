@@ -43,6 +43,7 @@ const testRule: Rule = {
   immutable: false,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',

@@ -9,7 +9,9 @@ import Boom from '@hapi/boom';
 
 import { TypeOf } from '@kbn/config-schema';
 import {
+  IKibanaResponse,
   IScopedClusterClient,
+  KibanaResponseFactory,
   Logger,
   RequestHandler,
   SavedObjectsClientContract,
@@ -17,10 +19,8 @@ import {
 import {
   HostInfo,
   HostMetadata,
-  HostMetadataInfo,
   HostResultList,
   HostStatus,
-  MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
@@ -33,6 +33,12 @@ import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { findAgentIDsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import {
+  queryResponseToHostListResult,
+  queryResponseToHostResult,
+} from './support/query_strategies';
+import { NotFoundError } from '../../errors';
+import { EndpointHostUnEnrolledError } from '../../services/metadata';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -56,10 +62,36 @@ export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
 };
 
+const errorHandler = <E extends Error>(
+  logger: Logger,
+  res: KibanaResponseFactory,
+  error: E
+): IKibanaResponse => {
+  if (error instanceof NotFoundError) {
+    return res.notFound({ body: error });
+  }
+
+  if (error instanceof EndpointHostUnEnrolledError) {
+    return res.badRequest({ body: error });
+  }
+
+  // legacy check for Boom errors. `ts-ignore` is for the errors around non-standard error properties
+  // @ts-ignore
+  const boomStatusCode = error.isBoom && error?.output?.statusCode;
+  if (boomStatusCode) {
+    return res.customError({
+      statusCode: boomStatusCode,
+      body: error,
+    });
+  }
+
+  // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
+  throw error;
+};
+
 export const getMetadataListRequestHandler = function (
   endpointAppContext: EndpointAppContext,
-  logger: Logger,
-  queryStrategyVersion?: MetadataQueryStrategyVersions
+  logger: Logger
 ): RequestHandler<
   unknown,
   unknown,
@@ -96,24 +128,15 @@ export const getMetadataListRequestHandler = function (
         )
       : undefined;
 
-    const queryStrategy = await endpointAppContext.service
-      ?.getMetadataService()
-      ?.queryStrategy(context.core.savedObjects.client, queryStrategyVersion);
-
-    const queryParams = await kibanaRequestToMetadataListESQuery(
-      request,
-      endpointAppContext,
-      queryStrategy!,
-      {
-        unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
-        statusAgentIDs: statusIDs,
-      }
-    );
+    const queryParams = await kibanaRequestToMetadataListESQuery(request, endpointAppContext, {
+      unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
+      statusAgentIDs: statusIDs,
+    });
 
     const result = await context.core.elasticsearch.client.asCurrentUser.search<HostMetadata>(
       queryParams
     );
-    const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(result.body);
+    const hostListQueryResult = queryResponseToHostListResult(result.body);
     return response.ok({
       body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),
     });
@@ -122,8 +145,7 @@ export const getMetadataListRequestHandler = function (
 
 export const getMetadataRequestHandler = function (
   endpointAppContext: EndpointAppContext,
-  logger: Logger,
-  queryStrategyVersion?: MetadataQueryStrategyVersions
+  logger: Logger
 ): RequestHandler<
   TypeOf<typeof GetMetadataRequestSchema.params>,
   unknown,
@@ -131,47 +153,25 @@ export const getMetadataRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    const agentService = endpointAppContext.service.getAgentService();
-    if (agentService === undefined) {
-      throw new Error('agentService not available');
-    }
-
-    const metadataRequestContext: MetadataRequestContext = {
-      esClient: context.core.elasticsearch.client,
-      endpointAppContextService: endpointAppContext.service,
-      logger,
-      requestHandlerContext: context,
-      savedObjectsClient: context.core.savedObjects.client,
-    };
+    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
 
     try {
-      const doc = await getHostData(
-        metadataRequestContext,
-        request?.params?.id,
-        queryStrategyVersion
-      );
-      if (doc) {
-        return response.ok({ body: doc });
-      }
-      return response.notFound({ body: 'Endpoint Not Found' });
-    } catch (err) {
-      logger.warn(JSON.stringify(err, null, 2));
-      if (err.isBoom) {
-        return response.customError({
-          statusCode: err.output.statusCode,
-          body: { message: err.message },
-        });
-      }
-      throw err;
+      return response.ok({
+        body: await endpointMetadataService.getEnrichedHostMetadata(
+          context.core.elasticsearch.client.asCurrentUser,
+          request.params.id
+        ),
+      });
+    } catch (error) {
+      return errorHandler(logger, response, error);
     }
   };
 };
 
 export async function getHostMetaData(
   metadataRequestContext: MetadataRequestContext,
-  id: string,
-  queryStrategyVersion?: MetadataQueryStrategyVersions
-): Promise<HostMetadataInfo | undefined> {
+  id: string
+): Promise<HostMetadata | undefined> {
   if (
     !metadataRequestContext.esClient &&
     !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
@@ -190,32 +190,23 @@ export async function getHostMetaData(
     metadataRequestContext.requestHandlerContext?.core.elasticsearch
       .client) as IScopedClusterClient;
 
-  const esSavedObjectClient =
-    metadataRequestContext?.savedObjectsClient ??
-    (metadataRequestContext.requestHandlerContext?.core.savedObjects
-      .client as SavedObjectsClientContract);
-
-  const queryStrategy = await metadataRequestContext.endpointAppContextService
-    ?.getMetadataService()
-    ?.queryStrategy(esSavedObjectClient, queryStrategyVersion);
-  const query = getESQueryHostMetadataByID(id, queryStrategy!);
+  const query = getESQueryHostMetadataByID(id);
 
   const response = await esClient.asCurrentUser.search<HostMetadata>(query);
 
-  const hostResult = queryStrategy!.queryResponseToHostResult(response.body);
+  const hostResult = queryResponseToHostResult(response.body);
 
   const hostMetadata = hostResult.result;
   if (!hostMetadata) {
     return undefined;
   }
 
-  return { metadata: hostMetadata, query_strategy_version: hostResult.queryStrategyVersion };
+  return hostMetadata;
 }
 
 export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
-  id: string,
-  queryStrategyVersion?: MetadataQueryStrategyVersions
+  id: string
 ): Promise<HostInfo | undefined> {
   if (!metadataRequestContext.savedObjectsClient) {
     throw Boom.badRequest('savedObjectsClient not found');
@@ -228,25 +219,21 @@ export async function getHostData(
     throw Boom.badRequest('esClient not found');
   }
 
-  const hostResult = await getHostMetaData(metadataRequestContext, id, queryStrategyVersion);
+  const hostMetadata = await getHostMetaData(metadataRequestContext, id);
 
-  if (!hostResult) {
+  if (!hostMetadata) {
     return undefined;
   }
 
-  const agent = await findAgent(metadataRequestContext, hostResult.metadata);
+  const agent = await findAgent(metadataRequestContext, hostMetadata);
 
   if (agent && !agent.active) {
     throw Boom.badRequest('the requested endpoint is unenrolled');
   }
 
-  const metadata = await enrichHostMetadata(
-    hostResult.metadata,
-    metadataRequestContext,
-    hostResult.query_strategy_version
-  );
+  const metadata = await enrichHostMetadata(hostMetadata, metadataRequestContext);
 
-  return { ...metadata, query_strategy_version: hostResult.query_strategy_version };
+  return metadata;
 }
 
 async function findAgent(
@@ -293,15 +280,10 @@ export async function mapToHostResultList(
       request_page_index: queryParams.from,
       hosts: await Promise.all(
         hostListQueryResult.resultList.map(async (entry) =>
-          enrichHostMetadata(
-            entry,
-            metadataRequestContext,
-            hostListQueryResult.queryStrategyVersion
-          )
+          enrichHostMetadata(entry, metadataRequestContext)
         )
       ),
       total: totalNumberOfHosts,
-      query_strategy_version: hostListQueryResult.queryStrategyVersion,
     };
   } else {
     return {
@@ -309,15 +291,13 @@ export async function mapToHostResultList(
       request_page_index: queryParams.from,
       total: totalNumberOfHosts,
       hosts: [],
-      query_strategy_version: hostListQueryResult.queryStrategyVersion,
     };
   }
 }
 
 export async function enrichHostMetadata(
   hostMetadata: HostMetadata,
-  metadataRequestContext: MetadataRequestContext,
-  metadataQueryStrategyVersion: MetadataQueryStrategyVersions
+  metadataRequestContext: MetadataRequestContext
 ): Promise<HostInfo> {
   let hostStatus = HostStatus.UNHEALTHY;
   let elasticAgentId = hostMetadata?.elastic?.agent?.id;
@@ -413,6 +393,5 @@ export async function enrichHostMetadata(
     metadata: hostMetadata,
     host_status: hostStatus,
     policy_info: policyInfo,
-    query_strategy_version: metadataQueryStrategyVersion,
   };
 }

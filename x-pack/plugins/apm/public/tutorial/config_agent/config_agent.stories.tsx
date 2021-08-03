@@ -8,8 +8,9 @@
 import { Story } from '@storybook/react';
 import { HttpStart } from 'kibana/public';
 import React from 'react';
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import TutorialConfigAgent from './';
-import { APIReturnType } from '../..//services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
 
@@ -18,10 +19,11 @@ interface Args {
   onPrem: boolean;
   hasFleetPoliciesWithApmIntegration: boolean;
   hasCloudPolicyWithApmIntegration: boolean;
+  isFleetEnabled: boolean;
 }
 
 const policyElasticAgentOnCloudAgent: APIResponseType['fleetAgents'][0] = {
-  id: 'policy-elastic-agent-on-cloud',
+  id: POLICY_ELASTIC_AGENT_ON_CLOUD,
   name: 'Elastic Cloud agent policy',
   apmServerUrl: 'apm_cloud_url',
   secretToken: 'apm_cloud_token',
@@ -47,6 +49,7 @@ function Wrapper({
   apmAgent,
   onPrem,
   hasCloudPolicyWithApmIntegration,
+  isFleetEnabled,
 }: Args) {
   const http = ({
     get: () => ({
@@ -56,6 +59,7 @@ function Wrapper({
           ? [policyElasticAgentOnCloudAgent]
           : []),
       ],
+      isFleetEnabled,
       cloudStandaloneSetup: {
         apmServerUrl: 'cloud_url',
         secretToken: 'foo',
@@ -80,6 +84,7 @@ Integration.args = {
   onPrem: true,
   hasFleetPoliciesWithApmIntegration: false,
   hasCloudPolicyWithApmIntegration: false,
+  isFleetEnabled: true,
 };
 
 export default {
@@ -112,6 +117,9 @@ export default {
     },
     hasCloudPolicyWithApmIntegration: {
       control: { type: 'boolean', options: [true, false] },
+    },
+    isFleetEnabled: {
+      control: { type: 'boolean', options: [true, false], defaultValue: true },
     },
   },
 };

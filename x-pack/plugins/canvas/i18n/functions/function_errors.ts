@@ -14,7 +14,6 @@ import { errors as csv } from './dict/csv';
 import { errors as date } from './dict/date';
 import { errors as demodata } from './dict/demodata';
 import { errors as getCell } from './dict/get_cell';
-import { errors as image } from './dict/image';
 import { errors as joinRows } from './dict/join_rows';
 import { errors as ply } from './dict/ply';
 import { errors as pointseries } from './dict/pointseries';
@@ -32,7 +31,6 @@ export const getFunctionErrors = () => ({
   date,
   demodata,
   getCell,
-  image,
   joinRows,
   ply,
   pointseries,

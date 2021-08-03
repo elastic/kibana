@@ -189,10 +189,10 @@ export const attachTimelineToExistingCase = () => {
   cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
 };
 
-export const checkIdToggleField = () => {
+export const clickIdToggleField = () => {
   cy.get(ID_HEADER_FIELD).should('not.exist');
 
-  cy.get(ID_TOGGLE_FIELD).check({
+  cy.get(ID_TOGGLE_FIELD).click({
     force: true,
   });
 };
@@ -294,10 +294,10 @@ export const unpinFirstEvent = () => {
   cy.get(PIN_EVENT).first().click({ force: true });
 };
 
-export const uncheckTimestampToggleField = () => {
+export const clickTimestampToggleField = () => {
   cy.get(TIMESTAMP_TOGGLE_FIELD).should('exist');
 
-  cy.get(TIMESTAMP_TOGGLE_FIELD).uncheck({ force: true });
+  cy.get(TIMESTAMP_TOGGLE_FIELD).click({ force: true });
 };
 
 export const dragAndDropIdToggleFieldToTimeline = () => {

@@ -23,11 +23,13 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
   viewDataStep?: EuiStepProps;
-}> = ({ agentPolicy, packagePolicy, viewDataStep }) => {
+  showAddAgent?: boolean;
+}> = ({ agentPolicy, packagePolicy, viewDataStep, showAddAgent }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshAgentPolicy = useAgentPolicyRefresh();
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -46,16 +48,23 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="plusInCircle"
-      onClick={() => setIsEnrollmentFlyoutOpen(true)}
-      key="addAgent"
-    >
-      <FormattedMessage
-        id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-        defaultMessage="Add Agent"
-      />
-    </EuiContextMenuItem>,
+    ...(showAddAgent
+      ? [
+          <EuiContextMenuItem
+            icon="plusInCircle"
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              setIsEnrollmentFlyoutOpen(true);
+            }}
+            key="addAgent"
+          >
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
+              defaultMessage="Add Agent"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       disabled={!hasWriteCapabilities}
       icon="pencil"
@@ -112,7 +121,11 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
-      <ContextMenuActions items={menuItems} />
+      <ContextMenuActions
+        isOpen={isActionsMenuOpen}
+        items={menuItems}
+        onChange={(isOpen) => setIsActionsMenuOpen(isOpen)}
+      />
     </>
   );
 };

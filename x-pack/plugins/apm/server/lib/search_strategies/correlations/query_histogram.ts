@@ -13,13 +13,13 @@ import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldname
 import type {
   HistogramItem,
   ResponseHit,
-  SearchServiceParams,
+  SearchServiceFetchParams,
 } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 
 export const getTransactionDurationHistogramRequest = (
-  params: SearchServiceParams,
+  params: SearchServiceFetchParams,
   interval: number,
   fieldName?: string,
   fieldValue?: string
@@ -42,7 +42,7 @@ export const getTransactionDurationHistogramRequest = (
 
 export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceParams,
+  params: SearchServiceFetchParams,
   interval: number,
   fieldName?: string,
   fieldValue?: string

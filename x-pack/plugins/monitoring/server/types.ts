@@ -20,6 +20,7 @@ import type {
   ActionsApiRequestHandlerContext,
 } from '../../actions/server';
 import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
+import type { RacApiRequestHandlerContext } from '../../rule_registry/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
@@ -29,6 +30,7 @@ import { LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
+import { ElasticsearchModifiedSource } from '../common/types/es';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -57,6 +59,7 @@ export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerCon
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
   infra: InfraRequestHandlerContext;
+  ruleRegistry?: RacApiRequestHandlerContext;
 }
 
 export interface PluginsStart {
@@ -113,7 +116,7 @@ export interface LegacyRequest {
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
-  getAlertsClient: () => any;
+  getRulesClient: () => any;
   getActionsClient: () => any;
   server: LegacyServer;
 }
@@ -143,4 +146,21 @@ export interface LegacyServer {
       };
     };
   };
+}
+
+export type Cluster = ElasticsearchModifiedSource & {
+  ml?: { jobs: any };
+  logs?: any;
+  alerts?: any;
+};
+
+export interface Bucket {
+  key: string;
+  uuids: {
+    buckets: unknown[];
+  };
+}
+
+export interface Aggregation {
+  buckets: Bucket[];
 }

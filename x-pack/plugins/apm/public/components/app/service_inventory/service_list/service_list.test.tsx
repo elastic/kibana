@@ -15,9 +15,9 @@ import { items } from './__fixtures__/service_api_mock_data';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <MockApmPluginContextWrapper>
-      <MemoryRouter>{children}</MemoryRouter>
-    </MockApmPluginContextWrapper>
+    <MemoryRouter initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
   );
 }
 
@@ -57,6 +57,7 @@ describe('ServiceList', () => {
       environments: ['test'],
     };
     const renderedColumns = getServiceColumns({
+      query: {},
       showTransactionTypeColumn: false,
     }).map((c) => c.render!(service[c.field!], service));
 

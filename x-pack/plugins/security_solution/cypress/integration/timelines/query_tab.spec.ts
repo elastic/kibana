@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 
 import {
   UNLOCKED_ICON,
@@ -38,22 +38,22 @@ describe('Timeline query tab', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
-    createTimeline(timeline)
-      .then<string>((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-      .then((timelineId) => {
+    createTimeline(getTimeline())
+      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((timelineId: string) => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
           // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
           // request responses and indeterminism since on clicks to activates URL's.
           .then(() => cy.wait(1000))
           .then(() =>
-            addNoteToTimeline(timeline.notes, timelineId).should((response) =>
+            addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
               expect(response.status).to.equal(200)
             )
           )
           .then(() => openTimelineById(timelineId))
           .then(() => pinFirstEvent())
           .then(() => persistNoteToFirstEvent('event note'))
-          .then(() => addFilter(timeline.filter));
+          .then(() => addFilter(getTimeline().filter));
       });
   });
 
@@ -63,7 +63,7 @@ describe('Timeline query tab', () => {
     });
 
     it('should contain the right query', () => {
-      cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query}`);
+      cy.get(TIMELINE_QUERY).should('have.text', `${getTimeline().query}`);
     });
 
     it('should be able to add event note', () => {
@@ -71,7 +71,7 @@ describe('Timeline query tab', () => {
     });
 
     it('should display timeline filter', () => {
-      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
+      cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
     });
 
     it('should display pinned events', () => {

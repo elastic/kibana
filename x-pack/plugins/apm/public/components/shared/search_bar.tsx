@@ -118,8 +118,8 @@ export function SearchBar({
         </EuiFlexItem>
         <EuiFlexItem grow={showTimeComparison && !isXXL}>
           <EuiFlexGroup
-            direction={isSmall || isMedium ? 'columnReverse' : 'row'}
-            justifyContent={isLarge || isXl ? 'flexEnd' : undefined}
+            direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
+            justifyContent={isXl ? 'flexEnd' : undefined}
             gutterSize="s"
             responsive={false}
           >

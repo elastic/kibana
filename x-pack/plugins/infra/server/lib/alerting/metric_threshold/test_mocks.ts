@@ -4,64 +4,176 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-const bucketsA = [
+import { range } from 'lodash';
+const bucketsA = (from: number) => [
+  {
+    doc_count: null,
+    aggregatedValue: { value: null, values: [{ key: 95.0, value: null }] },
+    from_as_string: new Date(from).toISOString(),
+  },
   {
     doc_count: 2,
     aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
+    from_as_string: new Date(from + 60000).toISOString(),
+  },
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
+    from_as_string: new Date(from + 120000).toISOString(),
+  },
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
+    from_as_string: new Date(from + 180000).toISOString(),
   },
   {
     doc_count: 3,
     aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
-    to_as_string: new Date(1577858400000).toISOString(),
+    from_as_string: new Date(from + 240000).toISOString(),
+  },
+  {
+    doc_count: 1,
+    aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
+    from_as_string: new Date(from + 300000).toISOString(),
   },
 ];
 
-const bucketsB = [
+const bucketsB = (from: number) => [
+  {
+    doc_count: 0,
+    aggregatedValue: { value: null, values: [{ key: 99.0, value: null }] },
+    from_as_string: new Date(from).toISOString(),
+  },
   {
     doc_count: 4,
     aggregatedValue: { value: 2.5, values: [{ key: 99.0, value: 2.5 }] },
+    from_as_string: new Date(from + 60000).toISOString(),
+  },
+  {
+    doc_count: 4,
+    aggregatedValue: { value: 2.5, values: [{ key: 99.0, value: 2.5 }] },
+    from_as_string: new Date(from + 120000).toISOString(),
+  },
+  {
+    doc_count: 4,
+    aggregatedValue: { value: 2.5, values: [{ key: 99.0, value: 2.5 }] },
+    from_as_string: new Date(from + 180000).toISOString(),
   },
   {
     doc_count: 5,
     aggregatedValue: { value: 3.5, values: [{ key: 99.0, value: 3.5 }] },
+    from_as_string: new Date(from + 240000).toISOString(),
+  },
+  {
+    doc_count: 1,
+    aggregatedValue: { value: 3, values: [{ key: 99.0, value: 3 }] },
+    from_as_string: new Date(from + 300000).toISOString(),
   },
 ];
 
-const bucketsC = [
+const bucketsC = (from: number) => [
+  {
+    doc_count: 0,
+    aggregatedValue: { value: null },
+    from_as_string: new Date(from).toISOString(),
+  },
   {
     doc_count: 2,
     aggregatedValue: { value: 0.5 },
+    from_as_string: new Date(from + 60000).toISOString(),
+  },
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5 },
+    from_as_string: new Date(from + 120000).toISOString(),
+  },
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5 },
+    from_as_string: new Date(from + 180000).toISOString(),
   },
   {
     doc_count: 3,
-    aggregatedValue: { value: 16.0 },
+    aggregatedValue: { value: 16 },
+    from_as_string: new Date(from + 240000).toISOString(),
+  },
+  {
+    doc_count: 1,
+    aggregatedValue: { value: 3 },
+    from_as_string: new Date(from + 300000).toISOString(),
   },
 ];
 
-const previewBucketsA = Array.from(Array(60), (_, i) => bucketsA[i % 2]); // Repeat bucketsA to a total length of 60
-const previewBucketsB = Array.from(Array(60), (_, i) => bucketsB[i % 2]);
-const previewBucketsWithNulls = [
-  ...Array.from(Array(10), (_, i) => ({ aggregatedValue: { value: null } })),
-  ...previewBucketsA.slice(10),
+const previewBucketsA = (from: number) =>
+  range(from, from + 3600000, 60000).map((timestamp, i) => {
+    return {
+      doc_count: i % 2 ? 3 : 2,
+      aggregatedValue: { value: i % 2 ? 16 : 0.5 },
+      from_as_string: new Date(timestamp).toISOString(),
+    };
+  });
+
+const previewBucketsB = (from: number) =>
+  range(from, from + 3600000, 60000).map((timestamp, i) => {
+    const value = i % 2 ? 3.5 : 2.5;
+    return {
+      doc_count: i % 2 ? 3 : 2,
+      aggregatedValue: { value, values: [{ key: 99.0, value }] },
+      from_as_string: new Date(timestamp).toISOString(),
+    };
+  });
+
+const previewBucketsWithNulls = (from: number) => [
+  // 25 Fired
+  ...range(from, from + 1500000, 60000).map((timestamp) => {
+    return {
+      doc_count: 2,
+      aggregatedValue: { value: 1, values: [{ key: 95.0, value: 1 }] },
+      from_as_string: new Date(timestamp).toISOString(),
+    };
+  }),
+  // 25 OK
+  ...range(from + 2100000, from + 2940000, 60000).map((timestamp) => {
+    return {
+      doc_count: 2,
+      aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
+      from_as_string: new Date(timestamp).toISOString(),
+    };
+  }),
+  // 10 No Data
+  ...range(from + 3000000, from + 3600000, 60000).map((timestamp) => {
+    return {
+      doc_count: 0,
+      aggregatedValue: { value: null, values: [{ key: 95.0, value: null }] },
+      from_as_string: new Date(timestamp).toISOString(),
+    };
+  }),
 ];
-const previewBucketsRepeat = Array.from(Array(60), (_, i) => bucketsA[Math.max(0, (i % 3) - 1)]);
 
-export const basicMetricResponse = {
+const previewBucketsRepeat = (from: number) =>
+  range(from, from + 3600000, 60000).map((timestamp, i) => {
+    return {
+      doc_count: i % 3 ? 3 : 2,
+      aggregatedValue: { value: i % 3 ? 0.5 : 16 },
+      from_as_string: new Date(timestamp).toISOString(),
+    };
+  });
+
+export const basicMetricResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: bucketsA,
+      buckets: bucketsA(from),
     },
   },
-};
+});
 
-export const alternateMetricResponse = {
+export const alternateMetricResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: bucketsB,
+      buckets: bucketsB(from),
     },
   },
-};
+});
 
 export const emptyMetricResponse = {
   aggregations: {
@@ -71,21 +183,21 @@ export const emptyMetricResponse = {
   },
 };
 
-export const emptyRateResponse = {
+export const emptyRateResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
       buckets: [
         {
           doc_count: 2,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          aggregatedValue_max: { value: null },
+          aggregatedValueMax: { value: null },
+          from_as_string: new Date(from).toISOString(),
         },
       ],
     },
   },
-};
+});
 
-export const basicCompositeResponse = {
+export const basicCompositeResponse = (from: number) => ({
   aggregations: {
     groupings: {
       after_key: { groupBy0: 'foo' },
@@ -95,7 +207,7 @@ export const basicCompositeResponse = {
             groupBy0: 'a',
           },
           aggregatedIntervals: {
-            buckets: bucketsA,
+            buckets: bucketsA(from),
           },
         },
         {
@@ -103,7 +215,7 @@ export const basicCompositeResponse = {
             groupBy0: 'b',
           },
           aggregatedIntervals: {
-            buckets: bucketsB,
+            buckets: bucketsB(from),
           },
         },
       ],
@@ -114,9 +226,9 @@ export const basicCompositeResponse = {
       value: 2,
     },
   },
-};
+});
 
-export const alternateCompositeResponse = {
+export const alternateCompositeResponse = (from: number) => ({
   aggregations: {
     groupings: {
       after_key: { groupBy0: 'foo' },
@@ -126,7 +238,7 @@ export const alternateCompositeResponse = {
             groupBy0: 'a',
           },
           aggregatedIntervals: {
-            buckets: bucketsB,
+            buckets: bucketsB(from),
           },
         },
         {
@@ -134,7 +246,7 @@ export const alternateCompositeResponse = {
             groupBy0: 'b',
           },
           aggregatedIntervals: {
-            buckets: bucketsA,
+            buckets: bucketsA(from),
           },
         },
       ],
@@ -145,46 +257,46 @@ export const alternateCompositeResponse = {
       value: 2,
     },
   },
-};
+});
 
 export const compositeEndResponse = {
   aggregations: {},
   hits: { total: { value: 0 } },
 };
 
-export const changedSourceIdResponse = {
+export const changedSourceIdResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: bucketsC,
+      buckets: bucketsC(from),
     },
   },
-};
+});
 
-export const basicMetricPreviewResponse = {
+export const basicMetricPreviewResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: previewBucketsA,
+      buckets: previewBucketsA(from),
     },
   },
-};
+});
 
-export const alternateMetricPreviewResponse = {
+export const alternateMetricPreviewResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: previewBucketsWithNulls,
+      buckets: previewBucketsWithNulls(from),
     },
   },
-};
+});
 
-export const repeatingMetricPreviewResponse = {
+export const repeatingMetricPreviewResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
-      buckets: previewBucketsRepeat,
+      buckets: previewBucketsRepeat(from),
     },
   },
-};
+});
 
-export const basicCompositePreviewResponse = {
+export const basicCompositePreviewResponse = (from: number) => ({
   aggregations: {
     groupings: {
       after_key: { groupBy0: 'foo' },
@@ -194,7 +306,7 @@ export const basicCompositePreviewResponse = {
             groupBy0: 'a',
           },
           aggregatedIntervals: {
-            buckets: previewBucketsA,
+            buckets: previewBucketsA(from),
           },
         },
         {
@@ -202,7 +314,7 @@ export const basicCompositePreviewResponse = {
             groupBy0: 'b',
           },
           aggregatedIntervals: {
-            buckets: previewBucketsB,
+            buckets: previewBucketsB(from),
           },
         },
       ],
@@ -213,4 +325,4 @@ export const basicCompositePreviewResponse = {
       value: 2,
     },
   },
-};
+});

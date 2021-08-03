@@ -13,7 +13,6 @@ import React, { Component, Fragment } from 'react';
 interface Props {
   iconType?: IconType;
   title: string | ReactNode;
-  description: string;
 }
 
 export class SectionPanel extends Component<Props, {}> {
@@ -30,7 +29,7 @@ export class SectionPanel extends Component<Props, {}> {
     return (
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
+          <EuiTitle size="s">
             <h2>
               {this.props.iconType && (
                 <Fragment>

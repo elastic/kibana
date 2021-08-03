@@ -8,18 +8,22 @@
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { UptimeAlertTypeFactory } from './types';
-import { updateState } from './common';
+import { updateState, generateAlertMessage } from './common';
 import { TLS } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
-import { uptimeAlertWrapper } from './uptime_alert_wrapper';
+import { TlsTranslations } from '../../../common/translations';
+
 import { ActionGroupIdsOf } from '../../../../alerting/common';
+
+import { savedObjectsAdapter } from '../saved_objects';
+import { createUptimeESClient } from '../lib';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
-const DEFAULT_SIZE = 20;
+export const DEFAULT_SIZE = 20;
 
 interface TlsAlertState {
   commonName: string;
@@ -93,78 +97,92 @@ export const getCertSummary = (
   };
 };
 
-export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
-  uptimeAlertWrapper<ActionGroupIds>({
-    id: 'xpack.uptime.alerts.tlsCertificate',
-    name: tlsTranslations.alertFactoryName,
-    validate: {
-      params: schema.object({}),
+export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
+  id: 'xpack.uptime.alerts.tlsCertificate',
+  producer: 'uptime',
+  name: tlsTranslations.alertFactoryName,
+  validate: {
+    params: schema.object({}),
+  },
+  defaultActionGroupId: TLS.id,
+  actionGroups: [
+    {
+      id: TLS.id,
+      name: TLS.name,
     },
-    defaultActionGroupId: TLS.id,
-    actionGroups: [
-      {
-        id: TLS.id,
-        name: TLS.name,
-      },
-    ],
-    actionVariables: {
-      context: [],
-      state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
-    },
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    async executor({ options, dynamicSettings, uptimeEsClient }) {
-      const {
-        services: { alertInstanceFactory },
-        state,
-      } = options;
+  ],
+  actionVariables: {
+    context: [],
+    state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
+  },
+  isExportable: true,
+  minimumLicenseRequired: 'basic',
+  async executor({
+    services: { alertWithLifecycle, savedObjectsClient, scopedClusterClient },
+    state,
+  }) {
+    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
-      const { certs, total }: CertResult = await libs.requests.getCerts({
-        uptimeEsClient,
-        from: DEFAULT_FROM,
-        to: DEFAULT_TO,
-        index: 0,
-        size: DEFAULT_SIZE,
-        notValidAfter: `now+${
-          dynamicSettings?.certExpirationThreshold ??
-          DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
-        }d`,
-        notValidBefore: `now-${
-          dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
-        }d`,
-        sortBy: 'common_name',
-        direction: 'desc',
-      });
+    const uptimeEsClient = createUptimeESClient({
+      esClient: scopedClusterClient.asCurrentUser,
+      savedObjectsClient,
+    });
 
-      const foundCerts = total > 0;
+    const { certs, total }: CertResult = await libs.requests.getCerts({
+      uptimeEsClient,
+      from: DEFAULT_FROM,
+      to: DEFAULT_TO,
+      index: 0,
+      size: DEFAULT_SIZE,
+      notValidAfter: `now+${
+        dynamicSettings?.certExpirationThreshold ??
+        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
+      }d`,
+      notValidBefore: `now-${
+        dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+      }d`,
+      sortBy: 'common_name',
+      direction: 'desc',
+    });
 
-      if (foundCerts) {
-        certs.forEach((cert) => {
-          const absoluteExpirationThreshold = moment()
-            .add(
-              dynamicSettings.certExpirationThreshold ??
-                DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-              'd'
-            )
-            .valueOf();
-          const absoluteAgeThreshold = moment()
-            .subtract(
-              dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-              'd'
-            )
-            .valueOf();
-          const alertInstance = alertInstanceFactory(
-            `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`
-          );
-          const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
-          alertInstance.replaceState({
-            ...updateState(state, foundCerts),
-            ...summary,
-          });
-          alertInstance.scheduleActions(TLS.id);
+    const foundCerts = total > 0;
+
+    if (foundCerts) {
+      certs.forEach((cert) => {
+        const absoluteExpirationThreshold = moment()
+          .add(
+            dynamicSettings.certExpirationThreshold ??
+              DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
+            'd'
+          )
+          .valueOf();
+        const absoluteAgeThreshold = moment()
+          .subtract(
+            dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
+            'd'
+          )
+          .valueOf();
+        const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
+
+        const alertInstance = alertWithLifecycle({
+          id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
+          fields: {
+            'tls.server.x509.subject.common_name': cert.common_name,
+            'tls.server.x509.issuer.common_name': cert.issuer,
+            'tls.server.x509.not_after': cert.not_after,
+            'tls.server.x509.not_before': cert.not_before,
+            'tls.server.hash.sha256': cert.sha256,
+            reason: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
+          },
         });
-      }
+        alertInstance.replaceState({
+          ...updateState(state, foundCerts),
+          ...summary,
+        });
+        alertInstance.scheduleActions(TLS.id);
+      });
+    }
 
-      return updateState(state, foundCerts);
-    },
-  });
+    return updateState(state, foundCerts);
+  },
+});

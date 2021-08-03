@@ -34,6 +34,7 @@
     "url_components": {
       "metrics": [
         "_all",
+        "bulk",
         "completion",
         "docs",
         "fielddata",
@@ -47,7 +48,6 @@
         "search",
         "segments",
         "store",
-        "suggest",
         "warmer"
       ],
       "indices": null

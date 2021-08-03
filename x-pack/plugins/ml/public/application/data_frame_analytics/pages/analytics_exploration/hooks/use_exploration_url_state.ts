@@ -6,9 +6,9 @@
  */
 
 import { usePageUrlState } from '../../../../util/url_state';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ExplorationPageUrlState } from '../../../../../../common/types/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
-import { ExplorationPageUrlState } from '../../../../../../common/types/ml_url_generator';
 import { isPopulatedObject } from '../../../../../../common/util/object_utils';
 
 export function getDefaultExplorationPageUrlState(

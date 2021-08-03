@@ -225,8 +225,12 @@ export class OptimizerConfig {
       ...getPluginBundles(plugins, options.repoRoot, options.outputRoot, limits),
     ];
 
+    const focusedBundles = focusBundles(options.focus, bundles);
+    const filteredBundles = filterById(options.filters, focusedBundles);
+
     return new OptimizerConfig(
-      filterById(options.filters, focusBundles(options.focus, bundles)),
+      focusedBundles,
+      filteredBundles,
       options.cache,
       options.watch,
       options.inspectWorkers,
@@ -241,6 +245,7 @@ export class OptimizerConfig {
 
   constructor(
     public readonly bundles: Bundle[],
+    public readonly filteredBundles: Bundle[],
     public readonly cache: boolean,
     public readonly watch: boolean,
     public readonly inspectWorkers: boolean,

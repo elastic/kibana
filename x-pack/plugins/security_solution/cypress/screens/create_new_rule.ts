@@ -16,6 +16,30 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ACTIONS_THROTTLE_INPUT =
   '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
 
+export const EMAIL_ACTION_BTN = '[data-test-subj=".email-ActionTypeSelectOption"]';
+
+export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
+
+export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
+
+export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';
+
+export const EMAIL_ACTION_SUBJECT_INPUT = '[data-test-subj="subjectInput"]';
+
+export const FROM_VALIDATION_ERROR = '.euiFormErrorText';
+
+export const CONNECTOR_NAME_INPUT = '[data-test-subj="nameInput"]';
+
+export const EMAIL_CONNECTOR_FROM_INPUT = '[data-test-subj="emailFromInput"]';
+
+export const EMAIL_CONNECTOR_HOST_INPUT = '[data-test-subj="emailHostInput"]';
+
+export const EMAIL_CONNECTOR_PORT_INPUT = '[data-test-subj="emailPortInput"]';
+
+export const EMAIL_CONNECTOR_USER_INPUT = '[data-test-subj="emailUserInput"]';
+
+export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInput"]';
+
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 

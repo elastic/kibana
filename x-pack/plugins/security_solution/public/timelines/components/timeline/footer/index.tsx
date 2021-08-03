@@ -45,11 +45,11 @@ const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainer
     const width = useEventDetailsWidthContext();
     const compact = useMemo(() => isCompactFooter(width), [width]);
 
-    return (
+    return updatedAt > 0 ? (
       <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
         {timelines.getLastUpdated({ updatedAt, compact })}
       </FixedWidthLastUpdated>
-    );
+    ) : null;
   }
 );
 
@@ -376,6 +376,10 @@ export const FooterComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
 
+        <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
+          <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
+        </EuiFlexItem>
+
         <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
           {isLive ? (
             <EuiText size="s" data-test-subj="is-live-on-message">
@@ -406,10 +410,6 @@ export const FooterComponent = ({
               isLoading={isLoading}
             />
           )}
-        </EuiFlexItem>
-
-        <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-          <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
         </EuiFlexItem>
       </FooterFlexGroup>
     </FooterContainer>

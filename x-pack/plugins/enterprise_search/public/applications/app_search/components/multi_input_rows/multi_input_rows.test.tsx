@@ -10,7 +10,7 @@ import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { rerender } from '../../../test_helpers';
 
@@ -162,10 +162,18 @@ describe('MultiInputRows', () => {
   });
 
   describe('onChange', () => {
+    let wrapper: ShallowWrapper;
     const onChange = jest.fn();
 
+    beforeEach(() => {
+      wrapper = shallow(<MultiInputRows {...props} onChange={onChange} />);
+    });
+
+    it('does not call on change on mount', () => {
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
     it('returns the current values dynamically on change', () => {
-      const wrapper = shallow(<MultiInputRows {...props} onChange={onChange} />);
       setMockValues({ ...values, values: ['updated'] });
       rerender(wrapper);
 

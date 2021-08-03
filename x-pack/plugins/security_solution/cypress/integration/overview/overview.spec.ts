@@ -16,7 +16,7 @@ import overviewFixture from '../../fixtures/overview_search_strategy.json';
 import emptyInstance from '../../fixtures/empty_instance.json';
 import { cleanKibana } from '../../tasks/common';
 import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timelines';
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 
 describe('Overview Page', () => {
   before(() => {
@@ -53,15 +53,15 @@ describe('Overview Page', () => {
 
   describe('Favorite Timelines', () => {
     it('should appear on overview page', () => {
-      createTimeline(timeline)
-        .then<string>((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-        .then((timelineId) => {
+      createTimeline(getTimeline())
+        .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+        .then((timelineId: string) => {
           favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
             cy.stubSearchStrategyApi(overviewFixture, 'overviewNetwork');
             loginAndWaitForPage(OVERVIEW_URL);
             cy.get('[data-test-subj="overview-recent-timelines"]').should(
               'contain',
-              timeline.title
+              getTimeline().title
             );
           });
         });

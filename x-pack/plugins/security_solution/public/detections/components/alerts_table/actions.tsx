@@ -12,7 +12,7 @@ import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { FilterStateStore, Filter } from '@kbn/es-query';
 import {
   KueryFilterQueryKind,
   TimelineId,
@@ -49,7 +49,6 @@ import {
   DataProvider,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
@@ -283,7 +282,7 @@ export const buildAlertsKqlFilter = (
         params: alertIds,
       },
       $state: {
-        store: esFilters.FilterStateStore.APP_STATE,
+        store: FilterStateStore.APP_STATE,
       },
     },
   ];

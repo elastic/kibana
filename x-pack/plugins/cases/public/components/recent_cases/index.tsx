@@ -49,7 +49,7 @@ const RecentCasesComponent = ({
               },
             ],
           }
-        : {},
+        : { reporters: [] },
     [currentUser, recentCasesFilterBy]
   );
 

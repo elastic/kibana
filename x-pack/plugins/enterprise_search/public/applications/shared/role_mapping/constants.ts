@@ -318,7 +318,7 @@ export const USERS_HEADING_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.usersHeadingDescription',
   {
     defaultMessage:
-      'User management provides granular access for individual or special permission needs. Users from federated sources such as SAML are managed by role mappings, and excluded from this list.',
+      'User management provides granular access for individual or special permission needs. Some users may be excluded from this list. These include users from federated sources such as SAML, which are managed by role mappings, and built-in user accounts such as the “elastic” or “enterprise_search” users.',
   }
 );
 

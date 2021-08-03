@@ -34,12 +34,12 @@ import {
   ReactExpressionRendererType,
 } from '../../../../../../../src/plugins/expressions/public';
 import {
-  Datasource,
-  Visualization,
   FramePublicAPI,
   isLensBrushEvent,
   isLensFilterEvent,
   isLensEditEvent,
+  VisualizationMap,
+  DatasourceMap,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
@@ -62,10 +62,10 @@ import {
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   visualizationState: unknown;
   activeDatasourceId: string | null;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
@@ -479,6 +479,7 @@ export const VisualizationWrapper = ({
           <EuiButton
             data-test-subj="errorFixAction"
             onClick={async () => {
+              trackUiEvent('error_fix_action');
               const newState = await validationError.fixAction?.newState(framePublicAPI);
               dispatchLens(
                 updateDatasourceState({

@@ -19,28 +19,37 @@ export const getAuditLogResponse = async ({
   elasticAgentId,
   page,
   pageSize,
+  startDate,
+  endDate,
   context,
   logger,
 }: {
   elasticAgentId: string;
   page: number;
   pageSize: number;
+  startDate?: string;
+  endDate?: string;
   context: SecuritySolutionRequestHandlerContext;
   logger: Logger;
-}): Promise<{
-  page: number;
-  pageSize: number;
-  data: ActivityLog['data'];
-}> => {
+}): Promise<ActivityLog> => {
   const size = Math.floor(pageSize / 2);
   const from = page <= 1 ? 0 : page * size - size + 1;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-
-  const data = await getActivityLog({ esClient, from, size, elasticAgentId, logger });
+  const data = await getActivityLog({
+    esClient,
+    from,
+    size,
+    startDate,
+    endDate,
+    elasticAgentId,
+    logger,
+  });
 
   return {
     page,
     pageSize,
+    startDate,
+    endDate,
     data,
   };
 };
@@ -49,6 +58,8 @@ const getActivityLog = async ({
   esClient,
   size,
   from,
+  startDate,
+  endDate,
   elasticAgentId,
   logger,
 }: {
@@ -56,6 +67,8 @@ const getActivityLog = async ({
   elasticAgentId: string;
   size: number;
   from: number;
+  startDate?: string;
+  endDate?: string;
   logger: Logger;
 }) => {
   const options = {
@@ -67,8 +80,22 @@ const getActivityLog = async ({
 
   let actionsResult;
   let responsesResult;
+  const dateFilters = [];
+  if (startDate) {
+    dateFilters.push({ range: { '@timestamp': { gte: startDate } } });
+  }
+  if (endDate) {
+    dateFilters.push({ range: { '@timestamp': { lte: endDate } } });
+  }
 
   try {
+    // fetch actions with matching agent_id
+    const baseActionFilters = [
+      { term: { agents: elasticAgentId } },
+      { term: { input_type: 'endpoint' } },
+      { term: { type: 'INPUT_ACTION' } },
+    ];
+    const actionsFilters = [...baseActionFilters, ...dateFilters];
     actionsResult = await esClient.search(
       {
         index: AGENT_ACTIONS_INDEX,
@@ -77,11 +104,8 @@ const getActivityLog = async ({
         body: {
           query: {
             bool: {
-              filter: [
-                { term: { agents: elasticAgentId } },
-                { term: { input_type: 'endpoint' } },
-                { term: { type: 'INPUT_ACTION' } },
-              ],
+              // @ts-ignore
+              filter: actionsFilters,
             },
           },
           sort: [
@@ -99,6 +123,12 @@ const getActivityLog = async ({
       (e) => (e._source as EndpointAction).action_id
     );
 
+    // fetch responses with matching `action_id`s
+    const baseResponsesFilter = [
+      { term: { agent_id: elasticAgentId } },
+      { terms: { action_id: actionIds } },
+    ];
+    const responsesFilters = [...baseResponsesFilter, ...dateFilters];
     responsesResult = await esClient.search(
       {
         index: AGENT_ACTIONS_RESULTS_INDEX,
@@ -106,7 +136,7 @@ const getActivityLog = async ({
         body: {
           query: {
             bool: {
-              filter: [{ term: { agent_id: elasticAgentId } }, { terms: { action_id: actionIds } }],
+              filter: responsesFilters,
             },
           },
         },

@@ -41,6 +41,7 @@ test('set correct defaults', () => {
         "authorization",
       ],
       "requestTimeout": "PT30S",
+      "serviceAccountToken": undefined,
       "shardTimeout": "PT30S",
       "sniffInterval": false,
       "sniffOnConnectionFault": false,
@@ -376,4 +377,23 @@ test('#username throws if equal to "elastic", only while running from source', (
     `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"kibana_system\\" user instead."`
   );
   expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
+});
+
+test('serviceAccountToken throws if username is also set', () => {
+  const obj = {
+    username: 'elastic',
+    serviceAccountToken: 'abc123',
+  };
+
+  expect(() => config.schema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[serviceAccountToken]: serviceAccountToken cannot be specified when \\"username\\" is also set."`
+  );
+});
+
+test('serviceAccountToken does not throw if username is not set', () => {
+  const obj = {
+    serviceAccountToken: 'abc123',
+  };
+
+  expect(() => config.schema.validate(obj)).not.toThrow();
 });

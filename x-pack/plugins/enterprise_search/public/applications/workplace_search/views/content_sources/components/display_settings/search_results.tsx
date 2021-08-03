@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiColorPicker,
-  EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
@@ -76,7 +76,7 @@ export const SearchResults: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSpacer size="m" />
           <EuiTitle size="s">
@@ -257,7 +257,7 @@ export const SearchResults: React.FC = () => {
             <ExampleSearchResultGroup />
           </EuiPanel>
         </EuiFlexItem>
-      </EuiFlexGrid>
+      </EuiFlexGroup>
     </>
   );
 };

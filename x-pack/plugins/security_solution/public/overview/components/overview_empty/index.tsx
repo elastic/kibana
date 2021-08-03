@@ -20,9 +20,9 @@ import {
   useIngestUrl,
 } from '../../../management/pages/endpoint_hosts/view/hooks';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { useIngestEnabledCheck } from '../../../common/hooks/endpoint/ingest_enabled';
 import { CreateStructuredSelector } from '../../../common/store';
 import { endpointPackageVersion as useEndpointPackageVersion } from '../../../management/pages/endpoint_hosts/store/selectors';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const OverviewEmptyComponent: React.FC = () => {
   const { http, docLinks } = useKibana().services;
@@ -36,11 +36,11 @@ const OverviewEmptyComponent: React.FC = () => {
   const endpointIntegrationUrlPath = endpointPackageVersion
     ? `/endpoint-${endpointPackageVersion}/add-integration`
     : '';
-  const endpointIntegrationUrl = `#/integrations${endpointIntegrationUrlPath}`;
+  const endpointIntegrationUrl = `/integrations${endpointIntegrationUrlPath}`;
   const handleEndpointClick = useNavigateToAppEventHandler('fleet', {
     path: endpointIntegrationUrl,
   });
-  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+  const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
 
   const emptyPageActions: EmptyPageActionsProps = useMemo(
     () => ({
@@ -72,7 +72,7 @@ const OverviewEmptyComponent: React.FC = () => {
     [emptyPageActions]
   );
 
-  return isIngestEnabled === true ? (
+  return canAccessFleet === true ? (
     <EmptyPage
       actions={emptyPageActions}
       data-test-subj="empty-page"

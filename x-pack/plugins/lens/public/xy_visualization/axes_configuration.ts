@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AxisExtentConfig, XYLayerConfig } from './types';
+import { FormatFactory } from '../../common';
+import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
 import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 
@@ -33,7 +34,7 @@ export function getAxesConfiguration(
   layers: XYLayerConfig[],
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
-  formatFactory?: (mapping: SerializedFieldFormat) => IFieldFormat
+  formatFactory?: FormatFactory
 ): GroupsConfiguration {
   const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {
     auto: [],

@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { ReportingStart } from '../../../../../reporting/public';
 import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { usePlatformService } from '../../../services';
 import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
-import { CanvasWorkpadSharingData, getPdfJobParams } from './utils';
 
 const strings = {
   getShareDownloadJSONTitle: () =>
@@ -54,30 +50,20 @@ type CloseTypes = 'share';
 export type OnCopyFn = (type: CopyTypes) => void;
 export type OnExportFn = (type: ExportTypes) => void;
 export type OnCloseFn = (type: CloseTypes) => void;
+export type ReportingComponent = ({ onClose }: { onClose: () => void }) => JSX.Element;
 
 export interface Props {
-  /** Canvas workpad to export as PDF **/
-  sharingData: CanvasWorkpadSharingData;
-  sharingServices: {
-    /** Reporting dependency **/
-    reporting?: ReportingStart;
-  };
-  /** Handler to invoke when an end product is exported. */
+  ReportingComponent: ReportingComponent | null;
   onExport: OnExportFn;
 }
 
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
-export const ShareMenu: FunctionComponent<Props> = ({
-  sharingData,
-  sharingServices: services,
-  onExport,
-}) => {
-  const platformService = usePlatformService();
+export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
-  const onClose = () => {
+  const onFlyoutClose = () => {
     setShowFlyout(false);
   };
 
@@ -92,22 +78,14 @@ export const ShareMenu: FunctionComponent<Props> = ({
           closePopover();
         },
       },
-      services.reporting != null
+      ReportingComponent !== null
         ? {
             name: strings.getShareDownloadPDFTitle(),
             icon: 'document',
             panel: {
               id: 1,
               title: strings.getShareDownloadPDFTitle(),
-              content: (
-                <services.reporting.components.ReportingPanelPDF
-                  getJobParams={() =>
-                    getPdfJobParams(sharingData, platformService.getBasePathInterface())
-                  }
-                  layoutOption="canvas"
-                  onClose={closePopover}
-                />
-              ),
+              content: <ReportingComponent onClose={closePopover} />,
             },
             'data-test-subj': 'sharePanel-PDFReports',
           }
@@ -125,7 +103,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
 
   const shareControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       aria-label={strings.getShareWorkpadMessage()}
       onClick={togglePopover}
       data-test-subj="shareTopNavButton"
@@ -134,7 +112,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
     </EuiButtonEmpty>
   );
 
-  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onClose} /> : null;
+  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onFlyoutClose} /> : null;
 
   return (
     <div>

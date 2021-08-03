@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Reporting API Integration Tests with Security disabled', function () {
     this.tags('ciGroup13');
-    loadTestFile(require.resolve('./job_apis'));
-    loadTestFile(require.resolve('./ilm_migration_apis'));
+    loadTestFile(require.resolve('./job_apis_csv'));
+    loadTestFile(require.resolve('./job_apis_csv_deprecated'));
   });
 }

@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiLink,
@@ -253,6 +252,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
   const output = outputsRequest.data?.items?.[0];
   const esHost = output?.hosts?.[0];
+  const refreshOutputs = outputsRequest.resendRequest;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
@@ -288,8 +288,8 @@ export const useFleetServerInstructions = (policyId?: string) => {
   }, [notifications.toasts]);
 
   const refresh = useCallback(() => {
-    return Promise.all([outputsRequest.resendRequest(), refreshSettings()]);
-  }, [outputsRequest, refreshSettings]);
+    return Promise.all([refreshOutputs(), refreshSettings()]);
+  }, [refreshOutputs, refreshSettings]);
 
   const addFleetServerHost = useCallback(
     async (host: string) => {
@@ -449,9 +449,11 @@ export const AddFleetServerHostStepContent = ({
       setIsLoading(true);
       if (validate(fleetServerHost)) {
         await addFleetServerHost(fleetServerHost);
+        setCalloutHost(fleetServerHost);
+        setFleetServerHost('');
+      } else {
+        setCalloutHost('');
       }
-      setCalloutHost(fleetServerHost);
-      setFleetServerHost('');
     } finally {
       setIsLoading(false);
     }
@@ -481,10 +483,11 @@ export const AddFleetServerHostStepContent = ({
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
-            placeholder={'http://127.0.0.1:8220'}
-            value={calloutHost}
+            placeholder={'e.g. http://127.0.0.1:8220'}
+            value={fleetServerHost}
             isInvalid={!!error}
             onChange={onChange}
+            disabled={isLoading}
             prepend={
               <EuiText>
                 <FormattedMessage
@@ -733,9 +736,8 @@ export const OnPremInstructions: React.FC = () => {
   }, [notifications.toasts]);
 
   return (
-    <EuiPanel paddingSize="l" grow={false} hasShadow={false} hasBorder={true}>
-      <EuiSpacer size="s" />
-      <EuiText className="eui-textCenter">
+    <>
+      <EuiText>
         <h2>
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.setupTitle"
@@ -784,6 +786,6 @@ export const OnPremInstructions: React.FC = () => {
             : CompleteStep(),
         ]}
       />
-    </EuiPanel>
+    </>
   );
 };

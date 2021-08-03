@@ -129,17 +129,29 @@ describe('Host Isolation', () => {
       endpointAppContextService = new EndpointAppContextService();
       const mockSavedObjectClient = savedObjectsClientMock.create();
       const mockPackageService = createMockPackageService();
-      mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
-        Promise.resolve([
-          {
-            id: 'logs-endpoint.events.security',
-            type: ElasticsearchAssetType.indexTemplate,
-          },
-          {
-            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
-            type: ElasticsearchAssetType.transform,
-          },
-        ])
+      mockPackageService.getInstallation.mockReturnValue(
+        Promise.resolve({
+          installed_kibana: [],
+          package_assets: [],
+          es_index_patterns: {},
+          name: '',
+          version: '',
+          install_status: 'installed',
+          install_version: '',
+          install_started_at: '',
+          install_source: 'registry',
+          installed_es: [
+            {
+              dupa: true,
+              id: 'logs-endpoint.events.security',
+              type: ElasticsearchAssetType.indexTemplate,
+            },
+            {
+              id: `${metadataTransformPrefix}-0.16.0-dev.0`,
+              type: ElasticsearchAssetType.transform,
+            },
+          ],
+        })
       );
       licenseEmitter = new Subject();
       licenseService = new LicenseService();

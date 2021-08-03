@@ -36,7 +36,7 @@ For detailed guidance, see <<alerting-troubleshooting, Alerting Troubleshooting>
 
 [float]
 [[alerting-scaling-guidance]]
-=== Scaling Guidance
+=== Scaling guidance
 
 As rules and actions leverage background tasks to perform the majority of work, scaling Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
 
@@ -58,7 +58,7 @@ Alerts and actions log activity in a set of "event log" indices.  These indices 
 
 The name of the index policy is `kibana-event-log-policy`.  {kib} creates the index policy on startup, if it doesn't already exist.  The index policy can be customized for your environment, but {kib} never modifies the index policy after creating it.
 
-Because Kibana uses the documents to display historic data, you should set the delete phase longer than you would like the historic data to be shown. For example, if you would like to see one month's worth of historic data, you should set the delete phase to at least one month.
+Because {kib} uses the documents to display historic data, you should set the delete phase longer than you would like the historic data to be shown. For example, if you would like to see one month's worth of historic data, you should set the delete phase to at least one month.
 
 For more information on index lifecycle management, see:
 {ref}/index-lifecycle-management.html[Index Lifecycle Policies].

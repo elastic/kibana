@@ -1,0 +1,11 @@
+{
+  "rollup.put_job": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_rollup/job/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-put-job.html"
+  }
+}

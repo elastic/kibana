@@ -9,13 +9,13 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import produce from 'immer';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import { useUserPrivileges } from '../../../components/user_privileges';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { Privilege } from './types';
 import { UseAlertsPrivelegesReturn, useAlertsPrivileges } from './use_alerts_privileges';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../components/user_privileges');
+jest.mock('../../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock<ReturnType<typeof useUserPrivileges>>;
 
@@ -86,6 +86,7 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     result: undefined,
     error: undefined,
   },
+  endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
 };
 
 describe('usePrivilegeUser', () => {

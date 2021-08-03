@@ -15,11 +15,8 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 
 export async function getDistributionMax({
   environment,

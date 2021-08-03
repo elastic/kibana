@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiIconTip, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY_LEVEL,
@@ -43,6 +42,7 @@ const getMappedNonEcsValue = ({
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
+
 export const getRenderCellValue = ({
   rangeTo,
   rangeFrom,
@@ -52,12 +52,22 @@ export const getRenderCellValue = ({
   rangeFrom: string;
   setFlyoutAlert: (data: TopAlert) => void;
 }) => {
-  return ({ columnId, data, linkValues }: CellValueElementProps) => {
+  return ({ columnId, data, setCellProps }: CellValueElementProps) => {
     const { observabilityRuleTypeRegistry } = usePluginContext();
     const value = getMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]);
+
+    useEffect(() => {
+      if (columnId === ALERT_STATUS) {
+        setCellProps({
+          style: {
+            textAlign: 'center',
+          },
+        });
+      }
+    }, [columnId, setCellProps]);
 
     switch (columnId) {
       case ALERT_STATUS:
@@ -80,7 +90,7 @@ export const getRenderCellValue = ({
       case ALERT_START:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
-        return asDuration(Number(value), { extended: true });
+        return asDuration(Number(value));
       case ALERT_SEVERITY_LEVEL:
         return <SeverityBadge severityLevel={value ?? undefined} />;
       case RULE_NAME:
@@ -92,7 +102,17 @@ export const getRenderCellValue = ({
         const alert = decoratedAlerts[0];
 
         return (
-          <EuiLink onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>{alert.reason}</EuiLink>
+          // NOTE: EuiLink automatically renders links using a <button>
+          // instead of an <a> when an `onClick` prop is provided, but this
+          // breaks text-truncation in `EuiDataGrid`, because (per the HTML
+          // spec), buttons are *always* rendered as `inline-block`, even if
+          // `display` is overridden. Passing an empty `href` prop forces
+          // `EuiLink` to render the link as an (inline) <a>, which enables
+          // text truncation, but requires overriding the linter warning below:
+          // eslint-disable-next-line @elastic/eui/href-or-on-click
+          <EuiLink href="" onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>
+            {alert.reason}
+          </EuiLink>
         );
       default:
         return <>{value}</>;

@@ -3,13 +3,8 @@ $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
 .kbnPageTemplateSolutionNav {
   @include euiYScroll;
 
-  @include euiBreakpoint('m') {
-    width: $euiPageSidebarMinWidth + ($euiSizeL * 2);
-    padding: $euiSizeL;
-  }
-
-  @include euiBreakpoint('l', 'xl') {
-    width: $euiPageSidebarMinWidth + ($euiSizeL * 2);
+  @include euiBreakpoint('m' ,'l', 'xl') {
+    width: 248px;
     padding: $euiSizeL;
   }
 }

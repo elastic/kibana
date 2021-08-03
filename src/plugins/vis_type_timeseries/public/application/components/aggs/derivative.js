@@ -25,6 +25,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 export const DerivativeAgg = (props) => {
   const { siblings, fields, indexPattern } = props;
@@ -80,7 +81,7 @@ export const DerivativeAgg = (props) => {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
-              fields={fields[indexPattern]}
+              fields={fields[getIndexPatternKey(indexPattern)]}
               value={model.field}
               exclude={[METRIC_TYPES.TOP_HIT]}
               fullWidth

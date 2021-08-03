@@ -1,7 +1,0 @@
-{
-  "prefix": "screenshotMode",
-  "paths": {
-    "screenshotMode": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}

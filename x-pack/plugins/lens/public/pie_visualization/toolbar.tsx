@@ -15,10 +15,10 @@ import {
   EuiRange,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { Position } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { Position } from '@elastic/charts';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieVisualizationState, SharedPieLayerState } from './types';
+import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
@@ -182,12 +182,12 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         >
           <DecimalPlaceSlider
             value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-            setValue={(value) =>
+            setValue={(value) => {
               setState({
                 ...state,
                 layers: [{ ...layer, percentDecimals: value }],
-              })
-            }
+              });
+            }}
           />
         </EuiFormRow>
       </ToolbarPopover>
@@ -232,7 +232,13 @@ const DecimalPlaceSlider = ({
   value: number;
   setValue: (value: number) => void;
 }) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
+  const { inputValue, handleInputChange } = useDebouncedValue(
+    {
+      value,
+      onChange: setValue,
+    },
+    { allowFalsyValue: true }
+  );
   return (
     <EuiRange
       data-test-subj="indexPattern-dimension-formatDecimals"

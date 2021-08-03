@@ -51,6 +51,7 @@ kibana_vars=(
     elasticsearch.pingTimeout
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
+    elasticsearch.serviceAccountToken
     elasticsearch.shardTimeout
     elasticsearch.sniffInterval
     elasticsearch.sniffOnConnectionFault
@@ -381,7 +382,6 @@ kibana_vars=(
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
     xpack.securitySolution.alertMergeStrategy
-    xpack.securitySolution.alertResultListDefaultDateRange
     xpack.securitySolution.endpointResultListDefaultFirstPageIndex
     xpack.securitySolution.endpointResultListDefaultPageSize
     xpack.securitySolution.maxRuleImportExportSize
@@ -389,7 +389,8 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
-    xpack.securitySolution.validateArtifactDownloads
+    xpack.securitySolution.prebuiltRulesFromFileSystem
+    xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.enabled
     xpack.spaces.maxSpaces
     xpack.task_manager.enabled

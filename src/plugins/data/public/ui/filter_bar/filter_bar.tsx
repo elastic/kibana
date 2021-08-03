@@ -8,15 +8,6 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import classNames from 'classnames';
-import React, { useState, useRef } from 'react';
-
-import { METRIC_TYPE } from '@kbn/analytics';
-import { FilterEditor } from './filter_editor';
-import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
-import { FilterOptions } from './filter_options';
-import { useKibana } from '../../../../kibana_react/public';
-import { IDataPluginServices, IIndexPattern } from '../..';
 import {
   buildEmptyFilter,
   Filter,
@@ -26,8 +17,18 @@ import {
   toggleFilterDisabled,
   toggleFilterNegated,
   unpinFilter,
-  UI_SETTINGS,
-} from '../../../common';
+} from '@kbn/es-query';
+import classNames from 'classnames';
+import React, { useState, useRef } from 'react';
+
+import { METRIC_TYPE } from '@kbn/analytics';
+import { FilterEditor } from './filter_editor';
+import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
+import { FilterOptions } from './filter_options';
+import { useKibana } from '../../../../kibana_react/public';
+import { IDataPluginServices, IIndexPattern } from '../..';
+
+import { UI_SETTINGS } from '../../../common';
 
 interface Props {
   filters: Filter[];
@@ -77,7 +78,7 @@ function FilterBarUI(props: Props) {
 
     const button = (
       <EuiButtonEmpty
-        size="xs"
+        size="s"
         onClick={() => setIsAddFilterPopoverOpen(true)}
         data-test-subj="addFilter"
         className="globalFilterBar__addButton"

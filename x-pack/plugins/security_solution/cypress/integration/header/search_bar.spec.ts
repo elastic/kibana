@@ -8,7 +8,7 @@
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openAddFilterPopover, fillAddFilterForm } from '../../tasks/search_bar';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../screens/search_bar';
-import { hostIpFilter } from '../../objects/filter';
+import { getHostIpFilter } from '../../objects/filter';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
@@ -23,11 +23,11 @@ describe('SearchBar', () => {
 
   it('adds correctly a filter to the global search bar', () => {
     openAddFilterPopover();
-    fillAddFilterForm(hostIpFilter);
+    fillAddFilterForm(getHostIpFilter());
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'have.text',
-      `${hostIpFilter.key}: ${hostIpFilter.value}`
+      `${getHostIpFilter().key}: ${getHostIpFilter().value}`
     );
   });
 });

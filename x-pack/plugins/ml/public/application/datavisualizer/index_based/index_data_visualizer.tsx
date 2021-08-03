@@ -7,10 +7,10 @@
 
 import React, { FC, Fragment, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useMlKibana, useTimefilter, useMlUrlGenerator } from '../../contexts/kibana';
+import { useMlKibana, useTimefilter, useMlLocator } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -33,7 +33,7 @@ export const IndexDataVisualizerPage: FC = () => {
       },
     },
   } = useMlKibana();
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator()!;
   getMlNodeCount();
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
@@ -64,7 +64,7 @@ export const IndexDataVisualizerPage: FC = () => {
         icon: 'createAdvancedJob',
         type: 'file',
         getUrl: async ({ indexPatternId, globalState }: GetUrlParams) => {
-          return await mlUrlGenerator.createUrl({
+          return await mlLocator.getUrl({
             page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED,
             pageState: {
               index: indexPatternId,
@@ -101,7 +101,7 @@ export const IndexDataVisualizerPage: FC = () => {
         icon: 'classificationJob',
         type: 'file',
         getUrl: async ({ indexPatternId, globalState }: GetUrlParams) => {
-          return await mlUrlGenerator.createUrl({
+          return await mlLocator.getUrl({
             page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
             pageState: {
               index: indexPatternId,

@@ -240,7 +240,9 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   return (
     <EuiText size="s" data-test-subj="timeline-description">
       {description ? (
-        <LineClamp lineClampHeight={4.5}>{description}</LineClamp>
+        <LineClamp key={description.length} lineClampHeight={4.5}>
+          {description}
+        </LineClamp>
       ) : (
         commonI18n.DESCRIPTION
       )}
