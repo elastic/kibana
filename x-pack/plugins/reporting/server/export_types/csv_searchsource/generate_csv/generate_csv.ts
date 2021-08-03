@@ -6,12 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
+  cellHasFormulas,
   ES_SEARCH_STRATEGY,
   FieldFormat,
   FieldFormatConfig,
@@ -22,7 +23,6 @@ import {
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
-  cellHasFormulas,
 } from '../../../../../../../src/plugins/data/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
@@ -68,7 +68,7 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: JobParamsCSV,
+    private job: Omit<JobParamsCSV, 'version'>,
     private config: ReportingConfig,
     private clients: Clients,
     private dependencies: Dependencies,
@@ -93,7 +93,7 @@ export class CsvGenerator {
     };
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
-    ).rawResponse as SearchResponse<unknown>;
+    ).rawResponse as estypes.SearchResponse<unknown>;
 
     return results;
   }
@@ -107,7 +107,7 @@ export class CsvGenerator {
           scroll_id: scrollId,
         },
       })
-    ).body as SearchResponse<unknown>;
+    ).body;
     return results;
   }
 
@@ -219,7 +219,6 @@ export class CsvGenerator {
    */
   private generateHeader(
     columns: string[],
-    table: Datatable,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
@@ -321,13 +320,13 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
-        let results: SearchResponse<unknown> | undefined;
+        let results: estypes.SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
           results = await this.scan(index, searchSource, scrollSettings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
-            totalRecords = results.hits.total;
+            totalRecords = results.hits.total as number;
             this.logger.debug(`Total search results: ${totalRecords}`);
           }
         } else {
@@ -357,7 +356,7 @@ export class CsvGenerator {
 
         if (first) {
           first = false;
-          this.generateHeader(columns, table, builder, settings);
+          this.generateHeader(columns, builder, settings);
         }
 
         if (table.rows.length < 1) {

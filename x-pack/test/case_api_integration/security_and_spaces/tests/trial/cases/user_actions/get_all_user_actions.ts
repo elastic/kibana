@@ -24,6 +24,7 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '../../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { getCreateConnectorUrl } from '../../../../../../../plugins/cases/common/utils/connectors_api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -49,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {
       const { body: connector } = await supertest
-        .post('/api/actions/connector')
+        .post(getCreateConnectorUrl())
         .set('kbn-xsrf', 'true')
         .send({
           ...getServiceNowConnector(),

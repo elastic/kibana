@@ -8,7 +8,6 @@
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
-import { SourceLink } from '../types';
 
 // Collect any paths encountered that are not in the correct scope folder.
 // APIs inside these folders will cause issues with the API docs system. The
@@ -27,11 +26,7 @@ export function getRelativePath(fullPath: string): string {
   return Path.relative(REPO_ROOT, fullPath);
 }
 
-export function getSourceForNode(node: Node): SourceLink {
+export function getSourceForNode(node: Node): string {
   const path = getRelativePath(node.getSourceFile().getFilePath());
-  const lineNumber = node.getStartLineNumber();
-  return {
-    path,
-    lineNumber,
-  };
+  return path;
 }
