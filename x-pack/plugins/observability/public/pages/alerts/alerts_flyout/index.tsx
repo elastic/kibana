@@ -28,7 +28,7 @@ import {
   ALERT_UUID,
   RULE_CATEGORY,
   RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+} from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
 import type { TopAlert, TopAlertResponse } from '../';

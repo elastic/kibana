@@ -19,7 +19,7 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
 import React, { Suspense, useState } from 'react';
-import { RULE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
+import { RULE_ID } from '@kbn/rule-data-utils';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';

@@ -6,11 +6,7 @@
  */
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import {
-  mapConsumerToIndexName,
-  validFeatureIds,
-  isValidFeatureId,
-} from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { mapConsumerToIndexName, validFeatureIds, isValidFeatureId } from '@kbn/rule-data-utils';
 
 import { AlertTypeParams } from '../../../alerting/server';
 import {

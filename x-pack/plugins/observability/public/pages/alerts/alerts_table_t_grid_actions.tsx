@@ -14,7 +14,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RULE_ID, RULE_NAME } from '@kbn/rule-data-utils/target/technical_field_names';
+import { RULE_ID, RULE_NAME } from '@kbn/rule-data-utils';
 import React, { useState } from 'react';
 import { format, parse } from 'url';
 

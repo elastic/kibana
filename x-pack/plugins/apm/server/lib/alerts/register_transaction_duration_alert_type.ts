@@ -11,7 +11,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+} from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   getEnvironmentLabel,

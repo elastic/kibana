@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  RULE_ID,
-  RULE_NAME,
-  ALERT_STATUS,
-  ALERT_START,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+import { RULE_ID, RULE_NAME, ALERT_STATUS, ALERT_START } from '@kbn/rule-data-utils';
 import type { TopAlertResponse, TopAlert } from '.';
 import { parseTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import { asDuration, asPercent } from '../../../common/utils/formatters';

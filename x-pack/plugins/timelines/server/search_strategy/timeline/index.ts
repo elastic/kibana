@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 import {
+  ALERT_OWNER,
+  RULE_ID,
+  SPACE_IDS,
   isValidFeatureId,
   mapConsumerToIndexName,
   ALERTS_CONSUMERS,
-} from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+} from '@kbn/rule-data-utils';
 
 import {
   AlertingAuthorizationEntity,

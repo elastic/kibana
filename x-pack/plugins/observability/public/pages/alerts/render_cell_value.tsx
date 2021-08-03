@@ -13,7 +13,7 @@ import {
   ALERT_STATUS,
   ALERT_START,
   RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+} from '@kbn/rule-data-utils';
 
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';

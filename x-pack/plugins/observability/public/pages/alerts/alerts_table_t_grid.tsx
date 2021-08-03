@@ -16,7 +16,7 @@ import {
   ALERT_STATUS,
   ALERT_START,
   RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+} from '@kbn/rule-data-utils';
 
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
