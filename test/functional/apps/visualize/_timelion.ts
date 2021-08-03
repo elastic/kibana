@@ -73,6 +73,74 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(forthAreaChartData).to.eql([5019, 4958, 0, 0]);
     });
 
+    it('should display correct chart data for expressions using functions', async () => {
+      const firstAreaExpectedChartData = [3, 2421, 2343, 2294, 2327, 2328, 2312, 7, 0, 0];
+      const thirdAreaExpectedChartData = [200, 167, 199, 200, 200, 198, 108, 200, 200];
+      const forthAreaExpectedChartData = [150, 50, 50, 50, 50, 50, 50, 150, 150, 150];
+      await initVisualization(
+        '.es(*).label("initial"),' +
+          '.es(*).add(term=.es(*).multiply(-1).abs()).divide(2).label("add multiply abs divide"),' +
+          '.es(q="bytes<100").derivative().sum(200).min(200).label("query derivative min sum"),' +
+          '.es(*).if(operator=gt,if=200,then=50,else=150).label("condition")'
+      );
+
+      const firstAreaChartData = await visChart.getAreaChartData('initial');
+      const secondAreaChartData = await visChart.getAreaChartData('add multiply abs divide');
+      const thirdAreaChartData = await visChart.getAreaChartData('query derivative min sum');
+      const forthAreaChartData = await visChart.getAreaChartData('condition');
+
+      expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
+      expect(secondAreaChartData).to.eql(firstAreaExpectedChartData);
+      expect(thirdAreaChartData).to.eql(thirdAreaExpectedChartData);
+      expect(forthAreaChartData).to.eql(forthAreaExpectedChartData);
+    });
+
+    it('should display correct chart title, data and labels for expressions with custom labels, yaxis and offset', async () => {
+      const firstAreaExpectedChartData = [13112352443.375292, 13095637741.055172];
+      const secondAreaExpectedChartData = [
+        [1442642400000, 5732.783676366217],
+        [1442772000000, 5721.775973559419],
+      ];
+      const thirdAreaExpectedChartData = [
+        [1442772000000, 5732.783676366217],
+        [1442901600000, 5721.775973559419],
+      ];
+      await initVisualization(
+        '.es(index=logstash*,timefield="@timestamp",metric=avg:machine.ram).label("Average Machine RAM amount").yaxis(2,units=bytes,position=right),' +
+          '.es(index=logstash*,timefield="@timestamp",metric=avg:bytes).label("Average Bytes for request").yaxis(1,units=bytes,position=left),' +
+          '.es(index=logstash*,timefield="@timestamp",metric=avg:bytes, offset=-12h).label("Average Bytes for request with offset").yaxis(3,units=custom:BYTES_,position=right)',
+        '36h'
+      );
+
+      const leftAxesCount = await visChart.getAxesCountByPosition('left');
+      const rightAxesCount = await visChart.getAxesCountByPosition('right');
+      const firstAxesLabels = await visChart.getYAxisLabels();
+      const secondAxesLabels = await visChart.getYAxisLabels(1);
+      const thirdAxesLabels = await visChart.getYAxisLabels(2);
+      const firstAreaChartData = await visChart.getAreaChartData('Average Machine RAM amount');
+      const secondAreaChartData = await visChart.getAreaChartData(
+        'Average Bytes for request',
+        undefined,
+        true
+      );
+      const thirdAreaChartData = await visChart.getAreaChartData(
+        'Average Bytes for request with offset',
+        undefined,
+        true
+      );
+
+      expect(leftAxesCount).to.be(1);
+      expect(rightAxesCount).to.be(2);
+      expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
+      expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
+      expect(thirdAreaChartData).to.eql(thirdAreaExpectedChartData);
+      expect(firstAxesLabels).to.eql(['12.19GB', '12.2GB', '12.21GB']);
+      expect(secondAxesLabels).to.eql(['5.59KB', '5.6KB']);
+      expect(thirdAxesLabels.toString()).to.be(
+        'BYTES_5721,BYTES_5722,BYTES_5723,BYTES_5724,BYTES_5725,BYTES_5726,BYTES_5727,BYTES_5728,BYTES_5729,BYTES_5730,BYTES_5731,BYTES_5732,BYTES_5733,BYTES_5734'
+      );
+    });
+
     it('should display correct chart data for split expression', async () => {
       await initVisualization('.es(index=logstash-*, split=geo.dest:3)', '1 day');
 
