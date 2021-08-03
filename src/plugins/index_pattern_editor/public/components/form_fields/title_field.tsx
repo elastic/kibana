@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import {
@@ -159,16 +159,28 @@ export const TitleField = ({
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
 
-  return (
-    <UseField<string, IndexPatternConfig>
-      path="title"
-      config={getTitleConfig({
+  const fieldConfig = useMemo(
+    () =>
+      getTitleConfig({
         namesNotAllowed: existingIndexPatterns,
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
         refreshMatchedIndices,
-      })}
+      }),
+    [
+      existingIndexPatterns,
+      isRollup,
+      matchedIndices,
+      rollupIndicesCapabilities,
+      refreshMatchedIndices,
+    ]
+  );
+
+  return (
+    <UseField<string, IndexPatternConfig>
+      path="title"
+      config={fieldConfig}
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
@@ -190,7 +202,7 @@ export const TitleField = ({
           >
             <EuiFieldText
               isInvalid={isInvalid}
-              value={field.value as string}
+              value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 e.persist();
                 let query = e.target.value;
