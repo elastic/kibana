@@ -64,6 +64,7 @@ import {
   SIGNALS_ID,
   NOTIFICATIONS_ID,
   QUERY_ALERT_TYPE_ID,
+  DEFAULT_SPACE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -88,6 +89,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
 import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
+import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 
@@ -181,6 +183,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       APP_ID,
       (context, request, response) => ({
         getAppClient: () => this.appClientFactory.create(request),
+        getSpaceId: () => plugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
+        getExecutionLogClient: () =>
+          new RuleExecutionLogClient({
+            ruleDataService: plugins.ruleRegistry.ruleDataService,
+            // TODO check if savedObjects.client contains spaceId
+            savedObjectsClient: context.core.savedObjects.client,
+          }),
       })
     );
 
@@ -199,11 +208,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
 
       const initializeRuleDataTemplates = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
-
         if (!ruleDataService.isWriteEnabled()) {
           return;
         }
+        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
         await ruleDataService.createOrUpdateComponentTemplate({
           name: componentTemplateName,
@@ -243,8 +251,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         indexAlias,
         () => initializeRuleDataTemplatesPromise
       );
-
-      // sec
 
       // Register rule types via rule-registry
       this.setupPlugins.alerting.registerType(
