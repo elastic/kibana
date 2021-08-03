@@ -11,6 +11,7 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsBaseOptions,
+  SavedObjectsResolveResponse,
   SavedObjectsServiceSetup,
   StartServicesAccessor,
 } from 'src/core/server';
@@ -43,6 +44,11 @@ export interface EncryptedSavedObjectsClient {
     id: string,
     options?: SavedObjectsBaseOptions
   ) => Promise<SavedObject<T>>;
+  resolveDecryptedAsInternalUser: <T = unknown>(
+    type: string,
+    id: string,
+    options?: SavedObjectsBaseOptions
+  ) => Promise<SavedObjectsResolveResponse<T>>;
 }
 
 export function setupSavedObjects({
@@ -83,7 +89,7 @@ export function setupSavedObjects({
         options?: SavedObjectsBaseOptions
       ): Promise<SavedObject<T>> => {
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
-        const { saved_object: savedObject } = await internalRepository.resolve(type, id, options);
+        const savedObject = await internalRepository.get(type, id, options);
         return {
           ...savedObject,
           attributes: (await service.decryptAttributes(
@@ -94,6 +100,28 @@ export function setupSavedObjects({
             },
             savedObject.attributes as Record<string, unknown>
           )) as T,
+        };
+      },
+      resolveDecryptedAsInternalUser: async <T = unknown>(
+        type: string,
+        id: string,
+        options?: SavedObjectsBaseOptions
+      ): Promise<SavedObjectsResolveResponse<T>> => {
+        const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
+        const resolvedSavedObject = await internalRepository.resolve(type, id, options);
+        return {
+          ...resolvedSavedObject,
+          saved_object: {
+            ...resolvedSavedObject.saved_object,
+            attributes: (await service.decryptAttributes(
+              {
+                type,
+                id,
+                namespace: getDescriptorNamespace(typeRegistry, type, options?.namespace),
+              },
+              resolvedSavedObject.saved_object.attributes as Record<string, unknown>
+            )) as T,
+          },
         };
       },
     };

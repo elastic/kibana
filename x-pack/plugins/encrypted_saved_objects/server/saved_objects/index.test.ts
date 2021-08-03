@@ -108,10 +108,7 @@ describe('#setupSavedObjects', () => {
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
       };
-      mockSavedObjectsRepository.resolve.mockResolvedValue({
-        saved_object: mockSavedObject,
-        outcome: 'exactMatch',
-      });
+      mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
 
       await expect(
@@ -121,6 +118,80 @@ describe('#setupSavedObjects', () => {
       ).resolves.toEqual({
         ...mockSavedObject,
         attributes: { attrOne: 'one', attrSecret: 'secret' },
+      });
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledWith(
+        { type: mockSavedObject.type, id: mockSavedObject.id, namespace: 'some-ns' },
+        mockSavedObject.attributes
+      );
+
+      expect(mockSavedObjectsRepository.get).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.get).toHaveBeenCalledWith(
+        mockSavedObject.type,
+        mockSavedObject.id,
+        { namespace: 'some-ns' }
+      );
+    });
+
+    it('does not include `namespace` for multiple-namespace saved objects', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+      };
+      mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
+      mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(false);
+
+      await expect(
+        setupContract().getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
+          namespace: 'some-ns',
+        })
+      ).resolves.toEqual({
+        ...mockSavedObject,
+        attributes: { attrOne: 'one', attrSecret: 'secret' },
+      });
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledWith(
+        { type: mockSavedObject.type, id: mockSavedObject.id, namespace: undefined },
+        mockSavedObject.attributes
+      );
+
+      expect(mockSavedObjectsRepository.get).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.get).toHaveBeenCalledWith(
+        mockSavedObject.type,
+        mockSavedObject.id,
+        { namespace: 'some-ns' }
+      );
+    });
+  });
+
+  describe('#resolveDecryptedAsInternalUser', () => {
+    it('includes `namespace` for single-namespace saved objects', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+      };
+      mockSavedObjectsRepository.resolve.mockResolvedValue({
+        saved_object: mockSavedObject,
+        outcome: 'exactMatch',
+      });
+      mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
+
+      await expect(
+        setupContract().resolveDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
+          namespace: 'some-ns',
+        })
+      ).resolves.toEqual({
+        saved_object: {
+          ...mockSavedObject,
+          attributes: { attrOne: 'one', attrSecret: 'secret' },
+        },
+        outcome: 'exactMatch',
       });
 
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
@@ -151,17 +222,61 @@ describe('#setupSavedObjects', () => {
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(false);
 
       await expect(
-        setupContract().getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
+        setupContract().resolveDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
           namespace: 'some-ns',
         })
       ).resolves.toEqual({
-        ...mockSavedObject,
-        attributes: { attrOne: 'one', attrSecret: 'secret' },
+        saved_object: {
+          ...mockSavedObject,
+          attributes: { attrOne: 'one', attrSecret: 'secret' },
+        },
+        outcome: 'exactMatch',
       });
 
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledWith(
         { type: mockSavedObject.type, id: mockSavedObject.id, namespace: undefined },
+        mockSavedObject.attributes
+      );
+
+      expect(mockSavedObjectsRepository.resolve).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.resolve).toHaveBeenCalledWith(
+        mockSavedObject.type,
+        mockSavedObject.id,
+        { namespace: 'some-ns' }
+      );
+    });
+
+    it('returns resolved outcome and aliasTargetId', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+      };
+      mockSavedObjectsRepository.resolve.mockResolvedValue({
+        saved_object: mockSavedObject,
+        outcome: 'aliasMatch',
+        aliasTargetId: 'another-id',
+      });
+      mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
+
+      await expect(
+        setupContract().resolveDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
+          namespace: 'some-ns',
+        })
+      ).resolves.toEqual({
+        saved_object: {
+          ...mockSavedObject,
+          attributes: { attrOne: 'one', attrSecret: 'secret' },
+        },
+        outcome: 'aliasMatch',
+        aliasTargetId: 'another-id',
+      });
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledWith(
+        { type: mockSavedObject.type, id: mockSavedObject.id, namespace: 'some-ns' },
         mockSavedObject.attributes
       );
 
