@@ -53,7 +53,7 @@ export enum SIBLING_PIPELINE_AGGREGATIONS {
 }
 
 export enum PARENT_PIPELINE_AGGREGATIONS {
-  CALCULATION = 'clculation',
+  CALCULATION = 'calculation',
   CUMULATIVE_SUM = 'cumulative_sum',
   DERIVATIVE = 'derivative',
   MOVING_AVERAGE = 'moving_average',
