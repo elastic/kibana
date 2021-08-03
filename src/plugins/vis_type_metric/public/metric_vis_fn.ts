@@ -15,7 +15,8 @@ import {
   Render,
   Style,
 } from '../../expressions/public';
-import { visType, VisParams } from './types';
+import { visType, DimensionsVisParam, VisParams } from './types';
+import { prepareLogTable, Dimension } from '../../visualizations/public';
 import { ColorSchemas, vislibColorMaps, ColorMode } from '../../charts/public';
 import { ExpressionValueVisDimension } from '../../visualizations/public';
 
@@ -157,7 +158,24 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
     const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
 
     if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.logDatatable('default', input);
+      const argsTable: Dimension[] = [
+        [
+          args.metric,
+          i18n.translate('visTypeMetric.function.dimension.metric', {
+            defaultMessage: 'Metric',
+          }),
+        ],
+      ];
+      if (args.bucket) {
+        argsTable.push([
+          [args.bucket],
+          i18n.translate('visTypeMetric.function.adimension.splitGroup', {
+            defaultMessage: 'Split group',
+          }),
+        ]);
+      }
+      const logTable = prepareLogTable(input, argsTable);
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
     return {

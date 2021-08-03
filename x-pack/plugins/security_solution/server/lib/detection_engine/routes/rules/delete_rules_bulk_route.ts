@@ -23,7 +23,6 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
@@ -57,7 +56,7 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
       return siemResponse.error({ statusCode: 404 });
     }
 
-    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+    const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {
@@ -79,9 +78,9 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
           }
 
           const ruleStatuses = await ruleStatusClient.find({
-            perPage: 6,
-            search: rule.id,
-            searchFields: ['alertId'],
+            logsCount: 6,
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
           });
           await deleteRules({
             rulesClient,

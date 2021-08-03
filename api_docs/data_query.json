@@ -35,10 +35,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-          "lineNumber": 36
-        },
+        "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
         "deprecated": false,
         "children": [
           {
@@ -51,10 +48,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -73,10 +67,7 @@
                     "text": "IUiSettingsClient"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 42
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -91,14 +82,9 @@
             "label": "getFilters",
             "description": [],
             "signature": [
-              "() => ",
-              "Filter",
-              "[]"
+              "() => any[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 99
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -111,14 +97,9 @@
             "label": "getAppFilters",
             "description": [],
             "signature": [
-              "() => ",
-              "Filter",
-              "[]"
+              "() => any[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 103
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -131,14 +112,9 @@
             "label": "getGlobalFilters",
             "description": [],
             "signature": [
-              "() => ",
-              "Filter",
-              "[]"
+              "() => any[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 108
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -154,10 +130,7 @@
               "() => ",
               "PartitionedFilters"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 113
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -174,10 +147,7 @@
               "Observable",
               "<void>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 117
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -194,10 +164,7 @@
               "Observable",
               "<void>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 121
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -210,35 +177,22 @@
             "label": "addFilters",
             "description": [],
             "signature": [
-              "(filters: ",
-              "Filter",
-              " | ",
-              "Filter",
-              "[], pinFilterStatus?: boolean) => void"
+              "(filters: any, pinFilterStatus?: boolean) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 127
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-public.FilterManager.addFilters.$1",
-                "type": "CompoundType",
+                "type": "Any",
                 "tags": [],
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "Filter",
-                  " | ",
-                  "Filter",
-                  "[]"
+                  "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 128
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -252,10 +206,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 129
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -270,14 +221,9 @@
             "label": "setFilters",
             "description": [],
             "signature": [
-              "(newFilters: ",
-              "Filter",
-              "[], pinFilterStatus?: boolean) => void"
+              "(newFilters: any[], pinFilterStatus?: boolean) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 155
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -288,13 +234,9 @@
                 "label": "newFilters",
                 "description": [],
                 "signature": [
-                  "Filter",
-                  "[]"
+                  "any[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 156
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -308,10 +250,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 157
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -328,14 +267,9 @@
               "\nSets new global filters and leaves app filters untouched,\nRemoves app filters for which there is a duplicate within new global filters"
             ],
             "signature": [
-              "(newGlobalFilters: ",
-              "Filter",
-              "[]) => void"
+              "(newGlobalFilters: any[]) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 174
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -346,13 +280,9 @@
                 "label": "newGlobalFilters",
                 "description": [],
                 "signature": [
-                  "Filter",
-                  "[]"
+                  "any[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 174
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -369,14 +299,9 @@
               "\nSets new app filters and leaves global filters untouched,\nRemoves app filters for which there is a duplicate within new global filters"
             ],
             "signature": [
-              "(newAppFilters: ",
-              "Filter",
-              "[]) => void"
+              "(newAppFilters: any[]) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 191
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -387,13 +312,9 @@
                 "label": "newAppFilters",
                 "description": [],
                 "signature": [
-                  "Filter",
-                  "[]"
+                  "any[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 191
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -408,30 +329,22 @@
             "label": "removeFilter",
             "description": [],
             "signature": [
-              "(filter: ",
-              "Filter",
-              ") => void"
+              "(filter: any) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 202
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-public.FilterManager.removeFilter.$1",
-                "type": "Object",
+                "type": "Any",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "Filter"
+                  "any"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 202
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -448,10 +361,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 214
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -464,16 +374,11 @@
             "label": "setFiltersStore",
             "description": [],
             "signature": [
-              "(filters: ",
-              "Filter",
-              "[], store: ",
+              "(filters: any[], store: ",
               "FilterStateStore",
               ", shouldOverrideStore?: boolean) => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 218
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "children": [
               {
@@ -484,13 +389,9 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "Filter",
-                  "[]"
+                  "any[]"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 219
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -504,10 +405,7 @@
                 "signature": [
                   "FilterStateStore"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 220
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -521,10 +419,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 221
-                },
+                "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -541,10 +436,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 233
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false
           },
           {
@@ -557,10 +449,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 236
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false
           },
           {
@@ -581,10 +470,7 @@
               },
               ", collector: unknown) => {}"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 238
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -606,10 +492,7 @@
                   },
                   "; }"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/persistable_state.ts",
-                  "lineNumber": 54
-                },
+                "path": "src/plugins/data/common/query/persistable_state.ts",
                 "deprecated": false
               },
               {
@@ -622,10 +505,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/persistable_state.ts",
-                  "lineNumber": 54
-                },
+                "path": "src/plugins/data/common/query/persistable_state.ts",
                 "deprecated": false
               }
             ]
@@ -640,10 +520,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 241
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false
           },
           {
@@ -656,10 +533,7 @@
             "signature": [
               "() => {}"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 243
-            },
+            "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -674,10 +548,7 @@
         "tags": [],
         "label": "TimeHistory",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/data/public/query/timefilter/time_history.ts",
         "deprecated": false,
         "children": [
           {
@@ -690,10 +561,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/data/public/query/timefilter/time_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -713,10 +581,7 @@
                   },
                   "<any, void>"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-                  "lineNumber": 18
-                },
+                "path": "src/plugins/data/public/query/timefilter/time_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -741,10 +606,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/public/query/timefilter/time_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -763,10 +625,7 @@
                     "text": "TimeRange"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-                  "lineNumber": 29
-                },
+                "path": "src/plugins/data/public/query/timefilter/time_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -791,10 +650,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/data/public/query/timefilter/time_history.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -822,9 +678,7 @@
             "section": "def-public.QueryState",
             "text": "QueryState"
           },
-          ">({ timefilter: { timefilter }, filterManager, queryString, state$, }: Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-          "Query",
-          ") => void; filterManager: ",
+          ">({ timefilter: { timefilter }, filterManager, queryString, state$, }: Pick<{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -880,11 +734,7 @@
           },
           " | undefined) => { bool: { must: ",
           "DslQuery",
-          "[]; filter: ",
-          "Filter",
-          "[]; should: never[]; must_not: ",
-          "Filter",
-          "[]; }; }; } | { filterManager: ",
+          "[]; filter: any[]; should: never[]; must_not: any[]; }; }; } | { filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -926,10 +776,7 @@
           "FilterStateStore",
           " | undefined; query?: boolean | undefined; }) => () => void"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
         "deprecated": false,
         "children": [
           {
@@ -940,9 +787,7 @@
             "label": "{\n    timefilter: { timefilter },\n    filterManager,\n    queryString,\n    state$,\n  }",
             "description": [],
             "signature": [
-              "Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-              "Query",
-              ") => void; filterManager: ",
+              "Pick<{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -998,11 +843,7 @@
               },
               " | undefined) => { bool: { must: ",
               "DslQuery",
-              "[]; filter: ",
-              "Filter",
-              "[]; should: never[]; must_not: ",
-              "Filter",
-              "[]; }; }; } | { filterManager: ",
+              "[]; filter: any[]; should: never[]; must_not: any[]; }; }; } | { filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1034,10 +875,7 @@
               },
               "; }>; }, \"state$\" | \"timefilter\" | \"filterManager\" | \"queryString\">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1060,10 +898,7 @@
               },
               "<S>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1074,10 +909,7 @@
             "tags": [],
             "label": "syncConfig",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -1090,10 +922,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 32
-                },
+                "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false
               },
               {
@@ -1106,10 +935,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 33
-                },
+                "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false
               },
               {
@@ -1124,10 +950,7 @@
                   "FilterStateStore",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 34
-                },
+                "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false
               },
               {
@@ -1140,10 +963,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 35
-                },
+                "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
                 "deprecated": false
               }
             ]
@@ -1177,10 +997,7 @@
             "text": "SavedQueryService"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
-          "lineNumber": 21
-        },
+        "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -1201,15 +1018,195 @@
               },
               ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
             "deprecated": false,
             "isRequired": true
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.extractTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTimeRange",
+        "description": [],
+        "signature": [
+          "(filters: any[], timeFieldName: string | undefined) => { restOfFilters: any[]; timeRange?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.extractTimeRange.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.extractTimeRange.$2",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.generateFilters",
+        "type": "Function",
+        "tags": [],
+        "label": "generateFilters",
+        "description": [
+          "\nGenerate filter objects, as a result of triggering a filter action on a\nspecific index pattern field.\n"
+        ],
+        "signature": [
+          "(filterManager: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.FilterManager",
+            "text": "FilterManager"
+          },
+          ", field: string | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IFieldType",
+            "text": "IFieldType"
+          },
+          ", values: any, operation: string, index: string) => any[]"
+        ],
+        "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "filterManager",
+            "description": [
+              "- The active filter manager to lookup for existing filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.FilterManager",
+                "text": "FilterManager"
+              }
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "- The field for which filters should be generated"
+            ],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IFieldType",
+                "text": "IFieldType"
+              }
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "values",
+            "description": [
+              "- One or more values to filter for."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$4",
+            "type": "string",
+            "tags": [],
+            "label": "operation",
+            "description": [
+              "- \"-\" to create a negated filter"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.generateFilters.$5",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "- Index string to generate filters for"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of filters to be added back to filterManager"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1226,10 +1223,7 @@
           "QueryLanguage",
           "; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/lib/get_default_query.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/public/query/lib/get_default_query.ts",
         "deprecated": false,
         "children": [
           {
@@ -1242,10 +1236,67 @@
             "signature": [
               "QueryLanguage"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/lib/get_default_query.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/data/public/query/lib/get_default_query.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.getDisplayValueFromFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "getDisplayValueFromFilter",
+        "description": [],
+        "signature": [
+          "(filter: any, indexPatterns: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          "[]) => string"
+        ],
+        "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.getDisplayValueFromFilter.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.getDisplayValueFromFilter.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IIndexPattern",
+                "text": "IIndexPattern"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1263,9 +1314,7 @@
           "\nHelper to setup syncing of global data with the URL"
         ],
         "signature": [
-          "(query: Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-          "Query",
-          ") => void; filterManager: ",
+          "(query: Pick<{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1321,11 +1370,7 @@
           },
           " | undefined) => { bool: { must: ",
           "DslQuery",
-          "[]; filter: ",
-          "Filter",
-          "[]; should: never[]; must_not: ",
-          "Filter",
-          "[]; }; }; } | { filterManager: ",
+          "[]; filter: any[]; should: never[]; must_not: any[]; }; }; } | { filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1365,10 +1410,7 @@
           },
           ") => { stop: () => void; hasInheritedQueryFromUrl: boolean; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-          "lineNumber": 26
-        },
+        "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -1379,9 +1421,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-              "Query",
-              ") => void; filterManager: ",
+              "Pick<{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1437,11 +1477,7 @@
               },
               " | undefined) => { bool: { must: ",
               "DslQuery",
-              "[]; filter: ",
-              "Filter",
-              "[]; should: never[]; must_not: ",
-              "Filter",
-              "[]; }; }; } | { filterManager: ",
+              "[]; filter: any[]; should: never[]; must_not: any[]; }; }; } | { filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1473,10 +1509,7 @@
               },
               "; }>; }, \"state$\" | \"timefilter\" | \"filterManager\" | \"queryString\">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1498,10 +1531,7 @@
                 "text": "IKbnUrlStateStorage"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1520,10 +1550,7 @@
         "description": [
           "\nAll query state service state"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/types.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/data/public/query/state_sync/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1543,10 +1570,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           },
           {
@@ -1566,10 +1590,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           },
           {
@@ -1580,30 +1601,22 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
-              "[] | undefined"
+              "any[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "data",
             "id": "def-public.QueryState.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "Query",
-              " | undefined"
+              "any"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           }
         ],
@@ -1626,10 +1639,7 @@
           },
           " extends QueryStateChangePartial"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/types.ts",
-          "lineNumber": 25
-        },
+        "path": "src/plugins/data/public/query/state_sync/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1642,10 +1652,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           },
           {
@@ -1658,10 +1665,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/data/public/query/state_sync/types.ts",
             "deprecated": false
           }
         ],
@@ -1674,10 +1678,7 @@
         "tags": [],
         "label": "SavedQuery",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/data/public/query/saved_query/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1687,10 +1688,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false
           },
           {
@@ -1703,10 +1701,7 @@
             "signature": [
               "SavedQueryAttributes"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false
           }
         ],
@@ -1719,10 +1714,7 @@
         "tags": [],
         "label": "SavedQueryService",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 28
-        },
+        "path": "src/plugins/data/public/query/saved_query/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1745,10 +1737,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1762,10 +1751,7 @@
                 "signature": [
                   "SavedQueryAttributes"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 30
-                },
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false
               },
               {
@@ -1778,10 +1764,7 @@
                 "signature": [
                   "{ overwrite: boolean; } | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 31
-                },
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false
               }
             ]
@@ -1804,10 +1787,7 @@
               },
               "[]>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -1830,10 +1810,7 @@
               },
               "[]; }>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1847,10 +1824,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 35
-                },
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false
               },
               {
@@ -1863,10 +1837,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 36
-                },
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false
               },
               {
@@ -1879,10 +1850,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 37
-                },
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false
               }
             ]
@@ -1905,10 +1873,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1919,10 +1884,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 39
-                },
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false
               }
             ]
@@ -1937,10 +1899,7 @@
             "signature": [
               "(id: string) => Promise<{}>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1951,10 +1910,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/data/public/query/saved_query/types.ts",
-                  "lineNumber": 40
-                },
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
                 "deprecated": false
               }
             ]
@@ -1969,10 +1925,7 @@
             "signature": [
               "() => Promise<number>"
             ],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -1993,10 +1946,7 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/lib/auto_refresh_loop.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/data/public/query/timefilter/lib/auto_refresh_loop.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2017,10 +1967,7 @@
           },
           " | { from: moment.Moment; to: moment.Moment; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/types.ts",
-          "lineNumber": 19
-        },
+        "path": "src/plugins/data/public/query/timefilter/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2032,9 +1979,7 @@
         "label": "QueryStart",
         "description": [],
         "signature": [
-          "{ addToQueryLog: (appName: string, { language, query }: ",
-          "Query",
-          ") => void; filterManager: ",
+          "{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -2090,16 +2035,9 @@
           },
           " | undefined) => { bool: { must: ",
           "DslQuery",
-          "[]; filter: ",
-          "Filter",
-          "[]; should: never[]; must_not: ",
-          "Filter",
-          "[]; }; }; }"
+          "[]; filter: any[]; should: never[]; must_not: any[]; }; }; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/query_service.ts",
-          "lineNumber": 104
-        },
+        "path": "src/plugins/data/public/query/query_service.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2128,10 +2066,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/public/query/saved_query/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2217,9 +2152,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => ",
-          "RangeFilter",
-          " | undefined; getBounds: () => ",
+          " | undefined) => any; getBounds: () => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2269,10 +2202,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/timefilter.ts",
-          "lineNumber": 242
-        },
+        "path": "src/plugins/data/public/query/timefilter/timefilter.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2302,10 +2232,7 @@
           },
           "[]; }"
         ],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-          "lineNumber": 47
-        },
+        "path": "src/plugins/data/public/query/timefilter/time_history.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2348,10 +2275,7 @@
             "text": "TimeRangeBounds"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
         "children": [
           {
@@ -2370,10 +2294,7 @@
                 "text": "TimeRange"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2387,227 +2308,12 @@
             "signature": [
               "CalculateBoundsOptions"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": true
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.compareFilters",
-        "type": "Function",
-        "tags": [],
-        "label": "compareFilters",
-        "description": [
-          "\nCompare two filters or filter arrays to see if they match.\nFor filter arrays, the assumption is they are sorted.\n"
-        ],
-        "signature": [
-          "(first: ",
-          "Filter",
-          " | ",
-          "Filter",
-          "[], second: ",
-          "Filter",
-          " | ",
-          "Filter",
-          "[], comparatorOptions?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.FilterCompareOptions",
-            "text": "FilterCompareOptions"
-          },
-          ") => boolean"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 64
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.compareFilters.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "first",
-            "description": [
-              "The first filter or filter array to compare"
-            ],
-            "signature": [
-              "Filter",
-              " | ",
-              "Filter",
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 65
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.compareFilters.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "second",
-            "description": [
-              "The second filter or filter array to compare"
-            ],
-            "signature": [
-              "Filter",
-              " | ",
-              "Filter",
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 66
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.compareFilters.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "comparatorOptions",
-            "description": [
-              "Parameters to use for comparison"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.FilterCompareOptions",
-                "text": "FilterCompareOptions"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 67
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "Filters are the same"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.dedupFilters",
-        "type": "Function",
-        "tags": [],
-        "label": "dedupFilters",
-        "description": [
-          "\nCombine 2 filter collections, removing duplicates\n"
-        ],
-        "signature": [
-          "(existingFilters: ",
-          "Filter",
-          "[], filters: ",
-          "Filter",
-          "[], comparatorOptions?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.FilterCompareOptions",
-            "text": "FilterCompareOptions"
-          },
-          ") => ",
-          "Filter",
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-          "lineNumber": 22
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.dedupFilters.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "existingFilters",
-            "description": [
-              "- The filters to compare to"
-            ],
-            "signature": [
-              "Filter",
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 23
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.dedupFilters.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [
-              "- The filters being added"
-            ],
-            "signature": [
-              "Filter",
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 24
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.dedupFilters.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "comparatorOptions",
-            "description": [
-              "- Parameters to use for comparison"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.FilterCompareOptions",
-                "text": "FilterCompareOptions"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 25
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "An array of filters that were not in existing"
-        ],
         "initialIsOpen": false
       },
       {
@@ -2635,10 +2341,7 @@
             "text": "TimeRange"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 27
-        },
+        "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
         "children": [
           {
@@ -2657,10 +2360,7 @@
                 "text": "TimeRange"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2671,10 +2371,7 @@
             "tags": [],
             "label": "{ forceNow }",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "children": [
               {
@@ -2687,10 +2384,7 @@
                 "signature": [
                   "Date | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 29
-                },
+                "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false
               }
             ]
@@ -2723,14 +2417,9 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
-          "RangeFilter",
-          " | undefined"
+          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => any"
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 38
-        },
+        "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
         "children": [
           {
@@ -2750,10 +2439,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -2773,10 +2459,7 @@
                 "text": "TimeRange"
               }
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2787,10 +2470,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/data/common/query/timefilter/get_time.ts",
             "deprecated": false,
             "children": [
               {
@@ -2803,10 +2483,7 @@
                 "signature": [
                   "Date | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 41
-                },
+                "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false
               },
               {
@@ -2819,10 +2496,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 41
-                },
+                "path": "src/plugins/data/common/query/timefilter/get_time.ts",
                 "deprecated": false
               }
             ]
@@ -2839,13 +2513,9 @@
         "label": "isQuery",
         "description": [],
         "signature": [
-          "(x: unknown) => x is ",
-          "Query"
+          "(x: unknown) => x is any"
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/is_query.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/query/is_query.ts",
         "deprecated": false,
         "children": [
           {
@@ -2858,10 +2528,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/is_query.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/data/common/query/is_query.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2886,10 +2553,7 @@
             "text": "TimeRange"
           }
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
         "deprecated": false,
         "children": [
           {
@@ -2902,182 +2566,16 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
-              "lineNumber": 11
-            },
+            "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
             "deprecated": false,
             "isRequired": true
           }
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.uniqFilters",
-        "type": "Function",
-        "tags": [],
-        "label": "uniqFilters",
-        "description": [
-          "\nRemove duplicate filters from an array of filters\n"
-        ],
-        "signature": [
-          "(filters: ",
-          "Filter",
-          "[], comparatorOptions?: any) => ",
-          "Filter",
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-          "lineNumber": 21
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.uniqFilters.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [
-              "The filters to remove duplicates from"
-            ],
-            "signature": [
-              "Filter",
-              "[]"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-              "lineNumber": 21
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.uniqFilters.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "comparatorOptions",
-            "description": [
-              "- Parameters to use for comparison"
-            ],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-              "lineNumber": 21
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "The original filters array with duplicates removed"
-        ],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "data",
-        "id": "def-common.FilterCompareOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "FilterCompareOptions",
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 12
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.index",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 13
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.disabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 14
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.negate",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "negate",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 15
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.state",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 16
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FilterCompareOptions.alias",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "alias",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "data",
         "id": "def-common.RefreshInterval",
@@ -3085,10 +2583,7 @@
         "tags": [],
         "label": "RefreshInterval",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3098,10 +2593,7 @@
             "tags": [],
             "label": "pause",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false
           },
           {
@@ -3111,10 +2603,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false
           }
         ],
@@ -3127,10 +2616,7 @@
         "tags": [],
         "label": "TimeRangeBounds",
         "description": [],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3143,10 +2629,7 @@
             "signature": [
               "moment.Moment | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false
           },
           {
@@ -3159,10 +2642,7 @@
             "signature": [
               "moment.Moment | undefined"
             ],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/data/common/query/timefilter/types.ts",
             "deprecated": false
           }
         ],
@@ -3181,113 +2661,11 @@
         "signature": [
           "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
         ],
-        "source": {
-          "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "data",
-        "id": "def-common.COMPARE_ALL_OPTIONS",
-        "type": "Object",
-        "tags": [],
-        "label": "COMPARE_ALL_OPTIONS",
-        "description": [
-          "\nInclude disabled, negate and store when comparing filters"
-        ],
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 23
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.index",
-            "type": "boolean",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 24
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.disabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "disabled",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 25
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.negate",
-            "type": "boolean",
-            "tags": [],
-            "label": "negate",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 26
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.state",
-            "type": "boolean",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 27
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.COMPARE_ALL_OPTIONS.alias",
-            "type": "boolean",
-            "tags": [],
-            "label": "alias",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 28
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }
