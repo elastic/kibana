@@ -43,6 +43,14 @@ export function useDiscoverState({
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const timefilter = data.query.timefilter.timefilter;
 
+  useEffect(() => {
+    const initializeIndexPatternAndSavedSearch = () => {
+      setIndexPattern(initialIndexPattern);
+      setSavedSearch(initialSavedSearch);
+    };
+    initializeIndexPatternAndSavedSearch();
+  }, [initialSavedSearch, initialIndexPattern]);
+
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
     return savedSearch.searchSource.createChild();

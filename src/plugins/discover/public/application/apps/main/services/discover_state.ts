@@ -243,6 +243,7 @@ export function getState({
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {
+
       if (appStateContainer.getState().index !== indexPattern.id) {
         // used index pattern is different than the given by url/state which is invalid
         setState(appStateContainerModified, { index: indexPattern.id });

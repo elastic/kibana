@@ -70,17 +70,15 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     async function loadSavedSearch() {
       const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
       setSavedSearch(loadedSavedSearch);
-      const { appStateContainer } = getState({ history, uiSettings: config });
-      appStateContainer.set({
-        ...appStateContainer.getState(),
-        index: loadedSavedSearch.searchSource.getId(),
-      });
       if (savedSearchId) {
         chrome.recentlyAccessed.add(
           ((loadedSavedSearch as unknown) as SavedObjectDeprecated).getFullPath(),
           loadedSavedSearch.title,
           loadedSavedSearch.id
         );
+        if (loadedSavedSearch) {
+          setIndexPattern(loadedSavedSearch.searchSource.getField('index'));
+        }
       }
     }
 
@@ -102,7 +100,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
 
   useEffect(() => {
     async function loadDefaultOrCurrentIndexPattern() {
-      if (!savedSearch) {
+      if (!savedSearch || id) {
         return;
       }
       await data.indexPatterns.ensureDefaultIndexPattern();
@@ -163,6 +161,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   if (!indexPattern || !savedSearch) {
     return null;
   }
+
   return (
     <DiscoverMainApp
       indexPattern={indexPattern}
