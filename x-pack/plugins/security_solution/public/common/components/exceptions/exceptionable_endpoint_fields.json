@@ -119,5 +119,5 @@
   "dll.code_signature.subject_name",
   "dll.pe.original_file_name",
   "dns.question.name",
-  "dns.question.type",
+  "dns.question.type"
 ]
