@@ -56,20 +56,7 @@ const MOCK_SERVER_CRAWLER_DATA: CrawlerDataFromServer = {
   ],
 };
 
-// const MOCK_SERVER_CRAWL_REQUESTS_DATA: CrawlRequestFromServer[] = [
-//   {
-//     id: '618d0e66abe97bc688328900',
-//     status: CrawlerStatus.Pending,
-//     created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
-//     began_at: null,
-//     completed_at: null,
-//   },
-// ];
-
 const MOCK_CLIENT_CRAWLER_DATA = crawlerDataServerToClient(MOCK_SERVER_CRAWLER_DATA);
-// const MOCK_CLIENT_CRAWL_REQUESTS_DATA = MOCK_SERVER_CRAWL_REQUESTS_DATA.map(
-//   crawlRequestServerToClient
-// );
 
 describe('CrawlerOverviewLogic', () => {
   const { mount, unmount } = new LogicMounter(CrawlerOverviewLogic);
@@ -102,6 +89,7 @@ describe('CrawlerOverviewLogic', () => {
         expect(CrawlerOverviewLogic.values.timeoutId).toEqual(null);
       });
     });
+
     describe('onCreatedNewTimeout', () => {
       it('sets the timeout in the logic', () => {
         const timeout = setTimeout(() => {}, 1);
@@ -166,7 +154,6 @@ describe('CrawlerOverviewLogic', () => {
     describe('fetchCrawlerData', () => {
       it('updates logic with data that has been converted from server to client', async () => {
         jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlerData');
-
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_SERVER_CRAWLER_DATA));
 
         CrawlerOverviewLogic.actions.fetchCrawlerData();
@@ -191,8 +178,8 @@ describe('CrawlerOverviewLogic', () => {
     describe('deleteDomain', () => {
       it('calls onReceiveCrawlerData with retrieved data that has been converted from server to client', async () => {
         jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlerData');
-
         http.delete.mockReturnValue(Promise.resolve(MOCK_SERVER_CRAWLER_DATA));
+
         CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
         await nextTick();
 
@@ -210,6 +197,7 @@ describe('CrawlerOverviewLogic', () => {
 
       it('calls flashApiErrors when there is an error', async () => {
         http.delete.mockReturnValue(Promise.reject('error'));
+
         CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
         await nextTick();
 
