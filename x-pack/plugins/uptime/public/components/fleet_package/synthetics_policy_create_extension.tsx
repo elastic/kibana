@@ -9,7 +9,7 @@ import React, { memo, useContext, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
-import { PolicyConfig, DataStream } from './types';
+import { PolicyConfig, DataStream, ConfigKeys } from './types';
 import {
   MonitorTypeContext,
   HTTPAdvancedFieldsContext,
@@ -93,17 +93,25 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
                 ...httpSimpleFields,
                 ...httpAdvancedFields,
                 ...tlsFields,
+                [ConfigKeys.NAME]: newPolicy.name,
               };
             case DataStream.TCP:
               return {
                 ...tcpSimpleFields,
                 ...tcpAdvancedFields,
                 ...tlsFields,
+                [ConfigKeys.NAME]: newPolicy.name,
               };
             case DataStream.ICMP:
-              return icmpSimpleFields;
+              return {
+                ...icmpSimpleFields,
+                [ConfigKeys.NAME]: newPolicy.name,
+              };
             case DataStream.BROWSER:
-              return browserSimpleFields;
+              return {
+                ...browserSimpleFields,
+                [ConfigKeys.NAME]: newPolicy.name,
+              };
           }
         });
       },
