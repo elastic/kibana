@@ -59,6 +59,7 @@ test('gets the csv content from job parameters', async () => {
       searchSource: {},
       objectType: 'search',
       title: 'Test Search',
+      version: '7.13.0',
     },
     new CancellationToken()
   );

@@ -26,7 +26,13 @@ import React, {
 } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { BulkActionsProp, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineTabs,
+  BulkActionsProp,
+  SortColumnTimeline,
+} from '../../../../common/types/timeline';
+
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -48,9 +54,9 @@ import { StatefulFieldsBrowser } from '../../../';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../toolbar/fields_browser/helpers';
 import * as i18n from './translations';
 import { AlertCount } from '../styles';
+import { checkBoxControlColumn } from './control_columns';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -109,6 +115,10 @@ const transformControlColumns = ({
   showCheckboxes,
   tabType,
   timelineId,
+  isSelectAllChecked,
+  onSelectPage,
+  browserFields,
+  sort,
 }: {
   actionColumnsWidth: number;
   columnHeaders: ColumnHeaderOptions[];
@@ -122,11 +132,38 @@ const transformControlColumns = ({
   showCheckboxes: boolean;
   tabType: TimelineTabs;
   timelineId: string;
+  isSelectAllChecked: boolean;
+  browserFields: BrowserFields;
+  onSelectPage: OnSelectAll;
+  sort: SortColumnTimeline[];
 }): EuiDataGridControlColumn[] =>
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,
-      headerCellRender: headerCellRender as ComponentType,
+      // eslint-disable-next-line react/display-name
+      headerCellRender: () => {
+        const HeaderActions = headerCellRender;
+        return (
+          <>
+            {HeaderActions && (
+              <HeaderActions
+                width={width ?? MIN_ACTION_COLUMN_WIDTH}
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                isEventViewer={isEventViewer}
+                isSelectAllChecked={isSelectAllChecked}
+                onSelectAll={onSelectPage}
+                showEventsSelect={false}
+                showSelectAllCheckbox={showCheckboxes}
+                sort={sort}
+                tabType={tabType}
+                timelineId={timelineId}
+              />
+            )}
+          </>
+        );
+      },
+
       // eslint-disable-next-line react/display-name
       rowCellRender: ({
         isDetails,
@@ -157,7 +194,7 @@ const transformControlColumns = ({
           width={width ?? MIN_ACTION_COLUMN_WIDTH}
         />
       ),
-      width: actionColumnsWidth,
+      width: width ?? actionColumnsWidth,
     })
   );
 
@@ -293,8 +330,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 {additionalControls ?? null}
                 <StatefulFieldsBrowser
                   data-test-subj="field-browser"
-                  height={FIELD_BROWSER_HEIGHT}
-                  width={FIELD_BROWSER_WIDTH}
                   browserFields={browserFields}
                   timelineId={id}
                   columnHeaders={columnHeaders}
@@ -348,45 +383,54 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       setVisibleColumns(columnHeaders.map(({ id: cid }) => cid));
     }, [columnHeaders]);
 
-    const [leadingTGridControlColumns, trailingTGridControlColumns] = useMemo(
-      () =>
-        [leadingControlColumns, trailingControlColumns].map((controlColumns) =>
-          transformControlColumns({
-            columnHeaders,
-            controlColumns,
-            data,
-            isEventViewer,
-            actionColumnsWidth: hasAdditionalActions(id as TimelineId)
-              ? getActionsColumnWidth(
-                  isEventViewer,
-                  showCheckboxes,
-                  DEFAULT_ICON_BUTTON_WIDTH * NUM_OF_ICON_IN_TIMELINE_ROW + EXTRA_WIDTH
-                )
-              : controlColumns.reduce((acc, c) => acc + (c.width ?? MIN_ACTION_COLUMN_WIDTH), 0),
-            loadingEventIds,
-            onRowSelected,
-            onRuleChange,
-            selectedEventIds,
-            showCheckboxes,
-            tabType,
-            timelineId: id,
-          })
-        ),
-      [
-        columnHeaders,
-        data,
-        id,
-        isEventViewer,
-        leadingControlColumns,
-        loadingEventIds,
-        onRowSelected,
-        onRuleChange,
-        selectedEventIds,
-        showCheckboxes,
-        tabType,
+    const [leadingTGridControlColumns, trailingTGridControlColumns] = useMemo(() => {
+      return [
+        showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
         trailingControlColumns,
-      ]
-    );
+      ].map((controlColumns) =>
+        transformControlColumns({
+          columnHeaders,
+          controlColumns,
+          data,
+          isEventViewer,
+          actionColumnsWidth: hasAdditionalActions(id as TimelineId)
+            ? getActionsColumnWidth(
+                isEventViewer,
+                showCheckboxes,
+                DEFAULT_ICON_BUTTON_WIDTH * NUM_OF_ICON_IN_TIMELINE_ROW + EXTRA_WIDTH
+              )
+            : controlColumns.reduce((acc, c) => acc + (c.width ?? MIN_ACTION_COLUMN_WIDTH), 0),
+          loadingEventIds,
+          onRowSelected,
+          onRuleChange,
+          selectedEventIds,
+          showCheckboxes,
+          tabType,
+          timelineId: id,
+          isSelectAllChecked,
+          sort,
+          browserFields,
+          onSelectPage,
+        })
+      );
+    }, [
+      columnHeaders,
+      data,
+      id,
+      isEventViewer,
+      leadingControlColumns,
+      loadingEventIds,
+      onRowSelected,
+      onRuleChange,
+      selectedEventIds,
+      showCheckboxes,
+      tabType,
+      trailingControlColumns,
+      isSelectAllChecked,
+      browserFields,
+      onSelectPage,
+      sort,
+    ]);
 
     const renderTGridCellValue: (x: EuiDataGridCellValueElementProps) => React.ReactNode = ({
       columnId,
