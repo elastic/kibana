@@ -6,16 +6,18 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButton,
   EuiBottomBar,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 
 import type { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
@@ -31,7 +33,11 @@ import {
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
-import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
+import {
+  sendUpgradePackagePolicy,
+  useBreadcrumbs as useIntegrationsBreadcrumbs,
+  useUpgradePackagePolicyDryRun,
+} from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
@@ -64,6 +70,14 @@ export const EditPackagePolicyForm = memo<{
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const history = useHistory();
+
+  const { search } = useLocation();
+  const isUpgrade = useMemo(() => new URLSearchParams(search).has('upgrade'), [search]);
+
+  if (isUpgrade) {
+    from = 'upgrade';
+  }
+
   const { getHref, getPath } = useLink();
 
   // Agent policy, package info, and package policy states
@@ -281,8 +295,34 @@ export const EditPackagePolicyForm = memo<{
       setFormState('CONFIRM');
       return;
     }
-    const { error } = await savePackagePolicy();
+
+    const { data, error } = await savePackagePolicy();
     if (!error) {
+      if (isUpgrade) {
+        const { data: upgradeData, error: upgradeError } = await sendUpgradePackagePolicy([
+          packagePolicyId,
+        ]);
+
+        if (upgradeError) {
+          notifications.toasts.addError(upgradeError, {
+            title: i18n.translate('xpack.fleet.upgradePackagePolicy.failedNotificationTitle', {
+              defaultMessage: 'Error upgrading {packagePolicyName}',
+              values: {
+                packagePolicyName: packagePolicy.name,
+              },
+            }),
+            toastMessage: i18n.translate(
+              'xpack.fleet.editPackagePolicy.failedConflictNotificationMessage',
+              {
+                defaultMessage: `Data is out of date. Refresh the page to get the latest policy.`,
+              }
+            ),
+          });
+
+          return;
+        }
+      }
+
       history.push(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
@@ -430,10 +470,20 @@ export const EditPackagePolicyForm = memo<{
               onCancel={() => setFormState('VALID')}
             />
           )}
+
+          {from === 'upgrade' && (
+            <>
+              <UpgradeStatusCallout agentPolicyId={policyId} packagePolicyId={packagePolicyId} />
+              <EuiSpacer size="xxl" />
+            </>
+          )}
+
           {configurePackage}
+
           {/* Extra space to accomodate the EuiBottomBar height */}
           <EuiSpacer size="xxl" />
           <EuiSpacer size="xxl" />
+
           <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -486,6 +536,71 @@ const PoliciesBreadcrumb: React.FunctionComponent<{ policyName: string; policyId
 }) => {
   useBreadcrumbs('edit_integration', { policyName, policyId });
   return null;
+};
+
+const UpgradeStatusCallout: React.FunctionComponent<{
+  agentPolicyId: string;
+  packagePolicyId: string;
+}> = ({ agentPolicyId, packagePolicyId }) => {
+  const { getHref } = useLink();
+  const { data } = useUpgradePackagePolicyDryRun([packagePolicyId]);
+
+  if (!data) {
+    return null;
+  }
+
+  const isReadyForUpgrade = !data[0].hasErrors;
+
+  const [currentPackagePolicy, proposedUpgradePackagePolicy] = data[0].diff || [];
+
+  return isReadyForUpgrade ? (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.successTitle', {
+        defaultMessage: 'Ready to upgrade',
+      })}
+      color="success"
+      iconType="checkInCircleFilled"
+    >
+      <FormattedMessage
+        id="xpack.fleet.upgradePackagePolicy.statusCallout.successContent"
+        defaultMessage="This integration is ready to be upgraded from version {currentVersion} to {upgradeVersion}. Review the changes below and save to upgrade."
+        values={{
+          currentVersion: currentPackagePolicy?.package?.version,
+          upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
+        }}
+      />
+    </EuiCallOut>
+  ) : (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.errorTitle', {
+        defaultMessage: 'Review field conflicts',
+      })}
+      color="warning"
+      iconType="alert"
+    >
+      <FormattedMessage
+        id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
+        defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform upgrade. You may reference your {previousConfigurationLink} for comparison."
+        values={{
+          currentVersion: currentPackagePolicy?.package?.version,
+          upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
+          previousConfigurationLink: (
+            <EuiLink
+              href={getHref('edit_integration', {
+                policyId: agentPolicyId,
+                packagePolicyId,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.fleet.upgradePackagePolicy.statusCallout.previousConfigurationLink"
+                defaultMessage="previous configuration"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiCallOut>
+  );
 };
 
 const IntegrationsBreadcrumb = memo<{

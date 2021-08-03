@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type CreatePackagePolicyFrom = 'package' | 'package-edit' | 'policy' | 'edit';
+export type CreatePackagePolicyFrom = 'package' | 'package-edit' | 'policy' | 'edit' | 'upgrade';
 export type PackagePolicyFormState = 'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED';

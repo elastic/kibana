@@ -44,7 +44,11 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
   }) => {
     const pageTitle = useMemo(() => {
       if (
-        (from === 'package' || from === 'package-edit' || from === 'edit' || from === 'policy') &&
+        (from === 'package' ||
+          from === 'package-edit' ||
+          from === 'edit' ||
+          from === 'policy' ||
+          from === 'upgrade') &&
         packageInfo
       ) {
         return (
@@ -61,11 +65,12 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             <EuiFlexItem>
               <EuiText>
                 <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
-                  {from === 'edit' || from === 'package-edit' ? (
+                  {from === 'edit' || from === 'package-edit' || from === 'upgrade' ? (
                     <FormattedMessage
                       id="xpack.fleet.editPackagePolicy.pageTitleWithPackageName"
-                      defaultMessage="Edit {packageName} integration"
+                      defaultMessage="{action} {packageName} integration"
                       values={{
+                        action: from === 'edit' || from === 'package-edit' ? 'Edit' : 'Upgrade',
                         packageName: packageInfo.title,
                       }}
                     />
