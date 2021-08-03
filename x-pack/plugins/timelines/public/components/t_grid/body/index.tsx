@@ -68,12 +68,11 @@ interface OwnProps {
   data: TimelineItem[];
   id: string;
   isEventViewer?: boolean;
-  leadingControlColumns: ControlColumnProps[];
-  loadPage: (newActivePage: number) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   tabType: TimelineTabs;
   leadingControlColumns?: ControlColumnProps[];
+  loadPage: (newActivePage: number) => void;
   trailingControlColumns?: ControlColumnProps[];
   totalPages: number;
   totalItems: number;
