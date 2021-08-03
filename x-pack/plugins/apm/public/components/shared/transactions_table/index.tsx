@@ -15,33 +15,57 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { OverviewTableContainer } from '../../../shared/overview_table_container';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
+import { TableFetchWrapper } from '../table_fetch_wrapper';
+import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
+import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
+import { ElasticDocsLink } from '../Links/ElasticDocsLink';
 
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
-const INITIAL_STATE = {
-  transactionGroups: [] as ApiResponse['transactionGroups'],
-  isAggregationAccurate: true,
+
+interface InitialState {
+  requestId: string;
+  mainStatisticsData: ApiResponse & {
+    transactionGroupsTotalItems: number;
+  };
+}
+
+const INITIAL_STATE: InitialState = {
   requestId: '',
-  transactionGroupsTotalItems: 0,
+  mainStatisticsData: {
+    transactionGroups: [],
+    isAggregationAccurate: true,
+    bucketSize: 0,
+    transactionGroupsTotalItems: 0,
+  },
 };
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
 type SortDirection = 'asc' | 'desc';
-const PAGE_SIZE = 5;
 const DEFAULT_SORT = {
   direction: 'desc' as const,
   field: 'impact' as const,
 };
 
-export function ServiceOverviewTransactionsTable() {
+interface Props {
+  hideViewTransactionsLink?: boolean;
+  numberOfTransactionsPerPage?: number;
+  showAggregationAccurateCallout?: boolean;
+}
+
+export function TransactionsTable({
+  hideViewTransactionsLink = false,
+  numberOfTransactionsPerPage = 5,
+  showAggregationAccurateCallout = false,
+}: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -100,14 +124,19 @@ export function ServiceOverviewTransactionsTable() {
           response.transactionGroups,
           field,
           direction
-        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+        ).slice(
+          pageIndex * numberOfTransactionsPerPage,
+          (pageIndex + 1) * numberOfTransactionsPerPage
+        );
 
         return {
-          ...response,
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
           requestId: uuid(),
-          transactionGroupsTotalItems: response.transactionGroups.length,
-          transactionGroups: currentPageTransactionGroups,
+          mainStatisticsData: {
+            ...response,
+            transactionGroups: currentPageTransactionGroups,
+            transactionGroupsTotalItems: response.transactionGroups.length,
+          },
         };
       });
     },
@@ -130,7 +159,15 @@ export function ServiceOverviewTransactionsTable() {
     ]
   );
 
-  const { transactionGroups, requestId, transactionGroupsTotalItems } = data;
+  const {
+    requestId,
+    mainStatisticsData: {
+      transactionGroups,
+      isAggregationAccurate,
+      bucketSize,
+      transactionGroupsTotalItems,
+    },
+  } = data;
 
   const {
     data: transactionGroupDetailedStatistics,
@@ -186,7 +223,7 @@ export function ServiceOverviewTransactionsTable() {
 
   const pagination = {
     pageIndex,
-    pageSize: PAGE_SIZE,
+    pageSize: numberOfTransactionsPerPage,
     totalItemCount: transactionGroupsTotalItems,
     hidePerPageOptions: true,
   };
@@ -207,22 +244,62 @@ export function ServiceOverviewTransactionsTable() {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TransactionOverviewLink
-              serviceName={serviceName}
-              latencyAggregationType={latencyAggregationType}
-              transactionType={transactionType}
-            >
-              {i18n.translate(
-                'xpack.apm.serviceOverview.transactionsTableLinkText',
-                {
-                  defaultMessage: 'View transactions',
-                }
-              )}
-            </TransactionOverviewLink>
-          </EuiFlexItem>
+          {!hideViewTransactionsLink && (
+            <EuiFlexItem grow={false}>
+              <TransactionOverviewLink
+                serviceName={serviceName}
+                latencyAggregationType={latencyAggregationType}
+                transactionType={transactionType}
+              >
+                {i18n.translate(
+                  'xpack.apm.serviceOverview.transactionsTableLinkText',
+                  {
+                    defaultMessage: 'View transactions',
+                  }
+                )}
+              </TransactionOverviewLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
+      {showAggregationAccurateCallout && !isAggregationAccurate && (
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.transactionCardinalityWarning.title',
+              {
+                defaultMessage:
+                  'This view shows a subset of reported transactions.',
+              }
+            )}
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.apm.transactionCardinalityWarning.body"
+                defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
+                values={{
+                  bucketSize,
+                  codeBlock: (
+                    <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
+                  ),
+                }}
+              />
+
+              <ElasticDocsLink
+                section="/kibana"
+                path="/troubleshooting.html#troubleshooting-too-many-transactions"
+              >
+                {i18n.translate(
+                  'xpack.apm.transactionCardinalityWarning.docsLink',
+                  { defaultMessage: 'Learn more in the docs' }
+                )}
+              </ElasticDocsLink>
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
