@@ -30,6 +30,7 @@ const DEFAULT_VALUES: CrawlerOverviewValues = {
   dataLoading: true,
   domains: [],
   mostRecentCrawlRequestStatus: CrawlerStatus.Success,
+  timeoutId: null,
 };
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -168,6 +169,26 @@ describe('CrawlerOverviewLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
+    describe('startCrawl', () => {
+      describe('on success', () => {
+        it('starts polling for crawl requests', () => {});
+      });
+
+      describe('on failure', () => {
+        it('flashes an error', () => {});
+      });
+    });
+
+    describe('stopCrawl', () => {
+      describe('on success', () => {
+        it('starts polling for crawl requests', () => {});
+      });
+
+      describe('on failure', () => {
+        it('flashes an error', () => {});
       });
     });
   });
