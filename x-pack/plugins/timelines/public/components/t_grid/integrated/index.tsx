@@ -45,6 +45,7 @@ import * as i18n from './translations';
 import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
 import { InspectButtonContainer } from '../../inspect';
+import { SummaryViewSelector, ViewSelection } from '../summary_view/selector';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -52,6 +53,12 @@ const COMPACT_HEADER_HEIGHT = 36; // px
 
 const UtilityBar = styled.div`
   height: ${UTILITY_BAR_HEIGHT}px;
+  display: flex;
+  align-items: baseline;
+  aside {
+    flex-grow: 1;
+    margin-right: ${({ theme }) => theme.eui.euiSizeS};
+  }
 `;
 
 const TitleText = styled.span`
@@ -174,6 +181,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const { uiSettings } = useKibana<CoreStart>().services;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
+  const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const unit = useMemo(() => (n: number) => i18n.ALERTS_UNIT(n), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
@@ -302,7 +310,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               {HeaderSectionContent}
             </HeaderSection>
             {utilityBar && !resolverIsShowing(graphEventId) && (
-              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
+              <UtilityBar>
+                {utilityBar?.(refetch, totalCountMinusDeleted)}{' '}
+                <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+              </UtilityBar>
             )}
             <EventsContainerLoading
               data-timeline-id={id}

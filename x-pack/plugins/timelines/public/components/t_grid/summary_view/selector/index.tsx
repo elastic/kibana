@@ -5,11 +5,38 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiTitle,
+  EuiTextColor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
-export type ViewSelection = 'default' | 'eventRendererView';
+export type ViewSelection = 'gridView' | 'eventRenderedView';
+
+const ContainerEuiSelectable = styled.div`
+  width: 300px;
+  .euiSelectableListItem__text {
+    white-space: pre-wrap !important;
+    line-height: normal;
+  }
+`;
+
+const gridView = i18n.translate('xpack.timelines.alerts.summaryView.gridView.label', {
+  defaultMessage: 'Grid view',
+});
+
+const eventRenderedView = i18n.translate(
+  'xpack.timelines.alerts.summaryView.eventRendererView.label',
+  {
+    defaultMessage: 'Event rendered view',
+  }
+);
 
 interface SummaryViewSelectorProps {
   onViewChange: (viewSelection: ViewSelection) => void;
@@ -23,31 +50,38 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onChangeSelectable = useCallback(
     (opts: EuiSelectableOption[]) => {
-      if (opts.length > 0) {
-        onViewChange((opts[0]?.key ?? 'default') as ViewSelection);
+      const selected = opts.filter((i) => i.checked === 'on');
+      if (selected.length > 0) {
+        onViewChange((selected[0]?.key ?? 'gridView') as ViewSelection);
       }
+      setIsPopoverOpen(false);
     },
     [onViewChange]
   );
 
   const button = useMemo(
     () => (
-      <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-        {i18n.translate('xpack.timelines.alerts.summaryView.dropdown.button', {
-          defaultMessage: 'Summary view',
-        })}
+      <EuiButtonEmpty
+        iconType="arrowDown"
+        iconSide="right"
+        iconSize="s"
+        onClick={onButtonClick}
+        size="xs"
+        flush="both"
+        style={{ fontWeight: 'normal' }}
+      >
+        {viewSelected === 'gridView' ? gridView : eventRenderedView}
       </EuiButtonEmpty>
     ),
-    [onButtonClick]
+    [onButtonClick, viewSelected]
   );
+
   const options = useMemo(
     () => [
       {
-        label: i18n.translate('xpack.timelines.alerts.summaryView.options.default.label', {
-          defaultMessage: 'Data view',
-        }),
-        key: 'default',
-        checked: (viewSelected === 'default' ? 'on' : 'off') as EuiSelectableOption['checked'],
+        label: gridView,
+        key: 'gridView',
+        checked: (viewSelected === 'gridView' ? 'on' : undefined) as EuiSelectableOption['checked'],
         meta: [
           {
             text: i18n.translate('xpack.timelines.alerts.summaryView.options.default.description', {
@@ -58,16 +92,11 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
         ],
       },
       {
-        label: i18n.translate(
-          'xpack.timelines.alerts.summaryView.options.eventRendererView.label',
-          {
-            defaultMessage: 'Summary view',
-          }
-        ),
-        key: 'eventRendererView',
-        checked: (viewSelected === 'eventRendererView'
+        label: eventRenderedView,
+        key: 'eventRenderedView',
+        checked: (viewSelected === 'eventRenderedView'
           ? 'on'
-          : 'off') as EuiSelectableOption['checked'],
+          : undefined) as EuiSelectableOption['checked'],
         meta: [
           {
             text: i18n.translate(
@@ -83,6 +112,19 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
     [viewSelected]
   );
 
+  const renderOption = useCallback((option) => {
+    return (
+      <>
+        <EuiTitle size="xxs">
+          <h6>{option.label}</h6>
+        </EuiTitle>
+        <EuiTextColor color="subdued">
+          <small>{option.meta[0].text}</small>
+        </EuiTextColor>
+      </>
+    );
+  }, []);
+
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -90,14 +132,23 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <EuiSelectable
-        aria-label="Basic example"
-        options={options}
-        onChange={onChangeSelectable}
-        singleSelection={true}
-      >
-        {(list) => list}
-      </EuiSelectable>
+      <ContainerEuiSelectable>
+        <EuiSelectable
+          aria-label="Basic example"
+          options={options}
+          onChange={onChangeSelectable}
+          renderOption={renderOption}
+          searchable={false}
+          height={160}
+          listProps={{
+            rowHeight: 80,
+            showIcons: true,
+          }}
+          singleSelection={true}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </ContainerEuiSelectable>
     </EuiPopover>
   );
 };
