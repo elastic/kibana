@@ -31,17 +31,21 @@ import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
-type InitialState = ApiResponse & {
+interface InitialState {
   requestId: string;
-  transactionGroupsTotalItems: number;
-};
+  mainStatisticsData: ApiResponse & {
+    transactionGroupsTotalItems: number;
+  };
+}
 
 const INITIAL_STATE: InitialState = {
-  transactionGroups: [],
-  isAggregationAccurate: true,
   requestId: '',
-  transactionGroupsTotalItems: 0,
-  bucketSize: 0,
+  mainStatisticsData: {
+    transactionGroups: [],
+    isAggregationAccurate: true,
+    bucketSize: 0,
+    transactionGroupsTotalItems: 0,
+  },
 };
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
@@ -126,11 +130,13 @@ export function ServiceOverviewTransactionsTable({
         );
 
         return {
-          ...response,
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
           requestId: uuid(),
-          transactionGroupsTotalItems: response.transactionGroups.length,
-          transactionGroups: currentPageTransactionGroups,
+          mainStatisticsData: {
+            ...response,
+            transactionGroups: currentPageTransactionGroups,
+            transactionGroupsTotalItems: response.transactionGroups.length,
+          },
         };
       });
     },
@@ -154,11 +160,13 @@ export function ServiceOverviewTransactionsTable({
   );
 
   const {
-    transactionGroups,
     requestId,
-    transactionGroupsTotalItems,
-    isAggregationAccurate,
-    bucketSize,
+    mainStatisticsData: {
+      transactionGroups,
+      isAggregationAccurate,
+      bucketSize,
+      transactionGroupsTotalItems,
+    },
   } = data;
 
   const {
