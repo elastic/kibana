@@ -315,7 +315,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     onRuleChange={onRuleChange}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    showHeaderTooltips={true}
                     tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDataGridColumnActions, EuiToolTip } from '@elastic/eui';
+import { EuiDataGridColumnActions } from '@elastic/eui';
 import { get, keyBy } from 'lodash/fp';
 import React from 'react';
 
@@ -23,7 +23,6 @@ import {
   MINIMUM_ACTIONS_COLUMN_WIDTH,
 } from '../constants';
 import { allowSorting } from '../helpers';
-import { HeaderToolTipContent } from './header_tooltip_content';
 import * as i18n from './translations';
 
 const defaultActions: EuiDataGridColumnActions = {
@@ -48,8 +47,7 @@ const getAllFieldsByName = (
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
-  browserFields: BrowserFields,
-  showHeaderTooltips?: boolean
+  browserFields: BrowserFields
 ): ColumnHeaderOptions[] => {
   return headers
     ? headers.map((header) => {
@@ -64,8 +62,6 @@ export const getColumnHeaders = (
           ),
         };
 
-        const toolTipContent = <HeaderToolTipContent header={augmentedHeader} />;
-
         const content = <>{header.display ?? header.displayAsText ?? header.id}</>;
 
         // return the augmentedHeader with additional properties used by `EuiDataGrid`
@@ -73,13 +69,7 @@ export const getColumnHeaders = (
           ...augmentedHeader,
           actions: header.actions ?? defaultActions,
           defaultSortDirection: 'desc', // the default action when a user selects a field via `EuiDataGrid`'s `Pick fields to sort by` UI
-          display: showHeaderTooltips ? (
-            <EuiToolTip data-test-subj="header-tooltip" content={toolTipContent}>
-              {content}
-            </EuiToolTip>
-          ) : (
-            <>{content}</>
-          ),
+          display: <>{content}</>,
           isSortable: allowSorting({
             browserField: getAllFieldsByName(browserFields)[header.id],
             fieldName: header.id,

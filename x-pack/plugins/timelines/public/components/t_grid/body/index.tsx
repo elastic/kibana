@@ -72,7 +72,6 @@ interface OwnProps {
   loadPage: (newActivePage: number) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  showHeaderTooltips?: boolean;
   tabType: TimelineTabs;
   leadingControlColumns?: ControlColumnProps[];
   trailingControlColumns?: ControlColumnProps[];
@@ -410,22 +409,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       columnHeaders.map(({ id: cid }) => cid)
     ); // initializes to the full set of columns
 
-    const onSetVisibleColumns = useCallback(
-      (newVisibleColumns: string[]) => {
-        const removed = columnHeaders.filter((h) => !newVisibleColumns.includes(h.id));
-
-        removed.forEach((c) =>
-          dispatch(
-            tGridActions.removeColumn({
-              id,
-              columnId: c.id,
-            })
-          )
-        );
-      },
-      [columnHeaders, dispatch, id]
-    );
-
     useEffect(() => {
       setVisibleColumns(columnHeaders.map(({ id: cid }) => cid));
     }, [columnHeaders]);
@@ -513,7 +496,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         data-test-subj="body-data-grid"
         aria-label={i18n.TGRID_BODY_ARIA_LABEL}
         columns={columnHeaders}
-        columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
+        columnVisibility={{ visibleColumns, setVisibleColumns }}
         gridStyle={gridStyle}
         leadingControlColumns={leadingTGridControlColumns}
         trailingControlColumns={trailingTGridControlColumns}
@@ -532,15 +515,11 @@ BodyComponent.displayName = 'BodyComponent';
 const makeMapStateToProps = () => {
   const memoizedColumnHeaders: (
     headers: ColumnHeaderOptions[],
-    browserFields: BrowserFields,
-    showHeaderTooltips?: boolean
+    browserFields: BrowserFields
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
-  const mapStateToProps = (
-    state: TimelineState,
-    { browserFields, id, showHeaderTooltips }: OwnProps
-  ) => {
+  const mapStateToProps = (state: TimelineState, { browserFields, id }: OwnProps) => {
     const timeline: TGridModel = getTGrid(state, id);
     const {
       columns,
@@ -553,7 +532,7 @@ const makeMapStateToProps = () => {
     } = timeline;
 
     return {
-      columnHeaders: memoizedColumnHeaders(columns, browserFields, showHeaderTooltips),
+      columnHeaders: memoizedColumnHeaders(columns, browserFields),
       excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,

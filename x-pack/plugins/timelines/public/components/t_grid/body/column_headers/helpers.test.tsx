@@ -140,20 +140,6 @@ describe('helpers', () => {
 
         expect(wrapper.text()).toEqual('@timestamp'); // fallback to rendering by header.id
       });
-
-      test('it renders a tooltip when showHeaderTooltips is true', () => {
-        const wrapper = mount(
-          <>{getColumnHeaders(mockHeader, mockBrowserFields, true)[0].display}</>
-        );
-
-        expect(wrapper.find('.euiToolTipAnchor').exists()).toBe(true);
-      });
-
-      test('it does NOT render a tooltip by default, when showHeaderTooltips is false', () => {
-        const wrapper = mount(<>{getColumnHeaders(mockHeader, mockBrowserFields)[0].display}</>);
-
-        expect(wrapper.find('.euiToolTipAnchor').exists()).toBe(false);
-      });
     });
 
     test('it renders the default actions when the header does NOT have custom actions', () => {
