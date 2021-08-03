@@ -24,7 +24,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import {
   TimelineId,
@@ -43,8 +43,7 @@ import type {
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
-import { getEventIdToDataMapping } from './helpers';
-import { Sort } from './sort';
+import { getEventIdToDataMapping, mapSortDirectionToDirection, mapSortingColumns } from './helpers';
 
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -69,9 +68,11 @@ interface OwnProps {
   data: TimelineItem[];
   id: string;
   isEventViewer?: boolean;
+  leadingControlColumns: ControlColumnProps[];
+  loadPage: (newActivePage: number) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  sort: Sort[];
+  showHeaderTooltips?: boolean;
   tabType: TimelineTabs;
   leadingControlColumns?: ControlColumnProps[];
   trailingControlColumns?: ControlColumnProps[];
@@ -217,6 +218,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     isEventViewer = false,
     isSelectAllChecked,
     loadingEventIds,
+    loadPage,
     selectedEventIds,
     setSelected,
     clearSelected,
@@ -235,6 +237,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     refetch,
   }) => {
+    const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
@@ -366,18 +369,62 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       ]
     );
 
-    const [sortingColumns, setSortingColumns] = useState([]);
+    const sortingColumns: Array<{
+      id: string;
+      direction: 'asc' | 'desc';
+    }> = useMemo(
+      () =>
+        sort.map((x) => ({
+          id: x.columnId,
+          direction: mapSortDirectionToDirection(x.sortDirection),
+        })),
+      [sort]
+    );
 
     const onSort = useCallback(
-      (columns) => {
-        setSortingColumns(columns);
+      (
+        nextSortingColumns: Array<{
+          id: string;
+          direction: 'asc' | 'desc';
+        }>
+      ) => {
+        dispatch(
+          tGridActions.updateSort({
+            id,
+            sort: mapSortingColumns({ columns: nextSortingColumns, columnHeaders }),
+          })
+        );
+
+        setTimeout(() => {
+          // schedule the query to be re-executed from page 0, (but only after the
+          // store has been updated with the new sort):
+          if (loadPage != null) {
+            loadPage(0);
+          }
+        }, 0);
       },
-      [setSortingColumns]
+      [columnHeaders, dispatch, id, loadPage]
     );
 
     const [visibleColumns, setVisibleColumns] = useState(() =>
       columnHeaders.map(({ id: cid }) => cid)
     ); // initializes to the full set of columns
+
+    const onSetVisibleColumns = useCallback(
+      (newVisibleColumns: string[]) => {
+        const removed = columnHeaders.filter((h) => !newVisibleColumns.includes(h.id));
+
+        removed.forEach((c) =>
+          dispatch(
+            tGridActions.removeColumn({
+              id,
+              columnId: c.id,
+            })
+          )
+        );
+      },
+      [columnHeaders, dispatch, id]
+    );
 
     useEffect(() => {
       setVisibleColumns(columnHeaders.map(({ id: cid }) => cid));
@@ -466,7 +513,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         data-test-subj="body-data-grid"
         aria-label={i18n.TGRID_BODY_ARIA_LABEL}
         columns={columnHeaders}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
         gridStyle={gridStyle}
         leadingControlColumns={leadingTGridControlColumns}
         trailingControlColumns={trailingTGridControlColumns}
@@ -485,11 +532,15 @@ BodyComponent.displayName = 'BodyComponent';
 const makeMapStateToProps = () => {
   const memoizedColumnHeaders: (
     headers: ColumnHeaderOptions[],
-    browserFields: BrowserFields
+    browserFields: BrowserFields,
+    showHeaderTooltips?: boolean
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
-  const mapStateToProps = (state: TimelineState, { browserFields, id }: OwnProps) => {
+  const mapStateToProps = (
+    state: TimelineState,
+    { browserFields, id, showHeaderTooltips }: OwnProps
+  ) => {
     const timeline: TGridModel = getTGrid(state, id);
     const {
       columns,
@@ -498,16 +549,18 @@ const makeMapStateToProps = () => {
       loadingEventIds,
       selectedEventIds,
       showCheckboxes,
+      sort,
     } = timeline;
 
     return {
-      columnHeaders: memoizedColumnHeaders(columns, browserFields),
+      columnHeaders: memoizedColumnHeaders(columns, browserFields, showHeaderTooltips),
       excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       id,
       selectedEventIds,
       showCheckboxes,
+      sort,
     };
   };
   return mapStateToProps;
