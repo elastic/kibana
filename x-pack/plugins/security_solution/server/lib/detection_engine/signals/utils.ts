@@ -946,11 +946,12 @@ export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert =>
 };
 
 export const getF = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
+  const sourceField = `_source.${field}`;
   if (isWrappedRACAlert(event)) {
-    return event._source[field.replace('signal', 'kibana.alert')] as T; // TODO: handle special cases
+    return event._source[sourceField.replace('signal', 'kibana.alert')] as T; // TODO: handle special cases
   } else if (isWrappedSignalHit(event)) {
-    return event._source[field] as T;
+    return event._source[sourceField] as T;
   } else if (isWrappedEventHit(event)) {
-    return event._source[field] as T;
+    return event._source[sourceField] as T;
   }
 };
