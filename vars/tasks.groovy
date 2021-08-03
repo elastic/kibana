@@ -145,6 +145,16 @@ def functionalXpack(Map params = [:]) {
         // task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressFirefox', './test/scripts/jenkins_security_solution_cypress_firefox.sh'))
       }
     }
+
+    whenChanged([
+      'x-pack/plugins/apm/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
+        // Temporarily disabled to figure out test flake
+        // task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressFirefox', './test/scripts/jenkins_security_solution_cypress_firefox.sh'))
+      }
+    }
   }
 }
 
