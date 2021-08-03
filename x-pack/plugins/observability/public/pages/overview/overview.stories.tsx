@@ -23,7 +23,10 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  createKibanaReactContext,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {
@@ -44,28 +47,39 @@ const withCore = makeDecorator({
   wrapper: (storyFn, context, { options }) => {
     unregisterAll();
 
+    const KibanaReactContext = createKibanaReactContext(({
+      application: { getUrlForApp: () => '' },
+      chrome: { docTitle: { change: () => {} } },
+      uiSettings: { get: () => [] },
+      usageCollection: { reportUiCounter: () => {} },
+    } as unknown) as Partial<CoreStart>);
+
     return (
       <MemoryRouter>
-        <PluginContext.Provider
-          value={{
-            appMountParameters: ({
-              setHeaderActionMenu: () => {},
-            } as unknown) as AppMountParameters,
-            config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
-            core: options as CoreStart,
-            plugins: ({
-              data: {
-                query: {
-                  timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
-                },
+        <KibanaReactContext.Provider>
+          <PluginContext.Provider
+            value={{
+              appMountParameters: ({
+                setHeaderActionMenu: () => {},
+              } as unknown) as AppMountParameters,
+              config: {
+                unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
               },
-            } as unknown) as ObservabilityPublicPluginsStart,
-            observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-            ObservabilityPageTemplate: KibanaPageTemplate,
-          }}
-        >
-          <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
-        </PluginContext.Provider>
+              core: options as CoreStart,
+              plugins: ({
+                data: {
+                  query: {
+                    timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+                  },
+                },
+              } as unknown) as ObservabilityPublicPluginsStart,
+              observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+              ObservabilityPageTemplate: KibanaPageTemplate,
+            }}
+          >
+            <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
+          </PluginContext.Provider>
+        </KibanaReactContext.Provider>
       </MemoryRouter>
     );
   },
