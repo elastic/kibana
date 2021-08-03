@@ -25,6 +25,43 @@ interface StatusMessageProps {
   showSystemIndices: boolean;
 }
 
+const NoMatchStatusMessage = (allIndicesLength: number) => (
+  <span>
+    <FormattedMessage
+      id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
+      defaultMessage="The index pattern you've entered doesn't match any indices.
+  You can match {indicesLength, plural,
+    one {your}
+    other {any of your}
+  } {strongIndices}, below."
+      values={{
+        strongIndices: (
+          <strong>
+            <FormattedMessage
+              id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
+              defaultMessage="{indicesLength, plural,
+            one {# index}
+            other {# indices}
+          }"
+              values={{ indicesLength: allIndicesLength }}
+            />
+          </strong>
+        ),
+        indicesLength: allIndicesLength,
+      }}
+    />
+  </span>
+);
+
+const NoMatchNoIndicesStatusMessage = () => (
+  <span>
+    <FormattedMessage
+      id="indexPatternEditor.status.notMatchLabel.notMatchNoIndicesDetail"
+      defaultMessage="The index pattern you've entered doesn't match any indices."
+    />
+  </span>
+);
+
 export const StatusMessage: React.FC<StatusMessageProps> = ({
   matchedIndices: { allIndices = [], exactMatchedIndices = [], partialMatchedIndices = [] },
   isIncludingSystemIndices,
@@ -124,33 +161,9 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   } else {
     statusIcon = undefined;
     statusColor = 'warning';
-    statusMessage = (
-      <span>
-        <FormattedMessage
-          id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
-          defaultMessage="The index pattern you've entered doesn't match any indices.
-          You can match {indicesLength, plural,
-            one {your}
-            other {any of your}
-          } {strongIndices}, below."
-          values={{
-            strongIndices: (
-              <strong>
-                <FormattedMessage
-                  id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
-                  defaultMessage="{indicesLength, plural,
-                    one {# index}
-                    other {# indices}
-                  }"
-                  values={{ indicesLength: allIndicesLength }}
-                />
-              </strong>
-            ),
-            indicesLength: allIndicesLength,
-          }}
-        />
-      </span>
-    );
+    statusMessage = allIndicesLength
+      ? NoMatchStatusMessage(allIndicesLength)
+      : NoMatchNoIndicesStatusMessage();
   }
 
   return (

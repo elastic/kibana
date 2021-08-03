@@ -21,6 +21,20 @@ interface Props {
 }
 
 export const PreviewPanel = ({ type, allowHidden, title = '', matched }: Props) => {
+  const indicesListContent =
+    matched.visibleIndices.length || matched.allIndices.length ? (
+      <>
+        <EuiSpacer />
+        <IndicesList
+          data-test-subj="createIndexPatternStep1IndicesList"
+          query={title}
+          indices={title.length ? matched.visibleIndices : matched.allIndices}
+        />
+      </>
+    ) : (
+      <></>
+    );
+
   return (
     <>
       <StatusMessage
@@ -29,12 +43,7 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matched }: Props) 
         isIncludingSystemIndices={allowHidden}
         query={title}
       />
-      <EuiSpacer />
-      <IndicesList
-        data-test-subj="createIndexPatternStep1IndicesList"
-        query={title}
-        indices={title.length ? matched.visibleIndices : matched.allIndices}
-      />
+      {indicesListContent}
     </>
   );
 };
