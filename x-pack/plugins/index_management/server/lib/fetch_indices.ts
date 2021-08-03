@@ -52,9 +52,9 @@ async function fetchIndicesCall(
         size: hit['store.size'],
         isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
         aliases: aliases.length ? aliases : 'none',
-        // @ts-expect-error @elastic/elasticsearch Property 'index' does not exist on type 'IndicesIndexSettings | IndicesIndexStatePrefixedSettings'.
+        // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/532
         hidden: index.settings.index.hidden === 'true',
-        // @ts-expect-error @elastic/elasticsearch Property 'data_stream' does not exist on type 'IndicesIndexState'.
+        // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/532
         data_stream: index.data_stream!,
       });
     }
