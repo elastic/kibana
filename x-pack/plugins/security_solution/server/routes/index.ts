@@ -118,7 +118,7 @@ export const initRoutes = (
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router, ruleDataService);
+  createIndexRoute(router, ruleDataService, config);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
 

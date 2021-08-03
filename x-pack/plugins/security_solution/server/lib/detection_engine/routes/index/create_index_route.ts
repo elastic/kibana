@@ -37,10 +37,13 @@ import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 import { RuleDataPluginService } from '../../../../../../rule_registry/server';
 import signalExtraFields from './signal_extra_fields.json';
+import { ConfigType } from '../../../../config';
+import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 
 export const createIndexRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataService: RuleDataPluginService
+  ruleDataService: RuleDataPluginService,
+  config: ConfigType
 ) => {
   router.post(
     {
@@ -52,13 +55,14 @@ export const createIndexRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
       try {
         const siemClient = context.securitySolution?.getAppClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        await createDetectionIndex(context, siemClient!, ruleDataService);
+        await createDetectionIndex(context, siemClient!, ruleDataService, ruleRegistryEnabled);
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         const error = transformError(err);
@@ -82,7 +86,8 @@ class CreateIndexError extends Error {
 export const createDetectionIndex = async (
   context: SecuritySolutionRequestHandlerContext,
   siemClient: AppClient,
-  ruleDataService: RuleDataPluginService
+  ruleDataService: RuleDataPluginService,
+  ruleRegistryEnabled: boolean
 ): Promise<void> => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const spaceId = siemClient.getSpaceId();
@@ -92,6 +97,14 @@ export const createDetectionIndex = async (
   }
 
   const index = siemClient.getSignalsIndex();
+
+  const indexExists = await getIndexExists(esClient, index);
+  // If using the rule registry implementation, we don't want to create new .siem-signals indices -
+  // only create/update resources if there are existing indices
+  if (ruleRegistryEnabled && !indexExists) {
+    return;
+  }
+
   await ensureMigrationCleanupPolicy({ alias: index, esClient });
   const policyExists = await getPolicyExists(esClient, index);
   if (!policyExists) {
@@ -124,7 +137,7 @@ export const createDetectionIndex = async (
       is_write_index: false,
     },
   });
-  const indexExists = await getIndexExists(esClient, index);
+
   if (indexExists) {
     const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
