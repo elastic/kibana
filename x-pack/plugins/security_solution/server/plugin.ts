@@ -213,6 +213,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           return;
         }
 
+        // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
+        // Split aliases by component template since we need to alias some fields in technical field mappings,
+        // some fields in security solution specific component template.
         const aliases: Record<string, estypes.MappingProperty> = {};
         Object.entries(aadFieldConversion).forEach(([key, value]) => {
           aliases[key] = {
@@ -220,9 +223,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             path: value,
           };
         });
-        // TODO: convert the aliases to a FieldMap. Requires enhancing FieldMap type to support alias path
-        const mappings = mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false);
-        merge(mappings.properties, aliases);
 
         const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
         await ruleDataService.createOrUpdateComponentTemplate({
@@ -232,7 +232,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings,
+              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
             },
           },
         });
