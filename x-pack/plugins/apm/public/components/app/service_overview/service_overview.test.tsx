@@ -107,7 +107,9 @@ describe('ServiceOverview', () => {
         totalTransactionGroups: 0,
         isAggregationAccurate: true,
       },
-      'GET /api/apm/services/{serviceName}/dependencies': [],
+      'GET /api/apm/services/{serviceName}/dependencies': {
+        serviceDependencies: [],
+      },
       'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics': [],
       'GET /api/apm/services/{serviceName}/transactions/charts/latency': {
         currentPeriod: {
