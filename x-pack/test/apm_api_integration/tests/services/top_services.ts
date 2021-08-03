@@ -72,8 +72,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(sortedItems.map((item) => item.serviceName)).toMatchInline(`
           Array [
             "auditbeat",
-            "kibana",
-            "kibana-frontend",
             "opbeans-dotnet",
             "opbeans-go",
             "opbeans-java",
@@ -92,49 +90,81 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {},
             Object {
-              "latency": 658101.291021672,
-              "throughput": 75.3666666666667,
-              "transactionErrorRate": 0,
+              "latency": Object {
+                "value": 520294.126436782,
+              },
+              "transactionErrorRate": Object {
+                "value": 0.0316091954022989,
+              },
+              "throughput": Object {
+                "value": 11.6,
+              },
             },
             Object {
-              "latency": 3588095,
-              "throughput": 0.133333333333333,
-              "transactionErrorRate": null,
+              "latency": Object {
+                "value": 74805.1452830189,
+              },
+              "transactionErrorRate": Object {
+                "value": 0.00566037735849057,
+              },
+              "throughput": Object {
+                "value": 17.6666666666667,
+              },
             },
             Object {
-              "latency": 586249.027027027,
-              "throughput": 9.86666666666667,
-              "transactionErrorRate": 0.00337837837837838,
+              "latency": Object {
+                "value": 411589.785714286,
+              },
+              "transactionErrorRate": Object {
+                "value": 0.0848214285714286,
+              },
+              "throughput": Object {
+                "value": 7.46666666666667,
+              },
             },
             Object {
-              "latency": 218838.954459203,
-              "throughput": 17.5666666666667,
-              "transactionErrorRate": 0.0113851992409867,
+              "latency": Object {
+                "value": 53906.6603773585,
+              },
+              "transactionErrorRate": Object {
+                "value": 0,
+              },
+              "throughput": Object {
+                "value": 7.06666666666667,
+              },
             },
             Object {
-              "latency": 17660.3103448276,
-              "throughput": 7.73333333333333,
-              "transactionErrorRate": 0.0646551724137931,
+              "latency": Object {
+                "value": 420634.9,
+              },
+              "transactionErrorRate": Object {
+                "value": 0.025,
+              },
+              "throughput": Object {
+                "value": 5.33333333333333,
+              },
             },
             Object {
-              "latency": 22281.4255319149,
-              "throughput": 6.26666666666667,
-              "transactionErrorRate": 0.00531914893617021,
+              "latency": Object {
+                "value": 40989.5802047782,
+              },
+              "transactionErrorRate": Object {
+                "value": 0.00341296928327645,
+              },
+              "throughput": Object {
+                "value": 9.76666666666667,
+              },
             },
             Object {
-              "latency": 243948.538461538,
-              "throughput": 5.2,
-              "transactionErrorRate": 0.032051282051282,
-            },
-            Object {
-              "latency": 44571.2584615385,
-              "throughput": 10.8333333333333,
-              "transactionErrorRate": 0.00307692307692308,
-            },
-            Object {
-              "latency": 1381526.7037037,
-              "throughput": 1.8,
-              "transactionErrorRate": null,
+              "latency": Object {
+                "value": 1040880.77777778,
+              },
+              "transactionErrorRate": Object {
+                "value": null,
+              },
+              "throughput": Object {
+                "value": 2.4,
+              },
             },
           ]
         `);
@@ -143,12 +173,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns environments', () => {
         expectSnapshot(sortedItems.map((item) => item.environments ?? [])).toMatchInline(`
           Array [
-            Array [
-              "production",
-            ],
-            Array [
-              "production",
-            ],
             Array [
               "production",
             ],
@@ -281,12 +305,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "healthy",
                 "healthy",
                 "healthy",
-                undefined,
-                "healthy",
-                undefined,
                 "healthy",
                 "healthy",
-                undefined,
+                "healthy",
+                "healthy",
               ]
             `);
           });
