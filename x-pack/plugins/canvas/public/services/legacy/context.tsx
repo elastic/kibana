@@ -21,7 +21,6 @@ export interface WithServicesProps {
 
 const defaultContextValue = {
   embeddables: {},
-  expressions: {},
   search: {},
 };
 
@@ -29,10 +28,7 @@ export const ServicesContext = createContext<CanvasServices>(defaultContextValue
 
 export const useServices = () => useContext(ServicesContext);
 export const useEmbeddablesService = () => useServices().embeddables;
-export const useExpressionsService = () => useServices().expressions;
 export const useLabsService = () => useServices().labs;
-export const useReportingService = () => useServices().reporting;
-
 export const withServices = <Props extends WithServicesProps>(type: ComponentType<Props>) => {
   const EnhancedType: FC<Props> = (props) =>
     createElement(type, { ...props, services: useServices() });
@@ -46,9 +42,7 @@ export const LegacyServicesProvider: FC<{
   const specifiedProviders: CanvasServiceProviders = { ...services, ...providers };
   const value = {
     embeddables: specifiedProviders.embeddables.getService(),
-    expressions: specifiedProviders.expressions.getService(),
     search: specifiedProviders.search.getService(),
-    reporting: specifiedProviders.reporting.getService(),
     labs: specifiedProviders.labs.getService(),
   };
   return <ServicesContext.Provider value={value}>{children}</ServicesContext.Provider>;

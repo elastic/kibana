@@ -16,7 +16,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 21
+        "lineNumber": 22
       },
       "deprecated": false,
       "children": [],
@@ -35,7 +35,24 @@
         "lineNumber": 23
       },
       "deprecated": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.OsqueryAction",
+          "type": "Function",
+          "tags": [],
+          "label": "OsqueryAction",
+          "description": [],
+          "signature": [
+            "((props: any) => JSX.Element) | undefined"
+          ],
+          "source": {
+            "path": "x-pack/plugins/osquery/public/types.ts",
+            "lineNumber": 24
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
