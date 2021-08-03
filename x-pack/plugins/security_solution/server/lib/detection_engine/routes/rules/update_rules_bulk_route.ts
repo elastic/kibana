@@ -20,7 +20,6 @@ import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
@@ -54,7 +53,7 @@ export const updateRulesBulkRoute = (
         savedObjectsClient,
       });
 
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
@@ -71,8 +70,9 @@ export const updateRulesBulkRoute = (
             throwHttpError(await mlAuthz.validateRuleType(payloadRule.type));
 
             const rule = await updateRules({
+              spaceId: context.securitySolution.getSpaceId(),
               rulesClient,
-              savedObjectsClient,
+              ruleStatusClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
               ruleUpdate: payloadRule,
             });
@@ -87,11 +87,9 @@ export const updateRulesBulkRoute = (
                 name: payloadRule.name,
               });
               const ruleStatuses = await ruleStatusClient.find({
-                perPage: 1,
-                sortField: 'statusDate',
-                sortOrder: 'desc',
-                search: rule.id,
-                searchFields: ['alertId'],
+                logsCount: 1,
+                ruleId: rule.id,
+                spaceId: context.securitySolution.getSpaceId(),
               });
               return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {

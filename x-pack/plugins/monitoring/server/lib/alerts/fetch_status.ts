@@ -14,14 +14,12 @@ import {
   CommonAlertFilter,
 } from '../../../common/types/alerts';
 import { ALERTS } from '../../../common/constants';
-import { MonitoringLicenseService } from '../../types';
 
 interface RulesByType {
   [type: string]: CommonAlertStatus[];
 }
 export async function fetchStatus(
   rulesClient: RulesClient,
-  licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
   clusterUuids: string[],
   filters: CommonAlertFilter[] = []
