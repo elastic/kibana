@@ -22,18 +22,19 @@ export const createJobFnFactory: CreateJobFnFactory<
 
   // compatibilityShim 7.x and below only
   return compatibilityShim(async function createJobFn(
-    jobParams: JobParamsPDF,
+    { relativeUrls, ...jobParams }: JobParamsPDF,
     context: RequestHandlerContext,
     req: KibanaRequest
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
-    validateUrls(jobParams.relativeUrls);
+    validateUrls(relativeUrls);
 
     return {
       headers: serializedEncryptedHeaders,
       spaceId: reporting.getSpaceId(req, logger),
       forceNow: new Date().toISOString(),
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })), // 7.x only: `objects` in the payload
       ...jobParams,
     };
   });
