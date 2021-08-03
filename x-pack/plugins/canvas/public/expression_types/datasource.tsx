@@ -10,6 +10,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { RenderToDom } from '../components/render_to_dom';
 import { BaseForm, BaseFormProps } from './base_form';
 import { ExpressionFormHandlers } from '../../common/lib';
+import { ExpressionFunction } from '../../types';
 
 const defaultTemplate = () => (
   <div>
@@ -31,8 +32,8 @@ export type DatasourceProps = {
 
 export interface DatasourceRenderProps {
   args: Record<string, Array<Ast | string>> | null;
-  updateArgs: Record<string, Array<Ast | string>> | null;
-  datasourceDef: Datasource;
+  updateArgs: (...args: any[]) => void;
+  datasourceDef: ExpressionFunction;
   isInvalid: boolean;
   setInvalid: (invalid: boolean) => void;
   defaultIndex: string;
