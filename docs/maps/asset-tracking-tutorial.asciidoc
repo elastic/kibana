@@ -13,7 +13,7 @@ You’ll learn to:
 - Use symbols and colors to style data values and show which direction an asset is heading.
 - Set up tracking containment alerts to monitor moving vehicles.
 
-When you complete this tutorial, you’ll have a map that works like this:
+When you complete this tutorial, you’ll have a map that looks like this:
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/construction_zones.png[]
