@@ -12,6 +12,7 @@ import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
 import { getDataSearch } from '../helpers/plugin_services';
+import { VisSeries } from '../../common/vis_data';
 
 interface Stats {
   cacheCount: number;
@@ -21,17 +22,13 @@ interface Stats {
   sheetTime: number;
 }
 
-export interface Series {
-  _global?: boolean;
+export interface Series extends VisSeries {
+  _global?: Record<any, any>;
   _hide?: boolean;
   _id?: number;
   _title?: string;
-  color?: string;
-  data: Array<Record<number, number>>;
   fit: string;
-  label: string;
   split: string;
-  stack?: boolean;
   type: string;
 }
 

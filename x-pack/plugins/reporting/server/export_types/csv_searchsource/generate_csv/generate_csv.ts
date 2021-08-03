@@ -12,6 +12,7 @@ import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
+  cellHasFormulas,
   ES_SEARCH_STRATEGY,
   FieldFormat,
   FieldFormatConfig,
@@ -22,7 +23,6 @@ import {
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
-  cellHasFormulas,
 } from '../../../../../../../src/plugins/data/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
@@ -68,7 +68,7 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: JobParamsCSV,
+    private job: Omit<JobParamsCSV, 'version'>,
     private config: ReportingConfig,
     private clients: Clients,
     private dependencies: Dependencies,
@@ -219,7 +219,6 @@ export class CsvGenerator {
    */
   private generateHeader(
     columns: string[],
-    table: Datatable,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
@@ -357,7 +356,7 @@ export class CsvGenerator {
 
         if (first) {
           first = false;
-          this.generateHeader(columns, table, builder, settings);
+          this.generateHeader(columns, builder, settings);
         }
 
         if (table.rows.length < 1) {
