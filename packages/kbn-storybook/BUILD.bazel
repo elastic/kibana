@@ -84,6 +84,7 @@ ts_project(
   emit_declaration_only = True,
   incremental = False,
   out_dir = "target_types",
+  root_dir = "src",
   source_map = True,
   tsconfig = ":tsconfig",
 )

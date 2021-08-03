@@ -8,3 +8,4 @@
 
 export { defaultConfig } from './lib/default_config';
 export { runStorybookCli } from './lib/run_storybook_cli';
+export { default as WebpackConfig } from './webpack.config';
