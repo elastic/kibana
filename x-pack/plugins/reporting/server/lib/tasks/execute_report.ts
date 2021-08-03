@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Readable, pipeline } from 'stream';
+import { Writable, finished } from 'stream';
 import { promisify } from 'util';
 import { UpdateResponse } from '@elastic/elasticsearch/api/types';
 import moment from 'moment';
@@ -19,6 +19,7 @@ import {
   TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common';
+import { ReportOutput } from '../../../common/types';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { BasePayload, RunTaskFn } from '../../types';
@@ -40,8 +41,8 @@ interface ReportingExecuteTaskInstance {
   runAt?: Date;
 }
 
-function isOutput(output: TaskRunResult | Error): output is TaskRunResult {
-  return typeof output === 'object' && (output as TaskRunResult).content != null;
+function isOutput(output: any): output is TaskRunResult {
+  return output?.size != null;
 }
 
 function reportFromTask(task: ReportTaskParams) {
@@ -203,12 +204,11 @@ export class ExecuteReportTask implements ReportingTask {
     return await store.setReportFailed(report, doc);
   }
 
-  private _formatOutput(output: TaskRunResult | Error): TaskRunResult {
-    const docOutput = {} as TaskRunResult;
+  private _formatOutput(output: TaskRunResult | Error): ReportOutput {
+    const docOutput = {} as ReportOutput;
     const unknownMime = null;
 
     if (isOutput(output)) {
-      docOutput.content = output.content;
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
       docOutput.csv_contains_formulas = output.csv_contains_formulas;
@@ -227,7 +227,8 @@ export class ExecuteReportTask implements ReportingTask {
 
   public async _performJob(
     task: ReportTaskParams,
-    cancellationToken: CancellationToken
+    cancellationToken: CancellationToken,
+    stream: Writable
   ): Promise<TaskRunResult> {
     if (!this.taskExecutors) {
       throw new Error(`Task run function factories have not been called yet!`);
@@ -242,7 +243,7 @@ export class ExecuteReportTask implements ReportingTask {
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
-    return Rx.from(runner(task.id, task.payload, cancellationToken))
+    return Rx.from(runner(task.id, task.payload, cancellationToken, stream))
       .pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
       .toPromise();
   }
@@ -253,18 +254,7 @@ export class ExecuteReportTask implements ReportingTask {
     this.logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
     const completedTime = moment().toISOString();
-    const { content, ...docOutput } = this._formatOutput(output);
-    const stream = await getContentStream(this.reporting, {
-      id: report._id,
-      index: report._index!,
-      if_primary_term: report._primary_term,
-      if_seq_no: report._seq_no,
-    });
-
-    await promisify(pipeline)(Readable.from(content ?? ''), stream);
-    report._seq_no = stream.getSeqNo();
-    report._primary_term = stream.getPrimaryTerm();
-
+    const docOutput = this._formatOutput(output);
     const store = await this.getStore();
     const doc = {
       completed_at: completedTime,
@@ -332,7 +322,20 @@ export class ExecuteReportTask implements ReportingTask {
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           try {
-            const output = await this._performJob(task, cancellationToken);
+            const stream = await getContentStream(this.reporting, {
+              id: report._id,
+              index: report._index!,
+              if_primary_term: report._primary_term,
+              if_seq_no: report._seq_no,
+            });
+            const output = await this._performJob(task, cancellationToken, stream);
+
+            stream.end();
+            await promisify(finished)(stream, { readable: false });
+
+            report._seq_no = stream.getSeqNo();
+            report._primary_term = stream.getPrimaryTerm();
+
             if (output) {
               report = await this._completeJob(report, output);
             }

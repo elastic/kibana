@@ -44,7 +44,7 @@ export interface ReportDocumentHead {
   _primary_term: number;
 }
 
-export interface TaskRunResult {
+export interface ReportOutput {
   content_type: string | null;
   content: string | null;
   size: number;
@@ -52,6 +52,8 @@ export interface TaskRunResult {
   max_size_reached?: boolean;
   warnings?: string[];
 }
+
+export type TaskRunResult = Omit<ReportOutput, 'content'>;
 
 export interface ReportSource {
   /*
@@ -73,7 +75,7 @@ export interface ReportSource {
   /*
    * `output` is only populated if the report job is completed or failed.
    */
-  output: TaskRunResult | null;
+  output: ReportOutput | null;
 
   /*
    * Optional fields: populated when the job is claimed to execute, and after
@@ -127,7 +129,7 @@ export type JobStatus =
  */
 interface ReportSimple extends Omit<ReportSource, 'payload' | 'output'> {
   payload: Omit<ReportSource['payload'], 'headers'>;
-  output?: Omit<TaskRunResult, 'content'>; // is undefined for report jobs that are not completed
+  output?: Omit<ReportOutput, 'content'>; // is undefined for report jobs that are not completed
 }
 
 /*
