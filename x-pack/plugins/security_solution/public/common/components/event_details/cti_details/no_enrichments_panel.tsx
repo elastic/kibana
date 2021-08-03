@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiHorizontalRule,
-  EuiLink,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useKibana } from '../../../lib/kibana';
@@ -39,22 +32,13 @@ const NoEnrichmentsPanelView: React.FC<{
     </Container>
   );
 };
-
 NoEnrichmentsPanelView.displayName = 'NoEnrichmentsPanelView';
 
-export const NoEnrichmentsPanel: React.FC<{
-  isIndicatorMatchesPresent: boolean;
-  isInvestigationTimeEnrichmentsPresent: boolean;
-  onRangeChange: RangeCallback;
-}> = ({ isIndicatorMatchesPresent, isInvestigationTimeEnrichmentsPresent, onRangeChange }) => {
+const NoIntelligenceCTA: React.FC<{}> = () => {
   const threatIntelDocsUrl = `${
     useKibana().services.docLinks.links.filebeat.base
   }/filebeat-module-threatintel.html`;
-
-  const [showPicker, setShowPicker] = useState(false);
-  const handleSearchClick = useCallback(() => setShowPicker((show) => !show), []);
-
-  const noIntelligenceCTA = (
+  return (
     <>
       {i18n.IF_CTI_NOT_ENABLED}
       <EuiLink href={threatIntelDocsUrl} target="_blank">
@@ -62,61 +46,72 @@ export const NoEnrichmentsPanel: React.FC<{
       </EuiLink>
     </>
   );
+};
+NoIntelligenceCTA.displayName = 'NoIntelligenceCTA';
 
+const RangeFilter: React.FC<{ onRangeChange: RangeCallback }> = ({ onRangeChange }) => {
+  const [showPicker, setShowPicker] = useState(false);
+  const handleSearchClick = useCallback(() => setShowPicker((show) => !show), []);
+
+  return (
+    <>
+      <EuiSpacer size="l" />
+      {showPicker && (
+        <EuiFlexGroup justifyContent="center">
+          <EnrichmentRangePicker onChange={onRangeChange} />
+        </EuiFlexGroup>
+      )}
+      <EuiLink data-test-subj="change-enrichment-lookback-query-button" onClick={handleSearchClick}>
+        {i18n.CHANGE_ENRICHMENT_LOOKBACK}
+      </EuiLink>
+    </>
+  );
+};
+
+const getTitleAndDescription = (
+  isIndicatorMatchesPresent: boolean,
+  isInvestigationTimeEnrichmentsPresent: boolean
+) => {
+  let title;
+  let description;
   if (!isIndicatorMatchesPresent && !isInvestigationTimeEnrichmentsPresent) {
-    return (
-      <NoEnrichmentsPanelView
-        title={<h2>{i18n.NO_ENRICHMENTS_FOUND_TITLE}</h2>}
-        description={
-          <p>
-            {i18n.NO_ENRICHMENTS_FOUND_DESCRIPTION} {noIntelligenceCTA}
-          </p>
-        }
-      />
-    );
+    title = i18n.NO_ENRICHMENTS_FOUND_TITLE;
+    description = i18n.NO_ENRICHMENTS_FOUND_DESCRIPTION;
   } else if (!isIndicatorMatchesPresent) {
-    return (
-      <>
-        <EuiHorizontalRule margin="s" />
-        <NoEnrichmentsPanelView
-          title={<h2>{i18n.NO_INDICATOR_ENRICHMENTS_TITLE}</h2>}
-          description={
-            <p>
-              {i18n.NO_INDICATOR_ENRICHMENTS_DESCRIPTION} {noIntelligenceCTA}
-            </p>
-          }
-        />
-      </>
-    );
-  } else if (!isInvestigationTimeEnrichmentsPresent) {
-    return (
-      <>
-        <EuiHorizontalRule margin="s" />
-        {showPicker && (
-          <>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup justifyContent="center">
-              <EnrichmentRangePicker onChange={onRangeChange} />
-            </EuiFlexGroup>
-          </>
-        )}
-        <NoEnrichmentsPanelView
-          title={<h2>{i18n.NO_INVESTIGATION_ENRICHMENTS_TITLE}</h2>}
-          description={
-            <p>
-              {i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION} {noIntelligenceCTA}
-            </p>
-          }
-        />
-        <EuiLink
-          data-test-subj="change-enrichment-lookback-query-button"
-          onClick={handleSearchClick}
-        >
-          {i18n.CHANGE_ENRICHMENT_LOOKBACK}
-        </EuiLink>
-      </>
-    );
+    title = i18n.NO_INDICATOR_ENRICHMENTS_TITLE;
+    description = i18n.NO_INDICATOR_ENRICHMENTS_DESCRIPTION;
   } else {
-    return null;
+    title = i18n.NO_INVESTIGATION_ENRICHMENTS_TITLE;
+    description = i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION;
   }
+  return { title, description };
+};
+
+export const NoEnrichmentsPanel: React.FC<{
+  isIndicatorMatchesPresent: boolean;
+  isInvestigationTimeEnrichmentsPresent: boolean;
+  onRangeChange: RangeCallback;
+}> = ({ isIndicatorMatchesPresent, isInvestigationTimeEnrichmentsPresent, onRangeChange }) => {
+  if (isIndicatorMatchesPresent && isInvestigationTimeEnrichmentsPresent) return null;
+
+  const { title, description } = getTitleAndDescription(
+    isIndicatorMatchesPresent,
+    isInvestigationTimeEnrichmentsPresent
+  );
+
+  return (
+    <Container hasShadow={false} data-test-subj="no-enrichments-panel">
+      {!isInvestigationTimeEnrichmentsPresent && <RangeFilter onRangeChange={onRangeChange} />}
+      <EuiText textAlign="center">
+        <h2>{title}</h2>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiText size="s" color="subdued">
+        <p>
+          {description}
+          <NoIntelligenceCTA />
+        </p>
+      </EuiText>
+    </Container>
+  );
 };

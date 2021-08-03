@@ -152,6 +152,28 @@ const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[] }> = ({ enrichm
   </>
 );
 
+const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
+  <>
+    <EuiTitle size="xxxs">
+      <h5>{title}</h5>
+    </EuiTitle>
+    <EuiSpacer size="xs" />
+  </>
+);
+
+const SectionMessage: React.FC<{
+  id: string;
+  defaultMessage: string;
+  values: { [key: string]: number };
+}> = ({ id, defaultMessage, values }) => (
+  <>
+    <EuiText size="xs">
+      <FormattedMessage id={id} defaultMessage={defaultMessage} values={values} />
+    </EuiText>
+    <EuiSpacer size="s" />
+  </>
+);
+
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
 }> = ({ enrichments }) => {
@@ -166,20 +188,14 @@ const ThreatDetailsViewComponent: React.FC<{
       <EuiSpacer size="m" />
       {indicatorMatches && (
         <div data-test-subj={'threat-match-detected'}>
-          <EuiTitle size="xxxs">
-            <h5>{i18n.INDICATOR_TOOLTIP_TITLE}</h5>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.alertDetails.threatDetails.threatMatchSubtitle"
-              defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} matched a threat intelligence indicator with a rule you created."
-              values={{
-                totalCount: indicatorMatches.length,
-              }}
-            />
-          </EuiText>
-          <EuiSpacer size="s" />
+          <SectionTitle title={i18n.INDICATOR_TOOLTIP_TITLE} />
+          <SectionMessage
+            id="xpack.securitySolution.alertDetails.threatDetails.threatMatchSubtitle"
+            defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} matched a threat intelligence indicator with a rule you created."
+            values={{
+              totalCount: indicatorMatches.length,
+            }}
+          />
           <EnrichmentSection enrichments={indicatorMatches} />
         </div>
       )}
@@ -187,20 +203,14 @@ const ThreatDetailsViewComponent: React.FC<{
         <div data-test-subj={'enriched-with-threat-intel'}>
           {indicatorMatches && <EuiSpacer size="l" />}
           <>
-            <EuiTitle size="xxxs">
-              <h5>{i18n.INVESTIGATION_TOOLTIP_TITLE}</h5>
-            </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiText size="xs">
-              <FormattedMessage
-                id="xpack.securitySolution.alertDetails.threatDetails.investigationSubtitle"
-                defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} has additional information available from threat intelligence sources we searched in the past 30 days by default."
-                values={{
-                  totalCount: threatIntelEnrichments.length,
-                }}
-              />
-            </EuiText>
-            <EuiSpacer size="s" />
+            <SectionTitle title={i18n.INVESTIGATION_TOOLTIP_TITLE} />
+            <SectionMessage
+              id="xpack.securitySolution.alertDetails.threatDetails.investigationSubtitle"
+              defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} has additional information available from threat intelligence sources we searched in the past 30 days by default."
+              values={{
+                totalCount: threatIntelEnrichments.length,
+              }}
+            />
             <EnrichmentSection enrichments={threatIntelEnrichments} />
           </>
         </div>
