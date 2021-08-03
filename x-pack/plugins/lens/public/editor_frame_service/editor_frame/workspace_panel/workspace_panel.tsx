@@ -40,6 +40,7 @@ import {
   isLensEditEvent,
   VisualizationMap,
   DatasourceMap,
+  DatasourceFixAction,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
@@ -59,7 +60,7 @@ import {
   updateDatasourceState,
   setSaveable,
   useLensSelector,
-  selectExternalContextSearch,
+  selectExecutionContext,
 } from '../../../state_management';
 
 export interface WorkspacePanelProps {
@@ -87,7 +88,7 @@ interface WorkspaceState {
   expressionBuildError?: Array<{
     shortMessage: string;
     longMessage: string;
-    fixAction?: { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> };
+    fixAction?: DatasourceFixAction<unknown>;
   }>;
   expandError: boolean;
 }
@@ -138,6 +139,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   suggestionForDraggedField: Suggestion | undefined;
 }) {
   const dispatchLens = useLensDispatch();
+  const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -184,53 +186,49 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [activeVisualization, visualizationState, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const expression = useMemo(
-    () => {
-      if (!configurationValidationError?.length && !missingRefsErrors.length) {
-        try {
-          const ast = buildExpression({
-            visualization: activeVisualization,
-            visualizationState,
-            datasourceMap,
-            datasourceStates,
-            datasourceLayers: framePublicAPI.datasourceLayers,
-          });
+  const expression = useMemo(() => {
+    if (!configurationValidationError?.length && !missingRefsErrors.length) {
+      try {
+        const ast = buildExpression({
+          visualization: activeVisualization,
+          visualizationState,
+          datasourceMap,
+          datasourceStates,
+          datasourceLayers,
+        });
 
-          if (ast) {
-            // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
-            // turning it into a string will make sure the expression renderer only re-renders if the
-            // expression actually changed.
-            return toExpression(ast);
-          } else {
-            return null;
-          }
-        } catch (e) {
-          const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
-          const defaultMessage = {
-            shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
-              defaultMessage: 'An unexpected error occurred while preparing the chart',
-            }),
-            longMessage: e.toString(),
-          };
-          // Most likely an error in the expression provided by a datasource or visualization
-          setLocalState((s) => ({
-            ...s,
-            expressionBuildError: buildMessages ?? [defaultMessage],
-          }));
+        if (ast) {
+          // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
+          // turning it into a string will make sure the expression renderer only re-renders if the
+          // expression actually changed.
+          return toExpression(ast);
+        } else {
+          return null;
         }
+      } catch (e) {
+        const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
+        const defaultMessage = {
+          shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
+            defaultMessage: 'An unexpected error occurred while preparing the chart',
+          }),
+          longMessage: e.toString(),
+        };
+        // Most likely an error in the expression provided by a datasource or visualization
+        setLocalState((s) => ({
+          ...s,
+          expressionBuildError: buildMessages ?? [defaultMessage],
+        }));
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      activeVisualization,
-      visualizationState,
-      datasourceMap,
-      datasourceStates,
-      framePublicAPI.dateRange,
-      framePublicAPI.query,
-      framePublicAPI.filters,
-    ]
-  );
+    }
+  }, [
+    activeVisualization,
+    visualizationState,
+    datasourceMap,
+    datasourceStates,
+    datasourceLayers,
+    configurationValidationError?.length,
+    missingRefsErrors.length,
+  ]);
 
   const expressionExists = Boolean(expression);
   const hasLoaded = Boolean(
@@ -426,7 +424,7 @@ export const VisualizationWrapper = ({
     configurationValidationError?: Array<{
       shortMessage: string;
       longMessage: string;
-      fixAction?: { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> };
+      fixAction?: DatasourceFixAction<unknown>;
     }>;
     missingRefsErrors?: Array<{ shortMessage: string; longMessage: string }>;
   };
@@ -434,7 +432,18 @@ export const VisualizationWrapper = ({
   application: ApplicationStart;
   activeDatasourceId: string | null;
 }) => {
-  const context: ExecutionContextSearch = useLensSelector(selectExternalContextSearch);
+  const context = useLensSelector(selectExecutionContext);
+  const searchContext: ExecutionContextSearch = useMemo(
+    () => ({
+      query: context.query,
+      timeRange: {
+        from: context.dateRange.fromDate,
+        to: context.dateRange.toDate,
+      },
+      filters: context.filters,
+    }),
+    [context]
+  );
   const searchSessionId = useLensSelector((state) => state.lens.searchSessionId);
 
   const dispatchLens = useLensDispatch();
@@ -453,9 +462,7 @@ export const VisualizationWrapper = ({
       | {
           shortMessage: string;
           longMessage: string;
-          fixAction?:
-            | { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> }
-            | undefined;
+          fixAction?: DatasourceFixAction<unknown>;
         }
       | undefined
   ) {
@@ -468,7 +475,10 @@ export const VisualizationWrapper = ({
             data-test-subj="errorFixAction"
             onClick={async () => {
               trackUiEvent('error_fix_action');
-              const newState = await validationError.fixAction?.newState(framePublicAPI);
+              const newState = await validationError.fixAction?.newState({
+                ...framePublicAPI,
+                ...context,
+              });
               dispatchLens(
                 updateDatasourceState({
                   updater: newState,
@@ -626,7 +636,7 @@ export const VisualizationWrapper = ({
         className="lnsExpressionRenderer__component"
         padding="m"
         expression={expression!}
-        searchContext={context}
+        searchContext={searchContext}
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         onData$={onData$}

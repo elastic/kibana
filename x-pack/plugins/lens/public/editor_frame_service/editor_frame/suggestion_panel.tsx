@@ -44,7 +44,7 @@ import { getMissingIndexPattern, validateDatasourceAndVisualization } from './st
 import {
   PreviewState,
   rollbackSuggestion,
-  selectExternalContextSearch,
+  selectExecutionContextSearch,
   submitSuggestion,
   useLensDispatch,
   useLensSelector,
@@ -280,7 +280,7 @@ export function SuggestionPanel({
     ]
   );
 
-  const context: ExecutionContextSearch = useLensSelector(selectExternalContextSearch);
+  const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);
   const searchSessionId = useLensSelector((state) => state.lens.searchSessionId);
 
   const contextRef = useRef<ExecutionContextSearch>(context);

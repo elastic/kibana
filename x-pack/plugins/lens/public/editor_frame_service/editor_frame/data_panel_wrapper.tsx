@@ -20,7 +20,7 @@ import {
   updateDatasourceState,
   useLensSelector,
   setState,
-  selectExternalContext,
+  selectExecutionContext,
 } from '../../state_management';
 import { initializeDatasources } from './state_helpers';
 
@@ -39,7 +39,7 @@ interface DataPanelWrapperProps {
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const { activeDatasource } = props;
 
-  const externalContext = useLensSelector(selectExternalContext);
+  const externalContext = useLensSelector(selectExecutionContext);
   const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
   const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
 

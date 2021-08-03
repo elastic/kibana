@@ -150,6 +150,13 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
+  };
+}
+
+export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;
+export function createMockFrameDatasourceAPI(): FrameDatasourceMock {
+  return {
+    datasourceLayers: {},
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
     filters: [],

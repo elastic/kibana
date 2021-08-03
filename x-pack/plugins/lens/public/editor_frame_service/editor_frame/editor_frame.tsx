@@ -33,13 +33,9 @@ export interface EditorFrameProps {
 export function EditorFrame(props: EditorFrameProps) {
   const {
     activeData,
-    resolvedDateRange: dateRange,
-    query,
-    filters,
-    searchSessionId,
     activeDatasourceId,
-    visualization,
     datasourceStates,
+    visualization,
     stagedPreview,
     isFullscreenDatasource,
   } = useLensSelector((state) => state.lens);
@@ -49,21 +45,14 @@ export function EditorFrame(props: EditorFrameProps) {
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   const datasourceLayers = React.useMemo(
-    () => createDatasourceLayers(props.datasourceMap, datasourceStates),
+    () => createDatasourceLayers(datasourceStates, props.datasourceMap),
     [props.datasourceMap, datasourceStates]
   );
 
-  const framePublicAPI: FramePublicAPI = useMemo(
-    () => ({
-      datasourceLayers,
-      activeData,
-      dateRange,
-      query,
-      filters,
-      searchSessionId,
-    }),
-    [activeData, datasourceLayers, dateRange, query, filters, searchSessionId]
-  );
+  const framePublicAPI: FramePublicAPI = useMemo(() => ({ datasourceLayers, activeData }), [
+    activeData,
+    datasourceLayers,
+  ]);
 
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();

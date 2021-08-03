@@ -29,6 +29,7 @@ import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
+import { useLensSelector } from '../../../state_management';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -75,6 +76,7 @@ export function LayerPanel(
     visualizationState,
   } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
+  const dateRange = useLensSelector((state) => state.lens.resolvedDateRange);
 
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
@@ -90,7 +92,7 @@ export function LayerPanel(
     layerId,
     state: props.visualizationState,
     frame: props.framePublicAPI,
-    dateRange: props.framePublicAPI.dateRange,
+    dateRange,
     activeData: props.framePublicAPI.activeData,
   };
 
@@ -113,8 +115,8 @@ export function LayerPanel(
   const layerDatasourceConfigProps = {
     ...layerDatasourceDropProps,
     frame: props.framePublicAPI,
-    dateRange: props.framePublicAPI.dateRange,
     activeData: props.framePublicAPI.activeData,
+    dateRange,
   };
 
   const { groups } = useMemo(

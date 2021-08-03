@@ -15,7 +15,7 @@ const selectQuery = (state: LensState) => state.lens.query;
 const selectFilters = (state: LensState) => state.lens.filters;
 const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
 
-export const selectExternalContext = createSelector(
+export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
   (query, filters, dateRange) => ({
     dateRange,
@@ -24,7 +24,7 @@ export const selectExternalContext = createSelector(
   })
 );
 
-export const selectExternalContextSearch = createSelector(selectExternalContext, (res) => ({
+export const selectExecutionContextSearch = createSelector(selectExecutionContext, (res) => ({
   query: res.query,
   timeRange: {
     from: res.dateRange.fromDate,
