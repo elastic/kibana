@@ -55,32 +55,35 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlRequest>> = [
 export const CrawlRequestsTable: React.FC = () => {
   const { crawlRequests } = useValues(CrawlerOverviewLogic);
 
-  if (crawlRequests.length === 0) {
-    return (
-      <EuiEmptyPrompt
-        iconType="tableDensityExpanded"
-        title={
-          <h3>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.emptyPrompt.title',
-              {
-                defaultMessage: 'No recent crawl requests',
-              }
-            )}
-          </h3>
-        }
-        body={
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.emptyPrompt.body',
-              {
-                defaultMessage: "You haven't started any crawls yet.",
-              }
-            )}
-          </p>
-        }
-      />
-    );
-  }
-  return <EuiBasicTable columns={columns} items={crawlRequests} />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={crawlRequests}
+      noItemsMessage={
+        <EuiEmptyPrompt
+          iconType="tableDensityExpanded"
+          title={
+            <h3>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.emptyPrompt.title',
+                {
+                  defaultMessage: 'No recent crawl requests',
+                }
+              )}
+            </h3>
+          }
+          body={
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.emptyPrompt.body',
+                {
+                  defaultMessage: "You haven't started any crawls yet.",
+                }
+              )}
+            </p>
+          }
+        />
+      }
+    />
+  );
 };

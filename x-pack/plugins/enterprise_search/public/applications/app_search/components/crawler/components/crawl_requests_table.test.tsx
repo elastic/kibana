@@ -97,7 +97,7 @@ describe('CrawlRequestsTable', () => {
 
       wrapper = shallow(<CrawlRequestsTable />);
 
-      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+      expect(wrapper.find(EuiBasicTable).dive().find(EuiEmptyPrompt)).toHaveLength(1);
     });
   });
 });
