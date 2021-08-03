@@ -135,11 +135,10 @@
           ],
           "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "visTypeTimeseries",
-              "id": "def-server.requestContext",
+              "id": "def-server.VisTypeTimeseriesSetup.getVisData.$1",
               "type": "Object",
               "tags": [],
               "label": "requestContext",
@@ -148,11 +147,12 @@
                 "DataRequestHandlerContext"
               ],
               "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "visTypeTimeseries",
-              "id": "def-server.fakeRequest",
+              "id": "def-server.VisTypeTimeseriesSetup.getVisData.$2",
               "type": "Object",
               "tags": [],
               "label": "fakeRequest",
@@ -168,11 +168,12 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "visTypeTimeseries",
-              "id": "def-server.options",
+              "id": "def-server.VisTypeTimeseriesSetup.getVisData.$3",
               "type": "Any",
               "tags": [],
               "label": "options",
@@ -181,9 +182,11 @@
                 "any"
               ],
               "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

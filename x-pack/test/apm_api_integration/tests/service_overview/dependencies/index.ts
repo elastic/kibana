@@ -344,11 +344,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem.location).toMatchInline(`
           Object {
-            "backendName": "postgresql",
-            "id": "d4e2a4d33829d41c096c26f8037921cfc7e566b2",
-            "spanSubtype": "postgresql",
-            "spanType": "db",
-            "type": "backend",
+            "agentName": "dotnet",
+            "environment": "production",
+            "id": "5948c153c2d8989f92a9c75ef45bb845f53e200d",
+            "serviceName": "opbeans-dotnet",
+            "type": "service",
           }
         `);
 
@@ -361,14 +361,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Object {
             "errorRate": Object {
-              "value": 0.00308832612723904,
+              "value": 0.163636363636364,
             },
             "impact": 100,
             "latency": Object {
-              "value": 30177.8418777023,
+              "value": 1117085.74545455,
             },
             "throughput": Object {
-              "value": 53.9666666666667,
+              "value": 1.83333333333333,
             },
           }
         `);
@@ -379,7 +379,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(names.sort()).toMatchInline(`
           Array [
             "elasticsearch",
-            "opbeans-python",
+            "opbeans-dotnet",
             "postgresql",
             "redis",
           ]
@@ -395,7 +395,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(serviceNames.sort()).toMatchInline(`
           Array [
-            "opbeans-python",
+            "opbeans-dotnet",
           ]
         `);
       });
@@ -412,19 +412,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(latencyValues).toMatchInline(`
           Array [
             Object {
-              "latency": 10125.412371134,
+              "latency": 9496.32291666667,
               "name": "elasticsearch",
             },
             Object {
-              "latency": 42984.2941176471,
-              "name": "opbeans-python",
+              "latency": 1117085.74545455,
+              "name": "opbeans-dotnet",
             },
             Object {
-              "latency": 30177.8418777023,
+              "latency": 27826.9968314322,
               "name": "postgresql",
             },
             Object {
-              "latency": 1341.11624072547,
+              "latency": 1468.27242524917,
               "name": "redis",
             },
           ]
@@ -444,19 +444,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {
               "name": "elasticsearch",
-              "throughput": 3.23333333333333,
+              "throughput": 3.2,
             },
             Object {
-              "name": "opbeans-python",
-              "throughput": 1.7,
+              "name": "opbeans-dotnet",
+              "throughput": 1.83333333333333,
             },
             Object {
               "name": "postgresql",
-              "throughput": 53.9666666666667,
+              "throughput": 52.6,
             },
             Object {
               "name": "redis",
-              "throughput": 40.4333333333333,
+              "throughput": 40.1333333333333,
             },
           ]
         `);
@@ -477,27 +477,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {
               "impact": 0,
-              "latency": 10125.412371134,
+              "latency": 9496.32291666667,
               "name": "elasticsearch",
-              "throughput": 3.23333333333333,
-            },
-            Object {
-              "impact": 2.52744598670713,
-              "latency": 42984.2941176471,
-              "name": "opbeans-python",
-              "throughput": 1.7,
+              "throughput": 3.2,
             },
             Object {
               "impact": 100,
-              "latency": 30177.8418777023,
-              "name": "postgresql",
-              "throughput": 53.9666666666667,
+              "latency": 1117085.74545455,
+              "name": "opbeans-dotnet",
+              "throughput": 1.83333333333333,
             },
             Object {
-              "impact": 1.34642037334926,
-              "latency": 1341.11624072547,
+              "impact": 71.0403531954737,
+              "latency": 27826.9968314322,
+              "name": "postgresql",
+              "throughput": 52.6,
+            },
+            Object {
+              "impact": 1.41447268043525,
+              "latency": 1468.27242524917,
               "name": "redis",
-              "throughput": 40.4333333333333,
+              "throughput": 40.1333333333333,
             },
           ]
         `);

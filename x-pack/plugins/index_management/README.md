@@ -83,3 +83,20 @@ PUT _template/.cloud-example
 ```
 
 The UI will now prevent you from editing or deleting this template.
+
+In 7.x, the UI supports types defined as part of the mappings for legacy index templates. To test this out, use the "Load JSON" feature and verify the custom type is preserved:
+
+```
+{
+  "my_custom_type": {
+    "_source": {
+      "enabled": false
+    },
+    "properties": {
+      "name1": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+```

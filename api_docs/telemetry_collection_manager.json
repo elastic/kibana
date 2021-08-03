@@ -533,6 +533,47 @@
         ],
         "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "telemetryCollectionManager",
+            "id": "def-server.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionConfig",
+                "text": "StatsCollectionConfig"
+              }
+            ],
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetryCollectionManager",
+            "id": "def-server.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionContext",
+                "text": "StatsCollectionContext"
+              }
+            ],
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -571,6 +612,67 @@
         ],
         "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "telemetryCollectionManager",
+            "id": "def-server.clustersDetails",
+            "type": "Array",
+            "tags": [],
+            "label": "clustersDetails",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.ClusterDetails",
+                "text": "ClusterDetails"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetryCollectionManager",
+            "id": "def-server.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionConfig",
+                "text": "StatsCollectionConfig"
+              }
+            ],
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetryCollectionManager",
+            "id": "def-server.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "telemetryCollectionManager",
+                "scope": "server",
+                "docId": "kibTelemetryCollectionManagerPluginApi",
+                "section": "def-server.StatsCollectionContext",
+                "text": "StatsCollectionContext"
+              }
+            ],
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -617,11 +719,10 @@
           ],
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "telemetryCollectionManager",
-              "id": "def-server.collectionConfig",
+              "id": "def-server.TelemetryCollectionManagerPluginSetup.setCollectionStrategy.$1",
               "type": "Object",
               "tags": [],
               "label": "collectionConfig",
@@ -631,9 +732,11 @@
                 "<T>"
               ],
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "telemetryCollectionManager",

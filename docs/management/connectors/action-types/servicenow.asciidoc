@@ -5,7 +5,7 @@
 <titleabbrev>ServiceNow</titleabbrev>
 ++++
 
-The ServiceNow connector uses the https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI[V2 Table API] to create ServiceNow incidents.
+The ServiceNow connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow incidents.
 
 [float]
 [[servicenow-connector-configuration]]
