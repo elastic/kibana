@@ -17,6 +17,6 @@ export type ArgTypeDef = View | Model | Transform | Datasource;
 export { Transform, View, Datasource, Model };
 export type { Arg } from './arg';
 
-export type ExpressionType = View | Model | Transform | Datasource;
+export type ExpressionType = View | Model | Transform;
 
 export type { RenderArgData } from './function_form';

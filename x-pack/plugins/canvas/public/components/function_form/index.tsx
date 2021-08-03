@@ -33,7 +33,7 @@ import { getAssets } from '../../state/selectors/assets';
 // @ts-expect-error unconverted lib
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
-import { Arg, ArgType, ArgTypeDef } from '../../expression_types/types';
+import { ArgType, ArgTypeDef } from '../../expression_types/types';
 import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
 
 interface FunctionFormProps {

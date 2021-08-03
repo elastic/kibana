@@ -8,8 +8,7 @@
 import { transformRegistry } from '../expression_types/transform_registry';
 import { modelRegistry } from '../expression_types/model_registry';
 import { viewRegistry } from '../expression_types/view_registry';
-import { ArgType } from '../expression_types/types';
-import { ExpressionType } from '../components/function_form/types';
+import { ArgType, ExpressionType } from '../expression_types/types';
 
 const expressionTypes: ArgType[] = ['view', 'model', 'transform', 'datasource'];
 
