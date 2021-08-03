@@ -8,6 +8,7 @@
 
 import { PluginInitializerContext } from '../../../core/server';
 import { FieldFormatsPlugin } from './plugin';
+export { DateFormat, DateNanosFormat } from './lib/converters';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new FieldFormatsPlugin(initializerContext);

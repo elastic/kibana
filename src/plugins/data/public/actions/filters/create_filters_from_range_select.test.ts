@@ -14,7 +14,7 @@ import { IndexPatternsContract, RangeFilter } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
 import { FieldFormatsGetConfigFn } from '../../../../field_formats/common';
-import { DateFormat } from '../../../../field_formats/public/lib/converters/date';
+import { DateFormat } from '../../../../field_formats/public/';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
