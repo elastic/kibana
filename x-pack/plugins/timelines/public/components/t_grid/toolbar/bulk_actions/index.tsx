@@ -7,13 +7,13 @@
 
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import * as i18n from './translations';
 
-export interface BulkActionsProps {
+interface BulkActionsProps {
   timelineId: string;
   totalItems: number;
   selectedCount: number;
@@ -33,7 +33,7 @@ BulkActionsContainer.displayName = 'BulkActionsContainer';
 /**
  * Stateless component integrating the bulk actions menu and the select all button
  */
-export const BulkActionsComponent: React.FC<BulkActionsProps> = ({
+const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   selectedCount,
   totalItems,
   showClearSelection,
@@ -41,13 +41,27 @@ export const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   onClearSelection,
   bulkActionItems,
 }) => {
-  const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const formattedTotalCount = numeral(totalItems).format(defaultNumberFormat);
-  const formattedSelectedEventsCount = numeral(selectedCount).format(defaultNumberFormat);
+  const formattedTotalCount = useMemo(() => numeral(totalItems).format(defaultNumberFormat), [
+    defaultNumberFormat,
+    totalItems,
+  ]);
+  const formattedSelectedEventsCount = useMemo(
+    () => numeral(selectedCount).format(defaultNumberFormat),
+    [defaultNumberFormat, selectedCount]
+  );
 
-  const onToggleSelectAll = useCallback(() => {
+  const toggleIsActionOpen = useCallback(() => {
+    setIsActionsPopoverOpen((currentIsOpen) => !currentIsOpen);
+  }, [setIsActionsPopoverOpen]);
+
+  const closeActionPopover = useCallback(() => {
+    setIsActionsPopoverOpen(false);
+  }, [setIsActionsPopoverOpen]);
+
+  const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
       onSelectAll();
     } else {
@@ -55,10 +69,32 @@ export const BulkActionsComponent: React.FC<BulkActionsProps> = ({
     }
   }, [onClearSelection, onSelectAll, showClearSelection]);
 
+  const selectedAlertsText = useMemo(
+    () =>
+      showClearSelection
+        ? i18n.SELECTED_ALERTS(formattedTotalCount, totalItems)
+        : i18n.SELECTED_ALERTS(formattedSelectedEventsCount, selectedCount),
+    [
+      showClearSelection,
+      formattedTotalCount,
+      formattedSelectedEventsCount,
+      totalItems,
+      selectedCount,
+    ]
+  );
+
+  const selectClearAllAlertsText = useMemo(
+    () =>
+      showClearSelection
+        ? i18n.CLEAR_SELECTION
+        : i18n.SELECT_ALL_ALERTS(formattedTotalCount, totalItems),
+    [showClearSelection, formattedTotalCount, totalItems]
+  );
+
   return (
     <BulkActionsContainer data-test-subj="bulk-actions-button-container">
       <EuiPopover
-        isOpen={isActionsOpen}
+        isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"
         panelPaddingSize="s"
         button={
@@ -69,15 +105,12 @@ export const BulkActionsComponent: React.FC<BulkActionsProps> = ({
             iconType="arrowDown"
             iconSide="right"
             color="primary"
-            onClick={() => setIsActionsOpen(!isActionsOpen)}
+            onClick={toggleIsActionOpen}
           >
-            {i18n.SELECTED_ALERTS(
-              showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
-              showClearSelection ? totalItems : selectedCount
-            )}
+            {selectedAlertsText}
           </EuiButtonEmpty>
         }
-        closePopover={() => setIsActionsOpen(false)}
+        closePopover={closeActionPopover}
       >
         <EuiContextMenuPanel size="s" items={bulkActionItems} />
       </EuiPopover>
@@ -87,11 +120,9 @@ export const BulkActionsComponent: React.FC<BulkActionsProps> = ({
         aria-label="selectAllAlerts"
         data-test-subj="selectAllAlertsButton"
         iconType={showClearSelection ? 'cross' : 'pagesSelect'}
-        onClick={onToggleSelectAll}
+        onClick={toggleSelectAll}
       >
-        {showClearSelection
-          ? i18n.CLEAR_SELECTION
-          : i18n.SELECT_ALL_ALERTS(formattedTotalCount, totalItems)}
+        {selectClearAllAlertsText}
       </EuiButtonEmpty>
     </BulkActionsContainer>
   );

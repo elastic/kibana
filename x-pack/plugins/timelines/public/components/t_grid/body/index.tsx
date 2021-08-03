@@ -240,7 +240,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       getManageTimeline(state, id)
     );
 
-    const subtitle = useMemo(() => `${totalItems.toLocaleString()} ${unit(totalItems)}`, [
+    const alertCountText = useMemo(() => `${totalItems.toLocaleString()} ${unit(totalItems)}`, [
       totalItems,
       unit,
     ]);
@@ -249,7 +249,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-        setSelected!({
+        setSelected({
           id,
           eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
           isSelected,
@@ -262,7 +262,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const onSelectPage: OnSelectAll = useCallback(
       ({ isSelected }: { isSelected: boolean }) =>
         isSelected
-          ? setSelected!({
+          ? setSelected({
               id,
               eventIds: getEventIdToDataMapping(
                 data,
@@ -272,7 +272,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               isSelected,
               isSelectAllChecked: isSelected,
             })
-          : clearSelected!({ id }),
+          : clearSelected({ id }),
       [setSelected, clearSelected, id, data, queryFields]
     );
 
@@ -309,7 +309,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       () => ({
         additionalControls: (
           <>
-            <AlertCount>{subtitle}</AlertCount>
+            <AlertCount>{alertCountText}</AlertCount>
             {showBulkActions ? (
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
@@ -353,7 +353,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }),
       [
         id,
-        subtitle,
+        alertCountText,
         totalItems,
         filterStatus,
         browserFields,
