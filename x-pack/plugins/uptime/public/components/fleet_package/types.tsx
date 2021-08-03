@@ -93,6 +93,7 @@ export enum ConfigKeys {
   SOURCE_ZIP_USERNAME = 'source.zip_url.username',
   SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
   SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
+  PARAMS = 'params',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
   TLS_KEY = 'ssl.key',
@@ -104,18 +105,6 @@ export enum ConfigKeys {
   URLS = 'urls',
   USERNAME = 'username',
   WAIT = 'wait',
-}
-
-export interface ISimpleFields {
-  [ConfigKeys.HOSTS]: string;
-  [ConfigKeys.MAX_REDIRECTS]: string;
-  [ConfigKeys.MONITOR_TYPE]: DataStream;
-  [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
-  [ConfigKeys.APM_SERVICE_NAME]: string;
-  [ConfigKeys.TIMEOUT]: string;
-  [ConfigKeys.URLS]: string;
-  [ConfigKeys.TAGS]: string[];
-  [ConfigKeys.WAIT]: string;
 }
 
 export interface ICommonFields {
@@ -195,6 +184,7 @@ export type IBrowserSimpleFields = {
   [ConfigKeys.SOURCE_ZIP_FOLDER]: string;
   [ConfigKeys.SOURCE_ZIP_USERNAME]: string;
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: string;
+  [ConfigKeys.PARAMS]: string;
 } & ICommonFields;
 
 export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;

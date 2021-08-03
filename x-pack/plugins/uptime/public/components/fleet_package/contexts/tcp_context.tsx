@@ -19,9 +19,8 @@ interface ITCPSimpleFieldsContextProvider {
   defaultValues?: ITCPSimpleFields;
 }
 
-export const initialValues = {
+export const initialValues: ITCPSimpleFields = {
   [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: '0',
   [ConfigKeys.MONITOR_TYPE]: DataStream.TCP,
   [ConfigKeys.SCHEDULE]: {
     number: '3',

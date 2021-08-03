@@ -19,7 +19,7 @@ interface ITCPAdvancedFieldsContextProvider {
   defaultValues?: ITCPAdvancedFields;
 }
 
-export const initialValues = {
+export const initialValues: ITCPAdvancedFields = {
   [ConfigKeys.PROXY_URL]: '',
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
   [ConfigKeys.RESPONSE_RECEIVE_CHECK]: '',

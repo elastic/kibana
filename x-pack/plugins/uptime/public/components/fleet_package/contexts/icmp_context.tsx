@@ -19,9 +19,8 @@ interface IICMPSimpleFieldsContextProvider {
   defaultValues?: IICMPSimpleFields;
 }
 
-export const initialValues = {
+export const initialValues: IICMPSimpleFields = {
   [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: '0',
   [ConfigKeys.MONITOR_TYPE]: DataStream.ICMP,
   [ConfigKeys.SCHEDULE]: {
     number: '3',

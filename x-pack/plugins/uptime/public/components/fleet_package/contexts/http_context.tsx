@@ -19,7 +19,7 @@ interface IHTTPSimpleFieldsContextProvider {
   defaultValues?: IHTTPSimpleFields;
 }
 
-export const initialValues = {
+export const initialValues: IHTTPSimpleFields = {
   [ConfigKeys.URLS]: '',
   [ConfigKeys.MAX_REDIRECTS]: '0',
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,

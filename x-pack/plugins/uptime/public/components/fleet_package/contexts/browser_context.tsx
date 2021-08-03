@@ -19,12 +19,13 @@ interface IBrowserSimpleFieldsContextProvider {
   defaultValues?: IBrowserSimpleFields;
 }
 
-export const initialValues = {
+export const initialValues: IBrowserSimpleFields = {
   [ConfigKeys.SOURCE_ZIP_URL]: '',
   [ConfigKeys.SOURCE_ZIP_USERNAME]: '',
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: '',
   [ConfigKeys.SOURCE_ZIP_FOLDER]: '',
   [ConfigKeys.SOURCE_INLINE]: '',
+  [ConfigKeys.PARAMS]: '',
   [ConfigKeys.MONITOR_TYPE]: DataStream.BROWSER,
   [ConfigKeys.SCHEDULE]: {
     number: '3',
