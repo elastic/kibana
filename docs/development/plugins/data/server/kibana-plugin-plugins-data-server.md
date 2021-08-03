@@ -10,6 +10,7 @@
 |  --- | --- |
 |  [AggParamType](./kibana-plugin-plugins-data-server.aggparamtype.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-server.indexpattern.md) |  |
+|  [IndexPatternField](./kibana-plugin-plugins-data-server.indexpatternfield.md) |  |
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [IndexPatternsServiceProvider](./kibana-plugin-plugins-data-server.indexpatternsserviceprovider.md) |  |

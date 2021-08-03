@@ -95,7 +95,7 @@ export function registerGenerateFromJobParams(
       path: `${BASE_GENERATE}/{p*}`,
       validate: false,
     },
-    (context, req, res) => {
+    (_context, _req, res) => {
       return res.customError({ statusCode: 405, body: 'GET is not allowed' });
     }
   );

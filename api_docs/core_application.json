@@ -23,10 +23,7 @@
           "History",
           "<HistoryLocationState>"
         ],
-        "source": {
-          "path": "src/core/public/application/scoped_history.ts",
-          "lineNumber": 34
-        },
+        "path": "src/core/public/application/scoped_history.ts",
         "deprecated": false,
         "children": [
           {
@@ -39,10 +36,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 59
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -56,10 +50,7 @@
                   "History",
                   "<any>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -73,10 +64,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -103,10 +91,7 @@
               },
               "<SubHistoryLocationState>"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 77
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -121,10 +106,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 78
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -140,10 +122,7 @@
             "description": [
               "\nThe number of entries in the history stack, including all entries forwards and backwards from the current location."
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 86
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false
           },
           {
@@ -159,10 +138,7 @@
               "Location",
               "<HistoryLocationState>"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 94
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false
           },
           {
@@ -177,10 +153,7 @@
             "signature": [
               "\"PUSH\" | \"POP\" | \"REPLACE\""
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 102
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false
           },
           {
@@ -197,10 +170,7 @@
               "LocationDescriptorObject",
               "<HistoryLocationState>, state?: HistoryLocationState | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 113
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -217,10 +187,7 @@
                   "LocationDescriptorObject",
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 114
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -234,10 +201,7 @@
                 "signature": [
                   "HistoryLocationState | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 115
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -258,10 +222,7 @@
               "LocationDescriptorObject",
               "<HistoryLocationState>, state?: HistoryLocationState | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 131
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -278,10 +239,7 @@
                   "LocationDescriptorObject",
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 132
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -295,10 +253,7 @@
                 "signature": [
                   "HistoryLocationState | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 133
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -317,10 +272,7 @@
             "signature": [
               "(n: number) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 150
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -335,10 +287,7 @@
                 "signature": [
                   "number"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 150
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -357,10 +306,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 168
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -377,10 +323,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 177
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -400,10 +343,7 @@
               ".TransitionPromptHook<HistoryLocationState> | undefined) => ",
               "UnregisterCallback"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 185
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -418,10 +358,7 @@
                   "History",
                   ".TransitionPromptHook<HistoryLocationState> | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 186
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -445,10 +382,7 @@
               ") => void) => ",
               "UnregisterCallback"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 205
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -467,10 +401,7 @@
                   "Action",
                   ") => void"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 206
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -493,10 +424,7 @@
               "LocationDescriptorObject",
               "<HistoryLocationState>, { prependBasePath }?: { prependBasePath?: boolean | undefined; }) => string"
             ],
-            "source": {
-              "path": "src/core/public/application/scoped_history.ts",
-              "lineNumber": 222
-            },
+            "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
             "children": [
               {
@@ -510,10 +438,7 @@
                   "LocationDescriptorObject",
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 223
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -524,10 +449,7 @@
                 "tags": [],
                 "label": "{ prependBasePath = true }",
                 "description": [],
-                "source": {
-                  "path": "src/core/public/application/scoped_history.ts",
-                  "lineNumber": 224
-                },
+                "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
                 "children": [
                   {
@@ -540,10 +462,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/public/application/scoped_history.ts",
-                      "lineNumber": 224
-                    },
+                    "path": "src/core/public/application/scoped_history.ts",
                     "deprecated": false
                   }
                 ]
@@ -581,10 +500,7 @@
             "text": "AppNavOptions"
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 107
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -596,10 +512,7 @@
             "description": [
               "\nThe unique identifier of the application"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 111
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -611,10 +524,7 @@
             "description": [
               "\nThe title of the application."
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 116
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -630,10 +540,7 @@
               "AppCategory",
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 123
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -655,10 +562,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 129
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -680,10 +584,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 136
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -698,10 +599,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 142
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -716,10 +614,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 149
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -743,10 +638,7 @@
               },
               "> | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 183
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -763,10 +655,7 @@
               "Capabilities",
               "> | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 188
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -781,10 +670,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 194
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -823,10 +709,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 199
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -847,10 +730,7 @@
                   },
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 346
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false
               }
             ]
@@ -867,10 +747,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 206
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -885,10 +762,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 224
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -903,10 +777,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 227
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -928,10 +799,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 266
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -946,10 +814,7 @@
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to show a confirmation\nmessage when trying to leave an application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 572
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -969,10 +834,7 @@
               },
               ".confirm"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 573
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -982,10 +844,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 574
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -998,10 +857,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 575
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1014,10 +870,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 576
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -1032,10 +885,7 @@
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to execute the default\nbehaviour when leaving the application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 560
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1055,10 +905,7 @@
               },
               ".default"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 561
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -1071,10 +918,7 @@
         "tags": [],
         "label": "ApplicationSetup",
         "description": [],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 628
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1097,10 +941,7 @@
               },
               "<HistoryLocationState>) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 634
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1122,10 +963,7 @@
                   },
                   "<HistoryLocationState>"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 634
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1154,10 +992,7 @@
               },
               ">) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 663
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1179,10 +1014,7 @@
                   },
                   ">"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 663
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1199,10 +1031,7 @@
         "tags": [],
         "label": "ApplicationStart",
         "description": [],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 710
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1217,10 +1046,7 @@
             "signature": [
               "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 714
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1244,10 +1070,7 @@
               },
               ">>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 723
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1270,10 +1093,7 @@
               },
               " | undefined) => Promise<void>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 731
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1286,10 +1106,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 731
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1312,10 +1129,7 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 731
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1334,10 +1148,7 @@
             "signature": [
               "(url: string) => Promise<void>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 769
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1352,10 +1163,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 769
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1374,10 +1182,7 @@
             "signature": [
               "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 783
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -1390,10 +1195,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 784
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1404,10 +1206,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 785
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "children": [
                   {
@@ -1420,10 +1219,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/public/application/types.ts",
-                      "lineNumber": 785
-                    },
+                    "path": "src/core/public/application/types.ts",
                     "deprecated": false
                   },
                   {
@@ -1436,10 +1232,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/public/application/types.ts",
-                      "lineNumber": 785
-                    },
+                    "path": "src/core/public/application/types.ts",
                     "deprecated": false
                   },
                   {
@@ -1452,10 +1245,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "source": {
-                      "path": "src/core/public/application/types.ts",
-                      "lineNumber": 785
-                    },
+                    "path": "src/core/public/application/types.ts",
                     "deprecated": false
                   }
                 ]
@@ -1476,10 +1266,7 @@
               "Observable",
               "<string | undefined>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 791
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -1502,10 +1289,7 @@
           },
           "<HistoryLocationState>"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 356
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1520,10 +1304,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 360
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1545,10 +1326,7 @@
               },
               "<HistoryLocationState>"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 406
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1562,88 +1340,52 @@
             "description": [
               "\nThe route path for configuring navigation to the application.\nThis string should not include the base path from HTTP.\n"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 456
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "management",
-                "link": {
-                  "path": "src/plugins/management/public/application.tsx",
-                  "lineNumber": 16
-                }
+                "path": "src/plugins/management/public/application.tsx"
               },
               {
                 "plugin": "fleet",
-                "link": {
-                  "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx",
-                  "lineNumber": 67
-                }
+                "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
               },
               {
                 "plugin": "fleet",
-                "link": {
-                  "path": "x-pack/plugins/fleet/public/applications/fleet/index.tsx",
-                  "lineNumber": 69
-                }
+                "path": "x-pack/plugins/fleet/public/applications/fleet/index.tsx"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts",
-                  "lineNumber": 57
-                }
+                "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts",
-                  "lineNumber": 50
-                }
+                "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts",
-                  "lineNumber": 48
-                }
+                "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts",
-                  "lineNumber": 53
-                }
+                "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts",
-                  "lineNumber": 54
-                }
+                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts",
-                  "lineNumber": 55
-                }
+                "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts"
               },
               {
                 "plugin": "fleet",
-                "link": {
-                  "path": "x-pack/plugins/fleet/target/types/public/applications/fleet/index.d.ts",
-                  "lineNumber": 11
-                }
+                "path": "x-pack/plugins/fleet/target/types/public/applications/fleet/index.d.ts"
               },
               {
                 "plugin": "fleet",
-                "link": {
-                  "path": "x-pack/plugins/fleet/target/types/public/applications/integrations/index.d.ts",
-                  "lineNumber": 11
-                }
+                "path": "x-pack/plugins/fleet/target/types/public/applications/integrations/index.d.ts"
               }
             ]
           },
@@ -1669,151 +1411,88 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 491
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "dashboard",
-                "link": {
-                  "path": "src/plugins/dashboard/public/types.ts",
-                  "lineNumber": 194
-                }
+                "path": "src/plugins/dashboard/public/types.ts"
               },
               {
                 "plugin": "dashboard",
-                "link": {
-                  "path": "src/plugins/dashboard/public/application/dashboard_router.tsx",
-                  "lineNumber": 57
-                }
+                "path": "src/plugins/dashboard/public/application/dashboard_router.tsx"
               },
               {
                 "plugin": "dashboard",
-                "link": {
-                  "path": "src/plugins/dashboard/public/plugin.tsx",
-                  "lineNumber": 315
-                }
+                "path": "src/plugins/dashboard/public/plugin.tsx"
               },
               {
                 "plugin": "lens",
-                "link": {
-                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 47
-                }
+                "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
               },
               {
                 "plugin": "lens",
-                "link": {
-                  "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 75
-                }
+                "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
               },
               {
                 "plugin": "lens",
-                "link": {
-                  "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx",
-                  "lineNumber": 247
-                }
+                "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/public/render_app.tsx",
-                  "lineNumber": 68
-                }
+                "path": "x-pack/plugins/maps/public/render_app.tsx"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx",
-                  "lineNumber": 67
-                }
+                "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/public/routes/map_page/map_page.tsx",
-                  "lineNumber": 19
-                }
+                "path": "x-pack/plugins/maps/public/routes/map_page/map_page.tsx"
               },
               {
                 "plugin": "ml",
-                "link": {
-                  "path": "x-pack/plugins/ml/public/application/app.tsx",
-                  "lineNumber": 133
-                }
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
                 "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/public/app/index.tsx",
-                  "lineNumber": 20
-                }
+                "path": "x-pack/plugins/security_solution/public/app/index.tsx"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts",
-                  "lineNumber": 58
-                }
+                "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/target/types/public/render_app.d.ts",
-                  "lineNumber": 5
-                }
+                "path": "x-pack/plugins/maps/target/types/public/render_app.d.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts",
-                  "lineNumber": 51
-                }
+                "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts",
-                  "lineNumber": 49
-                }
+                "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts",
-                  "lineNumber": 54
-                }
+                "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts",
-                  "lineNumber": 55
-                }
+                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               },
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts",
-                  "lineNumber": 56
-                }
+                "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_page.d.ts",
-                  "lineNumber": 9
-                }
+                "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_page.d.ts"
               },
               {
                 "plugin": "maps",
-                "link": {
-                  "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts",
-                  "lineNumber": 17
-                }
+                "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
               }
             ],
             "returnComment": [],
@@ -1837,10 +1516,7 @@
                     "text": "AppLeaveAction"
                   }
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 491
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false
               }
             ]
@@ -1865,10 +1541,7 @@
               },
               "<HTMLElement> | undefined) => void"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 522
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1889,10 +1562,7 @@
                   },
                   "<HTMLElement> | undefined"
                 ],
-                "source": {
-                  "path": "src/core/public/application/types.ts",
-                  "lineNumber": 522
-                },
+                "path": "src/core/public/application/types.ts",
                 "deprecated": false
               }
             ]
@@ -1909,10 +1579,7 @@
         "description": [
           "\nApp navigation menu options"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 73
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1927,10 +1594,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 77
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1945,10 +1609,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 82
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1963,10 +1624,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 88
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -1981,10 +1639,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 94
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -1999,10 +1654,7 @@
         "description": [
           "\nOptions for the {@link ApplicationStart.navigateToApp | navigateToApp API}"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 683
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2017,10 +1669,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 688
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -2035,10 +1684,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 693
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -2053,10 +1699,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 697
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -2071,10 +1714,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 701
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           },
           {
@@ -2089,10 +1729,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/core/public/application/types.ts",
-              "lineNumber": 706
-            },
+            "path": "src/core/public/application/types.ts",
             "deprecated": false
           }
         ],
@@ -2109,10 +1746,7 @@
         "description": [
           "\nPossible type of actions on application leave.\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 547
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2125,10 +1759,7 @@
         "description": [
           "\nStatus of the application's navLink.\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 40
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2141,10 +1772,7 @@
         "description": [
           "\nAccessibility status of an application.\n"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 24
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2210,10 +1838,7 @@
           },
           "[]; })"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 292
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2243,10 +1868,7 @@
             "text": "AppLeaveConfirmAction"
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 586
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2273,102 +1895,60 @@
             "text": "AppLeaveAction"
           }
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 537
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": true,
         "references": [
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx",
-              "lineNumber": 13
-            }
+            "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx",
-              "lineNumber": 23
-            }
+            "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx",
-              "lineNumber": 13
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx",
-              "lineNumber": 23
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx",
-              "lineNumber": 12
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx",
-              "lineNumber": 66
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
-              "lineNumber": 12
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/home/index.tsx",
-              "lineNumber": 28
-            }
+            "path": "x-pack/plugins/security_solution/public/app/home/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/routes.tsx",
-              "lineNumber": 13
-            }
+            "path": "x-pack/plugins/security_solution/public/app/routes.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/routes.tsx",
-              "lineNumber": 23
-            }
+            "path": "x-pack/plugins/security_solution/public/app/routes.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
-              "lineNumber": 14
-            }
+            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
-              "lineNumber": 32
-            }
+            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           },
           {
             "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/app/app.tsx",
-              "lineNumber": 81
-            }
+            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           }
         ],
         "initialIsOpen": false
@@ -2409,10 +1989,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 345
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2428,10 +2005,7 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 353
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2471,10 +2045,7 @@
           },
           " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 64
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2506,10 +2077,7 @@
           },
           "<unknown>, \"status\" | \"deepLinks\" | \"searchable\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 102
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2549,10 +2117,7 @@
           },
           "; searchable: boolean; }"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 274
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2600,10 +2165,7 @@
           },
           "[]; searchable: boolean; }"
         ],
-        "source": {
-          "path": "src/core/public/application/types.ts",
-          "lineNumber": 324
-        },
+        "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

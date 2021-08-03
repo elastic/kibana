@@ -17,8 +17,9 @@ export * from './utils';
 export * from './exports';
 
 /**
- * Use data plugin interface instead
- * @deprecated
+ *
+ * @deprecated Use data plugin interface instead
+ * @removeBy 8.1
  */
 
 export { IndexPatternAttributes } from './types';
