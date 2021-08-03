@@ -45,11 +45,13 @@ export const useExceptionActions = ({
         name: ACTION_ADD_ENDPOINT_EXCEPTION,
         onClick: handleEndpointExceptionModal,
         disabled: disabledAddEndpointException,
+        [`data-test-subj`]: 'add-endpoint-exception-menu-item',
       },
       {
         name: ACTION_ADD_EXCEPTION,
         onClick: handleDetectionExceptionModal,
         disabled: disabledAddException,
+        [`data-test-subj`]: 'add-exception-menu-item',
       },
     ],
     [
