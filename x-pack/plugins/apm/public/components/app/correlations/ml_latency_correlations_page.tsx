@@ -77,6 +77,23 @@ export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
+  const showCorrelationsButtonLabel = i18n.translate(
+    'xpack.apm.transactionDetails.showCorrelationsButtonLabel',
+    {
+      defaultMessage: 'Analyze correlations',
+    }
+  );
+
+  const hideCorrelationsButtonLabel = i18n.translate(
+    'xpack.apm.transactionDetails.hideCorrelationsButtonLabel',
+    {
+      defaultMessage: 'Hide correlations',
+    }
+  );
+
+  const [showCorrelations, setShowCorrelations] = useState(false);
+  const toggleShowCorrelations = () => setShowCorrelations(!showCorrelations);
+
   const {
     ccsWarning,
     log,
@@ -89,17 +106,16 @@ export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
     cancelFetch,
     overallHistogram: originalOverallHistogram,
   } = useCorrelations({
-    ...{
-      ...{
-        environment,
-        kuery,
-        serviceName,
-        transactionName,
-        transactionType,
-        start,
-        end,
-      },
+    params: {
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+      analyzeCorrelations: showCorrelations,
     },
   });
 
@@ -119,7 +135,7 @@ export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [showCorrelations]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -273,23 +289,6 @@ export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
     });
   }, [histograms]);
 
-  const showCorrelationsButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.showCorrelationsButtonLabel',
-    {
-      defaultMessage: 'Show correlations',
-    }
-  );
-
-  const hideCorrelationsButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.hideCorrelationsButtonLabel',
-    {
-      defaultMessage: 'Hide correlations',
-    }
-  );
-
-  const [showCorrelations, setShowCorrelations] = useState(false);
-  const toggleShowCorrelations = () => setShowCorrelations(!showCorrelations);
-
   return (
     <EuiPanel hasBorder={true}>
       {overallHistogram !== undefined ? (
@@ -312,15 +311,17 @@ export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={toggleShowCorrelations}>
-                    {showCorrelations
-                      ? hideCorrelationsButtonLabel
-                      : showCorrelationsButtonLabel}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              {!showCorrelations && (
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill onClick={toggleShowCorrelations}>
+                      {showCorrelations
+                        ? hideCorrelationsButtonLabel
+                        : showCorrelationsButtonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
 
