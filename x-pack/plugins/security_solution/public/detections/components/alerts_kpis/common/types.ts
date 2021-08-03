@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALERT_RULE_TACTIC_NAME } from './../../../../../common/alert_constants';
+
 export interface AlertsStackByOption {
   text: AlertsStackByField;
   value: AlertsStackByField;
@@ -13,7 +15,7 @@ export interface AlertsStackByOption {
 export type AlertsStackByField =
   | 'signal.rule.risk_score'
   | 'signal.rule.severity'
-  | 'signal.rule.threat.tactic.name'
+  | typeof ALERT_RULE_TACTIC_NAME
   | 'destination.ip'
   | 'event.action'
   | 'event.category'

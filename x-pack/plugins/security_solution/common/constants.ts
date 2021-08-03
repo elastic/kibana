@@ -7,6 +7,7 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
+import { ALERT_RULE_TACTIC_NAME } from './alert_constants';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -191,7 +192,7 @@ export const SIGNALS_ID = `siem.signals`;
 export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
 export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
 
-export const QUERY_ALERT_TYPE_ID = `siem.queryRule`;
+export const CUSTOM_ALERT_TYPE_ID = `siem.customRule`;
 export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
 export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
 export const ML_ALERT_TYPE_ID = `siem.mlRule`;
@@ -297,7 +298,7 @@ export const showAllOthersBucket: string[] = [
   'event.category',
   'event.dataset',
   'event.module',
-  'signal.rule.threat.tactic.name',
+  ALERT_RULE_TACTIC_NAME,
   'source.ip',
   'destination.ip',
   'user.name',

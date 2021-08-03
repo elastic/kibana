@@ -6,6 +6,12 @@
  */
 
 import { FieldMap } from '../../../../../../rule_registry/common/field_map';
+import {
+  ALERT_RULE_TACTIC,
+  ALERT_RULE_TACTIC_ID,
+  ALERT_RULE_TACTIC_NAME,
+  ALERT_RULE_TACTIC_REFERENCE,
+} from './../../../../../common/alert_constants';
 
 export const alertsFieldMap: FieldMap = {
   'kibana.alert.ancestors': {
@@ -188,22 +194,22 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
-  'kibana.alert.threat.tactic': {
+  [ALERT_RULE_TACTIC]: {
     type: 'object',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.tactic.id': {
+  [ALERT_RULE_TACTIC_ID]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.tactic.name': {
+  [ALERT_RULE_TACTIC_NAME]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.tactic.reference': {
+  [ALERT_RULE_TACTIC_REFERENCE]: {
     type: 'keyword',
     array: false,
     required: true,

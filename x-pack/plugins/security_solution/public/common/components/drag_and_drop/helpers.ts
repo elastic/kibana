@@ -9,11 +9,34 @@ import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 import { getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 
+import {
+  ALERT_RULE_CREATED_BY,
+  ALERT_RULE_DESCRIPTION,
+  ALERT_RULE_ENABLED,
+  ALERT_RULE_FROM,
+  ALERT_RULE_ID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_REFERENCES,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_RULE_ID,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TO,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_UPDATED_BY,
+  ALERT_RULE_VERSION,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils';
 import { BrowserField } from '../../containers/source';
 import { dragAndDropActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import {
+  ALERT_RULE_TACTIC_ID,
+  ALERT_RULE_TACTIC_NAME,
+  ALERT_RULE_TACTIC_REFERENCE,
+} from './../../../../common/alert_constants';
 
 export {
   draggableIdPrefix,
@@ -142,43 +165,43 @@ export const allowTopN = ({
     'signal.parent.index',
     'signal.parent.rule',
     'signal.parent.type',
-    'signal.rule.created_by',
-    'signal.rule.description',
-    'signal.rule.enabled',
+    ALERT_RULE_CREATED_BY,
+    ALERT_RULE_DESCRIPTION,
+    ALERT_RULE_ENABLED,
     'signal.rule.false_positives',
     'signal.rule.filters',
-    'signal.rule.from',
-    'signal.rule.id',
+    ALERT_RULE_FROM,
+    ALERT_RULE_ID,
     'signal.rule.immutable',
     'signal.rule.index',
     'signal.rule.interval',
     'signal.rule.language',
     'signal.rule.max_signals',
-    'signal.rule.name',
+    ALERT_RULE_NAME,
     'signal.rule.note',
     'signal.rule.output_index',
     'signal.rule.query',
-    'signal.rule.references',
-    'signal.rule.risk_score',
-    'signal.rule.rule_id',
+    ALERT_RULE_REFERENCES,
+    ALERT_RULE_RISK_SCORE,
+    ALERT_RULE_RULE_ID,
     'signal.rule.saved_id',
-    'signal.rule.severity',
+    ALERT_RULE_SEVERITY,
     'signal.rule.size',
-    'signal.rule.tags',
+    ALERT_RULE_TAGS,
     'signal.rule.threat',
-    'signal.rule.threat.tactic.id',
-    'signal.rule.threat.tactic.name',
-    'signal.rule.threat.tactic.reference',
+    ALERT_RULE_TACTIC_ID,
+    ALERT_RULE_TACTIC_NAME,
+    ALERT_RULE_TACTIC_REFERENCE,
     'signal.rule.threat.technique.id',
     'signal.rule.threat.technique.name',
     'signal.rule.threat.technique.reference',
     'signal.rule.timeline_id',
     'signal.rule.timeline_title',
-    'signal.rule.to',
-    'signal.rule.type',
-    'signal.rule.updated_by',
-    'signal.rule.version',
-    'signal.status',
+    ALERT_RULE_TO,
+    ALERT_RULE_TYPE,
+    ALERT_RULE_UPDATED_BY,
+    ALERT_RULE_VERSION,
+    ALERT_STATUS,
   ].includes(fieldName);
 
   return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);

@@ -6,11 +6,12 @@
  */
 
 import type { AlertsStackByOption } from './types';
+import { ALERT_RULE_TACTIC_NAME } from './../../../../../common/alert_constants';
 
 export const alertsStackByOptions: AlertsStackByOption[] = [
   { text: 'signal.rule.risk_score', value: 'signal.rule.risk_score' },
   { text: 'signal.rule.severity', value: 'signal.rule.severity' },
-  { text: 'signal.rule.threat.tactic.name', value: 'signal.rule.threat.tactic.name' },
+  { text: ALERT_RULE_TACTIC_NAME, value: ALERT_RULE_TACTIC_NAME },
   { text: 'destination.ip', value: 'destination.ip' },
   { text: 'event.action', value: 'event.action' },
   { text: 'event.category', value: 'event.category' },

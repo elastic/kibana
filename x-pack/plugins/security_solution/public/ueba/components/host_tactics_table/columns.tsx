@@ -18,6 +18,7 @@ import { HostTacticsColumns } from './';
 
 import * as i18n from './translations';
 import { HostTacticsFields } from '../../../../common';
+import { ALERT_RULE_TACTIC_NAME } from '../../../../common/alert_constants';
 
 export const getHostTacticsColumns = (): HostTacticsColumns => [
   {
@@ -39,7 +40,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               name: tactic,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.threat.tactic.name',
+                field: ALERT_RULE_TACTIC_NAME,
                 value: tactic,
                 operator: IS_OPERATOR,
               },

@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { ALERT_RULE_TACTIC_NAME } from '../../../../../../common/alert_constants';
 import { HostTacticsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -44,7 +45,7 @@ export const buildHostTacticsQuery = ({
         },
         tactic: {
           terms: {
-            field: 'signal.rule.threat.tactic.name',
+            field: ALERT_RULE_TACTIC_NAME,
           },
           aggs: {
             technique: {
@@ -63,7 +64,7 @@ export const buildHostTacticsQuery = ({
         },
         tactic_count: {
           cardinality: {
-            field: 'signal.rule.threat.tactic.name',
+            field: ALERT_RULE_TACTIC_NAME,
           },
         },
         technique_count: {

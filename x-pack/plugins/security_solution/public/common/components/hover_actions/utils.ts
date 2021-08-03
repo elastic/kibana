@@ -6,6 +6,11 @@
  */
 
 import { BrowserField } from '../../containers/source';
+import {
+  ALERT_RULE_TACTIC_ID,
+  ALERT_RULE_TACTIC_NAME,
+  ALERT_RULE_TACTIC_REFERENCE,
+} from './../../../../common/alert_constants';
 
 export const getAdditionalScreenReaderOnlyContext = ({
   field,
@@ -98,9 +103,9 @@ export const allowTopN = ({
     'signal.rule.size',
     'signal.rule.tags',
     'signal.rule.threat',
-    'signal.rule.threat.tactic.id',
-    'signal.rule.threat.tactic.name',
-    'signal.rule.threat.tactic.reference',
+    ALERT_RULE_TACTIC_ID,
+    ALERT_RULE_TACTIC_NAME,
+    ALERT_RULE_TACTIC_REFERENCE,
     'signal.rule.threat.technique.id',
     'signal.rule.threat.technique.name',
     'signal.rule.threat.technique.reference',
