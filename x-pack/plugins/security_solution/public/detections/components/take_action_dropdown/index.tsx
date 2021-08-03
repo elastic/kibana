@@ -9,7 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import { find, get } from 'lodash/fp';
+import { find } from 'lodash/fp';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
 import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
@@ -28,6 +28,15 @@ import { useHostIsolationAction } from '../host_isolation/use_host_isolation_act
 import { CHANGE_ALERT_STATUS } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+
+interface ActionsData {
+  alertStatus: Status;
+  eventId: string;
+  eventKind: string;
+  ruleId: string;
+  ruleName: string;
+}
 
 export const TakeActionDropdown = React.memo(
   ({
@@ -62,28 +71,26 @@ export const TakeActionDropdown = React.memo(
     */
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    const alertIds = useMemo(() => find({ category: '_id', field: '_id' }, detailsData)?.values, [
-      detailsData,
-    ]);
-
-    const alertId = get(0, alertIds);
-
-    const alertStatus = useMemo(
-      () => getFieldValue({ category: 'signal', field: 'signal.status' }, detailsData),
+    const actionsData = useMemo(
+      () =>
+        [
+          { category: 'signal', field: 'signal.rule.id', name: 'ruleId' },
+          { category: 'signal', field: 'signal.rule.name', name: 'ruleName' },
+          { category: 'signal', field: 'signal.status', name: 'alertStatus' },
+          { category: 'event', field: 'event.kind', name: 'eventKind' },
+          { category: '_id', field: '_id', name: 'eventId' },
+        ].reduce<ActionsData>(
+          (acc, curr) => ({
+            ...acc,
+            [curr.name]: getFieldValue({ category: curr.category, field: curr.field }, detailsData),
+          }),
+          {} as ActionsData
+        ),
       [detailsData]
     );
 
-    const eventKind = useMemo(
-      () => getFieldValue({ category: 'event', field: 'event.kind' }, detailsData),
-      [detailsData]
-    );
-
-    const ruleId = useMemo(
-      () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, detailsData),
-      [detailsData]
-    );
-
-    const isEvent = eventKind === 'event';
+    const alertIds = useMemo(() => [actionsData.eventId], [actionsData.eventId]);
+    const isEvent = actionsData.eventKind === 'event';
 
     const isEndpointAlert = useMemo((): boolean => {
       if (detailsData == null) {
@@ -151,8 +158,8 @@ export const TakeActionDropdown = React.memo(
     });
 
     const { statusActions } = useAlertsActions({
-      alertStatus,
-      eventId: alertId,
+      alertStatus: actionsData.alertStatus,
+      eventId: actionsData.eventId,
       timelineId,
       closePopover: closePopoverAndFlyout,
     });
@@ -165,7 +172,7 @@ export const TakeActionDropdown = React.memo(
 
     const alertsActionItems = useMemo(
       () =>
-        !isEvent && ruleId
+        !isEvent && actionsData.ruleId
           ? [
               {
                 name: CHANGE_ALERT_STATUS,
@@ -174,7 +181,7 @@ export const TakeActionDropdown = React.memo(
               ...exceptionActions,
             ]
           : [eventFilterActions],
-      [eventFilterActions, exceptionActions, isEvent, ruleId]
+      [eventFilterActions, exceptionActions, isEvent, actionsData.ruleId]
     );
 
     const panels = useMemo(

@@ -64,10 +64,7 @@ export const EventDetailsFooter = React.memo(
         ].reduce<AddExceptionModalWrapperData>(
           (acc, curr) => ({
             ...acc,
-            [curr.name]: getFieldValue(
-              { category: 'signal', field: 'signal.rule.id' },
-              detailsData
-            ),
+            [curr.name]: getFieldValue({ category: curr.category, field: curr.field }, detailsData),
           }),
           {} as AddExceptionModalWrapperData
         ),
