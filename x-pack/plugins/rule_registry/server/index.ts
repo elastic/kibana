@@ -18,13 +18,14 @@ export {
   createLifecycleRuleTypeFactory,
   LifecycleAlertService,
 } from './utils/create_lifecycle_rule_type_factory';
+export { RuleDataPluginService } from './rule_data_plugin_service';
 export {
   LifecycleRuleExecutor,
   LifecycleAlertServices,
   createLifecycleExecutor,
 } from './utils/create_lifecycle_executor';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
-export type { AlertTypeWithExecutor } from './types';
+export { AlertTypeWithExecutor } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);
