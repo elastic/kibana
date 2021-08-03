@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useRef } from 'react';
+import styled from 'styled-components';
 
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { FieldHook } from '../../shared_imports';
@@ -16,6 +17,10 @@ import {
   SavedQueriesDropdownRef,
 } from '../../saved_queries/saved_queries_dropdown';
 import { useKibana } from '../../common/lib/kibana';
+
+const StyledEuiCodeBlock = styled(EuiCodeBlock)`
+  min-height: 150px;
+`;
 
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
@@ -43,8 +48,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
     [setValue]
   );
 
-  console.error('deeed', disabled || !allLiveQueries);
-
   return (
     <EuiFormRow isInvalid={typeof error === 'string'} error={error} fullWidth>
       <>
@@ -55,11 +58,18 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
         />
         <EuiSpacer />
         <EuiFormRow fullWidth labelAppend={<OsquerySchemaLink />}>
-          <OsqueryEditor
-            defaultValue={value}
-            disabled={disabled || !allLiveQueries}
-            onChange={handleEditorChange}
-          />
+          {!allLiveQueries ? (
+            <StyledEuiCodeBlock
+              language="sql"
+              fontSize="m"
+              paddingSize="m"
+              transparentBackground={!value.length}
+            >
+              {value}
+            </StyledEuiCodeBlock>
+          ) : (
+            <OsqueryEditor defaultValue={value} disabled={disabled} onChange={handleEditorChange} />
+          )}
         </EuiFormRow>
       </>
     </EuiFormRow>

@@ -9,7 +9,7 @@ import { mapKeys } from 'lodash';
 import { useQueries, UseQueryResult } from 'react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
-import { agentPolicyRouteService, GetOneAgentPolicyResponse } from '../../../fleet/common';
+import { GetOneAgentPolicyResponse } from '../../../fleet/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useAgentPolicies = (policyIds: string[] = []) => {

@@ -15,6 +15,8 @@ export const useOsqueryIntegration = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  console.error('fff', useKibana());
+
   return useQuery('integrations', () => http.get('/internal/osquery/status'), {
     onError: (error: Error) =>
       setErrorToast(error, {

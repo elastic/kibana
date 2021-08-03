@@ -14,11 +14,8 @@ import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 export const buildActionsQuery = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filterQuery,
-  sort = {
-    field: '@timestamp',
-    direction: 'desc',
-  },
-  pagination: { cursorStart, querySize } = { cursorStart: 0, querySize: 1000 },
+  sort,
+  pagination: { cursorStart, querySize },
 }: AgentsRequestOptions): ISearchRequestParams => {
   // const filter = [...createQueryFilterClauses(filterQuery)];
 

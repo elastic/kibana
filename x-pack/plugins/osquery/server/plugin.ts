@@ -37,10 +37,9 @@ import { PLUGIN_ID } from '../common';
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
     id: PLUGIN_ID,
-    name: i18n.translate('xpack.features.osqueryFeatureName', {
+    name: i18n.translate('xpack.osquery.features.osqueryFeatureName', {
       defaultMessage: 'Osquery',
     }),
-    order: 2300,
     category: DEFAULT_APP_CATEGORIES.management,
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
@@ -72,7 +71,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
     },
     subFeatures: [
       {
-        name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
+        name: i18n.translate('xpack.osquery.features.liveQueriesSubFeatureName', {
           defaultMessage: 'Live queries',
         }),
         privilegeGroups: [
@@ -109,12 +108,9 @@ const registerFeatures = (features: SetupPlugins['features']) => {
               {
                 api: [`${PLUGIN_ID}-runSavedQueries`],
                 id: 'run_saved_queries',
-                name: i18n.translate(
-                  'xpack.features.ossFeatures.discoverCreateShortUrlPrivilegeName',
-                  {
-                    defaultMessage: 'Run Saved queries',
-                  }
-                ),
+                name: i18n.translate('xpack.osquery.features.runSavedQueriesPrivilegeName', {
+                  defaultMessage: 'Run Saved queries',
+                }),
                 includeIn: 'all',
                 savedObject: {
                   all: [usageMetricSavedObjectType],
@@ -127,7 +123,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         ],
       },
       {
-        name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
+        name: i18n.translate('xpack.osquery.features.savedQueriesSubFeatureName', {
           defaultMessage: 'Saved queries',
         }),
         privilegeGroups: [
@@ -159,7 +155,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         ],
       },
       {
-        name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
+        name: i18n.translate('xpack.osquery.features.scheduledQueryGroupsSubFeatureName', {
           defaultMessage: 'Scheduled query groups',
         }),
         privilegeGroups: [

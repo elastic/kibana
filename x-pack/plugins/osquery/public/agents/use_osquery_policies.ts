@@ -10,8 +10,6 @@ import { useQuery } from 'react-query';
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
-import { packagePolicyRouteService, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
-import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useOsqueryPolicies = () => {

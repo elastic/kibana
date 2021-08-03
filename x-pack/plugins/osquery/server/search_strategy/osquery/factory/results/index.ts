@@ -27,6 +27,10 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
     options: ResultsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<ResultsStrategyResponse> => {
+    console.error('-------');
+    console.error(JSON.stringify(response, null, 2));
+    console.error('-------');
+
     const { activePage } = options.pagination;
     const inspect = {
       dsl: [inspectStringifyObject(buildResultsQuery(options))],

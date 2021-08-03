@@ -55,7 +55,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({
       iconType="play"
       isDisabled={disabled}
       onClick={handlePlayClick}
-      aria-label={i18n.translate('xpack.osquery.savedQueryList.queriesTable.editActionAriaLabel', {
+      aria-label={i18n.translate('xpack.osquery.savedQueryList.queriesTable.runActionAriaLabel', {
         defaultMessage: 'Run {savedQueryName}',
         values: {
           savedQueryName,
