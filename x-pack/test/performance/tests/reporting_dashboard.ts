@@ -25,7 +25,9 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/performance/kbn_archives/reporting_dashboard');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/performance/kbn_archives/reporting_dashboard'
+      );
       await esArchiver.unload('x-pack/test/performance/es_archives/reporting_dashboard');
       await es.deleteByQuery({
         index: '.reporting-*',
