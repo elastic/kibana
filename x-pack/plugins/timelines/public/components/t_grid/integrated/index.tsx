@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -102,7 +102,7 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
   ${({ show }) => (show ? '' : 'visibility: hidden;')}
 `;
 
-const SECURITY_ALERTS_CONSUMERS = [ALERTS_CONSUMERS.SIEM];
+const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
   browserFields: BrowserFields;

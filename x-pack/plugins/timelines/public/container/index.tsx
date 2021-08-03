@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -81,7 +81,7 @@ export interface UseTimelineEventsProps {
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
   data?: DataPublicPluginStart;
-  alertConsumers?: ALERTS_CONSUMERS[];
+  alertConsumers?: AlertConsumers[];
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -108,7 +108,7 @@ export const initSortDefault = [
   },
 ];
 
-const EMPTY_ARRAY: ALERTS_CONSUMERS[] = [];
+const EMPTY_ARRAY: AlertConsumers[] = [];
 export const useTimelineEvents = ({
   alertConsumers = EMPTY_ARRAY,
   docValueFields,

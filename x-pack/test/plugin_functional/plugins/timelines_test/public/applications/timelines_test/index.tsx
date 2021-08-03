@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { Router } from 'react-router-dom';
 import React, { useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
@@ -38,7 +38,7 @@ export function renderApp(
     ReactDOM.unmountComponentAtNode(parameters.element);
   };
 }
-const ALERT_CONSUMER = [ALERTS_CONSUMERS.SIEM];
+const ALERT_CONSUMER = [AlertConsumers.SIEM];
 
 const AppRoot = React.memo(
   ({
