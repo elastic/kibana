@@ -114,6 +114,15 @@ test('executes the task by calling the executor with proper parameters', async (
     },
     references: [],
   });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
+  });
 
   const runnerResult = await taskRunner.run();
 
@@ -125,6 +134,123 @@ test('executes the task by calling the executor with proper parameters', async (
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [],
+    request: expect.objectContaining({
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
+  });
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
+});
+
+test('executes the task when getDecryptedAsInternalUser resolves to different SO ID ', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: 'abc',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
+  });
+
+  const runnerResult = await taskRunner.run();
+
+  expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
+  ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
+
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [],
+    request: expect.objectContaining({
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
+  });
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
+});
+
+test('executes the task when actionId resolves to different SO ID', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: 'xyz',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'aliasMatch',
+    aliasTargetId: '2',
+  });
+
+  const runnerResult = await taskRunner.run();
+
+  expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
+  ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
+
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: 'xyz',
     isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
@@ -163,6 +289,15 @@ test('cleans up action_task_params object', async () => {
     },
     references: [],
   });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
+  });
 
   await taskRunner.run();
 
@@ -185,6 +320,15 @@ test('runs successfully when cleanup fails and logs the error', async () => {
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
+  });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.delete.mockRejectedValueOnce(new Error('Fail'));
 
@@ -210,6 +354,15 @@ test('throws an error with suggested retry logic when return status is error', a
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
+  });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
   });
   mockedActionExecutor.execute.mockResolvedValueOnce({
     status: 'error',
@@ -245,6 +398,15 @@ test('uses API key when provided', async () => {
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
+  });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
   });
 
   await taskRunner.run();
@@ -290,6 +452,15 @@ test('uses relatedSavedObjects when provided', async () => {
     },
     references: [],
   });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
+  });
 
   await taskRunner.run();
 
@@ -333,6 +504,15 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
     },
     references: [],
   });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
+  });
 
   await taskRunner.run();
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
@@ -367,6 +547,15 @@ test(`doesn't use API key when not provided`, async () => {
       params: { baz: true },
     },
     references: [],
+  });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
   });
 
   await taskRunner.run();
@@ -405,6 +594,15 @@ test(`throws an error when license doesn't support the action type`, async () =>
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
+  });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
   });
   mockedActionExecutor.execute.mockImplementation(() => {
     throw new ActionTypeDisabledError('Fail', 'license_invalid');

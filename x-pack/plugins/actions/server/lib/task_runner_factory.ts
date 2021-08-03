@@ -87,14 +87,11 @@ export class TaskRunnerFactory {
         const {
           attributes: { actionId, params, apiKey, relatedSavedObjects },
           references,
-          /* resolveResponse, */
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
           spaceIdToNamespace
         );
-
-        // TODO: How to handle `resolveResponse` here?
 
         const requestHeaders: Record<string, string> = {};
         if (apiKey) {
@@ -121,15 +118,21 @@ export class TaskRunnerFactory {
 
         basePathService.set(fakeRequest, path);
 
+        // actionId could potentially be outdated; use resolve to ensure it is up to date
+        const {
+          saved_object: { id: resolvedActionId },
+        } = await getUnsecuredSavedObjectsClient(fakeRequest).resolve('action', actionId);
+
         let executorResult: ActionTypeExecutorResult<unknown>;
         try {
           executorResult = await actionExecutor.execute({
             params,
-            actionId: actionId as string,
+            actionId: resolvedActionId as string,
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request: fakeRequest,
             ...getSourceFromReferences(references),
             taskInfo,
+            // TODO - does this need to updated?
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
@@ -181,6 +184,8 @@ async function getActionTaskParams(
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {
+    // encryptedSavedObjectsClient.getDecryptedAsInternalUser will resolve outdated
+    // saved object IDs and return the resolved saved object
     return encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       executorParams.actionTaskParamsId,
