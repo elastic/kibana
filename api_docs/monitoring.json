@@ -21,7 +21,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/monitoring/server/types.ts",
-          "lineNumber": 94
+          "lineNumber": 95
         },
         "deprecated": false,
         "children": [
@@ -37,7 +37,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "deprecated": false,
             "returnComment": [],
@@ -55,7 +55,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "deprecated": false,
             "returnComment": [],
@@ -81,7 +81,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 97
+              "lineNumber": 98
             },
             "deprecated": false,
             "returnComment": [],
@@ -96,7 +96,7 @@
                 "signature": [
                   "Pick<",
                   "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"helpers\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                   "TransportRequestParams",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -108,7 +108,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/monitoring/server/types.ts",
-                  "lineNumber": 97
+                  "lineNumber": 98
                 },
                 "deprecated": false
               }
@@ -126,7 +126,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 98
+              "lineNumber": 99
             },
             "deprecated": false,
             "returnComment": [],
@@ -193,7 +193,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/monitoring/server/types.ts",
-        "lineNumber": 101
+        "lineNumber": 102
       },
       "deprecated": false,
       "children": [
@@ -209,7 +209,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/monitoring/server/types.ts",
-            "lineNumber": 102
+            "lineNumber": 103
           },
           "deprecated": false,
           "returnComment": [],
