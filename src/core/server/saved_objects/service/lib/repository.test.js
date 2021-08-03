@@ -27,7 +27,7 @@ import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { esKuery } from '../../es_query';
+import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 const { nodeTypes } = esKuery;

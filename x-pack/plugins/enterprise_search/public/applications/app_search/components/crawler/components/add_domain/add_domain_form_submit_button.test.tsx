@@ -22,7 +22,7 @@ describe('AddDomainFormSubmitButton', () => {
 
   it('is disabled when the domain has not been validated', () => {
     setMockValues({
-      hasValidationCompleted: false,
+      allowSubmit: false,
     });
 
     const wrapper = shallow(<AddDomainFormSubmitButton />);
@@ -32,7 +32,7 @@ describe('AddDomainFormSubmitButton', () => {
 
   it('is enabled when the domain has been validated', () => {
     setMockValues({
-      hasValidationCompleted: true,
+      allowSubmit: true,
     });
 
     const wrapper = shallow(<AddDomainFormSubmitButton />);
@@ -47,7 +47,7 @@ describe('AddDomainFormSubmitButton', () => {
       submitNewDomain,
     });
     setMockValues({
-      hasValidationCompleted: true,
+      allowSubmit: true,
     });
 
     const wrapper = shallow(<AddDomainFormSubmitButton />);

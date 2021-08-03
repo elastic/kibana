@@ -9,6 +9,7 @@
 import { createTagCloudFn } from './tag_cloud_fn';
 
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { Datatable } from '../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#tagcloud', () => {
   const fn = functionWrapper(createTagCloudFn());
@@ -30,5 +31,21 @@ describe('interpreter/functions#tagcloud', () => {
   it('returns an object with the correct structure', () => {
     const actual = fn(context, visConfig, undefined);
     expect(actual).toMatchSnapshot();
+  });
+
+  it('logs correct datatable to inspector', async () => {
+    let loggedTable: Datatable;
+    const handlers = {
+      inspectorAdapters: {
+        tables: {
+          logDatatable: (name: string, datatable: Datatable) => {
+            loggedTable = datatable;
+          },
+        },
+      },
+    };
+    await fn(context, visConfig, handlers as any);
+
+    expect(loggedTable!).toMatchSnapshot();
   });
 });

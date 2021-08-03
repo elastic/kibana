@@ -41,7 +41,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h5>{sourceName}</h5>
+            <h1>{sourceName}</h1>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
