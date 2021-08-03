@@ -136,7 +136,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 name: 'All',
                 savedObject: {
                   all: [savedQuerySavedObjectType],
-                  read: [savedQuerySavedObjectType],
+                  read: [],
                 },
                 ui: ['allSavedQueries', 'readSavedQueries'],
               },
@@ -169,7 +169,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 name: 'All',
                 savedObject: {
                   all: [packSavedObjectType],
-                  read: [packSavedObjectType],
+                  read: [],
                 },
                 ui: ['allPacks', 'readPacks'],
               },
