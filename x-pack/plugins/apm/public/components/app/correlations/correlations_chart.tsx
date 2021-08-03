@@ -26,8 +26,6 @@ import {
 
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { EuiSpacer } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 
 import { getDurationFormatter } from '../../../../common/utils/formatters';
@@ -277,7 +275,6 @@ export function CorrelationsChart({
             />
           )}
       </Chart>
-      <EuiSpacer size="s" />
     </div>
   );
 }
