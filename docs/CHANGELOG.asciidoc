@@ -756,8 +756,6 @@ You should export the used index patterns separately.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.13.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-97206]]
 .Remove Elastic Agent routes and related services
@@ -793,8 +791,6 @@ The *Explore underlying data* context menu on dashboards is now disabled by defa
 *Impact* +
 To enable the *Explore underlying data* context menu, set `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled` to `true` in kibana.yml. 
 ====
-
-// end::notable-breaking-changes[]
 
 
 [float]
@@ -1326,8 +1322,6 @@ For information about the {kib} 7.12.0 release, review the following information
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.12.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-89632]]
 .Removes geo threshold alert type
@@ -1370,8 +1364,6 @@ To display the cluster data in *Discover*, load documents directly from `_source
 
 . Go to `discover:searchFieldsFromSource`, then select *On*.
 ====
-
-// end::notable-breaking-changes[]
 
 [float]
 [[known-issues-v7.12.0]]
@@ -1922,9 +1914,6 @@ Breaking changes can prevent your application from optimal operation and perform
 
 // The following section is re-used in the Installation and Upgrade Guide
 
-// tag::notable-breaking-changes[]
-
-
 [discrete]
 [[ingestManager_renamed_fleet]]
 ==== Ingest Manager plugin renamed Fleet
@@ -1961,8 +1950,6 @@ which drops support for glibc `2.12`-based operating systems.
 *Impact*: Supported versions of {kib} are not impacted. You can no longer run {kib} on older operating systems that require glibc `2.12` (for example, CentOS 6). Refer to our https://www.elastic.co/support/matrix[support matrix] for a list of currently supported operating systems.
 
 *via https://github.com/elastic/kibana/pull/83425[#83425]*
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecation-v7.11.0]]
@@ -2470,8 +2457,6 @@ Breaking changes can prevent your application from optimal operation and perform
 
 // The following section is re-used in the Installation and Upgrade Guide
 
-// tag::notable-breaking-changes[]
-
 
 [discrete]
 [[breaking_kibana_legacy_plugins]]
@@ -2506,8 +2491,6 @@ Refer to the https://vega.github.io/vega/docs/specification/[Vega docs] for
 more information about this property.
 
 *via https://github.com/elastic/kibana/pull/73805[#73805]*
-
-// end::notable-breaking-changes[]
 
 [discrete]
 [[general-plugin-API-changes-7-10]]
@@ -3842,8 +3825,6 @@ Breaking changes can prevent your application from optimal operation and perform
 
 // The following section is re-used in the Installation and Upgrade Guide
 
-// tag::notable-breaking-changes[]
-
 [float]
 [[breaking_kibana_keystore]]
 ===== `kibana.keystore` moved from the data folder to the config folder
@@ -3854,8 +3835,6 @@ package distributions. If a pre-existing keystore exists in the data directory,
 that path will continue to be used.
 
 *via https://github.com/elastic/kibana/pull/57856[#57856]*
-
-// end::notable-breaking-changes[]
 
 [float]
 [[general-plugin-API-changes-79]]
@@ -4942,9 +4921,6 @@ Breaking changes can prevent your application from optimal operation and perform
 
 // The following section is re-used in the Installation and Upgrade Guide
 
-
-// tag::notable-breaking-changes[]
-
 [float]
 [[user-facing-changes-78]]
 ==== Breaking changes for users
@@ -4981,10 +4957,6 @@ This fixes the Back button when navigating between dashboards using drilldowns.
 
 *via https://github.com/elastic/kibana/pull/62415[#62415]*
 ====
-
-
-// end::notable-breaking-changes[]
-
 
 [float]
 [[general-plugin-API-changes-78]]
@@ -5803,11 +5775,6 @@ For information about the Kibana 7.7.0 release, review the following information
 === Breaking changes
 
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.7.0, review the breaking changes, then mitigate the impact to your application.
-
-// The following section is re-used in the Installation and Upgrade Guide
-// tag::notable-breaking-changes[]
-
-// end::notable-breaking-changes[]
 
 [float]
 ==== Breaking changes for users
@@ -7241,11 +7208,6 @@ Breaking changes can prevent your application from optimal operation and perform
 
 * <<user-facing-changes, Breaking changes for users>>
 * <<general-plugin-API-changes-76, Breaking changes for plugin developers>>
-
-// The following section is re-used in the Installation and Upgrade Guide
-//tag::notable-breaking-changes[]
-
-// end::notable-breaking-changes[]
 
 [float]
 [[user-facing-changes]]
@@ -9633,15 +9595,11 @@ Breaking changes can prevent your application from optimal operation and perform
 
 //See also {kibana-ref-all}/7.5/release-highlights-7.5.0.html[release highlights] and <<release-notes-7.4.0, release notes>>.
 
-//NOTE: The notable-breaking-changes tagged regions are re-used in the
-//Installation and Upgrade Guide
-
 ////
 The following section is re-used in the Installation and Upgrade Guide
 [[breaking_70_notable]]
 === Notable breaking changes
 ////
-// tag::notable-breaking-changes[]
 
 [float]
 [[breaking_75_search_instead_of-msearch]]
@@ -9669,7 +9627,6 @@ Any installs that previously enabled the Code app will now log a warning when
 Kibana starts up. It's safe to remove all configurations starting with
 `xpack.code.`. Starting in 8.0, these warnings will become errors that prevent
 Kibana from starting up.
-// end::notable-breaking-changes[]
 
 [float]
 [[enhancement-7.5.0]]
@@ -10037,15 +9994,11 @@ Breaking changes can prevent your application from optimal operation and perform
 
 //See also {kibana-ref-all}/7.4/release-highlights-7.4.0.html[release highlights] and <<release-notes-7.4.0, release notes>>.
 
-//NOTE: The notable-breaking-changes tagged regions are re-used in the
-//Installation and Upgrade Guide
-
 ////
 The following section is re-used in the Installation and Upgrade Guide
 [[breaking_70_notable]]
 === Notable breaking changes
 ////
-// tag::notable-breaking-changes[]
 
 [float]
 [[breaking_74_search_instead_of-msearch]]
@@ -10060,9 +10013,6 @@ We now use `_search` when batching is disabled.
 When the advanced setting `courier:batchSearches` is disabled, 
 requests from *Discover*, *Visualize*, and *Dashboard* will now query {es} 
 using the `_search` endpoint rather than the `_msearch` endpoint.
-
-
-// end::notable-breaking-changes[]
 
 [float]
 [[enhancement-7.4.0]]
@@ -10425,15 +10375,11 @@ Breaking changes can prevent your application from optimal operation and perform
 See also {kibana-ref-all}/7.3/release-highlights-7.3.0.html[release highlights] 
 and <<release-notes-7.3.0, release notes>>.
 
-//NOTE: The notable-breaking-changes tagged regions are re-used in the
-//Installation and Upgrade Guide
-
 ////
 The following section is re-used in the Installation and Upgrade Guide
 [[breaking_70_notable]]
 === Notable breaking changes
 ////
-// tag::notable-breaking-changes[]
 
 [float]
 ==== Visibility of features after configuring a term join in Maps
@@ -10453,8 +10399,6 @@ histograms might no longer work in 7.3. If you run into issues starting a
 {transform}, recreate it by copying the `pivot` part of the configuration into the
 advanced editor of the {transforms} wizard. The advanced editor will
 remove the unsupported attribute once the configuration gets applied.
-
-// end::notable-breaking-changes[]
 
 [float]
 [[breaking_73_dashboard_import_export]]
@@ -10789,13 +10733,6 @@ Breaking changes can prevent your application from optimal operation and perform
 See also {kibana-ref-all}/7.2/release-highlights-7.2.0.html[release highlights]
 and <<release-notes-7.2.0, release notes>>.
 
-//NOTE: The notable-breaking-changes tagged regions are re-used in the
-//Installation and Upgrade Guide
-
-//tag::notable-breaking-changes[]
-
-// end::notable-breaking-changes[]
-
 [float]
 [[breaking_72_index_pattern_changes]]
 
@@ -10811,14 +10748,6 @@ time-based index patterns to a wildcard pattern to prepare for this change.
 *Impact:* If you query a time-based index pattern, that query will now be performed 
 on the root wildcard term. For example, a query on an index pattern such as 
 `[logstash-]YYYY.MM.DD` will now query all indices that match `logstash-*`.
-
-
-//NOTE: The notable-breaking-changes tagged regions are re-used in the
-//Installation and Upgrade Guide
-
-//tag::notable-breaking-changes[]
-
-// end::notable-breaking-changes[]
 
 [float]
 [[enhancement-7.2.0]]
@@ -11291,13 +11220,10 @@ Breaking changes can prevent your application from optimal operation and perform
 * <<breaking_70_UI_changes>>
 
 ////
-The following section is re-used in the Installation and Upgrade Guide
 [[breaking_70_notable]]
 === Notable breaking changes
 ////
-// tag::notable-breaking-changes[]
 
-// end::notable-breaking-changes[]
 
 [float]
 [[breaking_70_api_changes]]
