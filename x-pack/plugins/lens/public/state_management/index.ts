@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { configureStore, DeepPartial, getDefaultMiddleware } from '@reduxjs/toolkit';
+import { configureStore, getDefaultMiddleware, DeepPartial } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { lensSlice, initialState } from './lens_slice';
+import { lensSlice } from './lens_slice';
 import { timeRangeMiddleware } from './time_range_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
-import { externalContextMiddleware } from './external_context_middleware';
-
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { LensAppState, LensState } from './types';
+import { LensState, LensStoreDeps } from './types';
+import { initMiddleware } from './init_middleware';
 export * from './types';
 
 export const reducer = {
@@ -22,8 +20,9 @@ export const reducer = {
 };
 
 export const {
-  setState,
+  loadInitial,
   navigateAway,
+  setState,
   setSaveable,
   onActiveDataChange,
   updateState,
@@ -38,29 +37,17 @@ export const {
   setToggleFullscreen,
 } = lensSlice.actions;
 
-export const getPreloadedState = (initializedState: Partial<LensAppState>) => {
-  const state = {
-    lens: {
-      ...initialState,
-      ...initializedState,
-    },
-  } as DeepPartial<LensState>;
-  return state;
-};
-
-type PreloadedState = ReturnType<typeof getPreloadedState>;
-
 export const makeConfigureStore = (
-  preloadedState: PreloadedState,
-  { data }: { data: DataPublicPluginStart }
+  storeDeps: LensStoreDeps,
+  preloadedState: DeepPartial<LensState>
 ) => {
   const middleware = [
     ...getDefaultMiddleware({
       serializableCheck: false,
     }),
+    initMiddleware(storeDeps),
     optimizingMiddleware(),
-    timeRangeMiddleware(data),
-    externalContextMiddleware(data),
+    timeRangeMiddleware(storeDeps.lensServices.data),
   ];
   if (process.env.NODE_ENV === 'development') middleware.push(logger);
 
