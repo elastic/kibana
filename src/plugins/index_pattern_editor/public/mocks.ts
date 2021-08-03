@@ -19,6 +19,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   return {
     openEditor: jest.fn(),
+    IndexPatternEditorComponent: jest.fn(),
     userPermissions: {
       editIndexPattern: jest.fn(),
     },
