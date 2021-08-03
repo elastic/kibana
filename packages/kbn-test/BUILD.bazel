@@ -76,6 +76,7 @@ TYPES_DEPS = [
   "@npm//@elastic/elasticsearch",
   "@npm//del",
   "@npm//form-data",
+  "@npm//globby",
   "@npm//jest",
   "@npm//jest-cli",
   "@npm//jest-snapshot",
