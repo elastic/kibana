@@ -119,22 +119,35 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     ]);
 
     const pageDescription = useMemo(() => {
-      return from === 'edit' || from === 'package-edit' ? (
-        <FormattedMessage
-          id="xpack.fleet.editPackagePolicy.pageDescription"
-          defaultMessage="Modify integration settings and deploy changes to the selected agent policy."
-        />
-      ) : from === 'policy' ? (
-        <FormattedMessage
-          id="xpack.fleet.createPackagePolicy.pageDescriptionfromPolicy"
-          defaultMessage="Configure an integration for the selected agent policy."
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.fleet.createPackagePolicy.pageDescriptionfromPackage"
-          defaultMessage="Follow these instructions to add this integration to an agent policy."
-        />
-      );
+      if (from === 'edit' || from === 'package-edit') {
+        return (
+          <FormattedMessage
+            id="xpack.fleet.editPackagePolicy.pageDescription"
+            defaultMessage="Modify integration settings and deploy changes to the selected agent policy."
+          />
+        );
+      } else if (from === 'policy') {
+        return (
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.pageDescriptionfromPolicy"
+            defaultMessage="Configure an integration for the selected agent policy."
+          />
+        );
+      } else if (from === 'upgrade') {
+        return (
+          <FormattedMessage
+            id="xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade"
+            defaultMessage="Upgrade this integration and deploy changes to the selected agent policy"
+          />
+        );
+      } else {
+        return (
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.pageDescriptionfromPackage"
+            defaultMessage="Follow these instructions to add this integration to an agent policy."
+          />
+        );
+      }
     }, [from]);
 
     const leftColumn = (

@@ -296,12 +296,10 @@ export const EditPackagePolicyForm = memo<{
       return;
     }
 
-    const { data, error } = await savePackagePolicy();
+    const { error } = await savePackagePolicy();
     if (!error) {
       if (isUpgrade) {
-        const { data: upgradeData, error: upgradeError } = await sendUpgradePackagePolicy([
-          packagePolicyId,
-        ]);
+        const { error: upgradeError } = await sendUpgradePackagePolicy([packagePolicyId]);
 
         if (upgradeError) {
           notifications.toasts.addError(upgradeError, {
