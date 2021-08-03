@@ -7,7 +7,11 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor } from 'src/core/server';
+import type {
+  PluginConfigDescriptor,
+  PluginInitializer,
+  PluginInitializerContext,
+} from 'src/core/server';
 
 import { ConfigSchema } from './config';
 import { UserSetupPlugin } from './plugin';
@@ -16,4 +20,6 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
 };
 
-export const plugin = () => new UserSetupPlugin();
+export const plugin: PluginInitializer<void, never> = (
+  initializerContext: PluginInitializerContext
+) => new UserSetupPlugin(initializerContext);
