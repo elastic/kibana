@@ -12,8 +12,11 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiText,
+  EuiPopover,
+  EuiLink,
   EuiTextColor,
   EuiButtonEmpty,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -51,33 +54,33 @@ const i18nTexts = {
       defaultMessage: 'Do not log deprecated actions.',
     }
   ),
-  fetchButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogging.loadingLabel',
-    {
-      defaultMessage: 'Retrieving logging state',
-    }
-  ),
-  enablingButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.enablingButtonLabel',
-    {
-      defaultMessage: 'Enabling deprecation logging',
-    }
-  ),
-  disablingButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.disablingButtonLabel',
-    {
-      defaultMessage: 'Disabling deprecation logging',
-    }
-  ),
   buttonLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.buttonLabel', {
     defaultMessage: 'Collect deprecation logs',
   }),
-  fetchErrorButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.fetchErrorButtonLabel',
-    {
-      defaultMessage: 'Deprecation logging unavailable',
-    }
-  ),
+};
+
+const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  if (!error.statusCode || !error.message) {
+    return null;
+  }
+
+  const button = (
+    <EuiLink color="danger" onClick={onButtonClick}>
+      Error {error.statusCode}
+    </EuiLink>
+  );
+
+  return (
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+      <EuiText style={{ width: 300 }}>
+        <p>{error.message}</p>
+      </EuiText>
+    </EuiPopover>
+  );
 };
 
 export const DeprecationLoggingToggle: React.FunctionComponent = () => {
@@ -88,22 +91,6 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
   const [isEnabled, setIsEnabled] = useState<boolean | undefined>(undefined);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<ResponseError | undefined>(undefined);
-
-  const getButtonLabel = () => {
-    if (isLoading) {
-      return i18nTexts.fetchButtonLabel;
-    }
-
-    if (isUpdating) {
-      return isEnabled ? i18nTexts.disablingButtonLabel : i18nTexts.enablingButtonLabel;
-    }
-
-    if (fetchError) {
-      return i18nTexts.fetchErrorButtonLabel;
-    }
-
-    return i18nTexts.buttonLabel;
-  };
 
   useEffect(() => {
     if (isLoading === false && data) {
@@ -135,50 +122,67 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>Loading log collection state...</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <EuiFlexGroup gutterSize="none" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" data-test-subj="fetchLoggingError">
+            <EuiFlexItem grow={false}>
+              <EuiTextColor color="danger">{i18nTexts.fetchErrorMessage}</EuiTextColor>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ErrorDetailsLink error={fetchError} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty iconType="refresh" onClick={resendRequest}>
+            {i18nTexts.reloadButtonLabel}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
-    <EuiFlexGroup alignItems="baseline">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiSwitch
           data-test-subj="upgradeAssistantDeprecationToggle"
-          label={getButtonLabel()}
+          label={i18nTexts.buttonLabel}
           checked={!!isEnabled}
           onChange={toggleLogging}
-          disabled={Boolean(fetchError) || isLoading || isUpdating}
+          disabled={Boolean(fetchError) || isUpdating}
         />
       </EuiFlexItem>
 
-      {fetchError && (
-        <EuiFlexItem>
-          <EuiText>
-            <p data-test-subj="fetchLoggingError">
-              <EuiTextColor color="danger">{i18nTexts.fetchErrorMessage}</EuiTextColor>
-              {fetchError.statusCode && fetchError.message && (
-                <>
-                  {' '}
-                  <EuiTextColor color="danger">{`${fetchError.statusCode}: ${fetchError.message}`}</EuiTextColor>
-                </>
-              )}{' '}
-              <EuiButtonEmpty iconType="refresh" onClick={resendRequest}>
-                {i18nTexts.reloadButtonLabel}
-              </EuiButtonEmpty>
-            </p>
-          </EuiText>
+      {updateError && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" data-test-subj="updateLoggingError">
+            <EuiFlexItem grow={false}>
+              <EuiTextColor color="danger">{i18nTexts.updateErrorMessage}</EuiTextColor>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ErrorDetailsLink error={updateError} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       )}
 
-      {updateError && (
-        <EuiFlexItem>
-          <EuiText>
-            <p data-test-subj="updateLoggingError">
-              <EuiTextColor color="danger">{i18nTexts.updateErrorMessage}</EuiTextColor>
-              {updateError.statusCode && updateError.message && (
-                <>
-                  {' '}
-                  <EuiTextColor color="danger">{`${updateError.statusCode}: ${updateError.message}`}</EuiTextColor>
-                </>
-              )}
-            </p>
-          </EuiText>
+      {isUpdating && (
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
