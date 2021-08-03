@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from 'kibana/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
-import { UI_SETTINGS } from '../common';
+import { FORMATS_UI_SETTINGS } from '../common';
 
 // We add the `en` key manually here, since that's not a real numeral locale, but the
 // default fallback in case the locale is not found.
@@ -24,7 +24,7 @@ const numeralLanguageIds = [
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
-    [UI_SETTINGS.SHORT_DOTS_ENABLE]: {
+    [FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE]: {
       name: i18n.translate('fieldFormats.advancedSettings.shortenFieldsTitle', {
         defaultMessage: 'Shorten fields',
       }),
@@ -34,7 +34,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
-    [UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {
+    [FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {
       name: i18n.translate('fieldFormats.advancedSettings.format.defaultTypeMapTitle', {
         defaultMessage: 'Field type format name',
       }),
@@ -93,7 +93,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         }),
       }),
     },
-    [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: {
+    [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: {
       name: i18n.translate('fieldFormats.advancedSettings.format.numberFormatTitle', {
         defaultMessage: 'Number format',
       }),
@@ -118,7 +118,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    [UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: {
+    [FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: {
       name: i18n.translate('fieldFormats.advancedSettings.format.percentFormatTitle', {
         defaultMessage: 'Percent format',
       }),
@@ -143,7 +143,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: {
+    [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: {
       name: i18n.translate('fieldFormats.advancedSettings.format.bytesFormatTitle', {
         defaultMessage: 'Bytes format',
       }),
@@ -168,7 +168,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    [UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN]: {
+    [FORMATS_UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN]: {
       name: i18n.translate('fieldFormats.advancedSettings.format.currencyFormatTitle', {
         defaultMessage: 'Currency format',
       }),
@@ -193,7 +193,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: {
+    [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: {
       name: i18n.translate('fieldFormats.advancedSettings.format.formattingLocaleTitle', {
         defaultMessage: 'Formatting locale',
       }),

@@ -11,7 +11,7 @@ import {
   FieldFormatsRegistry,
   BytesFormat,
   NumberFormat,
-  UI_SETTINGS,
+  FORMATS_UI_SETTINGS,
 } from 'src/plugins/field_formats/common';
 import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 import { fieldFormatMapFactory } from './field_format_map';
@@ -28,10 +28,10 @@ describe('field format map', function () {
     },
   };
   const configMock: Record<string, ConfigValue> = {};
-  configMock[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
+  configMock[FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
     number: { id: 'number', params: {} },
   };
-  configMock[UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
+  configMock[FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
   const getConfig = ((key: string) => configMock[key]) as FieldFormatsGetConfigFn;
   const testValue = '4000';
   const mockTimezone = 'Browser';

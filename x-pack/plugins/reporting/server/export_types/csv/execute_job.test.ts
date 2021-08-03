@@ -16,7 +16,7 @@ import { ReportingConfig, ReportingCore } from '../../';
 import {
   FieldFormatsRegistry,
   StringFormat,
-  UI_SETTINGS,
+  FORMATS_UI_SETTINGS,
 } from '../../../../../../src/plugins/field_formats/common';
 import {
   CSV_QUOTE_VALUES_SETTING,
@@ -103,7 +103,7 @@ describe('CSV Execute Job', function () {
     setFieldFormats({
       fieldFormatServiceFactory() {
         const uiConfigMock = {};
-        (uiConfigMock as any)[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
+        (uiConfigMock as any)[FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
           _default_: { id: 'string', params: {} },
         };
 

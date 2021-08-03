@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { NumeralFormat } from './numeral';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
-import { UI_SETTINGS } from '../constants/ui_settings';
+import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 export class PercentFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.PERCENT;
@@ -22,7 +22,7 @@ export class PercentFormat extends NumeralFormat {
   allowsNumericalAggregations = true;
 
   getParamDefaults = () => ({
-    pattern: this.getConfig!(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN),
+    pattern: this.getConfig!(FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN),
     fractional: true,
   });
 

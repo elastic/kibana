@@ -13,7 +13,7 @@ import { escape, keys } from 'lodash';
 import { shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
-import { UI_SETTINGS } from '../constants/ui_settings';
+import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 interface Props {
   defPairs: Array<[string, string]>;
@@ -55,7 +55,7 @@ export class SourceFormat extends FieldFormat {
     const formatted = indexPattern.formatHit(hit);
     const highlightPairs: any[] = [];
     const sourcePairs: any[] = [];
-    const isShortDots = this.getConfig!(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const isShortDots = this.getConfig!(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
 
     keys(formatted).forEach((key) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;

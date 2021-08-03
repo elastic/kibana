@@ -7,12 +7,12 @@
  */
 
 import { BytesFormat } from './bytes';
-import { UI_SETTINGS } from '../constants/ui_settings';
+import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 describe('BytesFormat', () => {
   const config: Record<string, any> = {};
 
-  config[UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN] = '0,0.[000]b';
+  config[FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN] = '0,0.[000]b';
 
   const getConfig = (key: string) => config[key];
 

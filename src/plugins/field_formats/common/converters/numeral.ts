@@ -13,7 +13,7 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
-import { UI_SETTINGS } from '../constants/ui_settings';
+import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 const numeralInst = numeral();
 
@@ -42,7 +42,7 @@ export abstract class NumeralFormat extends FieldFormat {
 
     const previousLocale = numeral.language();
     const defaultLocale =
-      (this.getConfig && this.getConfig(UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
+      (this.getConfig && this.getConfig(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
     const formatted = numeralInst.set(val).format(this.param('pattern'));

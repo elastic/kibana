@@ -22,7 +22,7 @@ import {
 } from './types';
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
-import { UI_SETTINGS } from '../common/constants/ui_settings';
+import { FORMATS_UI_SETTINGS } from '../common/constants/ui_settings';
 import { FieldFormatNotFoundError } from './errors';
 
 export class FieldFormatsRegistry {
@@ -53,7 +53,7 @@ export class FieldFormatsRegistry {
     metaParamsOptions: Record<string, any> = {},
     defaultFieldConverters: FieldFormatInstanceType[] = baseFormatters
   ) {
-    const defaultTypeMap = getConfig(UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP);
+    const defaultTypeMap = getConfig(FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP);
     this.register(defaultFieldConverters);
     this.parseDefaultTypeMap(defaultTypeMap);
     this.getConfig = getConfig;

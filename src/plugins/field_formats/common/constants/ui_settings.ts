@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const UI_SETTINGS = {
+export const FORMATS_UI_SETTINGS = {
   FORMAT_DEFAULT_TYPE_MAP: 'format:defaultTypeMap',
   FORMAT_NUMBER_DEFAULT_PATTERN: 'format:number:defaultPattern',
   FORMAT_PERCENT_DEFAULT_PATTERN: 'format:percent:defaultPattern',

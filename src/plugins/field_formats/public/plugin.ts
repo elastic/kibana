@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, Plugin } from '../../../core/public';
-import { FieldFormatsRegistry, UI_SETTINGS } from '../common';
+import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
 import { baseFormattersPublic } from './lib';
 import { FormatFactory } from '../common/types';
 import './index.scss';
@@ -17,7 +17,7 @@ export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormat
 
   public setup(core: CoreSetup): FieldFormatsSetup {
     core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
-      if (key === UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP) {
+      if (key === FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP) {
         this.fieldFormatsRegistry.parseDefaultTypeMap(newValue);
       }
     });

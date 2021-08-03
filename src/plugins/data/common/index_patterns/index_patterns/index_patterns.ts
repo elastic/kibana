@@ -29,10 +29,7 @@ import {
   FieldSpec,
   IndexPatternFieldMap,
 } from '../types';
-import {
-  FieldFormatsStartCommon,
-  UI_SETTINGS as FORMATS_UI_SETTINGS,
-} from '../../../../field_formats/common/';
+import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../../field_formats/common/';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';

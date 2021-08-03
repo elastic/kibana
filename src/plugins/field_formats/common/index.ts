@@ -33,7 +33,7 @@ export {
 export { getHighlightRequest } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
-export { UI_SETTINGS } from './constants/ui_settings';
+export { FORMATS_UI_SETTINGS } from './constants/ui_settings';
 export { FIELD_FORMAT_IDS } from './types';
 export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
 
