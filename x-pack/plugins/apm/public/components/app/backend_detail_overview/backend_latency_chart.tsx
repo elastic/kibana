@@ -65,7 +65,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
       specs.push({
         data: data.currentTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis0,
+        color: theme.eui.euiColorVis1,
         title: i18n.translate('xpack.apm.backendLatencyChart.chartTitle', {
           defaultMessage: 'Latency',
         }),
@@ -85,7 +85,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
     }
 
     return specs;
-  }, [data, theme.eui.euiColorVis0, theme.eui.euiColorMediumShade]);
+  }, [data, theme.eui.euiColorVis1, theme.eui.euiColorMediumShade]);
 
   const maxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(maxY);

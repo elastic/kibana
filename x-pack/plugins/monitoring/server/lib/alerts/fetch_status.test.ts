@@ -46,7 +46,6 @@ describe('fetchStatus', () => {
     triggeredMS: 0,
   };
   let alertStates: AlertState[] = [];
-  const licenseService = null;
   const rulesClient = {
     find: jest.fn(() => ({
       total: 1,
@@ -74,7 +73,7 @@ describe('fetchStatus', () => {
   });
 
   it('should fetch from the alerts client', async () => {
-    const status = await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
+    const status = await fetchStatus(rulesClient as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
     expect(status).toEqual({
@@ -96,7 +95,7 @@ describe('fetchStatus', () => {
       },
     ];
 
-    const status = await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
+    const status = await fetchStatus(rulesClient as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
     expect(Object.values(status).length).toBe(1);
@@ -105,9 +104,7 @@ describe('fetchStatus', () => {
   });
 
   it('should pass in the right filter to the alerts client', async () => {
-    await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
-      defaultClusterState.clusterUuid,
-    ]);
+    await fetchStatus(rulesClient as any, alertTypes, [defaultClusterState.clusterUuid]);
     expect((rulesClient.find as jest.Mock).mock.calls[0][0].options.filter).toBe(
       `alert.attributes.alertTypeId:${alertType}`
     );
@@ -118,7 +115,7 @@ describe('fetchStatus', () => {
       alertTypeState: null,
     })) as any;
 
-    const status = await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
+    const status = await fetchStatus(rulesClient as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
     expect(status[alertType].states.length).toEqual(0);
@@ -130,7 +127,7 @@ describe('fetchStatus', () => {
       data: [],
     })) as any;
 
-    const status = await fetchStatus(rulesClient as any, licenseService as any, alertTypes, [
+    const status = await fetchStatus(rulesClient as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
     expect(status).toEqual({});
@@ -146,7 +143,6 @@ describe('fetchStatus', () => {
     };
     await fetchStatus(
       rulesClient as any,
-      customLicenseService as any,
       [ALERT_CLUSTER_HEALTH],
       [defaultClusterState.clusterUuid]
     );
@@ -183,7 +179,6 @@ describe('fetchStatus', () => {
     };
     const status = await fetchStatus(
       customRulesClient as any,
-      licenseService as any,
       [ALERT_CPU_USAGE, ALERT_DISK_USAGE, ALERT_MISSING_MONITORING_DATA],
       [defaultClusterState.clusterUuid]
     );

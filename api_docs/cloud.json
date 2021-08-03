@@ -11,10 +11,7 @@
         "tags": [],
         "label": "CloudConfigType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
-          "lineNumber": 28
-        },
+        "path": "x-pack/plugins/cloud/public/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -27,10 +24,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -43,10 +37,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -59,10 +50,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -75,10 +63,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -91,10 +76,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -107,10 +89,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -123,10 +102,7 @@
             "signature": [
               "{ enabled: boolean; org_id?: string | undefined; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
             "deprecated": false
           }
         ],
@@ -143,10 +119,7 @@
       "tags": [],
       "label": "CloudSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/cloud/public/plugin.ts",
-        "lineNumber": 50
-      },
+      "path": "x-pack/plugins/cloud/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -159,10 +132,7 @@
           "signature": [
             "string | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 51
-          },
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -175,10 +145,7 @@
           "signature": [
             "string | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 52
-          },
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -191,10 +158,7 @@
           "signature": [
             "string | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 53
-          },
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -207,10 +171,7 @@
           "signature": [
             "string | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 54
-          },
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -223,10 +184,7 @@
           "signature": [
             "string | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 55
-          },
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -239,10 +197,7 @@
           "signature": [
             "string | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 56
-          },
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -252,10 +207,7 @@
           "tags": [],
           "label": "isCloudEnabled",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 57
-          },
+          "path": "x-pack/plugins/cloud/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -277,10 +229,7 @@
       "tags": [],
       "label": "CloudSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/cloud/server/plugin.ts",
-        "lineNumber": 20
-      },
+      "path": "x-pack/plugins/cloud/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -293,10 +242,7 @@
           "signature": [
             "string | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 21
-          },
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
           "deprecated": false
         },
         {
@@ -309,10 +255,7 @@
           "signature": [
             "string | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 22
-          },
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
           "deprecated": false
         },
         {
@@ -322,10 +265,7 @@
           "tags": [],
           "label": "isCloudEnabled",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 23
-          },
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
           "deprecated": false
         },
         {
@@ -338,10 +278,7 @@
           "signature": [
             "{ url?: string | undefined; secretToken?: string | undefined; }"
           ],
-          "source": {
-            "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 24
-          },
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
           "deprecated": false
         }
       ],
