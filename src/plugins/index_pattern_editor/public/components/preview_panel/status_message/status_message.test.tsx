@@ -22,6 +22,7 @@ const matchedIndices = {
   ] as unknown) as MatchedItem[],
   exactMatchedIndices: [] as MatchedItem[],
   partialMatchedIndices: ([{ name: 'kibana', ...tagsPartial }] as unknown) as MatchedItem[],
+  visibleIndices: [],
 };
 
 describe('StatusMessage', () => {
@@ -94,6 +95,7 @@ describe('StatusMessage', () => {
           allIndices: [],
           exactMatchedIndices: [],
           partialMatchedIndices: [],
+          visibleIndices: [],
         }}
         isIncludingSystemIndices={false}
         query={''}
@@ -111,6 +113,7 @@ describe('StatusMessage', () => {
           allIndices: [],
           exactMatchedIndices: [],
           partialMatchedIndices: [],
+          visibleIndices: [],
         }}
         isIncludingSystemIndices={true}
         query={''}

@@ -75,7 +75,7 @@ interface MatchesValidatorArgs {
   isRollup: boolean;
 }
 
-const matchesValidator = ({
+const createMatchesIndicesValidator = ({
   rollupIndicesCapabilities,
   refreshMatchedIndices,
   isRollup,
@@ -92,6 +92,7 @@ const matchesValidator = ({
       return;
     }
 
+    // A rollup index pattern needs to match one and only one rollup index.
     const rollupIndexMatches = matchedIndicesResult.exactMatchedIndices.filter((matchedIndex) =>
       rollupIndices.includes(matchedIndex.name)
     );
@@ -102,6 +103,7 @@ const matchesValidator = ({
       return rollupIndexPatternTooManyMatchesError;
     }
 
+    // Error info is potentially provided via the rollup indices caps request
     const error = newRollupIndexName && rollupIndicesCapabilities[newRollupIndexName].error;
 
     if (error) {
@@ -136,7 +138,7 @@ const getTitleConfig = ({
   const validations = [
     ...titleFieldConfig.validations,
     // note this is responsible for triggering the state update for the selected source list.
-    matchesValidator({
+    createMatchesIndicesValidator({
       rollupIndicesCapabilities,
       refreshMatchedIndices,
       isRollup,

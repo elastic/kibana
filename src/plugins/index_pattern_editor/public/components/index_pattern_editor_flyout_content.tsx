@@ -65,11 +65,9 @@ export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'>
   timestampField?: TimestampOption;
 }
 
-const editorTitle = {
-  message: i18n.translate('indexPatternEditor.title', {
-    defaultMessage: 'Create index pattern',
-  }),
-};
+const editorTitle = i18n.translate('indexPatternEditor.title', {
+  defaultMessage: 'Create index pattern',
+});
 
 const IndexPatternEditorFlyoutContentComponent = ({
   onSave,

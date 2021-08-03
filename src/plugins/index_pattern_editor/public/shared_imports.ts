@@ -44,6 +44,7 @@ export {
   NumericField,
   SelectField,
   FormRow,
+  SuperSelectField,
 } from '../../es_ui_shared/static/forms/components';
 
 export { HttpStart } from '../../../core/public';
