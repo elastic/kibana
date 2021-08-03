@@ -56,7 +56,7 @@ const values: { domains: CrawlerDomain[]; crawlRequests: CrawlRequest[] } = {
   ],
 };
 
-describe('DomainsTable', () => {
+describe('CrawlRequestsTable', () => {
   let wrapper: ShallowWrapper;
   let tableContent: string;
 

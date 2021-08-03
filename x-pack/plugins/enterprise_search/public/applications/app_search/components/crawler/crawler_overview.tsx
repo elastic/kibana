@@ -108,7 +108,7 @@ export const CrawlerOverview: React.FC = () => {
             <p>
               {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.crawlRequestsDescription', {
                 defaultMessage:
-                  "Recent crawl requests are logged here. Using the request ID of each crawl, you can track progress and examine crawl events in Kibana's Discover or Logs user interfaces. ",
+                  "Recent crawl requests are logged here. Using the request ID of each crawl, you can track progress and examine crawl events in Kibana's Discover or Logs user interfaces.",
               })}{' '}
               <EuiLink
                 href={`${DOCS_PREFIX}/view-web-crawler-events-logs.html`}

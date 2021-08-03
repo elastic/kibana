@@ -132,7 +132,7 @@ describe('CrawlerOverview', () => {
     expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
   });
 
-  it('shows the domain and the crawl request tableswhen there are crawl requests and domains', () => {
+  it('shows the domain and the crawl request tables when there are crawl requests and domains', () => {
     setMockValues(mockValues);
 
     const wrapper = shallow(<CrawlerOverview />);
