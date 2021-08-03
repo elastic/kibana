@@ -160,15 +160,47 @@ describe('crawlerDataServerToClient', () => {
   });
 
   it('converts all domains from the server form to their client form', () => {
-    expect(output.domains).toHaveLength(2);
-    expect(output.domains[0]).toEqual(crawlerDomainServerToClient(domains[0]));
-    expect(output.domains[1]).toEqual(crawlerDomainServerToClient(domains[1]));
+    expect(output.domains).toEqual([
+      {
+        id: 'x',
+        url: 'moviedatabase.com',
+        documentCount: 13,
+        createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
+        sitemaps: [],
+        entryPoints: [],
+        crawlRules: [],
+        defaultCrawlRule: DEFAULT_CRAWL_RULE,
+      },
+      {
+        id: 'y',
+        url: 'swiftype.com',
+        lastCrawl: 'Mon, 31 Aug 2020 17:00:00 +0000',
+        documentCount: 40,
+        createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
+        sitemaps: [],
+        entryPoints: [],
+        crawlRules: [],
+      },
+    ]);
   });
 
   it('converts all crawl requests from the server form to their client form', () => {
-    expect(output.crawlRequests).toHaveLength(2);
-    expect(output.crawlRequests[0]).toEqual(crawlRequestServerToClient(crawlRequests[0]));
-    expect(output.crawlRequests[1]).toEqual(crawlRequestServerToClient(crawlRequests[1]));
+    expect(output.crawlRequests).toEqual([
+      {
+        id: 'a',
+        status: CrawlerStatus.Canceled,
+        createdAt: 'Mon, 31 Aug 2020 11:00:00 +0000',
+        beganAt: 'Mon, 31 Aug 2020 12:00:00 +0000',
+        completedAt: 'Mon, 31 Aug 2020 13:00:00 +0000',
+      },
+      {
+        id: 'b',
+        status: CrawlerStatus.Success,
+        createdAt: 'Mon, 31 Aug 2020 14:00:00 +0000',
+        beganAt: 'Mon, 31 Aug 2020 15:00:00 +0000',
+        completedAt: 'Mon, 31 Aug 2020 16:00:00 +0000',
+      },
+    ]);
   });
 });
 
