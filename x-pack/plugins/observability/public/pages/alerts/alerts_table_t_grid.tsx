@@ -120,7 +120,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const leadingControlColumns = [
     {
       id: 'expand',
-      width: 20,
+      width: 40,
       headerCellRender: () => {
         return (
           <EventsThContent>
@@ -149,7 +149,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     },
     {
       id: 'view_in_app',
-      width: 20,
+      width: 40,
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});

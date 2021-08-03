@@ -62,7 +62,7 @@ import {
   updated_by,
   created_at,
   created_by,
-  job_status,
+  ruleExecutionStatus,
   status_date,
   last_success_at,
   last_success_message,
@@ -405,7 +405,7 @@ const responseRequiredFields = {
   created_by,
 };
 const responseOptionalFields = {
-  status: job_status,
+  status: ruleExecutionStatus,
   status_date,
   last_success_at,
   last_success_message,
