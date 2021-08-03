@@ -6,10 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
+import {
+  PluginSetup,
+  PluginStart,
+  SetupPlugins,
+  StartPlugins,
+  IndexPatternEditorProps,
+} from './types';
 import { getEditorOpener } from './open_editor';
+import { IndexPatternEditor } from './components';
 
 export class IndexPatternEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -18,9 +26,7 @@ export class IndexPatternEditorPlugin
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    const {
-      application: { capabilities },
-    } = core;
+    const { application, uiSettings, docLinks, http, notifications } = core;
     const { data } = plugins;
 
     return {
@@ -28,9 +34,22 @@ export class IndexPatternEditorPlugin
         core,
         indexPatternService: data.indexPatterns,
       }),
+      IndexPatternEditorComponent: (props: IndexPatternEditorProps) => (
+        <IndexPatternEditor
+          services={{
+            uiSettings,
+            docLinks,
+            http,
+            notifications,
+            application,
+            indexPatternService: data.indexPatterns,
+          }}
+          {...props}
+        />
+      ),
       userPermissions: {
         editIndexPattern: () => {
-          return capabilities.management.kibana.indexPatterns;
+          return application.capabilities.management.kibana.indexPatterns;
         },
       },
     };

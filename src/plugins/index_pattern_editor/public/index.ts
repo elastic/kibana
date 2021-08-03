@@ -22,11 +22,9 @@ import { IndexPatternEditorPlugin } from './plugin';
 
 export { PluginStart as IndexPatternEditorStart } from './types';
 
-export { IndexPatternEditor } from './components';
-
 export function plugin() {
   return new IndexPatternEditorPlugin();
 }
 
-// Expose types
+// TODO Expose types
 export type { OpenEditorOptions } from './open_editor';

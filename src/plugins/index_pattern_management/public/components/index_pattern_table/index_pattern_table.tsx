@@ -24,7 +24,6 @@ import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
-import { IndexPatternEditor } from '../../../../index_pattern_editor/public';
 
 const pagination = {
   initialPageSize: 10,
@@ -67,10 +66,7 @@ export const IndexPatternTable = ({
     indexPatternManagementStart,
     chrome,
     data,
-    docLinks,
-    http,
-    notifications,
-    application,
+    IndexPatternEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
@@ -153,14 +149,6 @@ export const IndexPatternTable = ({
         history.push(`patterns/${indexPattern.id}`);
       }}
       onCancel={() => setShowCreateDialog(false)}
-      services={{
-        uiSettings,
-        docLinks,
-        http,
-        notifications,
-        application,
-        indexPatternService: data.indexPatterns,
-      }}
       defaultTypeIsRollup={isRollup}
     />
   ) : (

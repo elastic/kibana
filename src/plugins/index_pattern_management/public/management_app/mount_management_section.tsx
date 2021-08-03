@@ -62,7 +62,7 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
-    indexPatternEditor,
+    IndexPatternEditor: indexPatternEditor.IndexPatternEditorComponent,
   };
 
   ReactDOM.render(

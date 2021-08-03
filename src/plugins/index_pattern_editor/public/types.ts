@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { FC } from 'react';
 import {
   ApplicationStart,
   IUiSettingsClient,
@@ -16,6 +17,7 @@ import {
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
+import type { IndexPattern } from 'src/plugins/data/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 import { OpenEditorOptions } from './open_editor';
 
@@ -28,11 +30,25 @@ export interface IndexPatternEditorContext {
   indexPatternService: DataPublicPluginStart['indexPatterns'];
 }
 
+export interface IndexPatternEditorProps {
+  /**
+   * Handler for the "save" footer button
+   */
+  onSave: (indexPattern: IndexPattern) => void;
+  /**
+   * Handler for the "cancel" footer button
+   */
+  onCancel: () => void;
+  defaultTypeIsRollup?: boolean;
+  requireTimestampField?: boolean;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
 
 export interface PluginStart {
   openEditor(options: OpenEditorOptions): () => void;
+  IndexPatternEditorComponent: FC<IndexPatternEditorProps>;
   userPermissions: {
     editIndexPattern: () => boolean;
   };
