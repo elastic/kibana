@@ -182,12 +182,14 @@ export function jobsHealthServiceProvider(
         earliestMs = previousStartedAt.getTime();
       }
 
+      // Take the latest annotation about delayed data
       const { annotations } = await annotationService.getAnnotations({
         jobIds,
-        maxAnnotations: 10,
+        maxAnnotations: 1,
         earliestMs,
         latestMs: currentTimestamp,
         event: 'delayed_data',
+        sort: [{ modified_time: { order: 'desc' } }],
       });
 
       if (docsCount) {

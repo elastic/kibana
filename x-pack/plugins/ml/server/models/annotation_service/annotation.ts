@@ -48,6 +48,7 @@ export interface IndexAnnotationArgs {
   detectorIndex?: number;
   entities?: any[];
   event?: Annotation['event'];
+  sort?: Array<Record<string, { order: 'asc' | 'desc' }>>;
 }
 
 export interface AggTerm {
@@ -119,6 +120,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     detectorIndex,
     entities,
     event,
+    sort,
   }: IndexAnnotationArgs): Promise<GetResponse> {
     const obj: GetResponse = {
       success: true,
@@ -294,6 +296,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
         },
         ...(fields ? { aggs } : {}),
       },
+      ...(sort ? sort : {}),
     };
 
     try {

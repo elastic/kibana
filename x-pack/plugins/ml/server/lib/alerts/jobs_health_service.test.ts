@@ -269,10 +269,11 @@ describe('JobsHealthService', () => {
     expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
     expect(annotationService.getAnnotations).toHaveBeenCalledWith({
       jobIds: ['test_job_01', 'test_job_02'],
-      maxAnnotations: 10,
+      maxAnnotations: 1,
       event: 'delayed_data',
       earliestMs: null,
       latestMs: 1487076708000,
+      sort: [{ modified_time: { order: 'desc' } }],
     });
 
     expect(executionResult).toEqual([
