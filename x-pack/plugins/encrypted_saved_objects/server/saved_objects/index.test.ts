@@ -108,7 +108,10 @@ describe('#setupSavedObjects', () => {
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
       };
-      mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
+      mockSavedObjectsRepository.resolve.mockResolvedValue({
+        saved_object: mockSavedObject,
+        outcome: 'exactMatch',
+      });
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
 
       await expect(
@@ -126,8 +129,8 @@ describe('#setupSavedObjects', () => {
         mockSavedObject.attributes
       );
 
-      expect(mockSavedObjectsRepository.get).toHaveBeenCalledTimes(1);
-      expect(mockSavedObjectsRepository.get).toHaveBeenCalledWith(
+      expect(mockSavedObjectsRepository.resolve).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.resolve).toHaveBeenCalledWith(
         mockSavedObject.type,
         mockSavedObject.id,
         { namespace: 'some-ns' }
@@ -141,7 +144,10 @@ describe('#setupSavedObjects', () => {
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
       };
-      mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
+      mockSavedObjectsRepository.resolve.mockResolvedValue({
+        saved_object: mockSavedObject,
+        outcome: 'exactMatch',
+      });
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(false);
 
       await expect(
@@ -159,8 +165,8 @@ describe('#setupSavedObjects', () => {
         mockSavedObject.attributes
       );
 
-      expect(mockSavedObjectsRepository.get).toHaveBeenCalledTimes(1);
-      expect(mockSavedObjectsRepository.get).toHaveBeenCalledWith(
+      expect(mockSavedObjectsRepository.resolve).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.resolve).toHaveBeenCalledWith(
         mockSavedObject.type,
         mockSavedObject.id,
         { namespace: 'some-ns' }

@@ -83,7 +83,7 @@ export function setupSavedObjects({
         options?: SavedObjectsBaseOptions
       ): Promise<SavedObject<T>> => {
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
-        const savedObject = await internalRepository.get(type, id, options);
+        const { saved_object: savedObject } = await internalRepository.resolve(type, id, options);
         return {
           ...savedObject,
           attributes: (await service.decryptAttributes(
