@@ -23,7 +23,6 @@ type TagFormValidation = FillTagFormFields;
  */
 class TagModal extends FtrService {
   private readonly browser = this.ctx.getService('browser');
-  private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
