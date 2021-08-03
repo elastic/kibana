@@ -12,5 +12,4 @@ export interface NetworkEcs {
   packets?: number[];
   protocol?: string[];
   transport?: string[];
-  type?: string;
 }
