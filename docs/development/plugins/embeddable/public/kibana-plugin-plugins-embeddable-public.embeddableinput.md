@@ -18,5 +18,6 @@ export declare type EmbeddableInput = {
     disableTriggers?: boolean;
     searchSessionId?: string;
     syncColors?: boolean;
+    executionContext?: KibanaExecutionContext;
 };
 ```
