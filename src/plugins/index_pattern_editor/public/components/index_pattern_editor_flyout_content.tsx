@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import {
   IndexPatternSpec,
@@ -63,6 +64,12 @@ export interface TimestampOption {
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {
   timestampField?: TimestampOption;
 }
+
+const editorTitle = {
+  message: i18n.translate('indexPatternEditor.title', {
+    defaultMessage: 'Create index pattern',
+  }),
+};
 
 const IndexPatternEditorFlyoutContentComponent = ({
   onSave,
@@ -227,6 +234,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         if (query?.endsWith('*')) {
           const exactMatchedQuery = getIndices(http, isRollupIndex, query, allowHidden);
           indexRequests.push(exactMatchedQuery);
+          // provide default value when not making a request for the partialMatchQuery
           indexRequests.push(Promise.resolve([]));
         } else {
           const exactMatchQuery = getIndices(http, isRollupIndex, query, allowHidden);
@@ -319,7 +327,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2>Create index pattern</h2>
+            <h2>{editorTitle}</h2>
           </EuiTitle>
           <Form form={form} className="indexPatternEditor__form">
             {indexPatternTypeSelect}
@@ -360,7 +368,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <></>
           ) : (
             <PreviewPanel
-              type={type as INDEX_PATTERN_TYPE}
+              type={type}
               allowHidden={allowHidden}
               title={title}
               matched={matchedIndices}
