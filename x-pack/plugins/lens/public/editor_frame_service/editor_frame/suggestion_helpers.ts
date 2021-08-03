@@ -18,6 +18,8 @@ import {
   TableSuggestion,
   DatasourceSuggestion,
   DatasourcePublicAPI,
+  DatasourceMap,
+  VisualizationMap,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { LensDispatch, selectSuggestion, switchVisualization } from '../../state_management';
@@ -57,7 +59,7 @@ export function getSuggestions({
   activeData,
   mainPalette,
 }: {
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
@@ -65,7 +67,7 @@ export function getSuggestions({
       state: unknown;
     }
   >;
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
   visualizationState: unknown;
@@ -140,7 +142,7 @@ export function getVisualizeFieldSuggestions({
   visualizationState,
   visualizeTriggerFieldContext,
 }: {
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
@@ -148,7 +150,7 @@ export function getVisualizeFieldSuggestions({
       state: unknown;
     }
   >;
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
   visualizationState: unknown;

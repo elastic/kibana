@@ -70,6 +70,7 @@ const sessionIdSubject = new Subject<string>();
 describe('Lens App', () => {
   let defaultDoc: Document;
   let defaultSavedObjectId: string;
+
   const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
   const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
   const datasourceMap = {
