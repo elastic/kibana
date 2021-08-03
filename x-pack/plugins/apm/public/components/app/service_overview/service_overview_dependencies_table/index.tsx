@@ -121,7 +121,7 @@ export function ServiceOverviewDependenciesTable() {
       title={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableTitle',
         {
-          defaultMessage: 'Dependencies',
+          defaultMessage: 'Downstream services and backends',
         }
       )}
       nameColumnTitle={i18n.translate(
@@ -135,7 +135,7 @@ export function ServiceOverviewDependenciesTable() {
         <EuiLink href={dependenciesLink}>
           {i18n.translate(
             'xpack.apm.serviceOverview.dependenciesTableTabLink',
-            { defaultMessage: 'View all dependencies' }
+            { defaultMessage: 'View dependencies' }
           )}
         </EuiLink>
       }
