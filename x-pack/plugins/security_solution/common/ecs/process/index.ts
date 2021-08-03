@@ -42,3 +42,9 @@ export interface Thread {
   start?: string[];
   Ext?: Ext;
 }
+export interface ProcessPe {
+  original_file_name?: string;
+  company?: string;
+  description?: string;
+  file_version?: string;
+}

@@ -695,6 +695,8 @@ export type SafeEndpointEvent = Partial<{
     }>;
   }>;
   network: Partial<{
+    transport: ECSField<string>;
+    type: ECSField<string>;
     direction: ECSField<string>;
     forwarded_ip: ECSField<string>;
   }>;
