@@ -39,7 +39,13 @@ import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/publ
 import { makeConfigureStore, LensAppState, LensState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
 import { presentationUtilPluginMock } from '../../../../src/plugins/presentation_util/public/mocks';
-import { DatasourcePublicAPI, Datasource, Visualization, FramePublicAPI } from './types';
+import {
+  DatasourcePublicAPI,
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  FrameDatasourceAPI,
+} from './types';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -159,8 +165,7 @@ export function createMockFrameDatasourceAPI(): FrameDatasourceMock {
     datasourceLayers: {},
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
-    filters: [],
-    searchSessionId: 'sessionId',
+    filters: []
   };
 }
 

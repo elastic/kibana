@@ -14,6 +14,9 @@ import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 const selectQuery = (state: LensState) => state.lens.query;
 const selectFilters = (state: LensState) => state.lens.filters;
 const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
+const selectVisualization = (state: LensState) => state.lens.visualization;
+const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
+const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
 
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
@@ -138,3 +141,14 @@ export const selectSavedObjectFormat = createSelector(
 //     }
 //   }
 // );
+
+export const selectCurrentVisualization = createSelector(
+  [selectVisualization, selectStagedPreview],
+  (visualization, stagedPreview) => (stagedPreview ? stagedPreview.visualization : visualization)
+);
+
+export const selectCurrentDatasourceStates = createSelector(
+  [selectDatasourceStates, selectStagedPreview],
+  (datasourceStates, stagedPreview) =>
+    stagedPreview ? stagedPreview.datasourceStates : datasourceStates
+);

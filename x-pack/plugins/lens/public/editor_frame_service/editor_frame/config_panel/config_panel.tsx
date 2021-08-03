@@ -24,11 +24,17 @@ import {
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
+  useLensSelector,
 } from '../../../state_management';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
-  return props.activeVisualization && props.visualizationState ? (
-    <LayerPanels {...props} activeVisualization={props.activeVisualization} />
+  const visualization = useLensSelector((state) => state.lens.visualization);
+  const activeVisualization = visualization.activeId
+    ? props.visualizationMap[visualization.activeId]
+    : null;
+
+  return activeVisualization && visualization.state ? (
+    <LayerPanels {...props} activeVisualization={activeVisualization} />
   ) : null;
 });
 
@@ -38,10 +44,12 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, visualizationState, activeDatasourceId, datasourceMap } = props;
+  const { activeVisualization, datasourceMap } = props;
+  const { activeDatasourceId, visualization } = useLensSelector((state) => state.lens);
+
   const dispatchLens = useLensDispatch();
 
-  const layerIds = activeVisualization.getLayerIds(visualizationState);
+  const layerIds = activeVisualization.getLayerIds(visualization.state);
   const {
     setNextFocusedId: setNextFocusedLayerId,
     removeRef: removeLayerRef,
@@ -139,7 +147,7 @@ export function LayerPanels(
             key={layerId}
             layerId={layerId}
             layerIndex={layerIndex}
-            visualizationState={visualizationState}
+            visualizationState={visualization.state}
             updateVisualization={setVisualizationState}
             updateDatasource={updateDatasource}
             updateDatasourceAsync={updateDatasourceAsync}
@@ -187,7 +195,7 @@ export function LayerPanels(
           />
         ) : null
       )}
-      {activeVisualization.appendLayer && visualizationState && (
+      {activeVisualization.appendLayer && visualization.state && (
         <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
           <EuiToolTip
             className="eui-fullWidth"
@@ -220,7 +228,7 @@ export function LayerPanels(
                         activeVisualization,
                         generateId: () => id,
                         trackUiEvent,
-                        activeDatasource: datasourceMap[activeDatasourceId],
+                        activeDatasource: datasourceMap[activeDatasourceId!],
                         state,
                       }),
                   })

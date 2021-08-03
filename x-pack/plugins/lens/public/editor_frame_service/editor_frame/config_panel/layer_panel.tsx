@@ -60,6 +60,7 @@ export function LayerPanel(
   );
 
   const {
+    isFullscreen,
     framePublicAPI,
     layerId,
     isOnlyLayer,
@@ -70,7 +71,6 @@ export function LayerPanel(
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
-    isFullscreen,
     updateAll,
     updateDatasourceAsync,
     visualizationState,

@@ -142,13 +142,7 @@ export function getVisualizeFieldSuggestions({
   visualizeTriggerFieldContext,
 }: {
   datasourceMap: DatasourceMap;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceStates:DatasourceStates;
   visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;

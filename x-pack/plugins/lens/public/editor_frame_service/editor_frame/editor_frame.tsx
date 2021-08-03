@@ -53,6 +53,7 @@ export function EditorFrame(props: EditorFrameProps) {
     datasourceLayers,
   ]);
 
+  // TODO: move to redux
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
   getSuggestionForField.current = (field: DragDropIdentifier) => {
@@ -101,11 +102,6 @@ export function EditorFrame(props: EditorFrameProps) {
             core={props.core}
             plugins={props.plugins}
             showNoDataPopover={props.showNoDataPopover}
-            activeDatasource={activeDatasourceId}
-            datasourceState={activeDatasourceId ? datasourceStates[activeDatasourceId].state : null}
-            datasourceIsLoading={
-              activeDatasourceId ? datasourceStates[activeDatasourceId].isLoading : true
-            }
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
           />
@@ -117,12 +113,13 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualization.activeId ? props.visualizationMap[visualization.activeId] : null
               }
               activeDatasourceId={activeDatasourceId!}
-              datasourceMap={props.datasourceMap}
               datasourceStates={datasourceStates}
               visualizationState={visualization.state}
-              framePublicAPI={framePublicAPI}
-              core={props.core}
               isFullscreen={Boolean(isFullscreenDatasource)}
+              framePublicAPI={framePublicAPI}
+              visualizationMap={props.visualizationMap}
+              datasourceMap={props.datasourceMap}
+              core={props.core}
             />
           )
         }
@@ -131,12 +128,12 @@ export function EditorFrame(props: EditorFrameProps) {
             <WorkspacePanel
               activeDatasourceId={activeDatasourceId}
               activeVisualizationId={visualization.activeId}
-              datasourceMap={props.datasourceMap}
               datasourceStates={datasourceStates}
-              framePublicAPI={framePublicAPI}
               visualizationState={visualization.state}
-              visualizationMap={props.visualizationMap}
+              framePublicAPI={framePublicAPI}
               isFullscreen={Boolean(isFullscreenDatasource)}
+              datasourceMap={props.datasourceMap}
+              visualizationMap={props.visualizationMap}
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
@@ -152,11 +149,6 @@ export function EditorFrame(props: EditorFrameProps) {
               datasourceMap={props.datasourceMap}
               ExpressionRenderer={props.ExpressionRenderer}
               frame={framePublicAPI}
-              visualization={visualization}
-              activeVisualizationId={visualization.activeId}
-              activeDatasourceId={activeDatasourceId}
-              datasourceStates={datasourceStates}
-              visualizationState={visualization.state}
             />
           )
         }

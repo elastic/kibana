@@ -25,10 +25,7 @@ import {
 import { initializeDatasources } from './state_helpers';
 
 interface DataPanelWrapperProps {
-  datasourceState: unknown;
   datasourceMap: DatasourceMap;
-  activeDatasource: string | null;
-  datasourceIsLoading: boolean;
   showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
@@ -37,11 +34,13 @@ interface DataPanelWrapperProps {
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
-  const { activeDatasource } = props;
-
   const externalContext = useLensSelector(selectExecutionContext);
   const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
   const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+
+  const datasourceIsLoading = activeDatasourceId
+    ? datasourceStates[activeDatasourceId].isLoading
+    : true;
 
   const dispatchLens = useLensDispatch();
   const setDatasourceState: StateSetter<unknown> = useMemo(() => {
@@ -49,12 +48,12 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       dispatchLens(
         updateDatasourceState({
           updater,
-          datasourceId: activeDatasource!,
+          datasourceId: activeDatasourceId!,
           clearStagedPreview: true,
         })
       );
     };
-  }, [activeDatasource, dispatchLens]);
+  }, [activeDatasourceId, dispatchLens]);
 
   useEffect(() => {
     if (activeDatasourceId && datasourceStates[activeDatasourceId].state === null) {
@@ -79,7 +78,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const datasourceProps: DatasourceDataPanelProps = {
     ...externalContext,
     dragDropContext: useContext(DragContext),
-    state: props.datasourceState,
+    state: activeDatasourceId ? datasourceStates[activeDatasourceId].state : null,
     setState: setDatasourceState,
     core: props.core,
     showNoDataPopover: props.showNoDataPopover,
@@ -122,7 +121,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
               <EuiContextMenuItem
                 key={datasourceId}
                 data-test-subj={`datasource-switch-${datasourceId}`}
-                icon={props.activeDatasource === datasourceId ? 'check' : 'empty'}
+                icon={activeDatasourceId === datasourceId ? 'check' : 'empty'}
                 onClick={() => {
                   setDatasourceSwitcher(false);
                   dispatchLens(switchDatasource({ newDatasourceId: datasourceId }));
@@ -134,10 +133,10 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           />
         </EuiPopover>
       )}
-      {props.activeDatasource && !props.datasourceIsLoading && (
+      {activeDatasourceId && !datasourceIsLoading && (
         <NativeRenderer
           className="lnsDataPanelWrapper"
-          render={props.datasourceMap[props.activeDatasource].renderDataPanel}
+          render={props.datasourceMap[activeDatasourceId].renderDataPanel}
           nativeProps={datasourceProps}
         />
       )}
