@@ -45,10 +45,16 @@ export const EmptyPrompts: FC<Props> = ({
   const hasDataIndices = allSources.some(({ name }: MatchedItem) => !name.startsWith('.'));
 
   useCallback(() => {
+    let isMounted = true;
     if (!hasDataIndices)
-      getIndices(http, () => false, '*:*', false).then((dataSources) =>
-        setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-      );
+      getIndices(http, () => false, '*:*', false).then((dataSources) => {
+        if (isMounted) {
+          setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
   }, [http, hasDataIndices]);
 
   if (!hasExistingIndexPatterns && !goToForm) {

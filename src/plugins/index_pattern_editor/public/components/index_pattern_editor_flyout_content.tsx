@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import {
@@ -70,6 +70,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
 }: Props) => {
+  const isMounted = useRef<boolean>(false);
   const {
     services: { http, indexPatternService, uiSettings },
   } = useKibana<IndexPatternEditorContext>();
@@ -139,28 +140,27 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // loading list of index patterns
   useEffect(() => {
-    let isMounted = true;
+    isMounted.current = true;
     loadSources();
     const getTitles = async () => {
       const indexPatternTitles = await indexPatternService.getTitles();
-      if (isMounted) {
+      if (isMounted.current) {
         setExistingIndexPatterns(indexPatternTitles);
         setIsLoadingIndexPatterns(false);
       }
     };
     getTitles();
     return () => {
-      isMounted = false;
+      isMounted.current = false;
     };
   }, [http, indexPatternService, loadSources]);
 
   // loading rollup info
   useEffect(() => {
-    let isMounted = true;
     const getRollups = async () => {
       try {
         const response = await http.get('/api/rollup/indices');
-        if (isMounted) {
+        if (isMounted.current) {
           setRollupIndicesCapabilities(response || {});
         }
       } catch (e) {
@@ -169,10 +169,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     };
 
     getRollups();
-
-    return () => {
-      isMounted = false;
-    };
   }, [http, type]);
 
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
@@ -197,8 +193,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
         );
         timestampOptions = extractTimeFields(fields, requireTimestampField);
       }
-      setIsLoadingTimestampFields(false);
-      setTimestampFieldOptions(timestampOptions);
+      if (isMounted.current) {
+        setIsLoadingTimestampFields(false);
+        setTimestampFieldOptions(timestampOptions);
+      }
       return timestampOptions;
     },
     [
@@ -249,16 +247,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
           allowHidden
         );
 
-        if (type === INDEX_PATTERN_TYPE.ROLLUP) {
-          const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
-          newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
-          setRollupIndex(newRollupIndexName);
-        } else {
-          setRollupIndex(undefined);
-        }
+        if (isMounted.current) {
+          if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+            const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
+            newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
+            setRollupIndex(newRollupIndexName);
+          } else {
+            setRollupIndex(undefined);
+          }
 
-        setMatchedIndices(matchedIndicesResult);
-        setIsLoadingMatchedIndices(false);
+          setMatchedIndices(matchedIndicesResult);
+          setIsLoadingMatchedIndices(false);
+        }
 
         return { matchedIndicesResult, newRollupIndexName };
       };
