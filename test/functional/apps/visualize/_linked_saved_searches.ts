@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.visualize.initTests();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await filterBar.addFilter('extension.raw', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch(savedSearchName);
@@ -43,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await retry.waitFor('wait for count to equal 9,109', async () => {
           const data = await PageObjects.visChart.getTableVisContent();
           return data[0][0] === '9,109';
