@@ -125,20 +125,20 @@ export const createDetectionIndex = async (
       throw err;
     }
   }
-  await addFieldAliasesToIndices({ esClient, index, spaceId });
-  // The internal user is used here because Elasticsearch requires the PUT alias requestor to have 'manage' permissions
-  // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
-  // and not .alerts-security.alerts (the alias). From the security solution perspective, all .siem-signals-<space id>-*
-  // indices should have an alias to .alerts-security.alerts-<space id> so it's safe to add those aliases as the internal user.
-  await context.core.elasticsearch.client.asInternalUser.indices.putAlias({
-    index: `${index}-*`,
-    name: aadIndexAliasName,
-    body: {
-      is_write_index: false,
-    },
-  });
 
   if (indexExists) {
+    await addFieldAliasesToIndices({ esClient, index, spaceId });
+    // The internal user is used here because Elasticsearch requires the PUT alias requestor to have 'manage' permissions
+    // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
+    // and not .alerts-security.alerts (the alias). From the security solution perspective, all .siem-signals-<space id>-*
+    // indices should have an alias to .alerts-security.alerts-<space id> so it's safe to add those aliases as the internal user.
+    await context.core.elasticsearch.client.asInternalUser.indices.putAlias({
+      index: `${index}-*`,
+      name: aadIndexAliasName,
+      body: {
+        is_write_index: false,
+      },
+    });
     const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
       await esClient.indices.rollover({ alias: index });
