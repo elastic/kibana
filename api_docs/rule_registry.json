@@ -792,8 +792,8 @@
             ],
             "path": "x-pack/plugins/rule_registry/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -915,6 +915,22 @@
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.alert",
+            "type": "Object",
+            "tags": [],
+            "label": "alert",
+            "description": [],
+            "signature": [
+              "{ id: string; fields: Record<string, unknown>; }"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -939,6 +955,46 @@
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.options",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertExecutorOptions",
+                "text": "AlertExecutorOptions"
+              },
+              "<Params, State, InstanceState, InstanceContext, ActionGroupIds>, \"name\" | \"params\" | \"tags\" | \"spaceId\" | \"rule\" | \"createdBy\" | \"updatedBy\" | \"previousStartedAt\" | \"state\" | \"alertId\" | \"namespace\" | \"startedAt\"> & { services: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertServices",
+                "text": "AlertServices"
+              },
+              "<InstanceState, InstanceContext, ActionGroupIds> & ",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.LifecycleAlertServices",
+                "text": "LifecycleAlertServices"
+              },
+              "<InstanceState, InstanceContext, ActionGroupIds>; }"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1029,11 +1085,10 @@
           ],
           "path": "x-pack/plugins/rule_registry/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "ruleRegistry",
-              "id": "def-server.req",
+              "id": "def-server.RuleRegistryPluginStartContract.getRacClientWithRequest.$1",
               "type": "Object",
               "tags": [],
               "label": "req",
@@ -1049,9 +1104,11 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/plugins/rule_registry/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "ruleRegistry",
