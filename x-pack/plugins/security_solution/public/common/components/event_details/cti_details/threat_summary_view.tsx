@@ -6,7 +6,7 @@
  */
 
 import styled from 'styled-components';
-import { get } from 'lodash/fp';
+import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
 
@@ -26,14 +26,13 @@ export interface ThreatSummaryItem {
     type: string | undefined;
   };
   description: {
-    timelineId: string;
-    eventId: string;
-    fieldName: string | undefined;
-    index: number;
-    value: string | undefined;
-    provider: string | undefined;
-    data: FieldsData | undefined;
     browserField: BrowserField;
+    data: FieldsData | undefined;
+    eventId: string;
+    index: number;
+    provider: string | undefined;
+    timelineId: string;
+    value: string | undefined;
   };
 }
 
@@ -54,13 +53,13 @@ const EnrichmentTitle: React.FC<ThreatSummaryItem['title']> = ({ title, type }) 
 );
 
 const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
-  timelineId,
-  eventId,
   browserField,
-  value,
-  provider,
   data,
+  eventId,
   index,
+  provider,
+  timelineId,
+  value,
 }) => {
   if (!data || !value) return null;
   const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${provider}`;
@@ -130,7 +129,6 @@ const buildThreatSummaryItems = (
       },
       description: {
         eventId,
-        fieldName: field,
         index,
         provider,
         timelineId,
