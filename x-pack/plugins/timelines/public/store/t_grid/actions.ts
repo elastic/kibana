@@ -9,6 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
+  DataProvider,
   SortColumnTimeline,
   TimelineExpandedDetailType,
 } from '../../../common/types/timeline';
@@ -99,4 +100,8 @@ export const initializeTGridSettings = actionCreator<InitialyzeTGridSettings>('I
 
 export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
   'SET_TGRID_SELECT_ALL'
+);
+
+export const addProviderToTimeline = actionCreator<{ id: string; dataProvider: DataProvider }>(
+  'ADD_PROVIDER_TO_TIMELINE'
 );

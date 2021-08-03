@@ -25,10 +25,7 @@
           },
           ">) => JSX.Element"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
         "deprecated": false,
         "children": [
           {
@@ -49,10 +46,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -71,10 +65,7 @@
         "description": [
           "\nProps to provide to the {@link TrackApplicationView} component."
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -86,10 +77,7 @@
             "description": [
               "\nThe name of the view to be tracked. The appId will be obtained automatically."
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
             "deprecated": false
           },
           {
@@ -104,10 +92,7 @@
             "signature": [
               "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
             "deprecated": false
           }
         ],
@@ -126,10 +111,7 @@
       "description": [
         "Public's setup APIs exposed by the UsageCollection Service"
       ],
-      "source": {
-        "path": "src/plugins/usage_collection/public/plugin.tsx",
-        "lineNumber": 36
-      },
+      "path": "src/plugins/usage_collection/public/plugin.tsx",
       "deprecated": false,
       "children": [
         {
@@ -144,10 +126,7 @@
           "signature": [
             "{ ApplicationUsageTrackingProvider: React.FC<{}>; }"
           ],
-          "source": {
-            "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 38
-          },
+          "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -164,10 +143,7 @@
             "UiCounterMetricType",
             ", eventNames: string | string[], count?: number | undefined) => void"
           ],
-          "source": {
-            "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 75
-          },
+          "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -178,10 +154,7 @@
               "tags": [],
               "label": "appName",
               "description": [],
-              "source": {
-                "path": "src/plugins/usage_collection/public/plugin.tsx",
-                "lineNumber": 76
-              },
+              "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false
             },
             {
@@ -199,10 +172,7 @@
                 "METRIC_TYPE",
                 ".CLICK"
               ],
-              "source": {
-                "path": "src/plugins/usage_collection/public/plugin.tsx",
-                "lineNumber": 77
-              },
+              "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false
             },
             {
@@ -215,10 +185,7 @@
               "signature": [
                 "string | string[]"
               ],
-              "source": {
-                "path": "src/plugins/usage_collection/public/plugin.tsx",
-                "lineNumber": 78
-              },
+              "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false
             },
             {
@@ -231,10 +198,7 @@
               "signature": [
                 "number | undefined"
               ],
-              "source": {
-                "path": "src/plugins/usage_collection/public/plugin.tsx",
-                "lineNumber": 79
-              },
+              "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false
             }
           ]
@@ -252,10 +216,7 @@
       "description": [
         "Public's start APIs exposed by the UsageCollection Service"
       ],
-      "source": {
-        "path": "src/plugins/usage_collection/public/plugin.tsx",
-        "lineNumber": 84
-      },
+      "path": "src/plugins/usage_collection/public/plugin.tsx",
       "deprecated": false,
       "children": [
         {
@@ -272,10 +233,7 @@
             "UiCounterMetricType",
             ", eventNames: string | string[], count?: number | undefined) => void"
           ],
-          "source": {
-            "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 86
-          },
+          "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -286,10 +244,7 @@
               "tags": [],
               "label": "appName",
               "description": [],
-              "source": {
-                "path": "src/plugins/usage_collection/public/plugin.tsx",
-                "lineNumber": 87
-              },
+              "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false
             },
             {
@@ -307,10 +262,7 @@
                 "METRIC_TYPE",
                 ".CLICK"
               ],
-              "source": {
-                "path": "src/plugins/usage_collection/public/plugin.tsx",
-                "lineNumber": 88
-              },
+              "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false
             },
             {
@@ -323,10 +275,7 @@
               "signature": [
                 "string | string[]"
               ],
-              "source": {
-                "path": "src/plugins/usage_collection/public/plugin.tsx",
-                "lineNumber": 89
-              },
+              "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false
             },
             {
@@ -339,10 +288,7 @@
               "signature": [
                 "number | undefined"
               ],
-              "source": {
-                "path": "src/plugins/usage_collection/public/plugin.tsx",
-                "lineNumber": 90
-              },
+              "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false
             }
           ]
@@ -375,10 +321,7 @@
           },
           "<TFetchReturn, ExtraOptions>"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/collector/types.ts",
-          "lineNumber": 171
-        },
+        "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -393,10 +336,7 @@
             "signature": [
               "Logger"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 173
-            },
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false
           },
           {
@@ -416,10 +356,7 @@
               "ICollectorOptionsFetchExtendedContext",
               "<true>, \"kibanaRequest\">>)"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 178
-            },
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false
           },
           {
@@ -431,10 +368,7 @@
             "description": [
               "The registered type (aka name) of the collector"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 180
-            },
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false
           },
           {
@@ -465,10 +399,7 @@
               },
               "<boolean>) => TFetchReturn | Promise<TFetchReturn>"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 192
-            },
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -506,10 +437,7 @@
                   },
                   "<unknown, unknown, unknown, any> | undefined; } : {})"
                 ],
-                "source": {
-                  "path": "src/plugins/usage_collection/server/collector/types.ts",
-                  "lineNumber": 110
-                },
+                "path": "src/plugins/usage_collection/server/collector/types.ts",
                 "deprecated": false
               }
             ]
@@ -526,10 +454,7 @@
             "signature": [
               "() => boolean | Promise<boolean>"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 196
-            },
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -546,10 +471,7 @@
         "description": [
           "\nDetails about the counter to be incremented"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-          "lineNumber": 26
-        },
+        "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
         "deprecated": false,
         "children": [
           {
@@ -561,10 +483,7 @@
             "description": [
               "The name of the counter"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
             "deprecated": false
           },
           {
@@ -579,10 +498,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
             "deprecated": false
           },
           {
@@ -597,10 +513,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
             "deprecated": false
           }
         ],
@@ -615,10 +528,7 @@
         "description": [
           "\nUsage Counter allows to keep track of any events that occur.\nBy calling {@link IUsageCounter.incrementCounter} devs can notify this\nAPI whenever the event happens."
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-          "lineNumber": 40
-        },
+        "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
         "deprecated": false,
         "children": [
           {
@@ -641,10 +551,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-              "lineNumber": 45
-            },
+            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -664,10 +571,7 @@
                     "text": "IncrementCounterParams"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-                  "lineNumber": 45
-                },
+                "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
                 "deprecated": false
               }
             ]
@@ -695,10 +599,7 @@
           " extends ",
           "SavedObjectAttributes"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-          "lineNumber": 21
-        },
+        "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
         "children": [
           {
@@ -710,10 +611,7 @@
             "description": [
               "The domain ID registered in the Usage Counter"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
             "deprecated": false
           },
           {
@@ -725,10 +623,7 @@
             "description": [
               "The counter name"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
             "deprecated": false
           },
           {
@@ -740,10 +635,7 @@
             "description": [
               "The counter type"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
             "deprecated": false
           },
           {
@@ -755,10 +647,7 @@
             "description": [
               "Number of times the event has occurred"
             ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
             "deprecated": false
           }
         ],
@@ -779,10 +668,7 @@
         "signature": [
           "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/collector/types.ts",
-          "lineNumber": 33
-        },
+        "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -822,10 +708,7 @@
           },
           "<unknown, unknown, unknown, any> | undefined; } : {})"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/collector/types.ts",
-          "lineNumber": 76
-        },
+        "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -857,10 +740,7 @@
           },
           "<WithKibanaRequest>) => TReturn | Promise<TReturn>"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/collector/types.ts",
-          "lineNumber": 104
-        },
+        "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -908,10 +788,7 @@
           },
           "<WithKibanaRequest> | undefined; })"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/collector/types.ts",
-          "lineNumber": 135
-        },
+        "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -930,10 +807,7 @@
           "ICollectorOptionsFetchExtendedContext",
           "<WithKibanaRequest>, \"kibanaRequest\">> : {})"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/collector/types.ts",
-          "lineNumber": 125
-        },
+        "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -953,10 +827,7 @@
           "RecursiveMakeSchemaFrom",
           "<Required<Base>[Key]>; }"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/collector/types.ts",
-          "lineNumber": 61
-        },
+        "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -972,10 +843,7 @@
         "signature": [
           "\"usage-counters\""
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-          "lineNumber": 38
-        },
+        "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1031,10 +899,7 @@
           },
           "<TFetchReturn, boolean, {}>, \"schema\">>"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
-          "lineNumber": 16
-        },
+        "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1059,10 +924,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-          "lineNumber": 35
-        },
+        "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1077,10 +939,7 @@
       "description": [
         "Server's setup APIs exposed by the UsageCollection Service"
       ],
-      "source": {
-        "path": "src/plugins/usage_collection/server/plugin.ts",
-        "lineNumber": 29
-      },
+      "path": "src/plugins/usage_collection/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -1102,10 +961,7 @@
               "text": "IUsageCounter"
             }
           ],
-          "source": {
-            "path": "src/plugins/usage_collection/server/plugin.ts",
-            "lineNumber": 33
-          },
+          "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -1116,10 +972,7 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "source": {
-                "path": "src/plugins/usage_collection/server/plugin.ts",
-                "lineNumber": 33
-              },
+              "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false
             }
           ]
@@ -1144,10 +997,7 @@
             },
             " | undefined"
           ],
-          "source": {
-            "path": "src/plugins/usage_collection/server/plugin.ts",
-            "lineNumber": 37
-          },
+          "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -1158,10 +1008,7 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "source": {
-                "path": "src/plugins/usage_collection/server/plugin.ts",
-                "lineNumber": 37
-              },
+              "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false
             }
           ]
@@ -1194,10 +1041,7 @@
             },
             "<TFetchReturn, ExtraOptions>"
           ],
-          "source": {
-            "path": "src/plugins/usage_collection/server/plugin.ts",
-            "lineNumber": 42
-          },
+          "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -1251,10 +1095,7 @@
                 },
                 "<TFetchReturn, boolean, {}>, \"schema\">>"
               ],
-              "source": {
-                "path": "src/plugins/usage_collection/server/plugin.ts",
-                "lineNumber": 47
-              },
+              "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false
             }
           ]
@@ -1279,10 +1120,7 @@
             },
             "<TFetchReturn, ExtraOptions>) => void"
           ],
-          "source": {
-            "path": "src/plugins/usage_collection/server/plugin.ts",
-            "lineNumber": 53
-          },
+          "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -1303,10 +1141,7 @@
                 },
                 "<TFetchReturn, ExtraOptions>"
               ],
-              "source": {
-                "path": "src/plugins/usage_collection/server/plugin.ts",
-                "lineNumber": 54
-              },
+              "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false
             }
           ]
@@ -1331,10 +1166,7 @@
             },
             "<TFetchReturn, ExtraOptions> | undefined"
           ],
-          "source": {
-            "path": "src/plugins/usage_collection/server/plugin.ts",
-            "lineNumber": 59
-          },
+          "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -1345,10 +1177,7 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "source": {
-                "path": "src/plugins/usage_collection/server/plugin.ts",
-                "lineNumber": 60
-              },
+              "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false
             }
           ]
