@@ -512,8 +512,13 @@ export class ActionsClient {
     ) {
       await this.authorization.ensureAuthorized('execute');
     }
+
+    const {
+      saved_object: { id: resolvedActionId },
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAction>('action', actionId);
+
     return this.actionExecutor.execute({
-      actionId,
+      actionId: resolvedActionId,
       params,
       source,
       request: this.request,

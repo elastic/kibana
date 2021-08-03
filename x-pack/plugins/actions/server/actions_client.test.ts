@@ -2003,6 +2003,20 @@ describe('update()', () => {
 describe('execute()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to execute actions', async () => {
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: {
+          id: 'action-id',
+          type: 'type',
+          attributes: {
+            name: 'my name',
+            actionTypeId: 'my-action-type',
+            isMissingSecrets: false,
+            config: {},
+          },
+          references: [],
+        },
+        outcome: 'exactMatch',
+      });
       await actionsClient.execute({
         actionId: 'action-id',
         params: {
@@ -2030,9 +2044,24 @@ describe('execute()', () => {
     });
   });
 
-  test('calls the actionExecutor with the appropriate parameters', async () => {
+  test('calls the actionExecutor with the appropriate parameters when outcome is exactMatch', async () => {
     const actionId = uuid.v4();
+    unsecuredSavedObjectsClient.resolve.mockResolvedValue({
+      saved_object: {
+        id: actionId,
+        type: 'type',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      },
+      outcome: 'exactMatch',
+    });
     actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
+
     await expect(
       actionsClient.execute({
         actionId,
@@ -2100,6 +2129,108 @@ describe('execute()', () => {
 
     expect(actionExecutor.execute).toHaveBeenCalledWith({
       actionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          typeId: 'some-type-id',
+          type: 'some-type',
+          namespace: 'some-namespace',
+        },
+      ],
+    });
+  });
+
+  test('calls the actionExecutor with the appropriate parameters when outcome is aliasMatch', async () => {
+    const actionId = uuid.v4();
+    const resolvedActionId = uuid.v4();
+    unsecuredSavedObjectsClient.resolve.mockResolvedValue({
+      saved_object: {
+        id: resolvedActionId,
+        type: 'type',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      },
+      outcome: 'aliasMatch',
+      aliasTargetId: actionId,
+    });
+    actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId: resolvedActionId });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+      })
+    ).resolves.toMatchObject({ status: 'ok', resolvedActionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId: resolvedActionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+    });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            typeId: 'some-type-id',
+            type: 'some-type',
+          },
+        ],
+      })
+    ).resolves.toMatchObject({ status: 'ok', resolvedActionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId: resolvedActionId,
+      request,
+      params: {
+        name: 'my name',
+      },
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          typeId: 'some-type-id',
+          type: 'some-type',
+        },
+      ],
+    });
+
+    await expect(
+      actionsClient.execute({
+        actionId,
+        params: {
+          name: 'my name',
+        },
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            typeId: 'some-type-id',
+            type: 'some-type',
+            namespace: 'some-namespace',
+          },
+        ],
+      })
+    ).resolves.toMatchObject({ status: 'ok', resolvedActionId });
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId: resolvedActionId,
       request,
       params: {
         name: 'my name',
