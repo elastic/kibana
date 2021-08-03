@@ -1,7 +1,11 @@
 {
   "id": "uiActionsExamples",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Example plugin of how to register custom uiActions",
   "server": false,
   "ui": true,
   "requiredPlugins": ["uiActions"],

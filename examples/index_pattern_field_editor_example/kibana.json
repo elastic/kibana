@@ -1,7 +1,6 @@
 {
   "id": "indexPatternFieldEditorExample",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
   "requiredPlugins": ["data", "indexPatternFieldEditor", "developerExamples"],
