@@ -74,7 +74,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
-          upstreamServices: JSON.stringify(['opbeans-node']),
         });
         const response = await supertest.get(`/api/apm/service-map/backend/postgres?${q}`);
 
@@ -285,12 +284,12 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
         expectSnapshot(response.body).toMatchInline(`
           Object {
-            "avgCpuUsage": 0.289166666666667,
-            "avgErrorRate": 0.00531914893617021,
-            "avgMemoryUsage": 0.213260669882427,
+            "avgCpuUsage": 0.240216666666667,
+            "avgErrorRate": 0,
+            "avgMemoryUsage": 0.202572668763642,
             "transactionStats": Object {
-              "avgRequestsPerMinute": 5.26666666666667,
-              "avgTransactionDuration": 22281.4255319149,
+              "avgRequestsPerMinute": 5.2,
+              "avgTransactionDuration": 53906.6603773585,
             },
           }
         `);
@@ -302,7 +301,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
-          upstreamServices: JSON.stringify(['opbeans-node']),
         });
         const response = await supertest.get(`/api/apm/service-map/backend/postgresql?${q}`);
 
@@ -312,8 +310,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           Object {
             "avgErrorRate": 0,
             "transactionStats": Object {
-              "avgRequestsPerMinute": 4.23333333333333,
-              "avgTransactionDuration": 2991.37795275591,
+              "avgRequestsPerMinute": 82.9666666666667,
+              "avgTransactionDuration": 18307.583366814,
             },
           }
         `);

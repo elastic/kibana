@@ -8,7 +8,6 @@
 import { rangeQuery } from '../../../../observability/server';
 import {
   EVENT_OUTCOME,
-  SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
@@ -25,7 +24,6 @@ interface Options {
   environment?: string;
   backendName: string;
   searchAggregatedTransactions: boolean;
-  upstreamServices: string[];
 }
 
 export function getServiceMapBackendNodeInfo({
@@ -33,7 +31,6 @@ export function getServiceMapBackendNodeInfo({
   backendName,
   setup,
   searchAggregatedTransactions,
-  upstreamServices,
 }: Options) {
   return withApmSpan('get_service_map_backend_node_stats', async () => {
     const { apmEventClient, start, end } = setup;
@@ -54,7 +51,6 @@ export function getServiceMapBackendNodeInfo({
             bool: {
               filter: [
                 { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
-                { terms: { [SERVICE_NAME]: upstreamServices } },
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
               ],

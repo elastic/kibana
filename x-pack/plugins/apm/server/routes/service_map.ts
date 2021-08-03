@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { isActivePlatinumLicense } from '../../common/license_check';
 import { invalidLicenseMessage } from '../../common/service_map';
@@ -108,11 +107,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     path: t.type({
       backendName: t.string,
     }),
-    query: t.intersection([
-      t.type({ upstreamServices: jsonRt.pipe(t.array(t.string)) }),
-      environmentRt,
-      rangeRt,
-    ]),
+    query: t.intersection([environmentRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -128,7 +123,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
 
     const {
       path: { backendName },
-      query: { environment, upstreamServices },
+      query: { environment },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -140,7 +135,6 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
       setup,
       backendName,
       searchAggregatedTransactions,
-      upstreamServices,
     });
   },
 });
