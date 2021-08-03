@@ -1,6 +1,7 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-monaco"
 PKG_REQUIRE_NAME = "@kbn/monaco"
@@ -27,7 +28,7 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md"
 ]
 
-SRC_DEPS = [
+RUNTIME_DEPS = [
   "//packages/kbn-babel-preset",
   "//packages/kbn-i18n",
   "@npm//antlr4ts",
@@ -38,15 +39,29 @@ SRC_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-i18n",
+  "@npm//antlr4ts",
+  "@npm//monaco-editor",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  config_file = ".babelrc.browser"
+)
 
 webpack(
-  name = "target_web",
-  data = DEPS + [
+  name = "target_workers",
+  data = RUNTIME_DEPS + [
     ":src",
     "webpack.config.js",
   ],
@@ -70,24 +85,24 @@ ts_config(
 )
 
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   declaration = True,
-  declaration_dir = "target_types",
   declaration_map = True,
-  incremental = True,
-  out_dir = "target_node",
+  emit_declaration_only = True,
+  incremental = False,
+  out_dir = "target_types",
   source_map = True,
-  root_dir = ".",
+  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":tsc", ":target_web"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":target_workers", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
