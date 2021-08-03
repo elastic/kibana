@@ -7,13 +7,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionValueVisDimension } from '../../../visualizations/public';
+import type { ExpressionValueVisDimension } from './vis_dimension';
+
 import type {
   ExpressionFunctionDefinition,
-  Datatable,
   ExpressionValueBoxed,
-} from '../../../expressions/public';
-import type { Dimension } from '../types';
+  Datatable,
+  DatatableColumn,
+  SerializedFieldFormat,
+} from '../../../expressions/common';
+
+export interface DateHistogramParams {
+  date: boolean;
+  interval: number;
+  intervalESValue: number;
+  intervalESUnit: string;
+  format: string;
+  bounds?: {
+    min: string | number;
+    max: string | number;
+  };
+}
+
+export interface HistogramParams {
+  interval: number;
+}
+
+export interface FakeParams {
+  defaultValue: string;
+}
 
 interface Arguments {
   visDimension: ExpressionValueVisDimension;
@@ -27,9 +49,9 @@ export type ExpressionValueXYDimension = ExpressionValueBoxed<
   {
     label: string;
     aggType: string;
-    params: Dimension['params'];
-    accessor: number;
-    format: Dimension['format'];
+    params: DateHistogramParams | HistogramParams | FakeParams | {};
+    accessor: number | DatatableColumn;
+    format: SerializedFieldFormat;
   }
 >;
 
@@ -40,34 +62,34 @@ export const xyDimension = (): ExpressionFunctionDefinition<
   ExpressionValueXYDimension
 > => ({
   name: 'xydimension',
-  help: i18n.translate('visTypeXy.function.xydimension.help', {
+  help: i18n.translate('visualizations.function.xydimension.help', {
     defaultMessage: 'Generates xy dimension object',
   }),
   type: 'xy_dimension',
   args: {
     visDimension: {
       types: ['vis_dimension'],
-      help: i18n.translate('visTypeXy.function.xyDimension.visDimension.help', {
+      help: i18n.translate('visualizations.function.xyDimension.visDimension.help', {
         defaultMessage: 'Dimension object config',
       }),
       required: true,
     },
     label: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.xyDimension.label.help', {
+      help: i18n.translate('visualizations.function.xyDimension.label.help', {
         defaultMessage: 'Label',
       }),
     },
     aggType: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.xyDimension.aggType.help', {
+      help: i18n.translate('visualizations.function.xyDimension.aggType.help', {
         defaultMessage: 'Aggregation type',
       }),
     },
     params: {
       types: ['string'],
       default: '"{}"',
-      help: i18n.translate('visTypeXy.function.xyDimension.params.help', {
+      help: i18n.translate('visualizations.function.xyDimension.params.help', {
         defaultMessage: 'Params',
       }),
     },
