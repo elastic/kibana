@@ -1394,11 +1394,10 @@
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-server.request",
+                "id": "def-server.SpacesServiceStart.createSpacesClient.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -1416,9 +1415,11 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "spaces",
@@ -1705,6 +1706,48 @@
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.savedObjectsStart",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsStart",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsServiceStart",
+                "text": "SavedObjectsServiceStart"
+              }
+            ],
+            "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1746,6 +1789,48 @@
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.baseClient",
+            "type": "Object",
+            "tags": [],
+            "label": "baseClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.ISpacesClient",
+                "text": "ISpacesClient"
+              }
+            ],
+            "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

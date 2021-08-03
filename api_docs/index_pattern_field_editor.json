@@ -314,22 +314,34 @@
             ],
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "indexPatternFieldEditor",
-                "id": "def-public.newParams",
+                "id": "def-public.FormatEditorProps.onChange.$1.newParams",
                 "type": "Object",
                 "tags": [],
                 "label": "newParams",
                 "description": [],
-                "signature": [
-                  "{ [key: string]: any; }"
-                ],
                 "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "indexPatternFieldEditor",
+                    "id": "def-public.FormatEditorProps.onChange.$1.newParams.Unnamed",
+                    "type": "Any",
+                    "tags": [],
+                    "label": "Unnamed",
+                    "description": [],
+                    "signature": [
+                      "any"
+                    ],
+                    "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+                    "deprecated": false
+                  }
+                ]
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "indexPatternFieldEditor",
@@ -405,7 +417,24 @@
               "((fieldNames: string[]) => void) | undefined"
             ],
             "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "indexPatternFieldEditor",
+                "id": "def-public.OpenFieldDeleteModalOptions.onDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "fieldNames",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "indexPatternFieldEditor",
@@ -473,7 +502,30 @@
               ") => void) | undefined"
             ],
             "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "indexPatternFieldEditor",
+                "id": "def-public.OpenFieldEditorOptions.onSave.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPatternField",
+                    "text": "IndexPatternField"
+                  }
+                ],
+                "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "indexPatternFieldEditor",
@@ -548,6 +600,8 @@
         ],
         "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       }
     ],
