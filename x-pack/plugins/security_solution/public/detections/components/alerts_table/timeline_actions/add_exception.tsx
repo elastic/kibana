@@ -11,18 +11,11 @@ import * as i18n from '../translations';
 
 interface AddExceptionProps {
   disabled?: boolean;
-  eventKind?: string | null | undefined;
   onClick: () => void;
-  ruleId: string | null | undefined;
 }
 
-const AddExceptionComponent: React.FC<AddExceptionProps> = ({
-  disabled,
-  eventKind,
-  onClick,
-  ruleId,
-}) => {
-  return eventKind === 'event' && ruleId ? (
+const AddExceptionComponent: React.FC<AddExceptionProps> = ({ disabled, onClick }) => {
+  return (
     <EuiContextMenuItem
       key="add-exception-menu-item"
       aria-label={i18n.ACTION_ADD_EXCEPTION}
@@ -35,7 +28,7 @@ const AddExceptionComponent: React.FC<AddExceptionProps> = ({
         {i18n.ACTION_ADD_EXCEPTION}
       </EuiText>
     </EuiContextMenuItem>
-  ) : null;
+  );
 };
 
 export const AddException = React.memo(AddExceptionComponent);
