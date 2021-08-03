@@ -10,6 +10,10 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
+// These "secret" values are intentionally written in the source. We would make the APM server accept annonymous traffic if we could
+const APM_SERVER_URL = 'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gcp.cloud.es.io:443';
+const APM_PUBLIC_TOKEN = 'Q5q5rWQEw6tKeirBpw';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
@@ -30,9 +34,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_ACTIVE: 'true',
         ELASTIC_APM_ENVIRONMENT: process.env.CI ? 'ci' : 'development',
         ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '1.0',
-        ELASTIC_APM_SERVER_URL:
-          'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gcp.cloud.es.io:443',
-        ELASTIC_APM_SECRET_TOKEN: 'Q5q5rWQEw6tKeirBpw',
+        ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
+        ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           ftrConfig: `x-pack/test/performance`,
           jenkinsJobName: process.env.JOB_NAME,
