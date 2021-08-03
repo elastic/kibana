@@ -14,6 +14,7 @@ import {
 } from '../../../../../../src/plugins/presentation_util/public';
 
 import { CanvasPluginServices } from '..';
+import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
 import { navLinkServiceFactory } from './nav_link';
 import { notifyServiceFactory } from './notify';
@@ -29,6 +30,7 @@ export { reportingServiceFactory } from './reporting';
 export { workpadServiceFactory } from './workpad';
 
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
+  embeddables: new PluginServiceProvider(embeddablesServiceFactory),
   expressions: new PluginServiceProvider(expressionsServiceFactory),
   navLink: new PluginServiceProvider(navLinkServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),
