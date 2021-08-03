@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
 import { Alert, AlertTableItem } from '../../../../types';
@@ -23,7 +23,10 @@ export const RuleEnabledSwitch: React.FunctionComponent<ComponentOpts> = ({
   disableAlert,
   enableAlert,
 }: ComponentOpts) => {
-  const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
+  const [isEnabled, setIsEnabled] = useState<boolean>(!item.enabled);
+  useEffect(() => {
+    setIsEnabled(item.enabled);
+  }, [item.enabled]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   const res = isUpdating ? (
