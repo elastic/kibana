@@ -135,23 +135,6 @@ describe('crawlerDataServerToClient', () => {
     },
   ];
 
-  const crawlRequests: CrawlRequestFromServer[] = [
-    {
-      id: 'a',
-      status: CrawlerStatus.Canceled,
-      created_at: 'Mon, 31 Aug 2020 11:00:00 +0000',
-      began_at: 'Mon, 31 Aug 2020 12:00:00 +0000',
-      completed_at: 'Mon, 31 Aug 2020 13:00:00 +0000',
-    },
-    {
-      id: 'b',
-      status: CrawlerStatus.Success,
-      created_at: 'Mon, 31 Aug 2020 14:00:00 +0000',
-      began_at: 'Mon, 31 Aug 2020 15:00:00 +0000',
-      completed_at: 'Mon, 31 Aug 2020 16:00:00 +0000',
-    },
-  ];
-
   beforeAll(() => {
     output = crawlerDataServerToClient({
       domains,
