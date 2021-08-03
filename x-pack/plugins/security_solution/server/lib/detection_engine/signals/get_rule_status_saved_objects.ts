@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsFindResult } from 'kibana/server';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { MAX_RULE_STATUSES } from './rule_status_service';
 import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
@@ -18,7 +18,7 @@ interface GetRuleStatusSavedObject {
 export const getRuleStatusSavedObjects = async ({
   alertId,
   ruleStatusClient,
-}: GetRuleStatusSavedObject): Promise<SavedObjectsFindResponse<IRuleStatusSOAttributes>> => {
+}: GetRuleStatusSavedObject): Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>> => {
   return ruleStatusClient.find({
     perPage: MAX_RULE_STATUSES,
     sortField: 'statusDate',

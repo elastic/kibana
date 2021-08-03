@@ -10,6 +10,7 @@ import { SavedObject } from 'src/core/server';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
 import { getRuleStatusSavedObjects } from './get_rule_status_saved_objects';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface RuleStatusParams {
   alertId: string;
@@ -24,7 +25,7 @@ export const createNewRuleStatus = async ({
   return ruleStatusClient.create({
     alertId,
     statusDate: now,
-    status: 'going to run',
+    status: RuleExecutionStatus['going to run'],
     lastFailureAt: null,
     lastSuccessAt: null,
     lastFailureMessage: null,
@@ -44,8 +45,8 @@ export const getOrCreateRuleStatuses = async ({
     alertId,
     ruleStatusClient,
   });
-  if (ruleStatuses.saved_objects.length > 0) {
-    return ruleStatuses.saved_objects;
+  if (ruleStatuses.length > 0) {
+    return ruleStatuses;
   }
   const newStatus = await createNewRuleStatus({ alertId, ruleStatusClient });
 
