@@ -6,12 +6,5 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from 'src/core/server';
-
-export class UserSetupPlugin implements Plugin {
-  public setup(core: CoreSetup) {}
-
-  public start(core: CoreStart) {}
-
-  public stop() {}
-}
+export type { InteractiveSetupViewState, EnrollmentToken } from './types';
+export { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
