@@ -6,7 +6,6 @@
  */
 
 import { merge } from 'lodash';
-import { ArgProps } from './arg';
 import { FunctionForm, FunctionFormProps } from './function_form';
 import { Arg } from './types';
 

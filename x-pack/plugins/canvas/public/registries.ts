@@ -20,7 +20,6 @@ import {
   modelRegistry,
   transformRegistry,
   viewRegistry,
-  // @ts-expect-error untyped local
 } from './expression_types';
 import { SetupRegistries } from './plugin_api';
 

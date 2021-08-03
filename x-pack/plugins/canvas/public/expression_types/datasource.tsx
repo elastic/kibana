@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef, useCallback } from 'react';
+import { Ast } from '@kbn/interpreter/common';
 import { RenderToDom } from '../components/render_to_dom';
 import { BaseForm, BaseFormProps } from './base_form';
 import { ExpressionFormHandlers } from '../../common/lib';
@@ -18,7 +19,7 @@ const defaultTemplate = () => (
 
 type TemplateFn = (
   domNode: HTMLElement,
-  config: DatasourceProps,
+  config: DatasourceRenderProps,
   handlers: ExpressionFormHandlers
 ) => void;
 
@@ -28,10 +29,20 @@ export type DatasourceProps = {
   requiresContext?: boolean;
 } & BaseFormProps;
 
+export interface DatasourceRenderProps {
+  args: Record<string, Array<Ast | string>> | null;
+  updateArgs: Record<string, Array<Ast | string>> | null;
+  datasourceDef: Datasource;
+  isInvalid: boolean;
+  setInvalid: (invalid: boolean) => void;
+  defaultIndex: string;
+  renderError: (...args: any[]) => void;
+}
+
 interface DatasourceWrapperProps {
   handlers: ExpressionFormHandlers;
   spec: Datasource;
-  datasourceProps: DatasourceProps;
+  datasourceProps: DatasourceRenderProps;
 }
 
 const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (props) => {
@@ -78,7 +89,7 @@ export class Datasource extends BaseForm {
     this.requiresContext = props.requiresContext;
   }
 
-  render(props: DatasourceProps) {
+  render(props: DatasourceRenderProps) {
     const expressionFormHandlers = new ExpressionFormHandlers();
     return (
       <DatasourceWrapper spec={this} handlers={expressionFormHandlers} datasourceProps={props} />
