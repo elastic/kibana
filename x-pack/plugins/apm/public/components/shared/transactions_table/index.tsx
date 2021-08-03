@@ -18,16 +18,16 @@ import uuid from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { OverviewTableContainer } from '../../../shared/overview_table_container';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
+import { TableFetchWrapper } from '../table_fetch_wrapper';
+import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
+import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
-import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
+import { ElasticDocsLink } from '../Links/ElasticDocsLink';
 
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
@@ -61,7 +61,7 @@ interface Props {
   showAggregationAccurateCallout?: boolean;
 }
 
-export function ServiceOverviewTransactionsTable({
+export function TransactionsTable({
   hideViewTransactionsLink = false,
   numberOfTransactionsPerPage = 5,
   showAggregationAccurateCallout = false,

@@ -14,7 +14,7 @@ import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { ServiceOverviewTransactionsTable } from '../service_overview/service_overview_transactions_table';
+import { TransactionsTable } from '../../shared/transactions_table';
 import { useRedirect } from './useRedirect';
 
 function getRedirectLocation({
@@ -58,7 +58,7 @@ export function TransactionOverview() {
       <TransactionCharts />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
-        <ServiceOverviewTransactionsTable
+        <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
           showAggregationAccurateCallout
