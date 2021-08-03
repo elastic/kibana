@@ -881,7 +881,30 @@
               ") => boolean) | undefined"
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.InspectorViewDescription.shouldShow.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "adapters",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Adapters",
+                    "text": "Adapters"
+                  }
+                ],
+                "path": "src/plugins/inspector/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "inspector",
@@ -1181,13 +1204,10 @@
           ],
           "path": "src/plugins/inspector/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [
-            "True, if a call to `open` with the same adapters\nwould have shown the inspector panel, false otherwise."
-          ],
           "children": [
             {
               "parentPluginId": "inspector",
-              "id": "def-public.adapters",
+              "id": "def-public.Start.isAvailable.$1",
               "type": "Object",
               "tags": [],
               "label": "adapters",
@@ -1205,8 +1225,12 @@
                 " | undefined"
               ],
               "path": "src/plugins/inspector/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": false
             }
+          ],
+          "returnComment": [
+            "True, if a call to `open` with the same adapters\nwould have shown the inspector panel, false otherwise."
           ]
         },
         {
@@ -1249,13 +1273,10 @@
           ],
           "path": "src/plugins/inspector/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [
-            "The session instance for the opened inspector."
-          ],
           "children": [
             {
               "parentPluginId": "inspector",
-              "id": "def-public.adapters",
+              "id": "def-public.Start.open.$1",
               "type": "Object",
               "tags": [],
               "label": "adapters",
@@ -1272,11 +1293,12 @@
                 }
               ],
               "path": "src/plugins/inspector/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "inspector",
-              "id": "def-public.options",
+              "id": "def-public.Start.open.$2",
               "type": "Object",
               "tags": [],
               "label": "options",
@@ -1294,8 +1316,12 @@
                 " | undefined"
               ],
               "path": "src/plugins/inspector/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": false
             }
+          ],
+          "returnComment": [
+            "The session instance for the opened inspector."
           ]
         }
       ],

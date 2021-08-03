@@ -3598,6 +3598,32 @@
         ],
         "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.defaultOverride",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
