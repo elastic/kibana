@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface PoliciesSelectorProps {
   policies: ImmutableArray<PolicyData>;
@@ -58,6 +59,10 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [query, setQuery] = useState<string>('');
     const [itemsList, setItemsList] = useState<PolicySelectionItem[]>([]);
+
+    const isExcludePoliciesInFilterEnabled = useIsExperimentalFeatureEnabled(
+      'excludePoliciesInFilterEnabled'
+    );
 
     useEffect(() => {
       const defaultIncludedPoliciesByKey: DefaultPoliciesByKey = defaultIncludedPolicies
@@ -110,7 +115,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
 
         switch (newItems[index].checked) {
           case 'on':
-            newItems[index].checked = 'off';
+            newItems[index].checked = isExcludePoliciesInFilterEnabled ? 'off' : undefined;
             break;
 
           case 'off':
@@ -124,7 +129,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
         setItemsList(newItems);
         onChangeSelection(newItems);
       },
-      [itemsList, onChangeSelection]
+      [itemsList, onChangeSelection, isExcludePoliciesInFilterEnabled]
     );
 
     const dropdownItems = useMemo(
