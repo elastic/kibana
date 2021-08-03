@@ -345,7 +345,11 @@ export const TimeseriesConfig = injectI18n(function (props) {
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
+          <DataFormatPicker
+            onChange={props.onChange}
+            value={model.formatter}
+            disabled={!model.ignore_field_formatting}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
@@ -370,6 +374,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
+              disabled={!model.ignore_field_formatting}
               fullWidth
               data-test-subj="tsvb_series_value"
             />

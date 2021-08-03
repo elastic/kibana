@@ -114,7 +114,11 @@ export class TableSeriesConfig extends Component {
       <div className="tvbAggRow">
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
-            <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
+            <DataFormatPicker
+              onChange={this.props.onChange}
+              value={model.formatter}
+              disabled={!model.ignore_field_formatting}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
@@ -139,6 +143,7 @@ export class TableSeriesConfig extends Component {
               <EuiFieldText
                 onChange={handleTextChange('value_template')}
                 value={model.value_template}
+                disabled={!model.ignore_field_formatting}
                 fullWidth
               />
             </EuiFormRow>

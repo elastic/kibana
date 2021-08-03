@@ -31,6 +31,7 @@ export interface Annotation {
   hidden?: boolean;
   icon?: string;
   id: string;
+  ignore_field_formatting?: number;
   ignore_global_filters?: number;
   ignore_panel_filters?: number;
   index_pattern: IndexPatternValue;

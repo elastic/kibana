@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { DataFormatPicker } from './data_format_picker';
-import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
 import { IndexPattern } from './index_pattern';
@@ -28,7 +27,6 @@ import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_quer
 export const SeriesConfig = (props) => {
   const defaults = { offset_time: '', value_template: '{{value}}' };
   const model = { ...defaults, ...props.model };
-  const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const htmlId = htmlIdGenerator();
   const seriesIndexPattern = props.model.override_index_pattern
@@ -39,7 +37,11 @@ export const SeriesConfig = (props) => {
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
+          <DataFormatPicker
+            onChange={props.onChange}
+            value={model.formatter}
+            disabled={!model.ignore_field_formatting}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
@@ -64,6 +66,7 @@ export const SeriesConfig = (props) => {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
+              disabled={!model.ignore_field_formatting}
               fullWidth
             />
           </EuiFormRow>

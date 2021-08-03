@@ -52,16 +52,18 @@ class TimeseriesVisualization extends Component {
     return `${(Number.isNaN(n) ? 0 : n).toFixed(0)}%`;
   };
 
-  applyDocTo = (template) => (doc) => {
-    const { fieldFormatMap } = this.props;
+  applyDocTo = (template, shouldApplyFormatting) => (doc) => {
+    if (shouldApplyFormatting) {
+      const { fieldFormatMap } = this.props;
 
-    // formatting each doc value with custom field formatter if fieldFormatMap contains that doc field name
-    Object.keys(doc).forEach((fieldName) => {
-      if (fieldFormatMap?.[fieldName]) {
-        const valueFieldFormatter = createFieldFormatter(fieldName, fieldFormatMap);
-        doc[fieldName] = valueFieldFormatter(doc[fieldName]);
-      }
-    });
+      // formatting each doc value with custom field formatter if fieldFormatMap contains that doc field name
+      Object.keys(doc).forEach((fieldName) => {
+        if (fieldFormatMap?.[fieldName]) {
+          const valueFieldFormatter = createFieldFormatter(fieldName, fieldFormatMap);
+          doc[fieldName] = valueFieldFormatter(doc[fieldName]);
+        }
+      });
+    }
 
     const vars = replaceVars(template, null, doc, {
       noEscape: true,
@@ -134,20 +136,23 @@ class TimeseriesVisualization extends Component {
   prepareAnnotations = () => {
     const { model, visData } = this.props;
 
-    return map(model.annotations, ({ id, color, icon, template }) => {
-      const annotationData = get(visData, `${model.id}.annotations.${id}`, []);
-      const applyDocToTemplate = this.applyDocTo(template);
+    return map(
+      model.annotations,
+      ({ id, color, icon, template, ignore_field_formatting: ignoreFieldFormatting }) => {
+        const annotationData = get(visData, `${model.id}.annotations.${id}`, []);
+        const applyDocToTemplate = this.applyDocTo(template, !ignoreFieldFormatting);
 
-      return {
-        id,
-        color,
-        icon,
-        data: annotationData.map(({ docs, ...rest }) => ({
-          ...rest,
-          docs: docs.map(applyDocToTemplate),
-        })),
-      };
-    });
+        return {
+          id,
+          color,
+          icon,
+          data: annotationData.map(({ docs, ...rest }) => ({
+            ...rest,
+            docs: docs.map(applyDocToTemplate),
+          })),
+        };
+      }
+    );
   };
 
   render() {

@@ -277,6 +277,20 @@ export const AnnotationRow = ({
                 />
               </EuiFormRow>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                label={i18n.translate('visTypeTimeseries.annotationsEditor.ignoreFieldFormatting', {
+                  defaultMessage: 'Ignore common formatting?',
+                })}
+              >
+                <YesNo
+                  value={model.ignore_field_formatting}
+                  name="ignore_field_formatting"
+                  onChange={onChange}
+                  data-test-subj="annotationsIgnoreFieldFormatting"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
 

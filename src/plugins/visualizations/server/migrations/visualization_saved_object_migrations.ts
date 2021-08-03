@@ -947,7 +947,7 @@ const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
 };
 
 /**
- * [TSVB] Set ignore field formatting param to true for series by default
+ * [TSVB] Set ignore field formatting param to true for series and annotations by default
  */
 const addTSVBIgnoreFilterFormatting: SavedObjectMigrationFn<any, any> = (doc) => {
   try {
