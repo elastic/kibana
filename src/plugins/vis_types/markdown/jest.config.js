@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/src/plugins/vis_types/vis_type_markdown'],
+  roots: ['<rootDir>/src/plugins/vis_types/markdown'],
 };
