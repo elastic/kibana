@@ -13,7 +13,7 @@ pageLoadAssetSize:
   dashboard: 374194
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 943821
+  data: 900000
   dataEnhanced: 50420
   devTools: 38637
   discover: 99999
@@ -107,7 +107,7 @@ pageLoadAssetSize:
   dataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
-  timelines: 330000
+  timelines: 327300
   screenshotMode: 17856
   visTypePie: 35583
   expressionRevealImage: 25675
@@ -117,4 +117,4 @@ pageLoadAssetSize:
   expressionImage: 19288
   expressionMetric: 22238
   expressionShape: 30033
-  userSetup: 18532
+  interactiveSetup: 18532

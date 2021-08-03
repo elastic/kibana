@@ -22,7 +22,12 @@ import {
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../timelines/common';
+import type {
+  ActionProps,
+  AlertStatus,
+  ColumnHeaderOptions,
+  RowRenderer,
+} from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -127,7 +132,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const leadingControlColumns = [
     {
       id: 'expand',
-      width: 20,
+      width: 40,
       headerCellRender: () => {
         return (
           <EventsThContent>
@@ -156,7 +161,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     },
     {
       id: 'view_in_app',
-      width: 20,
+      width: 40,
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
@@ -221,6 +226,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             sortDirection: 'desc',
           },
         ],
+        filterStatus: status as AlertStatus,
         leadingControlColumns,
         trailingControlColumns,
         unit: (totalAlerts: number) =>
