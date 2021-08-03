@@ -1583,6 +1583,10 @@ Object {
           "path": "signal.ancestors.type",
           "type": "alias",
         },
+        "kibana.alert.consumers": Object {
+          "type": "constant_keyword",
+          "value": "siem",
+        },
         "kibana.alert.depth": Object {
           "path": "signal.depth",
           "type": "alias",
@@ -1670,6 +1674,10 @@ Object {
         "kibana.alert.original_time": Object {
           "path": "signal.original_time",
           "type": "alias",
+        },
+        "kibana.alert.producer": Object {
+          "type": "constant_keyword",
+          "value": "siem",
         },
         "kibana.alert.risk_score": Object {
           "path": "signal.rule.risk_score",
@@ -1934,14 +1942,6 @@ Object {
         "kibana.alert.workflow_status": Object {
           "path": "signal.status",
           "type": "alias",
-        },
-        "kibana.consumers": Object {
-          "type": "constant_keyword",
-          "value": "siem",
-        },
-        "kibana.producer": Object {
-          "type": "constant_keyword",
-          "value": "siem",
         },
         "kibana.space_ids": Object {
           "type": "constant_keyword",
