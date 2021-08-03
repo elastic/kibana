@@ -10,7 +10,7 @@ import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'sr
 
 import { IndexDataEnricher } from '../../../services/index_data_enricher';
 
-import { registerPrivilegesRoute } from './privileges';
+import { registerPrivilegesRoute } from './register_privileges_route';
 
 jest.mock('../../../services/index_data_enricher');
 
