@@ -2229,12 +2229,5 @@ const isFoundGetResponse = <TDocument = unknown>(
  * @returns boolean
  */
 const isSupportedEsServer = (headers: Record<string, unknown> | null) => {
-  return !!headers && esXProductMatches(headers);
-};
-
-const esXProductMatches = (headers: Record<string, unknown>) => {
-  const esXProductHeaderKey = Object.keys(headers).find(
-    (key: string) => key.toLowerCase() === 'x-elastic-product'
-  );
-  return !!esXProductHeaderKey && headers[esXProductHeaderKey] === 'Elasticsearch';
+  return !!headers && headers['x-elastic-product'] === 'Elasticsearch';
 };
