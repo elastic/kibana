@@ -110,6 +110,7 @@ export function getPackagePolicyWithAgentConfigurations(
   packagePolicy: PackagePolicy,
   agentConfigurations: AgentConfiguration[]
 ) {
+  // @ts-ignore
   const [firstInput, ...restInputs] = packagePolicy.inputs;
   const apmServerValue = firstInput?.config?.[APM_SERVER].value;
   return {

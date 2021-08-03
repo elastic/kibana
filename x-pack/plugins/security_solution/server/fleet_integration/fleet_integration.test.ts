@@ -90,6 +90,7 @@ describe('ingest_integration tests ', () => {
         exceptionListClient
       );
 
+      // TODO: Fix this type error
       return callback(createNewPackagePolicyMock(), ctx, req);
     };
 

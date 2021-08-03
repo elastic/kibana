@@ -38,3 +38,5 @@ export type ExternalCallback =
   | ['packagePolicyCreate', PostPackagePolicyCreateCallback]
   | ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback]
   | ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
+
+export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

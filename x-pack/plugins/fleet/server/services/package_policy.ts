@@ -641,7 +641,7 @@ class PackagePolicyService {
       const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
       if (externalCallbacks && externalCallbacks.size > 0) {
         for (const callback of externalCallbacks) {
-          await callback(packagePolicy, context, request);
+          await callback(packagePolicy as DeletePackagePoliciesResponse, context, request);
         }
       }
     } else {
