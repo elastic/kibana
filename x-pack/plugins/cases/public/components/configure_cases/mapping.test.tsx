@@ -11,25 +11,13 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../common/mock';
 import { Mapping, MappingProps } from './mapping';
 import { mappings } from './__mock__';
-import { useKibana } from '../../common/lib/kibana';
-
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('Mapping', () => {
   const props: MappingProps = {
-    connectorActionTypeId: '.servicenow',
+    actionTypeName: 'ServiceNow ITSM',
     isLoading: false,
     mappings,
   };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: 'ServiceNow ITSM',
-      iconClass: 'logoSecurity',
-    });
-  });
 
   test('it shows mapping form group', () => {
     const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
@@ -45,6 +33,21 @@ describe('Mapping', () => {
       'short_description'
     );
   });
+
+  test('displays the title correctly', () => {
+    const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
+    expect(wrapper.find('[data-test-subj="field-mapping-text"] h4').first().text()).toBe(
+      'ServiceNow ITSM field mappings'
+    );
+  });
+
+  test('displays the description correctly', () => {
+    const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
+    expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
+      'Map Case fields to ServiceNow ITSM fields when pushing data to ServiceNow ITSM. Field mappings require an established connection to ServiceNow ITSM.'
+    );
+  });
+
   test('displays connection warning when isLoading: false and mappings: []', () => {
     const wrapper = mount(<Mapping {...{ ...props, mappings: [] }} />, {
       wrappingComponent: TestProviders,

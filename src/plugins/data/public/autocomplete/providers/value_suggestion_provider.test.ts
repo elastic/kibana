@@ -10,14 +10,17 @@ import { stubIndexPattern, stubFields } from '../../stubs';
 import { TimefilterSetup } from '../../query';
 import { setupValueSuggestionProvider, ValueSuggestionsGetFn } from './value_suggestion_provider';
 import { IUiSettingsClient, CoreSetup } from 'kibana/public';
+import { UI_SETTINGS } from '../../../common';
 
 describe('FieldSuggestions', () => {
   let getValueSuggestions: ValueSuggestionsGetFn;
   let http: any;
-  let shouldSuggestValues: boolean;
+  let uiConfig: Record<string, any> = {};
+  const uiSettings = {
+    get: (key: string) => uiConfig[key],
+  } as IUiSettingsClient;
 
   beforeEach(() => {
-    const uiSettings = { get: (key: string) => shouldSuggestValues } as IUiSettingsClient;
     http = { fetch: jest.fn().mockResolvedValue([]) };
 
     getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup, {
@@ -40,6 +43,8 @@ describe('FieldSuggestions', () => {
   });
 
   describe('with value suggestions disabled', () => {
+    uiConfig = { [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: false };
+
     it('should return an empty array', async () => {
       const suggestions = await getValueSuggestions({
         indexPattern: stubIndexPattern,
@@ -53,7 +58,7 @@ describe('FieldSuggestions', () => {
   });
 
   describe('with value suggestions enabled', () => {
-    shouldSuggestValues = true;
+    uiConfig = { [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: true };
 
     it('should return true/false for boolean fields', async () => {
       const [field] = stubFields.filter(({ type }) => type === 'boolean');
@@ -225,6 +230,67 @@ describe('FieldSuggestions', () => {
 
       expect(JSON.parse(callParams.body).filters).toHaveLength(1);
       expect(http.fetch).toHaveBeenCalled();
+    });
+
+    it('should use terms_enum', async () => {
+      uiConfig = {
+        [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: true,
+        [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: 'terms_enum',
+      };
+      const [field] = stubFields.filter(
+        ({ type, aggregatable }) => type === 'string' && aggregatable
+      );
+
+      await getValueSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+        useTimeRange: true,
+      });
+      const callParams = http.fetch.mock.calls[0][1];
+
+      expect(JSON.parse(callParams.body)).toHaveProperty('method', 'terms_enum');
+    });
+
+    it('should use terms_agg', async () => {
+      uiConfig = {
+        [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: true,
+        [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: 'terms_agg',
+      };
+      const [field] = stubFields.filter(
+        ({ type, aggregatable }) => type === 'string' && aggregatable
+      );
+
+      await getValueSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+        useTimeRange: true,
+      });
+      const callParams = http.fetch.mock.calls[0][1];
+
+      expect(JSON.parse(callParams.body)).toHaveProperty('method', 'terms_agg');
+    });
+
+    it('should use method passed in', async () => {
+      uiConfig = {
+        [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: true,
+        [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: 'terms_agg',
+      };
+      const [field] = stubFields.filter(
+        ({ type, aggregatable }) => type === 'string' && aggregatable
+      );
+
+      await getValueSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+        useTimeRange: true,
+        method: 'terms_agg',
+      });
+      const callParams = http.fetch.mock.calls[0][1];
+
+      expect(JSON.parse(callParams.body)).toHaveProperty('method', 'terms_agg');
     });
   });
 });

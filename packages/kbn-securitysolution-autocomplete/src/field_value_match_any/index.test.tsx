@@ -64,7 +64,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
-        selectedValue={['126.45.211.34']}
+        selectedValue={['127.0.0.1']}
       />
     );
 
@@ -124,7 +124,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
-        selectedValue={['126.45.211.34']}
+        selectedValue={['127.0.0.1']}
       />
     );
 
@@ -155,13 +155,13 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
-        selectedValue={['126.45.211.34']}
+        selectedValue={['127.0.0.1']}
       />
     );
 
     expect(
       wrapper.find(`[data-test-subj="valuesAutocompleteMatchAny"] EuiComboBoxPill`).at(0).text()
-    ).toEqual('126.45.211.34');
+    ).toEqual('127.0.0.1');
   });
 
   test('it invokes "onChange" when new value created', async () => {
@@ -191,9 +191,9 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
 
     ((wrapper.find(EuiComboBox).props() as unknown) as {
       onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    }).onCreateOption('127.0.0.1');
 
-    expect(mockOnChange).toHaveBeenCalledWith(['126.45.211.34']);
+    expect(mockOnChange).toHaveBeenCalledWith(['127.0.0.1']);
   });
 
   test('it invokes "onChange" when new value selected', async () => {

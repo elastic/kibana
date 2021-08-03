@@ -22,11 +22,11 @@ import React, { Component } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
 import { Job } from '../lib/job';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { Props as ListingProps } from './report_listing';
+import { ListingProps } from '.';
 
 interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
-  jobId: string;
   apiClient: ReportingAPIClient;
+  job: Job;
 }
 
 interface State {
@@ -58,7 +58,10 @@ class ReportInfoButtonUi extends Component<Props, State> {
     this.state = {
       isLoading: false,
       isFlyoutVisible: false,
-      calloutTitle: 'Job Info',
+      calloutTitle: props.intl.formatMessage({
+        id: 'xpack.reporting.listing.table.reportCalloutTitle',
+        defaultMessage: 'Report info',
+      }),
       info: null,
       error: null,
     };
@@ -76,58 +79,177 @@ class ReportInfoButtonUi extends Component<Props, State> {
       return null;
     }
 
-    const jobType = info.jobtype || NA;
-    const attempts = info.attempts ? info.attempts.toString() : NA;
-    const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
-    const warnings = info.warnings?.join(',') ?? null;
 
     const jobInfo = [
-      { title: 'Title', description: info.title || NA },
-      { title: 'Created By', description: info.created_by || NA },
-      { title: 'Created At', description: info.created_at || NA },
-      { title: 'Timezone', description: info.browserTimezone || NA },
-      { title: 'Status', description: info.status || NA },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.titleInfo',
+          defaultMessage: 'Title',
+        }),
+        description: info.title || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.createdAtInfo',
+          defaultMessage: 'Created At',
+        }),
+        description: info.getCreatedAtLabel(),
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.statusInfo',
+          defaultMessage: 'Status',
+        }),
+        description: info.getStatus(),
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.tzInfo',
+          defaultMessage: 'Timezone',
+        }),
+        description: info.browserTimezone || NA,
+      },
     ];
 
     const processingInfo = [
-      { title: 'Started At', description: info.started_at || NA },
-      { title: 'Completed At', description: info.completed_at || NA },
       {
-        title: 'Processed By',
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.startedAtInfo',
+          defaultMessage: 'Started At',
+        }),
+        description: info.started_at || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.completedAtInfo',
+          defaultMessage: 'Completed At',
+        }),
+        description: info.completed_at || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.processedByInfo',
+          defaultMessage: 'Processed By',
+        }),
         description:
           info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
       },
-      { title: 'Content Type', description: info.content_type || NA },
-      { title: 'Size in Bytes', description: info.size?.toString() || NA },
-      { title: 'Attempts', description: attempts },
-      { title: 'Max Attempts', description: maxAttempts },
-      { title: 'Timeout', description: timeout },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.contentTypeInfo',
+          defaultMessage: 'Content Type',
+        }),
+        description: info.content_type || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.sizeInfo',
+          defaultMessage: 'Size in Bytes',
+        }),
+        description: info.size?.toString() || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.attemptsInfo',
+          defaultMessage: 'Attempts',
+        }),
+        description: info.attempts.toString(),
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.maxAttemptsInfo',
+          defaultMessage: 'Max Attempts',
+        }),
+        description: info.max_attempts?.toString() || NA,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.timeoutInfo',
+          defaultMessage: 'Timeout',
+        }),
+        description: timeout,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.exportTypeInfo',
+          defaultMessage: 'Export Type',
+        }),
+        description: info.isDeprecated
+          ? this.props.intl.formatMessage(
+              {
+                id: 'xpack.reporting.listing.table.reportCalloutExportTypeDeprecated',
+                defaultMessage: '{jobtype} (DEPRECATED)',
+              },
+              { jobtype: info.jobtype }
+            )
+          : info.jobtype,
+      },
+
+      // TODO when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
     ];
 
     const jobScreenshot = [
-      { title: 'Dimensions', description: getDimensions(info) },
-      { title: 'Layout', description: info.layout?.id || UNKNOWN },
-      { title: 'Browser Type', description: info.browser_type || NA },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.dimensionsInfo',
+          defaultMessage: 'Dimensions',
+        }),
+        description: getDimensions(info),
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.layoutInfo',
+          defaultMessage: 'Layout',
+        }),
+        description: info.layout?.id || UNKNOWN,
+      },
+      {
+        title: this.props.intl.formatMessage({
+          id: 'xpack.reporting.listing.infoPanel.browserTypeInfo',
+          defaultMessage: 'Browser Type',
+        }),
+        description: info.browser_type || NA,
+      },
     ];
 
-    const warningInfo = warnings && [{ title: 'Errors', description: warnings }];
+    const warnings = info.getWarnings();
+    const warningsInfo = warnings && [
+      {
+        title: <EuiText color="danger">Warnings</EuiText>,
+        description: <EuiText color="warning">{warnings}</EuiText>,
+      },
+    ];
+
+    const errored = info.getError();
+    const errorInfo = errored && [
+      {
+        title: <EuiText color="danger">Error</EuiText>,
+        description: <EuiText color="danger">{errored}</EuiText>,
+      },
+    ];
 
     return (
       <>
         <EuiDescriptionList listItems={jobInfo} type="column" align="center" compressed />
         <EuiSpacer size="s" />
         <EuiDescriptionList listItems={processingInfo} type="column" align="center" compressed />
-        {USES_HEADLESS_JOB_TYPES.includes(jobType) ? (
+        {USES_HEADLESS_JOB_TYPES.includes(info.jobtype) ? (
           <>
             <EuiSpacer size="s" />
             <EuiDescriptionList listItems={jobScreenshot} type="column" align="center" compressed />
           </>
         ) : null}
-        {warningInfo ? (
+        {warningsInfo ? (
           <>
             <EuiSpacer size="s" />
-            <EuiDescriptionList listItems={warningInfo} type="column" align="center" compressed />
+            <EuiDescriptionList listItems={warningsInfo} type="column" align="center" compressed />
+          </>
+        ) : null}
+        {errorInfo ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiDescriptionList listItems={errorInfo} type="column" align="center" compressed />
           </>
         ) : null}
       </>
@@ -143,6 +265,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
   }
 
   public render() {
+    const job = this.props.job;
     let flyout;
 
     if (this.state.isFlyoutVisible) {
@@ -168,21 +291,44 @@ class ReportInfoButtonUi extends Component<Props, State> {
       );
     }
 
+    let message = this.props.intl.formatMessage({
+      id: 'xpack.reporting.listing.table.reportInfoButtonTooltip',
+      defaultMessage: 'See report info',
+    });
+    if (job.getError()) {
+      message = this.props.intl.formatMessage({
+        id: 'xpack.reporting.listing.table.reportInfoAndErrorButtonTooltip',
+        defaultMessage: 'See report info and error message',
+      });
+    } else if (job.getWarnings()) {
+      message = this.props.intl.formatMessage({
+        id: 'xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip',
+        defaultMessage: 'See report info and warnings',
+      });
+    }
+
+    let buttonIconType = 'iInCircle';
+    let buttonColor: 'primary' | 'danger' | 'warning' = 'primary';
+    if (job.getWarnings() || job.getError()) {
+      buttonIconType = 'alert';
+      buttonColor = 'danger';
+    }
+    if (job.getWarnings()) {
+      buttonColor = 'warning';
+    }
+
     return (
       <>
-        <EuiToolTip
-          position="top"
-          content={this.props.intl.formatMessage({
-            id: 'xpack.reporting.listing.table.reportInfo',
-            defaultMessage: 'Job info',
-          })}
-        >
+        <EuiToolTip position="top" content={message}>
           <EuiButtonIcon
             onClick={this.showFlyout}
-            iconType="iInCircle"
-            color={'primary'}
+            iconType={buttonIconType}
+            color={buttonColor}
             data-test-subj="reportInfoButton"
-            aria-label="Show report info"
+            aria-label={this.props.intl.formatMessage({
+              id: 'xpack.reporting.listing.table.showReportInfoAriaLabel',
+              defaultMessage: 'Show report info',
+            })}
           />
         </EuiToolTip>
         {flyout}
@@ -193,7 +339,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
   private loadInfo = async () => {
     this.setState({ isLoading: true });
     try {
-      const info = await this.props.apiClient.getInfo(this.props.jobId);
+      const info = await this.props.apiClient.getInfo(this.props.job.id);
       if (this.mounted) {
         this.setState({ isLoading: false, info });
       }
@@ -201,7 +347,10 @@ class ReportInfoButtonUi extends Component<Props, State> {
       if (this.mounted) {
         this.setState({
           isLoading: false,
-          calloutTitle: 'Unable to fetch report info',
+          calloutTitle: this.props.intl.formatMessage({
+            id: 'xpack.reporting.listing.table.reportInfoUnableToFetch',
+            defaultMessage: 'Unable to fetch report info',
+          }),
           info: null,
           error: err,
         });

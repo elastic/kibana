@@ -67,8 +67,8 @@ type LogThresholdAlertInstance = AlertInstance<
 type LogThresholdAlertInstanceFactory = (
   id: string,
   reason: string,
-  threshold: number,
-  value: number
+  value: number,
+  threshold: number
 ) => LogThresholdAlertInstance;
 
 const COMPOSITE_GROUP_SIZE = 2000;
@@ -96,7 +96,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async ({ services, params }) => {
     const { alertWithLifecycle, savedObjectsClient, scopedClusterClient } = services;
     const { sources } = libs;
-    const alertInstanceFactory: LogThresholdAlertInstanceFactory = (id, reason, threshold, value) =>
+    const alertInstanceFactory: LogThresholdAlertInstanceFactory = (id, reason, value, threshold) =>
       alertWithLifecycle({
         id,
         fields: {
@@ -251,8 +251,8 @@ export const processUngroupedResults = (
     const alertInstance = alertInstanceFactory(
       UNGROUPED_FACTORY_KEY,
       getReasonMessageForUngroupedCountAlert(documentCount, count.value, count.comparator),
-      count.value,
-      documentCount
+      documentCount,
+      count.value
     );
     alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
       {
@@ -285,8 +285,8 @@ export const processUngroupedRatioResults = (
     const alertInstance = alertInstanceFactory(
       UNGROUPED_FACTORY_KEY,
       getReasonMessageForUngroupedRatioAlert(ratio, count.value, count.comparator),
-      count.value,
-      ratio
+      ratio,
+      count.value
     );
     alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
       {
@@ -364,8 +364,8 @@ export const processGroupByResults = (
           count.comparator,
           group.name
         ),
-        count.value,
-        documentCount
+        documentCount,
+        count.value
       );
       alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
         {
@@ -415,8 +415,8 @@ export const processGroupByRatioResults = (
           count.comparator,
           numeratorGroup.name
         ),
-        count.value,
-        ratio
+        ratio,
+        count.value
       );
       alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
         {

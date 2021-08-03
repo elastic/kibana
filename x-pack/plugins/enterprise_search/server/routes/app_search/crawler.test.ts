@@ -43,6 +43,39 @@ describe('crawler routes', () => {
     });
   });
 
+  describe('GET /api/app_search/engines/{name}/crawler/crawl_requests', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+      });
+    });
+
+    it('validates correctly with name', () => {
+      const request = { params: { name: 'some-engine' } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = { params: {} };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
   describe('POST /api/app_search/engines/{name}/crawler/domains', () => {
     let mockRouter: MockRouter;
 
@@ -142,6 +175,43 @@ describe('crawler routes', () => {
         query: { respond_with: 'crawler_details' },
       };
       mockRouter.shouldValidate(request);
+    });
+  });
+
+  describe('POST /api/app_search/crawler/validate_url', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/crawler/validate_url',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/crawler/validate_url',
+      });
+    });
+
+    it('validates correctly with body', () => {
+      const request = {
+        body: { url: 'elastic.co', checks: ['tcp', 'url_request'] },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without a body', () => {
+      const request = {
+        body: {},
+      };
+      mockRouter.shouldThrow(request);
     });
   });
 });

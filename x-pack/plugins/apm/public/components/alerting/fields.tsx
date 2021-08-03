@@ -36,13 +36,17 @@ export function EnvironmentField({
   options: EuiSelectOption[];
   onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }) {
+  const title = i18n.translate('xpack.apm.alerting.fields.environment', {
+    defaultMessage: 'Environment',
+  });
+
+  // "1" means "All" is the only option and we should not show a select.
+  if (options.length === 1) {
+    return <EuiExpression description={title} value={currentValue} />;
+  }
+
   return (
-    <PopoverExpression
-      value={getEnvironmentLabel(currentValue)}
-      title={i18n.translate('xpack.apm.alerting.fields.environment', {
-        defaultMessage: 'Environment',
-      })}
-    >
+    <PopoverExpression value={getEnvironmentLabel(currentValue)} title={title}>
       <EuiSelect
         defaultValue={currentValue}
         options={options}

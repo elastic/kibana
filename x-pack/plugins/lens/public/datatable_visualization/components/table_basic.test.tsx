@@ -15,8 +15,8 @@ import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
-import { LensMultiTable } from '../../types';
-import { DatatableProps } from '../expression';
+import { LensMultiTable } from '../../../common';
+import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { IUiSettingsClient } from 'kibana/public';
 
