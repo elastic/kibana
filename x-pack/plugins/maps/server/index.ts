@@ -23,8 +23,23 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
     preserveDrawingBuffer: true,
   },
   schema: configSchema,
-  deprecations: ({ unusedFromRoot }) => [
-    unusedFromRoot('xpack.maps.showMapVisualizationTypes'),
+  deprecations: () => [
+    (
+      completeConfig: Record<string, any>,
+      rootPath: string,
+      addDeprecation: AddConfigDeprecation
+    ) => {
+      if (_.get(completeConfig, 'xpack.maps.showMapVisualizationTypes') === undefined) {
+        return completeConfig;
+      }
+      addDeprecation({
+        message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {
+          defaultMessage:
+            'xpack.maps.showMapVisualizationTypes is deprecated and is no longer used.',
+        }),
+      });
+      return completeConfig;
+    },
     (
       completeConfig: Record<string, any>,
       rootPath: string,
