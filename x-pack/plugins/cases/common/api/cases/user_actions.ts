@@ -34,7 +34,6 @@ const UserActionRt = rt.union([
   rt.literal('push-to-service'),
 ]);
 
-// TO DO change state to status
 const CaseUserActionBasicRT = rt.type({
   action_field: UserActionFieldRt,
   action: UserActionRt,
