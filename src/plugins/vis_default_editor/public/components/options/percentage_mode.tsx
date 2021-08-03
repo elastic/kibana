@@ -31,7 +31,9 @@ function PercentageModeOption({
   formatPattern,
 }: PercentageModeOptionProps) {
   const { services } = useKibana();
-  const defaultPattern = services.uiSettings?.get(FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
+  const defaultPattern = services.uiSettings?.get(
+    FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN
+  );
 
   return (
     <>
