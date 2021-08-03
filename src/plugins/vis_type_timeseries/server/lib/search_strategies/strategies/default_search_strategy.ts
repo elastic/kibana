@@ -27,7 +27,7 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
     return {
       isViable: true,
       capabilities: new DefaultSearchCapabilities({
-        panel: req.body.panels[0],
+        panel: req.body.panels ? req.body.panels[0] : null,
         timezone: req.body.timerange?.timezone,
         maxBucketsLimit: await uiSettings.get(MAX_BUCKETS_SETTING),
       }),

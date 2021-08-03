@@ -48,6 +48,7 @@ describe('DefaultSearchStrategy', () => {
     expect(value.capabilities).toMatchInlineSnapshot(`
       DefaultSearchCapabilities {
         "maxBucketsLimit": undefined,
+        "panel": undefined,
         "timezone": undefined,
       }
     `);

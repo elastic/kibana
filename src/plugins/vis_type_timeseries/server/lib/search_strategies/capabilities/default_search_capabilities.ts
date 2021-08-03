@@ -24,13 +24,13 @@ import type { Panel } from '../../../../common/types';
 export interface SearchCapabilitiesOptions {
   timezone?: string;
   maxBucketsLimit: number;
-  panel: Panel;
+  panel?: Panel;
 }
 
 export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];
   public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
-  public panel: Panel;
+  public panel?: Panel;
 
   constructor(options: SearchCapabilitiesOptions) {
     this.timezone = options.timezone;
@@ -44,6 +44,7 @@ export class DefaultSearchCapabilities {
 
   public get whiteListedMetrics() {
     if (
+      this.panel &&
       this.panel.type !== PANEL_TYPES.TIMESERIES &&
       this.panel.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
     ) {
