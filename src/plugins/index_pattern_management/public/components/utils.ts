@@ -130,7 +130,7 @@ export const getFieldInfo = (indexPattern: IndexPattern, field: IFieldType) => {
             defaultMessage: '{aggName} (interval: {interval})',
             values: {
               aggName,
-              interval: agg.fixed_interval,
+              interval: agg.interval,
             },
           });
         default:
