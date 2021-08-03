@@ -13,7 +13,7 @@ import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } fr
 import { createSelector } from '@reduxjs/toolkit';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
-import { StateSetter, DatasourceDataPanelProps, Datasource } from '../../types';
+import { StateSetter, DatasourceDataPanelProps, DatasourceMap } from '../../types';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import {
   switchDatasource,
@@ -27,7 +27,7 @@ import { initializeDatasources } from './state_helpers';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
   showNoDataPopover: () => void;
