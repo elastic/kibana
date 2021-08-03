@@ -90,81 +90,39 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {},
             Object {
-              "latency": Object {
-                "value": 520294.126436782,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.0316091954022989,
-              },
-              "throughput": Object {
-                "value": 11.6,
-              },
+              "latency": 520294.126436782,
+              "throughput": 11.6,
+              "transactionErrorRate": 0.0316091954022989,
             },
             Object {
-              "latency": Object {
-                "value": 74805.1452830189,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.00566037735849057,
-              },
-              "throughput": Object {
-                "value": 17.6666666666667,
-              },
+              "latency": 74805.1452830189,
+              "throughput": 17.6666666666667,
+              "transactionErrorRate": 0.00566037735849057,
             },
             Object {
-              "latency": Object {
-                "value": 411589.785714286,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.0848214285714286,
-              },
-              "throughput": Object {
-                "value": 7.46666666666667,
-              },
+              "latency": 411589.785714286,
+              "throughput": 7.46666666666667,
+              "transactionErrorRate": 0.0848214285714286,
             },
             Object {
-              "latency": Object {
-                "value": 53906.6603773585,
-              },
-              "transactionErrorRate": Object {
-                "value": 0,
-              },
-              "throughput": Object {
-                "value": 7.06666666666667,
-              },
+              "latency": 53906.6603773585,
+              "throughput": 7.06666666666667,
+              "transactionErrorRate": 0,
             },
             Object {
-              "latency": Object {
-                "value": 420634.9,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.025,
-              },
-              "throughput": Object {
-                "value": 5.33333333333333,
-              },
+              "latency": 420634.9,
+              "throughput": 5.33333333333333,
+              "transactionErrorRate": 0.025,
             },
             Object {
-              "latency": Object {
-                "value": 40989.5802047782,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.00341296928327645,
-              },
-              "throughput": Object {
-                "value": 9.76666666666667,
-              },
+              "latency": 40989.5802047782,
+              "throughput": 9.76666666666667,
+              "transactionErrorRate": 0.00341296928327645,
             },
             Object {
-              "latency": Object {
-                "value": 1040880.77777778,
-              },
-              "transactionErrorRate": Object {
-                "value": null,
-              },
-              "throughput": Object {
-                "value": 2.4,
-              },
+              "latency": 1040880.77777778,
+              "throughput": 2.4,
+              "transactionErrorRate": null,
             },
           ]
         `);
