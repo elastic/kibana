@@ -10,7 +10,7 @@ import { getAreaVisTypeDefinition } from './area';
 import { getLineVisTypeDefinition } from './line';
 import { getHistogramVisTypeDefinition } from './histogram';
 import { getHorizontalBarVisTypeDefinition } from './horizontal_bar';
-import { XyVisTypeDefinition } from '../../types';
+import { XyVisTypeDefinition } from '../types';
 
 export const visTypesDefinitions = [
   getAreaVisTypeDefinition(true),

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { VisEditorOptionsProps } from '../../../../visualizations/public';
 
-import type { VisParams } from '../../types';
+import type { VisParams } from '../types';
 import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
 import { ValidationWrapper } from './components/common/validation_wrapper';
 

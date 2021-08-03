@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 
 import { Axis } from '@elastic/charts';
 
-import { AxisConfig } from '../../types';
+import { AxisConfig } from '../types';
 
 type XYAxisPros = AxisConfig<any>;
 

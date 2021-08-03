@@ -8,7 +8,7 @@
 
 import { Rotation } from '@elastic/charts';
 
-import { CategoryAxis } from '../../types';
+import { CategoryAxis } from '../types';
 
 export function getRotation({ position }: CategoryAxis): Rotation {
   if (position === 'left' || position === 'right') {

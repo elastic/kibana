@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { DatatableColumn, SerializedFieldFormat } from '../../../../expressions/public';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { ExpressionValuePieLabels } from '../../expression_functions/pie_labels';
+import { ExpressionValuePieLabels } from '../expression_functions/pie_labels';
 import { PaletteOutput, ChartsPluginSetup } from '../../../../charts/public';
 
 export interface Dimension {
