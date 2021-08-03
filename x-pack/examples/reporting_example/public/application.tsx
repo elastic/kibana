@@ -8,13 +8,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
-import { SetupDeps, StartDeps } from './types';
 import { ReportingExampleApp } from './components/app';
+import { SetupDeps, StartDeps } from './types';
 
 export const renderApp = (
   coreStart: CoreStart,
   deps: Omit<StartDeps & SetupDeps, 'developerExamples'>,
-  { appBasePath, element }: AppMountParameters
+  { appBasePath, element }: AppMountParameters // FIXME: appBasePath is deprecated
 ) => {
   ReactDOM.render(<ReportingExampleApp basename={appBasePath} {...coreStart} {...deps} />, element);
 

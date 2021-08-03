@@ -18,28 +18,29 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import { ToastsSetup } from 'src/core/public';
+import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/constants';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-export interface Props {
+export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
+  uiSettings: IUiSettingsClient;
   reportType: string;
 
-  /** Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.  **/
-  requiresSavedState: boolean;
-  layoutId: string | undefined;
+  requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
+  layoutId?: string;
   objectId?: string;
-  getJobParams: () => BaseParams;
+  getJobParams: () => Omit<BaseParams, 'browserTimezone' | 'version'>;
   options?: ReactElement<any> | null;
   isDirty?: boolean;
   onClose?: () => void;
-  intl: InjectedIntl;
 }
+
+export type Props = ReportingPanelProps & { intl: InjectedIntl };
 
 interface State {
   isStale: boolean;
@@ -68,12 +69,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private getAbsoluteReportGenerationUrl = (props: Props) => {
     const relativePath = this.props.apiClient.getReportingJobPath(
       props.reportType,
-      props.getJobParams()
+      this.props.apiClient.getDecoratedJobParams(this.props.getJobParams())
     );
-    return url.resolve(window.location.href, relativePath);
+    return url.resolve(window.location.href, relativePath); // FIXME: '(from: string, to: string): string' is deprecated
   };
 
-  public componentDidUpdate(prevProps: Props, prevState: State) {
+  public componentDidUpdate(_prevProps: Props, prevState: State) {
     if (this.props.layoutId && this.props.layoutId !== prevState.layoutId) {
       this.setState({
         ...prevState,
@@ -231,9 +232,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   private createReportingJob = () => {
     const { intl } = this.props;
+    const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(
+      this.props.getJobParams()
+    );
 
     return this.props.apiClient
-      .createReportingJob(this.props.reportType, this.props.getJobParams())
+      .createReportingJob(this.props.reportType, decoratedJobParams)
       .then(() => {
         this.props.toasts.addSuccess({
           title: intl.formatMessage(
