@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, once } from 'lodash';
+import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import { estypes } from '@elastic/elasticsearch';
