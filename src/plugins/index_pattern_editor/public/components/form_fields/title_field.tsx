@@ -197,17 +197,14 @@ export const TitleField = ({
                 if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
                   query += '*';
                   setAppendedWildcard(true);
-                  field.setValue(query);
                   setTimeout(() => e.target.setSelectionRange(1, 1));
                 } else {
                   if (['', '*'].includes(query) && appendedWildcard) {
                     query = '';
                     setAppendedWildcard(false);
                   }
-                  field.setValue(query);
                 }
-                // todo
-                // setLastTitle(query);
+                field.setValue(query);
               }}
               isLoading={field.isValidating}
               fullWidth
