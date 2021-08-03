@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatRequest } from '@kbn/server-route-repository/target/format_request';
+import { formatRequest } from '@kbn/server-route-repository';
 import type { HttpSetup } from 'kibana/public';
 import type { AbstractObservabilityClient, ObservabilityClient } from './types';
 

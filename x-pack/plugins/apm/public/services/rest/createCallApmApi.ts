@@ -15,7 +15,7 @@ import type {
   ServerRouteRepository,
   ServerRoute,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository/target/format_request';
+import { formatRequest } from '@kbn/server-route-repository';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
 import type {
