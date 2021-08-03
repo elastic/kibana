@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors } from 'elasticsearch';
 import { httpServerMock } from 'src/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
@@ -20,7 +19,6 @@ import {
   defaultIngestErrorHandler,
 } from './index';
 
-const LegacyESErrors = errors as Record<string, any>;
 type ITestEsErrorsFnParams = [errorCode: string, error: any, expectedMessage: string];
 
 describe('defaultIngestErrorHandler', () => {
@@ -54,36 +52,6 @@ describe('defaultIngestErrorHandler', () => {
     expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
     expect(mockContract.logger?.error).toHaveBeenCalledWith(expectedMessage);
   }
-
-  describe('use the HTTP error status code provided by LegacyESErrors', () => {
-    const statusCodes = Object.keys(LegacyESErrors).filter((key) => /^\d+$/.test(key));
-    const errorCodes = statusCodes.filter((key) => parseInt(key, 10) >= 400);
-    const casesWithPathResponse: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
-      errorCode,
-      new LegacyESErrors[errorCode]('the root message', {
-        path: '/path/to/call',
-        response: 'response is here',
-      }),
-      'the root message response from /path/to/call: response is here',
-    ]);
-    const casesWithOtherMeta: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
-      errorCode,
-      new LegacyESErrors[errorCode]('the root message', {
-        other: '/path/to/call',
-        props: 'response is here',
-      }),
-      'the root message',
-    ]);
-    const casesWithoutMeta: ITestEsErrorsFnParams[] = errorCodes.map((errorCode) => [
-      errorCode,
-      new LegacyESErrors[errorCode]('some message'),
-      'some message',
-    ]);
-
-    test.each(casesWithPathResponse)('%d - with path & response', testEsErrorsFn);
-    test.each(casesWithOtherMeta)('%d - with other metadata', testEsErrorsFn);
-    test.each(casesWithoutMeta)('%d - without metadata', testEsErrorsFn);
-  });
 
   describe('IngestManagerError', () => {
     it('502: RegistryError', async () => {
