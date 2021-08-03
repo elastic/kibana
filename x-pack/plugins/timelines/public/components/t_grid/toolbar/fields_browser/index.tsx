@@ -61,9 +61,9 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   }, []);
 
   /** Shows / hides the field browser */
-  const toggleShow = useCallback(() => {
-    setShow(!show);
-  }, [show]);
+  const onShow = useCallback(() => {
+    setShow(true);
+  }, []);
 
   /** Invoked when the field browser should be hidden */
   const onHide = useCallback(() => {
@@ -127,8 +127,8 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           className={FIELDS_BUTTON_CLASS_NAME}
           color="text"
           data-test-subj="show-field-browser"
-          iconType="list"
-          onClick={toggleShow}
+          iconType="tableOfContents"
+          onClick={onShow}
           size="xs"
         >
           {i18n.FIELDS}
