@@ -18,10 +18,7 @@
         "signature": [
           "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\") => string"
         ],
-        "source": {
-          "path": "src/plugins/home/common/instruction_variant.ts",
-          "lineNumber": 61
-        },
+        "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,
         "children": [
           {
@@ -34,10 +31,7 @@
             "signature": [
               "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\""
             ],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 61
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -56,10 +50,7 @@
         "tags": [],
         "label": "Environment",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/public/services/environment/environment.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/home/public/services/environment/environment.ts",
         "deprecated": false,
         "children": [
           {
@@ -71,10 +62,7 @@
             "description": [
               "\nFlag whether the home app should advertise cloud features"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/environment/environment.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/home/public/services/environment/environment.ts",
             "deprecated": false
           },
           {
@@ -86,10 +74,7 @@
             "description": [
               "\nFlag whether the home app should advertise apm features"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/environment/environment.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/home/public/services/environment/environment.ts",
             "deprecated": false
           },
           {
@@ -101,10 +86,7 @@
             "description": [
               "\nFlag whether the home app should advertise ml features"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/environment/environment.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/home/public/services/environment/environment.ts",
             "deprecated": false
           }
         ],
@@ -117,10 +99,7 @@
         "tags": [],
         "label": "FeatureCatalogueEntry",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-          "lineNumber": 20
-        },
+        "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
         "deprecated": false,
         "children": [
           {
@@ -132,10 +111,7 @@
             "description": [
               "Unique string identifier for this feature."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -147,10 +123,7 @@
             "description": [
               "Title of feature displayed to the user."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -171,10 +144,7 @@
                 "text": "FeatureCatalogueCategory"
               }
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -189,10 +159,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -204,10 +171,7 @@
             "description": [
               "One-line description of feature displayed to the user."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -222,10 +186,7 @@
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -237,10 +198,7 @@
             "description": [
               "URL path to link to this future. Should not include the basePath."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -252,10 +210,7 @@
             "description": [
               "Whether or not this link should be shown on the front page of Kibana."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -270,10 +225,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -288,10 +240,7 @@
             "signature": [
               "(() => boolean) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -306,10 +255,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           }
         ],
@@ -322,10 +268,7 @@
         "tags": [],
         "label": "FeatureCatalogueSolution",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-          "lineNumber": 46
-        },
+        "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
         "deprecated": false,
         "children": [
           {
@@ -337,10 +280,7 @@
             "description": [
               "Unique string identifier for this solution."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 48
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -352,10 +292,7 @@
             "description": [
               "Title of solution displayed to the user."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 50
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -367,10 +304,7 @@
             "description": [
               "The tagline of the solution displayed to the user."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 52
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -385,10 +319,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 54
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -403,10 +334,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 56
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -421,10 +349,7 @@
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 58
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -436,10 +361,7 @@
             "description": [
               "URL path to link to this future. Should not include the basePath."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 60
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           },
           {
@@ -454,10 +376,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 62
-            },
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false
           }
         ],
@@ -472,10 +391,7 @@
         "tags": [],
         "label": "FeatureCatalogueCategory",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -499,10 +415,7 @@
           },
           ">) => void; }"
         ],
-        "source": {
-          "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 166
-        },
+        "path": "src/plugins/home/public/plugin.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -532,10 +445,7 @@
           },
           ") => void; }"
         ],
-        "source": {
-          "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 163
-        },
+        "path": "src/plugins/home/public/plugin.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -549,10 +459,7 @@
         "signature": [
           "React.FunctionComponent<{}>"
         ],
-        "source": {
-          "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
-          "lineNumber": 18
-        },
+        "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -566,10 +473,7 @@
         "signature": [
           "React.FunctionComponent<{}>"
         ],
-        "source": {
-          "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -583,10 +487,7 @@
         "signature": [
           "React.FunctionComponent<{ moduleName: string; }>"
         ],
-        "source": {
-          "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
-          "lineNumber": 21
-        },
+        "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -600,10 +501,7 @@
         "signature": [
           "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
         ],
-        "source": {
-          "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 169
-        },
+        "path": "src/plugins/home/public/plugin.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -617,10 +515,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "source": {
-          "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -633,10 +528,7 @@
         "tags": [],
         "label": "INSTRUCTION_VARIANT",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/common/instruction_variant.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,
         "children": [
           {
@@ -646,10 +538,7 @@
             "tags": [],
             "label": "ESC",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -659,10 +548,7 @@
             "tags": [],
             "label": "OSX",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -672,10 +558,7 @@
             "tags": [],
             "label": "DEB",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -685,10 +568,7 @@
             "tags": [],
             "label": "RPM",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -698,10 +578,7 @@
             "tags": [],
             "label": "DOCKER",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -711,10 +588,7 @@
             "tags": [],
             "label": "WINDOWS",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -724,10 +598,7 @@
             "tags": [],
             "label": "NODE",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -737,10 +608,7 @@
             "tags": [],
             "label": "DJANGO",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -750,10 +618,7 @@
             "tags": [],
             "label": "FLASK",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -763,10 +628,7 @@
             "tags": [],
             "label": "RAILS",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -776,10 +638,7 @@
             "tags": [],
             "label": "RACK",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -789,10 +648,7 @@
             "tags": [],
             "label": "JS",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -802,10 +658,7 @@
             "tags": [],
             "label": "GO",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -815,10 +668,7 @@
             "tags": [],
             "label": "JAVA",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -828,10 +678,7 @@
             "tags": [],
             "label": "DOTNET",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -841,10 +688,7 @@
             "tags": [],
             "label": "LINUX",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -854,10 +698,7 @@
             "tags": [],
             "label": "PHP",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -867,10 +708,7 @@
             "tags": [],
             "label": "FLEET",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           }
         ],
@@ -884,10 +722,7 @@
       "tags": [],
       "label": "HomePublicPluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/home/public/plugin.ts",
-        "lineNumber": 175
-      },
+      "path": "src/plugins/home/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -900,10 +735,7 @@
           "signature": [
             "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
           ],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 176
-          },
+          "path": "src/plugins/home/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -918,10 +750,7 @@
             "AddDataTab",
             ") => void; }"
           ],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 177
-          },
+          "path": "src/plugins/home/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -950,10 +779,7 @@
             },
             ") => void; }"
           ],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 178
-          },
+          "path": "src/plugins/home/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -978,25 +804,16 @@
             },
             ">) => void; }"
           ],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 185
-          },
+          "path": "src/plugins/home/public/plugin.ts",
           "deprecated": true,
           "references": [
             {
               "plugin": "cloud",
-              "link": {
-                "path": "x-pack/plugins/cloud/public/plugin.ts",
-                "lineNumber": 86
-              }
+              "path": "x-pack/plugins/cloud/public/plugin.ts"
             },
             {
               "plugin": "apm",
-              "link": {
-                "path": "x-pack/plugins/apm/public/plugin.ts",
-                "lineNumber": 91
-              }
+              "path": "x-pack/plugins/apm/public/plugin.ts"
             }
           ]
         }
@@ -1011,10 +828,7 @@
       "tags": [],
       "label": "HomePublicPluginStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/home/public/plugin.ts",
-        "lineNumber": 187
-      },
+      "path": "src/plugins/home/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -1027,10 +841,7 @@
           "signature": [
             "FeatureCatalogueRegistry"
           ],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 188
-          },
+          "path": "src/plugins/home/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -1050,10 +861,7 @@
         "tags": [],
         "label": "TutorialsCategory",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1069,10 +877,7 @@
         "signature": [
           "{ readonly application?: Readonly<{} & { label: string; path: string; }> | undefined; readonly exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; readonly dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }"
         ],
-        "source": {
-          "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
-          "lineNumber": 40
-        },
+        "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1086,10 +891,7 @@
         "signature": [
           "{ readonly title?: string | undefined; readonly callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; readonly statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; readonly instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }"
         ],
-        "source": {
-          "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
-          "lineNumber": 83
-        },
+        "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1103,10 +905,7 @@
         "signature": [
           "{ readonly params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; readonly instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }"
         ],
-        "source": {
-          "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
-          "lineNumber": 104
-        },
+        "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1134,10 +933,7 @@
           "SampleDatasetDashboardPanel",
           ") => void; }"
         ],
-        "source": {
-          "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
-          "lineNumber": 173
-        },
+        "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1153,10 +949,7 @@
           "Writable",
           "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
-        "source": {
-          "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1172,10 +965,7 @@
           "TutorialContext",
           ") => Readonly<{ savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; isBeta?: boolean | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; customStatusCheckName?: string | undefined; } & { id: string; name: string; category: \"metrics\" | \"security\" | \"other\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
         ],
-        "source": {
-          "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-          "lineNumber": 34
-        },
+        "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1189,10 +979,7 @@
         "signature": [
           "{ readonly savedObjects?: any[] | undefined; readonly euiIconType?: string | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly isBeta?: boolean | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly savedObjectsInstallMsg?: string | undefined; readonly customStatusCheckName?: string | undefined; readonly id: string; readonly name: string; readonly category: \"metrics\" | \"security\" | \"other\" | \"logging\"; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
         ],
-        "source": {
-          "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
-          "lineNumber": 159
-        },
+        "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1205,10 +992,7 @@
         "tags": [],
         "label": "INSTRUCTION_VARIANT",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/common/instruction_variant.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,
         "children": [
           {
@@ -1218,10 +1002,7 @@
             "tags": [],
             "label": "ESC",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1231,10 +1012,7 @@
             "tags": [],
             "label": "OSX",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1244,10 +1022,7 @@
             "tags": [],
             "label": "DEB",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1257,10 +1032,7 @@
             "tags": [],
             "label": "RPM",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1270,10 +1042,7 @@
             "tags": [],
             "label": "DOCKER",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1283,10 +1052,7 @@
             "tags": [],
             "label": "WINDOWS",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1296,10 +1062,7 @@
             "tags": [],
             "label": "NODE",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1309,10 +1072,7 @@
             "tags": [],
             "label": "DJANGO",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1322,10 +1082,7 @@
             "tags": [],
             "label": "FLASK",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1335,10 +1092,7 @@
             "tags": [],
             "label": "RAILS",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1348,10 +1102,7 @@
             "tags": [],
             "label": "RACK",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1361,10 +1112,7 @@
             "tags": [],
             "label": "JS",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1374,10 +1122,7 @@
             "tags": [],
             "label": "GO",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1387,10 +1132,7 @@
             "tags": [],
             "label": "JAVA",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1400,10 +1142,7 @@
             "tags": [],
             "label": "DOTNET",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1413,10 +1152,7 @@
             "tags": [],
             "label": "LINUX",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1426,10 +1162,7 @@
             "tags": [],
             "label": "PHP",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           },
           {
@@ -1439,10 +1172,7 @@
             "tags": [],
             "label": "FLEET",
             "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false
           }
         ],
@@ -1456,10 +1186,7 @@
       "tags": [],
       "label": "HomeServerPluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/home/server/plugin.ts",
-        "lineNumber": 54
-      },
+      "path": "src/plugins/home/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -1490,10 +1217,7 @@
             "ScopedTutorialContextFactory",
             ") => void; }"
           ],
-          "source": {
-            "path": "src/plugins/home/server/plugin.ts",
-            "lineNumber": 55
-          },
+          "path": "src/plugins/home/server/plugin.ts",
           "deprecated": false
         },
         {
@@ -1520,10 +1244,7 @@
             "SampleDatasetDashboardPanel",
             ") => void; }"
           ],
-          "source": {
-            "path": "src/plugins/home/server/plugin.ts",
-            "lineNumber": 56
-          },
+          "path": "src/plugins/home/server/plugin.ts",
           "deprecated": false
         }
       ],
@@ -1537,10 +1258,7 @@
       "tags": [],
       "label": "HomeServerPluginStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/home/server/plugin.ts",
-        "lineNumber": 60
-      },
+      "path": "src/plugins/home/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -1553,10 +1271,7 @@
           "signature": [
             "{}"
           ],
-          "source": {
-            "path": "src/plugins/home/server/plugin.ts",
-            "lineNumber": 61
-          },
+          "path": "src/plugins/home/server/plugin.ts",
           "deprecated": false
         },
         {
@@ -1569,10 +1284,7 @@
           "signature": [
             "{}"
           ],
-          "source": {
-            "path": "src/plugins/home/server/plugin.ts",
-            "lineNumber": 62
-          },
+          "path": "src/plugins/home/server/plugin.ts",
           "deprecated": false
         }
       ],

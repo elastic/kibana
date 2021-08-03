@@ -13,10 +13,7 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
-          "lineNumber": 9
-        },
+        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -36,10 +33,7 @@
         "signature": [
           "() => \"foo\""
         ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
-          "lineNumber": 11
-        },
+        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -70,10 +64,7 @@
         "signature": [
           "\"COMMON VAR!\""
         ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/foo/index.ts",
-          "lineNumber": 9
-        },
+        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/foo/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
