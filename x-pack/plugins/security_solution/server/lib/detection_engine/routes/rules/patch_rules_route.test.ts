@@ -10,12 +10,13 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getFindResultStatus,
+  getRuleExecutionStatuses,
   getAlertMock,
   getPatchRequest,
   getFindResultWithSingleHit,
   nonRuleFindResult,
   typicalMlRulePayload,
+  getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
@@ -37,7 +38,9 @@ describe('patch_rules', () => {
     clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful transform
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
+    clients.savedObjectsClient.create.mockResolvedValue(getRuleExecutionStatuses()[0]); // successful transform
+    clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses());
 
     patchRulesRoute(server.router, ml);
   });
