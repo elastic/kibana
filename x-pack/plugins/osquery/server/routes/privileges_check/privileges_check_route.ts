@@ -9,6 +9,7 @@ import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
