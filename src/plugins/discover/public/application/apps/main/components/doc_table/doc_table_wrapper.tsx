@@ -179,7 +179,9 @@ export const DocTableWrapper = ({
     (rowsToRender: DocTableRow[]) => {
       return rowsToRender.map((current) => (
         <TableRow
-          key={`${current._index}${current._type ?? ''}${current._id}${current._score}${current._version}${current._routing}`}
+          key={`${current._index}${current._type ?? ''}${current._id}${current._score}${
+            current._version
+          }${current._routing}`}
           columns={columns}
           filter={onFilter}
           indexPattern={indexPattern}
