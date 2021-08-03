@@ -8,7 +8,7 @@
 
 import { Configuration } from 'webpack';
 import { defaultConfig } from '@kbn/storybook';
-import webpackConfig from '@kbn/storybook/target/webpack.config';
+import webpackConfig from '@kbn/storybook/target_node/webpack.config';
 
 module.exports = {
   ...defaultConfig,
