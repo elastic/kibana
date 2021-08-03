@@ -9,8 +9,16 @@ import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
 import { SecurityPluginStart } from '../../../security/server';
-import { ExternalCallback } from '../../../fleet/server';
-import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
+import {
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../../../fleet/server';
+import {
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  DeletePackagePoliciesResponse,
+} from '../../../fleet/common';
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import { ManifestManager } from '../endpoint/services';
 import { AppClientFactory } from '../client';
@@ -19,6 +27,7 @@ import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
+import { removePolicyFromTrustedApps } from './handlers/remove_policy_from_trusted_apps';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -40,7 +49,7 @@ export const getPackagePolicyCreateCallback = (
   alerts: AlertsStartContract,
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined
-): ExternalCallback[1] => {
+): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
@@ -101,7 +110,7 @@ export const getPackagePolicyCreateCallback = (
 export const getPackagePolicyUpdateCallback = (
   logger: Logger,
   licenseService: LicenseService
-): ExternalCallback[1] => {
+): PutPackagePolicyUpdateCallback => {
   return async (
     newPackagePolicy: NewPackagePolicy
     // context: RequestHandlerContext,
@@ -121,5 +130,22 @@ export const getPackagePolicyUpdateCallback = (
     );
 
     return newPackagePolicy;
+  };
+};
+
+export const getPackagePolicyDeleteCallback = (logger: Logger): PostPackagePolicyDeleteCallback => {
+  return async (
+    deletePackagePolicy: DeletePackagePoliciesResponse,
+    context: RequestHandlerContext
+    // request: KibanaRequest
+  ): Promise<void> => {
+    const promises: Array<Promise<void>> = [];
+    for (const policy of deletePackagePolicy) {
+      if (!isEndpointPackagePolicy(policy)) {
+        return undefined;
+      }
+      promises.push(removePolicyFromTrustedApps(context, policy));
+    }
+    Promise.all(promises);
   };
 };
