@@ -13,6 +13,7 @@ import { initStatusRoutes } from './status';
 import { initFleetWrapperRoutes } from './fleet_wrapper';
 import { initPackRoutes } from './pack';
 import { initScheduledQueryGroupRoutes } from './scheduled_query_group';
+import { initPrivilegesCheckRoutes } from './privileges_check';
 
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
   const config = context.config();
@@ -21,6 +22,7 @@ export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
   initStatusRoutes(router, context);
   initScheduledQueryGroupRoutes(router, context);
   initFleetWrapperRoutes(router, context);
+  initPrivilegesCheckRoutes(router, context);
 
   if (config.packs) {
     initPackRoutes(router);
