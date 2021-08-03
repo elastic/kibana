@@ -69,11 +69,10 @@ export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer)
 }
 
 export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
-  const { domains, crawl_requests: crawlRequests } = payload;
+  const { domains } = payload;
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
-    crawlRequests: crawlRequests.map((crawlRequest) => crawlRequestServerToClient(crawlRequest)),
   };
 }
 

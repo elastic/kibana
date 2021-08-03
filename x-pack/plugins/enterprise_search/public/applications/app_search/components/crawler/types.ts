@@ -62,12 +62,10 @@ export interface CrawlerDomainFromServer {
 
 export interface CrawlerData {
   domains: CrawlerDomain[];
-  crawlRequests: CrawlRequest[];
 }
 
 export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
-  crawl_requests: CrawlRequestFromServer[];
 }
 
 export interface CrawlerDomainValidationResultFromServer {

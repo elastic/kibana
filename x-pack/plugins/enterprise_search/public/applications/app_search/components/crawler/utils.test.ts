@@ -155,7 +155,6 @@ describe('crawlerDataServerToClient', () => {
   beforeAll(() => {
     output = crawlerDataServerToClient({
       domains,
-      crawl_requests: crawlRequests,
     });
   });
 
@@ -180,25 +179,6 @@ describe('crawlerDataServerToClient', () => {
         sitemaps: [],
         entryPoints: [],
         crawlRules: [],
-      },
-    ]);
-  });
-
-  it('converts all crawl requests from the server form to their client form', () => {
-    expect(output.crawlRequests).toEqual([
-      {
-        id: 'a',
-        status: CrawlerStatus.Canceled,
-        createdAt: 'Mon, 31 Aug 2020 11:00:00 +0000',
-        beganAt: 'Mon, 31 Aug 2020 12:00:00 +0000',
-        completedAt: 'Mon, 31 Aug 2020 13:00:00 +0000',
-      },
-      {
-        id: 'b',
-        status: CrawlerStatus.Success,
-        createdAt: 'Mon, 31 Aug 2020 14:00:00 +0000',
-        beganAt: 'Mon, 31 Aug 2020 15:00:00 +0000',
-        completedAt: 'Mon, 31 Aug 2020 16:00:00 +0000',
       },
     ]);
   });

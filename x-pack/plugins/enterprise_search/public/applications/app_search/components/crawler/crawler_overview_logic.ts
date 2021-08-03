@@ -14,8 +14,8 @@ import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlerData, CrawlerDomain, CrawlRequest } from './types';
-import { crawlerDataServerToClient } from './utils';
+import { CrawlerData, CrawlerDomain, CrawlRequest, CrawlRequestFromServer } from './types';
+import { crawlerDataServerToClient, crawlRequestServerToClient } from './utils';
 
 export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
   i18n.translate(
@@ -38,6 +38,7 @@ interface CrawlerOverviewActions {
   deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   fetchCrawlerData(): void;
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
+  onReceiveCrawlRequests(crawlRequests: CrawlRequest[]): { crawlRequests: CrawlRequest[] };
 }
 
 export const CrawlerOverviewLogic = kea<
@@ -48,6 +49,7 @@ export const CrawlerOverviewLogic = kea<
     deleteDomain: (domain) => ({ domain }),
     fetchCrawlerData: true,
     onReceiveCrawlerData: (data) => ({ data }),
+    onReceiveCrawlRequests: (crawlRequests) => ({ crawlRequests }),
   },
   reducers: {
     dataLoading: [
@@ -65,7 +67,7 @@ export const CrawlerOverviewLogic = kea<
     crawlRequests: [
       [],
       {
-        onReceiveCrawlerData: (_, { data: { crawlRequests } }) => crawlRequests,
+        onReceiveCrawlRequests: (_, { crawlRequests }) => crawlRequests,
       },
     ],
   },
@@ -74,9 +76,23 @@ export const CrawlerOverviewLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
+      // TODO Remove fetching crawl requests here once Crawl Request Polling is implemented
+      try {
+        const crawlResultsResponse: CrawlRequestFromServer[] = await http.get(
+          `/api/app_search/engines/${engineName}/crawler/crawl_requests`
+        );
+
+        const crawlRequests = crawlResultsResponse.map(crawlRequestServerToClient);
+        actions.onReceiveCrawlRequests(crawlRequests);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+
       try {
         const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
+
         const crawlerData = crawlerDataServerToClient(response);
+
         actions.onReceiveCrawlerData(crawlerData);
       } catch (e) {
         flashAPIErrors(e);
