@@ -19,8 +19,6 @@ import {
   defaultIngestErrorHandler,
 } from './index';
 
-type ITestEsErrorsFnParams = [errorCode: string, error: any, expectedMessage: string];
-
 describe('defaultIngestErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   beforeEach(async () => {
@@ -33,25 +31,6 @@ describe('defaultIngestErrorHandler', () => {
     jest.clearAllMocks();
     appContextService.stop();
   });
-
-  async function testEsErrorsFn(...args: ITestEsErrorsFnParams) {
-    const [, error, expectedMessage] = args;
-    jest.clearAllMocks();
-    const response = httpServerMock.createResponseFactory();
-    await defaultIngestErrorHandler({ error, response });
-
-    // response
-    expect(response.ok).toHaveBeenCalledTimes(0);
-    expect(response.customError).toHaveBeenCalledTimes(1);
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: error.status,
-      body: { message: expectedMessage },
-    });
-
-    // logging
-    expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
-    expect(mockContract.logger?.error).toHaveBeenCalledWith(expectedMessage);
-  }
 
   describe('IngestManagerError', () => {
     it('502: RegistryError', async () => {
