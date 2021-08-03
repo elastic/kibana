@@ -7,6 +7,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import { CanvasSetup } from '../public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -25,6 +26,7 @@ export interface StartDeps {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
   charts: ChartsPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export type SetupInitializer<T> = (core: CoreSetup<StartDeps>, plugins: SetupDeps) => T;
