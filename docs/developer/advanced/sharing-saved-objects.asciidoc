@@ -46,6 +46,9 @@ change the IDs of any existing objects that are not in the Default space. Changi
 
 *To be perfectly clear: these effects will all be mitigated _if and only if_ you follow the steps below!*
 
+TIP: External plugins can also convert their objects, but <<sharing-saved-objects-faq-external-plugins,they don't have to do so before the
+8.0 release>>.
+
 [[sharing-saved-objects-dev-flowchart]]
 === Developer Flowchart
 
@@ -160,6 +163,8 @@ The https://github.com/elastic/kibana/blob/master/docs/development/core/server/k
 The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
 custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `aliasTargetId` fields need to be
 passed to your client-side code, and you should update your UI accordingly in the next step.
+
+NOTE: You don't need to use `resolve()` everywhere, <<sharing-saved-objects-faq-resolve-instead-of-get,you should only use it for deep links>>!
 
 [[sharing-saved-objects-step-3]]
 === Step 3
@@ -443,3 +448,21 @@ will be a rare occurrence.
 
 It is important to note that when a `'conflict'` occurs, the object that is returned is the "most correct" match -- the one with the ID that
 exactly matches.
+
+[[sharing-saved-objects-faq-resolve-instead-of-get]]
+==== 6. Should I always use resolve instead of get?
+
+Reading through this guide, you may think it is safer or better to use `resolve()` everywhere instead of `get()`. Actually, we made an
+explicit design decision to add a separate `resolve()` function because we want to limit the affects of and reliance upon legacy URL
+aliases. To that end, we collect anonymous usage data based on how many times `resolve()` is used and the different outcomes are
+encountered. That usage data is less useful is `resolve()` is used more often than necessary.
+
+Ultimately, `resolve()` should _only_ be used for data flows that involve a user-controlled deep link to an object. There is no reason to
+change any other data flows to use `resolve()`.
+
+[[sharing-saved-objects-faq-external-plugins]]
+==== 7. What about external plugins?
+
+External plugins (those not shipped with {kib}) can use this guide to convert any isolated objects to become share-capable or fully
+shareable! If you are an external plugin developer, the steps are the same, but you don't need to worry about getting anything done before a
+specific release. The only thing you need to know is that your plugin cannot convert your objects until the 8.0 release.
