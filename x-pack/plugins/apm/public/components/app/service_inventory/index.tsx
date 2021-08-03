@@ -24,7 +24,11 @@ import { MLCallout } from './service_list/MLCallout';
 
 const initialData = {
   requestId: '',
-  mainStatistics: { items: [], hasHistoricalData: true, hasLegacyData: false },
+  mainStatisticsData: {
+    items: [],
+    hasHistoricalData: true,
+    hasLegacyData: false,
+  },
 };
 
 let hasDisplayedToast = false;
@@ -50,7 +54,7 @@ function useServicesFetcher() {
     comparisonType,
   });
 
-  const { data = initialData, status } = useFetcher(
+  const { data = initialData, status: mainStatisticsStatus } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -63,10 +67,10 @@ function useServicesFetcher() {
               end,
             },
           },
-        }).then((response) => {
+        }).then((mainStatisticsData) => {
           return {
             requestId: uuid(),
-            mainStatistics: response,
+            mainStatisticsData,
           };
         });
       }
@@ -74,11 +78,11 @@ function useServicesFetcher() {
     [environment, kuery, start, end]
   );
 
-  const { mainStatistics, requestId } = data;
+  const { mainStatisticsData, requestId } = data;
 
   const { data: comparisonData, status: comparisonStatus } = useFetcher(
     (callApmApi) => {
-      if (start && end && mainStatistics.items.length) {
+      if (start && end && mainStatisticsData.items.length) {
         return callApmApi({
           endpoint: 'GET /api/apm/services/detailed_statistics',
           params: {
@@ -88,7 +92,7 @@ function useServicesFetcher() {
               start,
               end,
               serviceNames: JSON.stringify(
-                mainStatistics.items
+                mainStatisticsData.items
                   .map(({ serviceName }) => serviceName)
                   .sort()
               ),
@@ -105,7 +109,7 @@ function useServicesFetcher() {
   );
 
   useEffect(() => {
-    if (mainStatistics.hasLegacyData && !hasDisplayedToast) {
+    if (mainStatisticsData.hasLegacyData && !hasDisplayedToast) {
       hasDisplayedToast = true;
 
       core.notifications.toasts.addWarning({
@@ -133,17 +137,17 @@ function useServicesFetcher() {
       });
     }
   }, [
-    mainStatistics.hasLegacyData,
+    mainStatisticsData.hasLegacyData,
     upgradeAssistantHref,
     core.notifications.toasts,
   ]);
 
   return {
-    servicesData: mainStatistics,
-    servicesStatus: status,
+    servicesData: mainStatisticsData,
+    servicesStatus: mainStatisticsStatus,
     comparisonData,
     isLoading:
-      status === FETCH_STATUS.LOADING ||
+      mainStatisticsStatus === FETCH_STATUS.LOADING ||
       comparisonStatus === FETCH_STATUS.LOADING,
   };
 }
