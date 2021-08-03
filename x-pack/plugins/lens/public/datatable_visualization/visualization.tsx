@@ -21,12 +21,13 @@ import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { getStopsForFixedMode } from '../shared_components';
-import { getDefaultSummaryLabel, layerTypes } from '../../common/expressions';
+import { getDefaultSummaryLabel, LayerType, layerTypes } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
+  layerType: LayerType;
   sorting?: SortingState;
 }
 
@@ -82,6 +83,7 @@ export const getDatatableVisualization = ({
       state || {
         columns: [],
         layerId: addNewLayer(),
+        layerType: layerTypes.DATA,
       }
     );
   },
@@ -141,6 +143,7 @@ export const getDatatableVisualization = ({
         state: {
           ...(state || {}),
           layerId: table.layerId,
+          layerType: layerTypes.DATA,
           columns: table.columns.map((col, columnIndex) => ({
             ...(oldColumnSettings[col.columnId] || {}),
             isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
@@ -308,9 +311,7 @@ export const getDatatableVisualization = ({
   },
 
   getLayerType(state) {
-    if (state.layerId) {
-      return layerTypes.DATA;
-    }
+    return state.layerType;
   },
 
   toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {

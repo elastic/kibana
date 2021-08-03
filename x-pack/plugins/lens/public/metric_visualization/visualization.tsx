@@ -90,6 +90,7 @@ export const metricVisualization: Visualization<MetricState> = {
       state || {
         layerId: addNewLayer(),
         accessor: undefined,
+        layerType: layerTypes.DATA,
       }
     );
   },
@@ -121,9 +122,7 @@ export const metricVisualization: Visualization<MetricState> = {
   },
 
   getLayerType(state) {
-    if (state.layerId) {
-      return layerTypes.DATA;
-    }
+    return state.layerType;
   },
 
   toExpression,
