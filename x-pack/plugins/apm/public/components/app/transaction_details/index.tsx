@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { flatten, isEmpty } from 'lodash';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { flatten } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { XYBrushArea } from '@elastic/charts';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -20,7 +21,6 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { MlLatencyCorrelations } from '../correlations/ml_latency_correlations_page';
-import { TransactionDistribution } from './Distribution';
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { WaterfallWithSummary } from './waterfall_with_summary';
 
@@ -79,6 +79,27 @@ export function TransactionDetails() {
     ? distributionData.buckets.indexOf(bucketWithSample)
     : -1;
 
+  const selectionFrom = bucketWithSample?.key;
+  const bucketTo = distributionData.buckets[bucketIndex + 1];
+  const selectionTo = bucketTo?.key;
+
+  const selectSampleFromChartSelection = (selection: XYBrushArea) => {
+    if (selection !== undefined) {
+      const { x } = selection;
+      if (x !== undefined) {
+        const filteredSamples: Sample[] = flatten(
+          distributionData.buckets
+            .filter((b) => b.key > x[0] && b.key < x[1])
+            .map((bucket) => bucket.samples)
+        );
+
+        if (filteredSamples.length > 0) {
+          selectSampleFromBucketClick(filteredSamples[0]);
+        }
+      }
+    }
+  };
+
   const selectSampleFromBucketClick = (sample: Sample) => {
     history.push({
       ...history.location,
@@ -106,22 +127,19 @@ export function TransactionDetails() {
 
       <EuiHorizontalRule size="full" margin="l" />
 
-      <MlLatencyCorrelations />
-
-      <EuiPanel hasBorder={true}>
-        <TransactionDistribution
-          distribution={distributionData}
-          fetchStatus={distributionStatus}
-          bucketIndex={bucketIndex}
-          onBucketClick={(bucket) => {
-            if (!isEmpty(bucket.samples)) {
-              selectSampleFromBucketClick(bucket.samples[0]);
+      {distributionStatus === 'success' && (
+        <>
+          <MlLatencyCorrelations
+            onChartSelection={selectSampleFromChartSelection}
+            selection={
+              selectionFrom !== undefined && selectionTo !== undefined
+                ? [selectionFrom, selectionTo]
+                : undefined
             }
-          }}
-        />
-      </EuiPanel>
-
-      <EuiSpacer size="s" />
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
 
       <HeightRetainer>
         <WaterfallWithSummary

@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { BrushEndListener } from '@elastic/charts';
 import {
   EuiCallOut,
   EuiCode,
@@ -15,7 +16,6 @@ import {
   EuiIcon,
   EuiBasicTableColumn,
   EuiButton,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
@@ -60,7 +60,12 @@ interface MlCorrelationsTerms {
   duplicatedFields?: string[];
 }
 
-export function MlLatencyCorrelations() {
+interface Props {
+  onChartSelection: BrushEndListener;
+  selection?: [number, number];
+}
+
+export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -269,182 +274,174 @@ export function MlLatencyCorrelations() {
   }, [histograms]);
 
   return (
-    <>
-      <EuiFlexGrid columns={2} gutterSize="s">
-        <EuiFlexItem data-cy={`transaction-correlation-histogram-chart`}>
-          <EuiPanel hasBorder={true}>
-            {overallHistogram !== undefined ? (
-              <>
-                <EuiTitle size="xs">
-                  <span data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
-                    {i18n.translate(
-                      'xpack.apm.correlations.latencyCorrelations.chartTitle',
-                      {
-                        defaultMessage:
-                          'Latency distribution for {name} (Log-Log Plot)',
-                        values: {
-                          name: transactionName ?? serviceName,
-                        },
-                      }
-                    )}
-                  </span>
-                </EuiTitle>
-
-                <CorrelationsChart
-                  markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-                  markerValue={percentileThresholdValue ?? 0}
-                  {...selectedHistogram}
-                  overallHistogram={overallHistogram}
-                />
-
-                <EuiSpacer size="s" />
-              </>
-            ) : null}
-          </EuiPanel>
-        </EuiFlexItem>
-
-        <EuiFlexItem style={{ flexShrink: 1 }}>
-          <EuiPanel hasBorder={true}>
-            <EuiTitle size="xs">
-              <span data-test-subj="apmCorrelationsLatencyCorrelationsTablePanelTitle">
-                {i18n.translate(
-                  'xpack.apm.correlations.latencyCorrelations.tableTitle',
-                  {
-                    defaultMessage: 'Correlations',
-                  }
-                )}
-              </span>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                {!isRunning && (
-                  <EuiButton size="s" onClick={startFetch}>
-                    <FormattedMessage
-                      id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
-                      defaultMessage="Refresh"
-                    />
-                  </EuiButton>
-                )}
-                {isRunning && (
-                  <EuiButton size="s" onClick={cancelFetch}>
-                    <FormattedMessage
-                      id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButton>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle">
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle"
-                        id="xpack.apm.correlations.latencyCorrelations.progressTitle"
-                        defaultMessage="Progress: {progress}%"
-                        values={{ progress: Math.round(progress * 100) }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiProgress
-                      aria-label={i18n.translate(
-                        'xpack.apm.correlations.latencyCorrelations.progressAriaLabel',
-                        { defaultMessage: 'Progress' }
-                      )}
-                      value={Math.round(progress * 100)}
-                      max={100}
-                      size="m"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LatencyCorrelationsHelpPopover />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {ccsWarning && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutTitle',
-                    {
-                      defaultMessage: 'Cross-cluster search compatibility',
-                    }
-                  )}
-                  color="warning"
-                >
-                  <p>
-                    {i18n.translate(
-                      'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutBody',
-                      {
-                        defaultMessage:
-                          'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.14 and later versions.',
-                      }
-                    )}
-                  </p>
-                </EuiCallOut>
-              </>
-            )}
-            <EuiSpacer size="m" />
-            <div data-test-subj="apmCorrelationsTable">
-              {histograms.length > 0 && selectedHistogram !== undefined && (
-                <CorrelationsTable
-                  // @ts-ignore correlations don't have the same column format other tables have
-                  columns={mlCorrelationColumns}
-                  // @ts-expect-error correlations don't have the same significant term other tables have
-                  significantTerms={histogramTerms}
-                  status={FETCH_STATUS.SUCCESS}
-                  setSelectedSignificantTerm={setSelectedSignificantTerm}
-                  selectedTerm={{
-                    fieldName: selectedHistogram.field,
-                    fieldValue: selectedHistogram.value,
-                  }}
-                />
+    <EuiPanel hasBorder={true}>
+      {overallHistogram !== undefined ? (
+        <>
+          <EuiTitle size="xs">
+            <span data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.chartTitle',
+                {
+                  defaultMessage:
+                    'Latency distribution for {name} (Log-Log Plot)',
+                  values: {
+                    name: transactionName ?? serviceName,
+                  },
+                }
               )}
-              {histograms.length < 1 && progress > 0.99 ? (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiText textAlign="center">
-                    <FormattedMessage
-                      id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
-                      defaultMessage="No significant correlations found"
-                    />
-                  </EuiText>
-                </>
-              ) : null}
-            </div>
-            {log.length > 0 && displayLog && (
-              <EuiAccordion
-                id="accordion1"
-                buttonContent={i18n.translate(
-                  'xpack.apm.correlations.latencyCorrelations.logButtonContent',
-                  {
-                    defaultMessage: 'Log',
-                  }
-                )}
-              >
-                <EuiPanel color="subdued">
-                  {log.map((d, i) => {
-                    const splitItem = d.split(': ');
-                    return (
-                      <p key={i}>
-                        <small>
-                          <EuiCode>{splitItem[0]}</EuiCode> {splitItem[1]}
-                        </small>
-                      </p>
-                    );
-                  })}
-                </EuiPanel>
-              </EuiAccordion>
-            )}
-          </EuiPanel>
+            </span>
+          </EuiTitle>
+
+          <CorrelationsChart
+            markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
+            markerValue={percentileThresholdValue ?? 0}
+            {...selectedHistogram}
+            overallHistogram={overallHistogram}
+            onChartSelection={onChartSelection}
+            selection={selection}
+          />
+
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+
+      <EuiTitle size="xs">
+        <span data-test-subj="apmCorrelationsLatencyCorrelationsTablePanelTitle">
+          {i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.tableTitle',
+            {
+              defaultMessage: 'Correlations',
+            }
+          )}
+        </span>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          {!isRunning && (
+            <EuiButton size="s" onClick={startFetch}>
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
+                defaultMessage="Refresh"
+              />
+            </EuiButton>
+          )}
+          {isRunning && (
+            <EuiButton size="s" onClick={cancelFetch}>
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
+                defaultMessage="Cancel"
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
-      </EuiFlexGrid>
-    </>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle">
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle"
+                  id="xpack.apm.correlations.latencyCorrelations.progressTitle"
+                  defaultMessage="Progress: {progress}%"
+                  values={{ progress: Math.round(progress * 100) }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiProgress
+                aria-label={i18n.translate(
+                  'xpack.apm.correlations.latencyCorrelations.progressAriaLabel',
+                  { defaultMessage: 'Progress' }
+                )}
+                value={Math.round(progress * 100)}
+                max={100}
+                size="m"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LatencyCorrelationsHelpPopover />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {ccsWarning && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutTitle',
+              {
+                defaultMessage: 'Cross-cluster search compatibility',
+              }
+            )}
+            color="warning"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutBody',
+                {
+                  defaultMessage:
+                    'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.14 and later versions.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+      <EuiSpacer size="m" />
+      <div data-test-subj="apmCorrelationsTable">
+        {histograms.length > 0 && selectedHistogram !== undefined && (
+          <CorrelationsTable
+            // @ts-ignore correlations don't have the same column format other tables have
+            columns={mlCorrelationColumns}
+            // @ts-expect-error correlations don't have the same significant term other tables have
+            significantTerms={histogramTerms}
+            status={FETCH_STATUS.SUCCESS}
+            setSelectedSignificantTerm={setSelectedSignificantTerm}
+            selectedTerm={{
+              fieldName: selectedHistogram.field,
+              fieldValue: selectedHistogram.value,
+            }}
+          />
+        )}
+        {histograms.length < 1 && progress > 0.99 ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiText textAlign="center">
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
+                defaultMessage="No significant correlations found"
+              />
+            </EuiText>
+          </>
+        ) : null}
+      </div>
+      {log.length > 0 && displayLog && (
+        <EuiAccordion
+          id="accordion1"
+          buttonContent={i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.logButtonContent',
+            {
+              defaultMessage: 'Log',
+            }
+          )}
+        >
+          <EuiPanel color="subdued">
+            {log.map((d, i) => {
+              const splitItem = d.split(': ');
+              return (
+                <p key={i}>
+                  <small>
+                    <EuiCode>{splitItem[0]}</EuiCode> {splitItem[1]}
+                  </small>
+                </p>
+              );
+            })}
+          </EuiPanel>
+        </EuiAccordion>
+      )}
+    </EuiPanel>
   );
 }
