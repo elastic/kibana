@@ -25,7 +25,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { MlLatencyCorrelations } from './ml_latency_correlations';
-import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
 import {
@@ -50,13 +49,14 @@ import {
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { MlErrorCorrelations } from './ml_error_correlations';
 
 const errorRateTab = {
   key: 'errorRate',
   label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
-    defaultMessage: 'Error rate',
+    defaultMessage: 'Error',
   }),
-  component: ErrorCorrelations,
+  component: MlErrorCorrelations,
 };
 const latencyCorrelationsTab = {
   key: 'latencyCorrelations',
