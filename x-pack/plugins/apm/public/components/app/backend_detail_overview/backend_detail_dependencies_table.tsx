@@ -46,11 +46,11 @@ export function BackendDetailDependenciesTable() {
           path: {
             backendName,
           },
-          query: { start, end, environment, numBuckets: 20, offset },
+          query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
       });
     },
-    [start, end, environment, offset, backendName]
+    [start, end, environment, offset, backendName, kuery]
   );
 
   const dependencies =
