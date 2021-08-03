@@ -74,7 +74,7 @@ PUT tri_met_tracks/_mapping
 ==== Step 2: Start Logstash
 
 . In your `logstash/config` folder, create the file `trimet-pipeline.conf`.
-. Copy the pipeline script into your trimet-pipeline.conf file.
+. Copy the pipeline script into your `trimet-pipeline.conf` file.
 +
 [source,yaml]
 ----------------------------------
