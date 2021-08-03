@@ -86,9 +86,6 @@ export interface PluginsServiceDiscoverDeps {
   environment: InternalEnvironmentServicePreboot;
 }
 
-const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
-const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
-
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
@@ -340,12 +337,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       }
 
       // validate that OSS plugins do not have required dependencies on X-Pack plugins
-      if (OSS_PATH_REGEX.test(plugin.path)) {
+      if (plugin.source === 'oss') {
         for (const id of [...plugin.requiredPlugins, ...plugin.requiredBundles]) {
           const requiredPlugin = pluginEnableStatuses.get(id);
-          if (requiredPlugin && XPACK_PATH_REGEX.test(requiredPlugin.plugin.path)) {
+          if (requiredPlugin && requiredPlugin.plugin.source === 'x-pack') {
             throw new Error(
-              `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${pluginName}", which is prohibited.`
+              `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${pluginName}", which is prohibited. Consider making this an optional dependency instead.`
             );
           }
         }

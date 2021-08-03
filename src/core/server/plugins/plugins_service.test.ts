@@ -52,16 +52,9 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
   });
 });
 
-const OSS_PLUGIN_PATH_POSIX = '/kibana/src/plugins/ossPlugin';
-const OSS_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\src\\plugins\\ossPlugin';
-const XPACK_PLUGIN_PATH_POSIX = '/kibana/x-pack/plugins/xPackPlugin';
-const XPACK_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\x-pack\\plugins\\xPackPlugin';
-[
-  OSS_PLUGIN_PATH_POSIX,
-  OSS_PLUGIN_PATH_WINDOWS,
-  XPACK_PLUGIN_PATH_POSIX,
-  XPACK_PLUGIN_PATH_WINDOWS,
-].forEach((path) => {
+const OSS_PLUGIN_PATH = '/kibana/src/plugins/ossPlugin';
+const XPACK_PLUGIN_PATH = '/kibana/x-pack/plugins/xPackPlugin';
+[OSS_PLUGIN_PATH, XPACK_PLUGIN_PATH].forEach((path) => {
   jest.doMock(join(path, 'server'), () => ({}), {
     virtual: true,
   });
@@ -272,6 +265,7 @@ describe('PluginsService', () => {
         xPackPath: string;
         dependency: 'requiredPlugin' | 'requiredBundle' | 'optionalPlugin';
       }) {
+        // Each plugin's source is derived from its path; the PluginWrapper test suite contains more detailed test cases around the paths (for both POSIX and Windows)
         mockDiscover.mockReturnValue({
           error$: from([]),
           plugin$: from([
@@ -296,7 +290,7 @@ describe('PluginsService', () => {
 
       async function expectError() {
         await expect(pluginsService.discover({ environment: environmentPreboot })).rejects.toThrow(
-          `X-Pack plugin or bundle with id "xPackPlugin" is required by OSS plugin "ossPlugin", which is prohibited.`
+          `X-Pack plugin or bundle with id "xPackPlugin" is required by OSS plugin "ossPlugin", which is prohibited. Consider making this an optional dependency instead.`
         );
         expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
       }
@@ -307,64 +301,31 @@ describe('PluginsService', () => {
         expect(standardMockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
       }
 
-      describe('throws if an OSS plugin requires an X-Pack plugin', () => {
-        it('in POSIX', async () => {
-          mockDiscoveryResults({
-            ossPath: OSS_PLUGIN_PATH_POSIX,
-            xPackPath: XPACK_PLUGIN_PATH_POSIX,
-            dependency: 'requiredPlugin',
-          });
-          await expectError();
+      it('throws if an OSS plugin requires an X-Pack plugin', async () => {
+        mockDiscoveryResults({
+          ossPath: OSS_PLUGIN_PATH,
+          xPackPath: XPACK_PLUGIN_PATH,
+          dependency: 'requiredPlugin',
         });
-
-        it('in Windows', async () => {
-          mockDiscoveryResults({
-            ossPath: OSS_PLUGIN_PATH_WINDOWS,
-            xPackPath: XPACK_PLUGIN_PATH_WINDOWS,
-            dependency: 'requiredPlugin',
-          });
-          await expectError();
-        });
+        await expectError();
       });
 
-      describe('throws if an OSS plugin requires an X-Pack bundle', () => {
-        it('in POSIX', async () => {
-          mockDiscoveryResults({
-            ossPath: OSS_PLUGIN_PATH_POSIX,
-            xPackPath: XPACK_PLUGIN_PATH_POSIX,
-            dependency: 'requiredBundle',
-          });
-          await expectError();
+      it('throws if an OSS plugin requires an X-Pack bundle', async () => {
+        mockDiscoveryResults({
+          ossPath: OSS_PLUGIN_PATH,
+          xPackPath: XPACK_PLUGIN_PATH,
+          dependency: 'requiredBundle',
         });
-
-        it('in Windows', async () => {
-          mockDiscoveryResults({
-            ossPath: OSS_PLUGIN_PATH_WINDOWS,
-            xPackPath: XPACK_PLUGIN_PATH_WINDOWS,
-            dependency: 'requiredBundle',
-          });
-          await expectError();
-        });
+        await expectError();
       });
 
-      describe('does not throw if an OSS plugin has an optional dependency on an X-Pack plugin', () => {
-        it('in POSIX', async () => {
-          mockDiscoveryResults({
-            ossPath: OSS_PLUGIN_PATH_POSIX,
-            xPackPath: XPACK_PLUGIN_PATH_POSIX,
-            dependency: 'optionalPlugin',
-          });
-          await expectSuccess();
+      it('does not throw if an OSS plugin has an optional dependency on an X-Pack plugin', async () => {
+        mockDiscoveryResults({
+          ossPath: OSS_PLUGIN_PATH,
+          xPackPath: XPACK_PLUGIN_PATH,
+          dependency: 'optionalPlugin',
         });
-
-        it('in Windows', async () => {
-          mockDiscoveryResults({
-            ossPath: OSS_PLUGIN_PATH_WINDOWS,
-            xPackPath: XPACK_PLUGIN_PATH_WINDOWS,
-            dependency: 'optionalPlugin',
-          });
-          await expectSuccess();
-        });
+        await expectSuccess();
       });
     });
 
