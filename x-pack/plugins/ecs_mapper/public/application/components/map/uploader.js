@@ -8,10 +8,15 @@
 import React, { Component } from 'react';
 
 import { UploadPanel } from './upload_panel';
-import { LoadingPanel } from './loading_panel';
 import { ResultsPanel } from './results_panel';
 import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer
+} from '@elastic/eui';
 
 export class EcsMapperUploadView extends Component {
   constructor(props) {
@@ -43,7 +48,6 @@ export class EcsMapperUploadView extends Component {
   }
 
   onManageIngestPipeline = () => {
-    console.log("routing");
     this.props.navigateToApp('management', {
       path: `/ingest/ingest_pipelines/edit/${this.state.pipelineName}`,
     });
@@ -87,6 +91,7 @@ export class EcsMapperUploadView extends Component {
           this.state.pipelineName,
           processors
         );
+        
         this.setState({
           loading: false,
           loaded: true
@@ -117,17 +122,18 @@ export class EcsMapperUploadView extends Component {
     const { loading, loaded, fileCouldNotBeReadPermissionError } = this.state;
 
     return (
-      <div>
-        <>
-          {!loading && !loaded && (
-            <UploadPanel
-              onFileUpload={this.onFileUpload}
-              actionOptions={Object.values(FieldCopyAction)}
-              disabled={!fileCouldNotBeReadPermissionError}
-            />
-          )}
+      <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperFileUpload">
+      <EuiPageBody className="prfDevTool__page__pageBody">
+        <EuiPageContent className="prfDevTool__page__pageBodyContent">
+          <UploadPanel
+            onFileUpload={this.onFileUpload}
+            actionOptions={Object.values(FieldCopyAction)}
+            disabled={!fileCouldNotBeReadPermissionError}
+            isLoading={loading}
+            isLoaded={loaded}
+          />
 
-          {loading && <LoadingPanel />}
+          <EuiSpacer size="m" />
 
           {loaded && (
             <ResultsPanel
@@ -135,8 +141,9 @@ export class EcsMapperUploadView extends Component {
               onManageIngestPipeline={this.onManageIngestPipeline}
             />
           )}
-        </>
-      </div>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
     );
   }
 }
