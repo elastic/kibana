@@ -7,5 +7,9 @@
   "requiredPlugins": ["licensing", "data", "navigation", "savedObjects", "kibanaLegacy"],
   "optionalPlugins": ["home", "features"],
   "configPath": ["xpack", "graph"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "home"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "home"],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  }
 }
