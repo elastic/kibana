@@ -11,12 +11,7 @@ import { UploadPanel } from './upload_panel';
 import { ResultsPanel } from './results_panel';
 import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 
 export class EcsMapperUploadView extends Component {
   constructor(props) {
@@ -30,7 +25,7 @@ export class EcsMapperUploadView extends Component {
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
-      pipelineName: ''
+      pipelineName: '',
     };
 
     this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
@@ -51,7 +46,7 @@ export class EcsMapperUploadView extends Component {
     this.props.navigateToApp('management', {
       path: `/ingest/ingest_pipelines/edit/${this.state.pipelineName}`,
     });
-  }
+  };
 
   onFileUpload = (action, files, pipelineName) => {
     this.setState(
@@ -63,7 +58,7 @@ export class EcsMapperUploadView extends Component {
         fileTooLarge: false,
         fileCouldNotBeRead: false,
         fileCouldNotBeReadPermissionError: false,
-        pipelineName: pipelineName
+        pipelineName: pipelineName,
       },
       () => {
         if (files.length) {
@@ -83,18 +78,12 @@ export class EcsMapperUploadView extends Component {
           fileSize: file.size,
           loading: true,
         });
-        const processors = await this.props.mapper.fetchPipelineFromMapping(
-          fileContents,
-          action
-        );
-        await this.props.mapper.createIngestNodePipeline(
-          this.state.pipelineName,
-          processors
-        );
-        
+        const processors = await this.props.mapper.fetchPipelineFromMapping(fileContents, action);
+        await this.props.mapper.createIngestNodePipeline(this.state.pipelineName, processors);
+
         this.setState({
           loading: false,
-          loaded: true
+          loaded: true,
         });
       } catch (error) {
         this.setState({
@@ -123,27 +112,27 @@ export class EcsMapperUploadView extends Component {
 
     return (
       <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperFileUpload">
-      <EuiPageBody className="prfDevTool__page__pageBody">
-        <EuiPageContent className="prfDevTool__page__pageBodyContent">
-          <UploadPanel
-            onFileUpload={this.onFileUpload}
-            actionOptions={Object.values(FieldCopyAction)}
-            disabled={!fileCouldNotBeReadPermissionError}
-            isLoading={loading}
-            isLoaded={loaded}
-          />
-
-          <EuiSpacer size="m" />
-
-          {loaded && (
-            <ResultsPanel
-              pipelineName={this.state.pipelineName}
-              onManageIngestPipeline={this.onManageIngestPipeline}
+        <EuiPageBody className="prfDevTool__page__pageBody">
+          <EuiPageContent className="prfDevTool__page__pageBodyContent">
+            <UploadPanel
+              onFileUpload={this.onFileUpload}
+              actionOptions={Object.values(FieldCopyAction)}
+              disabled={!fileCouldNotBeReadPermissionError}
+              isLoading={loading}
+              isLoaded={loaded}
             />
-          )}
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+
+            <EuiSpacer size="m" />
+
+            {loaded && (
+              <ResultsPanel
+                pipelineName={this.state.pipelineName}
+                onManageIngestPipeline={this.onManageIngestPipeline}
+              />
+            )}
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 }

@@ -41,13 +41,9 @@ export class MapperProxy {
         }),
       });
     }
-  }
+  };
 
-  public createIngestNodePipeline = async (
-    name: string,
-    processors: object[]
-  ): Promise<void> => {
-    
+  public createIngestNodePipeline = async (name: string, processors: object[]): Promise<void> => {
     try {
       return this.http.post('/api/ingest_pipelines', {
         body: JSON.stringify({
@@ -56,14 +52,11 @@ export class MapperProxy {
         }),
       });
     } catch (error) {
-      console.log(error);
       this.notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.ecsMapper.mapToIngestPipelineError', {
+        title: i18n.translate('xpack.ecsMapper.postPipelineError', {
           defaultMessage: 'Error',
         }),
       });
     }
-  }
+  };
 }
-
-

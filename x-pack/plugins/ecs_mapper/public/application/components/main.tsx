@@ -16,16 +16,16 @@ export const EcsMapperMainUi: FC = () => {
   const { fileUpload, mapper } = getPluginsStart();
   const { application } = getCoreStart();
   const { navigateToApp } = application;
-  
+
   const services = {
     fileUpload,
     mapper,
-    navigateToApp
+    navigateToApp,
   };
 
   return (
     <KibanaContextProvider services={{ ...services }}>
-      <EcsMapperUploadView fileUpload={fileUpload} mapper={mapper} navigateToApp={navigateToApp}/>
+      <EcsMapperUploadView fileUpload={fileUpload} mapper={mapper} navigateToApp={navigateToApp} />
     </KibanaContextProvider>
   );
 };

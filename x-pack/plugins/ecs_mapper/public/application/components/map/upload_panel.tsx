@@ -33,23 +33,15 @@ interface Props {
 }
 
 function getOptions(actions: FieldCopyAction[]) {
-  const actionOptions = actions
-    .map((action) => ({
-      value: action,
-      text: action,
-    }));
+  const actionOptions = actions.map((action) => ({
+    value: action,
+    text: action,
+  }));
 
-  return [
-    ...actionOptions
-  ];
+  return [...actionOptions];
 }
 
-export const UploadPanel: FC<Props> = ({ 
-  actionOptions,
-  onFileUpload,
-  isLoading,
-  isLoaded
-}) => {
+export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading, isLoaded }) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
   const [file, setFile] = useState<FileList | null>(null);
   const [pipelineName, setPipelineName] = useState('');
@@ -63,99 +55,93 @@ export const UploadPanel: FC<Props> = ({
 
   return (
     <EuiFlexGroup gutterSize="xl">
-
       <EuiFlexItem grow={true}>
         <Instructions />
-      <EuiHorizontalRule margin="l" />
+        <EuiHorizontalRule margin="l" />
 
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.ecsMapper.file.upload.copyAction.title"
-              defaultMessage="Copy action"
-            />
-          </h3>
-        }
-        description={
-          <p>
-            <FormattedMessage
-              id="xpack.ecsMapper.file.upload.copyAction.description"
-              defaultMessage="TBD description"
-            />
-          </p>
-        }
+        <EuiDescribedFormGroup
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.ecsMapper.file.upload.copyAction.title"
+                defaultMessage="Copy action"
+              />
+            </h3>
+          }
+          description={
+            <p>
+              <FormattedMessage
+                id="xpack.ecsMapper.file.upload.copyAction.description"
+                defaultMessage="TBD description"
+              />
+            </p>
+          }
         >
-        <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
-          <EuiSelect
-            options={options}
-            value={action}
-            onChange={(option) => setAction(option.target.value as FieldCopyAction)}
-            data-test-subj="copyAction"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+          <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
+            <EuiSelect
+              options={options}
+              value={action}
+              onChange={(option) => setAction(option.target.value as FieldCopyAction)}
+              data-test-subj="copyAction"
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
 
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.ecsMapper.file.upload.pipelineName.title"
-              defaultMessage="Ingest Node Pipeline name"
-            />
-          </h3>
-        }
-        description={
-          <p>
-            <FormattedMessage
-              id="xpack.ecsMapper.file.upload.pipelineName.description"
-              defaultMessage="TBD description"
-            />
-          </p>
-        }
+        <EuiDescribedFormGroup
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.ecsMapper.file.upload.pipelineName.title"
+                defaultMessage="Ingest Node Pipeline name"
+              />
+            </h3>
+          }
+          description={
+            <p>
+              <FormattedMessage
+                id="xpack.ecsMapper.file.upload.pipelineName.description"
+                defaultMessage="TBD description"
+              />
+            </p>
+          }
         >
-        <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
-          <EuiFieldText
-            onChange={(e) => {
-              setPipelineName(e.target.value);
-            }}
+          <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
+            <EuiFieldText
+              onChange={(e) => {
+                setPipelineName(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+
+        <EuiSpacer size="l" />
+
+        <div style={{ alignContent: 'center' }}>
+          <EuiFilePicker
+            id="filePicker"
+            initialPromptText={i18n.translate(
+              'xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription',
+              {
+                defaultMessage: 'Select or drag and drop a file',
+              }
+            )}
+            onChange={(files) => setFile(files)}
+            className="ecs-mapper-file-picker"
           />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-              
-      <EuiSpacer size="l" />
-
-      <div style={{ alignContent: 'center' }}>
-        <EuiFilePicker
-          id="filePicker"
-          initialPromptText={i18n.translate(
-            'xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription',
-            {
-              defaultMessage: 'Select or drag and drop a file',
-            }
-          )}
-          onChange={(files) => setFile(files)}
-          className="ecs-mapper-file-picker"
-        />
-
         </div>
 
         <EuiSpacer size="l" />
 
         {!isLoaded && (
           <EuiButton
-          target="_self"
-          onClick={() => onFileUpload(action, file, pipelineName)}
-          isLoading={isLoading}
-          data-test-subj="ecsMapperManagePipelineButton"
+            target="_self"
+            onClick={() => onFileUpload(action, file, pipelineName)}
+            isLoading={isLoading}
+            data-test-subj="ecsMapperManagePipelineButton"
           >
-          <FormattedMessage
-           id="xpack.ecsMapper.manageIngestPipeline"
-            defaultMessage="Upload"
-          />
+            <FormattedMessage id="xpack.ecsMapper.manageIngestPipeline" defaultMessage="Upload" />
           </EuiButton>
         )}
-   
       </EuiFlexItem>
     </EuiFlexGroup>
   );
