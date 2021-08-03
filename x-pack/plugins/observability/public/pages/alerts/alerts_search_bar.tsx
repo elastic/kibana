@@ -35,7 +35,7 @@ export function AlertsSearchBar({
     <SearchBar
       indexPatterns={dynamicIndexPattern}
       placeholder={i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {
-        defaultMessage: '"rule.id" : "metrics.alert.threshold"',
+        defaultMessage: 'kibana.alert.status : "open"',
       })}
       query={{ query: query ?? '', language: queryLanguage }}
       timeHistory={timeHistory}
