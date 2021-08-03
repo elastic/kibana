@@ -90,7 +90,8 @@ export class TaskRunnerFactory {
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
-          spaceIdToNamespace
+          spaceIdToNamespace,
+          logger
         );
 
         const requestHeaders: Record<string, string> = {};
@@ -179,18 +180,26 @@ export class TaskRunnerFactory {
 async function getActionTaskParams(
   executorParams: ActionTaskExecutorParams,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  spaceIdToNamespace: SpaceIdToNamespaceFunction
+  spaceIdToNamespace: SpaceIdToNamespaceFunction,
+  logger: Logger
 ): Promise<Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {
-    // encryptedSavedObjectsClient.getDecryptedAsInternalUser will resolve outdated
-    // saved object IDs and return the resolved saved object
-    return encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+    const resolvedAction = await encryptedSavedObjectsClient.resolveDecryptedAsInternalUser<ActionTaskParams>(
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       executorParams.actionTaskParamsId,
       { namespace }
     );
+
+    // log warning if the resolved outcome is "conflict"
+    // maybe instead we should log and throw an error?
+    if (resolvedAction.outcome === 'conflict') {
+      logger.warn(
+        `Conflict when retrieving action task information. Action will be run with params from ${resolvedAction.saved_object.id} but may run with errors because it should be using params from ${resolvedAction.aliasTargetId}`
+      );
+    }
+    return resolvedAction.saved_object;
   } else {
     return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
   }

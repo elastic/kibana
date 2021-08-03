@@ -104,15 +104,18 @@ test('executes the task by calling the executor with proper parameters', async (
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -129,7 +132,7 @@ test('executes the task by calling the executor with proper parameters', async (
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
   expect(
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
+    mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser
   ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
@@ -155,22 +158,26 @@ test('executes the task by calling the executor with proper parameters', async (
   );
 });
 
-test('executes the task when getDecryptedAsInternalUser resolves to different SO ID ', async () => {
+test('executes the task when resolveDecryptedAsInternalUser resolves to different SO ID ', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: 'abc',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: 'abc',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'aliasMatch',
+    aliasTargetId: '3',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -187,9 +194,73 @@ test('executes the task when getDecryptedAsInternalUser resolves to different SO
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
   expect(
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
+    mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser
+  ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [],
+    request: expect.objectContaining({
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
+  });
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
+});
+
+test('executes the task when resolveDecryptedAsInternalUser resolves to different SO ID with conflict', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: 'abc',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    },
+    outcome: 'conflict',
+    aliasTargetId: '3',
+  });
+  services.savedObjectsClient.resolve.mockResolvedValueOnce({
+    saved_object: {
+      id: '2',
+      type: 'action',
+      attributes: {},
+      references: [],
+    },
+    outcome: 'exactMatch',
+  });
+
+  const runnerResult = await taskRunner.run();
+
+  expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(
+    mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser
   ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
 
+  expect(taskRunnerFactoryInitializerParams.logger.warn).toHaveBeenCalledWith(
+    'Conflict when retrieving action task information. Action will be run with params from abc but may run with errors because it should be using params from 3'
+  );
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     isEphemeral: false,
@@ -220,15 +291,18 @@ test('executes the task when actionId resolves to different SO ID', async () => 
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -246,7 +320,7 @@ test('executes the task when actionId resolves to different SO ID', async () => 
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
   expect(
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
+    mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser
   ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
@@ -279,15 +353,18 @@ test('cleans up action_task_params object', async () => {
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -311,15 +388,18 @@ test('runs successfully when cleanup fails and logs the error', async () => {
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -345,15 +425,18 @@ test('throws an error with suggested retry logic when return status is error', a
     taskInstance: mockedTaskInstance,
   });
 
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -389,15 +472,18 @@ test('uses API key when provided', async () => {
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -441,16 +527,19 @@ test('uses relatedSavedObjects when provided', async () => {
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
-      relatedSavedObjects: [{ id: 'some-id', type: 'some-type' }],
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        relatedSavedObjects: [{ id: 'some-id', type: 'some-type' }],
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -493,16 +582,19 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
-      relatedSavedObjects: [{ Xid: 'some-id', type: 'some-type' }],
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        relatedSavedObjects: [{ Xid: 'some-id', type: 'some-type' }],
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -539,14 +631,17 @@ test(`doesn't use API key when not provided`, async () => {
 
   mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
@@ -585,15 +680,18 @@ test(`throws an error when license doesn't support the action type`, async () =>
     taskInstance: mockedTaskInstance,
   });
 
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
+  mockedEncryptedSavedObjectsClient.resolveDecryptedAsInternalUser.mockResolvedValueOnce({
+    saved_object: {
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
     },
-    references: [],
+    outcome: 'exactMatch',
   });
   services.savedObjectsClient.resolve.mockResolvedValueOnce({
     saved_object: {
