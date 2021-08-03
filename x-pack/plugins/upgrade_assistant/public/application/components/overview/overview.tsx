@@ -29,48 +29,48 @@ const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
     defaultMessage: 'Upgrade Assistant',
   }),
-  // TODO: probably should become its own component?
-  pageDescription: ({
-    version,
-    upgradeGuideLink,
-    whatsNewLink,
-  }: {
-    version: number;
-    upgradeGuideLink: string;
-    whatsNewLink: string;
-  }) => (
-    <>
-      <FormattedMessage
-        id="xpack.upgradeAssistant.overview.pageDescription"
-        defaultMessage="Get ready for the next version of Elastic Stack. Prepare to upgrade by identifying deprecated settings and features below. When you are ready, follow the {upgradeGuideLink} to complete your version upgrade."
-        values={{
-          upgradeGuideLink: (
-            <EuiLink href={upgradeGuideLink} target="_blank" external={false}>
-              {i18n.translate('xpack.upgradeAssistant.overview.pageDescriptionLink', {
-                defaultMessage: 'upgrade guide',
-              })}
-            </EuiLink>
-          ),
-        }}
-      />
-
-      <EuiSpacer size="m" />
-
-      <EuiText>
-        <EuiLink href={whatsNewLink} target="_blank">
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overview.pageDescriptionLink"
-            defaultMessage="Learn about what is new in version {version}.0"
-            values={{ version }}
-          />
-        </EuiLink>
-      </EuiText>
-    </>
-  ),
   docLink: i18n.translate('xpack.upgradeAssistant.overview.documentationLinkText', {
     defaultMessage: 'Documentation',
   }),
 };
+
+const PageDescription = ({
+  version,
+  upgradeGuideLink,
+  whatsNewLink,
+}: {
+  version: number;
+  upgradeGuideLink: string;
+  whatsNewLink: string;
+}) => (
+  <>
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.pageDescription"
+      defaultMessage="Get ready for the next version of Elastic Stack. Prepare to upgrade by identifying deprecated settings and features below. When you are ready, follow the {upgradeGuideLink} to complete your version upgrade."
+      values={{
+        upgradeGuideLink: (
+          <EuiLink href={upgradeGuideLink} target="_blank" external={false}>
+            {i18n.translate('xpack.upgradeAssistant.overview.pageDescriptionLink', {
+              defaultMessage: 'upgrade guide',
+            })}
+          </EuiLink>
+        ),
+      }}
+    />
+
+    <EuiSpacer size="m" />
+
+    <EuiText>
+      <EuiLink href={whatsNewLink} target="_blank">
+        <FormattedMessage
+          id="xpack.upgradeAssistant.overview.pageDescriptionLink"
+          defaultMessage="Learn about what is new in version {version}.0"
+          values={{ version }}
+        />
+      </EuiLink>
+    </EuiText>
+  </>
+);
 
 interface Props {
   history: RouteComponentProps['history'];
@@ -99,11 +99,13 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
       <EuiPageHeader
         bottomBorder
         pageTitle={i18nTexts.pageTitle}
-        description={i18nTexts.pageDescription({
-          version: currentMajor,
-          upgradeGuideLink: docLinks.links.elasticsearch.setupUpgrade,
-          whatsNewLink: docLinks.links.elasticsearch.migrating8,
-        })}
+        description={
+          <PageDescription
+            version={currentMajor}
+            upgradeGuideLink={docLinks.links.elasticsearch.setupUpgrade}
+            whatsNewLink={docLinks.links.elasticsearch.migrating8}
+          />
+        }
         rightSideItems={[
           <EuiButtonEmpty
             href={docLinks.links.upgradeAssistant}
