@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
+import { merge, once } from 'lodash';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import { estypes } from '@elastic/elasticsearch';
@@ -220,9 +220,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             path: value,
           };
         });
+        // TODO: convert the aliases to a FieldMap. Requires enhancing FieldMap type to support alias path
+        const mappings = mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false);
+        merge(mappings.properties, aliases);
 
         const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
-
         await ruleDataService.createOrUpdateComponentTemplate({
           name: componentTemplateName,
           body: {
@@ -230,9 +232,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              // TODO: once https://github.com/elastic/kibana/pull/105096 is merged, add aliases into mappings.
-              // Until we add the actual fields to the mappings we can't add aliases for them
-              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
+              mappings,
             },
           },
         });

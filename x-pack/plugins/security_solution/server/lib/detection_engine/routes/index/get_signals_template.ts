@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { SPACE_IDS } from '@kbn/rule-data-utils';
+import {
+  SPACE_IDS,
+  ALERT_CONSUMERS,
+  ALERT_PRODUCER,
+  ALERT_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
@@ -111,18 +116,18 @@ export const getRbacRequiredFields = (spaceId: string) => {
       type: 'constant_keyword',
       value: spaceId,
     },
-    'kibana.consumers': {
+    [ALERT_CONSUMERS]: {
       type: 'constant_keyword',
       value: 'siem',
     },
-    'kibana.producer': {
+    [ALERT_PRODUCER]: {
       type: 'constant_keyword',
       value: 'siem',
     },
     // TODO: discuss naming of this field and what the value will be for legacy signals.
     // Can we leave it as 'siem.signals' or do we need a runtime field that will map signal.rule.type
     // to the new ruleTypeId?
-    'kibana.alert.rule.rule_type_id': {
+    [ALERT_RULE_TYPE_ID]: {
       type: 'constant_keyword',
       value: 'siem.signals',
     },
