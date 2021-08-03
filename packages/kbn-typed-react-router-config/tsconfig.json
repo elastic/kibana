@@ -1,15 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "declarationDir": "./target_types",
-    "outDir": "./target_node",
-    "stripInternal": true,
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "incremental": false,
     "isolatedModules": true,
+    "outDir": "./target_types",
     "sourceMap": true,
     "sourceRoot": "../../../../../packages/kbn-typed-react-router-config/src",
+    "stripInternal": true,
     "types": [
       "node",
       "jest"
