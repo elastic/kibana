@@ -73,7 +73,7 @@ export function TransactionBreakdownChartContents({
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
         <Settings
-          tooltip={{ stickTo: 'center' }}
+          tooltip={{ stickTo: 'top' }}
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           showLegend
           showLegendExtra
@@ -83,7 +83,9 @@ export function TransactionBreakdownChartContents({
           flatLegend
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Bottom },
+            tooltip: {
+              visible: true,
+            },
           }}
         />
         <Axis

@@ -115,7 +115,7 @@ export function TimeseriesChart({
     >
       <Chart ref={chartRef} id={id}>
         <Settings
-          tooltip={{ stickTo: 'center' }}
+          tooltip={{ stickTo: 'top' }}
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           theme={{
             ...chartTheme,
@@ -126,7 +126,7 @@ export function TimeseriesChart({
           }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Right },
+            tooltip: { visible: true },
           }}
           showLegend
           showLegendExtra
