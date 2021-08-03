@@ -16,6 +16,7 @@ interface Props {
   query?: Query;
   timeRange?: TimeRange;
   visConfig: TileMapVisConfig;
+  onInitialRenderComplete: () => void;
 }
 
 export function TileMapVisualization(props: Props) {
@@ -37,6 +38,8 @@ export function TileMapVisualization(props: Props) {
       timeRange={props.timeRange}
       mapCenter={mapCenter}
       getLayerDescriptors={getLayerDescriptors}
+      onInitialRenderComplete={props.onInitialRenderComplete}
+      isSharable={false}
     />
   );
 }

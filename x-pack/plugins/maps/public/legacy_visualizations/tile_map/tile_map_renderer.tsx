@@ -21,6 +21,9 @@ export const tileMapRenderer = {
 
     render(
       <TileMapVisualization
+        onInitialRenderComplete={() => {
+          handlers.done();
+        }}
         filters={filters}
         query={query}
         timeRange={timeRange}

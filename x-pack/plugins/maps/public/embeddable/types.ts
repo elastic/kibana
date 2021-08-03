@@ -7,6 +7,7 @@
 
 import type { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns';
 import {
+  Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
@@ -42,4 +43,9 @@ export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
 
 export type MapEmbeddableOutput = EmbeddableOutput & {
   indexPatterns: IndexPattern[];
+};
+
+export type MapEmbeddableType = Embeddable<MapEmbeddableInput, MapEmbeddableOutput> & {
+  setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void;
+  setIsSharable(isSharable: boolean): void;
 };

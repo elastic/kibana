@@ -16,6 +16,7 @@ interface Props {
   query?: Query;
   timeRange?: TimeRange;
   visConfig: RegionMapVisConfig;
+  onInitialRenderComplete: () => void;
 }
 
 export function RegionMapVisualization(props: Props) {
@@ -37,6 +38,8 @@ export function RegionMapVisualization(props: Props) {
       timeRange={props.timeRange}
       mapCenter={mapCenter}
       getLayerDescriptors={getLayerDescriptors}
+      onInitialRenderComplete={props.onInitialRenderComplete}
+      isSharable={false}
     />
   );
 }

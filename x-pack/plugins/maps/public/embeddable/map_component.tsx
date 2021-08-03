@@ -9,9 +9,8 @@ import React, { Component, RefObject } from 'react';
 import uuid from 'uuid/v4';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '../../../../../src/plugins/data/common';
-import type { Embeddable } from '../../../../../src/plugins/embeddable/public';
 import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
-import type { MapEmbeddableInput, MapEmbeddableOutput } from './types';
+import type { MapEmbeddableType } from './types';
 import type { LazyLoadedMapModules } from '../lazy_load_bundle';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
@@ -21,6 +20,11 @@ interface Props {
   timeRange?: TimeRange;
   getLayerDescriptors: (mapModules: LazyLoadedMapModules) => LayerDescriptor[];
   mapCenter?: MapCenterAndZoom;
+  onInitialRenderComplete?: () => void;
+  /*
+   * Set to false to exclude sharing attributes 'data-*'.
+   */
+  isSharable?: boolean;
 }
 
 interface State {
@@ -29,7 +33,7 @@ interface State {
 
 export class MapComponent extends Component<Props, State> {
   private _isMounted = false;
-  private _mapEmbeddable?: Embeddable<MapEmbeddableInput, MapEmbeddableOutput> | undefined;
+  private _mapEmbeddable?: MapEmbeddableType | undefined;
   private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
 
   state: State = { isLoaded: false };
@@ -80,6 +84,10 @@ export class MapComponent extends Component<Props, State> {
         mapCenter: this.props.mapCenter,
       }
     );
+    this._mapEmbeddable.setOnInitialRenderComplete(this.props.onInitialRenderComplete);
+    if (this.props.isSharable !== undefined) {
+      this._mapEmbeddable.setIsSharable(this.props.isSharable);
+    }
     if (this._embeddableRef.current) {
       this._mapEmbeddable.render(this._embeddableRef.current);
     }

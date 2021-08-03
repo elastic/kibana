@@ -8,9 +8,13 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
 import { AppMountParameters } from 'kibana/public';
-import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
+import { IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
-import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable/types';
+import type {
+  MapEmbeddableConfig,
+  MapEmbeddableInput,
+  MapEmbeddableType,
+} from '../embeddable/types';
 import { SourceRegistryEntry } from '../classes/sources/source_registry';
 import { LayerWizard } from '../classes/layers/layer_wizard_registry';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
@@ -25,7 +29,7 @@ export interface LazyLoadedMapModules {
     config: MapEmbeddableConfig,
     initialInput: MapEmbeddableInput,
     parent?: IContainer
-  ) => Embeddable<MapEmbeddableInput, MapEmbeddableOutput>;
+  ) => MapEmbeddableType;
   getIndexPatternService: () => IndexPatternsContract;
   getMapsCapabilities: () => any;
   renderApp: (params: AppMountParameters) => Promise<() => void>;

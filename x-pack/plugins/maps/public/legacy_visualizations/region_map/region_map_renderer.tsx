@@ -21,6 +21,9 @@ export const regionMapRenderer = {
 
     render(
       <RegionMapVisualization
+        onInitialRenderComplete={() => {
+          handlers.done();
+        }}
         filters={filters}
         query={query}
         timeRange={timeRange}
