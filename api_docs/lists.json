@@ -2551,8 +2551,8 @@
             ],
             "path": "x-pack/plugins/lists/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "lists",
@@ -2573,8 +2573,8 @@
             ],
             "path": "x-pack/plugins/lists/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
