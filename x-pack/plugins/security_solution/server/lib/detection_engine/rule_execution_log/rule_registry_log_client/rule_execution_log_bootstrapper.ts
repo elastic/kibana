@@ -28,7 +28,7 @@ export const bootstrapRuleExecutionLog = async (
         settings: {
           number_of_shards: 1,
         },
-        mappings: mappingFromFieldMap(ruleExecutionFieldMap),
+        mappings: mappingFromFieldMap(ruleExecutionFieldMap, 'strict'),
       },
     },
   });
