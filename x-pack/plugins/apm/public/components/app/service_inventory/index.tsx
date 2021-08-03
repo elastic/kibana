@@ -94,6 +94,7 @@ function useServicesFetcher() {
               serviceNames: JSON.stringify(
                 mainStatisticsData.items
                   .map(({ serviceName }) => serviceName)
+                  // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
                   .sort()
               ),
               offset,
