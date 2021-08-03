@@ -1798,9 +1798,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               }
@@ -2077,9 +2077,9 @@
             "signature": [
               "(fieldname: string) => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -2820,9 +2820,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -2882,9 +2882,9 @@
                       },
                       ") => ",
                       {
-                        "pluginId": "data",
+                        "pluginId": "fieldFormats",
                         "scope": "common",
-                        "docId": "kibDataFieldFormatsPluginApi",
+                        "docId": "kibFieldFormatsPluginApi",
                         "section": "def-common.FieldFormat",
                         "text": "FieldFormat"
                       },
@@ -5789,9 +5789,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -5806,7 +5806,67 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.IFieldType.toSpec.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.IFieldType.toSpec.$1.options.getFormatterForField",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "getFormatterForField",
+                    "description": [],
+                    "signature": [
+                      "((field: ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IFieldType",
+                        "text": "IFieldType"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IndexPatternField",
+                        "text": "IndexPatternField"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.FieldSpec",
+                        "text": "FieldSpec"
+                      },
+                      ") => ",
+                      {
+                        "pluginId": "fieldFormats",
+                        "scope": "common",
+                        "docId": "kibFieldFormatsPluginApi",
+                        "section": "def-common.FieldFormat",
+                        "text": "FieldFormat"
+                      },
+                      ") | undefined"
+                    ],
+                    "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -6253,14 +6313,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/ueba/pages/details/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts"
           },
           {
             "plugin": "timelines",
@@ -6819,16 +6871,55 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.IIndexPattern.getFormatterForField.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IFieldType",
+                    "text": "IFieldType"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPatternField",
+                    "text": "IndexPatternField"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/plugins/data/common/index_patterns/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -7186,9 +7277,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -7249,9 +7340,9 @@
                       },
                       ") => ",
                       {
-                        "pluginId": "data",
+                        "pluginId": "fieldFormats",
                         "scope": "common",
-                        "docId": "kibDataFieldFormatsPluginApi",
+                        "docId": "kibFieldFormatsPluginApi",
                         "section": "def-common.FieldFormat",
                         "text": "FieldFormat"
                       },
@@ -7298,11 +7389,10 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.IIndexPatternsApiClient.getFieldsForTimePattern.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -7317,9 +7407,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -7341,11 +7433,10 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.IIndexPatternsApiClient.getFieldsForWildcard.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -7360,9 +7451,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -7867,11 +7960,10 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.SavedObjectsClientCommon.find.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -7886,9 +7978,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -7904,29 +7998,37 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.type",
+                "id": "def-common.SavedObjectsClientCommon.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.id",
+                "id": "def-common.SavedObjectsClientCommon.get.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -7942,55 +8044,65 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.type",
+                "id": "def-common.SavedObjectsClientCommon.update.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.id",
+                "id": "def-common.SavedObjectsClientCommon.update.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.attributes",
+                "id": "def-common.SavedObjectsClientCommon.update.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.SavedObjectsClientCommon.update.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -8006,45 +8118,51 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.type",
+                "id": "def-common.SavedObjectsClientCommon.create.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.attributes",
+                "id": "def-common.SavedObjectsClientCommon.create.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.SavedObjectsClientCommon.create.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -8058,29 +8176,37 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.type",
+                "id": "def-common.SavedObjectsClientCommon.delete.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.id",
+                "id": "def-common.SavedObjectsClientCommon.delete.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8247,19 +8373,23 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.UiSettingsCommon.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -8273,8 +8403,8 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -8288,21 +8418,24 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.UiSettingsCommon.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.value",
+                "id": "def-common.UiSettingsCommon.set.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -8311,9 +8444,11 @@
                   "any"
                 ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -8327,19 +8462,23 @@
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.UiSettingsCommon.remove.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/index_patterns/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8688,6 +8827,41 @@
         ],
         "path": "src/plugins/data/common/index_patterns/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "src/plugins/data/common/index_patterns/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.toastInputFields",
+            "type": "Object",
+            "tags": [],
+            "label": "toastInputFields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.ErrorToastOptions",
+                "text": "ErrorToastOptions"
+              }
+            ],
+            "path": "src/plugins/data/common/index_patterns/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -8710,6 +8884,40 @@
         ],
         "path": "src/plugins/data/common/index_patterns/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.toastInputFields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "toastInputFields",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "Toast",
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.MountPoint",
+                "text": "MountPoint"
+              },
+              "<HTMLElement> | undefined; text?: string | ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.MountPoint",
+                "text": "MountPoint"
+              },
+              "<HTMLElement> | undefined; }"
+            ],
+            "path": "src/plugins/data/common/index_patterns/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -8724,6 +8932,22 @@
         ],
         "path": "src/plugins/data/common/index_patterns/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ id: string; title: string; index: string; }"
+            ],
+            "path": "src/plugins/data/common/index_patterns/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
