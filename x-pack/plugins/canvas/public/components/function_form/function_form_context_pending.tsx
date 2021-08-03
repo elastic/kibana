@@ -8,8 +8,8 @@
 import React, { useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { Loading } from '../loading';
-import { ExpressionType } from './types';
 import { CanvasElement, ExpressionContext } from '../../../types';
+import { ExpressionType } from '../../expression_types/types';
 
 interface FunctionFormContextPendingProps {
   context?: ExpressionContext;

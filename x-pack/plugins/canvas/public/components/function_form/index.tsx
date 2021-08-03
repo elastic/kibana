@@ -39,7 +39,7 @@ import { State, ExpressionContext, CanvasElement, AssetType } from '../../../typ
 interface FunctionFormProps {
   name: string;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Record<string, Array<string | Ast>>;
+  args: Record<string, Array<string | Ast>> | null;
   argType: ArgType;
   argTypeDef: ArgTypeDef;
   expressionIndex: number;
@@ -59,7 +59,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
   const assets = useSelector<State, State['assets']>((state) => getAssets(state));
   const filterGroups = useSelector<State, string[]>((state) => getGlobalFilterGroups(state));
   const addArgument = useCallback(
-    (argName: string, argValue: Arg) => () => {
+    (argName: string, argValue: string | Ast | null) => () => {
       dispatch(
         addArgumentValueAtIndex({
           index: expressionIndex,
@@ -80,7 +80,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
   ]);
 
   const setArgument = useCallback(
-    (argName: string, valueIndex: number) => (value: Arg) => {
+    (argName: string, valueIndex: number) => (value: string | Ast | null) => {
       dispatch(
         setArgumentAtIndex({
           index: expressionIndex,
@@ -139,7 +139,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
       context={context}
       filterGroups={filterGroups}
       expressionType={findExpressionType(argType)}
-      nextExpressionType={nextArgType ? findExpressionType(nextArgType) : nextArgType}
+      nextExpressionType={nextArgType ? findExpressionType(nextArgType) : undefined}
       onValueAdd={addArgument}
       updateContext={updateContext}
       onValueChange={setArgument}

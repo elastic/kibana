@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { merge } from 'lodash';
 import { FunctionForm, FunctionFormProps } from './function_form';
 
 export type TransformProps = { requiresContext: boolean } & FunctionFormProps;
@@ -19,6 +19,6 @@ export class Transform extends FunctionForm {
       requiresContext: true,
     };
 
-    Object.assign(this, defaultProps, { requiresContext });
+    merge(this, defaultProps, { requiresContext });
   }
 }

@@ -6,33 +6,9 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { Ast } from '@kbn/interpreter/common';
-import {
-  ExpressionAstExpression,
-  ExpressionValue,
-} from '../../../../../../src/plugins/expressions/common';
-import { ArgType, Arg, ArgTypeDef } from '../../expression_types/types';
-import { ExpressionType } from './types';
-import { AssetType, CanvasElement, ExpressionContext } from '../../../types';
+import { RenderArgData } from '../../expression_types/types';
 
-interface FunctionFormComponentProps {
-  name: string;
-  argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Record<string, Array<string | Ast>>;
-  argType: ArgType;
-  argTypeDef: ArgTypeDef;
-  filterGroups: string[];
-  context?: ExpressionContext;
-  expressionIndex: number;
-  expressionType: ExpressionType;
-  nextArgType?: ArgType;
-  nextExpressionType?: ExpressionType;
-  onValueAdd: (argName: string, argValue: Arg) => () => void;
-  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
-  onValueChange: (argName: string, argIndex: number) => (value: Arg) => void;
-  onValueRemove: (argName: string, argIndex: number) => () => void;
-  updateContext: (element?: CanvasElement) => void;
-}
+type FunctionFormComponentProps = RenderArgData;
 
 export const FunctionFormComponent: FunctionComponent<FunctionFormComponentProps> = (props) => (
   <div className="canvasFunctionForm">{props.expressionType.render(props)}</div>

@@ -20,7 +20,7 @@ const branches = [
   // rendered argType args should be resolved, but are not
   branch(({ argTypeInstance, resolvedArgValue }) => {
     const { argType } = argTypeInstance;
-    console.log(argTypeInstance);
+
     // arg does not need to be resolved, no need to branch
     if (!argType.resolveArgValue) {
       return false;
@@ -58,7 +58,6 @@ class ArgFormComponent extends PureComponent {
       resolvedArgValue,
     } = this.props;
 
-    console.log(templateProps);
     return (
       <ErrorBoundary>
         {({ error, resetErrorState }) => {
@@ -92,7 +91,7 @@ class ArgFormComponent extends PureComponent {
             argId,
             assets,
           };
-          console.log(argumentProps, template);
+
           const expandableLabel = Boolean(hasError || template);
 
           const simpleArg = (

@@ -6,37 +6,14 @@
  */
 
 import React from 'react';
-import { Ast } from '@kbn/interpreter/common';
-import {
-  ExpressionAstExpression,
-  ExpressionValue,
-} from '../../../../../../src/plugins/expressions/common';
 import { FunctionFormComponent } from './function_form_component';
 import { FunctionUnknown } from './function_unknown';
 import { FunctionFormContextPending } from './function_form_context_pending';
 import { FunctionFormContextError } from './function_form_context_error';
-import { ExpressionType } from './types';
-import { ArgType, Arg, ArgTypeDef } from '../../expression_types/types';
-import { AssetType, CanvasElement, ExpressionContext } from '../../../types';
+import { ExpressionContext } from '../../../types';
+import { RenderArgData, ExpressionType } from '../../expression_types/types';
 
-interface FunctionFormProps {
-  name: string;
-  argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Record<string, Array<string | Ast>>;
-  argType: ArgType;
-  argTypeDef: ArgTypeDef;
-  filterGroups: string[];
-  context?: ExpressionContext;
-  expressionIndex: number;
-  expressionType: ExpressionType;
-  nextArgType?: ArgType;
-  nextExpressionType?: ExpressionType;
-  onValueAdd: (argName: string, argValue: Arg) => () => void;
-  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
-  onValueChange: (argName: string, argIndex: number) => (value: Arg) => void;
-  onValueRemove: (argName: string, argIndex: number) => () => void;
-  updateContext: (element?: CanvasElement) => void;
-}
+type FunctionFormProps = RenderArgData;
 
 // helper to check the state of the passed in expression type
 function is(

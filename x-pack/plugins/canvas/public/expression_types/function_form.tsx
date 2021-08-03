@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
 import { Ast, fromExpression } from '@kbn/interpreter/common';
@@ -16,17 +16,15 @@ import { SidebarSection } from '../components/sidebar/sidebar_section';
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
 import { BaseForm, BaseFormProps } from './base_form';
 import { Arg, ArgProps } from './arg';
-import { ArgType, ArgTypeDef } from './types';
-
-export interface FunctionFormOwnProps {
-  args?: ArgProps[];
-  resolve: (...args: any[]) => any;
-  argType: ArgType;
-  expressionIndex: number;
-  onValueAdd: (argName: string, argValue: string | Ast | null) => () => void;
-  onValueChange: (argName: string, argIndex: number) => (value: string | Ast) => void;
-  onValueRemove: (argName: string, argIndex: number) => () => void;
-}
+import { ArgType, ArgTypeDef, ExpressionType } from './types';
+import {
+  AssetType,
+  CanvasElement,
+  DatatableColumn,
+  ExpressionAstExpression,
+  ExpressionContext,
+  ExpressionValue,
+} from '../../types';
 
 export interface DataArg {
   arg: Arg | undefined;
@@ -35,12 +33,35 @@ export interface DataArg {
   label?: 'string';
 }
 
-export interface RenderArgData {
+export type RenderArgData = BaseFormProps & {
+  argType: ArgType;
   argTypeDef?: ArgTypeDef;
   args: Record<string, Array<Ast | string>> | null;
-}
+  argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
+  context?: ExpressionContext;
+  contextExpression?: string;
+  expressionIndex: number;
+  expressionType: ExpressionType;
+  filterGroups: string[];
+  nextArgType?: ArgType;
+  nextExpressionType?: ExpressionType;
+  onValueAdd: (argName: string, argValue: string | Ast | null) => () => void;
+  onValueChange: (argName: string, argIndex: number) => (value: string | Ast) => void;
+  onValueRemove: (argName: string, argIndex: number) => () => void;
+  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
+  updateContext: (element?: CanvasElement) => void;
+  typeInstance?: ExpressionType;
+  columns?: DatatableColumn[];
+};
 
-export type FunctionFormProps = FunctionFormOwnProps & BaseFormProps;
+export type RenderArgProps = {
+  typeInstance: FunctionForm;
+} & RenderArgData;
+
+export type FunctionFormProps = {
+  args?: ArgProps[];
+  resolve?: (...args: any[]) => any;
+} & BaseFormProps;
 
 export class FunctionForm extends BaseForm {
   args: ArgProps[];
@@ -53,7 +74,7 @@ export class FunctionForm extends BaseForm {
     this.resolve = props.resolve || (() => ({}));
   }
 
-  renderArg(props: FunctionFormProps, dataArg: DataArg) {
+  renderArg(props: RenderArgProps, dataArg: DataArg) {
     const { onValueRemove, onValueChange, ...passedProps } = props;
     const { arg, argValues, skipRender, label } = dataArg;
     const { argType, expressionIndex } = passedProps;
@@ -62,15 +83,18 @@ export class FunctionForm extends BaseForm {
     if (!arg || skipRender) {
       return null;
     }
-    const renderArgWithProps = (argValue: string | Ast | null, valueIndex: number) =>
+    const renderArgWithProps = (
+      argValue: string | Ast | null,
+      valueIndex: number
+    ): ReactElement<any, any> | null =>
       arg.render({
         key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
         ...passedProps,
         label,
         valueIndex,
-        argValue: argValue ?? null,
         onValueChange: onValueChange(arg.name, valueIndex),
         onValueRemove: onValueRemove(arg.name, valueIndex),
+        argValue: argValue ?? null,
       });
 
     // render the argument's template, wrapped in a remove control
@@ -89,7 +113,7 @@ export class FunctionForm extends BaseForm {
   }
 
   // TODO: Argument adding isn't very good, we should improve this UI
-  getAddableArg(props: FunctionFormProps, dataArg: DataArg) {
+  getAddableArg(props: RenderArgProps, dataArg: DataArg) {
     const { onValueAdd } = props;
     const { arg, argValues, skipRender } = dataArg;
 
@@ -110,7 +134,13 @@ export class FunctionForm extends BaseForm {
     return {};
   }
 
-  render(data: RenderArgData = { args: null }) {
+  render(data: RenderArgData) {
+    if (!data) {
+      data = {
+        args: null,
+        argTypeDef: undefined,
+      } as RenderArgData;
+    }
     const { args, argTypeDef } = data;
 
     // Don't instaniate these until render time, to give the registries a chance to populate.

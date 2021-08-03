@@ -6,8 +6,7 @@
  */
 
 import { templateFromReactComponent } from '../lib/template_from_react_component';
-import { BaseForm } from './base_form';
-import { FunctionFormProps } from './function_form';
+import { BaseForm, BaseFormProps } from './base_form';
 
 interface ArgTypeOwnProps {
   simpleTemplate: ReturnType<typeof templateFromReactComponent>;
@@ -16,7 +15,7 @@ interface ArgTypeOwnProps {
   resolveArgValue?: boolean;
 }
 
-export type ArgTypeProps = ArgTypeOwnProps & FunctionFormProps;
+export type ArgTypeProps = ArgTypeOwnProps & BaseFormProps;
 
 export class ArgType extends BaseForm {
   simpleTemplate: ReturnType<typeof templateFromReactComponent>;

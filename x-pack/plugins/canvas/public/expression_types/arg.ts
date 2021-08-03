@@ -11,34 +11,64 @@ import { Ast } from '@kbn/interpreter/common';
 // @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type_registry';
-import type { ArgType } from './types';
-import type { FunctionFormProps } from './function_form';
+import type { ArgType, ArgTypeDef, ExpressionType } from './types';
+import {
+  AssetType,
+  CanvasElement,
+  ExpressionAstExpression,
+  ExpressionValue,
+  ExpressionContext,
+} from '../../types';
+import { BaseFormProps } from './base_form';
 
 interface ArtOwnProps {
-  argType: ArgType | undefined;
+  argType: ArgType;
   multi?: boolean;
   required?: boolean;
   types?: string[];
   default?: string | null;
   resolve?: (...args: any[]) => any;
   options?: {
-    include: string[];
+    include?: string[];
+    confirm?: string;
+    labelValue?: string;
+    choices?: Array<{ name: string; value: string }>;
+    min?: number;
+    max?: number;
+    shapes?: string[];
   };
 }
-export type ArgProps = ArtOwnProps & FunctionFormProps;
+export type ArgProps = ArtOwnProps & BaseFormProps;
 
 export interface DataArg {
   argValue?: string | Ast | null;
   skipRender?: boolean;
-  label?: 'string';
+  label?: string;
   valueIndex: number;
-  onValueAdd?: (argName: string, argValue: string | Ast | null) => void;
-  onValueChange?: (value: string | Ast) => void;
-  onValueRemove?: () => void;
   key?: string;
+  labels?: string[];
+  contextExpression?: string;
+  name: string;
+  argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
+  args: Record<string, Array<string | Ast>> | null;
+  argType: ArgType;
+  argTypeDef?: ArgTypeDef;
+  filterGroups: string[];
+  context?: ExpressionContext;
+  expressionIndex: number;
+  expressionType: ExpressionType;
+  nextArgType?: ArgType;
+  nextExpressionType?: ExpressionType;
+  onValueAdd: (argName: string, argValue: string | Ast | null) => () => void;
+  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
+  onValueChange: (value: Ast | string) => void;
+  onValueRemove: () => void;
+  updateContext: (element?: CanvasElement) => void;
+  typeInstance?: ExpressionType;
 }
 
 export class Arg {
+  argType?: ArgType;
   multi?: boolean;
   required?: boolean;
   types?: string[];
@@ -87,7 +117,8 @@ export class Arg {
   }
 
   // TODO: Document what these otherProps are. Maybe make them named arguments?
-  render({ onValueChange, onValueRemove, argValue, key, label, ...otherProps }: DataArg) {
+  render(data: DataArg) {
+    const { onValueChange, onValueRemove, argValue, key, label, ...otherProps } = data;
     // This is everything the arg_type template needs to render
     const templateProps = {
       ...otherProps,
