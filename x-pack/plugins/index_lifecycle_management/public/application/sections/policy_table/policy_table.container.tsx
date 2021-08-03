@@ -70,8 +70,8 @@ export const PolicyTable: React.FunctionComponent = () => {
   }
 
   return (
-    <PolicyListContextProvider updatePolicies={resendRequest}>
-      <PresentationComponent policies={policies || []} />
+    <PolicyListContextProvider>
+      <PresentationComponent policies={policies || []} updatePolicies={resendRequest} />
     </PolicyListContextProvider>
   );
 };

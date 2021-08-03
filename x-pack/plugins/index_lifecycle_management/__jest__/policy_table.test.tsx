@@ -35,7 +35,7 @@ initUiMetric(usageCollectionPluginMock.createSetupContract());
 
 // use a date far in the past to check the sorting
 const testDate = '2020-07-21T14:16:58.666Z';
-const testDateFormatted = moment(testDate).format('YYYY-MM-DD HH:mm:ss');
+const testDateFormatted = moment(testDate).format('MMM D, YYYY');
 
 const testPolicy = {
   version: 0,
@@ -88,9 +88,7 @@ const namesText = (rendered: ReactWrapper): string[] => {
 
 const testSort = (headerName: string) => {
   const rendered = mountWithIntl(component);
-  const nameHeader = findTestSubject(rendered, `policyTableHeaderCell-${headerName}`).find(
-    'button'
-  );
+  const nameHeader = findTestSubject(rendered, `tableHeaderCell_${headerName}`).find('button');
   nameHeader.simulate('click');
   rendered.update();
   snapshot(namesText(rendered));
@@ -100,7 +98,7 @@ const testSort = (headerName: string) => {
 };
 const openContextMenu = (buttonIndex: number) => {
   const rendered = mountWithIntl(component);
-  const actionsButton = findTestSubject(rendered, 'policyActionsContextMenuButton');
+  const actionsButton = findTestSubject(rendered, 'euiCollapsedItemActionsButton');
   actionsButton.at(buttonIndex).simulate('click');
   rendered.update();
   return rendered;
@@ -109,8 +107,8 @@ const openContextMenu = (buttonIndex: number) => {
 const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
   return (
     <KibanaContextProvider services={{ getUrlForApp: () => '' }}>
-      <PolicyListContextProvider updatePolicies={jest.fn()}>
-        <PolicyTable policies={testPolicies} />
+      <PolicyListContextProvider>
+        <PolicyTable updatePolicies={jest.fn()} policies={testPolicies} />
       </PolicyListContextProvider>
     </KibanaContextProvider>
   );
@@ -120,7 +118,7 @@ describe('policy table', () => {
     component = <TestComponent testPolicies={policies} />;
   });
 
-  test('should show empty state when there are not any policies', () => {
+  test('should show empty state when there are no policies', () => {
     component = <TestComponent testPolicies={[]} />;
     const rendered = mountWithIntl(component);
     mountedSnapshot(rendered);
@@ -138,10 +136,10 @@ describe('policy table', () => {
     const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
     perPageButton.simulate('click');
     rendered.update();
-    const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
-    fiftyButton.simulate('click');
+    const numberOfRowsButton = rendered.find('.euiContextMenuItem').at(1);
+    numberOfRowsButton.simulate('click');
     rendered.update();
-    expect(namesText(rendered).length).toBe(50);
+    expect(namesText(rendered).length).toBe(25);
   });
   test('should filter based on content of search input', () => {
     const rendered = mountWithIntl(component);
@@ -152,21 +150,18 @@ describe('policy table', () => {
     snapshot(namesText(rendered));
   });
   test('should sort when name header is clicked', () => {
-    testSort('name');
-  });
-  test('should sort when version header is clicked', () => {
-    testSort('version');
+    testSort('name_0');
   });
   test('should sort when modified date header is clicked', () => {
-    testSort('modifiedDate');
+    testSort('modifiedDate_3');
   });
   test('should sort when linked indices header is clicked', () => {
-    testSort('indices');
+    testSort('indices_2');
   });
   test('should sort when linked index templates header is clicked', () => {
-    testSort('indexTemplates');
+    testSort('indexTemplates_1');
   });
-  test('should have proper actions in context menu when there are linked indices', () => {
+  test('view indices button should be enabled when there are linked indices', () => {
     const rendered = openContextMenu(0);
     const buttons = rendered.find('button.euiContextMenuItem');
     expect(buttons.length).toBe(3);
@@ -175,24 +170,25 @@ describe('policy table', () => {
     expect(buttons.at(2).text()).toBe('Delete policy');
     expect((buttons.at(2).getDOMNode() as HTMLButtonElement).disabled).toBeTruthy();
   });
-  test('should have proper actions in context menu when there are not linked indices', () => {
+  test('view indices button should be disabled when there are no linked indices', () => {
     const rendered = openContextMenu(1);
     const buttons = rendered.find('button.euiContextMenuItem');
-    expect(buttons.length).toBe(2);
-    expect(buttons.at(0).text()).toBe('Add policy to index template');
-    expect(buttons.at(1).text()).toBe('Delete policy');
+    expect(buttons.length).toBe(3);
+    expect(buttons.at(0).text()).toBe('View indices linked to policy');
+    expect(buttons.at(1).text()).toBe('Add policy to index template');
+    expect(buttons.at(2).text()).toBe('Delete policy');
     expect((buttons.at(1).getDOMNode() as HTMLButtonElement).disabled).toBeFalsy();
   });
   test('confirmation modal should show when delete button is pressed', () => {
     const rendered = openContextMenu(1);
-    const deleteButton = rendered.find('button.euiContextMenuItem').at(1);
+    const deleteButton = rendered.find('button.euiContextMenuItem').at(2);
     deleteButton.simulate('click');
     rendered.update();
     expect(rendered.find('.euiModal--confirmation').exists()).toBeTruthy();
   });
   test('confirmation modal should show when add policy to index template button is pressed', () => {
     const rendered = openContextMenu(1);
-    const deleteButton = rendered.find('button.euiContextMenuItem').at(0);
+    const deleteButton = rendered.find('button.euiContextMenuItem').at(1);
     deleteButton.simulate('click');
     rendered.update();
     expect(rendered.find('.euiModal--confirmation').exists()).toBeTruthy();
@@ -203,7 +199,7 @@ describe('policy table', () => {
     const numberOfIndices = testPolicy.indices.length;
     const numberOfIndexTemplates = testPolicy.indexTemplates.length;
     expect(firstRow).toBe(
-      `testy0${numberOfIndices}${numberOfIndexTemplates}${testPolicy.version}${testDateFormatted}Actions`
+      `Nametesty0Linked index templates${numberOfIndexTemplates}Linked indices${numberOfIndices}Modified date${testDateFormatted}`
     );
   });
   test('opens a flyout with index templates', () => {

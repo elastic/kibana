@@ -5,37 +5,24 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactElement, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiPageHeader,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { PolicyFromES } from '../../../../common/types';
-import { filterItems } from '../../services';
 import { TableContent } from './components/table_content';
 import { getPolicyCreatePath } from '../../services/navigation';
-import { usePolicyListContext } from './policy_list_context';
+import { PolicyAction } from './components/policy_action';
 
 interface Props {
   policies: PolicyFromES[];
+  updatePolicies: () => void;
 }
 
-export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
-  const [filter, setFilter] = useState<string>('');
+export const PolicyTable: React.FunctionComponent<Props> = ({ policies, updatePolicies }) => {
   const history = useHistory();
-
-  const { policyAction } = usePolicyListContext();
 
   const createPolicyButton = (
     <EuiButton
@@ -51,55 +38,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
     </EuiButton>
   );
 
-  let content: ReactElement;
-
-  if (policies.length > 0) {
-    const filteredPolicies = filterItems('name', filter, policies);
-    let tableContent: ReactElement;
-    if (filteredPolicies.length > 0) {
-      tableContent = <TableContent policies={filteredPolicies} totalNumber={policies.length} />;
-    } else {
-      tableContent = (
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.noMatch.noPolicicesDescription"
-          defaultMessage="No policies to show"
-        />
-      );
-    }
-
-    // Wrapping the actual contents inside a div, otherwise the table layout will get messed up
-    // if the table size changes (ie: applying a filter) due to the flex props of the page wrapper.
-    content = (
-      <div>
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              value={filter}
-              onChange={(event) => {
-                setFilter(event.target.value);
-              }}
-              data-test-subj="policyTableFilterInput"
-              placeholder={i18n.translate(
-                'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
-                {
-                  defaultMessage: 'Search',
-                }
-              )}
-              aria-label={i18n.translate(
-                'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputAriaLabel',
-                {
-                  defaultMessage: 'Search policies',
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        {tableContent}
-      </div>
-    );
-  } else {
+  if (policies.length === 0) {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <EuiEmptyPrompt
@@ -130,7 +69,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
 
   return (
     <>
-      {policyAction}
+      <PolicyAction updatePolicies={updatePolicies} />
 
       <EuiPageHeader
         pageTitle={
@@ -154,7 +93,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
 
       <EuiSpacer size="l" />
 
-      {content}
+      <TableContent policies={policies} />
     </>
   );
 };

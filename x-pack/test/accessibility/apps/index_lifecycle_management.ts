@@ -58,8 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const clickPolicyActionsButton = async (policyName: string) => {
-    const actionsCell = await testSubjects.find(`policyTableCell-actions-${policyName}`);
-    const actionsButton = await actionsCell.findByTestSubject('policyActionsContextMenuButton');
+    const policyRow = await testSubjects.find(`policyTableRow-${policyName}`);
+
+    const actionsButton = await policyRow.findByTestSubject('euiCollapsedItemActionsButton');
 
     await actionsButton.click();
   };
