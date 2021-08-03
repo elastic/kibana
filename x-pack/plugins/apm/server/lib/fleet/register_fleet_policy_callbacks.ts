@@ -110,7 +110,6 @@ export function getPackagePolicyWithAgentConfigurations(
   packagePolicy: PackagePolicy,
   agentConfigurations: AgentConfiguration[]
 ) {
-  if (Array.isArray(packagePolicy)) return;
   const [firstInput, ...restInputs] = packagePolicy.inputs;
   const apmServerValue = firstInput?.config?.[APM_SERVER].value;
   return {
