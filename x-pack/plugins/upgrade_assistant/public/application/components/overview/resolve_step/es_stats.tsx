@@ -18,8 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { RouteComponentProps } from 'react-router-dom';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { useAppContext } from '../../app_context';
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useAppContext } from '../../../app_context';
 import { EsStatsErrors } from './es_stats_error';
 
 const i18nTexts = {

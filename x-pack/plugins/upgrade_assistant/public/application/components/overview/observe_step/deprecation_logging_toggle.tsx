@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useAppContext } from '../../app_context';
-import { ResponseError } from '../../lib/api';
+import { useAppContext } from '../../../app_context';
+import { ResponseError } from '../../../lib/api';
 
 const i18nTexts = {
   fetchErrorMessage: i18n.translate(

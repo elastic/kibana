@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { EuiIconTip, EuiSpacer } from '@elastic/eui';
-import { ResponseError } from '../../lib/api';
-import { getEsDeprecationError } from '../../lib/es_deprecation_errors';
+import { EuiIconTip } from '@elastic/eui';
+import { ResponseError } from '../../../lib/api';
+import { getEsDeprecationError } from '../../../lib/es_deprecation_errors';
 
 interface Props {
   error: ResponseError;
