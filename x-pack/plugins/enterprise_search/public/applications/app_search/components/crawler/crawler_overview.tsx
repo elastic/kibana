@@ -45,11 +45,11 @@ export const CrawlerOverview: React.FC = () => {
           <EuiFlexGroup direction="row" alignItems="stretch">
             <EuiFlexItem>
               <EuiTitle size="s">
-                <h3>
+                <h2>
                   {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTitle', {
                     defaultMessage: 'Domains',
                   })}
-                </h3>
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -62,11 +62,11 @@ export const CrawlerOverview: React.FC = () => {
       ) : (
         <>
           <EuiTitle size="s">
-            <h3>
+            <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.empty.title', {
                 defaultMessage: 'Add a domain to get started',
               })}
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiText>
             <p>
@@ -97,11 +97,11 @@ export const CrawlerOverview: React.FC = () => {
         <>
           <EuiSpacer size="xl" />
           <EuiTitle size="s">
-            <h3>
+            <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTitle', {
                 defaultMessage: 'Recent crawl requests',
               })}
-            </h3>
+            </h2>
           </EuiTitle>
           <EuiSpacer size="xs" />
           <EuiText color="subdued" size="s">
