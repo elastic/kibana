@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../kibana_services';
+import { IndexPattern } from '../../../../../../../kibana_services';
 
 export type SortOrder = [string, string];
 export interface ColumnProps {

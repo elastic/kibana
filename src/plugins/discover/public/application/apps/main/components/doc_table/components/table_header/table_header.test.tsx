@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
-import { IndexPattern, IndexPatternField } from '../../../../../kibana_services';
+import { IndexPattern, IndexPatternField } from '../../../../../../../kibana_services';
 
 function getMockIndexPattern() {
   return ({

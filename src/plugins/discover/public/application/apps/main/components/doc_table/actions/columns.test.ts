@@ -7,11 +7,11 @@
  */
 
 import { getStateColumnActions } from './columns';
-import { configMock } from '../../../../__mocks__/config';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { indexPatternsMock } from '../../../../__mocks__/index_patterns';
-import { Capabilities } from '../../../../../../../core/types';
-import { AppState } from '../../../apps/main/services/discover_state';
+import { configMock } from '../../../../../../__mocks__/config';
+import { indexPatternMock } from '../../../../../../__mocks__/index_pattern';
+import { indexPatternsMock } from '../../../../../../__mocks__/index_patterns';
+import { Capabilities } from '../../../../../../../../../core/types';
+import { AppState } from '../../../services/discover_state';
 
 function getStateColumnAction(state: {}, setAppState: (state: Partial<AppState>) => void) {
   return getStateColumnActions({

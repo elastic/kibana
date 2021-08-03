@@ -9,7 +9,7 @@
 import { getDefaultSort } from './get_default_sort';
 // @ts-expect-error
 import FixturesStubbedLogstashIndexPatternProvider from '../../../../__fixtures__/stubbed_logstash_index_pattern';
-import { IndexPattern } from '../../../../kibana_services';
+import { IndexPattern } from '../../../../../../kibana_services';
 
 describe('getDefaultSort function', function () {
   let indexPattern: IndexPattern;
