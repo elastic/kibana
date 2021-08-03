@@ -115,3 +115,26 @@ export const selectSavedObjectFormat = createSelector(
     };
   }
 );
+
+// export const selectCurrentForSuggestionPanel = createSelector(
+//   [
+//     (state) => state.lens.stagedPreview,
+//     (state) => state.lens.datasourceStates,
+//     (state) => state.lens.visualization,
+//   ],
+//   (stagedPreview, datasourceStates, visualization) => {
+//     const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
+//     const currentVisualizationState = stagedPreview
+//       ? stagedPreview.visualization.state
+//       : visualization.state;
+//     const currentVisualizationId = stagedPreview
+//       ? stagedPreview.visualization.activeId
+//       : visualization.activeId;
+//     return stagedPreview ? {
+//       datasourceStates: stagedPreview.datasourceStates : datasourceStates,
+//       visualization: {
+//         state:
+//       }
+//     }
+//   }
+// );

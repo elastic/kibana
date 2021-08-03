@@ -22,7 +22,12 @@ import {
   VisualizationMap,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
-import { LensDispatch, selectSuggestion, switchVisualization, DatasourceStates } from '../../state_management';
+import {
+  LensDispatch,
+  selectSuggestion,
+  switchVisualization,
+  DatasourceStates,
+} from '../../state_management';
 
 export interface Suggestion {
   visualizationId: string;

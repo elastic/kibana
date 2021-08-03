@@ -16,13 +16,13 @@ import {
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import { esFilters, IFieldType, IndexPattern } from '../../../../../../src/plugins/data/public';
+import { IFieldType, IndexPattern } from '../../../../../../src/plugins/data/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
-import { setState } from '../../state_management';
+import { PreviewState, setState } from '../../state_management';
 
 jest.mock('./suggestion_helpers');
 
@@ -76,12 +76,14 @@ describe('suggestion_panel', () => {
           state: {},
         },
       },
-      activeVisualizationId: 'testVis',
+      visualization: {
+        activeId: 'testVis',
+        state: {},
+      },
       visualizationMap: {
         testVis: mockVisualization,
         vis2: createMockVisualization(),
       },
-      visualizationState: {},
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
     };
@@ -103,7 +105,7 @@ describe('suggestion_panel', () => {
       SuggestionPanelProps,
       'datasourceStates' | 'activeVisualizationId' | 'visualizationState'
     >;
-    let stagedPreview: SuggestionPanelProps['stagedPreview'];
+    let stagedPreview: PreviewState;
     beforeEach(() => {
       suggestionState = {
         datasourceStates: {
@@ -112,15 +114,17 @@ describe('suggestion_panel', () => {
             state: {},
           },
         },
-        activeVisualizationId: 'vis2',
-        visualizationState: {},
+        visualization: {
+          activeId: 'vis2',
+          state: {},
+        },
       };
 
       stagedPreview = {
         datasourceStates: defaultProps.datasourceStates,
         visualization: {
-          state: defaultProps.visualizationState,
-          activeId: defaultProps.activeVisualizationId,
+          state: defaultProps.visualization.state,
+          activeId: defaultProps.visualization.activeId,
         },
       };
     });
@@ -130,8 +134,8 @@ describe('suggestion_panel', () => {
         <SuggestionPanel {...defaultProps} />
       );
       getSuggestionsMock.mockClear();
-      lensStore.dispatch(setState({ stagedPreview }));
-      instance.setProps(suggestionState);
+      lensStore.dispatch(setState({ stagedPreview, ...suggestionState }));
+      // instance.setProps(suggestionState);
       instance.update();
       expect(getSuggestionsMock).not.toHaveBeenCalled();
     });
@@ -141,11 +145,11 @@ describe('suggestion_panel', () => {
         <SuggestionPanel {...defaultProps} />
       );
       getSuggestionsMock.mockClear();
-      lensStore.dispatch(setState({ stagedPreview }));
-      instance.setProps(suggestionState);
+      lensStore.dispatch(setState({ stagedPreview, ...suggestionState }));
+      // instance.setProps(suggestionState);
       instance.update();
-      lensStore.dispatch(setState({ stagedPreview: undefined }));
-      instance.setProps(suggestionState);
+      lensStore.dispatch(setState({ stagedPreview: undefined, ...suggestionState }));
+      // instance.setProps(suggestionState);
       instance.update();
       expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
     });

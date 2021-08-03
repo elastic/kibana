@@ -42,12 +42,13 @@ import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
 import {
-  PreviewState,
   rollbackSuggestion,
   selectExecutionContextSearch,
   submitSuggestion,
   useLensDispatch,
   useLensSelector,
+  DatasourceStates,
+  VisualizationState,
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -55,16 +56,9 @@ const MAX_SUGGESTIONS_DISPLAYED = 5;
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
   datasourceMap: DatasourceMap;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
-  activeVisualizationId: string | null;
+  datasourceStates: DatasourceStates;
+  visualization: VisualizationState;
   visualizationMap: VisualizationMap;
-  visualizationState: unknown;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
 }
@@ -175,25 +169,26 @@ const SuggestionPreview = ({
 };
 
 export function SuggestionPanel({
-  activeDatasourceId,
+  // activeDatasourceId,
   datasourceMap,
-  datasourceStates,
-  activeVisualizationId,
+  // visualization: vis2,
   visualizationMap,
-  visualizationState,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
-}: SuggestionPanelProps) {
+}: // datasourceStates,
+SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
-  const stagedPreview = useLensSelector((state) => state.lens.stagedPreview);
+  const { stagedPreview, visualization, datasourceStates, activeDatasourceId } = useLensSelector(
+    (state) => state.lens
+  );
 
   const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
   const currentVisualizationState = stagedPreview
     ? stagedPreview.visualization.state
-    : visualizationState;
+    : visualization.state;
   const currentVisualizationId = stagedPreview
     ? stagedPreview.visualization.activeId
-    : activeVisualizationId;
+    : visualization.activeId;
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,

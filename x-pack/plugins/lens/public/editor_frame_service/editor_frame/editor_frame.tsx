@@ -152,6 +152,7 @@ export function EditorFrame(props: EditorFrameProps) {
               datasourceMap={props.datasourceMap}
               ExpressionRenderer={props.ExpressionRenderer}
               frame={framePublicAPI}
+              visualization={visualization}
               activeVisualizationId={visualization.activeId}
               activeDatasourceId={activeDatasourceId}
               datasourceStates={datasourceStates}
