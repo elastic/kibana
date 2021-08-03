@@ -21,7 +21,7 @@ const parseDatatable = (dataTables: Datatable[]) => {
   const isDateHistogram =
     Boolean(dataTables.length) &&
     dataTables.every((dataTable) =>
-      dataTable.columns.find((c) => Boolean(c.meta.sourceParams?.appliedTimeRange))
+      dataTable.columns.some((c) => Boolean(c.meta.sourceParams?.appliedTimeRange))
     );
 
   const accessors = uniq(
