@@ -36,14 +36,20 @@ export function getAlertPanelsByCategory(
   alerts: CommonAlertStatus[],
   stateFilter: (state: AlertState) => boolean
 ) {
+  // return items organized by categories in ALERT_PANEL_MENU
+  // only show rules in setup mode
   const menu = inSetupMode
     ? ALERT_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
+        // check if we have any rules with that match this category
         const alertsInCategory = category.alerts.filter((alert) =>
           alerts.find(({ rawAlert }) => rawAlert.alertTypeId === alert.alertName)
         );
+        // return all the categories that have rules and the rules
         if (alertsInCategory.length > 0) {
+          // add the category item to the menu
           acc.push({
             ...category,
+            // add the corresponding rules that belong to this category
             alerts: alertsInCategory
               .map(({ alertName }) => {
                 return alerts
@@ -63,6 +69,7 @@ export function getAlertPanelsByCategory(
         return acc;
       }, [])
     : ALERT_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
+        // return items organized by categories in ALERT_PANEL_MENU, then rule name, then the actual alerts
         const firingAlertsInCategory: MenuAlert[] = [];
         let categoryFiringAlertCount = 0;
         for (const { alertName } of category.alerts) {
@@ -71,6 +78,7 @@ export function getAlertPanelsByCategory(
           );
           if (foundAlerts.length > 0) {
             foundAlerts.forEach((foundAlert) => {
+              // add corresponding alerts to each rule
               const states = foundAlert.states.filter(({ state }) => stateFilter(state));
               if (states.length > 0) {
                 firingAlertsInCategory.push({
@@ -99,7 +107,7 @@ export function getAlertPanelsByCategory(
       alert.states.sort(sortByNewestAlert);
     }
   }
-
+  // if in setup mode add the count of alerts to the category name
   const panels: PanelItem[] = [
     {
       id: 0,
@@ -124,6 +132,7 @@ export function getAlertPanelsByCategory(
     },
   ];
   if (inSetupMode) {
+    // create the nested UI menu: category name -> rule name -> edit rule
     let secondaryPanelIndex = menu.length;
     let tertiaryPanelIndex = menu.length;
     let nodeIndex = 0;
@@ -153,6 +162,7 @@ export function getAlertPanelsByCategory(
       }
     }
   } else {
+    // create the nested UI menu: category name (n) -> rule name (n) -> list of firing alerts
     let primaryPanelIndex = menu.length;
     let nodeIndex = 0;
     for (const category of menu) {
