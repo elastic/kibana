@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('inclusive filter should be addable via expanded doc table rows', async function () {
