@@ -1547,7 +1547,7 @@
             "references": [
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",

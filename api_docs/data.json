@@ -3836,7 +3836,7 @@
             "references": [
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -15079,11 +15079,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           }
         ],
         "initialIsOpen": false
@@ -17015,11 +17015,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -24337,7 +24337,7 @@
             "references": [
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -31599,11 +31599,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           }
         ],
         "initialIsOpen": false
@@ -33392,11 +33392,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -38412,11 +38412,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/server/lib/vis_data/request_processors/table/types.ts"
+            "path": "src/plugins/vis_types/timeseries/server/lib/vis_data/request_processors/table/types.ts"
           }
         ],
         "initialIsOpen": false
@@ -40064,11 +40064,11 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_type_timeseries/common/types/index.ts"
+            "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
           {
             "plugin": "securitySolution",

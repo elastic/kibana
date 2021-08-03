@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { _LEGACY_ as visTypeTimelion } from '../../../vis_type_timelion/public';
+import { _LEGACY_ as visTypeTimelion } from '../../../vis_types/timelion/public';
 
 export const SUGGESTION_TYPE = {
   ARGUMENTS: 'arguments',

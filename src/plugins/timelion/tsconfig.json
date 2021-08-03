@@ -16,7 +16,7 @@
     { "path": "../data/tsconfig.json" },
     { "path": "../visualizations/tsconfig.json" },
     { "path": "../navigation/tsconfig.json" },
-    { "path": "../vis_type_timelion/tsconfig.json" },
+    { "path": "../vis_types/timelion/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
     { "path": "../kibana_legacy/tsconfig.json" },
   ]

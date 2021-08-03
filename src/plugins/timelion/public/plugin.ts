@@ -28,7 +28,7 @@ import { SavedObjectsStart } from '../../saved_objects/public';
 import {
   VisTypeTimelionPluginStart,
   VisTypeTimelionPluginSetup,
-} from '../../vis_type_timelion/public';
+} from '../../vis_types/timelion/public';
 
 export interface TimelionPluginSetupDependencies {
   data: DataPublicPluginSetup;

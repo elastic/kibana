@@ -11,7 +11,7 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
-import { _LEGACY_ as visTypeTimelion } from '../../../../vis_type_timelion/public';
+import { _LEGACY_ as visTypeTimelion } from '../../../../vis_types/timelion/public';
 import { TimelionVisualizationDependencies } from '../../application';
 
 const DEBOUNCE_DELAY = 50;

@@ -7,7 +7,7 @@
 
 import { IRouter } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
+import { VisTypeTimeseriesSetup } from 'src/plugins/vis_types/timeseries/server';
 
 import { getCapabilitiesForRollupIndices } from 'src/plugins/data/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';

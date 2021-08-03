@@ -9,6 +9,6 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/src/plugins/vis_types/vis_type_tagcloud'],
+  roots: ['<rootDir>/src/plugins/vis_types/tagcloud'],
   testRunner: 'jasmine2',
 };

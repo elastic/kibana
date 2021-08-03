@@ -21,7 +21,7 @@ import {
   registerListenEventListener,
   watchMultiDecorator,
 } from '../../kibana_legacy/public';
-import { _LEGACY_ as visTypeTimelion } from '../../vis_type_timelion/public';
+import { _LEGACY_ as visTypeTimelion } from '../../vis_types/timelion/public';
 import { initCellsDirective } from './directives/cells/cells';
 import { initFullscreenDirective } from './directives/fullscreen/fullscreen';
 import { initFixedElementDirective } from './directives/fixed_element';
