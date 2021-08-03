@@ -15,6 +15,9 @@ You’ll learn to:
 
 When you complete this tutorial, you’ll have a map that works like this:
 
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/construction_zones.png[]
+
 [float]
 === Prerequisites
 
@@ -276,65 +279,16 @@ Add a layer for construction zones. You will draw the construction zones on a ma
 
 The map now represents an operational view of live bus traffic.  You’ll see the direction that the buses are traveling, and whether they are near or have entered a construction zone.
 
+Congratulations! Your map is now complete.
+
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
-[float]
-==== Step 2. Create a new index for the alerts
-
-Every time a bus enters the construction zone, it will cause an alert. In this case, each alert will write a new document to the `bus_alerts` index.
-
-. Open the main menu, and click *Dev Tools*.
-. To create the `bus_alerts` index, run:
-+
-[source,js]
-----------------------------------
-PUT bus_alerts
-----------------------------------
-
-. To configure the `bus_alerts` index mappings, run:
-+
-[source,js]
-----------------------------------
-PUT bus_alerts/_mapping
-{
-  "properties": {
-    "entityId": {
-      "type": "keyword"
-    },
-    "entityDateTime": {
-      "type": "date"
-    },
-    "entityDocumentId": {
-      "type": "keyword"
-    },
-    "detectionDateTime": {
-      "type": "date"
-    },
-    "entityLocation": {
-      "type": "geo_point"
-    },
-    "containingBoundaryId": {
-      "type": "keyword"
-    },
-    "containingBoundaryName": {
-      "type": "keyword"
-    }
-  }
-}
-----------------------------------
-
-. Open the main menu, and click *Stack Management > Index Patterns*.
-. Click *Create index pattern*.
-. Give the index pattern a name: *bus_alerts**.
-. Click *Next step*.
-. Set the *Time field* to *detectionDateTime*.
-. Click *Create index pattern*.
 
 [float]
-==== Step 3. Configure an alert
+==== Step 2. Configure an alert
 
-Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered.
+Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will log a message to the Kibana log.
 
 . Open *Stack Management*, and then click *Rules and Connectors*.
 . Click *Create rule*.
@@ -344,7 +298,7 @@ Create a new alert by defining a rule and a connector. The rule includes the con
 +
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/rule_configuration.png[]
-. Scroll to *Tracking containment* and select.
+. Select *Tracking containment* rule type.
 . Set *Select entity*:
 .. Set *INDEX* to *tri_met_tracks**.
 .. Set *BY* to *vehicle_id*.
@@ -352,16 +306,13 @@ image::maps/images/asset-tracking-tutorial/rule_configuration.png[]
 +
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/tracking_containment_configuration.png[]
-. Under *Actions*, select the *Index* connector type.
+. Under *Actions*, select the *Server log* connector type.
 . Click *Create a connector*.
-. In the *Index connector*, set:
+. In the *Server log connector*, set:
 .. *Connector name* to *Bus alert connector*
-.. Index to *bus-alerts*.
 .. Click Save.
 . Complete the *Actions* configuration.
-.. *Run when*: Tracking containment met
-.. *Index connector*: Bus alert connector
-.. *Document to index*:
+.. Set *Message* to :
 +
 [source,js]
 ----------------------------------
@@ -382,18 +333,6 @@ The *Bus Alert connector* is added to the *Rules and Connectors* page. For more 
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/rules_and_connectors.png[]
-
-[float]
-==== Step 4. Visualize the alerts on the operational map
-
-Add a layer to the existing map based on the alert index. The end result will show a map with active bus locations, their direction, their routes, the construction zones, and the alerts for when a bus entered a construction zone.
-
-. Go to the map that you built in this tutorial.
-. Click *Add layer*, and then select *Documents*.
-. Select the *bus_alerts** index pattern.
-. Accept the defaults and click *Add layer*.
-
-Congratulations! Your map is now complete.
 
 [float]
 === What’s next?
