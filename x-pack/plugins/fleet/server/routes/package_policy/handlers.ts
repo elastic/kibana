@@ -179,8 +179,8 @@ export const deletePackagePolicyHandler: RequestHandler<
         request
       );
     } catch (error) {
-      // @ts-ignore
-      console.error(`An error occurred executing external callback: ${error}`);
+      const logger = appContextService.getLogger();
+      logger.error(`An error occurred executing external callback: ${error}`);
     }
     return response.ok({
       body,
