@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ChartsPluginSetup, PaletteOutput } from '../../charts/public';
-import type { SerializedFieldFormat } from '../../expressions/public';
-import { ExpressionValueVisDimension } from '../../visualizations/public';
+import type { ChartsPluginSetup, PaletteOutput } from '../../../charts/public';
+import type { SerializedFieldFormat } from '../../../expressions/public';
+import { ExpressionValueVisDimension } from '../../../visualizations/public';
 
 interface Dimension {
   accessor: number;

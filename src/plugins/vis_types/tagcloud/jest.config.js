@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../data/public';
-
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('data.fieldFormats');
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/plugins/vis_types/vis_type_tagcloud'],
+  testRunner: 'jasmine2',
+};

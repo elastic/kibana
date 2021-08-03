@@ -302,7 +302,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the data table visualization, that allows presenting data in a simple table format.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_tagcloud[visTypeTagcloud]
+|{kib-repo}blob/{branch}/src/plugins/vis_types/tagcloud[visTypeTagcloud]
 |WARNING: Missing README.
 
 

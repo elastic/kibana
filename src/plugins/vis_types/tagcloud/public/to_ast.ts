@@ -9,9 +9,9 @@
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../visualizations/public';
+} from '../../../data/public';
+import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
 import { TagcloudExpressionFunctionDefinition } from './tag_cloud_fn';
 import { TagCloudVisParams } from './types';
 

@@ -10,8 +10,8 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { VisualizationContainer } from '../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
+import { VisualizationContainer } from '../../../visualizations/public';
+import { ExpressionRenderDefinition } from '../../../expressions/common/expression_renderers';
 import { TagCloudVisDependencies } from './plugin';
 import { TagCloudVisRenderValue } from './tag_cloud_fn';
 

@@ -46,7 +46,7 @@
     { "path": "./src/plugins/vis_type_markdown/tsconfig.json" },
     { "path": "./src/plugins/vis_type_metric/tsconfig.json" },
     { "path": "./src/plugins/vis_type_table/tsconfig.json" },
-    { "path": "./src/plugins/vis_type_tagcloud/tsconfig.json" },
+    { "path": "./src/plugins/vis_types/tagcloud/tsconfig.json" },
     { "path": "./src/plugins/vis_type_timelion/tsconfig.json" },
     { "path": "./src/plugins/vis_type_timeseries/tsconfig.json" },
     { "path": "./src/plugins/vis_type_vislib/tsconfig.json" },

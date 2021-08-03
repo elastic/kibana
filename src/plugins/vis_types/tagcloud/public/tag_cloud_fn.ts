@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
-import { prepareLogTable, Dimension } from '../../visualizations/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../../expressions/public';
+import { prepareLogTable, Dimension } from '../../../visualizations/public';
 import { TagCloudVisParams, TagCloudVisConfig } from './types';
 
 const name = 'tagcloud';
