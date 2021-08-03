@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target_node/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -134,6 +134,10 @@ for use in their own application.
 |{kib-repo}blob/{branch}/src/plugins/inspector/README.md[inspector]
 |The inspector is a contextual tool to gain insights into different elements
 in Kibana, e.g. visualizations. It has the form of a flyout panel.
+
+
+|{kib-repo}blob/{branch}/src/plugins/interactive_setup/README.md[interactiveSetup]
+|The plugin provides UI and APIs for the interactive setup mode.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_legacy/README.md[kibanaLegacy]
@@ -274,10 +278,6 @@ In general this plugin provides:
 
 |{kib-repo}blob/{branch}/src/plugins/usage_collection/README.mdx[usageCollection]
 |The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
-
-
-|{kib-repo}blob/{branch}/src/plugins/user_setup/README.md[userSetup]
-|The plugin provides UI and APIs for the interactive setup mode.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
@@ -457,7 +457,7 @@ Index Management by running this series of requests in Console:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
-|Create a data stream using Console and you'll be able to view it in the UI:
+|Create an index with special characters and verify it renders correctly:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPortal, EuiToolTip } from '@elastic/eui';
-import { noop } from 'lodash/fp';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -17,7 +16,7 @@ import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory }
 import * as i18n from './translations';
 import type { FieldBrowserProps } from './types';
 
-const fieldsButtonClassName = 'fields-button';
+const FIELDS_BUTTON_CLASS_NAME = 'fields-button';
 
 /** wait this many ms after the user completes typing before applying the filter input */
 export const INPUT_TIMEOUT = 250;
@@ -28,16 +27,13 @@ const FieldsBrowserButtonContainer = styled.div`
 `;
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
-
 /**
  * Manages the state of the field browser
  */
 export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
+  timelineId,
   columnHeaders,
   browserFields,
-  height,
-  onFieldSelected,
-  timelineId,
   width,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -65,9 +61,18 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   }, []);
 
   /** Shows / hides the field browser */
-  const toggleShow = useCallback(() => {
-    setShow(!show);
-  }, [show]);
+  const onShow = useCallback(() => {
+    setShow(true);
+  }, []);
+
+  /** Invoked when the field browser should be hidden */
+  const onHide = useCallback(() => {
+    setFilterInput('');
+    setFilteredBrowserFields(null);
+    setIsSearching(false);
+    setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
+    setShow(false);
+  }, []);
 
   /** Invoked when the user types in the filter input */
   const updateFilter = useCallback(
@@ -108,16 +113,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     [browserFields, filterInput, inputTimeoutId.current]
   );
 
-  /** Invoked when the field browser should be hidden */
-  const hideFieldBrowser = useCallback(() => {
-    setFilterInput('');
-    setFilterInput('');
-    setFilteredBrowserFields(null);
-    setIsSearching(false);
-    setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
-    setShow(false);
-  }, []);
-
   // only merge in the default category if the field browser is visible
   const browserFieldsWithDefaultCategory = useMemo(() => {
     return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
@@ -129,11 +124,11 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
         <EuiButtonEmpty
           aria-label={i18n.FIELDS_BROWSER}
           buttonRef={customizeColumnsButtonRef}
-          className={fieldsButtonClassName}
+          className={FIELDS_BUTTON_CLASS_NAME}
           color="text"
           data-test-subj="show-field-browser"
-          iconType="listAdd"
-          onClick={toggleShow}
+          iconType="tableOfContents"
+          onClick={onShow}
           size="xs"
         >
           {i18n.FIELDS}
@@ -141,29 +136,22 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       </EuiToolTip>
 
       {show && (
-        <EuiPortal>
-          <FieldsBrowser
-            browserFields={browserFieldsWithDefaultCategory}
-            columnHeaders={columnHeaders}
-            filteredBrowserFields={
-              filteredBrowserFields != null
-                ? filteredBrowserFields
-                : browserFieldsWithDefaultCategory
-            }
-            height={height}
-            isSearching={isSearching}
-            onCategorySelected={setSelectedCategoryId}
-            onFieldSelected={onFieldSelected}
-            onHideFieldBrowser={hideFieldBrowser}
-            onOutsideClick={show ? hideFieldBrowser : noop}
-            onSearchInputChange={updateFilter}
-            restoreFocusTo={customizeColumnsButtonRef}
-            searchInput={filterInput}
-            selectedCategoryId={selectedCategoryId}
-            timelineId={timelineId}
-            width={width}
-          />
-        </EuiPortal>
+        <FieldsBrowser
+          browserFields={browserFieldsWithDefaultCategory}
+          columnHeaders={columnHeaders}
+          filteredBrowserFields={
+            filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
+          }
+          isSearching={isSearching}
+          onCategorySelected={setSelectedCategoryId}
+          onHide={onHide}
+          onSearchInputChange={updateFilter}
+          restoreFocusTo={customizeColumnsButtonRef}
+          searchInput={filterInput}
+          selectedCategoryId={selectedCategoryId}
+          timelineId={timelineId}
+          width={width}
+        />
       )}
     </FieldsBrowserButtonContainer>
   );
