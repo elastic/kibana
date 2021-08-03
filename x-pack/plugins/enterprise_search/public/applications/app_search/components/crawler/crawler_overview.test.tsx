@@ -75,6 +75,7 @@ const crawlRequests: CrawlRequestFromServer[] = [
 describe('CrawlerOverview', () => {
   const mockActions = {
     fetchCrawlerData: jest.fn(),
+    getLatestCrawlRequests: jest.fn(),
   };
 
   const mockValues = {
@@ -88,12 +89,13 @@ describe('CrawlerOverview', () => {
     setMockActions(mockActions);
   });
 
-  it('calls fetchCrawlerData on page load', () => {
+  it('calls fetchCrawlerData and starts polling on page load', () => {
     setMockValues(mockValues);
 
     shallow(<CrawlerOverview />);
 
     expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
+    expect(mockActions.getLatestCrawlRequests).toHaveBeenCalledWith(false);
   });
 
   it('hides the domain and crawl request tables when there are no domains, and no crawl requests', () => {

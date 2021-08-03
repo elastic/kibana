@@ -24,20 +24,25 @@ import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { DomainsTable } from './components/domains_table';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
+import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 
 export const CrawlerOverview: React.FC = () => {
-  const { crawlRequests, dataLoading, domains } = useValues(CrawlerOverviewLogic);
+  const { crawlRequests, dataLoading, domains, mostRecentCrawlRequestStatus} = useValues(CrawlerOverviewLogic);
 
-  const { fetchCrawlerData } = useActions(CrawlerOverviewLogic);
+  const { fetchCrawlerData, getLatestCrawlRequests } = useActions(CrawlerOverviewLogic);
 
   useEffect(() => {
     fetchCrawlerData();
+    getLatestCrawlRequests(false);
   }, []);
 
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE])}
-      pageHeader={{ pageTitle: CRAWLER_TITLE }}
+      pageHeader={{ pageTitle: CRAWLER_TITLE
+      rightSideItems: [
+        <CrawlerStatusIndicator status={mostRecentCrawlRequestStatus}/>
+      ]}}
       isLoading={dataLoading}
     >
       {domains.length > 0 ? (
