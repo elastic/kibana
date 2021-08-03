@@ -669,7 +669,7 @@ export const getPrepopulatedBehaviorException = ({
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
   const { process } = alertEcsData;
-  const entries = [
+  const entries = filterEmptyExceptionEntries([
     {
       field: 'rule.id',
       operator: 'included' as const,
@@ -778,7 +778,7 @@ export const getPrepopulatedBehaviorException = ({
       type: 'match' as const,
       value: alertEcsData.user?.id ?? '',
     },
-  ];
+  ]);
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: addIdToEntries(entries),
