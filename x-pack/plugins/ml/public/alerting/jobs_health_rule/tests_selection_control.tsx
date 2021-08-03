@@ -90,6 +90,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                           },
                         });
                       }}
+                      min={1}
                     />
                   </EuiFormRow>
 

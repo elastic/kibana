@@ -70,7 +70,7 @@ export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig)
     },
     delayedData: {
       enabled: config?.delayedData?.enabled ?? true,
-      docsCount: config?.delayedData?.docsCount ?? 0,
+      docsCount: config?.delayedData?.docsCount ?? 1,
       timeInterval: config?.delayedData?.timeInterval ?? null,
     },
     behindRealtime: {
