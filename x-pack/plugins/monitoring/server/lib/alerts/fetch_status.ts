@@ -8,16 +8,9 @@
 import { AlertInstanceState } from '../../../common/types/alerts';
 import { RulesClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
-import {
-  CommonAlertStatus,
-  CommonAlertState,
-  CommonAlertFilter,
-} from '../../../common/types/alerts';
+import { CommonAlertState, CommonAlertFilter, RulesByType } from '../../../common/types/alerts';
 import { ALERTS } from '../../../common/constants';
 
-interface RulesByType {
-  [type: string]: CommonAlertStatus[];
-}
 export async function fetchStatus(
   rulesClient: RulesClient,
   alertTypes: string[] | undefined,
