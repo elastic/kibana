@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Aggregators } from '../types';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
@@ -39,7 +39,11 @@ export const getElasticsearchMetricQuery = (
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMS = intervalAsSeconds * 1000;
 
-  const to = roundTimestamp(timeframe ? timeframe.end : Date.now(), timeUnit);
+  const to = moment(timeframe ? timeframe.end : Date.now())
+    .add(1, timeUnit)
+    .startOf(timeUnit)
+    .valueOf();
+
   // We need enough data for 5 buckets worth of data. We also need
   // to convert the intervalAsSeconds to milliseconds.
   const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
@@ -49,8 +53,7 @@ export const getElasticsearchMetricQuery = (
     timeUnit
   );
 
-  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
-  const offsetInMS = parseInt(offset, 10) * 1000;
+  const deliveryDelay = 60 * 1000; // INFO: This allows us to account for any delay ES has in indexing the most recent data.
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -74,7 +77,7 @@ export const getElasticsearchMetricQuery = (
             date_histogram: {
               field: timefield,
               fixed_interval: interval,
-              offset,
+              offset: calculateDateHistogramOffset({ from, to, interval, field: timefield }),
               extended_bounds: {
                 min: from,
                 max: to,
@@ -87,10 +90,12 @@ export const getElasticsearchMetricQuery = (
           aggregatedIntervals: {
             date_range: {
               field: timefield,
-              ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
-                from: from + intervalAsMS * i + offsetInMS,
-                to: from + intervalAsMS * (i + 1) + offsetInMS,
-              })),
+              ranges: [
+                {
+                  from: to - intervalAsMS - deliveryDelay,
+                  to: to - deliveryDelay,
+                },
+              ],
             },
             aggregations,
           },

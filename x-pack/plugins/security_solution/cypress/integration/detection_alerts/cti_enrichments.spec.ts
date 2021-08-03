@@ -155,7 +155,8 @@ describe('CTI Enrichment', () => {
     });
   });
 
-  describe('with additional indicators', () => {
+  // https://github.com/elastic/kibana/pull/106889
+  describe.skip('with additional indicators', () => {
     before(() => {
       esArchiverLoad('threat_indicator2');
     });

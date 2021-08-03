@@ -123,7 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'apmCorrelationsLatencyCorrelationsChartTitle'
           );
           expect(apmCorrelationsLatencyCorrelationsChartTitle).to.be(
-            `Latency distribution for ${testData.serviceName}`
+            `Latency distribution for ${testData.serviceName} (Log-Log Plot)`
           );
           await testSubjects.existOrFail('apmCorrelationsChart', {
             timeout: 10000,

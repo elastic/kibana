@@ -42,13 +42,13 @@ that disables certain unnecessary and potentially insecure capabilities in
 the browser. It is strongly recommended that you keep the default CSP rules
 that ship with {kib}.
 
-| `csp.script_src:`
+| [[csp-script-src]]`csp.script_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
 
-| `csp.worker_src:`
+| [[csp-worker-src]]`csp.worker_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src[Content Security Policy `worker-src` directive].
 
-| `csp.style_src:`
+| [[csp-style-src]]`csp.style_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src[Content Security Policy `style-src` directive].
 
 | `csp.connect_src:`
@@ -777,13 +777,11 @@ out through *Advanced Settings*. *Default: `true`*
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
-a|
-`xpack.discoverEnhanced.actions.`
+|[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 
-a|
-`xpack.discoverEnhanced.actions.`
+|[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
 `exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 

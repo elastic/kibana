@@ -37,15 +37,21 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
         throw new Error('CurrentUser is missing');
       }
 
+      // @ts-expect-error update types
+      const payloadId = payload.id;
       const conflictingEntries = await savedObjects.client.find({
         type: savedQuerySavedObjectType,
-        // @ts-expect-error update types
-        search: payload.id,
+        search: payloadId,
         searchFields: ['id'],
       });
-      if (conflictingEntries.savedObjects.length) {
-        // @ts-expect-error update types
-        throw new Error(`Saved query with id ${payload.id} already exists.`);
+      const conflictingObjects = conflictingEntries.savedObjects;
+      // we some how have more than one object with the same id
+      const updateConflicts =
+        conflictingObjects.length > 1 ||
+        // or the one we conflict with isn't the same one we are updating
+        (conflictingObjects.length && conflictingObjects[0].id !== savedQueryId);
+      if (updateConflicts) {
+        throw new Error(`Saved query with id ${payloadId} already exists.`);
       }
 
       return savedObjects.client.update(savedQuerySavedObjectType, savedQueryId, {
@@ -57,6 +63,12 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
     },
     {
       onError: (error) => {
+        if (error instanceof Error) {
+          return setErrorToast(error, {
+            title: 'Saved query update error',
+            toastMessage: error.message,
+          });
+        }
         // @ts-expect-error update types
         setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },

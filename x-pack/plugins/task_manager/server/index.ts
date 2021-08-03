@@ -22,6 +22,7 @@ export {
 
 export { asInterval } from './lib/intervals';
 export { isUnrecoverableError, throwUnrecoverableError } from './task_running';
+export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 
 export {
   TaskManagerPlugin as TaskManager,

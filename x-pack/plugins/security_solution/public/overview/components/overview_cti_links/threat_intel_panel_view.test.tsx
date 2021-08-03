@@ -75,7 +75,7 @@ describe('ThreatIntelPanelView', () => {
       </Provider>
     );
 
-    expect(wrapper.find('[data-test-subj="cti-inner-panel-info"]').length).toEqual(1);
+    expect(wrapper.find('[data-test-subj="cti-inner-panel-info"]').hostNodes().length).toEqual(1);
   });
 
   it('does not render info panel if dashboard plugin is disabled', () => {

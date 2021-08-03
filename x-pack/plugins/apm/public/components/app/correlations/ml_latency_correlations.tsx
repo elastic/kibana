@@ -362,7 +362,8 @@ export function MlLatencyCorrelations({ onClose }: Props) {
               {i18n.translate(
                 'xpack.apm.correlations.latencyCorrelations.chartTitle',
                 {
-                  defaultMessage: 'Latency distribution for {name}',
+                  defaultMessage:
+                    'Latency distribution for {name} (Log-Log Plot)',
                   values: {
                     name: transactionName ?? serviceName,
                   },

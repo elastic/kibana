@@ -72,7 +72,7 @@ const chartTheme: PartialTheme = {
 
 // Log based axis cannot start a 0. Use a small positive number instead.
 const yAxisDomain = {
-  min: 0.00001,
+  min: 0.9,
 };
 
 interface CorrelationsChartProps {
@@ -135,7 +135,18 @@ export function CorrelationsChart({
 
   if (!Array.isArray(overallHistogram)) return <div />;
   const annotationsDataValues: LineAnnotationDatum[] = [
-    { dataValue: markerValue, details: `${markerPercentile}th percentile` },
+    {
+      dataValue: markerValue,
+      details: i18n.translate(
+        'xpack.apm.correlations.latency.chart.percentileMarkerLabel',
+        {
+          defaultMessage: '{markerPercentile}th percentile',
+          values: {
+            markerPercentile,
+          },
+        }
+      ),
+    },
   ];
 
   const xMax = Math.max(...overallHistogram.map((d) => d.key)) ?? 0;
