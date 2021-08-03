@@ -27,7 +27,6 @@ import {
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
 import {
@@ -48,9 +47,7 @@ import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { createQueryAlertType } from './lib/detection_engine/reference_rules/query';
-import { createEqlAlertType } from './lib/detection_engine/reference_rules/eql';
-import { createThresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
+import { createQueryAlertType } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -66,9 +63,7 @@ import {
   SERVER_APP_ID,
   SIGNALS_ID,
   NOTIFICATIONS_ID,
-  REFERENCE_RULE_ALERT_TYPE_ID,
-  REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
-  CUSTOM_ALERT_TYPE_ID,
+  QUERY_ALERT_TYPE_ID,
   DEFAULT_SPACE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
@@ -92,6 +87,8 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
+import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -223,7 +220,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: { dynamic: false, ...mappingFromFieldMap(technicalRuleFieldMap) },
+              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
             },
           },
         });
@@ -247,21 +244,29 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.logger!.error(err);
       });
 
+      const indexAlias = ruleDataService.getFullAssetName('security.alerts');
+
       ruleDataClient = ruleDataService.getRuleDataClient(
         SERVER_APP_ID,
-        ruleDataService.getFullAssetName('security.alerts'),
+        indexAlias,
         () => initializeRuleDataTemplatesPromise
       );
 
-      // Register reference rule types via rule-registry
-      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
-      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
+      // Register rule types via rule-registry
       this.setupPlugins.alerting.registerType(
-        createThresholdAlertType(ruleDataClient, this.logger)
+        createQueryAlertType({
+          experimentalFeatures,
+          indexAlias,
+          lists: plugins.lists,
+          logger: this.logger,
+          mergeStrategy: this.config.alertMergeStrategy,
+          ruleDataClient,
+          version: this.context.env.packageInfo.version,
+        })
       );
     }
 
-    // TO DO We need to get the endpoint routes inside of initRoutes
+    // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
       config,
@@ -277,15 +282,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const referenceRuleTypes = [
-      REFERENCE_RULE_ALERT_TYPE_ID,
-      REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
-      CUSTOM_ALERT_TYPE_ID,
-    ];
+    const racRuleTypes = [QUERY_ALERT_TYPE_ID];
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
-      ...(isRuleRegistryEnabled ? referenceRuleTypes : []),
+      ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
     plugins.features.registerKibanaFeature(
