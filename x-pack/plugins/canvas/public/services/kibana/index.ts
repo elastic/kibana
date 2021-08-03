@@ -14,6 +14,7 @@ import {
 
 import { CanvasPluginServices } from '..';
 import { CanvasStartDeps } from '../../plugin';
+import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
 import { navLinkServiceFactory } from './nav_link';
 import { notifyServiceFactory } from './notify';
@@ -22,6 +23,7 @@ import { reportingServiceFactory } from './reporting';
 import { workpadServiceFactory } from './workpad';
 
 export { expressionsServiceFactory } from './expressions';
+export { embeddablesServiceFactory } from './embeddables';
 export { notifyServiceFactory } from './notify';
 export { platformServiceFactory } from './platform';
 export { reportingServiceFactory } from './reporting';
@@ -33,6 +35,7 @@ export const pluginServiceProviders: PluginServiceProviders<
 > = {
   expressions: new PluginServiceProvider(expressionsServiceFactory),
   navLink: new PluginServiceProvider(navLinkServiceFactory),
+  embeddables: new PluginServiceProvider(embeddablesServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),
   platform: new PluginServiceProvider(platformServiceFactory),
   reporting: new PluginServiceProvider(reportingServiceFactory),
