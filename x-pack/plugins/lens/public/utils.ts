@@ -13,6 +13,7 @@ import { SavedObjectReference } from 'kibana/public';
 import { uniq } from 'lodash';
 import { Document } from './persistence/saved_object_store';
 import { Datasource, DatasourceMap } from './types';
+import { DatasourceStates } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -62,7 +63,7 @@ export function getIndexPatternsIds({
   datasourceStates,
 }: {
   activeDatasources: Record<string, Datasource>;
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+  datasourceStates: DatasourceStates;
 }): string[] {
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {

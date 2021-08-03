@@ -28,10 +28,11 @@ import {
   getMissingIndexPatterns,
   getMissingVisualizationTypeError,
 } from '../error_helper';
+import { DatasourceStates } from '../../state_management';
 
 export async function initializeDatasources(
   datasourceMap: DatasourceMap,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
+  datasourceStates: DatasourceStates,
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext,
   options?: InitializationOptions
@@ -57,7 +58,7 @@ export async function initializeDatasources(
 }
 
 export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
+  datasourceStates: DatasourceStates,
   datasourceMap: DatasourceMap
 ) {
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};

@@ -22,7 +22,7 @@ import {
   VisualizationMap,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
-import { LensDispatch, selectSuggestion, switchVisualization } from '../../state_management';
+import { LensDispatch, selectSuggestion, switchVisualization, DatasourceStates } from '../../state_management';
 
 export interface Suggestion {
   visualizationId: string;
@@ -60,13 +60,7 @@ export function getSuggestions({
   mainPalette,
 }: {
   datasourceMap: DatasourceMap;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
@@ -232,7 +226,7 @@ export function getTopSuggestionForField(
   visualizationMap: Record<string, Visualization<unknown>>,
   visualizationState: unknown,
   datasource: Datasource,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
+  datasourceStates: DatasourceStates,
   field: DragDropIdentifier
 ) {
   const hasData = Object.values(datasourceLayers).some(

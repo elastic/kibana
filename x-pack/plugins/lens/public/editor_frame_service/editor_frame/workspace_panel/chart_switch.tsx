@@ -35,6 +35,8 @@ import {
   updateVisualizationState,
   useLensDispatch,
   useLensSelector,
+  VisualizationState,
+  DatasourceStates,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator/id_generator';
 
@@ -498,11 +500,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
-  visualization: {
-    activeId: string | null;
-    state: unknown;
-  },
+  datasourceStates: DatasourceStates,
+  visualization: VisualizationState,
   newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {

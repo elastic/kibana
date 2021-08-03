@@ -22,6 +22,7 @@ import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
+import { setState } from '../../state_management';
 
 jest.mock('./suggestion_helpers');
 
@@ -49,7 +50,7 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion1State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion1',
         keptLayerIds: ['a'],
       },
@@ -58,26 +59,26 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion2State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion2',
         keptLayerIds: ['a'],
       },
     ] as Suggestion[]);
 
     defaultProps = {
-      activeDatasourceId: 'mock',
+      activeDatasourceId: 'testDatasource',
       datasourceMap: {
-        mock: mockDatasource,
+        testDatasource: mockDatasource,
       },
       datasourceStates: {
-        mock: {
+        testDatasource: {
           isLoading: false,
           state: {},
         },
       },
-      activeVisualizationId: 'vis',
+      activeVisualizationId: 'testVis',
       visualizationMap: {
-        vis: mockVisualization,
+        testVis: mockVisualization,
         vis2: createMockVisualization(),
       },
       visualizationState: {},
@@ -106,7 +107,7 @@ describe('suggestion_panel', () => {
     beforeEach(() => {
       suggestionState = {
         datasourceStates: {
-          mock: {
+          testDatasource: {
             isLoading: false,
             state: {},
           },
@@ -125,28 +126,26 @@ describe('suggestion_panel', () => {
     });
 
     it('should not update suggestions if current state is moved to staged preview', async () => {
-      const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+      const { instance, lensStore } = await mountWithProvider(
+        <SuggestionPanel {...defaultProps} />
+      );
       getSuggestionsMock.mockClear();
-      instance.setProps({
-        stagedPreview,
-        ...suggestionState,
-      });
+      lensStore.dispatch(setState({ stagedPreview }));
+      instance.setProps(suggestionState);
       instance.update();
       expect(getSuggestionsMock).not.toHaveBeenCalled();
     });
 
     it('should update suggestions if staged preview is removed', async () => {
-      const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+      const { instance, lensStore } = await mountWithProvider(
+        <SuggestionPanel {...defaultProps} />
+      );
       getSuggestionsMock.mockClear();
-      instance.setProps({
-        stagedPreview,
-        ...suggestionState,
-      });
+      lensStore.dispatch(setState({ stagedPreview }));
+      instance.setProps(suggestionState);
       instance.update();
-      instance.setProps({
-        stagedPreview: undefined,
-        ...suggestionState,
-      });
+      lensStore.dispatch(setState({ stagedPreview: undefined }));
+      instance.setProps(suggestionState);
       instance.update();
       expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
     });
@@ -194,7 +193,7 @@ describe('suggestion_panel', () => {
     act(() => {
       instance.find('button[data-test-subj="lnsSuggestion"]').at(1).simulate('click');
     });
-    instance.update();
+    // instance.update();
 
     expect(lensStore.dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -203,7 +202,7 @@ describe('suggestion_panel', () => {
           datasourceId: undefined,
           datasourceState: {},
           initialState: { suggestion1: true },
-          newVisualizationId: 'vis',
+          newVisualizationId: 'testVis',
         },
       })
     );
@@ -217,7 +216,7 @@ describe('suggestion_panel', () => {
         previewIcon: LensIconChartDatatable,
         score: 0.5,
         visualizationState: suggestion1State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion1',
       },
       {
@@ -225,7 +224,7 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion2State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion2',
         previewExpression: 'test | expression',
       },
@@ -255,8 +254,8 @@ describe('suggestion_panel', () => {
     const newProps = {
       ...defaultProps,
       datasourceStates: {
-        mock: {
-          ...defaultProps.datasourceStates.mock,
+        testDatasource: {
+          ...defaultProps.datasourceStates.testDatasource,
           state: missingIndexPatternsState,
         },
       },
@@ -274,7 +273,7 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion1State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion1',
       },
       {
@@ -282,7 +281,7 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion2State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion2',
       },
     ] as Suggestion[]);
@@ -294,15 +293,7 @@ describe('suggestion_panel', () => {
     const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
     const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
-    mountWithProvider(
-      <SuggestionPanel
-        {...defaultProps}
-        frame={{
-          ...createMockFramePublicAPI(),
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
-        }}
-      />
-    );
+    mountWithProvider(<SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />);
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
     const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;

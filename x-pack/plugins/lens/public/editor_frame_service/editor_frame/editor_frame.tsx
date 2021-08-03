@@ -36,7 +36,6 @@ export function EditorFrame(props: EditorFrameProps) {
     activeDatasourceId,
     datasourceStates,
     visualization,
-    stagedPreview,
     isFullscreenDatasource,
   } = useLensSelector((state) => state.lens);
 
@@ -152,7 +151,6 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationMap={props.visualizationMap}
               datasourceMap={props.datasourceMap}
               ExpressionRenderer={props.ExpressionRenderer}
-              stagedPreview={stagedPreview}
               frame={framePublicAPI}
               activeVisualizationId={visualization.activeId}
               activeDatasourceId={activeDatasourceId}

@@ -67,7 +67,6 @@ export interface SuggestionPanelProps {
   visualizationState: unknown;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
-  stagedPreview?: PreviewState;
 }
 
 const PreviewRenderer = ({
@@ -184,9 +183,9 @@ export function SuggestionPanel({
   visualizationState,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
-  stagedPreview,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
+  const stagedPreview = useLensSelector((state) => state.lens.stagedPreview);
 
   const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
   const currentVisualizationState = stagedPreview
