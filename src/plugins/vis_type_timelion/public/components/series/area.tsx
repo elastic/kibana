@@ -22,7 +22,7 @@ const isShowLines = (lines: VisSeries['lines'], points: VisSeries['points']) =>
   lines?.show ? true : points?.show ? false : true;
 
 const getPointFillColor = (points: VisSeries['points'], color: string | undefined) => {
-  const pointFillColor = points?.fillColor ?? color;
+  const pointFillColor = points?.fillColor || color;
   return (
     pointFillColor &&
     chroma(pointFillColor)
