@@ -12,7 +12,7 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from 'src/plugins/embeddable/public';
-import { Filter, IIndexPattern, TimeRange, Query } from '../../../../data/public';
+import { Filter, IndexPattern, TimeRange, Query } from '../../../../data/public';
 import { SavedSearch } from '../..';
 import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
 
@@ -27,7 +27,7 @@ export interface SearchInput extends EmbeddableInput {
 
 export interface SearchOutput extends EmbeddableOutput {
   editUrl: string;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   editable: boolean;
 }
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   EuiSpacer,
   EuiButtonIcon,
@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -31,47 +31,28 @@ import {
 } from '../../../../../../../data/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  DOC_TABLE_LEGACY,
-  SAMPLE_SIZE_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-} from '../../../../../../common';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
-import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
-import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
-import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { SavedSearchDataMessage } from '../../services/use_saved_search';
+import { DataMainMsg } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
+import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../../types';
-import { SortPairArr } from '../doc_table/lib/get_sort';
-import { DocTableInfinite } from '../doc_table/doc_table_infinite';
-import { DocTableRenderProps, DocTableWrapper } from '../doc_table/doc_table_wrapper';
+import { useDataState } from '../../utils/use_data_state';
 
-const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
-const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
-const DocTableWrapperMemoized = React.memo(DocTableWrapper);
-
-interface DiscoverLayoutFetchState extends SavedSearchDataMessage {
-  state: FetchStatus;
-  fetchCounter: number;
-  fieldCounts: Record<string, number>;
-  rows: ElasticSearchHit[];
-}
-
-const renderDocTable = (params: DocTableRenderProps) => <DocTableInfiniteMemoized {...params} />;
 
 export function DiscoverLayout({
   indexPattern,
   indexPatternList,
+  inspectorAdapters,
   navigateTo,
   onChangeIndexPattern,
   onUpdateQuery,
@@ -85,34 +66,18 @@ export function DiscoverLayout({
   stateContainer,
 }: DiscoverLayoutProps) {
   const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager } = services;
+  const { main$, charts$, totalHits$ } = savedSearchData$;
 
-  const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-
-  const [fetchState, setFetchState] = useState<DiscoverLayoutFetchState>({
-    state: savedSearchData$.getValue().state,
-    fetchCounter: 0,
-    fieldCounts: {},
-    rows: [],
-  });
-  const { state: fetchStatus, fetchCounter, inspectorAdapters, rows } = fetchState;
+  const fetchCounter = useRef<number>(0);
+  const dataState: DataMainMsg = useDataState(main$);
 
   useEffect(() => {
-    const subscription = savedSearchData$.subscribe((next) => {
-      if (
-        (next.state && next.state !== fetchState.state) ||
-        (next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter) ||
-        (next.rows && next.rows !== fetchState.rows) ||
-        (next.chartData && next.chartData !== fetchState.chartData)
-      ) {
-        setFetchState({ ...fetchState, ...next });
-      }
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [savedSearchData$, fetchState]);
+    if (dataState.fetchStatus === FetchStatus.LOADING) {
+      fetchCounter.current++;
+    }
+  }, [dataState.fetchStatus]);
 
   const timeField = useMemo(() => {
     return indexPatternsUtils.isDefault(indexPattern) ? indexPattern.timeFieldName : undefined;
@@ -122,27 +87,18 @@ export function DiscoverLayout({
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const resultState = useMemo(() => getResultState(fetchStatus, rows!), [fetchStatus, rows]);
-
-  const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useDataGridColumns({
-    capabilities,
-    config: uiSettings,
-    indexPattern,
-    indexPatterns,
-    setAppState: stateContainer.setAppState,
-    state,
-    useNewFieldsApi,
-  });
+  const resultState = useMemo(
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
+    [dataState.fetchStatus, dataState.foundDocuments]
+  );
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    if (inspectorAdapters) {
-      setExpandedDoc(undefined);
-      const session = services.inspector.open(inspectorAdapters, {
-        title: savedSearch.title,
-      });
-      setInspectorSession(session);
-    }
+    setExpandedDoc(undefined);
+    const session = services.inspector.open(inspectorAdapters, {
+      title: savedSearch.title,
+    });
+    setInspectorSession(session);
   }, [setExpandedDoc, inspectorAdapters, savedSearch, services.inspector]);
 
   useEffect(() => {
@@ -154,12 +110,15 @@ export function DiscoverLayout({
     };
   }, [inspectorSession]);
 
-  const onSort = useCallback(
-    (sort: string[][]) => {
-      stateContainer.setAppState({ sort });
-    },
-    [stateContainer]
-  );
+  const { columns, onAddColumn, onRemoveColumn } = useDataGridColumns({
+    capabilities,
+    config: uiSettings,
+    indexPattern,
+    indexPatterns,
+    setAppState: stateContainer.setAppState,
+    state,
+    useNewFieldsApi,
+  });
 
   const onAddFilter = useCallback(
     (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
@@ -180,19 +139,6 @@ export function DiscoverLayout({
     [filterManager, indexPattern, indexPatterns, trackUiMetric]
   );
 
-  const onResize = useCallback(
-    (colSettings: { columnId: string; width: number }) => {
-      const grid = { ...state.grid } || {};
-      const newColumns = { ...grid.columns } || {};
-      newColumns[colSettings.columnId] = {
-        width: colSettings.width,
-      };
-      const newGrid = { ...grid, columns: newColumns };
-      stateContainer.setAppState({ grid: newGrid });
-    },
-    [stateContainer, state]
-  );
-
   const onEditRuntimeField = useCallback(() => {
     savedSearchRefetch$.next('reset');
   }, [savedSearchRefetch$]);
@@ -205,14 +151,10 @@ export function DiscoverLayout({
   }, [filterManager]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
-    [uiSettings, indexPattern.timeFieldName]
-  );
 
   return (
     <I18nProvider>
-      <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
+      <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
         <TopNavMemoized
           indexPattern={indexPattern}
           onOpenInspector={onOpenInspector}
@@ -233,8 +175,7 @@ export function DiscoverLayout({
             <EuiFlexItem grow={false}>
               <SidebarMemoized
                 columns={columns}
-                fieldCounts={fetchState.fieldCounts}
-                hits={rows}
+                documents$={savedSearchData$.documents$}
                 indexPatternList={indexPatternList}
                 onAddField={onAddColumn}
                 onAddFilter={onAddFilter}
@@ -283,7 +224,7 @@ export function DiscoverLayout({
                   <DiscoverNoResults
                     timeFieldName={timeField}
                     data={data}
-                    error={fetchState.fetchError}
+                    error={dataState.error}
                     hasQuery={!!state.query?.query}
                     hasFilters={
                       state.filters && state.filters.filter((f) => !f.meta.disabled).length > 0
@@ -305,76 +246,31 @@ export function DiscoverLayout({
                   >
                     <EuiFlexItem grow={false}>
                       <DiscoverChartMemoized
-                        config={uiSettings}
-                        chartData={fetchState.chartData}
-                        bucketInterval={fetchState.bucketInterval}
-                        data={data}
-                        hits={fetchState.hits}
-                        indexPattern={indexPattern}
                         isLegacy={isLegacy}
                         state={state}
                         resetQuery={resetQuery}
                         savedSearch={savedSearch}
+                        savedSearchDataChart$={charts$}
+                        savedSearchDataTotalHits$={totalHits$}
+                        services={services}
                         stateContainer={stateContainer}
                         timefield={timeField}
                       />
                     </EuiFlexItem>
                     <EuiHorizontalRule margin="none" />
 
-                    <EuiFlexItem className="eui-yScroll">
-                      <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
-                        <FormattedMessage
-                          id="discover.documentsAriaLabel"
-                          defaultMessage="Documents"
-                        />
-                      </h2>
-                      {isLegacy && rows && rows.length && (
-                        <DocTableWrapperMemoized
-                          columns={columns}
-                          indexPattern={indexPattern}
-                          rows={rows}
-                          sort={state.sort || []}
-                          isLoading={fetchStatus === 'loading'}
-                          searchDescription={savedSearch.description}
-                          sharedItemTitle={savedSearch.lastSavedTitle}
-                          onAddColumn={onAddColumn}
-                          onFilter={onAddFilter as DocViewFilterFn}
-                          onMoveColumn={onMoveColumn}
-                          onRemoveColumn={onRemoveColumn}
-                          onSort={onSort}
-                          useNewFieldsApi={useNewFieldsApi}
-                          dataTestSubj="discoverDocTable"
-                          render={renderDocTable}
-                        />
-                      )}
-                      {!isLegacy && rows && rows.length && (
-                        <div className="dscDiscoverGrid">
-                          <DataGridMemoized
-                            ariaLabelledBy="documentsAriaLabel"
-                            columns={columns}
-                            expandedDoc={expandedDoc}
-                            indexPattern={indexPattern}
-                            isLoading={fetchStatus === 'loading'}
-                            rows={rows}
-                            sort={(state.sort as SortPairArr[]) || []}
-                            sampleSize={sampleSize}
-                            searchDescription={savedSearch.description}
-                            searchTitle={savedSearch.lastSavedTitle}
-                            setExpandedDoc={setExpandedDoc}
-                            showTimeCol={showTimeCol}
-                            services={services}
-                            settings={state.grid}
-                            onAddColumn={onAddColumn}
-                            onFilter={onAddFilter as DocViewFilterFn}
-                            onRemoveColumn={onRemoveColumn}
-                            onSetColumns={onSetColumns}
-                            onSort={onSort}
-                            onResize={onResize}
-                            useNewFieldsApi={useNewFieldsApi}
-                          />
-                        </div>
-                      )}
-                    </EuiFlexItem>
+                    <DiscoverDocuments
+                      documents$={savedSearchData$.documents$}
+                      expandedDoc={expandedDoc}
+                      indexPattern={indexPattern}
+                      navigateTo={navigateTo}
+                      onAddFilter={onAddFilter as DocViewFilterFn}
+                      savedSearch={savedSearch}
+                      services={services}
+                      setExpandedDoc={setExpandedDoc}
+                      state={state}
+                      stateContainer={stateContainer}
+                    />
                   </EuiFlexGroup>
                 )}
               </EuiPageContent>
