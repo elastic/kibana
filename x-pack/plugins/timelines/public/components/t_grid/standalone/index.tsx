@@ -14,7 +14,6 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { Direction } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import { TimelineTabs } from '../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -22,6 +21,8 @@ import type {
   DataProvider,
   RowRenderer,
   SortColumnTimeline,
+  BulkActionsProp,
+  AlertStatus,
 } from '../../../../common/types/timeline';
 import {
   esQuery,
@@ -30,7 +31,6 @@ import {
   DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { Refetch } from '../../../store/t_grid/inputs';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
@@ -39,20 +39,15 @@ import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { LastUpdatedAt } from '../..';
-import { AlertCount, SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
-import * as i18n from './translations';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
+import * as i18n from '../translations';
 import { InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const UTILITY_BAR_HEIGHT = 19; // px
 const COMPACT_HEADER_HEIGHT = 36; // px
 const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
-
-const UtilityBar = styled.div`
-  height: ${UTILITY_BAR_HEIGHT}px;
-`;
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -109,6 +104,7 @@ export interface TGridStandaloneProps {
   filters: Filter[];
   footerText: React.ReactNode;
   headerFilterGroup?: React.ReactNode;
+  filterStatus: AlertStatus;
   height?: number;
   indexNames: string[];
   itemsPerPage: number;
@@ -120,10 +116,10 @@ export interface TGridStandaloneProps {
   setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
-  utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
   graphEventId?: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  bulkActions?: BulkActionsProp;
   data?: DataPublicPluginStart;
   unit: (total: number) => React.ReactNode;
 }
@@ -137,6 +133,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filters,
   footerText,
   headerFilterGroup,
+  filterStatus,
   indexNames,
   itemsPerPage,
   itemsPerPageOptions,
@@ -147,7 +144,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   setRefetch,
   start,
   sort,
-  utilityBar,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -167,6 +163,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     queryFields,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
+
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: isQueryLoading }));
   }, [dispatch, isQueryLoading]);
@@ -238,13 +235,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [deletedEventIds.length, totalCount]
   );
 
-  const subtitle = useMemo(
-    () => `${totalCountMinusDeleted.toLocaleString()} ${unit && unit(totalCountMinusDeleted)}`,
-    [totalCountMinusDeleted, unit]
-  );
-
-  const additionalControls = useMemo(() => <AlertCount>{subtitle}</AlertCount>, [subtitle]);
-
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
     deletedEventIds,
     events,
@@ -280,7 +270,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         sort,
         itemsPerPage,
         itemsPerPageOptions,
-        showCheckboxes: false,
+        showCheckboxes: true,
       })
     );
     dispatch(
@@ -311,9 +301,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             >
               {HeaderSectionContent}
             </HeaderSection>
-            {utilityBar && !resolverIsShowing(graphEventId) && (
-              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
-            )}
+
             <EventsContainerLoading
               data-timeline-id={STANDALONE_ID}
               data-test-subj={`events-container-loading-${loading}`}
@@ -328,7 +316,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     activePage={pageInfo.activePage}
-                    additionalControls={additionalControls}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
                     id={STANDALONE_ID}
@@ -342,8 +329,12 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage: itemsPerPageStore,
                     })}
+                    totalItems={totalCountMinusDeleted}
+                    unit={unit}
+                    filterStatus={filterStatus}
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
+                    refetch={refetch}
                   />
                   <Footer
                     activePage={pageInfo.activePage}

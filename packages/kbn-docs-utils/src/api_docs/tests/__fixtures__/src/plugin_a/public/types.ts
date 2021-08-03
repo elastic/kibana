@@ -26,6 +26,14 @@ export type ImAType = string | number | TypeWithGeneric<string> | FooType | ImAC
 export type FnWithGeneric = <T>(t: T) => TypeWithGeneric<T>;
 
 /**
+ * Ever so slightly different than above. Users of this type must specify the generic.
+ *
+ * @param t something!
+ * @return something!
+ */
+export type FnTypeWithGeneric<T> = (t: T, p: MyProps) => TypeWithGeneric<T>;
+
+/**
  * Comments on enums.
  */
 export enum DayOfWeek {

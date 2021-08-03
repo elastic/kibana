@@ -92,7 +92,7 @@ export class EventLogResolver implements IEventLogResolver {
       kibanaSpaceId,
     });
 
-    const indexMappings = mappingFromFieldMap(eventSchema.objectFields);
+    const indexMappings = mappingFromFieldMap(eventSchema.objectFields, 'strict');
 
     return { indexNames, indexMappings, ilmPolicy };
   }

@@ -50,7 +50,6 @@ export interface TaskRunResult {
   size: number;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
-  needs_sorting?: boolean;
   warnings?: string[];
 }
 
@@ -98,10 +97,11 @@ export interface ReportDocument extends ReportDocumentHead {
 }
 
 export interface BaseParams {
-  browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
   layout?: LayoutParams;
   objectType: string;
   title: string;
+  browserTimezone: string; // to format dates in the user's time zone
+  version: string; // to handle any state migrations
 }
 
 export type JobId = string;
@@ -120,8 +120,10 @@ export type JobStatus =
   | 'processing' // Report job has been claimed and is executing
   | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
 
+// payload for retrieving the error message of a failed job
 export interface JobContent {
-  content: string;
+  content: TaskRunResult['content'];
+  content_type: false;
 }
 
 /*

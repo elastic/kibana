@@ -12,8 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visEditor']);
   const listingTable = getService('listingTable');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/40912
-  describe.skip('visualize listing page', function describeIndexTests() {
+  describe('visualize listing page', function describeIndexTests() {
     const vizName = 'Visualize Listing Test';
 
     describe('create and delete', function () {
@@ -32,9 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('delete all viz', async function () {
         await PageObjects.visualize.createSimpleMarkdownViz(vizName + '1');
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.expectItemsCount('visualize', 2);
+
         await PageObjects.visualize.createSimpleMarkdownViz(vizName + '2');
         await PageObjects.visualize.gotoVisualizationLandingPage();
-
         await listingTable.expectItemsCount('visualize', 3);
 
         await PageObjects.visualize.deleteAllVisualizations();
