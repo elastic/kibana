@@ -26,7 +26,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-babel-preset",
   "@npm//@babel/parser",
   "@npm//@babel/traverse",
   "@npm//lodash",
