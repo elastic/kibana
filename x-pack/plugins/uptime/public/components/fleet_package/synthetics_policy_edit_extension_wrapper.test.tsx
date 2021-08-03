@@ -20,6 +20,10 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
+jest.mock('./code_editor', () => ({
+  CodeEditor: () => <div>code editor mock</div>,
+}));
+
 const defaultNewPolicy: NewPackagePolicy = {
   name: 'samplePolicyName',
   description: '',
