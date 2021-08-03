@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error no ts
-import { esKuery } from '../../../es_query';
+import * as esKuery from '@kbn/es-query';
 type KueryNode = any;
 
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';

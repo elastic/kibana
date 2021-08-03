@@ -120,21 +120,6 @@ export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
   }
 );
 
-export const CHECKBOX_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-  checked,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-  checked: boolean;
-}) =>
-  i18n.translate('xpack.timelines.timeline.body.actions.checkboxForRowAriaLabel', {
-    values: { ariaRowindex, checked, columnValues },
-    defaultMessage:
-      '{checked, select, false {unchecked} true {checked}} checkbox for the alert or event in row {ariaRowindex}, with columns {columnValues}',
-  });
-
 export const ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW = ({
   ariaRowindex,
   columnValues,

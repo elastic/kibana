@@ -19,7 +19,6 @@ import { deleteRules } from '../../rules/delete_rules';
 import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 
 export const deleteRulesRoute = (
@@ -55,7 +54,7 @@ export const deleteRulesRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const rule = await readRules({ rulesClient, id, ruleId });
         if (!rule) {
           const error = getIdError({ id, ruleId });
@@ -66,9 +65,9 @@ export const deleteRulesRoute = (
         }
 
         const ruleStatuses = await ruleStatusClient.find({
-          perPage: 6,
-          search: rule.id,
-          searchFields: ['alertId'],
+          logsCount: 6,
+          ruleId: rule.id,
+          spaceId: context.securitySolution.getSpaceId(),
         });
         await deleteRules({
           rulesClient,
@@ -77,7 +76,7 @@ export const deleteRulesRoute = (
           ruleStatuses,
           id: rule.id,
         });
-        const transformed = transform(rule, undefined, ruleStatuses.saved_objects[0]);
+        const transformed = transform(rule, undefined, ruleStatuses[0]);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
         } else {

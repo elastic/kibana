@@ -370,30 +370,58 @@ export const EditPackagePolicyForm = memo<{
     }
   };
 
+  const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const extensionTabsView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-edit-tabs'
+  );
+  const tabsViews = extensionTabsView?.tabs;
+  const [selectedTab, setSelectedTab] = useState(0);
+
   const layoutProps = {
     from,
     cancelUrl,
     agentPolicy,
     packageInfo,
+    tabs: tabsViews?.length
+      ? [
+          {
+            title: i18n.translate('xpack.fleet.editPackagePolicy.settingsTabName', {
+              defaultMessage: 'Settings',
+            }),
+            isSelected: selectedTab === 0,
+            onClick: () => {
+              setSelectedTab(0);
+            },
+          },
+          ...tabsViews.map(({ title }, index) => ({
+            title,
+            isSelected: selectedTab === index + 1,
+            onClick: () => {
+              setSelectedTab(index + 1);
+            },
+          })),
+        ]
+      : [],
   };
-
-  const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
 
   const configurePackage = useMemo(
     () =>
       agentPolicy && packageInfo ? (
         <>
-          <StepDefinePackagePolicy
-            agentPolicy={agentPolicy}
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
+          {selectedTab === 0 && (
+            <StepDefinePackagePolicy
+              agentPolicy={agentPolicy}
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!extensionView && (
+          {!extensionView && selectedTab === 0 && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
@@ -408,11 +436,19 @@ export const EditPackagePolicyForm = memo<{
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
-                <extensionView.Component
-                  policy={originalPackagePolicy}
-                  newPolicy={packagePolicy}
-                  onChange={handleExtensionViewOnChange}
-                />
+                {selectedTab > 0 && tabsViews ? (
+                  React.createElement(tabsViews[selectedTab - 1].Component, {
+                    policy: originalPackagePolicy,
+                    newPolicy: packagePolicy,
+                    onChange: handleExtensionViewOnChange,
+                  })
+                ) : (
+                  <extensionView.Component
+                    policy={originalPackagePolicy}
+                    newPolicy={packagePolicy}
+                    onChange={handleExtensionViewOnChange}
+                  />
+                )}
               </ExtensionWrapper>
             )}
         </>
@@ -427,6 +463,8 @@ export const EditPackagePolicyForm = memo<{
       originalPackagePolicy,
       extensionView,
       handleExtensionViewOnChange,
+      selectedTab,
+      tabsViews,
     ]
   );
 
