@@ -11,13 +11,13 @@ import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
 import { TableRow, TableRowProps } from './table_row';
 import { setDocViewsRegistry, setServices } from '../../../../../../kibana_services';
 import { createFilterManagerMock } from '../../../../../../../../data/public/query/filter_manager/filter_manager.mock';
-import { DiscoverServices } from 'src/plugins/discover/public/build_services';
-import { indexPatternWithTimefieldMock } from 'src/plugins/discover/public/__mocks__/index_pattern_with_timefield';
-import { uiSettingsMock } from 'src/plugins/discover/public/__mocks__/ui_settings';
-import { DocViewsRegistry } from 'src/plugins/discover/public/application/doc_views/doc_views_registry';
+import { DiscoverServices } from '../../../../../../build_services';
+import { indexPatternWithTimefieldMock } from '../../../../../../__mocks__/index_pattern_with_timefield';
+import { uiSettingsMock } from '../../../../../../__mocks__/ui_settings';
+import { DocViewsRegistry } from '../../../../../doc_views/doc_views_registry';
 
-jest.mock('../../helpers', () => {
-  const originalModule = jest.requireActual('../../helpers');
+jest.mock('../lib/row_formatter', () => {
+  const originalModule = jest.requireActual('../lib/row_formatter');
   return {
     ...originalModule,
     formatRow: () => <span>mocked_document_cell</span>,

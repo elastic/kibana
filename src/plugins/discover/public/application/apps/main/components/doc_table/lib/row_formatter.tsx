@@ -7,8 +7,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { getServices, IndexPattern } from '../../../kibana_services';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
+import { getServices, IndexPattern } from '../../../../../../kibana_services';
 
 interface Props {
   defPairs: Array<[string, unknown]>;

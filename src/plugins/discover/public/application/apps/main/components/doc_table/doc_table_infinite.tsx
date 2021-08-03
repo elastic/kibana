@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
+import './index.scss';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { DocTableRenderProps } from './doc_table_wrapper';
+import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../skip_bottom_button';
 
-export const DocTableInfinite = (props: DocTableRenderProps) => {
+const DocTableInfiniteContent = (props: DocTableRenderProps) => {
   const [limit, setLimit] = useState(props.minimumVisibleRows);
 
   // Reset infinite scroll limit
@@ -54,14 +55,15 @@ export const DocTableInfinite = (props: DocTableRenderProps) => {
   }, []);
 
   const onBackToTop = useCallback(() => {
-    const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
-
     const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
+    const focusElem = document.querySelector('.dscTable') as HTMLElement;
+    focusElem.focus();
+
     // Only the desktop one needs to target a specific container
-    if (!isMobileView && scrollDiv) {
-      scrollDiv.focus();
+    if (!isMobileView) {
+      const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
       scrollDiv.scrollTo(0, 0);
-    } else {
+    } else if (window) {
       window.scrollTo(0, 0);
     }
   }, []);
@@ -97,4 +99,15 @@ export const DocTableInfinite = (props: DocTableRenderProps) => {
       )}
     </Fragment>
   );
+};
+
+const DocTableWrapperMemoized = memo(DocTableWrapper);
+const DocTableInfiniteContentMemoized = memo(DocTableInfiniteContent);
+
+const renderDocTable = (tableProps: DocTableRenderProps) => (
+  <DocTableInfiniteContentMemoized {...tableProps} />
+);
+
+export const DocTableInfinite = (props: DocTableProps) => {
+  return <DocTableWrapperMemoized {...props} render={renderDocTable} />;
 };

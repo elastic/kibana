@@ -10,16 +10,16 @@ import React from 'react';
 import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
 import { setServices } from '../../../../../kibana_services';
 import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
-import { DocTableWrapper, DocTableProps } from './doc_table_wrapper';
+import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
 import { DocTableRow } from './components/table_row';
-import { discoverServiceMock } from 'src/plugins/discover/public/__mocks__/services';
+import { discoverServiceMock } from '../../../../../__mocks__/services';
 
-const mountComponent = (props: DocTableProps) => {
+const mountComponent = (props: DocTableWrapperProps) => {
   return mountWithIntl(<DocTableWrapper {...props} />);
 };
 
 describe('Doc table component', () => {
-  let defaultProps: DocTableProps;
+  let defaultProps: DocTableWrapperProps;
 
   const initDefaults = (rows?: DocTableRow[]) => {
     defaultProps = {

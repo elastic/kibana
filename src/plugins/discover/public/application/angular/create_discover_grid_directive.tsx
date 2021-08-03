@@ -27,9 +27,11 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   return (
     <I18nProvider>
       <EuiFlexGroup style={{ width: '100%' }} direction="column" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
-          <TotalDocuments totalHitCount={props.totalHitCount} />
-        </EuiFlexItem>
+        {props.totalHitCount !== 0 && (
+          <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
+            <TotalDocuments totalHitCount={props.totalHitCount} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem style={{ minHeight: 0 }}>
           <DataGridMemoized
             {...props}

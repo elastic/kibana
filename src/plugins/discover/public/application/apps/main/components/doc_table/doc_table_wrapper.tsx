@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import './index.scss';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TableHeader } from './components/table_header/table_header';
@@ -22,20 +21,7 @@ import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
 
-export interface DocTableRenderProps {
-  rows: DocTableRow[];
-  minimumVisibleRows: number;
-  sampleSize: number;
-  renderRows: (row: DocTableRow[]) => JSX.Element[];
-  renderHeader: () => JSX.Element;
-  onSkipBottomButtonClick: () => void;
-}
-
 export interface DocTableProps {
-  /**
-   * Renders Doc table content
-   */
-  render: (params: DocTableRenderProps) => JSX.Element;
   /**
    * Rows of classic table
    */
@@ -94,6 +80,22 @@ export interface DocTableProps {
   onRemoveColumn?: (column: string) => void;
 }
 
+export interface DocTableRenderProps {
+  rows: DocTableRow[];
+  minimumVisibleRows: number;
+  sampleSize: number;
+  renderRows: (row: DocTableRow[]) => JSX.Element[];
+  renderHeader: () => JSX.Element;
+  onSkipBottomButtonClick: () => void;
+}
+
+export interface DocTableWrapperProps extends DocTableProps {
+  /**
+   * Renders Doc table content
+   */
+  render: (params: DocTableRenderProps) => JSX.Element;
+}
+
 export const DocTableWrapper = ({
   render,
   columns,
@@ -110,7 +112,7 @@ export const DocTableWrapper = ({
   sharedItemTitle,
   dataTestSubj,
   isLoading,
-}: DocTableProps) => {
+}: DocTableWrapperProps) => {
   const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
   const [
     defaultSortOrder,
@@ -213,8 +215,7 @@ export const DocTableWrapper = ({
       data-test-subj={dataTestSubj}
       data-render-complete={!isLoading}
     >
-      {rows &&
-        rows.length &&
+      {rows.length !== 0 &&
         render({
           rows,
           minimumVisibleRows,
@@ -223,7 +224,7 @@ export const DocTableWrapper = ({
           renderHeader,
           renderRows,
         })}
-      {rows && !rows.length && (
+      {!rows.length && (
         <div className="kbnDocTable__error">
           <EuiText size="xs" color="subdued">
             <EuiIcon type="visualizeApp" size="m" color="subdued" />

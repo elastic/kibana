@@ -5,8 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useRef, useMemo, useCallback, memo } from 'react';
-import { EuiFlexItem, EuiSpacer, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useMemo, useCallback, memo } from 'react';
+import {
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
@@ -24,15 +30,11 @@ import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_searc
 import { DiscoverServices } from '../../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../utils/use_data_state';
-import { DocTableRenderProps, DocTableWrapper } from '../doc_table/doc_table_wrapper';
 import { DocTableInfinite } from '../doc_table/doc_table_infinite';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 
-const DocTableWrapperMemoized = React.memo(DocTableWrapper);
-const DataGridMemoized = React.memo(DiscoverGrid);
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
-
-const renderDocTable = (params: DocTableRenderProps) => <DocTableInfiniteMemoized {...params} />;
+const DataGridMemoized = React.memo(DiscoverGrid);
 
 function DiscoverDocumentsComponent({
   documents$,
@@ -59,7 +61,6 @@ function DiscoverDocumentsComponent({
   const { capabilities, indexPatterns, uiSettings } = services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const scrollableDesktop = useRef<HTMLDivElement>(null);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
@@ -119,63 +120,57 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="eui-yScroll">
-      <section
-        className="dscTable eui-yScroll eui-xScroll"
-        aria-labelledby="documentsAriaLabel"
-        ref={scrollableDesktop}
-        tabIndex={-1}
-      >
-        <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
+    <EuiFlexItem className="dscTable" tabIndex={-1} aria-labelledby="documentsAriaLabel">
+      <EuiScreenReaderOnly>
+        <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
-        {isLegacy && rows && rows.length && (
-          <DocTableWrapperMemoized
+      </EuiScreenReaderOnly>
+      {isLegacy && rows && rows.length && (
+        <DocTableInfiniteMemoized
+          columns={columns}
+          indexPattern={indexPattern}
+          rows={rows}
+          sort={state.sort || []}
+          isLoading={isLoading}
+          searchDescription={savedSearch.description}
+          sharedItemTitle={savedSearch.lastSavedTitle}
+          onAddColumn={onAddColumn}
+          onFilter={onAddFilter as DocViewFilterFn}
+          onMoveColumn={onMoveColumn}
+          onRemoveColumn={onRemoveColumn}
+          onSort={onSort}
+          useNewFieldsApi={useNewFieldsApi}
+          dataTestSubj="discoverDocTable"
+        />
+      )}
+      {!isLegacy && (
+        <div className="dscDiscoverGrid">
+          <DataGridMemoized
+            ariaLabelledBy="documentsAriaLabel"
             columns={columns}
+            expandedDoc={expandedDoc}
             indexPattern={indexPattern}
-            rows={rows}
-            sort={state.sort || []}
             isLoading={isLoading}
+            rows={rows}
+            sort={(state.sort as SortPairArr[]) || []}
+            sampleSize={sampleSize}
             searchDescription={savedSearch.description}
-            sharedItemTitle={savedSearch.lastSavedTitle}
+            searchTitle={savedSearch.lastSavedTitle}
+            setExpandedDoc={setExpandedDoc}
+            showTimeCol={showTimeCol}
+            services={services}
+            settings={state.grid}
             onAddColumn={onAddColumn}
             onFilter={onAddFilter as DocViewFilterFn}
-            onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
+            onSetColumns={onSetColumns}
             onSort={onSort}
+            onResize={onResize}
             useNewFieldsApi={useNewFieldsApi}
-            dataTestSubj="discoverDocTable"
-            render={renderDocTable}
           />
-        )}
-        {!isLegacy && (
-          <div className="dscDiscoverGrid">
-            <DataGridMemoized
-              ariaLabelledBy="documentsAriaLabel"
-              columns={columns}
-              expandedDoc={expandedDoc}
-              indexPattern={indexPattern}
-              isLoading={isLoading}
-              rows={rows}
-              sort={(state.sort as SortPairArr[]) || []}
-              sampleSize={sampleSize}
-              searchDescription={savedSearch.description}
-              searchTitle={savedSearch.lastSavedTitle}
-              setExpandedDoc={setExpandedDoc}
-              showTimeCol={showTimeCol}
-              services={services}
-              settings={state.grid}
-              onAddColumn={onAddColumn}
-              onFilter={onAddFilter as DocViewFilterFn}
-              onRemoveColumn={onRemoveColumn}
-              onSetColumns={onSetColumns}
-              onSort={onSort}
-              onResize={onResize}
-              useNewFieldsApi={useNewFieldsApi}
-            />
-          </div>
-        )}
-      </section>
+        </div>
+      )}
     </EuiFlexItem>
   );
 }

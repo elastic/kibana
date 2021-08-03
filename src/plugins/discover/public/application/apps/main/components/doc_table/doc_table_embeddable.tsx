@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import './index.scss';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../../../../common';
@@ -16,9 +17,11 @@ import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table
 import { TotalDocuments } from '../total_documents/total_documents';
 import { getServices } from '../../../../../kibana_services';
 
-export type DocTableEmbeddableProps = Omit<DocTableProps, 'render'> & {
+export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
-};
+}
+
+const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const pager = usePager({ totalItems: props.rows.length });
@@ -31,19 +34,18 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const shouldShowLimitedResultsWarning = () =>
     !pager.hasNextPage && props.rows.length < props.totalHitCount;
 
-  const moveFocus = () => {
+  const scrollTop = () => {
     const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
-    scrollDiv.focus();
     scrollDiv.scrollTo(0, 0);
   };
 
   const onPageChange = (page: number) => {
-    moveFocus();
+    scrollTop();
     pager.onPageChange(page);
   };
 
   const onPageSizeChange = (size: number) => {
-    moveFocus();
+    scrollTop();
     pager.onPageSizeChange(size);
   };
 
@@ -51,16 +53,19 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     return getServices().uiSettings.get(SAMPLE_SIZE_SETTING, 500);
   }, []);
 
-  const renderDocTable = (renderProps: DocTableRenderProps) => {
-    return (
-      <div className="kbnDocTable__container">
-        <table className="kbnDocTable table" data-test-subj="docTable">
-          <thead>{renderProps.renderHeader()}</thead>
-          <tbody>{renderProps.renderRows(pageOfItems)}</tbody>
-        </table>
-      </div>
-    );
-  };
+  const renderDocTable = useCallback(
+    (renderProps: DocTableRenderProps) => {
+      return (
+        <div className="kbnDocTable__container">
+          <table className="kbnDocTable table" data-test-subj="docTable">
+            <thead>{renderProps.renderHeader()}</thead>
+            <tbody>{renderProps.renderRows(pageOfItems)}</tbody>
+          </table>
+        </div>
+      );
+    },
+    [pageOfItems]
+  );
 
   return (
     <EuiFlexGroup style={{ width: '100%' }} direction="column" gutterSize="xs" responsive={false}>
@@ -83,14 +88,16 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
               </EuiText>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
-            <TotalDocuments totalHitCount={props.totalHitCount} />
-          </EuiFlexItem>
+          {props.totalHitCount !== 0 && (
+            <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
+              <TotalDocuments totalHitCount={props.totalHitCount} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem style={{ minHeight: 0 }}>
-        <DocTableWrapper {...props} render={renderDocTable} />
+        <DocTableWrapperMemoized {...props} render={renderDocTable} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

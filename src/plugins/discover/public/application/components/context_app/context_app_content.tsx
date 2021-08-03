@@ -20,11 +20,7 @@ import { AppState } from '../../angular/context_state';
 import { EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
 import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
-import {
-  DocTableRenderProps,
-  DocTableWrapper,
-} from '../../apps/main/components/doc_table/doc_table_wrapper';
-import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
+import { DocTableContext } from '../../apps/main/components/doc_table/doc_table_context';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -55,23 +51,8 @@ export function clamp(value: number) {
 }
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
-const DocTableWrapperMemoized = React.memo(DocTableWrapper);
+const DocTableContextMemoized = React.memo(DocTableContext);
 const ActionBarMemoized = React.memo(ActionBar);
-
-const renderDocTable = (props: DocTableRenderProps) => {
-  return (
-    <Fragment>
-      <SkipBottomButton onClick={props.onSkipBottomButtonClick} />
-      <table className="kbn-table table" data-test-subj="docTable">
-        <thead>{props.renderHeader()}</thead>
-        <tbody>{props.renderRows(props.rows)}</tbody>
-      </table>
-      <span tabIndex={-1} id="discoverBottomMarker">
-        &#8203;
-      </span>
-    </Fragment>
-  );
-};
 
 export function ContextAppContent({
   columns,
@@ -144,7 +125,7 @@ export function ContextAppContent({
       {loadingFeedback()}
       <EuiHorizontalRule margin="xs" />
       {isLegacy && rows && rows.length !== 0 && (
-        <DocTableWrapperMemoized
+        <DocTableContextMemoized
           columns={columns}
           indexPattern={indexPattern}
           rows={rows}
@@ -155,7 +136,6 @@ export function ContextAppContent({
           sort={sort}
           useNewFieldsApi={useNewFieldsApi}
           dataTestSubj="contextDocTable"
-          render={renderDocTable}
         />
       )}
       {!isLegacy && rows && rows.length && (
