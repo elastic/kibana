@@ -5,47 +5,27 @@
  * 2.0.
  */
 
-import {
-  IndexBootstrapper,
-  IndexManagementGateway,
-  IndexNames,
-  IndexReader,
-  IndexSpecification,
-  IndexWriter,
-} from '../elasticsearch';
+import { CommonFields, EventLogDefinition } from '../common';
 
-import { Event, FieldMap } from '../event_schema';
+import { IEventLog, IEventLogResolver } from './public_api';
 import { IEventLogRegistry, IEventLogProvider } from './internal_api';
-import {
-  EventLogServiceConfig,
-  EventLogServiceDependencies,
-  IEventLog,
-  IEventLogDefinition,
-  IEventLogResolver,
-} from './public_api';
-
-import { EventLog } from './event_log';
-import { EventLogBootstrapper } from './event_log_bootstrapper';
+import { EventLogObjectFactory } from './event_log_object_factory';
 import { EventLogProvider } from './event_log_provider';
-import { mappingFromFieldMap } from './utils/mapping_from_field_map';
+import { BootstrappingResult } from './bootstrapper_of_common_resources';
 
 export class EventLogResolver implements IEventLogResolver {
-  private readonly indexBootstrapper: IndexBootstrapper;
-
   constructor(
-    private readonly config: EventLogServiceConfig,
-    private readonly deps: EventLogServiceDependencies,
+    private readonly factory: EventLogObjectFactory,
     private readonly registry: IEventLogRegistry,
+    private readonly isMechanismReady: Promise<BootstrappingResult>,
     private readonly bootstrapLog: boolean
-  ) {
-    this.indexBootstrapper = this.createIndexBootstrapper();
-  }
+  ) {}
 
-  public async resolve<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>,
+  public async resolve<TEvent extends CommonFields>(
+    logDefinition: EventLogDefinition<TEvent>,
     kibanaSpaceId: string
-  ): Promise<IEventLog<Event<TMap>>> {
-    const provider = this.resolveLogProvider(definition, kibanaSpaceId);
+  ): Promise<IEventLog<TEvent>> {
+    const provider = this.resolveLogProvider(logDefinition, kibanaSpaceId);
 
     if (this.bootstrapLog) {
       await provider.bootstrapLog();
@@ -54,109 +34,30 @@ export class EventLogResolver implements IEventLogResolver {
     return provider.getLog();
   }
 
-  private resolveLogProvider<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>,
+  private resolveLogProvider<TEvent extends CommonFields>(
+    logDefinition: EventLogDefinition<TEvent>,
     kibanaSpaceId: string
-  ): IEventLogProvider<Event<TMap>> {
-    const existingProvider = this.registry.get(definition, kibanaSpaceId);
+  ): IEventLogProvider<TEvent> {
+    const { factory, registry, isMechanismReady } = this;
+
+    const existingProvider = registry.get(logDefinition, kibanaSpaceId);
     if (existingProvider) {
       return existingProvider;
     }
 
-    const indexSpec = this.createIndexSpec(definition, kibanaSpaceId);
-    const indexReader = this.createIndexReader(indexSpec);
-    const indexWriter = this.createIndexWriter(indexSpec);
-    const logBootstrapper = this.createEventLogBootstrapper(indexSpec);
-    const log = this.createEventLog<TMap>(indexSpec, indexReader, indexWriter);
+    const indexSpec = factory.createIndexSpec(logDefinition, kibanaSpaceId);
+    const indexReader = factory.createIndexReader(indexSpec);
+    const indexWriter = factory.createIndexWriter(indexSpec);
+    const logBootstrapper = factory.createBootstrapperOfLogResources(indexSpec, isMechanismReady);
+    const log = factory.createEventLog<TEvent>(indexSpec, indexReader, indexWriter);
     const logProvider = new EventLogProvider({
       log,
       logBootstrapper,
       indexWriter,
     });
 
-    this.registry.add(definition, kibanaSpaceId, logProvider);
+    registry.add(logDefinition, kibanaSpaceId, logProvider);
 
     return logProvider;
-  }
-
-  private createIndexSpec<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>,
-    kibanaSpaceId: string
-  ): IndexSpecification {
-    const { indexPrefix } = this.config;
-    const { eventLogName, eventSchema, ilmPolicy } = definition;
-
-    const indexNames = IndexNames.create({
-      indexPrefix,
-      logName: eventLogName,
-      kibanaSpaceId,
-    });
-
-    const indexMappings = mappingFromFieldMap(eventSchema.objectFields, 'strict');
-
-    return { indexNames, indexMappings, ilmPolicy };
-  }
-
-  private createIndexBootstrapper(): IndexBootstrapper {
-    const { clusterClient, logger } = this.deps;
-
-    return new IndexBootstrapper({
-      gateway: new IndexManagementGateway({
-        elasticsearch: clusterClient.then((c) => c.asInternalUser),
-        logger,
-      }),
-      logger,
-    });
-  }
-
-  private createIndexReader(indexSpec: IndexSpecification): IndexReader {
-    const { clusterClient, logger } = this.deps;
-    const { indexNames } = indexSpec;
-
-    return new IndexReader({
-      indexName: indexNames.indexAliasPattern,
-      elasticsearch: clusterClient.then((c) => c.asInternalUser), // TODO: internal or current?
-      logger,
-    });
-  }
-
-  private createIndexWriter(indexSpec: IndexSpecification): IndexWriter {
-    const { clusterClient, logger } = this.deps;
-    const { isWriteEnabled } = this.config;
-    const { indexNames } = indexSpec;
-
-    return new IndexWriter({
-      indexName: indexNames.indexAliasName,
-      elasticsearch: clusterClient.then((c) => c.asInternalUser), // TODO: internal or current?
-      isWriteEnabled,
-      logger,
-    });
-  }
-
-  private createEventLogBootstrapper(indexSpec: IndexSpecification): EventLogBootstrapper {
-    const { logger } = this.deps;
-    const { isWriteEnabled } = this.config;
-
-    return new EventLogBootstrapper({
-      indexSpec,
-      indexBootstrapper: this.indexBootstrapper,
-      isWriteEnabled,
-      logger,
-    });
-  }
-
-  private createEventLog<TMap extends FieldMap>(
-    indexSpec: IndexSpecification,
-    indexReader: IndexReader,
-    indexWriter: IndexWriter
-  ): IEventLog<Event<TMap>> {
-    const { logger } = this.deps;
-
-    return new EventLog<Event<TMap>>({
-      indexNames: indexSpec.indexNames,
-      indexReader,
-      indexWriter,
-      logger,
-    });
   }
 }

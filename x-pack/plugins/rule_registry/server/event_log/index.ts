@@ -6,5 +6,4 @@
  */
 
 export * from './elasticsearch';
-export * from './event_schema';
 export * from './log';

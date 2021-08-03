@@ -29,14 +29,31 @@ export interface IndexNames extends IndexParams {
   /** @example '.alerts-security.alerts-default-*' */
   indexAliasPattern: string;
 
+  /** @example '.alerts-security.alerts-default-000001' */
+  indexInitialName: string;
+
   /** @example '.alerts-security.alerts-default-policy' */
   indexIlmPolicyName: string;
 
   /** @example '.alerts-security.alerts-default-template' */
   indexTemplateName: string;
 
-  /** @example '.alerts-security.alerts-default-000001' */
-  indexInitialName: string;
+  componentTemplates: {
+    /** @example '.alerts-mappings' */
+    commonMappingsTemplateName: string;
+
+    /** @example '.alerts-settings' */
+    commonSettingsTemplateName: string;
+
+    /** @example '.alerts-security.alerts-app' */
+    applicationDefinedTemplateName: string;
+
+    /** @example '.alerts-security.alerts-user' */
+    userDefinedTemplateName: string;
+
+    /** @example '.alerts-security.alerts-user-default' */
+    userDefinedSpaceAwareTemplateName: string;
+  };
 }
 
 export abstract class IndexNames {
@@ -49,9 +66,19 @@ export abstract class IndexNames {
     const indexBasePattern = joinWithDash(indexPrefix, logName, '*');
     const indexAliasName = joinWithDash(indexPrefix, logName, kibanaSpaceId);
     const indexAliasPattern = joinWithDash(indexPrefix, logName, kibanaSpaceId, '*');
+    const indexInitialName = joinWithDash(indexPrefix, logName, kibanaSpaceId, '000001');
     const indexIlmPolicyName = joinWithDash(indexPrefix, logName, kibanaSpaceId, 'policy');
     const indexTemplateName = joinWithDash(indexPrefix, logName, kibanaSpaceId, 'template');
-    const indexInitialName = joinWithDash(indexPrefix, logName, kibanaSpaceId, '000001');
+    const commonMappingsTemplateName = joinWithDash(indexPrefix, 'mappings');
+    const commonSettingsTemplateName = joinWithDash(indexPrefix, 'settings');
+    const applicationDefinedTemplateName = joinWithDash(indexPrefix, logName, 'app');
+    const userDefinedTemplateName = joinWithDash(indexPrefix, logName, 'user');
+    const userDefinedSpaceAwareTemplateName = joinWithDash(
+      indexPrefix,
+      logName,
+      'user',
+      kibanaSpaceId
+    );
 
     return {
       indexPrefix,
@@ -61,9 +88,16 @@ export abstract class IndexNames {
       indexBasePattern,
       indexAliasName,
       indexAliasPattern,
+      indexInitialName,
       indexIlmPolicyName,
       indexTemplateName,
-      indexInitialName,
+      componentTemplates: {
+        commonMappingsTemplateName,
+        commonSettingsTemplateName,
+        applicationDefinedTemplateName,
+        userDefinedTemplateName,
+        userDefinedSpaceAwareTemplateName,
+      },
     };
   }
 

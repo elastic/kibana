@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { Event, FieldMap } from '../event_schema';
-import { IEventLogDefinition } from './public_api';
+import { CommonFields, EventLogDefinition } from '../common';
 import { IEventLogRegistry, IEventLogProvider } from './internal_api';
 
-const getRegistryKey = (definition: IEventLogDefinition<any>, spaceId: string) =>
-  `${definition.eventLogName}-${spaceId}`;
+const getRegistryKey = (definition: EventLogDefinition<any>, spaceId: string) =>
+  `${definition.logName}-${spaceId}`;
 
 interface RegistryEntry {
-  definition: IEventLogDefinition<any>;
+  definition: EventLogDefinition<any>;
   spaceId: string;
   provider: IEventLogProvider<any>;
 }
@@ -21,19 +20,19 @@ interface RegistryEntry {
 export class EventLogRegistry implements IEventLogRegistry {
   private readonly map = new Map<string, RegistryEntry>();
 
-  public get<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>,
+  public get<TEvent extends CommonFields>(
+    definition: EventLogDefinition<TEvent>,
     spaceId: string
-  ): IEventLogProvider<Event<TMap>> | null {
+  ): IEventLogProvider<TEvent> | null {
     const key = getRegistryKey(definition, spaceId);
     const entry = this.map.get(key);
-    return entry != null ? (entry.provider as IEventLogProvider<Event<TMap>>) : null;
+    return entry != null ? (entry.provider as IEventLogProvider<TEvent>) : null;
   }
 
-  public add<TMap extends FieldMap>(
-    definition: IEventLogDefinition<TMap>,
+  public add<TEvent extends CommonFields>(
+    definition: EventLogDefinition<TEvent>,
     spaceId: string,
-    provider: IEventLogProvider<Event<TMap>>
+    provider: IEventLogProvider<TEvent>
   ): void {
     const key = getRegistryKey(definition, spaceId);
 

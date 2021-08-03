@@ -19,7 +19,6 @@ import { PluginStartContract as AlertingStart } from '../../alerting/server';
 import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
 import { SpacesPluginStart } from '../../spaces/server';
-
 import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { EventLogService, IEventLogService } from './event_log';
@@ -132,6 +131,12 @@ export class RuleRegistryPlugin
     plugins: RuleRegistryPluginStartDependencies
   ): RuleRegistryPluginStartContract {
     const { logger, alertsClientFactory, security } = this;
+
+    // TODO: delete me
+    const { eventLogService } = this;
+    if (eventLogService) {
+      eventLogService.start();
+    }
 
     alertsClientFactory.initialize({
       logger,

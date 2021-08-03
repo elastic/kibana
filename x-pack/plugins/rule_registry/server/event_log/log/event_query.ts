@@ -6,8 +6,8 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { IIndexReader } from '../elasticsearch';
 import { truthy } from '../utils/predicates';
+import { IIndexReader } from '../elasticsearch';
 import { IEventQuery } from './public_api';
 
 export interface EventQueryParams {

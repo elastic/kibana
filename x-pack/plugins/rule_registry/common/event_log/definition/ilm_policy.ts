@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './event_log_service';
-export * from './public_api';
+import { estypes } from '@elastic/elasticsearch';
+
+export type IlmPolicy = estypes.IlmPolicy;
