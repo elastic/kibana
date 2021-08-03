@@ -6,12 +6,10 @@
  */
 
 import { CanvasServices, services } from '../';
-import { embeddablesService } from './embeddables';
 import { labsService } from './labs';
 import { searchService } from './search';
 
 export const stubs: CanvasServices = {
-  embeddables: embeddablesService,
   search: searchService,
   labs: labsService,
 };
