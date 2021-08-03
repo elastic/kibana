@@ -15,10 +15,7 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
-          "lineNumber": 39
-        },
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -38,10 +35,7 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -52,10 +46,7 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/screenshot_mode/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -71,10 +62,7 @@
       "signature": [
         "IScreenshotModeService"
       ],
-      "source": {
-        "path": "src/plugins/screenshot_mode/public/types.ts",
-        "lineNumber": 18
-      },
+      "path": "src/plugins/screenshot_mode/public/types.ts",
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -95,10 +83,7 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
-          "lineNumber": 39
-        },
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -130,10 +115,7 @@
             "text": "RequestHandlerContext"
           }
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/server/types.ts",
-          "lineNumber": 31
-        },
+        "path": "src/plugins/screenshot_mode/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -146,10 +128,7 @@
             "signature": [
               "{ isScreenshot: boolean; }"
             ],
-            "source": {
-              "path": "src/plugins/screenshot_mode/server/types.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/screenshot_mode/server/types.ts",
             "deprecated": false
           }
         ],
@@ -168,10 +147,7 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -182,10 +158,7 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/screenshot_mode/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -198,10 +171,7 @@
       "tags": [],
       "label": "ScreenshotModePluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/screenshot_mode/server/types.ts",
-        "lineNumber": 18
-      },
+      "path": "src/plugins/screenshot_mode/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -222,10 +192,7 @@
             },
             "<unknown, unknown, unknown, any>) => boolean"
           ],
-          "source": {
-            "path": "src/plugins/screenshot_mode/server/types.ts",
-            "lineNumber": 19
-          },
+          "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -246,10 +213,7 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "source": {
-                "path": "src/plugins/screenshot_mode/server/types.ts",
-                "lineNumber": 16
-              },
+              "path": "src/plugins/screenshot_mode/server/types.ts",
               "deprecated": false
             }
           ]
@@ -266,10 +230,7 @@
           "signature": [
             "() => void"
           ],
-          "source": {
-            "path": "src/plugins/screenshot_mode/server/types.ts",
-            "lineNumber": 24
-          },
+          "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": []
@@ -285,10 +246,7 @@
       "tags": [],
       "label": "ScreenshotModePluginStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/screenshot_mode/server/types.ts",
-        "lineNumber": 27
-      },
+      "path": "src/plugins/screenshot_mode/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -309,10 +267,7 @@
             },
             "<unknown, unknown, unknown, any>) => boolean"
           ],
-          "source": {
-            "path": "src/plugins/screenshot_mode/server/types.ts",
-            "lineNumber": 28
-          },
+          "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -333,10 +288,7 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "source": {
-                "path": "src/plugins/screenshot_mode/server/types.ts",
-                "lineNumber": 16
-              },
+              "path": "src/plugins/screenshot_mode/server/types.ts",
               "deprecated": false
             }
           ]
@@ -361,10 +313,7 @@
         "signature": [
           "() => boolean"
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
-          "lineNumber": 22
-        },
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -380,10 +329,7 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
-          "lineNumber": 52
-        },
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -401,10 +347,7 @@
         "signature": [
           "() => void"
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
-          "lineNumber": 39
-        },
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -424,10 +367,7 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -438,10 +378,7 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "source": {
-          "path": "src/plugins/screenshot_mode/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/screenshot_mode/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

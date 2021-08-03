@@ -69,6 +69,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const {
     data$,
     indexPattern,
+    inspectorAdapters,
     onChangeIndexPattern,
     onUpdateQuery,
     refetch$,
@@ -116,6 +117,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     <DiscoverLayoutMemoized
       indexPattern={indexPattern}
       indexPatternList={indexPatternList}
+      inspectorAdapters={inspectorAdapters}
       onChangeIndexPattern={onChangeIndexPattern}
       onUpdateQuery={onUpdateQuery}
       resetQuery={resetQuery}
