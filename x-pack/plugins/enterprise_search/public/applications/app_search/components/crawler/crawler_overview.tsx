@@ -99,7 +99,7 @@ export const CrawlerOverview: React.FC = () => {
           <EuiTitle size="s">
             <h3>
               {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTitle', {
-                defaultMessage: 'Recent Crawl Requests',
+                defaultMessage: 'Recent crawl requests',
               })}
             </h3>
           </EuiTitle>
