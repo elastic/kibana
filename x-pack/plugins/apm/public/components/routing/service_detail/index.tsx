@@ -101,6 +101,7 @@ export const serviceDetail = {
         element: <Outlet />,
         searchBarOptions: {
           showTransactionTypeSelector: true,
+          showTimeComparison: true,
         },
       }),
       children: [
