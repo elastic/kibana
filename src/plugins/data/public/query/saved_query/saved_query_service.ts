@@ -9,6 +9,7 @@
 import { isObject } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
+import { SerializableState } from '../../../../kibana_utils/common/persistable_state';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes &
   SavedQueryAttributes & {
@@ -120,10 +121,10 @@ export const createSavedQueryService = (
     id: string;
     attributes: SerializedSavedQueryAttributes;
   }) => {
-    let queryString: string | object = savedQuery.attributes.query.query;
+    let queryString: string | SerializableState = savedQuery.attributes.query.query;
 
     try {
-      const parsedQueryString: object = JSON.parse(savedQuery.attributes.query.query);
+      const parsedQueryString: SerializableState = JSON.parse(savedQuery.attributes.query.query);
       if (isObject(parsedQueryString)) {
         queryString = parsedQueryString;
       }

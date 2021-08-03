@@ -62,7 +62,7 @@ interface State {
   selectedOperator?: Operator;
   params: any;
   useCustomLabel: boolean;
-  customLabel: string | null;
+  customLabel?: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
 }
@@ -489,7 +489,14 @@ class FilterEditorUI extends Component<Props, State> {
       const { index, disabled, negate } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
+      const filter = buildCustomFilter(
+        newIndex,
+        body,
+        disabled || false,
+        negate || false,
+        alias || null,
+        $state.store
+      );
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
       const filter = buildFilter(
@@ -497,9 +504,9 @@ class FilterEditorUI extends Component<Props, State> {
         field,
         operator.type,
         operator.negate,
-        this.props.filter.meta.disabled,
+        this.props.filter.meta.disabled || false,
         params ?? '',
-        alias,
+        alias || null,
         $state.store
       );
       this.props.onSubmit(filter);

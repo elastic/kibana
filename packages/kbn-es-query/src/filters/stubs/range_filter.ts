@@ -13,7 +13,6 @@ export const rangeFilter: RangeFilter = {
     index: 'logstash-*',
     negate: false,
     disabled: false,
-    alias: null,
     type: 'range',
     key: 'bytes',
     value: '0 to 10',

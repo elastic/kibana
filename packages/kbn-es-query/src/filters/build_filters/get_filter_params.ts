@@ -17,7 +17,7 @@ import { Filter, FILTERS } from './types';
 export function getFilterParams(filter: Filter) {
   switch (filter.meta.type) {
     case FILTERS.PHRASE:
-      return (filter as PhraseFilter).meta.params.query;
+      return (filter as PhraseFilter).meta.params!.query;
     case FILTERS.PHRASES:
       return (filter as PhrasesFilter).meta.params;
     case FILTERS.RANGE:

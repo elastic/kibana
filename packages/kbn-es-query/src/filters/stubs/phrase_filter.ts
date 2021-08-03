@@ -16,7 +16,6 @@ export const phraseFilter: PhraseFilter = {
     key: 'machine.os',
     value: 'ios',
     disabled: false,
-    alias: null,
     params: {
       query: 'ios',
     },

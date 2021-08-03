@@ -15,7 +15,6 @@ export const existsFilter: ExistsFilter = {
     disabled: false,
     type: 'exists',
     key: 'machine.os',
-    alias: null,
   },
   $state: {
     store: FilterStateStore.APP_STATE,

@@ -61,16 +61,16 @@ export const isScriptedPhraseFilter = (filter: FieldFilter): filter is PhraseFil
 
 /** @internal */
 export const getPhraseFilterField = (filter: PhraseFilter) => {
-  const queryConfig = filter.query.match_phrase || filter.query.match;
-  return Object.keys(queryConfig)[0];
+  const queryConfig = filter.query!.match_phrase || filter.query!.match;
+  return Object.keys(queryConfig as object)[0];
 };
 
 /**
  * @internal
  */
 export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue => {
-  const queryConfig = filter.query.match_phrase || filter.query.match;
-  const queryValue = Object.values(queryConfig)[0] as any;
+  const queryConfig = filter.query!.match_phrase || filter.query!.match;
+  const queryValue = Object.values(queryConfig as object)[0] as any;
   return isPlainObject(queryValue) ? queryValue.query : queryValue;
 };
 

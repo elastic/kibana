@@ -17,7 +17,6 @@ export const phrasesFilter: PhrasesFilter = {
     params: ['win xp', 'osx'],
     negate: false,
     disabled: false,
-    alias: null,
   },
   $state: {
     store: FilterStateStore.APP_STATE,

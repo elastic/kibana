@@ -33,5 +33,5 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBa
       path: field.subType.nested.path,
       query: query.query || query,
     },
-  };
+  } as Filter;
 };

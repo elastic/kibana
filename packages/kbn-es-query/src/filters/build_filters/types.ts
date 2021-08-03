@@ -14,6 +14,18 @@ import { PhraseFilter } from './phrase_filter';
 import { RangeFilter } from './range_filter';
 import { MatchAllFilter } from './match_all_filter';
 import { MissingFilter } from './missing_filter';
+import { DslQuery } from '../../kuery';
+
+/**
+ * Serializable state is something is a POJO JavaScript object that can be
+ * serialized to a JSON string.
+ */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SerializableState = {
+  [key: string]: Serializable;
+};
+export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
+export type Serializable = SerializableValue | SerializableValue[];
 
 /**
  * A common type for filters supported by this package
@@ -33,7 +45,7 @@ export type FieldFilter =
  * A common type for filters supported by this package
  * @public
  **/
-export type FilterParams = any;
+export type FilterParams = Serializable;
 
 /**
  * An enum of all types of filters supported by this package
@@ -65,9 +77,9 @@ export enum FilterStateStore {
 
 // eslint-disable-next-line
 export type FilterMeta = {
-  alias: string | null;
-  disabled: boolean;
-  negate: boolean;
+  alias?: string | null;
+  disabled?: boolean;
+  negate?: boolean;
   // controlledBy is there to identify who owns the filter
   controlledBy?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
@@ -75,7 +87,7 @@ export type FilterMeta = {
   isMultiIndex?: boolean;
   type?: string;
   key?: string;
-  params?: any;
+  params?: Serializable;
   value?: string;
 };
 
@@ -85,12 +97,12 @@ export type Filter = {
     store: FilterStateStore;
   };
   meta: FilterMeta;
-  query?: any; // TODO: can we use the Query type her?
+  query?: DslQuery;
 };
 
 // eslint-disable-next-line
 export type Query = {
-  query: string | { [key: string]: any };
+  query: string | SerializableState;
   language: string;
 };
 

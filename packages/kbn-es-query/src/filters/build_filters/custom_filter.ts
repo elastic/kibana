@@ -9,9 +9,7 @@
 import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
 
 /** @public */
-export type CustomFilter = Filter & {
-  query: any;
-};
+export type CustomFilter = Filter;
 
 /**
  *

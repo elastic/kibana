@@ -106,33 +106,27 @@ describe('kibanaContextFn', () => {
       query: [
         {
           language: 'kuery',
-          query: [
-            // TODO: Is it expected that if we pass in an array that the values in the array are not deduplicated?
-            {
-              language: 'kuery',
-              query: {
-                match_phrase: {
-                  DUPLICATE: 'DUPLICATE',
-                },
-              },
+          query: {
+            match_phrase: {
+              DUPLICATE: 'DUPLICATE',
             },
-            {
-              language: 'kuery',
-              query: {
-                match_phrase: {
-                  DUPLICATE: 'DUPLICATE',
-                },
-              },
+          },
+        },
+        {
+          language: 'kuery',
+          query: {
+            match_phrase: {
+              DUPLICATE: 'DUPLICATE',
             },
-            {
-              language: 'kuery',
-              query: {
-                match_phrase: {
-                  test: 'something3',
-                },
-              },
+          },
+        },
+        {
+          language: 'kuery',
+          query: {
+            match_phrase: {
+              test: 'something3',
             },
-          ],
+          },
         },
       ],
       timeRange: {
@@ -146,32 +140,19 @@ describe('kibanaContextFn', () => {
     expect(query).toEqual([
       {
         language: 'kuery',
-        query: [
-          {
-            language: 'kuery',
-            query: {
-              match_phrase: {
-                DUPLICATE: 'DUPLICATE',
-              },
-            },
+        query: {
+          match_phrase: {
+            DUPLICATE: 'DUPLICATE',
           },
-          {
-            language: 'kuery',
-            query: {
-              match_phrase: {
-                DUPLICATE: 'DUPLICATE',
-              },
-            },
+        },
+      },
+      {
+        language: 'kuery',
+        query: {
+          match_phrase: {
+            test: 'something3',
           },
-          {
-            language: 'kuery',
-            query: {
-              match_phrase: {
-                test: 'something3',
-              },
-            },
-          },
-        ],
+        },
       },
       {
         type: 'kibana_query',
@@ -180,14 +161,6 @@ describe('kibanaContextFn', () => {
           type: 'test',
           match_phrase: {
             test: 'something2',
-          },
-        },
-      },
-      {
-        language: 'kuery',
-        query: {
-          match_phrase: {
-            DUPLICATE: 'DUPLICATE',
           },
         },
       },

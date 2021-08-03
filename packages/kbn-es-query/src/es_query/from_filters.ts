@@ -34,10 +34,8 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  * @return {Object} the query version of that filter
  */
 const translateToQuery = (filter: Filter) => {
-  if (!filter) return;
-
   if (filter.query) {
-    return filter.query;
+    return filter.query as Filter;
   }
 
   return filter;

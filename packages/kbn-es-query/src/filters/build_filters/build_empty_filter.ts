@@ -12,7 +12,6 @@ export const buildEmptyFilter = (isPinned: boolean, index?: string): Filter => {
   const meta: FilterMeta = {
     disabled: false,
     negate: false,
-    alias: null,
     index,
   };
   const $state: Filter['$state'] = {
