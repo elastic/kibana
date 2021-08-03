@@ -73,15 +73,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             "DispatcherServlet#doGet",
             "ResourceHttpRequestHandler",
-            "APIRestController#customerWhoBought",
             "APIRestController#topProducts",
-            "APIRestController#order",
             "APIRestController#customer",
+            "APIRestController#order",
             "APIRestController#stats",
+            "APIRestController#customerWhoBought",
             "APIRestController#product",
+            "APIRestController#orders",
             "APIRestController#products",
             "APIRestController#customers",
-            "APIRestController#orders",
+            "DispatcherServlet#doPost",
           ]
         `);
 
@@ -90,17 +91,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
         expectSnapshot(impacts).toMatchInline(`
           Array [
-            82.2566386523884,
-            0.550268848003875,
-            2.18961795050566,
-            2.22111156210036,
-            1.56739768205378,
-            2.03144456685581,
-            3.35707136969079,
-            1.71733679850543,
-            1.1557171279893,
-            2.35878129236824,
-            0.594614149538393,
+            98.4867713293593,
+            0.0910992862692518,
+            0.217172932411727,
+            0.197499651612207,
+            0.117088451625813,
+            0.203168003440319,
+            0.0956764857936742,
+            0.353287132108131,
+            0.043688393280619,
+            0.0754467823979389,
+            0.115710953190738,
+            0.00339059851027124,
           ]
         `);
 
@@ -111,11 +113,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(pick(firstItem, 'name', 'latency', 'throughput', 'errorRate', 'impact'))
           .toMatchInline(`
           Object {
-            "errorRate": 0.103448275862069,
-            "impact": 82.2566386523884,
-            "latency": 172922.586206897,
+            "errorRate": 0.08,
+            "impact": 98.4867713293593,
+            "latency": 1816019.48,
             "name": "DispatcherServlet#doGet",
-            "throughput": 1.93333333333333,
+            "throughput": 1.66666666666667,
           }
         `);
       });
@@ -138,7 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transctionsGroupsPrimaryStatistics = response.body as TransactionsGroupsPrimaryStatistics;
 
         const firstItem = transctionsGroupsPrimaryStatistics.transactionGroups[0];
-        expectSnapshot(firstItem.latency).toMatchInline(`6801325.08000001`);
+        expectSnapshot(firstItem.latency).toMatchInline(`66846719`);
       });
     }
   );

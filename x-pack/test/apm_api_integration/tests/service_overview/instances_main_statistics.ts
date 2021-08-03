@@ -97,7 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(serviceNodeNames).toMatchInline(`
             Array [
-              "512388b65878b1ed410e7a85e793878bb4bd6a4e1943db6d12ca12dd4286623a",
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
             ]
           `);
 
@@ -113,11 +113,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": 0.00181666666666667,
-              "errorRate": 0.0304806565064478,
-              "latency": 47077.0231660232,
-              "memoryUsage": 0.784222412109375,
-              "throughput": 28.4333333333333,
+              "cpuUsage": 0.002,
+              "errorRate": 0.0252659574468085,
+              "latency": 411589.785714286,
+              "memoryUsage": 0.786029688517253,
+              "throughput": 25.0666666666667,
             }
           `);
         });
@@ -162,7 +162,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(serviceNodeNames).toMatchInline(`
             Array [
-              "7cadf0447f2393bbaa8ce98f0e0349d4457bf21f5e9ac67c3eea41dd9b576125",
+              "b4c600993a0b233120cd333b8c4a7e35e73ee8f18f95b5854b8d7f6442531466",
             ]
           `);
 
@@ -172,10 +172,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": 0.0011,
-              "errorRate": 0.000707714083510262,
-              "latency": 130610.2,
-              "throughput": 47.1,
+              "cpuUsage": 0.001,
+              "errorRate": 0.000907441016333938,
+              "latency": 40989.5802047782,
+              "throughput": 36.7333333333333,
             }
           `);
 
@@ -243,7 +243,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(serviceNodeNames).toMatchInline(`
             Array [
-              "512388b65878b1ed410e7a85e793878bb4bd6a4e1943db6d12ca12dd4286623a",
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
             ]
           `);
 
@@ -259,11 +259,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": 0.0017,
-              "errorRate": 0.0366748166259169,
-              "latency": 15614.8,
-              "memoryUsage": 0.781229909261068,
-              "throughput": 27.2666666666667,
+              "cpuUsage": 0.00223333333333333,
+              "errorRate": 0.0268292682926829,
+              "latency": 739013.634146341,
+              "memoryUsage": 0.783296203613281,
+              "throughput": 27.3333333333333,
             }
           `);
         });
