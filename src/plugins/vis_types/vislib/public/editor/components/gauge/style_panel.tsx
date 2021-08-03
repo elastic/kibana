@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SelectOption } from '../../../../../../vis_default_editor/public';
-import { GaugeOptionsInternalProps } from '../../gauge';
+import { GaugeOptionsInternalProps } from '../gauge';
 import { AggGroupNames } from '../../../../../../data/public';
 import { getGaugeCollections } from './../../collections';
 

@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { GaugeVisParams } from '../../../../gauge';
+import { GaugeVisParams } from '../../../gauge';
 import { RangesPanel } from './ranges_panel';
 import { StylePanel } from './style_panel';
 import { LabelsPanel } from './labels_panel';

@@ -18,8 +18,8 @@ import {
   PercentageModeOption,
 } from '../../../../../../vis_default_editor/public';
 import { ColorSchemaParams, ColorSchemas, colorSchemas } from '../../../../../../charts/public';
-import { GaugeOptionsInternalProps } from '../../gauge';
-import { Gauge } from '../../../../gauge';
+import { GaugeOptionsInternalProps } from '../gauge';
+import { Gauge } from '../../../gauge';
 
 function RangesPanel({
   setGaugeValue,

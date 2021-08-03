@@ -26,7 +26,7 @@ import {
   PercentageModeOption,
 } from '../../../../../../vis_default_editor/public';
 
-import { HeatmapVisParams } from '../../../../heatmap';
+import { HeatmapVisParams } from '../../../heatmap';
 import { LabelsPanel } from './labels_panel';
 import { getHeatmapCollections } from './../../collections';
 

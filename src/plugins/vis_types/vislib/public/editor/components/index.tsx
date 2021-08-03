@@ -9,8 +9,8 @@
 import React, { lazy } from 'react';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { GaugeVisParams } from '../../../gauge';
-import { HeatmapVisParams } from '../../../heatmap';
+import { GaugeVisParams } from '../../gauge';
+import { HeatmapVisParams } from '../../heatmap';
 
 const GaugeOptionsLazy = lazy(() => import('./gauge'));
 const HeatmapOptionsLazy = lazy(() => import('./heatmap'));

@@ -16,7 +16,7 @@ import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { SwitchOption } from '../../../../../../vis_default_editor/public';
 import { ValueAxis } from '../../../../../../vis_types/xy/public';
 
-import { HeatmapVisParams } from '../../../../heatmap';
+import { HeatmapVisParams } from '../../../heatmap';
 
 const VERTICAL_ROTATION = 270;
 
