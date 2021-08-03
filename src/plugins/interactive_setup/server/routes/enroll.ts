@@ -116,6 +116,9 @@ export function defineEnrollRoute({
 }
 
 export function generateCertificate(pem: string) {
+  if (pem.startsWith('-----BEGIN')) {
+    return pem;
+  }
   return `-----BEGIN CERTIFICATE-----
 ${pem
   .replace(/_/g, '/')

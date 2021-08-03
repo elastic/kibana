@@ -10,6 +10,7 @@ import type { CorePreboot, IRouter, Logger, PluginInitializerContext } from 'src
 
 import { defineEnrollRoute } from './enroll';
 import { defineConfigureRoute } from './configure';
+import { definePingRoute } from './ping';
 import type { ConfigType } from '../config';
 
 export interface RouteDefinitionParams {
@@ -23,4 +24,5 @@ export interface RouteDefinitionParams {
 export function defineRoutes(params: RouteDefinitionParams) {
   defineEnrollRoute(params);
   defineConfigureRoute(params);
+  definePingRoute(params);
 }

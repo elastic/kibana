@@ -13,6 +13,7 @@ import path from 'path';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import type { RouteDefinitionParams } from '.';
+import { generateCertificate } from './enroll';
 
 export function defineConfigureRoute({
   router,
@@ -40,11 +41,13 @@ export function defineConfigureRoute({
         return response.badRequest();
       }
 
+      const certificateAuthority = generateCertificate(request.body.caCert);
+
       const client = core.elasticsearch.createClient('configure', {
         hosts: request.body.hosts,
         username: request.body.username,
         password: request.body.password,
-        ssl: { certificateAuthorities: [request.body.caCert] },
+        ssl: { certificateAuthorities: [certificateAuthority] },
       });
 
       const configPath = initializerContext.env.mode.dev
@@ -72,7 +75,7 @@ export function defineConfigureRoute({
             configPath,
             generateConfig(request.body.hosts, request.body.username, request.body.password, caPath)
           ),
-          fs.writeFile(caPath, request.body.caCert),
+          fs.writeFile(caPath, certificateAuthority),
         ]);
 
         completeSetup({ shouldReloadConfig: true });
