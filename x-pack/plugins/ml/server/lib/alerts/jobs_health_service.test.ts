@@ -93,30 +93,19 @@ describe('JobsHealthService', () => {
   } as unknown) as jest.Mocked<DatafeedsService>;
 
   const annotationService = ({
-    getAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
-      return Promise.resolve({
-        annotations: jobIds.reduce((acc, jobId) => {
+    getDelayedDataAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
+      return Promise.resolve(
+        jobIds.map((jobId) => {
           return {
-            ...acc,
-            [jobId]: [
-              {
-                annotation: `Datafeed has missed ${
-                  jobId === 'test_job_01' ? 11 : 8
-                } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
-                create_time: 1627653905143,
-                create_username: '_xpack',
-                timestamp: 1627653000000,
-                end_timestamp: 1627653300000,
-                job_id: jobId,
-                modified_time: 1627660295141,
-                modified_username: '_xpack',
-                type: 'annotation',
-                event: 'delayed_data',
-              },
-            ],
+            job_id: jobId,
+            annotation: `Datafeed has missed ${
+              jobId === 'test_job_01' ? 11 : 8
+            } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
+            modified_time: 1627660295141,
+            end_timestamp: 1627653300000,
           };
-        }, {}),
-      });
+        })
+      );
     }),
   } as unknown) as jest.Mocked<AnnotationService>;
 
@@ -230,6 +219,10 @@ describe('JobsHealthService', () => {
           results: [
             {
               job_id: 'test_job_01',
+              annotation:
+                'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              missed_docs_count: 11,
             },
           ],
           message: '1 job is suffering from delayed data.',
@@ -267,13 +260,9 @@ describe('JobsHealthService', () => {
       datafeed_id: 'test_datafeed_01,test_datafeed_02',
     });
     expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
-    expect(annotationService.getAnnotations).toHaveBeenCalledWith({
+    expect(annotationService.getDelayedDataAnnotations).toHaveBeenCalledWith({
       jobIds: ['test_job_01', 'test_job_02'],
-      maxAnnotations: 1,
-      event: 'delayed_data',
-      earliestMs: null,
-      latestMs: 1487076708000,
-      sort: [{ modified_time: { order: 'desc' } }],
+      earliestMs: undefined,
     });
 
     expect(executionResult).toEqual([
@@ -311,9 +300,17 @@ describe('JobsHealthService', () => {
           results: [
             {
               job_id: 'test_job_01',
+              annotation:
+                'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              missed_docs_count: 11,
             },
             {
               job_id: 'test_job_02',
+              annotation:
+                'Datafeed has missed 8 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              missed_docs_count: 8,
             },
           ],
           message: '2 jobs are suffering from delayed data.',
