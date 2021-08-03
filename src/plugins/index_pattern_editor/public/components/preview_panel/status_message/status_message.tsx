@@ -12,14 +12,10 @@ import { EuiCallOut } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MatchedItem } from '../../../types';
+import { MatchedIndicesSet } from '../../../types';
 
 interface StatusMessageProps {
-  matchedIndices: {
-    allIndices: MatchedItem[];
-    exactMatchedIndices: MatchedItem[];
-    partialMatchedIndices: MatchedItem[];
-  };
+  matchedIndices: MatchedIndicesSet;
   isIncludingSystemIndices: boolean;
   query: string;
   showSystemIndices: boolean;

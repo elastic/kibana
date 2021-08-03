@@ -268,6 +268,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
     [http, allowHidden, allSources, type, rollupIndicesCapabilities]
   );
 
+  const onTypeChange = useCallback(
+    (newType) => {
+      form.setFieldValue('title', '');
+      form.setFieldValue('timestampField', '');
+      if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
+        form.setFieldValue('allowHidden', false);
+      }
+    },
+    [form]
+  );
+
   if (isLoadingSources || isLoadingIndexPatterns) {
     return <EuiLoadingSpinner size="xl" />;
   }
@@ -281,15 +292,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <TypeField
-            onChange={(newType) => {
-              form.setFieldValue('title', '');
-              form.setFieldValue('timestampField', '');
-              if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
-                form.setFieldValue('allowHidden', false);
-              }
-            }}
-          />
+          <TypeField onChange={onTypeChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {type === INDEX_PATTERN_TYPE.ROLLUP ? (

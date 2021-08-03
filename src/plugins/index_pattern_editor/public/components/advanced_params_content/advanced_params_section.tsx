@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
@@ -18,9 +18,9 @@ interface Props {
 export const AdvancedParamsSection = ({ children }: Props) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
-  const toggleIsVisible = () => {
+  const toggleIsVisible = useCallback(() => {
     setIsVisible(!isVisible);
-  };
+  }, [isVisible]);
 
   return (
     <>
