@@ -23,6 +23,7 @@ import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 
 const { embeddable: strings } = RendererStrings;
 
+// registry of references to embeddables on the workpad
 const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
@@ -30,11 +31,11 @@ const embeddablesRegistry: {
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
 
-  return (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
+  return (embeddableObject: IEmbeddable) => {
     return (
       <div
         className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
+        style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
           <plugins.embeddable.EmbeddablePanel embeddable={embeddableObject} />
@@ -56,6 +57,9 @@ export const embeddableRendererFactory = (
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType }, handlers) => {
       const uniqueId = handlers.getElementId();
+      const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
+        'labs:canvas:byValueEmbeddable'
+      );
 
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
@@ -70,6 +74,7 @@ export const embeddableRendererFactory = (
         const embeddablePromise = factory
           .createFromSavedObject(input.id, input)
           .then((embeddable) => {
+            // stores embeddable in registrey
             embeddablesRegistry[uniqueId] = embeddable;
             return embeddable;
           });
@@ -86,7 +91,8 @@ export const embeddableRendererFactory = (
           const updatedExpression = embeddableInputToExpression(
             updatedInput,
             embeddableType,
-            palettes
+            palettes,
+            isByValueEnabled
           );
 
           if (updatedExpression) {
@@ -94,15 +100,7 @@ export const embeddableRendererFactory = (
           }
         });
 
-        ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-          handlers.done()
-        );
-
-        handlers.onResize(() => {
-          ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-            handlers.done()
-          );
-        });
+        ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
 
         handlers.onDestroy(() => {
           subscription.unsubscribe();
@@ -115,6 +113,7 @@ export const embeddableRendererFactory = (
       } else {
         const embeddable = embeddablesRegistry[uniqueId];
 
+        // updating embeddable input with changes made to expression or filters
         if ('updateInput' in embeddable) {
           embeddable.updateInput(input);
           embeddable.reload();

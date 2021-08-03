@@ -9,5 +9,6 @@ import { savedLens } from './saved_lens';
 import { savedMap } from './saved_map';
 import { savedSearch } from './saved_search';
 import { savedVisualization } from './saved_visualization';
+import { embeddable } from './embeddable';
 
-export const functions = [savedLens, savedMap, savedVisualization, savedSearch];
+export const functions = [embeddable, savedLens, savedMap, savedSearch, savedVisualization];
