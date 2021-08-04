@@ -271,7 +271,7 @@ Add a layer for construction zones, which you will draw on the map. The construc
 .. Click to start rectangle.
 .. Move mouse to adjust rectangle size.
 .. Click again to finish.
-. When finished drawing construction zones, click *Exit* under the layer name in the legend.
+. When you finish drawing the construction zones, click *Exit* under the layer name in the legend.
 . In *Layer settings*, set *Name* to *Construction zones*.
 . Scroll to *Layer Style*, set *Fill color* to yellow.
 . Click *Save & close*.
