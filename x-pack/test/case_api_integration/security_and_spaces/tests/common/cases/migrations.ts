@@ -11,7 +11,7 @@ import {
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../../../plugins/cases/common/constants';
-import { getCase } from '../../../../common/lib/utils';
+import { getCase, getCaseSavedObjectsFromES } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -121,13 +121,90 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
       });
 
-      it('adds the owner field', async () => {
-        const theCase = await getCase({
-          supertest,
-          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+      describe('owner field', () => {
+        it('adds the owner field', async () => {
+          const theCase = await getCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(theCase.owner).to.be(SECURITY_SOLUTION_OWNER);
+        });
+      });
+
+      describe('migrating connector id to a reference', () => {
+        const es = getService('es');
+
+        it('preserves the connector id after migration in the API response', async () => {
+          const theCase = await getCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(theCase.connector.id).to.be('d68508f0-cf9d-11eb-a603-13e7747d215c');
         });
 
-        expect(theCase.owner).to.be(SECURITY_SOLUTION_OWNER);
+        it('preserves the connector fields after migration in the API response', async () => {
+          const theCase = await getCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(theCase.connector).to.eql({
+            fields: {
+              issueType: '10002',
+              parent: null,
+              priority: null,
+            },
+            id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+            name: 'Test Jira',
+            type: '.jira',
+          });
+        });
+
+        it('removes the connector id field in the saved object', async () => {
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+          expect(casesFromES.body.hits.hits[0]._source?.cases.connector).to.not.have.property('id');
+        });
+
+        it('preserves the external_service.connector_id after migration in the API response', async () => {
+          const theCase = await getCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(theCase.external_service?.connector_id).to.be(
+            'd68508f0-cf9d-11eb-a603-13e7747d215c'
+          );
+        });
+
+        it('preserves the external_service fields after migration in the API response', async () => {
+          const theCase = await getCase({
+            supertest,
+            caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          });
+
+          expect(theCase.external_service).to.eql({
+            connector_id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+            connector_name: 'Test Jira',
+            external_id: '10106',
+            external_title: 'TPN-99',
+            external_url: 'https://cases-testing.atlassian.net/browse/TPN-99',
+            pushed_at: '2021-06-17T18:57:45.524Z',
+            pushed_by: {
+              email: null,
+              full_name: 'j@j.com',
+              username: '711621466',
+            },
+          });
+        });
+
+        it('removes the connector_id field in the saved object', async () => {
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+          expect(
+            casesFromES.body.hits.hits[0]._source?.cases.external_service
+          ).to.not.have.property('id');
+        });
       });
     });
   });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RuleStatusType } from '../../../containers/detection_engine/rules';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
-export const getStatusColor = (status: RuleStatusType | string | null) =>
+export const getStatusColor = (status: RuleExecutionStatus | string | null) =>
   status == null
     ? 'subdued'
     : status === 'succeeded'

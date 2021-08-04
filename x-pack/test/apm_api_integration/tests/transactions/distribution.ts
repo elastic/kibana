@@ -64,11 +64,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', () => {
-        expectSnapshot(response.body.buckets.length).toMatchInline(`12`);
+        expectSnapshot(response.body.buckets.length).toMatchInline(`26`);
       });
 
       it('returns the correct bucket size', () => {
-        expectSnapshot(response.body.bucketSize).toMatchInline(`5000`);
+        expectSnapshot(response.body.bucketSize).toMatchInline(`1000`);
       });
 
       it('returns the correct buckets', () => {
@@ -76,22 +76,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (bucket: any) => !isEmpty(bucket.samples)
         );
 
-        expectSnapshot(bucketWithSamples.count).toMatchInline(`3`);
+        expectSnapshot(bucketWithSamples.count).toMatchInline(`1`);
 
         expectSnapshot(bucketWithSamples.samples.sort((sample: any) => sample.traceId))
           .toMatchInline(`
           Array [
             Object {
-              "traceId": "e48afea3046e0e8c17c72bf8bfac1607",
-              "transactionId": "ed4e7a5c044aff66",
-            },
-            Object {
-              "traceId": "0733f58b70d8a3fd983a15459e4a5fcf",
-              "transactionId": "564511c803125e00",
-            },
-            Object {
-              "traceId": "c1bc7fcf4e999c03107c129c131fb55c",
-              "transactionId": "82c81c2c6c483da3",
+              "traceId": "6d85d8f1bc4bbbfdb19cdba59d2fc164",
+              "transactionId": "d0a16f0f52f25d6b",
             },
           ]
         `);

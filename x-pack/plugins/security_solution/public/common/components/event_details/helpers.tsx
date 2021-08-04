@@ -7,6 +7,7 @@
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import styled from 'styled-components';
 import React from 'react';
 import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
@@ -21,9 +22,10 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
+import { FieldsData } from './types';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions, TimelineEventsDetailsItem } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -55,9 +57,9 @@ export interface Item {
 export interface AlertSummaryRow {
   title: string;
   description: {
-    data: TimelineEventsDetailsItem;
+    data: FieldsData;
     eventId: string;
-    fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
+    fieldFromBrowserField?: BrowserField;
     linkValue: string | undefined;
     timelineId: string;
     values: string[] | null | undefined;
@@ -196,9 +198,13 @@ export const onEventDetailsTabKeyPressed = ({
   }
 };
 
+const StyledH5 = styled.h5`
+  line-height: 1.7rem;
+`;
+
 const getTitle = (title: string) => (
   <EuiTitle size="xxxs">
-    <h5>{title}</h5>
+    <StyledH5>{title}</StyledH5>
   </EuiTitle>
 );
 getTitle.displayName = 'getTitle';
@@ -213,7 +219,7 @@ export const getSummaryColumns = (
       field: 'title',
       truncateText: false,
       render: getTitle,
-      width: '33%',
+      width: '220px',
       name: '',
     },
     {
