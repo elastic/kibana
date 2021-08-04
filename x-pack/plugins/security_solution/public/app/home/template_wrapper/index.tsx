@@ -23,6 +23,8 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 
 /* eslint-disable react/display-name */
 
@@ -74,8 +76,9 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const { indicesExist } = useSourcererScope();
 
-    return (
+    return indicesExist ? (
       <StyledKibanaPageTemplate
         $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
@@ -96,6 +99,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
           {children}
         </EuiPanel>
       </StyledKibanaPageTemplate>
+    ) : (
+      <OverviewEmpty />
     );
   }
 );
