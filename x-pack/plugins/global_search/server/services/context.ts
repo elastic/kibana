@@ -24,11 +24,6 @@ export const getContextFactory = (coreStart: CoreStart) => (
         client: soClient,
         typeRegistry: coreStart.savedObjects.getTypeRegistry(),
       },
-      elasticsearch: {
-        legacy: {
-          client: coreStart.elasticsearch.legacy.client.asScoped(request),
-        },
-      },
       uiSettings: {
         client: coreStart.uiSettings.asScopedToClient(soClient),
       },

@@ -11,7 +11,6 @@ import { RacRequestHandlerContext } from '../../types';
 
 const createMockClients = () => ({
   rac: alertsClientMock.create(),
-  clusterClient: elasticsearchServiceMock.createLegacyScopedClusterClient(),
   newClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
 });
@@ -27,7 +26,6 @@ const createRequestContextMock = (
       elasticsearch: {
         ...coreContext.elasticsearch,
         client: clients.newClusterClient,
-        legacy: { ...coreContext.elasticsearch.legacy, client: clients.clusterClient },
       },
       savedObjects: { client: clients.savedObjectsClient },
     },

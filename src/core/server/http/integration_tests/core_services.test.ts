@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  MockLegacyScopedClusterClient,
-  MockElasticsearchClient,
-  legacyClusterClientInstanceMock,
-} from './core_service.test.mocks';
-
-import { errors as esErrors } from 'elasticsearch';
-import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
-
+import { MockElasticsearchClient } from './core_service.test.mocks';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
@@ -183,99 +175,6 @@ describe('http service', () => {
 
         expect(authenticate).not.toHaveBeenCalled();
       });
-    });
-  });
-
-  describe('legacy elasticsearch client', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
-    beforeEach(async () => {
-      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
-      await root.preboot();
-    }, 30000);
-
-    afterEach(async () => {
-      MockLegacyScopedClusterClient.mockClear();
-      await root.shutdown();
-    });
-
-    it('rewrites authorization header via authHeaders to make a request to Elasticsearch', async () => {
-      const authHeaders = { authorization: 'Basic: user:password' };
-      const { http } = await root.setup();
-      const { registerAuth, createRouter } = http;
-
-      registerAuth((req, res, toolkit) => toolkit.authenticated({ requestHeaders: authHeaders }));
-
-      const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        // it forces client initialization since the core creates them lazily.
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
-        return res.ok();
-      });
-
-      await root.start();
-
-      await kbnTestServer.request.get(root, '/new-platform/').expect(200);
-
-      // client contains authHeaders for BWC with legacy platform.
-      const [client] = MockLegacyScopedClusterClient.mock.calls;
-      const [, , clientHeaders] = client;
-      expect(clientHeaders).toEqual({
-        ...authHeaders,
-        'x-opaque-id': expect.any(String),
-      });
-    });
-
-    it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
-      const authorizationHeader = 'Basic: username:password';
-      const { http } = await root.setup();
-      const { createRouter } = http;
-
-      const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        // it forces client initialization since the core creates them lazily.
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
-        return res.ok();
-      });
-
-      await root.start();
-
-      await kbnTestServer.request
-        .get(root, '/new-platform/')
-        .set('Authorization', authorizationHeader)
-        .expect(200);
-
-      const [client] = MockLegacyScopedClusterClient.mock.calls;
-      const [, , clientHeaders] = client;
-      expect(clientHeaders).toEqual({
-        authorization: authorizationHeader,
-        'x-opaque-id': expect.any(String),
-      });
-    });
-
-    it('forwards 401 errors returned from elasticsearch', async () => {
-      const { http } = await root.setup();
-      const { createRouter } = http;
-
-      const authenticationError = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
-        new (esErrors.AuthenticationException as any)('Authentication Exception', {
-          body: { error: { header: { 'WWW-Authenticate': 'authenticate header' } } },
-          statusCode: 401,
-        })
-      );
-
-      legacyClusterClientInstanceMock.callAsCurrentUser.mockRejectedValue(authenticationError);
-
-      const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
-        return res.ok();
-      });
-
-      await root.start();
-
-      const response = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
-
-      expect(response.header['www-authenticate']).toEqual('authenticate header');
     });
   });
 

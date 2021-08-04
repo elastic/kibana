@@ -22,7 +22,6 @@ export type {
   ScopeableRequest,
   ElasticsearchConfigPreboot,
 } from './types';
-export * from './legacy';
 export type {
   IClusterClient,
   ICustomClusterClient,
