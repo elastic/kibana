@@ -115,7 +115,7 @@ export class TOCEntryButton extends Component<Props, State> {
 
       if (this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length) {
         footnotes.push({
-          icon: <EuiIcon color="subdued" type="filter" size="s" />,
+          icon: <EuiIcon color="ghost" type="filter" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
             defaultMessage: 'Results narrowed by query and filters',
           }),
@@ -123,7 +123,7 @@ export class TOCEntryButton extends Component<Props, State> {
       }
       if (this.state.isFilteredByGlobalTime) {
         footnotes.push({
-          icon: <EuiIcon color="subdued" type="clock" size="s" />,
+          icon: <EuiIcon color="ghost" type="clock" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
             defaultMessage: 'Results narrowed by time filter',
           }),
@@ -135,7 +135,7 @@ export class TOCEntryButton extends Component<Props, State> {
         (source as IVectorSource).isFilterByMapBounds()
       ) {
         footnotes.push({
-          icon: <EuiIcon color="subdued" type="stop" size="s" />,
+          icon: <EuiIcon color="ghost" type="stop" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingBoundsFilter', {
             defaultMessage: 'Results narrowed by visible map area',
           }),
