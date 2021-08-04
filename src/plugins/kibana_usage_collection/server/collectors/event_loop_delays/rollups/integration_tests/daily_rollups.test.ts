@@ -64,6 +64,7 @@ describe('daily rollups integration test', () => {
     esServer = await startES();
     root = createRootWithCorePlugins();
 
+    await root.preboot();
     await root.setup();
     const start = await root.start();
     logger = root.logger.get('test dailt rollups');

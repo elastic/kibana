@@ -284,6 +284,11 @@ the username and password that the {kib} server uses to perform maintenance
 on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
+|[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
+ | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
+is an alternative to `elasticsearch.username` and `elasticsearch.password`.
+
 | `enterpriseSearch.host`
   | The URL of your Enterprise Search instance
 
@@ -777,13 +782,11 @@ out through *Advanced Settings*. *Default: `true`*
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
-a|
-`xpack.discoverEnhanced.actions.`
+|[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 
-a|
-`xpack.discoverEnhanced.actions.`
+|[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
 `exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 

@@ -7,7 +7,6 @@
 
 import type Boom from '@hapi/boom';
 import { isBoom } from '@hapi/boom';
-import { errors as LegacyESErrors } from 'elasticsearch';
 
 import type {
   IKibanaResponse,
@@ -40,26 +39,6 @@ interface IngestErrorHandlerParams {
 // unsure if this is correct. would prefer to use something "official"
 // this type is based on BadRequest values observed while debugging https://github.com/elastic/kibana/issues/75862
 
-interface LegacyESClientError {
-  message: string;
-  stack: string;
-  status: number;
-  displayName: string;
-  path?: string;
-  query?: string | undefined;
-  body?: {
-    error: {
-      type: string;
-    };
-    status: number;
-  };
-  statusCode?: number;
-  response?: string;
-}
-export const isLegacyESClientError = (error: any): error is LegacyESClientError => {
-  return error instanceof LegacyESErrors._Abstract;
-};
-
 const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof RegistryError) {
     return 502; // Bad Gateway
@@ -84,23 +63,6 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
 
 export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
   const logger = appContextService.getLogger();
-  if (isLegacyESClientError(error)) {
-    // there was a problem communicating with ES (e.g. via `callCluster`)
-    // only log the message
-    const message =
-      error?.path && error?.response
-        ? // if possible, return the failing endpoint and its response
-          `${error.message} response from ${error.path}: ${error.response}`
-        : error.message;
-
-    logger.error(message);
-
-    return {
-      statusCode: error?.statusCode || error.status,
-      body: { message },
-    };
-  }
-
   // our "expected" errors
   if (error instanceof IngestManagerError) {
     // only log the message

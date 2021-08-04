@@ -64,6 +64,28 @@ Object {
         "hideEndzones": Array [
           true,
         ],
+        "labelsOrientation": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    0,
+                  ],
+                  "yLeft": Array [
+                    -90,
+                  ],
+                  "yRight": Array [
+                    -45,
+                  ],
+                },
+                "function": "lens_xy_labelsOrientationConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "layers": Array [
           Object {
             "chain": Array [
@@ -114,6 +136,9 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
+                  "floatingColumns": Array [],
+                  "horizontalAlignment": Array [],
+                  "isInside": Array [],
                   "isVisible": Array [
                     true,
                   ],
@@ -121,6 +146,7 @@ Object {
                     "bottom",
                   ],
                   "showSingleSeries": Array [],
+                  "verticalAlignment": Array [],
                 },
                 "function": "lens_xy_legendConfig",
                 "type": "function",

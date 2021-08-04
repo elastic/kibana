@@ -23,7 +23,8 @@ export function resultsServiceProvider(
     intervalMs: number,
     perPage?: number,
     fromPage?: number,
-    swimLaneSeverity?: number
+    swimLaneSeverity?: number,
+    influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
   getTopInfluencers(
     selectedJobIds: string[],
@@ -32,7 +33,7 @@ export function resultsServiceProvider(
     maxFieldValues: number,
     perPage?: number,
     fromPage?: number,
-    influencers?: any[],
+    influencers?: EntityField[],
     influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
   getTopInfluencerValues(): Promise<any>;

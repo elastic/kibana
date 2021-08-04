@@ -15,7 +15,8 @@ import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
-import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
+import type { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -27,6 +28,16 @@ import { CellValueElementProps } from '../../../timelines/components/timeline/ce
 import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { EventsViewer } from './events_viewer';
+import * as i18n from './translations';
+
+const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
+const leadingControlColumns: ControlColumnProps[] = [
+  {
+    ...defaultControlColumn,
+    // eslint-disable-next-line react/display-name
+    headerCellRender: () => <>{i18n.ACTIONS}</>,
+  },
+];
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
@@ -44,6 +55,7 @@ export interface OwnProps {
   showTotalCount?: boolean;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
+  currentFilter?: Status;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -73,6 +85,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   pageFilters,
+  currentFilter,
   onRuleChange,
   query,
   renderCellValue,
@@ -115,8 +128,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
-  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
-  const trailingControlColumns: ControlColumnProps[] = [];
+  const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
 
   return (
     <>
@@ -151,6 +163,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               sort,
               utilityBar,
               graphEventId,
+              filterStatus: currentFilter,
               leadingControlColumns,
               trailingControlColumns,
             })

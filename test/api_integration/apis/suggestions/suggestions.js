@@ -44,5 +44,14 @@ export default function ({ getService }) {
           query: 'nes',
         })
         .expect(200, ['nestedValue']));
+
+    it('should return 404 if index is not found', () =>
+      supertest
+        .post('/api/kibana/suggestions/values/not_found')
+        .send({
+          field: 'baz.keyword',
+          query: '1',
+        })
+        .expect(404));
   });
 }

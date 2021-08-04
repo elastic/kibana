@@ -57,7 +57,7 @@ import {
   SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
   checkNonPersistedSessions,
   SEARCH_SESSIONS_CLEANUP_TASK_ID,
-} from './check_non_persiseted_sessions';
+} from './check_non_persisted_sessions';
 import {
   SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
   SEARCH_SESSIONS_EXPIRE_TASK_ID,
@@ -98,6 +98,7 @@ export class SearchSessionService
   constructor(
     private readonly logger: Logger,
     private readonly config: ConfigSchema,
+    private readonly version: string,
     private readonly security?: SecurityPluginSetup
   ) {
     this.sessionConfig = this.config.search.sessions;
@@ -330,6 +331,7 @@ export class SearchSessionService
         touched: new Date().toISOString(),
         idMapping: {},
         persisted: false,
+        version: this.version,
         realmType,
         realmName,
         username,

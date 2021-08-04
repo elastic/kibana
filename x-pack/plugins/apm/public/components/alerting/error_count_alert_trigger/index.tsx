@@ -6,19 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { defaults, omit } from 'lodash';
 import React from 'react';
-import { defaults } from 'lodash';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 export interface AlertParams {
   windowSize: number;
@@ -30,33 +27,26 @@ export interface AlertParams {
 
 interface Props {
   alertParams: AlertParams;
+  metadata?: AlertMetadata;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
 export function ErrorCountAlertTrigger(props: Props) {
-  const { setAlertParams, setAlertProperty, alertParams } = props;
+  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  const { serviceName: serviceNameFromContext } = useApmServiceContext();
-
-  const { urlParams } = useUrlParams();
-  const { start, end, environment: environmentFromUrl } = urlParams;
   const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: serviceNameFromContext,
-    start,
-    end,
+    serviceName: metadata?.serviceName,
+    start: metadata?.start,
+    end: metadata?.end,
   });
 
   const params = defaults(
-    {
-      ...alertParams,
-    },
+    { ...omit(metadata, ['start', 'end']), ...alertParams },
     {
       threshold: 25,
       windowSize: 1,
       windowUnit: 'm',
-      environment: environmentFromUrl || ENVIRONMENT_ALL.value,
-      serviceName: serviceNameFromContext,
     }
   );
 

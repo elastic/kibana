@@ -106,6 +106,12 @@ export default async function ({ readConfigFile }) {
       observabilityCases: {
         pathname: '/app/observability/cases',
       },
+      fleet: {
+        pathname: '/app/fleet',
+      },
+      integrations: {
+        pathname: '/app/integrations',
+      },
     },
     junit: {
       reportName: 'Chrome UI Functional Tests',
@@ -239,6 +245,21 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['date_nanos_mixed', 'timestamp-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        kibana_date_nested: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['date-nested'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

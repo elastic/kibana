@@ -22,7 +22,6 @@ import {
   TimelineFactoryQueryTypes,
   TimelineEventsQueries,
 } from '../../common/search_strategy';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   DocValueFields,
   Inspect,

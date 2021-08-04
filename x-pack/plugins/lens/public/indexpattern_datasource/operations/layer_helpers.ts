@@ -32,7 +32,7 @@ import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
-import { TimeScaleUnit } from '../time_scale';
+import type { TimeScaleUnit } from '../../../common/expressions';
 
 interface ColumnAdvancedParams {
   filter?: Query | undefined;

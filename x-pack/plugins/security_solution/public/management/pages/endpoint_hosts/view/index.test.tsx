@@ -30,7 +30,6 @@ import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
-import { fireEvent } from '@testing-library/dom';
 import {
   createFailedResourceState,
   createLoadedResourceState,
@@ -42,6 +41,8 @@ import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 import { APP_PATH, MANAGEMENT_PATH } from '../../../../../common/constants';
+import { TransformStats, TRANSFORM_STATE } from '../types';
+import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -68,7 +69,7 @@ jest.mock('../../../../common/hooks/use_license');
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
-  const act = reactTestingLibrary.act;
+  const { act, screen, fireEvent } = reactTestingLibrary;
 
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -997,7 +998,7 @@ describe('when on the endpoint list page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toEqual(
-          `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1`
+          `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=details`
         );
       });
 
@@ -1009,7 +1010,7 @@ describe('when on the endpoint list page', () => {
         });
         const changedUrlAction = await userChangedUrlChecker;
         expect(changedUrlAction.payload.search).toEqual(
-          '?page_index=0&page_size=10&selected_endpoint=1'
+          '?page_index=0&page_size=10&selected_endpoint=1&show=details'
         );
       });
 
@@ -1082,7 +1083,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: `${MANAGEMENT_PATH}/endpoints`,
-          search: '?page_index=0&page_size=10&selected_endpoint=1',
+          search: '?page_index=0&page_size=10&selected_endpoint=1&show=details',
         });
       });
 
@@ -1095,7 +1096,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: `${MANAGEMENT_PATH}/endpoints`,
-          search: '?page_index=0&page_size=10&selected_endpoint=1',
+          search: '?page_index=0&page_size=10&selected_endpoint=1&show=details',
         });
       });
 
@@ -1115,7 +1116,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: `${MANAGEMENT_PATH}/endpoints`,
-          search: '?page_index=0&page_size=10&selected_endpoint=1',
+          search: '?page_index=0&page_size=10&selected_endpoint=1&show=details',
         });
       });
 
@@ -1248,18 +1249,56 @@ describe('when on the endpoint list page', () => {
     });
     it('navigates to the Ingest Agent Policy page', async () => {
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
-      expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet#/policies/${agentPolicyId}`);
+      expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet/policies/${agentPolicyId}`);
     });
     it('navigates to the Ingest Agent Details page', async () => {
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
-      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/agents/${agentId}`);
+      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet/agents/${agentId}`);
     });
 
     it('navigates to the Ingest Agent Details page with policy reassign', async () => {
       const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
       expect(agentPolicyReassignLink.getAttribute('href')).toEqual(
-        `/app/fleet#/agents/${agentId}/activity?openReassignFlyout=true`
+        `/app/fleet/agents/${agentId}?openReassignFlyout=true`
       );
+    });
+  });
+
+  describe('required transform failed banner', () => {
+    it('is not displayed when transform state is not failed', () => {
+      const transforms: TransformStats[] = [
+        {
+          id: `${metadataTransformPrefix}-0.20.0`,
+          state: TRANSFORM_STATE.STARTED,
+        } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeNull();
+    });
+
+    it('is not displayed when non-relevant transform is failing', () => {
+      const transforms: TransformStats[] = [
+        { id: 'not-metadata', state: TRANSFORM_STATE.FAILED } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeNull();
+    });
+
+    it('is displayed when relevant transform state is failed state', async () => {
+      const transforms: TransformStats[] = [
+        {
+          id: `${metadataTransformPrefix}-0.20.0`,
+          state: TRANSFORM_STATE.FAILED,
+        } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeInTheDocument();
     });
   });
 });

@@ -8,7 +8,7 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { validateDurationSchema, ILicenseState, AlertTypeDisabledError } from '../lib';
-import { CreateOptions } from '../alerts_client';
+import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
   RewriteResponseCase,
@@ -112,11 +112,11 @@ export const createRuleRoute = (
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const alertsClient = context.alerting.getAlertsClient();
+          const rulesClient = context.alerting.getRulesClient();
           const rule = req.body;
           const params = req.params;
           try {
-            const createdRule: SanitizedAlert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>(
+            const createdRule: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
               {
                 data: rewriteBodyReq({
                   ...rule,

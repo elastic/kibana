@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { EndpointIndexUIQueryParams, EndpointState } from '../types';
+import { EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ServerReturnedEndpointList {
@@ -173,10 +173,11 @@ export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
   };
 }
 
-export interface EndpointDetailsFlyoutTabChanged {
-  type: 'endpointDetailsFlyoutTabChanged';
-  payload: { flyoutView: EndpointIndexUIQueryParams['show'] };
-}
+export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
+
+export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
+  payload: EndpointState['metadataTransformStats'];
+};
 
 export type EndpointAction =
   | ServerReturnedEndpointList
@@ -185,7 +186,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointDetails
   | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogUpdateIsInvalidDateRange
-  | EndpointDetailsFlyoutTabChanged
   | EndpointDetailsActivityLogChanged
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
@@ -208,4 +208,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
   | EndpointIsolationRequestStateChange
-  | EndpointPendingActionsStateChanged;
+  | EndpointPendingActionsStateChanged
+  | LoadMetadataTransformStats
+  | MetadataTransformStatsChanged;

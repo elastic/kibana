@@ -18,7 +18,7 @@ import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { esArchiverCCSLoad, esArchiverCCSUnload } from '../../tasks/es_archiver';
 
-import { unmappedCCSRule } from '../../objects/rule';
+import { getUnmappedCCSRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
@@ -29,7 +29,7 @@ describe('Alert details with unmapped fields', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(unmappedCCSRule);
+    createCustomRuleActivated(getUnmappedCCSRule());
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     expandFirstAlert();
@@ -65,8 +65,8 @@ describe('Alert details with unmapped fields', () => {
     cy.get(TABLE_ROWS)
       .eq(expectedUnmmappedField.row)
       .within(() => {
-        cy.get(CELL_TEXT).eq(0).should('have.text', expectedUnmmappedField.field);
-        cy.get(CELL_TEXT).eq(1).should('have.text', expectedUnmmappedField.text);
+        cy.get(CELL_TEXT).eq(2).should('have.text', expectedUnmmappedField.field);
+        cy.get(CELL_TEXT).eq(4).should('have.text', expectedUnmmappedField.text);
       });
   });
 });

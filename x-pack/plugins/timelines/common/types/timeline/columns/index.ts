@@ -6,8 +6,7 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IFieldSubType } from '../../../../../../../src/plugins/data/public';
+import { IFieldSubType } from '../../../../../../../src/plugins/data/common';
 import { TimelineNonEcsData } from '../../../search_strategy/timeline';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
@@ -18,7 +17,13 @@ export type ColumnId = string;
 /** The specification of a column header */
 export type ColumnHeaderOptions = Pick<
   EuiDataGridColumn,
-  'display' | 'displayAsText' | 'id' | 'initialWidth'
+  | 'actions'
+  | 'defaultSortDirection'
+  | 'display'
+  | 'displayAsText'
+  | 'id'
+  | 'initialWidth'
+  | 'isSortable'
 > & {
   aggregatable?: boolean;
   category?: string;

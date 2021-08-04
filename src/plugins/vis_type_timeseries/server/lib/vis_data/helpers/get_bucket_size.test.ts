@@ -16,7 +16,7 @@ describe('getBucketSize', () => {
     body: {
       timerange: {
         min: '2017-01-01T00:00:00.000Z',
-        max: '2017-01-01T01:00:00.000Z',
+        max: '2017-07-01T01:00:00.000Z',
       },
     },
   } as VisTypeTimeseriesVisDataRequest;
@@ -29,9 +29,10 @@ describe('getBucketSize', () => {
 
   test('returns auto calculated buckets', () => {
     const result = getBucketSize(req, 'auto', capabilities, 100);
+    const expectedValue = 86400; // 24h
 
-    expect(result).toHaveProperty('bucketSize', 30);
-    expect(result).toHaveProperty('intervalString', '30s');
+    expect(result).toHaveProperty('bucketSize', expectedValue);
+    expect(result).toHaveProperty('intervalString', `${expectedValue}s`);
   });
 
   test('returns overridden buckets (1s)', () => {
@@ -56,16 +57,23 @@ describe('getBucketSize', () => {
   });
 
   test('returns overridden buckets (>=2d)', () => {
-    const result = getBucketSize(req, '>=2d', capabilities, 100);
+    const result = getBucketSize(req, '>=2d', capabilities, 1000);
 
     expect(result).toHaveProperty('bucketSize', 86400 * 2);
     expect(result).toHaveProperty('intervalString', '2d');
   });
 
-  test('returns overridden buckets (>=10s)', () => {
-    const result = getBucketSize(req, '>=10s', capabilities, 100);
+  test('returns overridden buckets (>=5d)', () => {
+    const result = getBucketSize(req, '>=5d', capabilities, 100);
 
-    expect(result).toHaveProperty('bucketSize', 30);
-    expect(result).toHaveProperty('intervalString', '30s');
+    expect(result).toHaveProperty('bucketSize', 432000);
+    expect(result).toHaveProperty('intervalString', '5d');
+  });
+
+  test('returns overridden buckets for 1 bar and >=1d interval', () => {
+    const result = getBucketSize(req, '>=1d', capabilities, 1);
+
+    expect(result).toHaveProperty('bucketSize', 2592000);
+    expect(result).toHaveProperty('intervalString', '2592000s');
   });
 });

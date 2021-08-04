@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import { keyBy } from 'lodash';
 import Boom from '@hapi/boom';
-import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
+import * as t from 'io-ts';
+import { keyBy } from 'lodash';
 import {
-  APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
+  APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
 } from '../../common/apm_saved_object_constants';
+import { createCloudApmPackgePolicy } from '../lib/fleet/create_cloud_apm_package_policy';
 import { getFleetAgents } from '../lib/fleet/get_agents';
 import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import {
-  getCloudAgentPolicy,
   getApmPackagePolicy,
+  getCloudAgentPolicy,
 } from '../lib/fleet/get_cloud_apm_package_policy';
-import { createCloudApmPackgePolicy } from '../lib/fleet/create_cloud_apm_package_policy';
 import { getUnsupportedApmServerSchema } from '../lib/fleet/get_unsupported_apm_server_schema';
 import { isSuperuser } from '../lib/fleet/is_superuser';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
+import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fleet/has_data',
@@ -139,10 +138,12 @@ const getMigrationCheckRoute = createApmServerRoute({
     const fleetPluginStart = await plugins.fleet.start();
     const securityPluginStart = await plugins.security.start();
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
-    const cloudAgentPolicy = await getCloudAgentPolicy({
-      savedObjectsClient,
-      fleetPluginStart,
-    });
+    const cloudAgentPolicy = hasRequiredRole
+      ? await getCloudAgentPolicy({
+          savedObjectsClient,
+          fleetPluginStart,
+        })
+      : undefined;
     return {
       has_cloud_agent_policy: !!cloudAgentPolicy,
       has_cloud_apm_package_policy: !!getApmPackagePolicy(cloudAgentPolicy),
@@ -156,7 +157,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/fleet/cloud_apm_package_policy',
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources) => {
-    const { plugins, context, config, request, logger, core } = resources;
+    const { plugins, context, config, request, logger } = resources;
     const cloudApmMigrationEnabled =
       config['xpack.apm.agent.migrations.enabled'];
     if (!plugins.fleet || !plugins.security) {
@@ -174,33 +175,18 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
 
-    const cloudApmAackagePolicy = await createCloudApmPackgePolicy({
+    const setup = await setupRequest(resources);
+
+    const cloudApmPackagePolicy = await createCloudApmPackgePolicy({
       cloudPluginSetup,
       fleetPluginStart,
       savedObjectsClient,
       esClient,
       logger,
+      setup,
     });
 
-    const [setup, internalSavedObjectsClient] = await Promise.all([
-      setupRequest(resources),
-      core
-        .start()
-        .then(({ savedObjects }) => savedObjects.createInternalRepository()),
-    ]);
-
-    const spaceId = plugins.spaces?.setup.spacesService.getSpaceId(request);
-
-    // force update the index pattern title with data streams
-    await createStaticIndexPattern(
-      setup,
-      config,
-      internalSavedObjectsClient,
-      spaceId,
-      true
-    );
-
-    return { cloud_apm_package_policy: cloudApmAackagePolicy };
+    return { cloudApmPackagePolicy };
   },
 });
 

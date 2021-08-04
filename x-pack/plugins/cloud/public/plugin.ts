@@ -162,7 +162,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }: CloudSetupDependencies & { basePath: IBasePath }) {
     const { enabled, org_id: orgId } = this.config.full_story;
     if (!enabled || !orgId) {
-      return;
+      return; // do not load any fullstory code in the browser if not enabled
     }
 
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
@@ -171,16 +171,39 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
       : Promise.resolve(undefined);
 
+    // We need to call FS.identify synchronously after FullStory is initialized, so we must load the user upfront
     const [{ initializeFullStory }, userId] = await Promise.all([
       fullStoryChunkPromise,
       userIdPromise,
     ]);
 
-    initializeFullStory({
+    const { fullStory, sha256 } = initializeFullStory({
       basePath,
       orgId,
       packageInfo: this.initializerContext.env.packageInfo,
-      userId,
+    });
+
+    // Very defensive try/catch to avoid any UnhandledPromiseRejections
+    try {
+      // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
+      // across domains work
+      if (userId) {
+        // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
+        const hashedId = sha256(userId.toString());
+        fullStory.identify(hashedId);
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[cloud.full_story] Could not call FS.identify due to error: ${e.toString()}`,
+        e
+      );
+    }
+
+    // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
+    fullStory.event('Loaded Kibana', {
+      // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
+      kibana_version_str: this.initializerContext.env.packageInfo.version,
     });
   }
 }

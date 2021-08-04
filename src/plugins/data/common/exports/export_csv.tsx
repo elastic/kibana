@@ -10,40 +10,26 @@
 
 import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { Datatable } from 'src/plugins/expressions';
+import { createEscapeValue } from './escape_value';
 
 export const LINE_FEED_CHARACTER = '\r\n';
-const nonAlphaNumRE = /[^a-zA-Z0-9]/;
-const allDoubleQuoteRE = /"/g;
 export const CSV_MIME_TYPE = 'text/plain;charset=utf-8';
-
-// TODO: enhance this later on
-function escape(val: object | string, quoteValues: boolean) {
-  if (val != null && typeof val === 'object') {
-    val = val.valueOf();
-  }
-
-  val = String(val);
-
-  if (quoteValues && nonAlphaNumRE.test(val)) {
-    val = `"${val.replace(allDoubleQuoteRE, '""')}"`;
-  }
-
-  return val;
-}
 
 interface CSVOptions {
   csvSeparator: string;
   quoteValues: boolean;
+  escapeFormulaValues: boolean;
   formatFactory: FormatFactory;
   raw?: boolean;
 }
 
 export function datatableToCSV(
   { columns, rows }: Datatable,
-  { csvSeparator, quoteValues, formatFactory, raw }: CSVOptions
+  { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions
 ) {
+  const escapeValues = createEscapeValue(quoteValues, escapeFormulaValues);
   // Build the header row by its names
-  const header = columns.map((col) => escape(col.name, quoteValues));
+  const header = columns.map((col) => escapeValues(col.name));
 
   const formatters = columns.reduce<Record<string, ReturnType<FormatFactory>>>(
     (memo, { id, meta }) => {
@@ -56,7 +42,7 @@ export function datatableToCSV(
   // Convert the array of row objects to an array of row arrays
   const csvRows = rows.map((row) => {
     return columns.map((column) =>
-      escape(raw ? row[column.id] : formatters[column.id].convert(row[column.id]), quoteValues)
+      escapeValues(raw ? row[column.id] : formatters[column.id].convert(row[column.id]))
     );
   });
 

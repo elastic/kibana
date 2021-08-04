@@ -504,8 +504,9 @@ export class AnomalyExplorerChartsService {
         const config = seriesConfigs[i];
         let records;
         if (
-          config.detectorLabel !== undefined &&
-          config.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)
+          (config.detectorLabel !== undefined &&
+            config.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) ||
+          config?.metricFunction === ML_JOB_AGGREGATION.LAT_LONG
         ) {
           if (config.entityFields.length) {
             records = [

@@ -56,8 +56,8 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
     () =>
       debounce(async () => {
         try {
-          const { results } = await ml.dataFrameAnalytics.jobsExists([jobId], true);
-          setFormState({ jobIdExists: results[jobId] });
+          const results = await ml.dataFrameAnalytics.jobsExist([jobId], true);
+          setFormState({ jobIdExists: results[jobId].exists });
         } catch (e) {
           toasts.addDanger(
             i18n.translate(

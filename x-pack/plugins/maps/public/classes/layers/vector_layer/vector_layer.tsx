@@ -69,17 +69,7 @@ import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
-
-interface SourceResult {
-  refreshed: boolean;
-  featureCollection?: FeatureCollection;
-}
-
-interface JoinState {
-  dataHasChanged: boolean;
-  join: InnerJoin;
-  propertiesMap?: PropertiesMap;
-}
+import { JoinState, performInnerJoins } from './perform_inner_joins';
 
 export interface VectorLayerArguments {
   source: IVectorSource;
@@ -435,51 +425,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     };
   }
 
-  _performInnerJoins(
-    sourceResult: SourceResult,
-    joinStates: JoinState[],
-    updateSourceData: DataRequestContext['updateSourceData']
-  ) {
-    // should update the store if
-    // -- source result was refreshed
-    // -- any of the join configurations changed (joinState changed)
-    // -- visibility of any of the features has changed
-
-    let shouldUpdateStore =
-      sourceResult.refreshed || joinStates.some((joinState) => joinState.dataHasChanged);
-
-    if (!shouldUpdateStore) {
-      return;
-    }
-
-    for (let i = 0; i < sourceResult.featureCollection!.features.length; i++) {
-      const feature = sourceResult.featureCollection!.features[i];
-      if (!feature.properties) {
-        feature.properties = {};
-      }
-      const oldVisbility = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
-      let isFeatureVisible = true;
-      for (let j = 0; j < joinStates.length; j++) {
-        const joinState = joinStates[j];
-        const innerJoin = joinState.join;
-        const canJoinOnCurrent = joinState.propertiesMap
-          ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
-          : false;
-        isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
-      }
-
-      if (oldVisbility !== isFeatureVisible) {
-        shouldUpdateStore = true;
-      }
-
-      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = isFeatureVisible;
-    }
-
-    if (shouldUpdateStore) {
-      updateSourceData({ ...sourceResult.featureCollection });
-    }
-  }
-
   async _syncSourceStyleMeta(
     syncContext: DataRequestContext,
     source: IVectorSource,
@@ -714,7 +659,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
 
       const joinStates = await this._syncJoins(syncContext, style);
-      this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+      performInnerJoins(
+        sourceResult,
+        joinStates,
+        syncContext.updateSourceData,
+        syncContext.onJoinError
+      );
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
         throw error;

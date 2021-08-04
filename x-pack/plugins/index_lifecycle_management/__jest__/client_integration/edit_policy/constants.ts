@@ -17,7 +17,7 @@ export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
 
 export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     name: 'my_policy',
     phases: {
@@ -40,7 +40,7 @@ export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
 
 export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     name: 'my_policy',
     phases: {
@@ -73,7 +73,7 @@ export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
 
 export const DELETE_PHASE_POLICY: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     phases: {
       hot: {
@@ -107,7 +107,7 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
 
 export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     name: policyName,
     phases: {
@@ -127,7 +127,7 @@ export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
 
 export const POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     phases: {
       hot: {
@@ -160,7 +160,7 @@ export const POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION: PolicyFromES = {
 
 export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
   version: 1,
-  modified_date: Date.now().toString(),
+  modifiedDate: Date.now().toString(),
   policy: {
     phases: {
       hot: {
@@ -238,8 +238,8 @@ export const getGeneratedPolicies = (): PolicyFromES[] => {
   for (let i = 0; i < 105; i++) {
     policies.push({
       version: i,
-      modified_date: moment().subtract(i, 'days').toISOString(),
-      linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
+      modifiedDate: moment().subtract(i, 'days').toISOString(),
+      indices: i % 2 === 0 ? [`index${i}`] : [],
       name: `testy${i}`,
       policy: {
         ...policy,

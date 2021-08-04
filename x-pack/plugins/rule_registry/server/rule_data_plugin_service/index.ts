@@ -6,6 +6,8 @@
  */
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
 import { estypes } from '@elastic/elasticsearch';
+import { ValidFeatureId } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { get, isEmpty } from 'lodash';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
@@ -20,7 +22,6 @@ import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../
 import { RuleDataClient } from '../rule_data_client';
 import { RuleDataWriteDisabledError } from './errors';
 import { incrementIndexName } from './utils';
-import { ValidFeatureId } from '../utils/rbac';
 
 const BOOTSTRAP_TIMEOUT = 60000;
 
@@ -146,6 +147,12 @@ export class RuleDataPluginService {
       return;
     } catch (err) {
       if (err.meta?.body?.error?.type !== 'illegal_argument_exception') {
+        /**
+         * We skip the rollover if we catch anything except for illegal_argument_exception - that's the error
+         * returned by ES when the mapping update contains a conflicting field definition (e.g., a field changes types).
+         * We expect to get that error for some mapping changes we might make, and in those cases,
+         * we want to continue to rollover the index. Other errors are unexpected.
+         */
         this.options.logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
         return;
       }
@@ -160,6 +167,10 @@ export class RuleDataPluginService {
           new_index: newIndexName,
         });
       } catch (e) {
+        /**
+         * If we catch resource_already_exists_exception, that means that the index has been
+         * rolled over already — nothing to do for us in this case.
+         */
         if (e?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
           this.options.logger.error(`Failed to rollover index for alias ${alias}: ${e.message}`);
         }

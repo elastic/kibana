@@ -52,6 +52,8 @@ const logStateTransition = (
       switch (level) {
         case 'error':
           return logger.error(logMessagePrefix + message);
+        case 'warning':
+          return logger.warn(logMessagePrefix + message);
         case 'info':
           return logger.info(logMessagePrefix + message);
         default:

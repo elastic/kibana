@@ -197,6 +197,10 @@ export class VisualizePageObject extends FtrService {
     return await this.hasVisType('tile_map');
   }
 
+  public async clickTimelion() {
+    await this.clickVisType('timelion');
+  }
+
   public async clickTagCloud() {
     await this.clickVisType('tagcloud');
   }
@@ -449,6 +453,14 @@ export class VisualizePageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
     await this.testSubjects.click('visualizesaveAndReturnButton');
+  }
+
+  public async getDeprecationWarningStatus() {
+    if (await this.visChart.isNewChartsLibraryEnabled()) {
+      await this.testSubjects.missingOrFail('vizDeprecationWarning');
+    } else {
+      await this.testSubjects.existOrFail('vizDeprecationWarning');
+    }
   }
 
   public async linkedToOriginatingApp() {

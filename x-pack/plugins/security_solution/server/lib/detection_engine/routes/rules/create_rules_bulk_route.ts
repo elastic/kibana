@@ -40,12 +40,12 @@ export const createRulesBulkRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const esClient = context.core.elasticsearch.client;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
-      if (!siemClient || !alertsClient) {
+      if (!siemClient || !rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -65,7 +65,7 @@ export const createRulesBulkRoute = (
           .map(async (payloadRule) => {
             if (payloadRule.rule_id != null) {
               const rule = await readRules({
-                alertsClient,
+                rulesClient,
                 ruleId: payloadRule.rule_id,
                 id: undefined,
               });
@@ -99,13 +99,13 @@ export const createRulesBulkRoute = (
                 });
               }
 
-              const createdRule = await alertsClient.create({
+              const createdRule = await rulesClient.create({
                 data: internalRule,
               });
 
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: createdRule.id,
-                alertsClient,
+                rulesClient,
                 savedObjectsClient,
                 enabled: createdRule.enabled,
                 actions: payloadRule.actions,

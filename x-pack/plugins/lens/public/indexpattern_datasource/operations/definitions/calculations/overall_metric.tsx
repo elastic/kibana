@@ -6,9 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import type {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from '../column_types';
 import { optionallHistogramBasedOperationToExpression } from './utils';
-import { OperationDefinition } from '..';
+import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 
 type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternColumn &
@@ -75,7 +78,7 @@ function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<s
             : undefined
         ),
         dataType: 'number',
-        operationType: 'overall_sum',
+        operationType: `overall_${metric}`,
         isBucketed: false,
         scale: 'ratio',
         references: referenceIds,
@@ -154,7 +157,7 @@ Other dimensions breaking down the data like top values or filter are treated as
 If no date histograms or interval functions are used in the current chart, \`overall_min\` is calculating the minimum over all dimensions no matter the used function
 
 Example: Percentage of range
-\`(sum(bytes) - overall_min(sum(bytes)) / (overall_max(bytes) - overall_min(bytes))\`
+\`(sum(bytes) - overall_min(sum(bytes)) / (overall_max(sum(bytes)) - overall_min(sum(bytes)))\`
       `,
   }),
 });
@@ -185,7 +188,7 @@ Other dimensions breaking down the data like top values or filter are treated as
 If no date histograms or interval functions are used in the current chart, \`overall_max\` is calculating the maximum over all dimensions no matter the used function
 
 Example: Percentage of range
-\`(sum(bytes) - overall_min(sum(bytes)) / (overall_max(bytes) - overall_min(bytes))\`
+\`(sum(bytes) - overall_min(sum(bytes))) / (overall_max(sum(bytes)) - overall_min(sum(bytes)))\`
       `,
   }),
 });

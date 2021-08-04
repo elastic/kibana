@@ -49,7 +49,7 @@ function wrapper({ children }: { children?: ReactNode }) {
   }) as unknown) as ApmPluginContextValue;
 
   return (
-    <MemoryRouter>
+    <MemoryRouter initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}>
       <EuiThemeProvider>
         <KibanaReactContext.Provider>
           <MockApmPluginContextWrapper value={mockPluginContext}>

@@ -35,13 +35,13 @@ const NoEnrichmentsPanelView: React.FC<{
 NoEnrichmentsPanelView.displayName = 'NoEnrichmentsPanelView';
 
 export const NoEnrichmentsPanel: React.FC<{
-  existingEnrichmentsCount: number;
-  investigationEnrichmentsCount: number;
-}> = ({ existingEnrichmentsCount, investigationEnrichmentsCount }) => {
+  isIndicatorMatchesPresent: boolean;
+  isInvestigationTimeEnrichmentsPresent: boolean;
+}> = ({ isIndicatorMatchesPresent, isInvestigationTimeEnrichmentsPresent }) => {
   const threatIntelDocsUrl = `${
     useKibana().services.docLinks.links.filebeat.base
   }/filebeat-module-threatintel.html`;
-  const noIndicatorEnrichmentsDescription = (
+  const noIntelligenceCTA = (
     <>
       {i18n.IF_CTI_NOT_ENABLED}
       <EuiLink href={threatIntelDocsUrl} target="_blank">
@@ -50,35 +50,42 @@ export const NoEnrichmentsPanel: React.FC<{
     </>
   );
 
-  if (existingEnrichmentsCount === 0 && investigationEnrichmentsCount === 0) {
+  if (!isIndicatorMatchesPresent && !isInvestigationTimeEnrichmentsPresent) {
     return (
       <NoEnrichmentsPanelView
         title={<h2>{i18n.NO_ENRICHMENTS_FOUND_TITLE}</h2>}
         description={
-          <>
-            <p>{noIndicatorEnrichmentsDescription}</p>
-            <p>{i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}</p>
-          </>
+          <p>
+            {i18n.NO_ENRICHMENTS_FOUND_DESCRIPTION} {noIntelligenceCTA}
+          </p>
         }
       />
     );
-  } else if (existingEnrichmentsCount === 0) {
+  } else if (!isIndicatorMatchesPresent) {
     return (
       <>
         <EuiHorizontalRule margin="s" />
         <NoEnrichmentsPanelView
           title={<h2>{i18n.NO_INDICATOR_ENRICHMENTS_TITLE}</h2>}
-          description={noIndicatorEnrichmentsDescription}
+          description={
+            <p>
+              {i18n.NO_INDICATOR_ENRICHMENTS_DESCRIPTION} {noIntelligenceCTA}
+            </p>
+          }
         />
       </>
     );
-  } else if (investigationEnrichmentsCount === 0) {
+  } else if (!isInvestigationTimeEnrichmentsPresent) {
     return (
       <>
         <EuiHorizontalRule margin="s" />
         <NoEnrichmentsPanelView
           title={<h2>{i18n.NO_INVESTIGATION_ENRICHMENTS_TITLE}</h2>}
-          description={i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}
+          description={
+            <p>
+              {i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION} {noIntelligenceCTA}
+            </p>
+          }
         />
       </>
     );
