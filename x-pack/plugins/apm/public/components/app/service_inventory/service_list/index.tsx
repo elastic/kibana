@@ -20,7 +20,6 @@ import {
   BreakPoints,
   useBreakPoints,
 } from '../../../../hooks/use_break_points';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
@@ -40,6 +39,7 @@ import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
@@ -50,13 +50,6 @@ type ServiceListItem = ValuesType<Items>;
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
-
-const ToolTipWrapper = euiStyled.span`
-  width: 100%;
-  .apmServiceList__serviceNameTooltip {
-    width: 100%;
-  }
-`;
 
 const SERVICE_HEALTH_STATUS_ORDER = [
   ServiceHealthStatus.unknown,
@@ -103,20 +96,16 @@ export function getServiceColumns({
       width: '40%',
       sortable: true,
       render: (_, { serviceName, agentName }) => (
-        <ToolTipWrapper data-test-subj="apmServiceListAppLink">
-          <EuiToolTip
-            delay="long"
-            content={formatString(serviceName)}
-            id="service-name-tooltip"
-            anchorClassName="apmServiceList__serviceNameTooltip"
-          >
+        <TruncateWithTooltip
+          text={formatString(serviceName)}
+          content={
             <ServiceLink
               agentName={agentName}
               query={query}
               serviceName={serviceName}
             />
-          </EuiToolTip>
-        </ToolTipWrapper>
+          }
+        />
       ),
     },
     ...(showWhenSmallOrGreaterThanLarge
