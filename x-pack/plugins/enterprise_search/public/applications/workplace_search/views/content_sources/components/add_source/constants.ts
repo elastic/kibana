@@ -307,6 +307,13 @@ export const SAVE_CUSTOM_DOC_PERMISSIONS_TITLE = i18n.translate(
   }
 );
 
+export const INCLUDED_FEATURES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.includedFeaturesTitle',
+  {
+    defaultMessage: 'Included features',
+  }
+);
+
 export const SOURCE_FEATURES_SEARCHABLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.searchable.text',
   {

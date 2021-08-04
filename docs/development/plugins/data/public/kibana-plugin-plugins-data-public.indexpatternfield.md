@@ -4,6 +4,7 @@
 
 ## IndexPatternField class
 
+
 <b>Signature:</b>
 
 ```typescript
