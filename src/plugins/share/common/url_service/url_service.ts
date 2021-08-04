@@ -9,7 +9,7 @@
 import { LocatorClient, LocatorClientDependencies } from './locators';
 import { IShortUrlClientFactory } from './short_urls';
 
-export interface UrlServiceDependencies<D> extends LocatorClientDependencies {
+export interface UrlServiceDependencies<D = unknown> extends LocatorClientDependencies {
   shortUrls: IShortUrlClientFactory<D>;
 }
 
