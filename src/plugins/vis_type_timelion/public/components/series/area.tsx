@@ -22,11 +22,11 @@ const isShowLines = (lines: VisSeries['lines'], points: VisSeries['points']) =>
   lines?.show ? true : points?.show ? false : true;
 
 const getPointFillColor = (points: VisSeries['points'], color: string | undefined) => {
-  const pointFillColor = points?.fillColor || color;
+  const pointFillColor = points?.fillColor || points?.fill === undefined ? 'white' : color;
   return (
     pointFillColor &&
     chroma(pointFillColor)
-      .alpha((points?.fill || 0) * 10)
+      .alpha((points?.fill ?? 1))
       .css()
   );
 };
@@ -65,7 +65,7 @@ export const AreaSeriesComponent = ({ index, groupId, visData }: AreaSeriesCompo
     yScaleType={ScaleType.Linear}
     xAccessor={0}
     yAccessors={[1]}
-    data={visData.data}
+    data={visData._hide ? [] : visData.data}
     sortIndex={index}
     color={visData.color}
     stackAccessors={visData.stack ? [0] : undefined}
