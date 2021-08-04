@@ -74,7 +74,7 @@ export const getRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.resolve({ id });
+        const rule = await rulesClient.get({ id });
         return res.ok({
           body: rewriteBodyRes(rule),
         });

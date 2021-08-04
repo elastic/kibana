@@ -9,6 +9,7 @@ import React from 'react';
 
 import {
   Alert,
+  ResolvedAlert,
   AlertType,
   AlertTaskState,
   AlertInstanceSummary,
@@ -27,6 +28,7 @@ import {
   muteAlertInstance,
   unmuteAlertInstance,
   loadAlert,
+  resolveAlert,
   loadAlertState,
   loadAlertInstanceSummary,
   loadAlertTypes,
@@ -58,6 +60,7 @@ export interface ComponentOpts {
     errors: string[];
   }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
+  resolveAlert: (id: Alert['id']) => Promise<ResolvedAlert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
   loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
@@ -127,6 +130,7 @@ export function withBulkAlertOperations<T>(
         }}
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
+        resolveAlert={async (alertId: Alert['id']) => resolveAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
         loadAlertInstanceSummary={async (alertId: Alert['id']) =>
           loadAlertInstanceSummary({ http, alertId })
