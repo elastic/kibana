@@ -7,42 +7,19 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
+import {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
+} from '../../../../../../src/core/server';
 import {
   ConnectorTypes,
   CommentType,
-  CaseType,
   AssociationType,
-  ESConnectorFields,
   SECURITY_SOLUTION_OWNER,
-} from '../../common';
+} from '../../../common';
 
-interface UnsanitizedCaseConnector {
-  connector_id: string;
-}
-
-interface UnsanitizedConfigureConnector {
-  connector_id: string;
-  connector_name: string;
-}
-
-interface SanitizedCaseConnector {
-  connector: {
-    id: string;
-    name: string | null;
-    type: string | null;
-    fields: null | ESConnectorFields;
-  };
-}
-
-interface SanitizedConfigureConnector {
-  connector: {
-    id: string;
-    name: string | null;
-    type: string | null;
-    fields: null;
-  };
-}
+export { caseMigrations } from './cases';
+export { configureMigrations } from './configuration';
 
 interface UserActions {
   action_field: string[];
@@ -50,21 +27,11 @@ interface UserActions {
   old_value: string;
 }
 
-interface SanitizedCaseSettings {
-  settings: {
-    syncAlerts: boolean;
-  };
-}
-
-interface SanitizedCaseType {
-  type: string;
-}
-
-interface SanitizedCaseOwner {
+export interface SanitizedCaseOwner {
   owner: string;
 }
 
-const addOwnerToSO = <T = Record<string, unknown>>(
+export const addOwnerToSO = <T = Record<string, unknown>>(
   doc: SavedObjectUnsanitizedDoc<T>
 ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => ({
   ...doc,
@@ -74,94 +41,6 @@ const addOwnerToSO = <T = Record<string, unknown>>(
   },
   references: doc.references || [],
 });
-
-export const caseMigrations = {
-  '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
-  ): SavedObjectSanitizedDoc<SanitizedCaseConnector> => {
-    const { connector_id, ...attributesWithoutConnectorId } = doc.attributes;
-
-    return {
-      ...doc,
-      attributes: {
-        ...attributesWithoutConnectorId,
-        connector: {
-          id: connector_id ?? 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-      },
-      references: doc.references || [],
-    };
-  },
-  '7.11.0': (
-    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseSettings> => {
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        settings: {
-          syncAlerts: true,
-        },
-      },
-      references: doc.references || [],
-    };
-  },
-  '7.12.0': (
-    doc: SavedObjectUnsanitizedDoc<SanitizedCaseConnector>
-  ): SavedObjectSanitizedDoc<SanitizedCaseType & SanitizedCaseConnector> => {
-    const { fields, type } = doc.attributes.connector;
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        type: CaseType.individual,
-        connector: {
-          ...doc.attributes.connector,
-          fields:
-            Array.isArray(fields) && fields.length > 0 && type === ConnectorTypes.serviceNowITSM
-              ? [...fields, { key: 'category', value: null }, { key: 'subcategory', value: null }]
-              : fields,
-        },
-      },
-      references: doc.references || [],
-    };
-  },
-  '7.14.0': (
-    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
-    return addOwnerToSO(doc);
-  },
-};
-
-export const configureMigrations = {
-  '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigureConnector>
-  ): SavedObjectSanitizedDoc<SanitizedConfigureConnector> => {
-    const { connector_id, connector_name, ...restAttributes } = doc.attributes;
-
-    return {
-      ...doc,
-      attributes: {
-        ...restAttributes,
-        connector: {
-          id: connector_id ?? 'none',
-          name: connector_name ?? 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-      },
-      references: doc.references || [],
-    };
-  },
-  '7.14.0': (
-    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
-    return addOwnerToSO(doc);
-  },
-};
 
 export const userActionsMigrations = {
   '7.10.0': (doc: SavedObjectUnsanitizedDoc<UserActions>): SavedObjectSanitizedDoc<UserActions> => {
