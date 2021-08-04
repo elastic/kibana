@@ -75,7 +75,7 @@ async function endpointDetailsMiddleware({
   coreStart,
 }: {
   store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-  coreStart: coreStart;
+  coreStart: CoreStart;
 }) {
   const { getState, dispatch } = store;
   dispatch({
