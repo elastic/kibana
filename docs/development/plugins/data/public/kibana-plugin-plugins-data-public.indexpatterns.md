@@ -16,5 +16,6 @@ indexPatterns: {
     isFilterable: typeof isFilterable;
     isNestedField: typeof isNestedField;
     validate: typeof validateIndexPattern;
+    flattenHitWrapper: typeof flattenHitWrapper;
 }
 ```

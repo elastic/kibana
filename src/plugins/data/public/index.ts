@@ -107,6 +107,7 @@ import {
   ILLEGAL_CHARACTERS,
   isDefault,
   validateIndexPattern,
+  flattenHitWrapper,
 } from './index_patterns';
 
 export type { IndexPatternsService } from './index_patterns';
@@ -121,6 +122,7 @@ export const indexPatterns = {
   isFilterable,
   isNestedField,
   validate: validateIndexPattern,
+  flattenHitWrapper,
 };
 
 export { IndexPatternsContract, IndexPattern, IndexPatternField } from './index_patterns';
