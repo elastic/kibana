@@ -36,7 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(currentUrl).to.equal(fieldUrl);
   };
 
-  describe('Changing field formatter to Url', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('Changing field formatter to Url', () => {
     before(async function () {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
