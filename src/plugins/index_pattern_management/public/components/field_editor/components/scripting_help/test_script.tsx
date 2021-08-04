@@ -80,7 +80,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
       isLoading: true,
     });
 
-    let query;
+    let query: any;
     if (searchContext) {
       const esQueryConfigs = esQuery.getEsQueryConfig(this.context.services.uiSettings);
       query = esQuery.buildEsQuery(

@@ -11,6 +11,7 @@ import { convertTimeValueToIso } from './date_conversion';
 import { EsHitRecordList, EsHitRecord } from '../context';
 import { IntervalValue } from './generate_intervals';
 import { EsQuerySearchAfter } from './get_es_query_search_after';
+import { SerializableState } from '../../../../../../../kibana_utils/common/persistable_state';
 
 interface RangeQuery {
   format: string;
@@ -56,9 +57,9 @@ export async function fetchHitsInInterval(
           must: {
             constant_score: {
               filter: {
-                range: {
+                range: ({
                   [timeField]: range,
-                },
+                } as unknown) as SerializableState,
               },
             },
           },

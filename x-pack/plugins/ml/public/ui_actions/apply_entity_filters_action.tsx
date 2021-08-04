@@ -15,6 +15,7 @@ import {
 } from '../embeddables';
 import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
 import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
+import { SerializableState } from '../../../../../src/plugins/kibana_utils/common/persistable_state';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 
@@ -78,7 +79,9 @@ export function createApplyEntityFieldFiltersAction(
           const filter = filterManager
             .getFilters()
             .find(
-              (f) => f.meta.key === field.fieldName && f.meta.params.query === field.fieldValue
+              (f) =>
+                f.meta.key === field.fieldName &&
+                (f.meta.params as SerializableState).query === field.fieldValue
             );
           if (filter) {
             filterManager.removeFilter(filter);

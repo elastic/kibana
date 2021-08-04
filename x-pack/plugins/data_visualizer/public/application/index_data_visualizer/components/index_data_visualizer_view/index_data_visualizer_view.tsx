@@ -69,6 +69,7 @@ import { extractSearchData } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
+import { SerializableState } from '../../../../../../../../src/plugins/kibana_utils/common/persistable_state';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -864,7 +865,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   <SearchPanel
                     indexPattern={currentIndexPattern}
                     searchString={searchString}
-                    searchQuery={searchQuery}
+                    searchQuery={searchQuery as SerializableState}
                     searchQueryLanguage={searchQueryLanguage}
                     setSearchParams={setSearchParams}
                     samplerShardSize={samplerShardSize}

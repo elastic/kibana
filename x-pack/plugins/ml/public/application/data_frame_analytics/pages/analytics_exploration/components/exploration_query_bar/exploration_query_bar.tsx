@@ -70,7 +70,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
    */
   useEffect(function updateIdToSelectedMap() {
     if (filters !== undefined) {
-      const match: string[] | null = query.query.match(regex);
+      const match: string[] | null = (query.query as string).match(regex);
       let filterKeyInEffect: string | undefined;
 
       if (match !== null && match[0].includes('true')) {
@@ -154,9 +154,9 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
       // Toggling selected optionId to 'on'
       if (searchInput.query === '') {
         newQuery = filterQueryString;
-      } else if (searchInput.query.match(regex) !== null) {
+      } else if ((searchInput.query as string).match(regex) !== null) {
         // If query already contains columnId filter - replace with incoming value from filter selection
-        newQuery = searchInput.query.replace(regex, filterQueryString);
+        newQuery = (searchInput.query as string).replace(regex, filterQueryString);
       } else {
         // Otherwise just add filter query to the end of existing query
         newQuery = `${searchInput.query} and ${filterQueryString}`;

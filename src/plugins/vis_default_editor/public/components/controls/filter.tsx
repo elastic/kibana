@@ -53,7 +53,7 @@ function FilterRow({
   });
 
   const onBlur = () => {
-    if (value.query.length > 0) {
+    if (typeof value.query === 'string' && value.query.length > 0) {
       // Store filter to the query log so that it is available in autocomplete.
       services.data.query.addToQueryLog(services.appName, value);
     }

@@ -8,6 +8,7 @@
 
 import { has } from 'lodash';
 import { Query } from 'src/plugins/data/public';
+import { SerializableState } from '../../../../kibana_utils/common/persistable_state';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL
@@ -16,7 +17,7 @@ import { Query } from 'src/plugins/data/public';
  * @return Object
  */
 
-export function migrateLegacyQuery(query: Query | { [key: string]: unknown } | string): Query {
+export function migrateLegacyQuery(query: Query | SerializableState | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
     return { query, language: 'lucene' };
