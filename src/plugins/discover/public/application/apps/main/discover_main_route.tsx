@@ -9,7 +9,7 @@ import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/target/types/public';
-import { IndexPatternAttributes, SavedObject } from '../../../../../data/common';
+import { IndexPatternAttributes, SavedObject } from 'src/plugins/data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { getState } from './services/discover_state';

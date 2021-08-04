@@ -16,7 +16,7 @@ import 'angular-sanitize';
 import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, PluginInitializerContext } from 'kibana/public';
-import { DataPublicPluginStart } from '../../../../data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Storage } from '../../../../kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../navigation/public';
 import { createDocTableDirective } from './doc_table';
