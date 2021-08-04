@@ -22,7 +22,7 @@ export const ResultsPanel: FC<Props> = ({ pipelineName, onManageIngestPipeline }
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.ecsMapper.file.informational.instructions"
+                id="xpack.ecsMapper.results.success"
                 defaultMessage="Import successful!"
               />
             </p>
