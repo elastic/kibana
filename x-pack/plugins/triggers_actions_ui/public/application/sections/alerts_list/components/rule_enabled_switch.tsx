@@ -29,7 +29,7 @@ export const RuleEnabledSwitch: React.FunctionComponent<ComponentOpts> = ({
   }, [item.enabled]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-  const res = isUpdating ? (
+  return isUpdating ? (
     <EuiLoadingSpinner data-test-subj="enableSpinner" size="m" />
   ) : (
     <EuiSwitch
@@ -53,5 +53,4 @@ export const RuleEnabledSwitch: React.FunctionComponent<ComponentOpts> = ({
       label=""
     />
   );
-  return res;
 };

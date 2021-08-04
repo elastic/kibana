@@ -28,7 +28,7 @@ export const RuleMutedSwitch: React.FunctionComponent<ComponentOpts> = ({
     <EuiLoadingSpinner size="m" />
   ) : (
     <EuiSwitch
-      name="enable"
+      name="mute"
       disabled={disabled}
       compressed={true}
       checked={isMuted}
