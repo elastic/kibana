@@ -766,14 +766,14 @@ export const esFilters: {
     toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
         meta: {
             negate: boolean;
-            alias: string | null;
-            disabled: boolean;
+            alias?: string | null | undefined;
+            disabled?: boolean | undefined;
             controlledBy?: string | undefined;
             index?: string | undefined;
             isMultiIndex?: boolean | undefined;
             type?: string | undefined;
             key?: string | undefined;
-            params?: any;
+            params?: import("@kbn/es-query/target_types/filters/build_filters").Serializable;
             value?: string | undefined;
         };
         $state?: {

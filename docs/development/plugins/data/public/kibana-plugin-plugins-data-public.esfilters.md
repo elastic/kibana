@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Import helpers from the "<!-- -->@<!-- -->kbn/es-query" package directly instead.  8.0
+> Import helpers from the "<!-- -->@<!-- -->kbn/es-query" package directly instead.  8.1
 > 
 
 Filter helpers namespace:
@@ -36,14 +36,14 @@ esFilters: {
     toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
         meta: {
             negate: boolean;
-            alias: string | null;
-            disabled: boolean;
+            alias?: string | null | undefined;
+            disabled?: boolean | undefined;
             controlledBy?: string | undefined;
             index?: string | undefined;
             isMultiIndex?: boolean | undefined;
             type?: string | undefined;
             key?: string | undefined;
-            params?: any;
+            params?: import("@kbn/es-query/target_types/filters/build_filters").Serializable;
             value?: string | undefined;
         };
         $state?: {
