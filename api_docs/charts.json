@@ -1354,11 +1354,10 @@
             ],
             "path": "src/plugins/charts/public/services/palettes/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "charts",
-                "id": "def-public.state",
+                "id": "def-public.PaletteDefinition.toExpression.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -1369,9 +1368,11 @@
                   "T | undefined"
                 ],
                 "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "charts",
@@ -1403,11 +1404,10 @@
             ],
             "path": "src/plugins/charts/public/services/palettes/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "charts",
-                "id": "def-public.series",
+                "id": "def-public.PaletteDefinition.getCategoricalColor.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "series",
@@ -1425,11 +1425,12 @@
                   "[]"
                 ],
                 "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "charts",
-                "id": "def-public.chartConfiguration",
+                "id": "def-public.PaletteDefinition.getCategoricalColor.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "chartConfiguration",
@@ -1445,11 +1446,12 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               },
               {
                 "parentPluginId": "charts",
-                "id": "def-public.state",
+                "id": "def-public.PaletteDefinition.getCategoricalColor.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -1460,9 +1462,11 @@
                   "T | undefined"
                 ],
                 "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "charts",
@@ -1478,21 +1482,24 @@
             ],
             "path": "src/plugins/charts/public/services/palettes/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "charts",
-                "id": "def-public.size",
+                "id": "def-public.PaletteDefinition.getCategoricalColors.$1",
                 "type": "number",
                 "tags": [],
                 "label": "size",
                 "description": [],
+                "signature": [
+                  "number"
+                ],
                 "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "charts",
-                "id": "def-public.state",
+                "id": "def-public.PaletteDefinition.getCategoricalColors.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -1501,9 +1508,11 @@
                   "T | undefined"
                 ],
                 "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "charts",
@@ -1533,7 +1542,70 @@
               "((value: number | undefined, state: T, { min, max }: { min: number; max: number; }) => string | undefined) | undefined"
             ],
             "path": "src/plugins/charts/public/services/palettes/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.PaletteDefinition.getColorForValue.$1",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/plugins/charts/public/services/palettes/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.PaletteDefinition.getColorForValue.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/plugins/charts/public/services/palettes/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax",
+                "type": "Object",
+                "tags": [],
+                "label": "{ min, max }",
+                "description": [],
+                "path": "src/plugins/charts/public/services/palettes/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "charts",
+                    "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax.min",
+                    "type": "number",
+                    "tags": [],
+                    "label": "min",
+                    "description": [],
+                    "path": "src/plugins/charts/public/services/palettes/types.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "charts",
+                    "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax.max",
+                    "type": "number",
+                    "tags": [],
+                    "label": "max",
+                    "description": [],
+                    "path": "src/plugins/charts/public/services/palettes/types.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1627,19 +1699,23 @@
             ],
             "path": "src/plugins/charts/public/services/palettes/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "charts",
-                "id": "def-public.name",
+                "id": "def-public.PaletteRegistry.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/charts/public/services/palettes/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "charts",
@@ -1661,8 +1737,8 @@
             ],
             "path": "src/plugins/charts/public/services/palettes/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
