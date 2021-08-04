@@ -561,8 +561,6 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
-    // @internal (undocumented)
-    deprecations: DeprecationsServiceStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
@@ -896,6 +894,14 @@ export interface DeprecationInfo {
     url: string;
 }
 
+// @public
+export interface DeprecationsClient {
+    // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+}
+
 // Warning: (ae-missing-release-tag) "DeprecationsDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -931,16 +937,6 @@ export interface DeprecationSettings {
 export interface DeprecationsServiceSetup {
     // (undocumented)
     registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
-}
-
-// Warning: (ae-missing-release-tag) "DeprecationsServiceStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface DeprecationsServiceStart {
-    // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    getAllDeprecations: (dependencies: GetDeprecationsContext) => Promise<DomainDeprecationDetails[]>;
 }
 
 // @public
@@ -2119,6 +2115,9 @@ export interface RequestHandlerContext {
         };
         uiSettings: {
             client: IUiSettingsClient;
+        };
+        deprecations: {
+            client: DeprecationsClient;
         };
     };
 }

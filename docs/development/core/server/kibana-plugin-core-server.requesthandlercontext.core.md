@@ -24,5 +24,8 @@ core: {
         uiSettings: {
             client: IUiSettingsClient;
         };
+        deprecations: {
+            client: DeprecationsClient;
+        };
     };
 ```
