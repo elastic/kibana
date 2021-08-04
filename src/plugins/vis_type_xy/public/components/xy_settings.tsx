@@ -110,6 +110,9 @@ export const XYSettings: FC<XYSettingsProps> = ({
     barSeriesStyle: {
       ...valueLabelsStyling,
     },
+    crosshair: {
+      ...theme.crosshair,
+    },
     axes: {
       axisTitle: {
         padding: {
@@ -158,7 +161,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       onPointerUpdate={onPointerUpdate}
       xDomain={adjustedXDomain}
       rotation={rotation}
-      theme={[theme, themeOverrides]}
+      theme={[themeOverrides, theme]}
       baseTheme={baseTheme}
       showLegend={showLegend}
       legendPosition={legendPosition}
