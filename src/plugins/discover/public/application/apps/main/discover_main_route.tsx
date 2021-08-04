@@ -8,7 +8,7 @@
 import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
-import { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/target/types/public';
+import type { SavedObject as SavedObjectDeprecated } from '../../../../../saved_objects/public';
 import { IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
