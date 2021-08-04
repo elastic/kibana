@@ -339,18 +339,20 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="lensApp"
-                  fullWidth={false}
-                  isDisabled={!lens?.canUseEditor() || lensEmbeddableAttributes === null}
-                  onClick={() => handleEditInLensClick()}
-                >
-                  <FormattedMessage
-                    id="xpack.cases.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
-                    defaultMessage="Edit visualization"
-                  />
-                </EuiButton>
+              <EuiFlexItem>
+                <span>
+                  <EuiButton
+                    iconType="lensApp"
+                    fullWidth={false}
+                    isDisabled={!lens?.canUseEditor() || lensEmbeddableAttributes === null}
+                    onClick={() => handleEditInLensClick()}
+                  >
+                    <FormattedMessage
+                      id="xpack.cases.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
+                      defaultMessage="Edit visualization"
+                    />
+                  </EuiButton>
+                </span>
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
