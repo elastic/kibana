@@ -27,7 +27,9 @@ import {
 } from '@elastic/eui';
 
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
+import { ExportJobDependenciesWarningCallout } from './export_job_warning_callout';
 import { JobsExportService } from './jobs_export_service';
+import type { JobDependencies } from './jobs_export_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import type { JobType } from '../../../../../common/types/saved_objects';
 
@@ -65,6 +67,10 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     [toasts]
   );
 
+  const [jobDependencies, setJobDependencies] = useState<JobDependencies>([]);
+  const [selectedJobDependencies, setSelectedJobDependencies] = useState<JobDependencies>([]);
+  // const [showJobDependenciesWarning, setShowJobDependenciesWarning] = useState(false);
+
   useEffect(
     function onFlyoutChange() {
       setLoadingADJobs(true);
@@ -80,6 +86,22 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
           .then(({ jobs }) => {
             setLoadingADJobs(false);
             setAdJobIds(jobs.map((j) => j.job_id));
+
+            jobsExportService
+              .getJobDependencies(jobs)
+              .then((jobDeps) => {
+                setJobDependencies(jobDeps);
+                setLoadingADJobs(false);
+              })
+              .catch((error) => {
+                const errorTitle = i18n.translate(
+                  'xpack.ml.importExport.exportFlyout.calendarsError',
+                  {
+                    defaultMessage: 'Could not load calendars',
+                  }
+                );
+                displayErrorToast(error, errorTitle);
+              });
           })
           .catch((error) => {
             const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.adJobsError', {
@@ -87,6 +109,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
             });
             displayErrorToast(error, errorTitle);
           });
+
         getDataFrameAnalytics()
           .then(({ data_frame_analytics: dataFrameAnalytics }) => {
             setLoadingDFAJobs(false);
@@ -151,6 +174,12 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     switchTab();
   }, [selectedJobIds]);
 
+  useEffect(() => {
+    setSelectedJobDependencies(
+      jobDependencies.filter(({ jobId }) => selectedJobIds.includes(jobId))
+    );
+  }, [selectedJobIds]);
+
   function switchTab() {
     const jobType =
       selectedJobType === 'anomaly-detector' ? 'data-frame-analytics' : 'anomaly-detector';
@@ -187,6 +216,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
+              <ExportJobDependenciesWarningCallout jobs={selectedJobDependencies} />
               <EuiTabs size="s">
                 <EuiTab
                   isSelected={selectedJobType === 'anomaly-detector'}

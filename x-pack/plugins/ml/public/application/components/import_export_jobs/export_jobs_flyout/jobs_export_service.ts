@@ -12,6 +12,9 @@ import type { JobType } from '../../../../../common/types/saved_objects';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
 
+export type JobDependencies = Array<{ jobId: string; calendarIds: string[]; filterIds: string[] }>;
+export type FiltersPerJob = Array<{ jobId: string; filterIds: string[] }>;
+
 type ExportableConfigs =
   | Array<
       | {
@@ -50,5 +53,69 @@ export class JobsExportService {
     return (
       (jobType === 'anomaly-detector' ? 'anomaly_detection' : 'data_frame_analytics') + '_jobs.json'
     );
+  }
+
+  public async getJobDependencies(jobs: Job[]): Promise<JobDependencies> {
+    const calendars = await this._mlApiServices.calendars();
+
+    const groups = jobs.reduce((acc, cur) => {
+      if (Array.isArray(cur.groups)) {
+        cur.groups.forEach((g) => {
+          if (acc[g] === undefined) {
+            acc[g] = [];
+          }
+          acc[g].push(cur.job_id);
+        });
+      }
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    const isGroup = (id: string) => groups[id] !== undefined;
+
+    const calendarsPerJob = calendars.reduce((acc, cur) => {
+      cur.job_ids.forEach((j) => {
+        if (isGroup(j)) {
+          groups[j].forEach((j2) => {
+            if (acc[j2] === undefined) {
+              acc[j2] = [];
+            }
+            acc[j2].push(cur.calendar_id);
+          });
+        } else {
+          if (acc[j] === undefined) {
+            acc[j] = [];
+          }
+          acc[j].push(cur.calendar_id);
+        }
+      });
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    const filtersPerJob = jobs.reduce((acc, cur) => {
+      if (acc[cur.job_id] === undefined) {
+        acc[cur.job_id] = [];
+      }
+      cur.analysis_config.detectors.forEach((d) => {
+        if (d.custom_rules !== undefined) {
+          d.custom_rules.forEach((r) => {
+            if (r.scope !== undefined) {
+              Object.values(r.scope).forEach((scope) => {
+                acc[cur.job_id].push(scope.filter_id);
+              });
+            }
+          });
+        }
+      });
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    return jobs.map((j) => {
+      const jobId = j.job_id;
+      return {
+        jobId,
+        calendarIds: [...new Set(calendarsPerJob[jobId])] ?? [],
+        filterIds: [...new Set(filtersPerJob[jobId])] ?? [],
+      };
+    });
   }
 }
