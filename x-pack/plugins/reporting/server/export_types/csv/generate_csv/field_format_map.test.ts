@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { fieldFormats, FieldFormatsGetConfigFn, UI_SETTINGS } from 'src/plugins/data/server';
+import { GetConfigFn } from 'src/plugins/data/common';
+import { fieldFormats, UI_SETTINGS } from 'src/plugins/data/server';
 import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 import { fieldFormatMapFactory } from './field_format_map';
 
@@ -26,7 +27,7 @@ describe('field format map', function () {
     number: { id: 'number', params: {} },
   };
   configMock[UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
-  const getConfig = ((key: string) => configMock[key]) as FieldFormatsGetConfigFn;
+  const getConfig = ((key: string) => configMock[key]) as GetConfigFn;
   const testValue = '4000';
   const mockTimezone = 'Browser';
 
