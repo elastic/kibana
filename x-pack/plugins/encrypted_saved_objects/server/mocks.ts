@@ -32,6 +32,7 @@ function createEncryptedSavedObjectsStartMock() {
 function createEncryptedSavedObjectsClienttMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
     getDecryptedAsInternalUser: jest.fn(),
+    resolveDecryptedIdAsInternalUser: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsClient>;
 }
 
