@@ -18,7 +18,7 @@ import {
   getFieldValidityAndErrorMessage,
 } from '../../shared_imports';
 
-import { TimestampOption } from '../index_pattern_editor_flyout_content';
+import { TimestampOption } from '../../types';
 import { schema } from '../form_schema';
 
 interface Props {

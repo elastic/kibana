@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IndexPatternField } from '../../../../plugins/data/public';
-import { TimestampOption } from '../components/index_pattern_editor_flyout_content';
+import { TimestampOption } from '../types';
 
 export function extractTimeFields(
   fields: IndexPatternField[],
