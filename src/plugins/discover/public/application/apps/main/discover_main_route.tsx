@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/target/types/public';
@@ -16,6 +16,8 @@ import { getState } from './services/discover_state';
 import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
+
+const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
 export interface DiscoverMainProps {
   opts: {
@@ -111,7 +113,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   }
 
   return (
-    <DiscoverMainApp
+    <DiscoverMainAppMemoized
       indexPattern={indexPattern}
       opts={{ ...props.opts, savedSearch, indexPatternList }}
     />

@@ -203,9 +203,10 @@ export function useDiscoverState({
   );
 
   useEffect(() => {
-    if (!initialSavedSearch) {
+    if (!initialSavedSearch || !initialSavedSearch.id) {
       return;
     }
+    // handling pushing to state of a persisted saved object
     const newAppState = getStateDefaults({
       config,
       data,
