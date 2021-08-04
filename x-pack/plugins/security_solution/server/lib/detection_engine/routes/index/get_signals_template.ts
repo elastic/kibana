@@ -78,12 +78,8 @@ export const getSignalsTemplate = (index: string, spaceId: string, aadIndexAlias
             ...ecsMapping.mappings.properties.threat,
             properties: {
               ...ecsMapping.mappings.properties.threat.properties,
-              indicator: {
-                ...otherMapping.mappings.properties.threat.properties.indicator,
-                properties: {
-                  ...otherMapping.mappings.properties.threat.properties.indicator.properties,
-                  event: ecsMapping.mappings.properties.event,
-                },
+              enrichments: {
+                ...otherMapping.mappings.properties.threat.properties.enrichments,
               },
             },
           },
