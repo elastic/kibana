@@ -35,9 +35,9 @@ export const commonHideTSVBLastValueIndicator = (visState: any) => {
 
 export const commonAddTSVBIgnoreFilterFormatting = (visState: any) => {
   if (visState && visState.type === 'metrics') {
-    const params = get(visState, 'params') || {};
-    params?.series.forEach((item: any) => (item.ignore_field_formatting = true));
-    params?.annotations.forEach((item: any) => (item.ignore_field_formatting = true));
+    const { series = [], annotations = [] } = get(visState, 'params', {});
+    series.forEach((item: any) => (item.ignore_field_formatting = true));
+    annotations.forEach((item: any) => (item.ignore_field_formatting = true));
   }
   return visState;
 };

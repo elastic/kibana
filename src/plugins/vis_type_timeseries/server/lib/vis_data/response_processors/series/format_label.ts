@@ -26,7 +26,7 @@ export function formatLabel(
     const termsField = series.terms_field;
 
     // no need to format labels for markdown as they also used there as variables keys
-    if (termsField && panel.type !== PANEL_TYPES.MARKDOWN) {
+    if (termsField && panel.type !== PANEL_TYPES.MARKDOWN && panel.use_kibana_indexes) {
       const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.index });
       const getFieldFormatByName = createFieldFormatAccessor(
         fieldFormatService,

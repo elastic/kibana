@@ -74,7 +74,7 @@ export function processBucket({
     );
 
     const key =
-      getFieldFormatByName && panel.pivot_id
+      getFieldFormatByName && panel.pivot_id && panel.use_kibana_indexes
         ? getFieldFormatByName(panel.pivot_id).convert(bucket.key)
         : bucket.key;
 

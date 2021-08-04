@@ -31,10 +31,10 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
 
         const varName = [label, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
-        const formatter = seriesModel.ignore_field_formatting
-          ? createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig)
-          : createFieldFormatter(last(seriesModel.metrics)?.field, fieldFormatMap);
-
+        const formatter =
+          model.use_kibana_indexes && !seriesModel.ignore_field_formatting
+            ? createFieldFormatter(last(seriesModel.metrics)?.field, fieldFormatMap)
+            : createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig);
         const lastValue = getLastValue(row.data);
 
         const data = {

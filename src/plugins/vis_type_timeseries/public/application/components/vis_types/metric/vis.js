@@ -45,9 +45,10 @@ function MetricVisualization(props) {
       const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = seriesDef.ignore_field_formatting
-          ? createTickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig)
-          : createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap);
+        newProps.formatter =
+          model.use_kibana_indexes && !seriesDef.ignore_field_formatting
+            ? createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap)
+            : createTickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
       return assign({}, pick(row, ['label', 'data']), newProps);

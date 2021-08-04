@@ -188,9 +188,10 @@ class TimeseriesVisualization extends Component {
         : undefined;
       const isCustomDomain = groupId !== mainAxisGroupId;
 
-      const seriesGroupTickFormatter = seriesGroup.ignore_field_formatting
-        ? TimeseriesVisualization.getTickFormatter(seriesGroup, this.props.getConfig)
-        : createFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap);
+      const seriesGroupTickFormatter =
+        model.use_kibana_indexes && !seriesGroup.ignore_field_formatting
+          ? createFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap)
+          : TimeseriesVisualization.getTickFormatter(seriesGroup, this.props.getConfig);
 
       const palette = {
         ...seriesGroup.palette,

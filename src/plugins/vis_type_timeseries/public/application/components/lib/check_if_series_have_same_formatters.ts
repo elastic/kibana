@@ -12,7 +12,7 @@ import type { FieldFormatMap } from '../../../../../data/common';
 
 export const checkIfSeriesHaveSameFormatters = (
   seriesModel: Series[],
-  fieldFormatMap: FieldFormatMap
+  fieldFormatMap?: FieldFormatMap
 ) => {
   const allSeriesHaveSameIgnoreFieldFormatting = seriesModel.every(
     (seriesGroup) => seriesGroup.ignore_field_formatting === seriesModel[0].ignore_field_formatting
@@ -26,7 +26,7 @@ export const checkIfSeriesHaveSameFormatters = (
             series.value_template === seriesModel[0].value_template
         )
       : seriesModel
-          .map(({ metrics }) => fieldFormatMap[last(metrics)?.field ?? ''])
+          .map(({ metrics }) => fieldFormatMap?.[last(metrics)?.field ?? ''])
           .every(
             (fieldFormat, index, [firstSeriesFieldFormat]) =>
               JSON.stringify(fieldFormat) === JSON.stringify(firstSeriesFieldFormat)

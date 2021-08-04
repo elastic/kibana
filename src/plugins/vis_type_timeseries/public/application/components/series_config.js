@@ -32,6 +32,7 @@ export const SeriesConfig = (props) => {
   const seriesIndexPattern = props.model.override_index_pattern
     ? props.model.series_index_pattern
     : props.indexPatternForQuery;
+  const isFieldFormattingIgnored = props.panel.use_kibana_indexes && !model.ignore_field_formatting;
 
   return (
     <div className="tvbAggRow">
@@ -40,7 +41,7 @@ export const SeriesConfig = (props) => {
           <DataFormatPicker
             onChange={props.onChange}
             value={model.formatter}
-            disabled={!model.ignore_field_formatting}
+            disabled={isFieldFormattingIgnored}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -66,7 +67,7 @@ export const SeriesConfig = (props) => {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
-              disabled={!model.ignore_field_formatting}
+              disabled={isFieldFormattingIgnored}
               fullWidth
             />
           </EuiFormRow>
@@ -81,6 +82,7 @@ export const SeriesConfig = (props) => {
               value={model.ignore_field_formatting}
               name="ignore_field_formatting"
               onChange={props.onChange}
+              disabled={!props.panel.use_kibana_indexes}
               data-test-subj="seriesIgnoreFieldFormatting"
             />
           </EuiFormRow>

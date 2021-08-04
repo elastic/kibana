@@ -61,6 +61,7 @@ describe('TimeseriesVisualization', () => {
           model={{
             id,
             series,
+            use_kibana_indexes: true,
           }}
           visData={{
             [id]: {

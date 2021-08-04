@@ -57,7 +57,7 @@ const getCollectionActionsProps = (props: AnnotationsEditorProps) =>
   } as CollectionActionsProps<Panel>);
 
 export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
-  const { annotations } = props.model;
+  const { annotations, use_kibana_indexes: useKibanaIndexes } = props.model;
 
   const handleAdd = useCallback(
     () => collectionActions.handleAdd(getCollectionActionsProps(props), newAnnotation),
@@ -99,6 +99,7 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
               key={annotation.id}
               annotation={annotation}
               fields={props.fields}
+              useKibanaIndexes={useKibanaIndexes}
               onChange={onChange(annotation)}
               handleAdd={handleAdd}
               handleDelete={handleDelete(annotation)}

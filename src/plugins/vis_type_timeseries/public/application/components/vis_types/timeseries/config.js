@@ -327,6 +327,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const seriesIndexPattern = props.model.override_index_pattern
     ? props.model.series_index_pattern
     : props.indexPatternForQuery;
+  const isFieldFormattingIgnored = props.panel.use_kibana_indexes && !model.ignore_field_formatting;
 
   const initialPalette = model.palette ?? {
     type: 'palette',
@@ -348,7 +349,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
           <DataFormatPicker
             onChange={props.onChange}
             value={model.formatter}
-            disabled={!model.ignore_field_formatting}
+            disabled={isFieldFormattingIgnored}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -374,7 +375,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
-              disabled={!model.ignore_field_formatting}
+              disabled={isFieldFormattingIgnored}
               fullWidth
               data-test-subj="tsvb_series_value"
             />
@@ -390,6 +391,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               value={model.ignore_field_formatting}
               name="ignore_field_formatting"
               onChange={props.onChange}
+              disabled={!props.panel.use_kibana_indexes}
               data-test-subj="seriesIgnoreFieldFormatting"
             />
           </EuiFormRow>

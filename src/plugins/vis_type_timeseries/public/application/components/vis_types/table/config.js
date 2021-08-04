@@ -109,6 +109,8 @@ export class TableSeriesConfig extends Component {
     const selectedAggFuncOption = functionOptions.find((option) => {
       return model.aggregate_function === option.value;
     });
+    const isFieldFormattingIgnored =
+      this.props.panel.use_kibana_indexes && !model.ignore_field_formatting;
 
     return (
       <div className="tvbAggRow">
@@ -117,7 +119,7 @@ export class TableSeriesConfig extends Component {
             <DataFormatPicker
               onChange={this.props.onChange}
               value={model.formatter}
-              disabled={!model.ignore_field_formatting}
+              disabled={isFieldFormattingIgnored}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -143,7 +145,7 @@ export class TableSeriesConfig extends Component {
               <EuiFieldText
                 onChange={handleTextChange('value_template')}
                 value={model.value_template}
-                disabled={!model.ignore_field_formatting}
+                disabled={isFieldFormattingIgnored}
                 fullWidth
               />
             </EuiFormRow>
@@ -158,6 +160,7 @@ export class TableSeriesConfig extends Component {
                 value={model.ignore_field_formatting}
                 name="ignore_field_formatting"
                 onChange={this.props.onChange}
+                disabled={!this.props.panel.use_kibana_indexes}
                 data-test-subj="seriesIgnoreFieldFormatting"
               />
             </EuiFormRow>

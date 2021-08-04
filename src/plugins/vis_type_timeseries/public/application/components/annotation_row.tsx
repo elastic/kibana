@@ -49,6 +49,7 @@ export interface AnnotationRowProps {
   onChange: (partialModel: Partial<Annotation>) => void;
   handleAdd: () => void;
   handleDelete: () => void;
+  useKibanaIndexes?: boolean;
 }
 
 const getAnnotationDefaults = () => ({
@@ -61,6 +62,7 @@ const getAnnotationDefaults = () => ({
 export const AnnotationRow = ({
   annotation,
   fields,
+  useKibanaIndexes,
   onChange,
   handleAdd,
   handleDelete,
@@ -287,6 +289,7 @@ export const AnnotationRow = ({
                   value={model.ignore_field_formatting}
                   name="ignore_field_formatting"
                   onChange={onChange}
+                  disabled={!useKibanaIndexes}
                   data-test-subj="annotationsIgnoreFieldFormatting"
                 />
               </EuiFormRow>

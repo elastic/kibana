@@ -72,9 +72,10 @@ class TableVis extends Component {
       .map((item) => {
         const column = this.visibleSeries.find((c) => c.id === item.id);
         if (!column) return null;
-        const formatter = column.ignore_field_formatting
-          ? createTickFormatter(column.formatter, column.value_template, this.props.getConfig)
-          : createFieldFormatter(last(column.metrics)?.field, fieldFormatMap);
+        const formatter =
+          model.use_kibana_indexes && !column.ignore_field_formatting
+            ? createFieldFormatter(last(column.metrics)?.field, fieldFormatMap)
+            : createTickFormatter(column.formatter, column.value_template, this.props.getConfig);
         const value = formatter(item.last);
         let trend;
         if (column.trend_arrows) {
