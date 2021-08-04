@@ -10,12 +10,14 @@ import * as t from 'io-ts';
 import type {
   ClientRequestParamsOf,
   EndpointOf,
+  formatRequest as formatRequestType,
   ReturnOf,
   RouteRepositoryClient,
   ServerRouteRepository,
   ServerRoute,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository';
+// @ts-expect-error
+import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
 import type {
@@ -81,7 +83,10 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       params?: Partial<Record<string, any>>;
     };
 
-    const { method, pathname } = formatRequest(endpoint, params?.path);
+    const { method, pathname } = formatRequest(
+      endpoint,
+      params?.path
+    ) as ReturnType<typeof formatRequestType>;
 
     return callApi(core, {
       ...opts,
