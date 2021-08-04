@@ -10,6 +10,13 @@ import { get, getOr, find, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import {
+  ALERT_RULE_ID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_SEVERITY,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils';
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
@@ -25,7 +32,6 @@ import {
 import {
   AGENT_STATUS_FIELD_NAME,
   IP_FIELD_TYPE,
-  SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { SummaryView } from './summary_view';
@@ -38,6 +44,11 @@ import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
 import { TimelineEventsDetailsItem } from '../../../../common';
+import {
+  ALERT_THRESHOLD_RESULT_COUNT,
+  ALERT_THRESHOLD_RESULT_TERMS,
+  ALERT_THRESHOLD_RESULT_CARDINALITY,
+} from '../../../../common/alert_constants';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -49,23 +60,23 @@ const StyledEmptyComponent = styled.div`
 `;
 
 const fields = [
-  { id: 'signal.status', label: SIGNAL_STATUS },
+  { id: ALERT_STATUS, label: SIGNAL_STATUS },
   { id: '@timestamp', label: TIMESTAMP },
   {
-    id: SIGNAL_RULE_NAME_FIELD_NAME,
-    linkField: 'signal.rule.id',
+    id: ALERT_RULE_NAME,
+    linkField: ALERT_RULE_ID,
     label: ALERTS_HEADERS_RULE,
   },
-  { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
-  { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
+  { id: ALERT_RULE_SEVERITY, label: ALERTS_HEADERS_SEVERITY },
+  { id: ALERT_RULE_RISK_SCORE, label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
-  { id: 'signal.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
-  { id: 'signal.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
-  { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
+  { id: ALERT_THRESHOLD_RESULT_COUNT, label: ALERTS_HEADERS_THRESHOLD_COUNT },
+  { id: ALERT_THRESHOLD_RESULT_TERMS, label: ALERTS_HEADERS_THRESHOLD_TERMS },
+  { id: ALERT_THRESHOLD_RESULT_CARDINALITY, label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
 const processFields = [
@@ -189,7 +200,7 @@ const getSummaryRows = ({
           return acc;
         }
 
-        if (item.id === 'signal.threshold_result.terms') {
+        if (item.id === ALERT_THRESHOLD_RESULT_TERMS) {
           try {
             const terms = getOr(null, 'originalValue', field);
             const parsedValue = terms.map((term: string) => JSON.parse(term));
@@ -210,7 +221,7 @@ const getSummaryRows = ({
           }
         }
 
-        if (item.id === 'signal.threshold_result.cardinality') {
+        if (item.id === ALERT_THRESHOLD_RESULT_CARDINALITY) {
           try {
             const parsedValue = JSON.parse(value);
             return [
@@ -256,7 +267,7 @@ const AlertSummaryViewComponent: React.FC<{
   ]);
 
   const ruleId = useMemo(() => {
-    const item = data.find((d) => d.field === 'signal.rule.id');
+    const item = data.find((d) => d.field === ALERT_RULE_ID);
     return Array.isArray(item?.originalValue)
       ? item?.originalValue[0]
       : item?.originalValue ?? null;

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
+import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { EventHit, EventSource } from '../search_strategy';
 import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './field_formatters';
-import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
 
 describe('Events Details Helpers', () => {
   const fields: EventHit['fields'] = eventHit.fields;
@@ -135,8 +136,8 @@ describe('Events Details Helpers', () => {
   it('#getDataFromSourceHits', () => {
     const _source: EventSource = {
       '@timestamp': '2021-02-24T00:41:06.527Z',
-      'signal.status': 'open',
-      'signal.rule.name': 'Rawr',
+      [ALERT_STATUS]: 'open',
+      [ALERT_RULE_NAME]: 'Rawr',
       'threat.indicator': [
         {
           provider: 'yourself',
@@ -162,14 +163,14 @@ describe('Events Details Helpers', () => {
       },
       {
         category: 'signal',
-        field: 'signal.status',
+        field: ALERT_STATUS,
         values: ['open'],
         originalValue: ['open'],
         isObjectArray: false,
       },
       {
         category: 'signal',
-        field: 'signal.rule.name',
+        field: ALERT_RULE_NAME,
         values: ['Rawr'],
         originalValue: ['Rawr'],
         isObjectArray: false,

@@ -33,6 +33,10 @@ import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { useEventFilterAction } from './use_event_filter_action';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  ALERT_ORIGINAL_EVENT_MODULE,
+  ALERT_ORIGINAL_EVENT_KIND,
+} from '../../../../../common/alert_constants';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -53,10 +57,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const ruleId = get(0, ecsRowData?.signal?.rule?.id);
-  const ruleName = get(0, ecsRowData?.signal?.rule?.name);
+  const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.id);
+  const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
 
-  const alertStatus = get(0, ecsRowData?.signal?.status) as Status;
+  const alertStatus = get(0, ecsRowData?.kibana?.alert?.status) as Status;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
@@ -65,8 +69,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       return false;
     }
 
-    const eventModules = getOr([], 'signal.original_event.module', ecsRowData);
-    const kinds = getOr([], 'signal.original_event.kind', ecsRowData);
+    const eventModules = getOr([], ALERT_ORIGINAL_EVENT_MODULE, ecsRowData);
+    const kinds = getOr([], ALERT_ORIGINAL_EVENT_KIND, ecsRowData);
 
     return eventModules.includes('endpoint') && kinds.includes('alert');
   }, [ecsRowData]);
@@ -101,7 +105,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     onAddExceptionTypeClick,
     ruleIndices,
   } = useExceptionModal({
-    ruleIndex: ecsRowData?.signal?.rule?.index,
+    ruleIndex: ecsRowData?.kibana?.alert?.rule?.index,
     refetch,
     timelineId,
   });

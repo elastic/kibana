@@ -5,23 +5,30 @@
  * 2.0.
  */
 
+import {
+  ALERT_RULE_NAME,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_TYPE,
+} from '@kbn/rule-data-utils';
 import type { AlertsStackByOption } from './types';
+import { ALERT_RULE_THREAT_TACTIC_NAME } from './../../../../../common/alert_constants';
 
 export const alertsStackByOptions: AlertsStackByOption[] = [
-  { text: 'signal.rule.risk_score', value: 'signal.rule.risk_score' },
-  { text: 'signal.rule.severity', value: 'signal.rule.severity' },
-  { text: 'signal.rule.threat.tactic.name', value: 'signal.rule.threat.tactic.name' },
+  { text: ALERT_RULE_RISK_SCORE, value: ALERT_RULE_RISK_SCORE },
+  { text: ALERT_RULE_SEVERITY, value: ALERT_RULE_SEVERITY },
+  { text: ALERT_RULE_THREAT_TACTIC_NAME, value: ALERT_RULE_THREAT_TACTIC_NAME },
   { text: 'destination.ip', value: 'destination.ip' },
   { text: 'event.action', value: 'event.action' },
   { text: 'event.category', value: 'event.category' },
   { text: 'host.name', value: 'host.name' },
-  { text: 'signal.rule.type', value: 'signal.rule.type' },
-  { text: 'signal.rule.name', value: 'signal.rule.name' },
+  { text: ALERT_RULE_TYPE, value: ALERT_RULE_TYPE },
+  { text: ALERT_RULE_NAME, value: ALERT_RULE_NAME },
   { text: 'source.ip', value: 'source.ip' },
   { text: 'user.name', value: 'user.name' },
 ];
 
-export const DEFAULT_STACK_BY_FIELD = 'signal.rule.name';
+export const DEFAULT_STACK_BY_FIELD = ALERT_RULE_NAME;
 
 export const PANEL_HEIGHT = 300;
 export const MOBILE_PANEL_HEIGHT = 500;

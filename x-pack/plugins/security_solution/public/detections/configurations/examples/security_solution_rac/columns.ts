@@ -6,6 +6,12 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
+import {
+  ALERT_REASON,
+  ALERT_RULE_ID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_SEVERITY,
+} from '@kbn/rule-data-utils';
 import { ColumnHeaderOptions } from '../../../../../common';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
@@ -26,20 +32,20 @@ export const columns: Array<
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'signal.rule.name',
+    id: ALERT_RULE_NAME,
     displayAsText: i18n.ALERTS_HEADERS_RULE_NAME,
-    linkField: 'signal.rule.id',
+    linkField: ALERT_RULE_ID,
     initialWidth: 212,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'signal.rule.severity',
+    id: ALERT_RULE_SEVERITY,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
     initialWidth: 104,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'signal.reason',
+    id: ALERT_REASON,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
   },
 ];

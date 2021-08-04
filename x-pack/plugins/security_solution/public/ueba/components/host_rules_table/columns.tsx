@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ALERT_RULE_NAME, ALERT_RULE_RISK_SCORE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import {
   DragEffects,
   DraggableWrapper,
@@ -38,7 +39,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               id,
               name: ruleName,
               kqlQuery: '',
-              queryMatch: { field: 'signal.rule.name', value: ruleName, operator: IS_OPERATOR },
+              queryMatch: { field: ALERT_RULE_NAME, value: ruleName, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -73,7 +74,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               id,
               name: ruleType,
               kqlQuery: '',
-              queryMatch: { field: 'signal.rule.type', value: ruleType, operator: IS_OPERATOR },
+              queryMatch: { field: ALERT_RULE_TYPE, value: ruleType, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -109,7 +110,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               name: `${riskScore}`,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.risk_score',
+                field: ALERT_RULE_RISK_SCORE,
                 value: riskScore,
                 operator: IS_OPERATOR,
               },

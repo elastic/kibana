@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_DESCRIPTION } from '@kbn/rule-data-utils';
 import { omit } from 'lodash/fp';
 import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
@@ -271,7 +272,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: ALERT_RULE_DESCRIPTION,
           searchable: null,
         },
         {
@@ -387,7 +388,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: ALERT_RULE_DESCRIPTION,
           searchable: null,
         },
         {
@@ -550,7 +551,7 @@ export const mockCheckTimelinesStatusBeforeInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: ALERT_RULE_DESCRIPTION,
           searchable: null,
         },
         {
@@ -738,7 +739,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: ALERT_RULE_DESCRIPTION,
           searchable: null,
         },
         {
@@ -906,7 +907,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: ALERT_RULE_DESCRIPTION,
           searchable: null,
         },
         {
@@ -1089,7 +1090,7 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: ALERT_RULE_DESCRIPTION,
           searchable: null,
         },
         {

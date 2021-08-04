@@ -5,6 +5,11 @@
  * 2.0.
  */
 import { JsonObject, JsonArray } from '@kbn/common-utils';
+import {
+  ALERT_ORIGINAL_TIME,
+  ALERT_RULE_INDEX,
+  ALERT_RULE_LANGUAGE,
+} from './../../../../plugins/security_solution/common/alert_constants';
 
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({
   bool: {
@@ -37,6 +42,7 @@ export const getFilterValue = (hostName: string, from: string, to: string): Json
   },
 });
 
+// TODO: Revert these to pure strings to avoid pulling in logic from other plugins
 export const getFieldsToRequest = (): string[] => [
   '@timestamp',
   'message',
@@ -49,16 +55,16 @@ export const getFieldsToRequest = (): string[] => [
   '@timestamp',
   'signal.status',
   'signal.group.id',
-  'signal.original_time',
+  ALERT_ORIGINAL_TIME,
   'signal.rule.building_block_type',
   'signal.rule.filters',
   'signal.rule.from',
-  'signal.rule.language',
+  ALERT_RULE_LANGUAGE,
   'signal.rule.query',
   'signal.rule.name',
   'signal.rule.to',
   'signal.rule.id',
-  'signal.rule.index',
+  ALERT_RULE_INDEX,
   'signal.rule.type',
   'signal.original_event.kind',
   'signal.original_event.module',

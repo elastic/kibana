@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_ID } from '@kbn/rule-data-utils';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import { buildAlertsRuleIdFilter, buildThreatMatchFilter } from './default_config';
 
@@ -20,14 +21,14 @@ describe('alerts default_config', () => {
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: 'signal.rule.id',
+          key: ALERT_RULE_ID,
           params: {
             query: 'rule-id-1',
           },
         },
         query: {
           match_phrase: {
-            'signal.rule.id': 'rule-id-1',
+            [ALERT_RULE_ID]: 'rule-id-1',
           },
         },
       };

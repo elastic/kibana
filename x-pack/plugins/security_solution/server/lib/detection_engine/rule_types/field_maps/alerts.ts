@@ -6,304 +6,366 @@
  */
 
 import { FieldMap } from '../../../../../../rule_registry/common/field_map';
+import {
+  ALERT_ANCESTORS,
+  ALERT_ANCESTORS_DEPTH,
+  ALERT_ANCESTORS_ID,
+  ALERT_ANCESTORS_INDEX,
+  ALERT_ANCESTORS_RULE,
+  ALERT_ANCESTORS_TYPE,
+  ALERT_DEPTH,
+  ALERT_GROUP,
+  ALERT_GROUP_ID,
+  ALERT_GROUP_INDEX,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_EVENT_ACTION,
+  ALERT_ORIGINAL_EVENT_AGENT_ID_STATUS,
+  ALERT_ORIGINAL_EVENT_CATEGORY,
+  ALERT_ORIGINAL_EVENT_CODE,
+  ALERT_ORIGINAL_EVENT_CREATED,
+  ALERT_ORIGINAL_EVENT_DATASET,
+  ALERT_ORIGINAL_EVENT_DURATION,
+  ALERT_ORIGINAL_EVENT_END,
+  ALERT_ORIGINAL_EVENT_HASH,
+  ALERT_ORIGINAL_EVENT_ID,
+  ALERT_ORIGINAL_EVENT_INGESTED,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
+  ALERT_ORIGINAL_EVENT_ORIGINAL,
+  ALERT_ORIGINAL_EVENT_OUTCOME,
+  ALERT_ORIGINAL_EVENT_PROVIDER,
+  ALERT_ORIGINAL_EVENT_REASON,
+  ALERT_ORIGINAL_EVENT_REFERENCE,
+  ALERT_ORIGINAL_EVENT_RISK_SCORE,
+  ALERT_ORIGINAL_EVENT_RISK_SCORE_NORM,
+  ALERT_ORIGINAL_EVENT_SEQUENCE,
+  ALERT_ORIGINAL_EVENT_START,
+  ALERT_ORIGINAL_EVENT_TIMEZONE,
+  ALERT_ORIGINAL_EVENT_TYPE,
+  ALERT_ORIGINAL_EVENT_URL,
+  ALERT_ORIGINAL_TIME,
+  ALERT_THREAT,
+  ALERT_THREAT_FRAMEWORK,
+  ALERT_THREAT_TACTIC,
+  ALERT_THREAT_TACTIC_ID,
+  ALERT_THREAT_TACTIC_NAME,
+  ALERT_THREAT_TACTIC_REFERENCE,
+  ALERT_THREAT_TECHNIQUE,
+  ALERT_THREAT_TECHNIQUE_ID,
+  ALERT_THREAT_TECHNIQUE_NAME,
+  ALERT_THREAT_TECHNIQUE_REFERENCE,
+  ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE,
+  ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_ID,
+  ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_NAME,
+  ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE,
+  ALERT_THRESHOLD_RESULT,
+  ALERT_THRESHOLD_RESULT_CARDINALITY,
+  ALERT_THRESHOLD_RESULT_CARDINALITY_FIELD,
+  ALERT_THRESHOLD_RESULT_CARDINALITY_VALUE,
+  ALERT_THRESHOLD_RESULT_COUNT,
+  ALERT_THRESHOLD_RESULT_FROM,
+  ALERT_THRESHOLD_RESULT_TERMS,
+  ALERT_THRESHOLD_RESULT_TERMS_FIELD,
+  ALERT_THRESHOLD_RESULT_TERMS_VALUE,
+} from './../../../../../common/alert_constants';
 
 export const alertsFieldMap: FieldMap = {
-  'kibana.alert.ancestors': {
+  [ALERT_ANCESTORS]: {
     type: 'object',
     array: true,
     required: true,
   },
-  'kibana.alert.ancestors.depth': {
+  [ALERT_ANCESTORS_DEPTH]: {
     type: 'long',
     array: false,
     required: true,
   },
-  'kibana.alert.ancestors.id': {
+  [ALERT_ANCESTORS_ID]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.ancestors.index': {
+  [ALERT_ANCESTORS_INDEX]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.ancestors.rule': {
+  [ALERT_ANCESTORS_RULE]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.ancestors.type': {
+  [ALERT_ANCESTORS_TYPE]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.depth': {
+  [ALERT_DEPTH]: {
     type: 'long',
     array: false,
     required: true,
   },
-  'kibana.alert.group': {
+  [ALERT_GROUP]: {
     type: 'object',
     array: false,
     required: false,
   },
-  'kibana.alert.group.id': {
+  [ALERT_GROUP_ID]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.group.index': {
+  [ALERT_GROUP_INDEX]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event': {
+  [ALERT_ORIGINAL_EVENT]: {
     type: 'object',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.action': {
+  [ALERT_ORIGINAL_EVENT_ACTION]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.agent_id_status': {
+  [ALERT_ORIGINAL_EVENT_AGENT_ID_STATUS]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.category': {
+  [ALERT_ORIGINAL_EVENT_CATEGORY]: {
     type: 'keyword',
     array: true,
     required: true,
   },
-  'kibana.alert.original_event.code': {
+  [ALERT_ORIGINAL_EVENT_CODE]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.created': {
+  [ALERT_ORIGINAL_EVENT_CREATED]: {
     type: 'date',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.dataset': {
+  [ALERT_ORIGINAL_EVENT_DATASET]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.duration': {
+  [ALERT_ORIGINAL_EVENT_DURATION]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.end': {
+  [ALERT_ORIGINAL_EVENT_END]: {
     type: 'date',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.hash': {
+  [ALERT_ORIGINAL_EVENT_HASH]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.id': {
+  [ALERT_ORIGINAL_EVENT_ID]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.ingested': {
+  [ALERT_ORIGINAL_EVENT_INGESTED]: {
     type: 'date',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.kind': {
+  [ALERT_ORIGINAL_EVENT_KIND]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.module': {
+  [ALERT_ORIGINAL_EVENT_MODULE]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.original': {
+  [ALERT_ORIGINAL_EVENT_ORIGINAL]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.outcome': {
+  [ALERT_ORIGINAL_EVENT_OUTCOME]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.provider': {
+  [ALERT_ORIGINAL_EVENT_PROVIDER]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.reason': {
+  [ALERT_ORIGINAL_EVENT_REASON]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.reference': {
+  [ALERT_ORIGINAL_EVENT_REFERENCE]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.risk_score': {
+  [ALERT_ORIGINAL_EVENT_RISK_SCORE]: {
     type: 'float',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.risk_score_norm': {
+  [ALERT_ORIGINAL_EVENT_RISK_SCORE_NORM]: {
     type: 'float',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.sequence': {
+  [ALERT_ORIGINAL_EVENT_SEQUENCE]: {
     type: 'long',
     array: false,
     required: true,
   },
-  'kibana.alert.original_event.start': {
+  [ALERT_ORIGINAL_EVENT_START]: {
     type: 'date',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.timezone': {
+  [ALERT_ORIGINAL_EVENT_TIMEZONE]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_event.type': {
+  [ALERT_ORIGINAL_EVENT_TYPE]: {
     type: 'keyword',
     array: true,
     required: true,
   },
-  'kibana.alert.original_event.url': {
+  [ALERT_ORIGINAL_EVENT_URL]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.original_time': {
+  [ALERT_ORIGINAL_TIME]: {
     type: 'date',
     array: false,
     required: true,
   },
-  'kibana.alert.threat': {
+  [ALERT_THREAT]: {
     type: 'object',
     array: false,
     required: false,
   },
-  'kibana.alert.threat.framework': {
+  [ALERT_THREAT_FRAMEWORK]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.tactic': {
+  [ALERT_THREAT_TACTIC]: {
     type: 'object',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.tactic.id': {
+  [ALERT_THREAT_TACTIC_ID]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.tactic.name': {
+  [ALERT_THREAT_TACTIC_NAME]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.tactic.reference': {
+  [ALERT_THREAT_TACTIC_REFERENCE]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.technique': {
+  [ALERT_THREAT_TECHNIQUE]: {
     type: 'object',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.technique.id': {
+  [ALERT_THREAT_TECHNIQUE_ID]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.technique.name': {
+  [ALERT_THREAT_TECHNIQUE_NAME]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.technique.reference': {
+  [ALERT_THREAT_TECHNIQUE_REFERENCE]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.technique.subtechnique': {
+  [ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE]: {
     type: 'object',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.technique.subtechnique.id': {
+  [ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_ID]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.technique.subtechnique.name': {
+  [ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_NAME]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threat.technique.subtechnique.reference': {
+  [ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  'kibana.alert.threshold_result': {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  'kibana.alert.threshold_result.cardinality': {
+  [ALERT_THRESHOLD_RESULT]: {
     type: 'object',
     array: false,
     required: false,
   },
-  'kibana.alert.threshold_result.cardinality.field': {
+  [ALERT_THRESHOLD_RESULT_CARDINALITY]: {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  [ALERT_THRESHOLD_RESULT_CARDINALITY_FIELD]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.threshold_result.cardinality.value': {
+  [ALERT_THRESHOLD_RESULT_CARDINALITY_VALUE]: {
     type: 'long',
     array: false,
     required: false,
   },
-  'kibana.alert.threshold_result.count': {
+  [ALERT_THRESHOLD_RESULT_COUNT]: {
     type: 'long',
     array: false,
     required: false,
   },
-  'kibana.alert.threshold_result.from': {
+  [ALERT_THRESHOLD_RESULT_FROM]: {
     type: 'date',
     array: false,
     required: false,
   },
-  'kibana.alert.threshold_result.terms': {
+  [ALERT_THRESHOLD_RESULT_TERMS]: {
     type: 'object',
     array: false,
     required: false,
   },
-  'kibana.alert.threshold_result.terms.field': {
+  [ALERT_THRESHOLD_RESULT_TERMS_FIELD]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'kibana.alert.threshold_result.terms.value': {
+  [ALERT_THRESHOLD_RESULT_TERMS_VALUE]: {
     type: 'keyword',
     array: false,
     required: false,

@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -28,10 +29,8 @@ import {
   MESSAGE_FIELD_NAME,
   EVENT_MODULE_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
-  SIGNAL_RULE_NAME_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
-  SIGNAL_STATUS_FIELD_NAME,
   AGENT_STATUS_FIELD_NAME,
   GEO_FIELD_TYPE,
 } from './constants';
@@ -135,7 +134,7 @@ const FormattedFieldValueComponent: React.FC<{
         value={`${value}`}
       />
     );
-  } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
+  } else if (fieldName === ALERT_RULE_NAME) {
     return (
       <RenderRuleName
         contextId={contextId}
@@ -157,7 +156,7 @@ const FormattedFieldValueComponent: React.FC<{
       truncate,
       value,
     });
-  } else if (fieldName === SIGNAL_STATUS_FIELD_NAME) {
+  } else if (fieldName === ALERT_STATUS) {
     return (
       <RuleStatus
         contextId={contextId}

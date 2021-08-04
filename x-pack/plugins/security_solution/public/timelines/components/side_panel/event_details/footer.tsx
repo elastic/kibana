@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find, get } from 'lodash/fp';
+import { ALERT_RULE_ID, ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common';
 import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
@@ -17,6 +18,7 @@ import { useEventFilterModal } from '../../../../detections/components/alerts_ta
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
+import { ALERT_RULE_INDEX } from '../../../../../common/alert_constants';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -50,16 +52,16 @@ export const EventDetailsFooter = React.memo(
     timelineId,
   }: EventDetailsFooterProps) => {
     const ruleIndex = useMemo(
-      () => find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values,
+      () => find({ category: 'signal', field: ALERT_RULE_INDEX }, detailsData)?.values,
       [detailsData]
     );
 
     const addExceptionModalWrapperData = useMemo(
       () =>
         [
-          { category: 'signal', field: 'signal.rule.id', name: 'ruleId' },
-          { category: 'signal', field: 'signal.rule.name', name: 'ruleName' },
-          { category: 'signal', field: 'signal.status', name: 'alertStatus' },
+          { category: 'signal', field: ALERT_RULE_ID, name: 'ruleId' },
+          { category: 'signal', field: ALERT_RULE_NAME, name: 'ruleName' },
+          { category: 'signal', field: ALERT_STATUS, name: 'alertStatus' },
           { category: '_id', field: '_id', name: 'eventId' },
         ].reduce<AddExceptionModalWrapperData>(
           (acc, curr) => ({

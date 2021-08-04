@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
 import {
   DragEffects,
   DraggableWrapper,
@@ -18,6 +19,10 @@ import { HostTacticsColumns } from './';
 
 import * as i18n from './translations';
 import { HostTacticsFields } from '../../../../common';
+import {
+  ALERT_RULE_THREAT_TACTIC_NAME,
+  ALERT_RULE_THREAT_TECHNIQUE_NAME,
+} from '../../../../common/alert_constants';
 
 export const getHostTacticsColumns = (): HostTacticsColumns => [
   {
@@ -39,7 +44,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               name: tactic,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.threat.tactic.name',
+                field: ALERT_RULE_THREAT_TACTIC_NAME,
                 value: tactic,
                 operator: IS_OPERATOR,
               },
@@ -78,7 +83,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               name: technique,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.threat.technique.name',
+                field: ALERT_RULE_THREAT_TECHNIQUE_NAME,
                 value: technique,
                 operator: IS_OPERATOR,
               },
@@ -117,7 +122,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
               name: `${riskScore}`,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.risk_score',
+                field: ALERT_RULE_RISK_SCORE,
                 value: riskScore,
                 operator: IS_OPERATOR,
               },

@@ -8,6 +8,7 @@
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { metadataTransformPattern } from './endpoint/constants';
+import { ALERT_RULE_THREAT_TACTIC_NAME } from './alert_constants';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -299,7 +300,7 @@ export const showAllOthersBucket: string[] = [
   'event.category',
   'event.dataset',
   'event.module',
-  'signal.rule.threat.tactic.name',
+  ALERT_RULE_THREAT_TACTIC_NAME,
   'source.ip',
   'destination.ip',
   'user.name',

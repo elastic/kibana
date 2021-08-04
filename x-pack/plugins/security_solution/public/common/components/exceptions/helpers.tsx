@@ -44,6 +44,7 @@ import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
 import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
+import { ALERT_ORIGINAL_EVENT } from '../../../../common/alert_constants';
 
 export const filterIndexPatterns = (
   patterns: IndexPatternBase,
@@ -131,7 +132,7 @@ export const formatExceptionItemForUpdate = (
 };
 
 /**
- * Maps "event." fields to "signal.original_event.". This is because when a rule is created
+ * Maps "event." fields to "kibana.alert.original_event.". This is because when a rule is created
  * the "event" field is copied over to "original_event". When the user creates an exception,
  * they expect it to match against the original_event's fields, not the signal event's.
  * @param exceptionItems new or existing ExceptionItem[]
@@ -145,7 +146,7 @@ export const prepareExceptionItemsForBulkClose = (
         return {
           ...itemEntry,
           field: itemEntry.field.startsWith('event.')
-            ? itemEntry.field.replace(/^event./, 'signal.original_event.')
+            ? itemEntry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
             : itemEntry.field,
         };
       });

@@ -9,19 +9,29 @@ import {
   ALERT_DURATION,
   ALERT_ID,
   ALERT_PRODUCER,
+  ALERT_RULE_ID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TO,
+  ALERT_RULE_TYPE,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-
 import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
+import {
+  ALERT_ORIGINAL_TIME,
+  ALERT_RULE_BUILDING_BLOCK_TYPE,
+  ALERT_RULE_FILTERS,
+  ALERT_RULE_INDEX,
+  ALERT_RULE_LANGUAGE,
+  ALERT_RULE_QUERY,
+} from '../../../../common/alert_constants';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -30,14 +40,14 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => [
       negate: false,
       disabled: false,
       type: 'phrase',
-      key: 'signal.status',
+      key: ALERT_STATUS,
       params: {
         query: status,
       },
     },
     query: {
       term: {
-        'signal.status': status,
+        [ALERT_STATUS]: status,
       },
     },
   },
@@ -52,14 +62,14 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: 'signal.rule.id',
+            key: ALERT_RULE_ID,
             params: {
               query: ruleId,
             },
           },
           query: {
             match_phrase: {
-              'signal.rule.id': ruleId,
+              [ALERT_RULE_ID]: ruleId,
             },
           },
         },
@@ -76,11 +86,11 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'signal.rule.building_block_type',
+            key: ALERT_RULE_BUILDING_BLOCK_TYPE,
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'signal.rule.building_block_type' },
+          exists: { field: ALERT_RULE_BUILDING_BLOCK_TYPE },
         },
       ];
 
@@ -111,21 +121,20 @@ export const alertsDefaultModel: SubsetTimelineModel = {
 
 export const requiredFieldsForActions = [
   '@timestamp',
-  'signal.status',
-  'signal.group.id',
-  'signal.original_time',
-  'signal.rule.building_block_type',
-  'signal.rule.filters',
-  'signal.rule.from',
-  'signal.rule.language',
-  'signal.rule.query',
-  'signal.rule.name',
-  'signal.rule.to',
-  'signal.rule.id',
-  'signal.rule.index',
-  'signal.rule.type',
-  'signal.original_event.kind',
-  'signal.original_event.module',
+  ALERT_STATUS,
+  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_TIME,
+  ALERT_RULE_BUILDING_BLOCK_TYPE,
+  ALERT_RULE_FILTERS,
+  ALERT_RULE_LANGUAGE,
+  ALERT_RULE_QUERY,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TO,
+  ALERT_RULE_ID,
+  ALERT_RULE_INDEX,
+  ALERT_RULE_TYPE,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
   // Endpoint exception fields
   'file.path',
   'file.Ext.code_signature.subject_name',

@@ -25,6 +25,7 @@ import * as lib from './helpers';
 import { importTimelines } from '../../timelines/import_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
+import { ALERT_RULE_DESCRIPTION } from '@kbn/rule-data-utils';
 
 jest.mock('../../timelines/import_timelines');
 
@@ -105,7 +106,7 @@ describe('installPrepackagedTimelines', () => {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: ALERT_RULE_DESCRIPTION,
           searchable: null,
         },
         {

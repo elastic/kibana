@@ -10,6 +10,7 @@
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import { isArray, isEmpty, isString } from 'lodash/fp';
 import { useMemo } from 'react';
+import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import {
   AGENT_STATUS_FIELD_NAME,
   EVENT_MODULE_FIELD_NAME,
@@ -20,8 +21,6 @@ import {
   MESSAGE_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
-  SIGNAL_RULE_NAME_FIELD_NAME,
-  SIGNAL_STATUS_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/renderers/bytes';
 import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
@@ -112,11 +111,11 @@ export const useActionCellDataProvider = ({
           id = `event-details-value-default-draggable-${appendedUniqueId}`;
         } else if (fieldFormat === BYTES_FORMAT) {
           id = `bytes-default-draggable-${appendedUniqueId}`;
-        } else if (field === SIGNAL_RULE_NAME_FIELD_NAME) {
+        } else if (field === ALERT_RULE_NAME) {
           id = `event-details-value-default-draggable-${appendedUniqueId}-${linkValue}`;
         } else if (field === EVENT_MODULE_FIELD_NAME) {
           id = `event-details-value-default-draggable-${appendedUniqueId}-${value}`;
-        } else if (field === SIGNAL_STATUS_FIELD_NAME) {
+        } else if (field === ALERT_STATUS) {
           id = `alert-details-value-default-draggable-${appendedUniqueId}`;
         } else if (field === AGENT_STATUS_FIELD_NAME) {
           const valueToUse = typeof value === 'string' ? value : '';

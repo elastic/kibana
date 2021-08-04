@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_DESCRIPTION } from '@kbn/rule-data-utils';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
 export const mockTimeline = {
@@ -194,7 +195,7 @@ export const mockTemplate = {
           description: null,
           example: null,
           indexes: null,
-          id: 'signal.rule.description',
+          id: ALERT_RULE_DESCRIPTION,
           name: null,
           searchable: null,
           type: null,

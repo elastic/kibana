@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_NAME, ALERT_RULE_RISK_SCORE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { Direction, HostRulesRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -39,12 +40,12 @@ export const buildHostRulesQuery = ({
       aggs: {
         risk_score: {
           sum: {
-            field: 'signal.rule.risk_score',
+            field: ALERT_RULE_RISK_SCORE,
           },
         },
         rule_name: {
           terms: {
-            field: 'signal.rule.name',
+            field: ALERT_RULE_NAME,
             order: {
               risk_score: Direction.desc,
             },
@@ -52,19 +53,19 @@ export const buildHostRulesQuery = ({
           aggs: {
             risk_score: {
               sum: {
-                field: 'signal.rule.risk_score',
+                field: ALERT_RULE_RISK_SCORE,
               },
             },
             rule_type: {
               terms: {
-                field: 'signal.rule.type',
+                field: ALERT_RULE_TYPE,
               },
             },
           },
         },
         rule_count: {
           cardinality: {
-            field: 'signal.rule.name',
+            field: ALERT_RULE_NAME,
           },
         },
       },

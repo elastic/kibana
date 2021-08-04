@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
+import {
+  ALERT_RULE_THREAT_TACTIC_NAME,
+  ALERT_RULE_THREAT_TECHNIQUE_NAME,
+} from '../../../../../../common/alert_constants';
 import { HostTacticsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -39,22 +44,22 @@ export const buildHostTacticsQuery = ({
       aggs: {
         risk_score: {
           sum: {
-            field: 'signal.rule.risk_score',
+            field: ALERT_RULE_RISK_SCORE,
           },
         },
         tactic: {
           terms: {
-            field: 'signal.rule.threat.tactic.name',
+            field: ALERT_RULE_THREAT_TACTIC_NAME,
           },
           aggs: {
             technique: {
               terms: {
-                field: 'signal.rule.threat.technique.name',
+                field: ALERT_RULE_THREAT_TECHNIQUE_NAME,
               },
               aggs: {
                 risk_score: {
                   sum: {
-                    field: 'signal.rule.risk_score',
+                    field: ALERT_RULE_RISK_SCORE,
                   },
                 },
               },
@@ -63,12 +68,12 @@ export const buildHostTacticsQuery = ({
         },
         tactic_count: {
           cardinality: {
-            field: 'signal.rule.threat.tactic.name',
+            field: ALERT_RULE_THREAT_TACTIC_NAME,
           },
         },
         technique_count: {
           cardinality: {
-            field: 'signal.rule.threat.technique.name',
+            field: ALERT_RULE_THREAT_TECHNIQUE_NAME,
           },
         },
       },
