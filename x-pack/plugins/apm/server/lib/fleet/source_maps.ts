@@ -163,7 +163,6 @@ export async function updateSourceMapsOnFleetPolicies({
         savedObjectsClient,
         elasticsearchClient,
         id,
-        // TODO: Fix this type error
         updatedPackagePolicy
       );
     })
