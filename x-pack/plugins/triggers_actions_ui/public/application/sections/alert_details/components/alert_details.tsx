@@ -46,6 +46,7 @@ export type AlertDetailsProps = {
   alertType: AlertType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
+  getLegacyUrlConflictCallout: () => void;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
 
 export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
@@ -57,6 +58,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   unmuteAlert,
   muteAlert,
   requestRefresh,
+  getLegacyUrlConflictCallout,
 }) => {
   const history = useHistory();
   const {
@@ -180,6 +182,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
       />
       <EuiSpacer size="l" />
       <EuiPageContentBody>
+        {getLegacyUrlConflictCallout()}
         <EuiFlexGroup wrap responsive={false} gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
