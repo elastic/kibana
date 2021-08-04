@@ -145,6 +145,8 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 {enrichmentCount > 0 && (
                   <ThreatSummaryView
+                    browserFields={browserFields}
+                    data={data}
                     eventId={id}
                     timelineId={timelineId}
                     enrichments={allEnrichments}
