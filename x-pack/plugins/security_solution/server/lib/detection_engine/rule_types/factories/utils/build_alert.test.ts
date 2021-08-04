@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALERT_RULE_NAMESPACE, ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
 import { flatten } from './flatten';
 import {
@@ -20,6 +22,11 @@ import {
   ANCHOR_DATE,
 } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
+import {
+  ALERT_ANCESTORS,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+} from '../../field_maps/field_names';
 
 type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
@@ -41,7 +48,7 @@ describe('buildAlert', () => {
     const timestamp = alert['@timestamp'];
     const expected = {
       '@timestamp': timestamp,
-      'kibana.alert.ancestors': [
+      [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
           type: 'event',
@@ -49,10 +56,10 @@ describe('buildAlert', () => {
           depth: 0,
         },
       ],
-      'kibana.alert.original_time': '2020-04-20T21:27:45.000Z',
-      'kibana.alert.status': 'open',
-      'kibana.alert.workflow_status': 'open',
-      ...flatten('kibana.alert.rule', {
+      [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
+      [ALERT_STATUS]: 'open',
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      ...flatten(ALERT_RULE_NAMESPACE, {
         author: [],
         id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
@@ -108,7 +115,7 @@ describe('buildAlert', () => {
     const timestamp = alert['@timestamp'];
     const expected = {
       '@timestamp': timestamp,
-      'kibana.alert.ancestors': [
+      [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
           type: 'event',
@@ -116,16 +123,16 @@ describe('buildAlert', () => {
           depth: 0,
         },
       ],
-      'kibana.alert.original_time': '2020-04-20T21:27:45.000Z',
-      'kibana.alert.original_event': {
+      [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
+      [ALERT_ORIGINAL_EVENT]: {
         action: 'socket_opened',
         dataset: 'socket',
         kind: 'event',
         module: 'system',
       },
-      'kibana.alert.status': 'open',
-      'kibana.alert.workflow_status': 'open',
-      ...flatten('kibana.alert.rule', {
+      [ALERT_STATUS]: 'open',
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      ...flatten(ALERT_RULE_NAMESPACE, {
         author: [],
         id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),

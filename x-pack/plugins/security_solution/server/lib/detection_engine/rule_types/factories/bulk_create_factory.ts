@@ -8,6 +8,8 @@
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty } from 'lodash';
 
+import { ALERT_OWNER, SPACE_IDS } from '@kbn/rule-data-utils';
+
 import { Logger } from 'kibana/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { BuildRuleMessage } from '../../signals/rule_messages';
@@ -28,7 +30,8 @@ export const bulkCreateFactory = <TContext extends AlertInstanceContext>(
   logger: Logger,
   alertWithPersistence: PersistenceAlertService<TContext>,
   buildRuleMessage: BuildRuleMessage,
-  refreshForBulkCreate: RefreshTypes
+  refreshForBulkCreate: RefreshTypes,
+  spaceId: string
 ) => async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
   if (wrappedDocs.length === 0) {
     return {
@@ -45,7 +48,11 @@ export const bulkCreateFactory = <TContext extends AlertInstanceContext>(
   const response = await alertWithPersistence(
     wrappedDocs.map((doc) => ({
       id: doc._id,
-      fields: doc.fields ?? doc._source ?? {},
+      fields: {
+        ...(doc.fields ?? doc._source ?? {}),
+        [ALERT_OWNER]: 'siem',
+        [SPACE_IDS]: [spaceId],
+      },
     })),
     refreshForBulkCreate
   );

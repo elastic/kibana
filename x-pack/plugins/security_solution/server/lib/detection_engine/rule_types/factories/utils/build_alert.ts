@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAMESPACE, ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { Ancestor, BaseSignalHit, SimpleHit } from '../../../signals/types';
@@ -18,6 +18,12 @@ import {
 import { invariant } from '../../../../../../common/utils/invariant';
 import { RACAlert } from '../../types';
 import { flatten } from './flatten';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+} from '../../field_maps/field_names';
 
 /**
  * Takes an event document and extracts the information needed for the corresponding entry in the child
@@ -94,11 +100,11 @@ export const buildAlert = (docs: SimpleHit[], rule: RulesSchema): RACAlert => {
 
   return ({
     '@timestamp': new Date().toISOString(),
-    'kibana.alert.ancestors': ancestors,
+    [ALERT_ANCESTORS]: ancestors,
     [ALERT_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS]: 'open',
-    'kibana.alert.depth': depth,
-    ...flatten('kibana.alert.rule', rule),
+    [ALERT_DEPTH]: depth,
+    ...flatten(ALERT_RULE_NAMESPACE, rule),
   } as unknown) as RACAlert;
 };
 
@@ -113,11 +119,11 @@ export const additionalAlertFields = (doc: BaseSignalHit) => {
     timestampOverride: undefined,
   });
   const additionalFields: Record<string, unknown> = {
-    'kibana.alert.original_time': originalTime != null ? originalTime.toISOString() : undefined,
+    [ALERT_ORIGINAL_TIME]: originalTime != null ? originalTime.toISOString() : undefined,
   };
   const event = doc._source?.event;
   if (event != null) {
-    additionalFields['kibana.alert.original_event'] = event;
+    additionalFields[ALERT_ORIGINAL_EVENT] = event;
   }
   return additionalFields;
 };

@@ -50,5 +50,5 @@ export const buildBulkBody = (
     };
   }
 
-  throw Error("This shouldn't happen");
+  throw Error('Error building alert from source document.');
 };
