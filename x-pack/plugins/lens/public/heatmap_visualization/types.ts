@@ -10,11 +10,7 @@ import type { LensBrushEvent, LensFilterEvent } from '../types';
 import type { LensMultiTable, FormatFactory, CustomPaletteParams } from '../../common';
 import type { HeatmapGridConfigResult, HeatmapLegendConfigResult } from '../../common/expressions';
 import { CHART_SHAPES, LENS_HEATMAP_RENDERER } from './constants';
-import type {
-  ChartsPluginSetup,
-  ChartsPluginStart,
-  PaletteRegistry,
-} from '../../../../../src/plugins/charts/public';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export type ChartShapes = typeof CHART_SHAPES[keyof typeof CHART_SHAPES];
 
@@ -57,7 +53,6 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   timeZone: string;
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
-  chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
   paletteService: PaletteRegistry;

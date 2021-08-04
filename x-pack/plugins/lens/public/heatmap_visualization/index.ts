@@ -9,8 +9,6 @@ import type { CoreSetup } from 'kibana/public';
 import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import type { EditorFrameSetup } from '../types';
 import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import type { LensPluginStartDependencies } from '../plugin';
-
 import { getTimeZone } from '../utils';
 import type { FormatFactory } from '../../common';
 
@@ -25,8 +23,8 @@ export class HeatmapVisualization {
   constructor() {}
 
   setup(
-    core: CoreSetup<LensPluginStartDependencies, void>,
-    { expressions, formatFactory, editorFrame }: HeatmapVisualizationPluginSetupPlugins
+    core: CoreSetup,
+    { expressions, formatFactory, editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
       const timeZone = getTimeZone(core.uiSettings);
@@ -38,7 +36,6 @@ export class HeatmapVisualization {
         heatmapGridConfig,
         getHeatmapRenderer,
       } = await import('../async_services');
-      const [, { charts }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
 
       expressions.registerFunction(() => heatmap);
@@ -50,7 +47,6 @@ export class HeatmapVisualization {
           formatFactory,
           chartsThemeService: charts.theme,
           paletteService: palettes,
-          chartsActiveCursorService: charts.activeCursor,
           timeZone,
         })
       );

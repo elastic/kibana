@@ -13,11 +13,7 @@ import type { IInterpreterRenderHandlers } from '../../../../../src/plugins/expr
 import type { LensBrushEvent, LensFilterEvent } from '../types';
 import type { FormatFactory } from '../../common';
 import { LENS_HEATMAP_RENDERER } from './constants';
-import type {
-  ChartsPluginSetup,
-  ChartsPluginStart,
-  PaletteRegistry,
-} from '../../../../../src/plugins/charts/public';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { HeatmapChartReportable } from './chart_component';
 import type { HeatmapExpressionProps } from './types';
 
@@ -26,7 +22,6 @@ export { heatmapGridConfig, heatmapLegendConfig, heatmap } from '../../common/ex
 export const getHeatmapRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
-  chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
 }) => ({
@@ -59,7 +54,6 @@ export const getHeatmapRenderer = (dependencies: {
             onSelectRange={onSelectRange}
             timeZone={dependencies.timeZone}
             formatFactory={formatFactory}
-            chartsActiveCursorService={dependencies.chartsActiveCursorService}
             chartsThemeService={dependencies.chartsThemeService}
             paletteService={dependencies.paletteService}
           />

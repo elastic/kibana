@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -16,7 +16,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { CustomPaletteState, useActiveCursor } from '../../../../../src/plugins/charts/public';
+import type { CustomPaletteState } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../visualization_container';
 import type { HeatmapRenderProps } from './types';
 import './index.scss';
@@ -118,15 +118,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   onClickValue,
   onSelectRange,
   paletteService,
-  chartsActiveCursorService,
 }) => {
   const chartTheme = chartsThemeService.useChartsTheme();
   const isDarkTheme = chartsThemeService.useDarkMode();
 
-  const chartRef = useRef<Chart>(null);
-  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-    datatables: Object.values(data.tables),
-  });
   const tableId = Object.keys(data.tables)[0];
   const table = data.tables[tableId];
 
@@ -320,9 +315,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   }
 
   return (
-    <Chart ref={chartRef}>
+    <Chart>
       <Settings
-        onPointerUpdate={handleCursorUpdate}
         onElementClick={onElementClick}
         showLegend={args.legend.isVisible}
         legendPosition={args.legend.position}
