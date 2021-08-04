@@ -48,7 +48,7 @@ export interface DelayedDataResponse {
   annotation: string;
   /** Number of missed documents */
   missed_docs_count: number;
-  /** Timestamp of the latest closed bucket with missing docs */
+  /** Timestamp of the latest finalized bucket with missing docs */
   end_timestamp?: number;
 }
 

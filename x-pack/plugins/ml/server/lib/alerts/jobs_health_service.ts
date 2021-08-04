@@ -8,7 +8,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
-import { MlJobStats } from '@elastic/elasticsearch/api/types';
+import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
 import { MlClient } from '../ml_client';
 import {
   AnomalyDetectionJobsHealthRuleParams,
@@ -28,6 +28,7 @@ import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 
 interface TestResult {
   name: string;
@@ -43,11 +44,14 @@ export function jobsHealthServiceProvider(
   logger: Logger
 ) {
   /**
-   * Extracts result list of job ids based on included and excluded selection of jobs and groups.
+   * Extracts result list of jobs based on included and excluded selection of jobs and groups.
    * @param includeJobs
    * @param excludeJobs
    */
-  const getResultJobIds = async (includeJobs: JobSelection, excludeJobs?: JobSelection | null) => {
+  const getResultJobs = async (
+    includeJobs: JobSelection,
+    excludeJobs?: JobSelection | null
+  ): Promise<MlJob[]> => {
     const jobAndGroupIds = [...(includeJobs.jobIds ?? []), ...(includeJobs.groupIds ?? [])];
 
     const includeAllJobs = jobAndGroupIds.some((id) => id === ALL_JOBS_SELECTION);
@@ -59,7 +63,7 @@ export function jobsHealthServiceProvider(
       })
     ).body.jobs;
 
-    let resultJobIds = jobsResponse.map((v) => v.job_id);
+    let resultJobs = jobsResponse;
 
     if (excludeJobs && (!!excludeJobs.jobIds.length || !!excludeJobs?.groupIds.length)) {
       const excludedJobAndGroupIds = [
@@ -74,10 +78,50 @@ export function jobsHealthServiceProvider(
 
       const excludedJobsIds: Set<string> = new Set(excludedJobsResponse.map((v) => v.job_id));
 
-      resultJobIds = resultJobIds.filter((v) => !excludedJobsIds.has(v));
+      resultJobs = resultJobs.filter((v) => !excludedJobsIds.has(v.job_id));
     }
 
-    return resultJobIds;
+    return resultJobs;
+  };
+
+  /**
+   * Resolves the timestamp for delayed data check.
+   *
+   * Takes the longest interval between:
+   *  - the longest bucket span for provided jobs
+   *  - custom interval specified by the user
+   *  - the time passed since the previous rule execution
+   *
+   * @param timeInterval - Custom time interval provided by the user
+   * @param bucketSpans - Bucket spans from the jobs configurations.
+   * @param previousStartedAt - Date object of the previous rule execution time
+   */
+  const getDelayedDataLookbackTimestamp = (
+    timeInterval: string | null,
+    bucketSpans: string[],
+    previousStartedAt: Date | null
+  ): number => {
+    const currentTimestamp = Date.now();
+
+    const maxBucketLengthInSeconds = resolveMaxTimeInterval(bucketSpans) ?? 0;
+
+    if (!maxBucketLengthInSeconds) {
+      logger.error('Unable to resolve resulting bucket length.');
+    }
+
+    const doubleBucketOffsetTimestamp = currentTimestamp - maxBucketLengthInSeconds * 1000 * 2;
+
+    const customIntervalOffsetTimestamp = timeInterval
+      ? currentTimestamp - parseInterval(timeInterval)!.asMilliseconds()
+      : 0;
+
+    const previousCheckTimestamp = previousStartedAt ? previousStartedAt.getTime() : 0;
+
+    return Math.min(
+      doubleBucketOffsetTimestamp,
+      customIntervalOffsetTimestamp,
+      previousCheckTimestamp
+    );
   };
 
   const getJobStats: (jobIds: string[]) => Promise<MlJobStats[]> = (() => {
@@ -160,26 +204,26 @@ export function jobsHealthServiceProvider(
         });
     },
     /**
-     * Returns annotations about delayed data
+     * Returns annotations about delayed data.
+     *
      * @param jobIds
-     * @param timeInterval
-     * @param previousStartedAt
+     * @param timeInterval - Custom time interval provided by the user.
+     * @param previousStartedAt - Date object of the previous rule execution time.
+     * @param bucketSpans - Bucket spans from the jobs configurations.
+     * @param docsCount - The threshold for a number of missing documents to alert upon.
      */
     async getDelayedDataReport(
       jobIds: string[],
       timeInterval: string | null,
       previousStartedAt: Date | null,
+      bucketSpans: string[],
       docsCount: number | null
     ): Promise<DelayedDataResponse[]> {
-      const currentTimestamp = Date.now();
-
-      let earliestMs;
-
-      if (timeInterval) {
-        earliestMs = currentTimestamp - parseInterval(timeInterval)!.asMilliseconds();
-      } else if (previousStartedAt) {
-        earliestMs = previousStartedAt.getTime();
-      }
+      const earliestMs = getDelayedDataLookbackTimestamp(
+        timeInterval,
+        bucketSpans,
+        previousStartedAt
+      );
 
       let annotations: DelayedDataResponse[] = (
         await annotationService.getDelayedDataAnnotations({
@@ -217,7 +261,8 @@ export function jobsHealthServiceProvider(
 
       const results: TestsResults = [];
 
-      const jobIds = await getResultJobIds(includeJobs, excludeJobs);
+      const jobs = await getResultJobs(includeJobs, excludeJobs);
+      const jobIds = jobs.map((job) => job.job_id);
 
       if (jobIds.length === 0) {
         logger.warn(`Rule "${ruleInstanceName}" does not have associated jobs.`);
@@ -279,10 +324,13 @@ export function jobsHealthServiceProvider(
       }
 
       if (config.delayedData.enabled) {
+        const bucketsLength = jobs.map((v) => v.analysis_config.bucket_span);
+
         const response = await this.getDelayedDataReport(
           jobIds,
           config.delayedData.timeInterval,
           previousStartedAt,
+          bucketsLength,
           config.delayedData.docsCount
         );
 
