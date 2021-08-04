@@ -10,6 +10,7 @@ import { IScopedClusterClient } from 'src/core/server';
 
 interface DeprecationLoggingStatus {
   isEnabled: boolean;
+  isLoggerDeprecationEnabled: boolean;
 }
 
 export async function getDeprecationLoggingStatus(
@@ -20,7 +21,8 @@ export async function getDeprecationLoggingStatus(
   });
 
   return {
-    isEnabled: isDeprecationLoggingEnabled(response),
+    isEnabled: isClusterDeprecationLoggingEnabled(response),
+    isLoggerDeprecationEnabled: isDeprecationLoggingEnabled(response),
   };
 }
 
@@ -28,7 +30,7 @@ export async function setDeprecationLogging(
   dataClient: IScopedClusterClient,
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {
-  const { body: response } = await dataClient.asCurrentUser.cluster.putSettings({
+  const { body: loggerDeprecationResponse } = await dataClient.asCurrentUser.cluster.putSettings({
     body: {
       transient: {
         'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
@@ -36,9 +38,28 @@ export async function setDeprecationLogging(
     },
   });
 
+  await dataClient.asCurrentUser.cluster.putSettings({
+    body: {
+      transient: {
+        'cluster.deprecation_indexing.enabled': isEnabled,
+      },
+    },
+  });
+
   return {
-    isEnabled: isDeprecationLoggingEnabled(response),
+    isEnabled,
+    isLoggerDeprecationEnabled: isDeprecationLoggingEnabled(loggerDeprecationResponse),
   };
+}
+
+export function isClusterDeprecationLoggingEnabled(settings: any) {
+  const clusterDeprecationLoggingEnabled = ['default', 'persistent', 'transient'].reduce(
+    (currentLogLevel, settingsTier) =>
+      get(settings, [settingsTier, 'cluster', 'deprecation_indexing', 'enabled'], currentLogLevel),
+    'false'
+  ) as string;
+
+  return clusterDeprecationLoggingEnabled === 'true';
 }
 
 export function isDeprecationLoggingEnabled(settings: any) {
