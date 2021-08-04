@@ -30,6 +30,7 @@
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
+|  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
 
 ## Interfaces
 
@@ -53,6 +54,7 @@
 
 |  Variable | Description |
 |  --- | --- |
+|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) |  |
 |  [config](./kibana-plugin-plugins-data-server.config.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-server.es_search_strategy.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |

@@ -77,6 +77,7 @@ export {
 
 export {
   IndexPatternsFetcher,
+  shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
   getCapabilitiesForRollupIndices,
 } from './index_patterns';
@@ -149,6 +150,7 @@ export const search = {
  */
 
 export {
+  castEsToKbnFieldTypeName,
   getTime,
   // timefilter
   TimeRange,

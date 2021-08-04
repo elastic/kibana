@@ -80,6 +80,11 @@ export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 're
     _shards: estypes.ShardStatistics;
 }
 
+// Warning: (ae-missing-release-tag) "castEsToKbnFieldTypeName" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public @deprecated (undocumented)
+export const castEsToKbnFieldTypeName: (esType: string) => import("@kbn/field-types").KBN_FIELD_TYPES;
+
 // Warning: (ae-forgotten-export) The symbol "PluginConfigDescriptor" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ConfigSchema" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "config" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -859,6 +864,11 @@ export function shimHitsTotal(response: estypes.SearchResponse<unknown>, { legac
     terminated_early?: boolean | undefined;
 };
 
+// Warning: (ae-missing-release-tag) "shouldReadFieldFromDocValues" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function shouldReadFieldFromDocValues(aggregatable: boolean, esType: string): boolean;
+
 // Warning: (ae-missing-release-tag) "TimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -929,10 +939,10 @@ export const UI_SETTINGS: {
 // src/plugins/data/server/index.ts:49:26 - (ae-forgotten-export) The symbol "StringFormat" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:49:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:49:26 - (ae-forgotten-export) The symbol "HistogramFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:138:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:139:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:140:1 - (ae-forgotten-export) The symbol "IpAddress" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:142:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:139:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:140:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:141:1 - (ae-forgotten-export) The symbol "IpAddress" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:143:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:81:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:103:7 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:110:31 - (ae-forgotten-export) The symbol "ISearchStart" needs to be exported by the entry point index.d.ts
