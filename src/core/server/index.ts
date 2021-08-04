@@ -412,7 +412,6 @@ export type {
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,
-  DeprecationsServiceStart,
   DeprecationsClient,
 } from './deprecations';
 

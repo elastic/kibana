@@ -101,10 +101,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         }
         return this.savedObjectsServiceStart;
       },
-      getDeprecationsService: async () => {
-        const [coreStart] = await getStartServices();
-        return coreStart.deprecations;
-      },
     };
 
     // Initialize version service with current kibana version
@@ -123,7 +119,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     }
   }
 
-  start({ savedObjects, elasticsearch, deprecations }: CoreStart) {
+  start({ savedObjects, elasticsearch }: CoreStart) {
     this.savedObjectsServiceStart = savedObjects;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials

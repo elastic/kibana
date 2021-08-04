@@ -21,7 +21,7 @@ import {
   LegacyScopedClusterClient,
 } from './elasticsearch';
 import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
-import { DeprecationsClient, DeprecationsServiceStart } from './deprecations';
+import { DeprecationsClient, InternalDeprecationsServiceStart } from './deprecations';
 
 class CoreElasticsearchRouteHandlerContext {
   #client?: IScopedClusterClient;
@@ -107,7 +107,7 @@ class CoreUiSettingsRouteHandlerContext {
 class CoreDeprecationsRouteHandlerContext {
   #client?: DeprecationsClient;
   constructor(
-    private readonly deprecationsStart: DeprecationsServiceStart,
+    private readonly deprecationsStart: InternalDeprecationsServiceStart,
     private readonly elasticsearchRouterHandlerContext: CoreElasticsearchRouteHandlerContext,
     private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext
   ) {}

@@ -13,7 +13,7 @@ import { getKibanaUpgradeStatus } from '../lib/kibana_status';
 import { RouteDependencies } from '../types';
 import { handleEsError } from '../shared_imports';
 
-export function registerUpgradeStatusRoute({ router, getDeprecationsService }: RouteDependencies) {
+export function registerUpgradeStatusRoute({ router }: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
@@ -23,7 +23,6 @@ export function registerUpgradeStatusRoute({ router, getDeprecationsService }: R
       async (
         {
           core: {
-            savedObjects: { client: savedObjectsClient },
             elasticsearch: { client: esClient },
             deprecations: { client: deprecationsClient },
           },

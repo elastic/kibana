@@ -54,7 +54,7 @@ describe('getESUpgradeStatus', () => {
     expect(resp).toMatchSnapshot();
   });
 
-  it('returns readyForUpgrade === false when critical issues found', async () => {
+  it('returns totalCriticalDeprecations > 0 when critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
       // @ts-expect-error not full interface
       asApiResponse({
@@ -71,7 +71,7 @@ describe('getESUpgradeStatus', () => {
     );
   });
 
-  it('returns readyForUpgrade === true when no critical issues found', async () => {
+  it('returns totalCriticalDeprecations === 0 when no critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
       // @ts-expect-error not full interface
       asApiResponse({

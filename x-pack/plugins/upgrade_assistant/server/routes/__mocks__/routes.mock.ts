@@ -9,6 +9,7 @@ import { RequestHandler, RequestHandlerContext } from 'src/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  deprecationsServiceMock,
 } from '../../../../../../src/core/server/mocks';
 
 export const routeHandlerContextMock = ({
@@ -17,6 +18,7 @@ export const routeHandlerContextMock = ({
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
     savedObjects: { client: savedObjectsClientMock.create() },
+    deprecations: { client: deprecationsServiceMock.createClient() },
   },
 } as unknown) as RequestHandlerContext;
 

@@ -8,15 +8,8 @@
 
 import { InternalHttpServiceSetup } from '../../http';
 import { registerGetRoute } from './get';
-import { DeprecationsFactory } from '../deprecations_factory';
 
-export function registerRoutes({
-  http,
-  deprecationsFactory,
-}: {
-  http: InternalHttpServiceSetup;
-  deprecationsFactory: DeprecationsFactory;
-}) {
+export function registerRoutes({ http }: { http: InternalHttpServiceSetup }) {
   const router = http.createRouter('/api/deprecations');
-  registerGetRoute(router, { deprecationsFactory });
+  registerGetRoute(router);
 }

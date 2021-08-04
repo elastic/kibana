@@ -7,11 +7,7 @@
  */
 
 import { DeprecationsFactory } from './deprecations_factory';
-import {
-  DomainDeprecationDetails,
-  GetDeprecationsContext,
-  RegisterDeprecationsConfig,
-} from './types';
+import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 
 import { CoreContext } from '../core_context';
@@ -114,10 +110,9 @@ export interface DeprecationsServiceSetup {
  * @public
  */
 export interface DeprecationsClient {
-  getAllDeprecations: (dependencies: GetDeprecationsContext) => Promise<DomainDeprecationDetails[]>;
+  getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
 }
-
-export interface DeprecationsServiceStart {
+export interface InternalDeprecationsServiceStart {
   /**
    * Creates a {@link DeprecationsClient} with provided SO client and ES client.
    *
@@ -140,7 +135,7 @@ export interface DeprecationsSetupDeps {
 
 /** @internal */
 export class DeprecationsService
-  implements CoreService<InternalDeprecationsServiceSetup, DeprecationsServiceStart> {
+  implements CoreService<InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart> {
   private readonly logger: Logger;
   private readonly deprecationsFactory: DeprecationsFactory;
 
@@ -155,7 +150,7 @@ export class DeprecationsService
     this.logger.debug('Setting up Deprecations service');
     const deprecationsFactory = this.deprecationsFactory;
 
-    registerRoutes({ http, deprecationsFactory });
+    registerRoutes({ http });
     this.registerConfigDeprecationsInfo(this.deprecationsFactory);
 
     return {
@@ -168,7 +163,7 @@ export class DeprecationsService
     };
   }
 
-  public start(): DeprecationsServiceStart {
+  public start(): InternalDeprecationsServiceStart {
     return {
       asScopedToClient: this.createScopedDeprecations(),
     };
@@ -182,7 +177,7 @@ export class DeprecationsService
   ) => DeprecationsClient {
     return (esClient: IScopedClusterClient, savedObjectsClient: SavedObjectsClientContract) => {
       return {
-        getAllDeprecations: this.deprecationsFactory.getAllDeprecations.bind({
+        getAllDeprecations: this.deprecationsFactory.getAllDeprecations.bind(null, {
           savedObjectsClient,
           esClient,
         }),
