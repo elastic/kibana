@@ -80,6 +80,9 @@ export class JobsExportService {
         if (jId === GLOBAL_CALENDAR) {
           // add the calendar to all jobs
           jobs.forEach((j) => {
+            if (acc[j.job_id] === undefined) {
+              acc[j.job_id] = [];
+            }
             acc[j.job_id].push(cur.calendar_id);
           });
         } else if (isGroup(jId)) {
