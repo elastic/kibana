@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { LegacyColorsService } from './legacy_colors';
-export { ThemeService } from './theme';
-export { ActiveCursor, useActiveCursor } from './active_cursor';
+export { ActiveCursor } from './active_cursor';
+export { useActiveCursor } from './use_active_cursor';

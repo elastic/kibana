@@ -187,7 +187,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         getExecutionLogClient: () =>
           new RuleExecutionLogClient({
             ruleDataService: plugins.ruleRegistry.ruleDataService,
-            // TODO check if savedObjects.client contains spaceId
             savedObjectsClient: context.core.savedObjects.client,
           }),
       })
@@ -262,6 +261,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           mergeStrategy: this.config.alertMergeStrategy,
           ruleDataClient,
           version: this.context.env.packageInfo.version,
+          ruleDataService,
         })
       );
     }
@@ -303,6 +303,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         lists: plugins.lists,
         mergeStrategy: this.config.alertMergeStrategy,
         experimentalFeatures,
+        ruleDataService: plugins.ruleRegistry.ruleDataService,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
