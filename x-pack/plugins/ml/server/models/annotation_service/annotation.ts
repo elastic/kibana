@@ -360,20 +360,8 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       body: {
         query: {
           bool: {
-            ...(earliestMs
-              ? {
-                  must: [
-                    {
-                      range: {
-                        end_timestamp: {
-                          gte: earliestMs,
-                        },
-                      },
-                    },
-                  ],
-                }
-              : {}),
             filter: [
+              ...(earliestMs ? [{ range: { end_timestamp: { gte: earliestMs } } }] : []),
               {
                 term: { event: { value: 'delayed_data' } },
               },
