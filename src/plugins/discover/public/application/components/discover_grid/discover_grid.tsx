@@ -227,12 +227,6 @@ export const DiscoverGrid = ({
   const rowHeightsOptions = useMemo(
     () => ({
       defaultHeight: 'auto', // each row auto fit to content except rows which was defined in 'rowHeights'
-      rowHeights: {
-        1: {
-          lineCount: 5, // for row which have index 1 we allow to show 5 lines after that we truncate
-        },
-        4: 140, // for row which have index 4 we set 140 pixel
-      },
     }),
     []
   );
