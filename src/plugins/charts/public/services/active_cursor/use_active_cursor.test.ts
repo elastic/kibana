@@ -19,14 +19,21 @@ describe('useActiveCursor', () => {
   let cursor: ActiveCursorPayload['cursor'];
   let dispatchExternalPointerEvent: jest.Mock;
 
-  const act = (syncOption: ActiveCursorSyncOption, events: Array<Partial<ActiveCursorPayload>>) =>
-    new Promise((resolve) => {
+  const act = (
+    syncOption: ActiveCursorSyncOption,
+    events: Array<Partial<ActiveCursorPayload>>,
+    eventsTimeout = 1
+  ) =>
+    new Promise(async (resolve) => {
       const activeCursor = new ActiveCursor();
+      let allEventsExecuted = false;
 
       activeCursor.setup();
 
       dispatchExternalPointerEvent.mockImplementation((pointerEvent) => {
-        resolve(pointerEvent);
+        if (allEventsExecuted) {
+          resolve(pointerEvent);
+        }
       });
 
       renderHook(() =>
@@ -39,18 +46,54 @@ describe('useActiveCursor', () => {
               ) => void,
             },
           } as RefObject<Chart>,
-          syncOption
+          { ...syncOption, debounce: syncOption.debounce ?? 1 }
         )
       );
 
-      events.forEach((event) => {
-        activeCursor.activeCursor$!.next({ cursor, ...event });
-      });
+      for (const e of events) {
+        await new Promise((eventResolve) =>
+          setTimeout(() => {
+            if (e === events[events.length - 1]) {
+              allEventsExecuted = true;
+            }
+            activeCursor.activeCursor$!.next({ cursor, ...e });
+            eventResolve(null);
+          }, eventsTimeout)
+        );
+      }
     });
 
   beforeEach(() => {
     cursor = {} as ActiveCursorPayload['cursor'];
     dispatchExternalPointerEvent = jest.fn();
+  });
+
+  test('should debounce events', async () => {
+    await act(
+      {
+        debounce: 5,
+        datatables: [
+          {
+            columns: [
+              {
+                meta: {
+                  index: 'foo_index',
+                  field: 'foo_field',
+                },
+              },
+            ],
+          },
+        ] as Datatable[],
+      },
+      [
+        { accessors: ['foo_index:foo_field'] },
+        { accessors: ['foo_index:foo_field'] },
+        { accessors: ['foo_index:foo_field'] },
+        { accessors: ['foo_index:foo_field'] },
+      ]
+    );
+
+    expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);
   });
 
   test('should trigger cursor pointer update (chart type: time, event type: time)', async () => {
