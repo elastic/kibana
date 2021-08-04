@@ -660,6 +660,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'event.agent_id_status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'event.category': {
     type: 'keyword',
     array: true,
