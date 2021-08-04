@@ -16,17 +16,15 @@ export const getPrioritizedFieldValuePairs = (
   const prioritizedFields = [...FIELDS_TO_ADD_AS_CANDIDATE];
 
   return fieldValuePairs.sort((a, b) => {
-    if (
-      (prioritizedFields.includes(a.field) || hasPrefixToInclude(a.field)) &&
-      !prioritizedFields.includes(b.field) &&
-      !hasPrefixToInclude(b.field)
-    ) {
+    const hasPrefixA = hasPrefixToInclude(a.field);
+    const hasPrefixB = hasPrefixToInclude(b.field);
+
+    const includesA = prioritizedFields.includes(a.field);
+    const includesB = prioritizedFields.includes(b.field);
+
+    if ((includesA || hasPrefixA) && !includesB && !hasPrefixB) {
       return -1;
-    } else if (
-      !prioritizedFields.includes(a.field) &&
-      !hasPrefixToInclude(a.field) &&
-      (prioritizedFields.includes(b.field) || hasPrefixToInclude(b.field))
-    ) {
+    } else if (!includesA && !hasPrefixA && (includesB || hasPrefixB)) {
       return 1;
     }
 
