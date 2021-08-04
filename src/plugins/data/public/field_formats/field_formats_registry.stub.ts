@@ -8,10 +8,10 @@
 
 import { CoreSetup } from 'src/core/public';
 import { baseFormattersPublic } from './constants';
-import { fieldFormats } from '..';
+import { FieldFormatsRegistry } from '../../common';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
-  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+  const fieldFormatsRegistry = new FieldFormatsRegistry();
   const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
   fieldFormatsRegistry.init(getConfig, {}, baseFormattersPublic);
