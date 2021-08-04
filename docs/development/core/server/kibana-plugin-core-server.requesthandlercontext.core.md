@@ -17,9 +17,6 @@ core: {
         };
         elasticsearch: {
             client: IScopedClusterClient;
-            legacy: {
-                client: ILegacyScopedClusterClient;
-            };
         };
         uiSettings: {
             client: IUiSettingsClient;
