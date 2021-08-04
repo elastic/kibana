@@ -66,8 +66,8 @@ export const sendGetOnePackagePolicy = (packagePolicyId: string) => {
   });
 };
 
-export function useUpgradePackagePolicyDryRun(packagePolicyIds: string[]) {
-  return useRequest<UpgradePackagePolicyDryRunResponse>({
+export function sendUpgradePackagePolicyDryRun(packagePolicyIds: string[]) {
+  return sendRequest<UpgradePackagePolicyDryRunResponse>({
     path: packagePolicyRouteService.getUpgradePath(),
     method: 'post',
     body: JSON.stringify({

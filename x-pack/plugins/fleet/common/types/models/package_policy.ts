@@ -87,6 +87,6 @@ export interface InMemoryPackagePolicy extends PackagePolicy {
 
 export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
 
-export type DryRunPackagePolicy = NewPackagePolicy & {
+export type DryRunPackagePolicy = PackagePolicy & {
   errors?: Array<{ key: string | undefined; message: string }>;
 };

@@ -20,7 +20,13 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import type { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
+import type {
+  AgentPolicy,
+  PackageInfo,
+  UpdatePackagePolicy,
+  PackagePolicy,
+  DryRunPackagePolicy,
+} from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -35,8 +41,8 @@ import {
 } from '../../../hooks';
 import {
   sendUpgradePackagePolicy,
+  sendUpgradePackagePolicyDryRun,
   useBreadcrumbs as useIntegrationsBreadcrumbs,
-  useUpgradePackagePolicyDryRun,
 } from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
@@ -49,7 +55,10 @@ import type {
 } from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
-import type { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
+import type {
+  GetOnePackagePolicyResponse,
+  UpgradePackagePolicyDryRunResponse,
+} from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
@@ -98,6 +107,7 @@ export const EditPackagePolicyForm = memo<{
   const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
     GetOnePackagePolicyResponse['item']
   >();
+  const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -127,8 +137,25 @@ export const EditPackagePolicyForm = memo<{
         if (agentPolicyData?.item) {
           setAgentPolicy(agentPolicyData.item);
         }
-        if (packagePolicyData?.item) {
-          setOriginalPackagePolicy(packagePolicyData.item);
+
+        const { data: upgradePackagePolicyDryRunData } = await sendUpgradePackagePolicyDryRun([
+          packagePolicyId,
+        ]);
+
+        if (upgradePackagePolicyDryRunData) {
+          setDryRunData(upgradePackagePolicyDryRunData);
+        }
+
+        let basePolicy: PackagePolicy | DryRunPackagePolicy | undefined = packagePolicyData?.item;
+
+        // If we're upgrading the package, we need to "start from" the policy as it's returned from
+        // the dry run so we can allow the user to edit any new variables before saving + upgrading
+        if (isUpgrade && !!upgradePackagePolicyDryRunData?.[0]?.diff?.[1]) {
+          basePolicy = upgradePackagePolicyDryRunData[0].diff?.[1];
+        }
+
+        if (basePolicy) {
+          setOriginalPackagePolicy(basePolicy);
 
           const {
             id,
@@ -141,7 +168,7 @@ export const EditPackagePolicyForm = memo<{
             updated_at,
             /* eslint-enable @typescript-eslint/naming-convention */
             ...restOfPackagePolicy
-          } = packagePolicyData.item;
+          } = basePolicy;
           // Remove `compiled_stream` from all stream info, we assign this after saving
           const newPackagePolicy = {
             ...restOfPackagePolicy,
@@ -158,11 +185,23 @@ export const EditPackagePolicyForm = memo<{
               };
             }),
           };
+
           setPackagePolicy(newPackagePolicy);
-          if (packagePolicyData.item.package) {
+
+          if (basePolicy.package) {
+            let _packageInfo = basePolicy.package;
+
+            // When upgrading, we need to grab the `packageInfo` data from the new package version's
+            // proposed policy (comes from the dry run diff) to ensure we have the valid package key/version
+            // before saving
+            if (isUpgrade && !!upgradePackagePolicyDryRunData?.[0]?.diff?.[1]?.package) {
+              _packageInfo = upgradePackagePolicyDryRunData[0].diff?.[1]?.package;
+            }
+
             const { data: packageData } = await sendGetPackageInfoByKey(
-              pkgKeyFromPackageInfo(packagePolicyData.item.package)
+              pkgKeyFromPackageInfo(_packageInfo!)
             );
+
             if (packageData?.response) {
               setPackageInfo(packageData.response);
               setValidationResults(validatePackagePolicy(newPackagePolicy, packageData.response));
@@ -176,7 +215,7 @@ export const EditPackagePolicyForm = memo<{
       setIsLoadingData(false);
     };
     getData();
-  }, [policyId, packagePolicyId]);
+  }, [policyId, packagePolicyId, isUpgrade]);
 
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
@@ -507,9 +546,13 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
 
-          {from === 'upgrade' && (
+          {from === 'upgrade' && dryRunData && (
             <>
-              <UpgradeStatusCallout agentPolicyId={policyId} packagePolicyId={packagePolicyId} />
+              <UpgradeStatusCallout
+                dryRunData={dryRunData}
+                agentPolicyId={policyId}
+                packagePolicyId={packagePolicyId}
+              />
               <EuiSpacer size="xxl" />
             </>
           )}
@@ -575,19 +618,19 @@ const PoliciesBreadcrumb: React.FunctionComponent<{ policyName: string; policyId
 };
 
 const UpgradeStatusCallout: React.FunctionComponent<{
+  dryRunData: UpgradePackagePolicyDryRunResponse;
   agentPolicyId: string;
   packagePolicyId: string;
-}> = ({ agentPolicyId, packagePolicyId }) => {
+}> = ({ dryRunData, agentPolicyId, packagePolicyId }) => {
   const { getHref } = useLink();
-  const { data } = useUpgradePackagePolicyDryRun([packagePolicyId]);
 
-  if (!data) {
+  if (!dryRunData) {
     return null;
   }
 
-  const isReadyForUpgrade = !data[0].hasErrors;
+  const isReadyForUpgrade = !dryRunData[0].hasErrors;
 
-  const [currentPackagePolicy, proposedUpgradePackagePolicy] = data[0].diff || [];
+  const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
 
   return isReadyForUpgrade ? (
     <EuiCallOut

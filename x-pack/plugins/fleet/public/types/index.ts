@@ -51,6 +51,9 @@ export {
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
   GetPackagePoliciesResponse,
+  DryRunPackagePolicy,
+  UpgradePackagePolicyResponse,
+  UpgradePackagePolicyDryRunResponse,
   // API schemas - Data streams
   GetDataStreamsResponse,
   // API schemas - Agents
