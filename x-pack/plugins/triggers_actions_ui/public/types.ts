@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart, ResolvedSimpleSavedObject } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -39,9 +39,11 @@ import {
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type Alert = SanitizedAlert<AlertTypeParams>;
+type ResolvedAlert = ResolvedSimpleSavedObject<Alert>;
 
 export {
   Alert,
+  ResolvedAlert,
   AlertAction,
   AlertAggregations,
   AlertTaskState,

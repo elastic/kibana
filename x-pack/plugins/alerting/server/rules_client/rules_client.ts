@@ -17,12 +17,12 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
-  SavedObjectsResolveResponse,
 } from '../../../../../src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
   Alert,
+  ResolvedAlert,
   PartialAlert,
   RawAlert,
   RuleTypeRegistry,
@@ -372,7 +372,7 @@ export class RulesClient {
       createdAlert.attributes.alertTypeId,
       createdAlert.attributes,
       references
-    );
+    ) as Alert<Params>;
   }
 
   public async get<Params extends AlertTypeParams = never>({
@@ -409,14 +409,14 @@ export class RulesClient {
       result.attributes.alertTypeId,
       result.attributes,
       result.references
-    );
+    ) as Alert<Params>;
   }
 
   public async resolve<Params extends AlertTypeParams = never>({
     id,
   }: {
     id: string;
-  }): Promise<SanitizedAlert<Params>> {
+  }): Promise<ResolvedAlert<Params>> {
     const {
       saved_object: result,
       ...resolveResponse
@@ -444,13 +444,18 @@ export class RulesClient {
         savedObject: { type: 'alert', id },
       })
     );
-    return this.getAlertFromRaw<Params>(
-      result.id,
-      result.attributes.alertTypeId,
-      result.attributes,
-      result.references,
-      resolveResponse
-    );
+    return {
+      ...resolveResponse,
+      saved_object: {
+        ...result,
+        attributes: this.getAlertFromRaw<Params>(
+          result.id,
+          result.attributes.alertTypeId,
+          result.attributes,
+          result.references
+        ),
+      },
+    };
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -582,7 +587,7 @@ export class RulesClient {
         attributes.alertTypeId,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
         references
-      );
+      ) as Alert<Params>;
     });
 
     authorizedData.forEach(({ id }) =>
@@ -1511,20 +1516,13 @@ export class RulesClient {
     id: string,
     ruleTypeId: string,
     rawAlert: RawAlert,
-    references: SavedObjectReference[] | undefined,
-    resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>
+    references: SavedObjectReference[] | undefined
   ): Alert {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw<Params>(
-      id,
-      ruleType,
-      rawAlert,
-      references,
-      resolveResponse
-    ) as Alert;
+    return this.getPartialAlertFromRaw<Params>(id, ruleType, rawAlert, references) as Alert;
   }
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
@@ -1539,8 +1537,7 @@ export class RulesClient {
       params,
       ...rawAlert
     }: Partial<RawAlert>,
-    references: SavedObjectReference[] | undefined,
-    resolveResponse?: Omit<SavedObjectsResolveResponse, 'saved_object'>
+    references: SavedObjectReference[] | undefined
   ): PartialAlert<Params> {
     // Not the prettiest code here, but if we want to use most of the
     // alert fields from the rawAlert using `...rawAlert` kind of access, we
@@ -1568,7 +1565,6 @@ export class RulesClient {
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
       ...(executionStatus ? { executionStatus } : {}),
-      ...(resolveResponse ? { resolveResponse } : {}),
     };
   }
 
