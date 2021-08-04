@@ -11,6 +11,7 @@ import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../../index_patterns';
 import { SearchSource } from './search_source';
+import { Serializable, SerializableState } from '../../../../kibana_utils/common/persistable_state';
 
 /**
  * search source interface
@@ -27,7 +28,7 @@ export interface ISearchStartSearchSource {
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields
    */
-  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+  create: (fields?: SearchSourceFieldsSerializable) => Promise<ISearchSource>;
   /**
    * creates empty {@link SearchSource}
    */
@@ -41,12 +42,12 @@ export enum SortDirection {
   desc = 'desc',
 }
 
-export interface SortDirectionFormat {
+export interface SortDirectionFormat extends SerializableState {
   order: SortDirection;
   format?: string;
 }
 
-export interface SortDirectionNumeric {
+export interface SortDirectionNumeric extends SerializableState {
   order: SortDirection;
   numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
 }
@@ -86,7 +87,7 @@ export interface SearchSourceFields {
   /**
    * {@link AggConfigs}
    */
-  aggs?: object | IAggConfigs | (() => object);
+  aggs?: IAggConfigs | (() => IAggConfigs);
   from?: number;
   size?: number;
   source?: boolean | estypes.Fields;
@@ -110,6 +111,55 @@ export interface SearchSourceFields {
   terminate_after?: number;
 
   parent?: SearchSourceFields;
+}
+
+/**
+ * search source fields
+ */
+export interface SearchSourceFieldsSerializable extends SerializableState {
+  type?: string;
+  /**
+   * {@link Query}
+   */
+  query?: Query;
+  /**
+   * {@link Filter}
+   */
+  filter?: Filter[];
+  /**
+   * {@link EsQuerySortValue}
+   */
+  sort?: EsQuerySortValue | EsQuerySortValue[];
+  highlight?: Serializable;
+  highlightAll?: boolean;
+  trackTotalHits?: boolean | number;
+  /**
+   * {@link AggConfigs}
+   */
+  aggs?: Serializable;
+  from?: number;
+  size?: number;
+  source?: boolean | estypes.Fields;
+  version?: boolean;
+  /**
+   * Retrieve fields via the search Fields API
+   */
+  fields?: SearchFieldValue[];
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
+   */
+  fieldsFromSource?: estypes.Fields;
+  /**
+   * {@link IndexPatternService}
+   */
+  index?: string;
+  searchAfter?: EsQuerySearchAfter;
+  timeout?: string;
+  terminate_after?: number;
+
+  parent?: SearchSourceFieldsSerializable;
 }
 
 export interface SearchSourceOptions {

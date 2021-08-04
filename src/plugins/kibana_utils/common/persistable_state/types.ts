@@ -16,7 +16,11 @@ export type SerializableState = {
   [key: string]: Serializable;
 };
 export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
-export type Serializable = SerializableValue | SerializableValue[];
+export type Serializable =
+  | SerializableValue
+  | SerializableValue[]
+  | Record<string, SerializableValue>
+  | Array<Record<string, SerializableValue>>;
 
 /**
  * Versioned state is a POJO JavaScript object that can be serialized to JSON,

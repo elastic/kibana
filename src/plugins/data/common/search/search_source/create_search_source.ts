@@ -9,7 +9,8 @@
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
-import { SearchSourceFields } from './types';
+import { SearchSourceFields, SearchSourceFieldsSerializable } from './types';
+import { AggsCommonStart } from '../aggs';
 
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.
@@ -30,15 +31,20 @@ import { SearchSourceFields } from './types';
  * @public */
 export const createSearchSource = (
   indexPatterns: IndexPatternsContract,
+  aggs: AggsCommonStart,
   searchSourceDependencies: SearchSourceDependencies
-) => async (searchSourceFields: SearchSourceFields = {}) => {
-  const fields = { ...searchSourceFields };
+) => async (searchSourceFields: SearchSourceFieldsSerializable = {}) => {
+  const index = await indexPatterns.get(searchSourceFields.index as any);
 
-  // hydrating index pattern
-  if (fields.index && typeof fields.index === 'string') {
-    fields.index = await indexPatterns.get(searchSourceFields.index as any);
-  }
-
+  const convertFields = (serializedFields: SearchSourceFieldsSerializable): SearchSourceFields => {
+    return {
+      ...serializedFields,
+      index: serializedFields.index ? index : undefined,
+      aggs: aggs.createAggConfigs(index, searchSourceFields.aggs as any),
+      parent: serializedFields.parent ? convertFields(serializedFields.parent) : undefined,
+    };
+  };
+  const fields: SearchSourceFields = convertFields(searchSourceFields);
   const searchSource = new SearchSource(fields, searchSourceDependencies);
 
   // todo: move to migration script .. create issue

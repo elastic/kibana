@@ -185,15 +185,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       onResponse: handleResponse,
     };
 
+    const aggsStart = this.aggsService.start({ fieldFormats, uiSettings, indexPatterns });
+
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs: aggsStart,
       search,
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
       },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
-      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
+      searchSource: this.searchSourceService.start(
+        indexPatterns,
+        aggsStart,
+        searchSourceDependencies
+      ),
     };
   }
 

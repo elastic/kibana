@@ -8,16 +8,21 @@
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { AggsCommonStart } from '../aggs';
 
 export class SearchSourceService {
   public setup() {}
 
-  public start(indexPatterns: IndexPatternsContract, dependencies: SearchSourceDependencies) {
+  public start(
+    indexPatterns: IndexPatternsContract,
+    aggs: AggsCommonStart,
+    dependencies: SearchSourceDependencies
+  ) {
     return {
       /**
        * creates searchsource based on serialized search source fields
        */
-      create: createSearchSource(indexPatterns, dependencies),
+      create: createSearchSource(indexPatterns, aggs, dependencies),
       /**
        * creates an enpty search source
        */

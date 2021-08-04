@@ -82,6 +82,7 @@ import {
   IEsSearchResponse,
   ISearchGeneric,
   ISearchOptions,
+  SearchSourceFieldsSerializable,
 } from '../..';
 import type {
   ISearchSource,
@@ -849,20 +850,14 @@ export class SearchSource {
    */
   public getSerializedFields(recurse = false) {
     const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
-    let serializedSearchSourceFields: SearchSourceFields = {
+    const serializedSearchSourceFields: SearchSourceFieldsSerializable = {
       ...searchSourceFields,
       index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
+      aggs: (searchSourceFields.aggs as AggConfigs).serialize(),
+      filter: this.getFilters(originalFilters),
+      parent: this.getParent()!.getSerializedFields(recurse),
     };
-    if (originalFilters) {
-      const filters = this.getFilters(originalFilters);
-      serializedSearchSourceFields = {
-        ...serializedSearchSourceFields,
-        filter: filters,
-      };
-    }
-    if (recurse && this.getParent()) {
-      serializedSearchSourceFields.parent = this.getParent()!.getSerializedFields(recurse);
-    }
+
     return serializedSearchSourceFields;
   }
 

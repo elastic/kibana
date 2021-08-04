@@ -484,4 +484,8 @@ export class AggConfigs {
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))
     );
   }
+
+  serialize() {
+    return this.aggs.map((agg) => agg.serialize());
+  }
 }
