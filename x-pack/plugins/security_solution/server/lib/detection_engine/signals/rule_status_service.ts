@@ -6,7 +6,7 @@
  */
 
 import { assertUnreachable } from '../../../../common/utility_types';
-import { JobStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { getOrCreateRuleStatuses } from './get_or_create_rule_statuses';
 import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
@@ -29,7 +29,7 @@ export interface RuleStatusService {
 }
 
 export const buildRuleStatusAttributes: (
-  status: JobStatus,
+  status: RuleExecutionStatus,
   message?: string,
   attributes?: Attributes
 ) => Partial<IRuleStatusSOAttributes> = (status, message, attributes = {}) => {
@@ -41,35 +41,35 @@ export const buildRuleStatusAttributes: (
   };
 
   switch (status) {
-    case 'succeeded': {
+    case RuleExecutionStatus.succeeded: {
       return {
         ...baseAttributes,
         lastSuccessAt: now,
         lastSuccessMessage: message,
       };
     }
-    case 'warning': {
+    case RuleExecutionStatus.warning: {
       return {
         ...baseAttributes,
         lastSuccessAt: now,
         lastSuccessMessage: message,
       };
     }
-    case 'partial failure': {
+    case RuleExecutionStatus['partial failure']: {
       return {
         ...baseAttributes,
         lastSuccessAt: now,
         lastSuccessMessage: message,
       };
     }
-    case 'failed': {
+    case RuleExecutionStatus.failed: {
       return {
         ...baseAttributes,
         lastFailureAt: now,
         lastFailureMessage: message,
       };
     }
-    case 'going to run': {
+    case RuleExecutionStatus['going to run']: {
       return baseAttributes;
     }
   }
@@ -93,7 +93,7 @@ export const ruleStatusServiceFactory = async ({
 
       await ruleStatusClient.update(currentStatus.id, {
         ...currentStatus.attributes,
-        ...buildRuleStatusAttributes('going to run'),
+        ...buildRuleStatusAttributes(RuleExecutionStatus['going to run']),
       });
     },
 
@@ -105,7 +105,7 @@ export const ruleStatusServiceFactory = async ({
 
       await ruleStatusClient.update(currentStatus.id, {
         ...currentStatus.attributes,
-        ...buildRuleStatusAttributes('succeeded', message, attributes),
+        ...buildRuleStatusAttributes(RuleExecutionStatus.succeeded, message, attributes),
       });
     },
 
@@ -117,7 +117,7 @@ export const ruleStatusServiceFactory = async ({
 
       await ruleStatusClient.update(currentStatus.id, {
         ...currentStatus.attributes,
-        ...buildRuleStatusAttributes('partial failure', message, attributes),
+        ...buildRuleStatusAttributes(RuleExecutionStatus['partial failure'], message, attributes),
       });
     },
 
@@ -130,7 +130,7 @@ export const ruleStatusServiceFactory = async ({
 
       const failureAttributes = {
         ...currentStatus.attributes,
-        ...buildRuleStatusAttributes('failed', message, attributes),
+        ...buildRuleStatusAttributes(RuleExecutionStatus.failed, message, attributes),
       };
 
       // We always update the newest status, so to 'persist' a failure we push a copy to the head of the list

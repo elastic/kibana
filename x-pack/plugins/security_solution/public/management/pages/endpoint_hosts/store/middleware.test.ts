@@ -23,7 +23,7 @@ import {
 import { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { listData } from './selectors';
-import { EndpointState } from '../types';
+import { EndpointState, TransformStats } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
@@ -42,7 +42,7 @@ import {
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
 } from '../../../../common/lib/endpoint_isolation/mocks';
-import { endpointPageHttpMock } from '../mocks';
+import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
@@ -318,6 +318,76 @@ describe('endpoint list middleware', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('handles metadata transform stats actions', () => {
+    const dispatchLoadTransformStats = () => {
+      dispatch({
+        type: 'loadMetadataTransformStats',
+      });
+    };
+
+    let mockedApis: ReturnType<typeof endpointPageHttpMock>;
+
+    beforeEach(() => {
+      mockedApis = endpointPageHttpMock(fakeHttpServices);
+    });
+
+    it('correctly fetches stats', async () => {
+      const loadedDispatched = waitForAction('metadataTransformStatsChanged', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      dispatchLoadTransformStats();
+      await loadedDispatched;
+      expect(mockedApis.responseProvider.metadataTransformStats).toHaveBeenCalled();
+    });
+
+    it('correctly sets loading', async () => {
+      const loadingDispatched = waitForAction('metadataTransformStatsChanged', {
+        validate(action) {
+          return isLoadingResourceState(action.payload);
+        },
+      });
+
+      dispatchLoadTransformStats();
+      expect(await loadingDispatched).toBeTruthy();
+    });
+
+    it('correctly sets loaded state on success', async () => {
+      const loadedDispatched = waitForAction('metadataTransformStatsChanged', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      dispatchLoadTransformStats();
+      const action = await loadedDispatched;
+      const { data } = action.payload as LoadedResourceState<TransformStats[]>;
+      expect(data).toEqual(failedTransformStateMock.transforms);
+    });
+
+    it('correctly sets failed state on api failure', async () => {
+      const failedDispatched = waitForAction('metadataTransformStatsChanged', {
+        validate(action) {
+          return isFailedResourceState(action.payload);
+        },
+      });
+
+      const apiError = new Error('hey look an error');
+      mockedApis.responseProvider.metadataTransformStats.mockImplementation(() => {
+        throw apiError;
+      });
+
+      dispatchLoadTransformStats();
+
+      const failedAction = (await failedDispatched).payload as FailedResourceState<
+        TransformStats[]
+      >;
+      expect(failedAction.error).toBe(apiError);
     });
   });
 });

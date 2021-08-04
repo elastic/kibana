@@ -15,6 +15,8 @@ import { getMetadataForBackend } from '../lib/backends/get_metadata_for_backend'
 import { getLatencyChartsForBackend } from '../lib/backends/get_latency_charts_for_backend';
 import { getTopBackends } from '../lib/backends/get_top_backends';
 import { getUpstreamServicesForBackend } from '../lib/backends/get_upstream_services_for_backend';
+import { getThroughputChartsForBackend } from '../lib/backends/get_throughput_charts_for_backend';
+import { getErrorRateChartsForBackend } from '../lib/backends/get_error_rate_charts_for_backend';
 
 const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/backends/top_backends',
@@ -68,7 +70,7 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
       query: t.intersection([rangeRt, t.type({ numBuckets: toNumberRt })]),
     }),
     t.partial({
-      query: t.intersection([environmentRt, offsetRt]),
+      query: t.intersection([environmentRt, offsetRt, kueryRt]),
     }),
   ]),
   options: {
@@ -80,10 +82,18 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
     const { start, end } = setup;
     const {
       path: { backendName },
-      query: { environment, offset, numBuckets },
+      query: { environment, offset, numBuckets, kuery },
     } = resources.params;
 
-    const opts = { backendName, setup, start, end, numBuckets, environment };
+    const opts = {
+      backendName,
+      setup,
+      start,
+      end,
+      numBuckets,
+      environment,
+      kuery,
+    };
 
     const [currentServices, previousServices] = await Promise.all([
       getUpstreamServicesForBackend(opts),
@@ -182,8 +192,100 @@ const backendLatencyChartsRoute = createApmServerRoute({
   },
 });
 
+const backendThroughputChartsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/backends/{backendName}/charts/throughput',
+  params: t.type({
+    path: t.type({
+      backendName: t.string,
+    }),
+    query: t.intersection([rangeRt, kueryRt, environmentRt, offsetRt]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { backendName } = params.path;
+    const { kuery, environment, offset } = params.query;
+
+    const { start, end } = setup;
+
+    const [currentTimeseries, comparisonTimeseries] = await Promise.all([
+      getThroughputChartsForBackend({
+        backendName,
+        setup,
+        start,
+        end,
+        kuery,
+        environment,
+      }),
+      offset
+        ? getThroughputChartsForBackend({
+            backendName,
+            setup,
+            start,
+            end,
+            kuery,
+            environment,
+            offset,
+          })
+        : null,
+    ]);
+
+    return { currentTimeseries, comparisonTimeseries };
+  },
+});
+
+const backendErrorRateChartsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/backends/{backendName}/charts/error_rate',
+  params: t.type({
+    path: t.type({
+      backendName: t.string,
+    }),
+    query: t.intersection([rangeRt, kueryRt, environmentRt, offsetRt]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { backendName } = params.path;
+    const { kuery, environment, offset } = params.query;
+
+    const { start, end } = setup;
+
+    const [currentTimeseries, comparisonTimeseries] = await Promise.all([
+      getErrorRateChartsForBackend({
+        backendName,
+        setup,
+        start,
+        end,
+        kuery,
+        environment,
+      }),
+      offset
+        ? getErrorRateChartsForBackend({
+            backendName,
+            setup,
+            start,
+            end,
+            kuery,
+            environment,
+            offset,
+          })
+        : null,
+    ]);
+
+    return { currentTimeseries, comparisonTimeseries };
+  },
+});
+
 export const backendsRouteRepository = createApmServerRouteRepository()
   .add(topBackendsRoute)
   .add(upstreamServicesForBackendRoute)
   .add(backendMetadataRoute)
-  .add(backendLatencyChartsRoute);
+  .add(backendLatencyChartsRoute)
+  .add(backendThroughputChartsRoute)
+  .add(backendErrorRateChartsRoute);
