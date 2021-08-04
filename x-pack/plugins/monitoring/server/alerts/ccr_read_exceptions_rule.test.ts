@@ -47,16 +47,16 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-describe('CCRReadExceptionsAlert', () => {
+describe('CCRReadExceptionsRule', () => {
   it('should have defaults', () => {
-    const alert = new CCRReadExceptionsRule() as ICCRReadExceptionsRuleMock;
-    expect(alert.alertOptions.id).toBe(RULE_CCR_READ_EXCEPTIONS);
-    expect(alert.alertOptions.name).toBe('CCR read exceptions');
-    expect(alert.alertOptions.throttle).toBe('6h');
-    expect(alert.alertOptions.defaultParams).toStrictEqual({
+    const rule = new CCRReadExceptionsRule() as ICCRReadExceptionsRuleMock;
+    expect(rule.alertOptions.id).toBe(RULE_CCR_READ_EXCEPTIONS);
+    expect(rule.alertOptions.name).toBe('CCR read exceptions');
+    expect(rule.alertOptions.throttle).toBe('6h');
+    expect(rule.alertOptions.defaultParams).toStrictEqual({
       duration: '1h',
     });
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    expect(rule.alertOptions.actionVariables).toStrictEqual([
       {
         name: 'remoteCluster',
         description: 'The remote cluster experiencing CCR read exceptions.',
@@ -146,11 +146,11 @@ describe('CCRReadExceptionsAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new CCRReadExceptionsRule() as ICCRReadExceptionsRuleMock;
-      const type = alert.getAlertType();
+      const rule = new CCRReadExceptionsRule() as ICCRReadExceptionsRuleMock;
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         internalFullMessage: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Current 'follower_index' index affected: ${followerIndex}. [View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:${clusterUuid}))`,
@@ -177,11 +177,11 @@ describe('CCRReadExceptionsAlert', () => {
           },
         ];
       });
-      const alert = new CCRReadExceptionsRule() as ICCRReadExceptionsRuleMock;
-      const type = alert.getAlertType();
+      const rule = new CCRReadExceptionsRule() as ICCRReadExceptionsRuleMock;
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         internalFullMessage: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Current 'follower_index' index affected: ${followerIndex}. [View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:${clusterUuid},ccs:testCluster))`,

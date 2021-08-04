@@ -39,11 +39,11 @@ jest.mock('../static_globals', () => ({
 
 describe('LogstashVersionMismatchRule', () => {
   it('should have defaults', () => {
-    const alert = new LogstashVersionMismatchRule();
-    expect(alert.alertOptions.id).toBe(RULE_LOGSTASH_VERSION_MISMATCH);
-    expect(alert.alertOptions.name).toBe('Logstash version mismatch');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new LogstashVersionMismatchRule();
+    expect(rule.alertOptions.id).toBe(RULE_LOGSTASH_VERSION_MISMATCH);
+    expect(rule.alertOptions.name).toBe('Logstash version mismatch');
+    expect(rule.alertOptions.throttle).toBe('1d');
+    expect(rule.alertOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Logstash running in this cluster.',
@@ -117,12 +117,12 @@ describe('LogstashVersionMismatchRule', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new LogstashVersionMismatchRule();
-      const type = alert.getAlertType();
+      const rule = new LogstashVersionMismatchRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -171,12 +171,12 @@ describe('LogstashVersionMismatchRule', () => {
           },
         ];
       });
-      const alert = new LogstashVersionMismatchRule();
-      const type = alert.getAlertType();
+      const rule = new LogstashVersionMismatchRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

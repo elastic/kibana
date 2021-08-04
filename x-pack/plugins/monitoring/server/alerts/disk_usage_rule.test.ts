@@ -48,7 +48,7 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-describe('DiskUsageAlert', () => {
+describe('DiskUsageRule', () => {
   it('should have defaults', () => {
     const alert = new DiskUsageRule() as IDiskUsageAlertMock;
     expect(alert.alertOptions.id).toBe(RULE_DISK_USAGE);
@@ -126,11 +126,11 @@ describe('DiskUsageAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new DiskUsageRule() as IDiskUsageAlertMock;
-      const type = alert.getAlertType();
+      const rule = new DiskUsageRule() as IDiskUsageAlertMock;
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
@@ -156,11 +156,11 @@ describe('DiskUsageAlert', () => {
           },
         ];
       });
-      const alert = new DiskUsageRule() as IDiskUsageAlertMock;
-      const type = alert.getAlertType();
+      const rule = new DiskUsageRule() as IDiskUsageAlertMock;
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {

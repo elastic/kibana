@@ -38,11 +38,11 @@ jest.mock('../static_globals', () => ({
 
 describe('ElasticsearchVersionMismatchAlert', () => {
   it('should have defaults', () => {
-    const alert = new ElasticsearchVersionMismatchRule();
-    expect(alert.alertOptions.id).toBe(RULE_ELASTICSEARCH_VERSION_MISMATCH);
-    expect(alert.alertOptions.name).toBe('Elasticsearch version mismatch');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new ElasticsearchVersionMismatchRule();
+    expect(rule.alertOptions.id).toBe(RULE_ELASTICSEARCH_VERSION_MISMATCH);
+    expect(rule.alertOptions.name).toBe('Elasticsearch version mismatch');
+    expect(rule.alertOptions.throttle).toBe('1d');
+    expect(rule.alertOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Elasticsearch running in this cluster.',
@@ -116,12 +116,12 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new ElasticsearchVersionMismatchRule();
-      const type = alert.getAlertType();
+      const rule = new ElasticsearchVersionMismatchRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -170,12 +170,12 @@ describe('ElasticsearchVersionMismatchAlert', () => {
           },
         ];
       });
-      const alert = new ElasticsearchVersionMismatchRule();
-      const type = alert.getAlertType();
+      const rule = new ElasticsearchVersionMismatchRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

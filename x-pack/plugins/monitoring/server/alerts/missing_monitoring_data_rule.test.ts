@@ -39,12 +39,12 @@ jest.mock('../static_globals', () => ({
 
 describe('MissingMonitoringDataRule', () => {
   it('should have defaults', () => {
-    const alert = new MissingMonitoringDataRule();
-    expect(alert.alertOptions.id).toBe(RULE_MISSING_MONITORING_DATA);
-    expect(alert.alertOptions.name).toBe('Missing monitoring data');
-    expect(alert.alertOptions.throttle).toBe('6h');
-    expect(alert.alertOptions.defaultParams).toStrictEqual({ limit: '1d', duration: '15m' });
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new MissingMonitoringDataRule();
+    expect(rule.alertOptions.id).toBe(RULE_MISSING_MONITORING_DATA);
+    expect(rule.alertOptions.name).toBe('Missing monitoring data');
+    expect(rule.alertOptions.throttle).toBe('6h');
+    expect(rule.alertOptions.defaultParams).toStrictEqual({ limit: '1d', duration: '15m' });
+    expect(rule.alertOptions.actionVariables).toStrictEqual([
       { name: 'node', description: 'The node missing monitoring data.' },
       {
         name: 'internalShortMessage',
@@ -118,11 +118,11 @@ describe('MissingMonitoringDataRule', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new MissingMonitoringDataRule();
-      const type = alert.getAlertType();
+      const rule = new MissingMonitoringDataRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(replaceState).toHaveBeenCalledWith({
@@ -202,12 +202,12 @@ describe('MissingMonitoringDataRule', () => {
           },
         ];
       });
-      const alert = new MissingMonitoringDataRule();
-      const type = alert.getAlertType();
+      const rule = new MissingMonitoringDataRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [],
@@ -225,12 +225,12 @@ describe('MissingMonitoringDataRule', () => {
           },
         ];
       });
-      const alert = new MissingMonitoringDataRule();
-      const type = alert.getAlertType();
+      const rule = new MissingMonitoringDataRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {

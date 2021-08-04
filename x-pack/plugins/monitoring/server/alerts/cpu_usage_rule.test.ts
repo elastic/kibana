@@ -35,14 +35,14 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-describe('CpuUsageAlert', () => {
+describe('CpuUsageRule', () => {
   it('should have defaults', () => {
-    const alert = new CpuUsageRule();
-    expect(alert.alertOptions.id).toBe(RULE_CPU_USAGE);
-    expect(alert.alertOptions.name).toBe('CPU Usage');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.defaultParams).toStrictEqual({ threshold: 85, duration: '5m' });
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new CpuUsageRule();
+    expect(rule.alertOptions.id).toBe(RULE_CPU_USAGE);
+    expect(rule.alertOptions.name).toBe('CPU Usage');
+    expect(rule.alertOptions.throttle).toBe('1d');
+    expect(rule.alertOptions.defaultParams).toStrictEqual({ threshold: 85, duration: '5m' });
+    expect(rule.alertOptions.actionVariables).toStrictEqual([
       { name: 'node', description: 'The node reporting high cpu usage.' },
       {
         name: 'internalShortMessage',
@@ -114,11 +114,11 @@ describe('CpuUsageAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new CpuUsageRule();
-      const type = alert.getAlertType();
+      const rule = new CpuUsageRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(replaceState).toHaveBeenCalledWith({
@@ -211,11 +211,11 @@ describe('CpuUsageAlert', () => {
           },
         ];
       });
-      const alert = new CpuUsageRule();
-      const type = alert.getAlertType();
+      const rule = new CpuUsageRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [],
@@ -233,11 +233,11 @@ describe('CpuUsageAlert', () => {
           },
         ];
       });
-      const alert = new CpuUsageRule();
-      const type = alert.getAlertType();
+      const rule = new CpuUsageRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {

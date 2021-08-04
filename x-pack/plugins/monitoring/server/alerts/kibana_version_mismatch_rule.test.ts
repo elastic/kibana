@@ -38,11 +38,11 @@ jest.mock('../static_globals', () => ({
 
 describe('KibanaVersionMismatchRule', () => {
   it('should have defaults', () => {
-    const alert = new KibanaVersionMismatchRule();
-    expect(alert.alertOptions.id).toBe(RULE_KIBANA_VERSION_MISMATCH);
-    expect(alert.alertOptions.name).toBe('Kibana version mismatch');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new KibanaVersionMismatchRule();
+    expect(rule.alertOptions.id).toBe(RULE_KIBANA_VERSION_MISMATCH);
+    expect(rule.alertOptions.name).toBe('Kibana version mismatch');
+    expect(rule.alertOptions.throttle).toBe('1d');
+    expect(rule.alertOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Kibana running in this cluster.',
@@ -119,11 +119,11 @@ describe('KibanaVersionMismatchRule', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new KibanaVersionMismatchRule();
-      const type = alert.getAlertType();
+      const rule = new KibanaVersionMismatchRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -172,11 +172,11 @@ describe('KibanaVersionMismatchRule', () => {
           },
         ];
       });
-      const alert = new KibanaVersionMismatchRule();
-      const type = alert.getAlertType();
+      const rule = new KibanaVersionMismatchRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

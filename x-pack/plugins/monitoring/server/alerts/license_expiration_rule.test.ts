@@ -42,13 +42,13 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-describe('LicenseExpirationAlert', () => {
+describe('LicenseExpirationRule', () => {
   it('should have defaults', () => {
-    const alert = new LicenseExpirationRule();
-    expect(alert.alertOptions.id).toBe(RULE_LICENSE_EXPIRATION);
-    expect(alert.alertOptions.name).toBe('License expiration');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new LicenseExpirationRule();
+    expect(rule.alertOptions.id).toBe(RULE_LICENSE_EXPIRATION);
+    expect(rule.alertOptions.name).toBe('License expiration');
+    expect(rule.alertOptions.throttle).toBe('1d');
+    expect(rule.alertOptions.actionVariables).toStrictEqual([
       { name: 'expiredDate', description: 'The date when the license expires.' },
       { name: 'clusterName', description: 'The cluster to which the license belong.' },
       {
@@ -196,12 +196,12 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationRule();
-      const type = alert.getAlertType();
+      const rule = new LicenseExpirationRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
@@ -218,12 +218,12 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationRule();
-      const type = alert.getAlertType();
+      const rule = new LicenseExpirationRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Danger);
     });
@@ -239,12 +239,12 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationRule();
-      const type = alert.getAlertType();
+      const rule = new LicenseExpirationRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Warning);
     });

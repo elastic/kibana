@@ -44,11 +44,11 @@ jest.mock('../static_globals', () => ({
 
 describe('NodesChangedAlert', () => {
   it('should have defaults', () => {
-    const alert = new NodesChangedRule();
-    expect(alert.alertOptions.id).toBe(RULE_NODES_CHANGED);
-    expect(alert.alertOptions.name).toBe('Nodes changed');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new NodesChangedRule();
+    expect(rule.alertOptions.id).toBe(RULE_NODES_CHANGED);
+    expect(rule.alertOptions.name).toBe('Nodes changed');
+    expect(rule.alertOptions.throttle).toBe('1d');
+    expect(rule.alertOptions.actionVariables).toStrictEqual([
       { name: 'added', description: 'The list of nodes added to the cluster.' },
       { name: 'removed', description: 'The list of nodes removed from the cluster.' },
       { name: 'restarted', description: 'The list of nodes restarted in the cluster.' },
@@ -168,12 +168,12 @@ describe('NodesChangedAlert', () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
         return nodesChanged;
       });
-      const alert = new NodesChangedRule();
-      const type = alert.getAlertType();
+      const rule = new NodesChangedRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -231,12 +231,12 @@ describe('NodesChangedAlert', () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
         return nodesAddedChangedRemoved;
       });
-      const alert = new NodesChangedRule();
-      const type = alert.getAlertType();
+      const rule = new NodesChangedRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -325,12 +325,12 @@ describe('NodesChangedAlert', () => {
           },
         ];
       });
-      const alert = new NodesChangedRule();
-      const type = alert.getAlertType();
+      const rule = new NodesChangedRule();
+      const type = rule.getAlertType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
