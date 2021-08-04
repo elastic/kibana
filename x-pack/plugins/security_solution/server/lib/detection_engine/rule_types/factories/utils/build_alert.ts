@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_RULE_NAMESPACE, ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_OWNER,
+  ALERT_RULE_NAMESPACE,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { Ancestor, BaseSignalHit, SimpleHit } from '../../../signals/types';
@@ -89,7 +95,11 @@ export const removeClashes = (doc: SimpleHit) => {
  * @param docs The parent alerts/events of the new alert to be built.
  * @param rule The rule that is generating the new alert.
  */
-export const buildAlert = (docs: SimpleHit[], rule: RulesSchema): RACAlert => {
+export const buildAlert = (
+  docs: SimpleHit[],
+  rule: RulesSchema,
+  spaceId: string | null | undefined
+): RACAlert => {
   const removedClashes = docs.map(removeClashes);
   const parents = removedClashes.map(buildParent).filter((parent) => parent != null) as Ancestor[];
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
@@ -100,6 +110,8 @@ export const buildAlert = (docs: SimpleHit[], rule: RulesSchema): RACAlert => {
 
   return ({
     '@timestamp': new Date().toISOString(),
+    [ALERT_OWNER]: 'siem',
+    [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [ALERT_ANCESTORS]: ancestors,
     [ALERT_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS]: 'open',

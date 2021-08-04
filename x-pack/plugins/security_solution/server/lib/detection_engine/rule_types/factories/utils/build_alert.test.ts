@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_RULE_NAMESPACE, ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_OWNER,
+  ALERT_RULE_NAMESPACE,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
 import { flatten } from './flatten';
@@ -32,6 +38,8 @@ type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
 };
 
+const SPACE_ID = 'space';
+
 describe('buildAlert', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,12 +50,14 @@ describe('buildAlert', () => {
     delete doc._source.event;
     const rule = getRulesSchemaMock();
     const alert = {
-      ...buildAlert([doc], rule),
+      ...buildAlert([doc], rule, SPACE_ID),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert['@timestamp'];
     const expected = {
       '@timestamp': timestamp,
+      [SPACE_IDS]: [SPACE_ID],
+      [ALERT_OWNER]: 'siem',
       [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -109,12 +119,14 @@ describe('buildAlert', () => {
     };
     const rule = getRulesSchemaMock();
     const alert = {
-      ...buildAlert([doc], rule),
+      ...buildAlert([doc], rule, SPACE_ID),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert['@timestamp'];
     const expected = {
       '@timestamp': timestamp,
+      [SPACE_IDS]: [SPACE_ID],
+      [ALERT_OWNER]: 'siem',
       [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
