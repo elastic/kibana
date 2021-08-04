@@ -16,6 +16,8 @@ import { getState } from './services/discover_state';
 import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
+import { redirectWhenMissing } from '../../../../../kibana_utils/public';
+import { getUrlTracker } from '../../../kibana_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -47,7 +49,14 @@ interface DiscoverLandingParams {
 export function DiscoverMainRoute(props: DiscoverMainProps) {
   const { opts } = props;
   const { services, history } = opts;
-  const { chrome, uiSettings: config, data, toastNotifications } = services;
+  const {
+    core,
+    chrome,
+    uiSettings: config,
+    data,
+    toastNotifications,
+    http: { basePath },
+  } = services;
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
@@ -76,25 +85,46 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
     }
 
     async function loadSavedSearch() {
-      const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
-      const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(loadedSavedSearch);
-      if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
-        loadedSavedSearch.searchSource.setField('index', loadedIndexPattern);
-      }
-      setSavedSearch(loadedSavedSearch);
-      if (savedSearchId) {
-        chrome.recentlyAccessed.add(
-          ((loadedSavedSearch as unknown) as SavedObjectDeprecated).getFullPath(),
-          loadedSavedSearch.title,
-          loadedSavedSearch.id
-        );
+      try {
+        const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
+        const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(loadedSavedSearch);
+        if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
+          loadedSavedSearch.searchSource.setField('index', loadedIndexPattern);
+        }
+        setSavedSearch(loadedSavedSearch);
+        if (savedSearchId) {
+          chrome.recentlyAccessed.add(
+            ((loadedSavedSearch as unknown) as SavedObjectDeprecated).getFullPath(),
+            loadedSavedSearch.title,
+            loadedSavedSearch.id
+          );
+        }
+      } catch (e) {
+        redirectWhenMissing({
+          history,
+          navigateToApp: core.application.navigateToApp,
+          basePath,
+          mapping: {
+            search: '/',
+            'index-pattern': {
+              app: 'management',
+              path: `kibana/objects/savedSearches/${id}`,
+            },
+          },
+          toastNotifications,
+          onBeforeRedirect() {
+            getUrlTracker().setTrackedUrl('/');
+          },
+        })(e);
       }
     }
 
     loadSavedSearch();
   }, [
+    basePath,
     chrome.recentlyAccessed,
     config,
+    core.application.navigateToApp,
     data.indexPatterns,
     history,
     id,
