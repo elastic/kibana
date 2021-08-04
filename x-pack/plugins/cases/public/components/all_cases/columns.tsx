@@ -370,7 +370,7 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
         <EuiIcon
           size="original"
           title={theCase.externalService?.connectorName}
-          type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId ?? '')}
+          type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
         />
       </IconWrapper>
       <EuiLink

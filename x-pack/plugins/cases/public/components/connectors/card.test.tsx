@@ -29,14 +29,15 @@ describe('ConnectorCard ', () => {
   });
 
   it('it does not throw when accessing the icon if the connector type is not registered', () => {
-    // If the component throws the test will fail
-    mount(
-      <ConnectorCard
-        connectorType={ConnectorTypes.none}
-        title="None"
-        listItems={[]}
-        isLoading={false}
-      />
-    );
+    expect(() =>
+      mount(
+        <ConnectorCard
+          connectorType={ConnectorTypes.none}
+          title="None"
+          listItems={[]}
+          isLoading={false}
+        />
+      )
+    ).not.toThrowError();
   });
 });

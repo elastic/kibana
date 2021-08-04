@@ -225,76 +225,24 @@ describe('ConnectorsDropdown', () => {
   });
 
   test('it does not throw when accessing the icon if the connector type is not registered', () => {
-    const newWrapper = mount(
-      <ConnectorsDropdown
-        {...props}
-        connectors={[
-          {
-            id: 'none',
-            actionTypeId: '.none',
-            name: 'None',
-            config: {},
-            isPreconfigured: false,
-          },
-        ]}
-      />,
-      {
-        wrappingComponent: TestProviders,
-      }
-    );
-
-    const selectProps = newWrapper.find(EuiSuperSelect).props();
-    expect(selectProps.options).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data-test-subj": "dropdown-connector-no-connector",
-          "inputDisplay": <EuiFlexGroup
-            alignItems="center"
-            gutterSize="none"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <Styled(EuiIcon)
-                size="m"
-                type="minusInCircle"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <span
-                data-test-subj="dropdown-connector-no-connector"
-              >
-                No connector selected
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          "value": "none",
-        },
-        Object {
-          "data-test-subj": "dropdown-connector-none",
-          "inputDisplay": <EuiFlexGroup
-            alignItems="center"
-            gutterSize="none"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <Styled(EuiIcon)
-                size="m"
-                type=""
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <span>
-                None
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          "value": "none",
-        },
-      ]
-    `);
+    expect(() =>
+      mount(
+        <ConnectorsDropdown
+          {...props}
+          connectors={[
+            {
+              id: 'none',
+              actionTypeId: '.none',
+              name: 'None',
+              config: {},
+              isPreconfigured: false,
+            },
+          ]}
+        />,
+        {
+          wrappingComponent: TestProviders,
+        }
+      )
+    ).not.toThrowError();
   });
 });

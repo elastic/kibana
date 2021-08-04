@@ -46,15 +46,25 @@ export const getConnectorsFormValidators = ({
 
 export const getConnectorIcon = (
   triggersActionsUi: StartPlugins['triggersActionsUi'],
-  type: string
+  type?: string
 ): IconType => {
   /**
    * triggersActionsUi.actionTypeRegistry.get will throw an error if the type is not registered.
    * This will break Kibana if not handled properly.
    */
-  if (triggersActionsUi.actionTypeRegistry.has(type)) {
-    return triggersActionsUi.actionTypeRegistry.get(type).iconClass;
+  const emptyResponse = '';
+
+  if (type == null) {
+    return emptyResponse;
   }
 
-  return '';
+  try {
+    if (triggersActionsUi.actionTypeRegistry.has(type)) {
+      return triggersActionsUi.actionTypeRegistry.get(type).iconClass;
+    }
+  } catch {
+    return emptyResponse;
+  }
+
+  return emptyResponse;
 };

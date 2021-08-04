@@ -58,19 +58,21 @@ describe('ExternalServiceColumn ', () => {
 
   it('it does not throw when accessing the icon if the connector type is not registered', () => {
     // If the component throws the test will fail
-    mount(
-      <ExternalServiceColumn
-        theCase={useGetCasesMockState.data.cases[2]}
-        connectors={[
-          {
-            id: 'none',
-            actionTypeId: '.none',
-            name: 'None',
-            config: {},
-            isPreconfigured: false,
-          },
-        ]}
-      />
-    );
+    expect(() =>
+      mount(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[2]}
+          connectors={[
+            {
+              id: 'none',
+              actionTypeId: '.none',
+              name: 'None',
+              config: {},
+              isPreconfigured: false,
+            },
+          ]}
+        />
+      )
+    ).not.toThrowError();
   });
 });
