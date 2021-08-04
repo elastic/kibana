@@ -42,13 +42,13 @@ export const enableRule = async ({
   // set current status for this rule to be 'going to run'
   if (ruleCurrentStatus && ruleCurrentStatus.length > 0) {
     const currentStatusToDisable = ruleCurrentStatus[0];
-    await ruleStatusClient.update(
-      currentStatusToDisable.id,
-      {
+    await ruleStatusClient.update({
+      id: currentStatusToDisable.id,
+      attributes: {
         ...currentStatusToDisable.attributes,
         status: RuleExecutionStatus['going to run'],
       },
-      spaceId
-    );
+      spaceId,
+    });
   }
 };
