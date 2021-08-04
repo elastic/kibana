@@ -425,13 +425,13 @@ export class RulesClient {
       await this.authorization.ensureAuthorized({
         ruleTypeId: result.attributes.alertTypeId,
         consumer: result.attributes.consumer,
-        operation: ReadOperations.Get,
+        operation: ReadOperations.Resolve,
         entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.GET,
+          action: RuleAuditAction.RESOLVE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -440,7 +440,7 @@ export class RulesClient {
     }
     this.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.GET,
+        action: RuleAuditAction.RESOLVE,
         savedObject: { type: 'alert', id },
       })
     );
