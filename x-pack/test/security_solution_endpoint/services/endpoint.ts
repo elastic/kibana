@@ -14,14 +14,58 @@ import {
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
 } from '../../../plugins/security_solution/common/endpoint/index_data';
+import { TransformPivotConfig } from '../../../plugins/transform/common/types/transform';
+import { GetTransformsResponseSchema } from '../../../plugins/transform/common/api_schemas/transforms';
+import { catchAndWrapError } from '../../../plugins/security_solution/server/endpoint/utils';
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
   private readonly retry = this.ctx.getService('retry');
   private readonly kbnClient = this.ctx.getService('kibanaServer');
+  private readonly transform = this.ctx.getService('transform');
 
-  async setMetadataTransformInterval() {
-    // FIXME:PT implement method
+  private generateTransformId(endpointPackageVersion?: string): string {
+    return `endpoint.metadata_current-default-${endpointPackageVersion ?? ''}`;
+  }
+
+  /**
+   * Fetches the information for the endpoint transform
+   *
+   * @param [endpointPackageVersion] if set, it will be used to get the specific transform this this package version. Else just returns first one found
+   */
+  async getTransform(endpointPackageVersion?: string): Promise<TransformPivotConfig> {
+    const transformId = this.generateTransformId(endpointPackageVersion);
+    let transform: TransformPivotConfig | undefined;
+
+    if (endpointPackageVersion) {
+      await this.transform.api.waitForTransformToExist(transformId);
+
+      transform = ((
+        await this.transform.api
+          .getTransform(transformId)
+          .catch(catchAndWrapError)
+          .then((response: { body: GetTransformsResponseSchema }) => response)
+      ).body as GetTransformsResponseSchema).transforms[0];
+    } else {
+      transform = (
+        await this.transform.api.getTransformList(100).catch(catchAndWrapError)
+      ).transforms.find((t) => t.id.startsWith(transformId));
+    }
+
+    if (!transform) {
+      throw new EndpointError('Endpoint metadata transform not found');
+    }
+
+    return transform;
+  }
+
+  async setMetadataTransformFrequency(
+    frequency: string,
+    /** Used to update the transform installed with the given package version */
+    endpointPackageVersion?: string
+  ): Promise<void> {
+    const transform = await this.getTransform(endpointPackageVersion).catch(catchAndWrapError);
+    await this.transform.api.updateTransform(transform.id, { frequency }).catch(catchAndWrapError);
   }
 
   /**
@@ -34,21 +78,25 @@ export class EndpointTestResources extends FtrService {
    * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
    * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processd by the transform
    */
-  async loadEndpointData({
-    numHosts = 1,
-    numHostDocs = 1,
-    alertsPerHost = 1,
-    enableFleetIntegration = 1,
-    generatorSeed = 'seed',
-    waitUntilTransformed = true,
-  }?: Partial<{
-    numHosts: number;
-    numHostDocs: number;
-    alertsPerHost: number;
-    enableFleetIntegration: boolean;
-    generatorSeed: string;
-    waitUntilTransformed: boolean;
-  }>): IndexedHostsAndAlertsResponse {
+  async loadEndpointData(
+    options: Partial<{
+      numHosts: number;
+      numHostDocs: number;
+      alertsPerHost: number;
+      enableFleetIntegration: boolean;
+      generatorSeed: string;
+      waitUntilTransformed: boolean;
+    }> = {}
+  ): Promise<IndexedHostsAndAlertsResponse> {
+    const {
+      numHosts = 1,
+      numHostDocs = 1,
+      alertsPerHost = 1,
+      enableFleetIntegration = true,
+      generatorSeed = 'seed',
+      waitUntilTransformed = true,
+    } = options;
+
     // load data into the system
     const indexedData = await indexHostsAndAlerts(
       this.esClient as Client,
@@ -65,7 +113,7 @@ export class EndpointTestResources extends FtrService {
     );
 
     if (waitUntilTransformed) {
-      await endpointTestResources.waitForEndpoints(indexedData.hosts.map((host) => host.agent.id));
+      await this.waitForEndpoints(indexedData.hosts.map((host) => host.agent.id));
     }
 
     return indexedData;
