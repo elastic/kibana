@@ -266,7 +266,7 @@ Add a layer for construction zones, which you will draw on the map. The construc
 . Set *Index name* to *construction_zones*.
 . Click *Create index*.
 . Draw 2 or 3 construction zones on your map
-.. Select bounding box icon image:maps/images/asset-tracking-tutorial/bounding_box_icon.png[bounding box icon] in the toolbar on the left side of the map.
+.. In the toolbar on left side of the map, select the bounding box icon image:maps/images/asset-tracking-tutorial/bounding_box_icon.png[bounding box icon].
 .. Move your mouse to an area of the map where you would like to draw a construction zone bounding box.
 .. Click to start rectangle.
 .. Move mouse to adjust rectangle size.
