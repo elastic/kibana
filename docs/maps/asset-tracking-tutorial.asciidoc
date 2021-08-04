@@ -183,6 +183,7 @@ image::maps/images/asset-tracking-tutorial/discover.png[]
 
 [float]
 === Part 2: Build an operational map
+Its hard to get an overview of Portland buses by looking at individual events. Lets create a map to show the bus routes and current location for each bus along with the direction buses are headed.
 
 [float]
 ==== Step 1: Create your map
@@ -255,6 +256,7 @@ image::maps/images/asset-tracking-tutorial/tracks_and_top_hits.png[]
 
 [float]
 === Part 3: Setup geo-fencing alerts
+Lets make TriMet Portland bus data actionable and alert when buses enter construction zones.
 
 [float]
 ==== Step 1. Add a construction zone
