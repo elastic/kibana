@@ -16,7 +16,6 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { calculateThroughput } from '../helpers/calculate_throughput';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 

@@ -17,7 +17,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 
 export function BackendContents({ nodeData }: ContentsProps) {
-  const { query } = useApmParams('*/service-map/*');
+  const { query } = useApmParams('/*');
   const apmRouter = useApmRouter();
   const {
     urlParams: { environment, start, end },
