@@ -267,10 +267,8 @@ Add a layer for construction zones, which you will draw on the map. The construc
 . Click *Create index*.
 . Draw 2 or 3 construction zones on your map:
 .. In the toolbar on left side of the map, select the bounding box icon image:maps/images/asset-tracking-tutorial/bounding_box_icon.png[bounding box icon].
-.. Move your mouse to an area of the map where you would like to draw a construction zone bounding box.
-.. Click to start rectangle.
-.. Move mouse to adjust rectangle size.
-.. Click again to finish.
+.. To draw a construction zone, click a start point on the map and drag.
+.. Click an endpoint to finish.
 . When you finish drawing the construction zones, click *Exit* under the layer name in the legend.
 . In *Layer settings*, set *Name* to *Construction zones*.
 . Scroll to *Layer Style*, and set *Fill color* to yellow.
@@ -279,7 +277,7 @@ Add a layer for construction zones, which you will draw on the map. The construc
 
 The map now represents an operational view of live bus traffic.  You’ll see the direction that the buses are traveling, and whether they are near or have entered a construction zone.
 
-Congratulations! Your map is now complete.
+Your map is now complete.
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/construction_zones.png[]
@@ -334,7 +332,4 @@ The *Bus Alert connector* is added to the *Rules and Connectors* page. For more 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/rules_and_connectors.png[]
 
-[float]
-=== What’s next?
-
-You have successfully completed the asset tracking tutorial. You now have the recipe. Now it’s your turn to try replicating the same analysis with your data. Have fun!
+Congratulations! You have completed the tutorial and have the recipe for tracking assets. Now try replicating this same analysis with your own data.
