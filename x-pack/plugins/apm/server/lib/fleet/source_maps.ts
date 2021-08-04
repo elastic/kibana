@@ -96,7 +96,6 @@ export function getPackagePolicyWithSourceMap({
   packagePolicy: PackagePolicy;
   artifacts: ArtifactSourceMap[];
 }) {
-  // @ts-ignore
   const [firstInput, ...restInputs] = packagePolicy.inputs;
   return {
     ...packagePolicy,
