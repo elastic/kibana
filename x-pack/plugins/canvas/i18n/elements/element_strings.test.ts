@@ -6,10 +6,10 @@
  */
 
 import { getElementStrings } from './element_strings';
-import { initializeElements } from '../../canvas_plugin_src/elements';
+import { getElements } from '../../canvas_plugin_src/elements';
 import { coreMock } from '../../../../../src/core/public/mocks';
 
-const elementSpecs = initializeElements(coreMock.createSetup() as any, {} as any);
+const elementSpecs = getElements(coreMock.createSetup() as any, {} as any);
 
 describe('ElementStrings', () => {
   const elementStrings = getElementStrings();

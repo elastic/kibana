@@ -70,12 +70,18 @@ const excludeElementsForDisabledPlugins = (element: ElementFactory, functions: s
   return !element().external || functions.find((fn) => element().expression_name === fn);
 };
 
-export const initializeElements: SetupInitializer<ElementFactory[]> = (core, plugins) => {
-  const availableFunctions = Object.keys(plugins.expressions.getFunctions());
+export const getElements: SetupInitializer<ElementFactory[]> = (core, plugins) => {
   const specs = [
     ...elementSpecs,
     ...initializeElementFactories.map((factory) => factory(core, plugins)),
-  ].filter((element) => excludeElementsForDisabledPlugins(element, availableFunctions));
-
+  ];
   return applyElementStrings(specs);
+};
+
+export const initializeElements: SetupInitializer<ElementFactory[]> = (core, plugins) => {
+  const availableFunctions = Object.keys(plugins.expressions.getFunctions());
+  const elements = getElements(core, plugins);
+  return elements.filter((element) =>
+    excludeElementsForDisabledPlugins(element, availableFunctions)
+  );
 };
