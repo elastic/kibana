@@ -122,6 +122,7 @@ describe('CoreUsageDataService', () => {
           hidden: true,
           namespaceType: 'agnostic',
           mappings: expect.anything(),
+          migrations: expect.anything(),
         });
       });
     });

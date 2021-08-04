@@ -1,8 +1,6 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[7.14.0]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check out the <<release-notes, release notes>>.
@@ -192,7 +190,7 @@ image::user/images/new-canvas.png[Canvas Elasticsearch SQL expression function]
 [float]
 [[ml-7-14]]
 
-=== Machine learning&mdash;maps,delayed data, & more
+=== Machine learning&mdash;maps, delayed data, & more
 
 [float]
 ==== Choropleth maps for anomalies
@@ -206,9 +204,10 @@ For example, for jobs with region ISO code partitioning or influencer fields,
 a map showing the count of anomalies by location is displayed in the *Anomaly Explorer* .
 
 [role="screenshot"]
-image::user/images/new-ml-choropleth-map.png[Canvas Elasticsearch SQL expression function]
+image::user/images/new-ml-choropleth-map.png[Map showing anomalies by country]
 
 For more details, see {ml-docs}/mapping-anomalies.html[Mapping anomalies by location].
+
 [float]
 ==== Delayed data visualization for anomaly detection
 
@@ -228,7 +227,8 @@ image::user/images/new-ml-delayed-data.png[Delayed data visualization for anomal
 
 [float]
 ==== Rare job wizard for anomaly detection
-Beginning in 7.13, you can create rare detector jobs by using the new {anomaly-job} wizard.
+
+Beginning in 7.14, you can create rare detector jobs by using the new {anomaly-job} wizard.
 https://www.elastic.co/blog/using-elastic-machine-learning-rare-analysis-to-hunt-for-the-unusual[Three general detector types are available]:
 rare, rare in population, and frequently rare in population. The latter two require
 a population field to select, and it’s also possible to add a split field to any of the choices.
@@ -236,7 +236,7 @@ A detector summary appears when the configuration details are provided,
 showing what the job will do and which fields it will operate on.
 
 [role="screenshot"]
-image::user/images/new-ml-rare-job.jpg[Rare job wizard for anomaly detection]
+image::user/images/new-ml-rare-job.png[Rare job wizard for anomaly detection]
 
 [float]
 [[enterprise-search-7-14]]
@@ -263,7 +263,7 @@ When enabled, you’ll see *Labs* in the toolbar.
 [role="screenshot"]
 image::user/images/new-labs.png[Dashboard app showing how to access Labs from the toolbar]
 
-The first *Labs* project is *Defer loading panels below the fold*. To improve dashboard loading time,
+The first *Labs* project is {kibana-ref}/dashboard.html#defer-loading-panels-below-the-fold[Defer loading panels below the fold]. To improve dashboard loading time,
 only the visible panels are loaded when you open the dashboard.
 All other panels are loaded as you scroll. Give the *Labs* project a try,
 and let us know what you think.
