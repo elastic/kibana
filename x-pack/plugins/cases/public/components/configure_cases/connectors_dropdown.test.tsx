@@ -13,6 +13,7 @@ import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
 import { useKibana } from '../../common/lib/kibana';
+import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -27,11 +28,14 @@ describe('ConnectorsDropdown', () => {
     selectedConnector: 'none',
   };
 
+  const { createMockActionTypeModel } = actionTypeRegistryMock;
+
   beforeAll(() => {
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.servicenow',
-      iconClass: 'logoSecurity',
-    });
+    connectors.forEach((connector) =>
+      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
+        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
+      )
+    );
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -218,5 +222,79 @@ describe('ConnectorsDropdown', () => {
     expect(
       options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-sir')
     ).toBeFalsy();
+  });
+
+  test('it does not throw when accessing the icon if the connector type is not registered', () => {
+    const newWrapper = mount(
+      <ConnectorsDropdown
+        {...props}
+        connectors={[
+          {
+            id: 'none',
+            actionTypeId: '.none',
+            name: 'None',
+            config: {},
+            isPreconfigured: false,
+          },
+        ]}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
+
+    const selectProps = newWrapper.find(EuiSuperSelect).props();
+    expect(selectProps.options).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data-test-subj": "dropdown-connector-no-connector",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="minusInCircle"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <span
+                data-test-subj="dropdown-connector-no-connector"
+              >
+                No connector selected
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "none",
+        },
+        Object {
+          "data-test-subj": "dropdown-connector-none",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type=""
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <span>
+                None
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "none",
+        },
+      ]
+    `);
   });
 });
