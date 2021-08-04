@@ -14,8 +14,6 @@ import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { getState } from './services/discover_state';
 import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
-import { redirectWhenMissing } from '../../../../../kibana_utils/public';
-import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
 
@@ -47,14 +45,7 @@ interface DiscoverLandingParams {
 export function DiscoverMainRoute(props: DiscoverMainProps) {
   const { opts } = props;
   const { services, history } = opts;
-  const {
-    chrome,
-    uiSettings: config,
-    data,
-    toastNotifications,
-    core,
-    http: { basePath },
-  } = services;
+  const { chrome, uiSettings: config, data, toastNotifications } = services;
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
@@ -67,10 +58,26 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   useEffect(() => {
     const savedSearchId = id;
 
+    async function loadDefaultOrCurrentIndexPattern(usedSavedSearch: SavedSearch) {
+      await data.indexPatterns.ensureDefaultIndexPattern();
+      const { appStateContainer } = getState({ history, uiSettings: config });
+      const { index } = appStateContainer.getState();
+      const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
+      const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
+      const indexPatternData = await resolveIndexPattern(
+        ip,
+        usedSavedSearch.searchSource,
+        toastNotifications
+      );
+      setIndexPatternList(ipList);
+      return indexPatternData;
+    }
+
     async function loadSavedSearch() {
       const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
+      const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(loadedSavedSearch);
       if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
-        loadedSavedSearch.searchSource.setField('index', indexPattern);
+        loadedSavedSearch.searchSource.setField('index', loadedIndexPattern);
       }
       setSavedSearch(loadedSavedSearch);
       if (savedSearchId) {
@@ -82,76 +89,15 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
       }
     }
 
-    if (!savedSearch || (savedSearch && savedSearchId !== savedSearch.id)) {
-      loadSavedSearch();
-    }
+    loadSavedSearch();
   }, [
     chrome.recentlyAccessed,
     config,
     data.indexPatterns,
     history,
     id,
-    indexPattern,
-    indexPatternList.length,
-    props.opts,
-    savedSearch,
     services,
     toastNotifications,
-  ]);
-
-  useEffect(() => {
-    async function loadDefaultOrCurrentIndexPattern() {
-      if (!savedSearch) {
-        return;
-      }
-      await data.indexPatterns.ensureDefaultIndexPattern();
-      const { appStateContainer } = getState({ history, uiSettings: config });
-      const { index } = appStateContainer.getState();
-      const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
-      const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
-      const indexPatternData = await resolveIndexPattern(
-        ip,
-        savedSearch?.searchSource,
-        toastNotifications
-      );
-      savedSearch.searchSource.setField('index', indexPatternData);
-      if (indexPatternList.length === 0) {
-        setIndexPatternList(ipList);
-      }
-      return indexPatternData;
-    }
-
-    try {
-      loadDefaultOrCurrentIndexPattern();
-    } catch (e) {
-      redirectWhenMissing({
-        history,
-        navigateToApp: core.application.navigateToApp,
-        basePath,
-        mapping: {
-          search: '/',
-          'index-pattern': {
-            app: 'management',
-            path: `kibana/objects/savedSearches/${id}`,
-          },
-        },
-        toastNotifications,
-        onBeforeRedirect() {
-          getUrlTracker().setTrackedUrl('/');
-        },
-      });
-    }
-  }, [
-    chrome.recentlyAccessed,
-    data.indexPatterns,
-    history,
-    savedSearch,
-    id,
-    config,
-    toastNotifications,
-    core.application.navigateToApp,
-    basePath,
-    indexPatternList.length,
   ]);
 
   useEffect(() => {
