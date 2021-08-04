@@ -358,21 +358,24 @@
           ],
           "path": "x-pack/plugins/infra/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "infra",
-              "id": "def-server.sourceId",
+              "id": "def-server.InfraPluginSetup.defineInternalSourceConfiguration.$1",
               "type": "string",
               "tags": [],
               "label": "sourceId",
               "description": [],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/infra/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "infra",
-              "id": "def-server.sourceProperties",
+              "id": "def-server.InfraPluginSetup.defineInternalSourceConfiguration.$2",
               "type": "Object",
               "tags": [],
               "label": "sourceProperties",
@@ -381,9 +384,11 @@
                 "InfraStaticSourceConfiguration"
               ],
               "path": "x-pack/plugins/infra/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
