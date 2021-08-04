@@ -1247,6 +1247,24 @@
         ],
         "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ rowIndex: number; columnId: string; setCellProps: (props: ",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLDivElement>) => void; }"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

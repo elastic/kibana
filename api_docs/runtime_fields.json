@@ -200,11 +200,10 @@
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "runtimeFields",
-                "id": "def-public.field",
+                "id": "def-public.Props.onSave.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "field",
@@ -219,9 +218,11 @@
                   }
                 ],
                 "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "runtimeFields",
@@ -237,8 +238,8 @@
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "runtimeFields",
