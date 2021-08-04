@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
-import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import { EuiDataGridColumnActions } from '@elastic/eui';
+import { get, keyBy } from 'lodash/fp';
+import React from 'react';
 
+import type {
+  BrowserField,
+  BrowserFields,
+} from '../../../../../common/search_strategy/index_fields';
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
@@ -17,6 +22,27 @@ import {
   DEFAULT_ACTIONS_COLUMN_WIDTH,
   MINIMUM_ACTIONS_COLUMN_WIDTH,
 } from '../constants';
+import { allowSorting } from '../helpers';
+import * as i18n from './translations';
+
+const defaultActions: EuiDataGridColumnActions = {
+  showSortAsc: { label: i18n.SORT_AZ },
+  showSortDesc: { label: i18n.SORT_ZA },
+};
+
+const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
+  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
+    (acc, namespace) => [
+      ...acc,
+      ...Object.values(namespace.fields != null ? namespace.fields : {}),
+    ],
+    []
+  );
+
+const getAllFieldsByName = (
+  browserFields: BrowserFields
+): { [fieldName: string]: Partial<BrowserField> } =>
+  keyBy('name', getAllBrowserFields(browserFields));
 
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
@@ -26,12 +52,28 @@ export const getColumnHeaders = (
   return headers
     ? headers.map((header) => {
         const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
-        return {
+
+        // augment the header with metadata from browserFields:
+        const augmentedHeader = {
           ...header,
           ...get(
             [splitHeader.length > 1 ? splitHeader[0] : 'base', 'fields', header.id],
             browserFields
           ),
+        };
+
+        const content = <>{header.display ?? header.displayAsText ?? header.id}</>;
+
+        // return the augmentedHeader with additional properties used by `EuiDataGrid`
+        return {
+          ...augmentedHeader,
+          actions: header.actions ?? defaultActions,
+          defaultSortDirection: 'desc', // the default action when a user selects a field via `EuiDataGrid`'s `Pick fields to sort by` UI
+          display: <>{content}</>,
+          isSortable: allowSorting({
+            browserField: getAllFieldsByName(browserFields)[header.id],
+            fieldName: header.id,
+          }),
         };
       })
     : [];
