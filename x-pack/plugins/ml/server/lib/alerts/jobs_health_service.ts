@@ -193,12 +193,15 @@ export function jobsHealthServiceProvider(
       const jobsMap = keyBy(jobs, 'job_id');
       const datafeedsMap = keyBy(datafeeds, 'job_id');
 
+      // We shouldn't check jobs that don't have associated datafeeds
+      const resultJobIds = jobIds.filter((jobId) => datafeedsMap[jobId] !== undefined);
+
       const defaultLookbackInterval = resolveLookbackInterval(jobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
 
       const annotations: DelayedDataResponse[] = (
         await annotationService.getDelayedDataAnnotations({
-          jobIds,
+          jobIds: resultJobIds,
           earliestMs,
         })
       )
