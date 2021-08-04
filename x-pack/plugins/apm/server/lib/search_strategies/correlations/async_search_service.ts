@@ -134,7 +134,8 @@ export const asyncSearchServiceProvider = (
         esClient,
         params,
         fieldCandidates,
-        state
+        state,
+        addLogMessage
       );
 
       addLogMessage(`Identified ${fieldValuePairs.length} fieldValuePairs.`);

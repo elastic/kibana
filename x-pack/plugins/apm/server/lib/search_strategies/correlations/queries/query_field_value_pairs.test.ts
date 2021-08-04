@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
+import { asyncSearchServiceLogProvider } from '../async_search_service_log';
 import { asyncSearchServiceStateProvider } from '../async_search_service_state';
 
 import {
@@ -58,13 +59,15 @@ describe('query_field_value_pairs', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
+      const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
       const state = asyncSearchServiceStateProvider();
 
       const resp = await fetchTransactionDurationFieldValuePairs(
         esClientMock,
         params,
         fieldCandidates,
-        state
+        state,
+        addLogMessage
       );
 
       const { progress } = state.getState();
@@ -79,6 +82,7 @@ describe('query_field_value_pairs', () => {
         { field: 'myFieldCandidate3', value: 'myValue2' },
       ]);
       expect(esClientSearchMock).toHaveBeenCalledTimes(3);
+      expect(getLogMessages()).toEqual([]);
     });
   });
 });
