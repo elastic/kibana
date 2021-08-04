@@ -33,7 +33,7 @@ To get to the fun of visualizing and alerting on Portland buses, you must first 
 ==== Step 1: Set up an Elasticsearch index
 
 . In Kibana, open the main menu, then click *Dev Tools*.
-. To create the `tri_met_tracks` index, run:
+. In *Console*, create the `tri_met_tracks` index:
 +
 [source,js]
 ----------------------------------
