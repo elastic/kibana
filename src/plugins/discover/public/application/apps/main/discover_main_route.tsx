@@ -5,19 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/target/types/public';
-import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
+import { IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { getState } from './services/discover_state';
 import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
-import { redirectWhenMissing } from '../../../../../kibana_utils/public';
-import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
+import { redirectWhenMissing } from '../../../../../kibana_utils/public';
+import { getUrlTracker } from '../../../kibana_services';
+
+const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
 export interface DiscoverMainProps {
   opts: {
@@ -48,16 +50,16 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   const { opts } = props;
   const { services, history } = opts;
   const {
+    core,
     chrome,
     uiSettings: config,
     data,
     toastNotifications,
-    core,
     http: { basePath },
   } = services;
 
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
+  const indexPattern = savedSearch?.searchSource?.getField('index');
   const [indexPatternList, setIndexPatternList] = useState<
     Array<SavedObject<IndexPatternAttributes>>
   >(opts.indexPatternList);
@@ -67,42 +69,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   useEffect(() => {
     const savedSearchId = id;
 
-    async function loadSavedSearch() {
-      const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
-      setSavedSearch(loadedSavedSearch);
-      if (savedSearchId) {
-        chrome.recentlyAccessed.add(
-          ((loadedSavedSearch as unknown) as SavedObjectDeprecated).getFullPath(),
-          loadedSavedSearch.title,
-          loadedSavedSearch.id
-        );
-        if (loadedSavedSearch) {
-          setIndexPattern(loadedSavedSearch.searchSource.getField('index'));
-        }
-      }
-    }
-
-    if (!savedSearch || (savedSearch && savedSearchId !== savedSearch.id)) {
-      loadSavedSearch();
-    }
-  }, [
-    chrome.recentlyAccessed,
-    config,
-    data.indexPatterns,
-    history,
-    id,
-    indexPatternList.length,
-    props.opts,
-    savedSearch,
-    services,
-    toastNotifications,
-  ]);
-
-  useEffect(() => {
-    async function loadDefaultOrCurrentIndexPattern() {
-      if (!savedSearch || id) {
-        return;
-      }
+    async function loadDefaultOrCurrentIndexPattern(usedSavedSearch: SavedSearch) {
       await data.indexPatterns.ensureDefaultIndexPattern();
       const { appStateContainer } = getState({ history, uiSettings: config });
       const { index } = appStateContainer.getState();
@@ -110,46 +77,59 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
       const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
       const indexPatternData = await resolveIndexPattern(
         ip,
-        savedSearch?.searchSource,
+        usedSavedSearch.searchSource,
         toastNotifications
       );
-      setIndexPattern(indexPatternData);
-      if (indexPatternList.length === 0) {
-        setIndexPatternList(ipList);
+      setIndexPatternList(ipList);
+      return indexPatternData;
+    }
+
+    async function loadSavedSearch() {
+      try {
+        const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
+        const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(loadedSavedSearch);
+        if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
+          loadedSavedSearch.searchSource.setField('index', loadedIndexPattern);
+        }
+        setSavedSearch(loadedSavedSearch);
+        if (savedSearchId) {
+          chrome.recentlyAccessed.add(
+            ((loadedSavedSearch as unknown) as SavedObjectDeprecated).getFullPath(),
+            loadedSavedSearch.title,
+            loadedSavedSearch.id
+          );
+        }
+      } catch (e) {
+        redirectWhenMissing({
+          history,
+          navigateToApp: core.application.navigateToApp,
+          basePath,
+          mapping: {
+            search: '/',
+            'index-pattern': {
+              app: 'management',
+              path: `kibana/objects/savedSearches/${id}`,
+            },
+          },
+          toastNotifications,
+          onBeforeRedirect() {
+            getUrlTracker().setTrackedUrl('/');
+          },
+        })(e);
       }
     }
 
-    try {
-      loadDefaultOrCurrentIndexPattern();
-    } catch (e) {
-      redirectWhenMissing({
-        history,
-        navigateToApp: core.application.navigateToApp,
-        basePath,
-        mapping: {
-          search: '/',
-          'index-pattern': {
-            app: 'management',
-            path: `kibana/objects/savedSearches/${id}`,
-          },
-        },
-        toastNotifications,
-        onBeforeRedirect() {
-          getUrlTracker().setTrackedUrl('/');
-        },
-      });
-    }
+    loadSavedSearch();
   }, [
+    basePath,
     chrome.recentlyAccessed,
+    config,
+    core.application.navigateToApp,
     data.indexPatterns,
     history,
-    savedSearch,
     id,
-    config,
+    services,
     toastNotifications,
-    core.application.navigateToApp,
-    basePath,
-    indexPatternList.length,
   ]);
 
   useEffect(() => {
@@ -163,7 +143,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   }
 
   return (
-    <DiscoverMainApp
+    <DiscoverMainAppMemoized
       indexPattern={indexPattern}
       opts={{ ...props.opts, savedSearch, indexPatternList }}
     />
