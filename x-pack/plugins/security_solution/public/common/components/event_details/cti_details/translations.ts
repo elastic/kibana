@@ -69,7 +69,8 @@ export const NO_INVESTIGATION_ENRICHMENTS_TITLE = i18n.translate(
 export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
   {
-    defaultMessage: 'We did not find any threat intelligence in last 30 days to enrich this alert.',
+    defaultMessage:
+      "We haven't found field value has additional information available from threat intelligence sources we searched in the past 30 days by default.",
   }
 );
 

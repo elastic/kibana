@@ -201,28 +201,10 @@ const EventDetailsComponent: React.FC<Props> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),
-            content: (
-              <>
-                <ThreatDetailsView enrichments={allEnrichments} />
-                <NoEnrichmentsPanel
-                  onRangeChange={setRange}
-                  isInvestigationTimeEnrichmentsPresent={
-                    enrichmentCount > existingEnrichments.length
-                  }
-                  isIndicatorMatchesPresent={existingEnrichments.length > 0}
-                />
-              </>
-            ),
+            content: <ThreatDetailsView enrichments={allEnrichments} setRange={setRange} />,
           }
         : undefined,
-    [
-      allEnrichments,
-      setRange,
-      enrichmentCount,
-      enrichmentsLoading,
-      existingEnrichments.length,
-      isAlert,
-    ]
+    [allEnrichments, setRange, enrichmentCount, enrichmentsLoading, isAlert]
   );
 
   const tableTab = useMemo(

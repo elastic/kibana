@@ -36,7 +36,7 @@ export interface ThreatSummaryItem {
   };
 }
 
-const RightMargin = styled.span`
+export const RightMargin = styled.span`
   margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
   min-width: 30px;
 `;

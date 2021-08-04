@@ -6,19 +6,18 @@
  */
 import styled from 'styled-components';
 import {
+  EuiAccordion,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiToolTip,
+  EuiHorizontalRule,
   EuiLink,
-  EuiText,
-  EuiAccordion,
+  EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import { groupBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
@@ -27,6 +26,7 @@ import {
   EVENT_URL,
   EVENT_REFERENCE,
   ENRICHMENT_TYPES,
+  ENRICHMENT_TYPE,
 } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
@@ -40,6 +40,8 @@ import * as i18n from './translations';
 import { QUERY_ID } from '../../../containers/cti/event_enrichment/use_investigation_enrichment';
 import { InspectButton } from '../../inspect';
 import { EnrichmentButtonContent } from './enrichment_button_content';
+import { EnrichmentIcon } from './enrichment_icon';
+import { useKibana } from '../../../lib/kibana';
 
 const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
@@ -56,6 +58,28 @@ const StyledEuiAccordion = styled(EuiAccordion)`
     margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
   }
 `;
+
+const InlineBlock = styled.div`
+  display: inline-block;
+  line-height: 1.7em;
+`;
+
+const NoIntelligenceCTA: React.FC<{}> = () => {
+  const threatIntelDocsUrl = `${
+    useKibana().services.docLinks.links.filebeat.base
+  }/filebeat-module-threatintel.html`;
+  return (
+    <>
+      <span>{i18n.INDICATOR_TOOLTIP_CONTENT}</span>
+      <span>{i18n.IF_CTI_NOT_ENABLED}</span>
+      <span>
+        <EuiLink href={threatIntelDocsUrl} target="_blank">
+          {i18n.CHECK_DOCS}
+        </EuiLink>
+      </span>
+    </>
+  );
+};
 
 const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   fieldName,
@@ -89,19 +113,15 @@ const columns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(Threat
 const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
   Object.keys(enrichment)
     .sort()
-    .map((field) => {
-      const displayField = field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
+    .map((field) => ({
+      title: field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
         ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}.`, '')
-        : field;
-
-      return {
-        title: displayField,
-        description: {
-          fieldName: field,
-          value: getFirstElement(enrichment[field]),
-        },
-      };
-    });
+        : field,
+      description: {
+        fieldName: field,
+        value: getFirstElement(enrichment[field]),
+      },
+    }));
 
 const EnrichmentAccordion: React.FC<{
   enrichment: CtiEnrichment;
@@ -138,44 +158,68 @@ const EnrichmentAccordion: React.FC<{
   );
 };
 
-const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[] }> = ({ enrichments }) => (
-  <>
-    {enrichments
-      .sort((a, b) => getFirstSeen(b) - getFirstSeen(a))
-      .map((enrichment, index) => (
-        <EnrichmentAccordion
-          enrichment={enrichment}
-          index={index}
-          enrichmentsLength={enrichments.length}
-        />
-      ))}
-  </>
-);
+const getMessagesFromType = (type?: ENRICHMENT_TYPE) => {
+  let title;
+  let dataTestSubj;
+  let noData;
+  if (type === ENRICHMENT_TYPES.IndicatorMatchRule) {
+    dataTestSubj = 'threat-match-detected';
+    title = i18n.INDICATOR_TOOLTIP_TITLE;
+    noData = <NoIntelligenceCTA />;
+  } else if (type === ENRICHMENT_TYPES.InvestigationTime) {
+    dataTestSubj = 'enriched-with-threat-intel';
+    title = i18n.INVESTIGATION_TOOLTIP_TITLE;
+    noData = i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION;
+  } else {
+    dataTestSubj = 'matches-with-no-type';
+  }
+  return { dataTestSubj, title, noData };
+};
 
-const SectionTitle: React.FC<{ title: string }> = ({ title }) => (
-  <>
-    <EuiTitle size="xxxs">
-      <h5>{title}</h5>
-    </EuiTitle>
-    <EuiSpacer size="xs" />
-  </>
-);
-
-const SectionMessage: React.FC<{
-  id: string;
-  defaultMessage: string;
-  values: { [key: string]: number };
-}> = ({ id, defaultMessage, values }) => (
-  <>
-    <EuiText size="xs">
-      <FormattedMessage id={id} defaultMessage={defaultMessage} values={values} />
-    </EuiText>
-    <EuiSpacer size="s" />
-  </>
-);
+const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[]; type?: ENRICHMENT_TYPE }> = ({
+  enrichments,
+  type,
+}) => {
+  const { dataTestSubj, title, noData } = getMessagesFromType(type);
+  return (
+    <div data-test-subj={dataTestSubj}>
+      {type && (
+        <>
+          <EuiFlexGroup direction={'row'} gutterSize={'xs'} alignItems={'baseline'}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxxs">
+                <h5>{title}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EnrichmentIcon type={type} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {Array.isArray(enrichments) ? (
+        <>
+          {enrichments
+            .sort((a, b) => getFirstSeen(b) - getFirstSeen(a))
+            .map((enrichment, index) => (
+              <EnrichmentAccordion
+                enrichment={enrichment}
+                index={index}
+                enrichmentsLength={enrichments.length}
+              />
+            ))}
+        </>
+      ) : (
+        noData && <InlineBlock data-test-subj={'no-intelligence-cta'}>{noData}</InlineBlock>
+      )}
+    </div>
+  );
+};
 
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
+  setRange: unknown;
 }> = ({ enrichments }) => {
   const {
     [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
@@ -186,35 +230,16 @@ const ThreatDetailsViewComponent: React.FC<{
   return (
     <>
       <EuiSpacer size="m" />
-      {indicatorMatches && (
-        <div data-test-subj={'threat-match-detected'}>
-          <SectionTitle title={i18n.INDICATOR_TOOLTIP_TITLE} />
-          <SectionMessage
-            id="xpack.securitySolution.alertDetails.threatDetails.threatMatchSubtitle"
-            defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} matched a threat intelligence indicator with a rule you created."
-            values={{
-              totalCount: indicatorMatches.length,
-            }}
-          />
-          <EnrichmentSection enrichments={indicatorMatches} />
-        </div>
-      )}
-      {threatIntelEnrichments && (
-        <div data-test-subj={'enriched-with-threat-intel'}>
-          {indicatorMatches && <EuiSpacer size="l" />}
-          <>
-            <SectionTitle title={i18n.INVESTIGATION_TOOLTIP_TITLE} />
-            <SectionMessage
-              id="xpack.securitySolution.alertDetails.threatDetails.investigationSubtitle"
-              defaultMessage="We have found {totalCount, plural, one {# field value} other {# field values}} has additional information available from threat intelligence sources we searched in the past 30 days by default."
-              values={{
-                totalCount: threatIntelEnrichments.length,
-              }}
-            />
-            <EnrichmentSection enrichments={threatIntelEnrichments} />
-          </>
-        </div>
-      )}
+      <EnrichmentSection
+        enrichments={indicatorMatches}
+        type={ENRICHMENT_TYPES.IndicatorMatchRule}
+      />
+      <EuiHorizontalRule />
+      <EnrichmentSection
+        enrichments={threatIntelEnrichments}
+        type={ENRICHMENT_TYPES.InvestigationTime}
+      />
+
       {matchesWithNoType && (
         <div data-test-subj={'matches-with-no-type'}>
           {indicatorMatches && <EuiSpacer size="l" />}
