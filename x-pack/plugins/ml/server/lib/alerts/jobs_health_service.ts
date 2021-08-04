@@ -196,7 +196,7 @@ export function jobsHealthServiceProvider(
       const defaultLookbackInterval = resolveLookbackInterval(jobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
 
-      let annotations: DelayedDataResponse[] = (
+      const annotations: DelayedDataResponse[] = (
         await annotationService.getDelayedDataAnnotations({
           jobIds,
           earliestMs,
@@ -220,17 +220,15 @@ export function jobsHealthServiceProvider(
           const job = jobsMap[v.job_id];
           const datafeed = datafeedsMap[v.job_id];
 
-          const jobLookbackInterval = resolveLookbackInterval([job], [datafeed]);
-          return (
-            v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval)
-          );
-        });
+          const isDocCountExceededThreshold = docsCount ? v.missed_docs_count >= docsCount : true;
 
-      if (docsCount) {
-        annotations = annotations.filter(
-          ({ missed_docs_count: missedDocsCount }) => missedDocsCount >= docsCount
-        );
-      }
+          const jobLookbackInterval = resolveLookbackInterval([job], [datafeed]);
+
+          const isEndTimestampWithinRange =
+            v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval);
+
+          return isDocCountExceededThreshold && isEndTimestampWithinRange;
+        });
 
       return annotations;
     },
