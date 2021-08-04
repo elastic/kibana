@@ -1453,8 +1453,8 @@
             ],
             "path": "src/core/public/deprecations/deprecations_service.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -1472,19 +1472,23 @@
             ],
             "path": "src/core/public/deprecations/deprecations_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.domainId",
+                "id": "def-public.DeprecationsServiceStart.getDeprecations.$1",
                 "type": "string",
                 "tags": [],
                 "label": "domainId",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/deprecations/deprecations_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -1502,11 +1506,10 @@
             ],
             "path": "src/core/public/deprecations/deprecations_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.details",
+                "id": "def-public.DeprecationsServiceStart.isDeprecationResolvable.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "details",
@@ -1515,9 +1518,11 @@
                   "DomainDeprecationDetails"
                 ],
                 "path": "src/core/public/deprecations/deprecations_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -1543,11 +1548,10 @@
             ],
             "path": "src/core/public/deprecations/deprecations_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.details",
+                "id": "def-public.DeprecationsServiceStart.resolveDeprecation.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "details",
@@ -1556,9 +1560,11 @@
                   "DomainDeprecationDetails"
                 ],
                 "path": "src/core/public/deprecations/deprecations_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1784,11 +1790,10 @@
             ],
             "path": "src/core/public/execution_context/execution_context_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.context",
+                "id": "def-public.ExecutionContextServiceStart.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -1797,9 +1802,11 @@
                   "KibanaExecutionContext"
                 ],
                 "path": "src/core/public/execution_context/execution_context_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1868,11 +1875,10 @@
             ],
             "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.error",
+                "id": "def-public.FatalErrorsSetup.add.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -1883,11 +1889,12 @@
                   "string | Error"
                 ],
                 "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.source",
+                "id": "def-public.FatalErrorsSetup.add.$2",
                 "type": "string",
                 "tags": [],
                 "label": "source",
@@ -1898,9 +1905,11 @@
                   "string | undefined"
                 ],
                 "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -1926,8 +1935,8 @@
             ],
             "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1958,22 +1967,34 @@
             ],
             "path": "src/core/public/i18n/i18n_service.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.__0",
+                "id": "def-public.I18nStart.Context.$1.children",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ children }",
                 "description": [],
-                "signature": [
-                  "{ children: React.ReactNode; }"
-                ],
                 "path": "src/core/public/i18n/i18n_service.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "core",
+                    "id": "def-public.I18nStart.Context.$1.children.children",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "children",
+                    "description": [],
+                    "signature": [
+                      "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+                    ],
+                    "path": "src/core/public/i18n/i18n_service.tsx",
+                    "deprecated": false
+                  }
+                ]
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2000,8 +2021,8 @@
             ],
             "path": "src/core/public/execution_context/execution_context_container.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2017,8 +2038,8 @@
             ],
             "path": "src/core/public/execution_context/execution_context_container.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2106,21 +2127,24 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.key",
+                "id": "def-public.IUiSettingsClient.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.defaultOverride",
+                "id": "def-public.IUiSettingsClient.get.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "defaultOverride",
@@ -2129,9 +2153,11 @@
                   "T | undefined"
                 ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2149,21 +2175,24 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.key",
+                "id": "def-public.IUiSettingsClient.get$.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.defaultOverride",
+                "id": "def-public.IUiSettingsClient.get$.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "defaultOverride",
@@ -2172,9 +2201,11 @@
                   "T | undefined"
                 ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2194,8 +2225,8 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2211,21 +2242,24 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.key",
+                "id": "def-public.IUiSettingsClient.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.value",
+                "id": "def-public.IUiSettingsClient.set.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -2234,9 +2268,11 @@
                   "any"
                 ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2252,19 +2288,23 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.key",
+                "id": "def-public.IUiSettingsClient.remove.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2280,19 +2320,23 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.key",
+                "id": "def-public.IUiSettingsClient.isDeclared.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2308,19 +2352,23 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.key",
+                "id": "def-public.IUiSettingsClient.isDefault.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2336,19 +2384,23 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.key",
+                "id": "def-public.IUiSettingsClient.isCustom.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2364,19 +2416,23 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.key",
+                "id": "def-public.IUiSettingsClient.isOverridden.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/public/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2394,8 +2450,8 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -2413,8 +2469,8 @@
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3753,7 +3809,23 @@
                   }
                 ],
                 "path": "src/core/public/overlays/flyout/flyout_service.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "core",
+                    "id": "def-public.element",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "element",
+                    "description": [],
+                    "signature": [
+                      "T"
+                    ],
+                    "path": "src/core/public/types.ts",
+                    "deprecated": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "core",
@@ -3834,7 +3906,23 @@
                   }
                 ],
                 "path": "src/core/public/overlays/modal/modal_service.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "core",
+                    "id": "def-public.element",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "element",
+                    "description": [],
+                    "signature": [
+                      "T"
+                    ],
+                    "path": "src/core/public/types.ts",
+                    "deprecated": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "core",
@@ -6444,6 +6532,26 @@
         ],
         "path": "src/core/public/types.ts",
         "deprecated": false,
+        "returnComment": [
+          "a {@link UnmountCallback} that unmount the element on call."
+        ],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.element",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "element",
+            "description": [
+              "the container element to render into"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/core/public/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6484,6 +6592,29 @@
         ],
         "path": "src/core/public/plugins/plugin.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
+              "<object>"
+            ],
+            "path": "src/core/public/plugins/plugin.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6640,6 +6771,8 @@
         ],
         "path": "src/core/public/index.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -7085,6 +7218,8 @@
         ],
         "path": "src/core/public/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -7944,24 +8079,7 @@
         "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
         "deprecated": true,
         "removeBy": "7.16",
-        "references": [
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/server/types.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/server/types.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/target/types/server/types.d.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/target/types/server/types.d.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "core",
@@ -8150,120 +8268,7 @@
             "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
             "deprecated": true,
             "removeBy": "7.16",
-            "references": [
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_delete_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_clear_cache_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_close_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_flush_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_forcemerge_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_list_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_open_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_refresh_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_reload_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_delete_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_freeze_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_unfreeze_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_delete_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_update_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_simulate_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_mapping_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_load_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_update_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/stats/register_stats_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/get.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/get.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/create.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/update.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/delete.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/privileges.ts"
-              }
-            ],
+            "references": [],
             "children": [
               {
                 "parentPluginId": "core",
@@ -10377,11 +10382,10 @@
             ],
             "path": "src/core/server/deprecations/deprecations_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.deprecationContext",
+                "id": "def-server.DeprecationsServiceSetup.registerDeprecations.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "deprecationContext",
@@ -10396,9 +10400,11 @@
                   }
                 ],
                 "path": "src/core/server/deprecations/deprecations_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10607,23 +10613,26 @@
             ],
             "path": "src/core/server/elasticsearch/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.type",
+                "id": "def-server.ElasticsearchServicePreboot.createClient.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [
                   "Unique identifier of the client"
                 ],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/server/elasticsearch/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.clientConfig",
+                "id": "def-server.ElasticsearchServicePreboot.createClient.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "clientConfig",
@@ -10642,9 +10651,11 @@
                   "> | undefined"
                 ],
                 "path": "src/core/server/elasticsearch/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10772,23 +10783,26 @@
             ],
             "path": "src/core/server/elasticsearch/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.type",
+                "id": "def-server.ElasticsearchServiceStart.createClient.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [
                   "Unique identifier of the client"
                 ],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/server/elasticsearch/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.clientConfig",
+                "id": "def-server.ElasticsearchServiceStart.createClient.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "clientConfig",
@@ -10807,9 +10821,11 @@
                   "> | undefined"
                 ],
                 "path": "src/core/server/elasticsearch/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -10860,10 +10876,6 @@
             "path": "src/core/server/elasticsearch/types.ts",
             "deprecated": true,
             "references": [
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/plugin.ts"
-              },
               {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/services/context.ts"
@@ -11802,11 +11814,10 @@
             ],
             "path": "src/core/server/http_resources/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.HttpResources.register.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -11822,25 +11833,25 @@
                   "<P, Q, B, \"get\">"
                 ],
                 "path": "src/core/server/http_resources/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.HttpResources.register.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  "(context: Context, request: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
                   },
-                  "<P, Q, B, \"get\">, response: { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+                  "<P, Q, B, Context, \"get\", { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
                   "Stream",
                   " | undefined>(options: ",
                   {
@@ -12022,28 +12033,14 @@
                     "section": "def-server.HttpResourcesServiceToolkit",
                     "text": "HttpResourcesServiceToolkit"
                   },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.IKibanaResponse",
-                    "text": "IKibanaResponse"
-                  },
-                  "<any> | Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.IKibanaResponse",
-                    "text": "IKibanaResponse"
-                  },
-                  "<any>>"
+                  ">"
                 ],
                 "path": "src/core/server/http_resources/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -12120,11 +12117,10 @@
             ],
             "path": "src/core/server/http_resources/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.options",
+                "id": "def-server.HttpResourcesServiceToolkit.renderCoreApp.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -12140,9 +12136,11 @@
                   " | undefined"
                 ],
                 "path": "src/core/server/http_resources/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -12174,11 +12172,10 @@
             ],
             "path": "src/core/server/http_resources/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.options",
+                "id": "def-server.HttpResourcesServiceToolkit.renderAnonymousCoreApp.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -12194,9 +12191,11 @@
                   " | undefined"
                 ],
                 "path": "src/core/server/http_resources/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -12228,11 +12227,10 @@
             ],
             "path": "src/core/server/http_resources/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.options",
+                "id": "def-server.HttpResourcesServiceToolkit.renderHtml.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -12247,9 +12245,11 @@
                   }
                 ],
                 "path": "src/core/server/http_resources/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -12281,11 +12281,10 @@
             ],
             "path": "src/core/server/http_resources/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.options",
+                "id": "def-server.HttpResourcesServiceToolkit.renderJs.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -12300,9 +12299,11 @@
                   }
                 ],
                 "path": "src/core/server/http_resources/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -12420,11 +12421,10 @@
             ],
             "path": "src/core/server/elasticsearch/client/cluster_client.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.IClusterClient.asScoped.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "request",
@@ -12433,31 +12433,17 @@
                   {
                     "pluginId": "core",
                     "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any> | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.LegacyRequest",
-                    "text": "LegacyRequest"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
                     "docId": "kibCorePluginApi",
-                    "section": "def-server.FakeRequest",
-                    "text": "FakeRequest"
+                    "section": "def-server.ScopeableRequest",
+                    "text": "ScopeableRequest"
                   }
                 ],
                 "path": "src/core/server/elasticsearch/client/cluster_client.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -13310,8 +13296,8 @@
             ],
             "path": "src/core/server/elasticsearch/client/cluster_client.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -13612,8 +13598,8 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13629,19 +13615,23 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.key",
+                "id": "def-server.IUiSettingsClient.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/server/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13657,8 +13647,8 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13676,8 +13666,8 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13693,22 +13683,23 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.changes",
+                "id": "def-server.IUiSettingsClient.setMany.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "changes",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/core/server/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13724,21 +13715,24 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.key",
+                "id": "def-server.IUiSettingsClient.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/server/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.value",
+                "id": "def-server.IUiSettingsClient.set.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -13747,9 +13741,11 @@
                   "any"
                 ],
                 "path": "src/core/server/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13765,19 +13761,23 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.key",
+                "id": "def-server.IUiSettingsClient.remove.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/server/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13793,11 +13793,10 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.keys",
+                "id": "def-server.IUiSettingsClient.removeMany.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "keys",
@@ -13806,9 +13805,11 @@
                   "string[]"
                 ],
                 "path": "src/core/server/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13824,19 +13825,23 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.key",
+                "id": "def-server.IUiSettingsClient.isOverridden.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/server/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -13852,19 +13857,23 @@
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.key",
+                "id": "def-server.IUiSettingsClient.isSensitive.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/server/ui_settings/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -13992,24 +14001,7 @@
         "path": "src/core/server/elasticsearch/legacy/api_types.ts",
         "deprecated": true,
         "removeBy": "7.16",
-        "references": [
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/server/plugin.ts"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/server/plugin.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/server/plugin.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/server/plugin.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "core",
@@ -16264,8 +16256,8 @@
             ],
             "path": "src/core/server/metrics/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -17497,8 +17489,8 @@
             ],
             "path": "src/core/server/preboot/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -17514,23 +17506,26 @@
             ],
             "path": "src/core/server/preboot/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.reason",
+                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$1",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
                 "description": [
                   "A string that explains the reason why this promise should hold `setup`. It's supposed to be a human\nreadable string that will be recorded in the logs or standard output."
                 ],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/core/server/preboot/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.promise",
+                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "promise",
@@ -17541,9 +17536,11 @@
                   "Promise<{ shouldReloadConfig: boolean; } | undefined>"
                 ],
                 "path": "src/core/server/preboot/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -17586,11 +17583,10 @@
             ],
             "path": "src/core/server/deprecations/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.context",
+                "id": "def-server.RegisterDeprecationsConfig.getDeprecations.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -17605,9 +17601,11 @@
                   }
                 ],
                 "path": "src/core/server/deprecations/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -18527,8 +18525,8 @@
             ],
             "path": "src/core/server/status/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -18965,6 +18963,22 @@
         ],
         "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.details",
+            "type": "Object",
+            "tags": [],
+            "label": "details",
+            "description": [],
+            "signature": [
+              "DeprecatedConfigDetails"
+            ],
+            "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19021,6 +19035,8 @@
         ],
         "path": "src/core/server/capabilities/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -19051,6 +19067,52 @@
         ],
         "path": "src/core/server/capabilities/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/core/server/capabilities/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.uiCapabilities",
+            "type": "Object",
+            "tags": [],
+            "label": "uiCapabilities",
+            "description": [],
+            "signature": [
+              "Capabilities"
+            ],
+            "path": "src/core/server/capabilities/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.useDefaultCapabilities",
+            "type": "boolean",
+            "tags": [],
+            "label": "useDefaultCapabilities",
+            "description": [],
+            "path": "src/core/server/capabilities/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19071,6 +19133,22 @@
         ],
         "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.factory",
+            "type": "Object",
+            "tags": [],
+            "label": "factory",
+            "description": [],
+            "signature": [
+              "ConfigDeprecationFactory"
+            ],
+            "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19332,6 +19410,35 @@
         ],
         "path": "src/core/server/context/container/context.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.context",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/core/server/context/container/context.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "src/core/server/context/container/context.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19572,6 +19679,55 @@
         ],
         "path": "src/core/server/http_resources/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.context",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "Context"
+            ],
+            "path": "src/core/server/http/router/router.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<P, Q, B, Method>"
+            ],
+            "path": "src/core/server/http/router/router.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.response",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "ResponseFactory"
+            ],
+            "path": "src/core/server/http/router/router.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19792,6 +19948,223 @@
         ],
         "path": "src/core/server/context/container/context.ts",
         "deprecated": false,
+        "returnComment": [
+          "The context value associated with this key. May also return a Promise which will be resolved before\nattaching to the context object."
+        ],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [
+              "- A partial context object containing only the keys for values provided by plugin dependencies"
+            ],
+            "signature": [
+              "{ [P in Exclude<keyof Context, ContextName>]: Context[P]; }"
+            ],
+            "path": "src/core/server/context/container/context.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.rest",
+            "type": "Object",
+            "tags": [],
+            "label": "rest",
+            "description": [
+              "- Additional parameters provided by the service owner of this context"
+            ],
+            "signature": [
+              "[request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, response: { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+              "Stream",
+              " | undefined>(options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.CustomHttpResponseOptions",
+                "text": "CustomHttpResponseOptions"
+              },
+              "<T>) => ",
+              "KibanaResponse",
+              "<T>; badRequest: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; unauthorized: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; forbidden: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; notFound: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; conflict: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; customError: (options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.CustomHttpResponseOptions",
+                "text": "CustomHttpResponseOptions"
+              },
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">) => ",
+              "KibanaResponse",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseError",
+                "text": "ResponseError"
+              },
+              ">; redirected: (options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.RedirectResponseOptions",
+                "text": "RedirectResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<string | Record<string, any> | Buffer | ",
+              "Stream",
+              ">; ok: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<string | Record<string, any> | Buffer | ",
+              "Stream",
+              ">; accepted: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<string | Record<string, any> | Buffer | ",
+              "Stream",
+              ">; noContent: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<undefined>; }]"
+            ],
+            "path": "src/core/server/context/container/context.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19911,16 +20284,7 @@
         "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
         "deprecated": true,
         "removeBy": "7.16",
-        "references": [
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/server/plugin.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/server/plugin.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -19958,18 +20322,6 @@
         "removeBy": "7.16",
         "references": [
           {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/server/types.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/server/types.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/server/types.ts"
-          },
-          {
             "plugin": "globalSearch",
             "path": "x-pack/plugins/global_search/server/types.ts"
           },
@@ -19984,18 +20336,6 @@
           {
             "plugin": "globalSearch",
             "path": "x-pack/plugins/global_search/target/types/server/types.d.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/target/types/server/types.d.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/target/types/server/types.d.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/target/types/server/types.d.ts"
           }
         ],
         "initialIsOpen": false
@@ -20271,6 +20611,29 @@
         ],
         "path": "src/core/server/plugins/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
+              "<unknown>"
+            ],
+            "path": "src/core/server/plugins/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -20457,6 +20820,8 @@
         ],
         "path": "src/core/server/index.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {

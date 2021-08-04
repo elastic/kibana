@@ -499,11 +499,10 @@
             ],
             "path": "src/plugins/management/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "management",
-                "id": "def-public.crumbs",
+                "id": "def-public.ManagementAppMountParams.setBreadcrumbs.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "crumbs",
@@ -513,9 +512,11 @@
                   "[]"
                 ],
                 "path": "src/plugins/management/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "management",
