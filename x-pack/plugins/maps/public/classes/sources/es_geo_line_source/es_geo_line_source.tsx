@@ -202,6 +202,13 @@ export class ESGeoLineSource extends AbstractESAggSource {
         terms: addFieldToDSL(termsAgg, splitField),
       },
     });
+    const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(splitField, '', indexPattern);
+    entityIsNotEmptyFilter.meta.negate = true;
+    entitySearchSource.setField('filter', [
+      ...entitySearchSource.getField('filter'),
+      entityIsNotEmptyFilter,
+    ]);
+
     const entityResp = await this._runEsQuery({
       requestId: `${this.getId()}_entities`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {
