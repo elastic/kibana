@@ -92,13 +92,13 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [policies]);
 
-    const onButtonClick = () => {
+    const onButtonClick = useCallback(() => {
       setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
-    };
+    }, []);
 
-    const closePopover = () => {
+    const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
-    };
+    }, []);
 
     const onChange = useCallback((ev: ChangeEvent<HTMLInputElement>) => {
       const value = ev.target.value || '';
@@ -167,7 +167,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
           </EuiText>
         </EuiFilterButton>
       ),
-      [isPopoverOpen, itemsList]
+      [isPopoverOpen, itemsList, onButtonClick]
     );
 
     return (
