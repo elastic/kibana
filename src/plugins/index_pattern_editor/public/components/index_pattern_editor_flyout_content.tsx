@@ -52,7 +52,6 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
-  existingIndexPatterns: string[];
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
 }

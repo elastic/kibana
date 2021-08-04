@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { IndexPattern, IndexPatternSpec, useKibana } from '../shared_imports';
@@ -53,27 +53,10 @@ export const IndexPatternFlyoutContentContainer = ({
     await onSave(indexPattern);
   };
 
-  const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
-
-  useEffect(() => {
-    let isMounted = true;
-    const getTitles = async () => {
-      const indexPatternTitles = await indexPatternService.getTitles();
-      if (isMounted) {
-        setExistingIndexPatterns(indexPatternTitles);
-      }
-    };
-    getTitles();
-    return () => {
-      isMounted = false;
-    };
-  }, [indexPatternService]);
-
   return (
     <IndexPatternEditorFlyoutContent
       onSave={onSaveClick}
       onCancel={onCancel}
-      existingIndexPatterns={existingIndexPatterns}
       defaultTypeIsRollup={defaultTypeIsRollup}
       requireTimestampField={requireTimestampField}
     />
