@@ -286,6 +286,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dimensionGroups: [],
       isFullscreen: false,
       toggleFullscreen: () => {},
+      supportStaticValue: false,
     };
 
     jest.clearAllMocks();

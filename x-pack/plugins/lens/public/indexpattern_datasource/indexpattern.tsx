@@ -203,7 +203,7 @@ export function getIndexPatternDatasource({
           field: undefined,
           indexPattern,
           visualizationGroups: [],
-          incompleteParams: { params: { value: staticValue } },
+          initialParams: { params: { value: staticValue } },
           targetGroup: groupId,
         }),
       });

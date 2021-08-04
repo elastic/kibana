@@ -50,6 +50,7 @@ interface ColumnChange {
   targetGroup?: string;
   shouldResetLabel?: boolean;
   incompleteParams?: ColumnAdvancedParams;
+  initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
 
 interface ColumnCopy {
@@ -182,6 +183,7 @@ export function insertNewColumn({
   targetGroup,
   shouldResetLabel,
   incompleteParams,
+  initialParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -195,7 +197,7 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
-    previousColumn: { ...incompleteParams, ...layer.columns[columnId] },
+    previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {

@@ -28,6 +28,7 @@ import {
   TermsIndexPatternColumn,
   CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
+import { layerTypes } from '../../../../../../lens/common/expressions';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
@@ -631,6 +632,7 @@ export class LensAttributes {
           ...Object.keys(this.getChildYAxises(layerConfig)),
         ],
         layerId: `layer${index}`,
+        layerType: layerTypes.DATA,
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
         palette: layerConfig.seriesConfig.palette,
         yConfig: layerConfig.seriesConfig.yConfig || [
