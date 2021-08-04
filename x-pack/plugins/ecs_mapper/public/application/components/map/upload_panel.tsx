@@ -18,7 +18,7 @@ import {
   EuiSelect,
   EuiFormRow,
   EuiDescribedFormGroup,
-  EuiFieldText,
+  EuiFieldText
 } from '@elastic/eui';
 import { FieldCopyAction } from '../../../../common';
 import { Instructions } from './instructions';
@@ -45,7 +45,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
   const [file, setFile] = useState<FileList | null>(null);
   const [pipelineName, setPipelineName] = useState('');
-
+  
   const selectedAction = [];
   if (action) {
     selectedAction.push({ value: action, label: action });
@@ -116,8 +116,10 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
 
         <EuiSpacer size="l" />
 
-        <div style={{ alignContent: 'center' }}>
-          <EuiFilePicker
+        <EuiFormRow
+          fullWidth
+        >
+        <EuiFilePicker
             id="filePicker"
             initialPromptText={i18n.translate(
               'xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription',
@@ -127,8 +129,9 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             )}
             onChange={(files) => setFile(files)}
             className="ecs-mapper-file-picker"
+            accept=".csv"
           />
-        </div>
+        </EuiFormRow>
 
         <EuiSpacer size="l" />
 
@@ -138,6 +141,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             onClick={() => onFileUpload(action, file, pipelineName)}
             isLoading={isLoading}
             data-test-subj="ecsMapperManagePipelineButton"
+            fill
           >
             <FormattedMessage id="xpack.ecsMapper.file.upload.button" defaultMessage="Upload" />
           </EuiButton>
