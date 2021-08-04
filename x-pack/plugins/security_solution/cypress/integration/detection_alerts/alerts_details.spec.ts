@@ -47,7 +47,8 @@ describe('Alert details with unmapped fields', () => {
         const length = elements.length;
         cy.wrap(elements)
           .eq(length - expectedUnmappedField.line)
-          .should('have.text', expectedUnmappedField.text);
+          .invoke('text')
+          .should('include', expectedUnmappedField.text);
       });
   });
 
