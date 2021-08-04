@@ -9,19 +9,19 @@ import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
-} from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { unit } from '../../../../utils/style';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ImpactBar } from '../../../shared/ImpactBar';
-import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { getLatencyColumnLabel } from '../get_latency_column_label';
+} from '../../../../common/utils/formatters';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { unit } from '../../../utils/style';
+import { SparkPlot } from '../charts/spark_plot';
+import { ImpactBar } from '../ImpactBar';
+import { TransactionDetailLink } from '../Links/apm/transaction_detail_link';
+import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { getLatencyColumnLabel } from './get_latency_column_label';
 
 type TransactionGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
