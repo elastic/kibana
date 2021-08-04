@@ -5,53 +5,71 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useRef, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { merge, Subject, BehaviorSubject } from 'rxjs';
-import { debounceTime, tap, filter } from 'rxjs/operators';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { BehaviorSubject, merge, Subject } from 'rxjs';
+import { debounceTime, filter, tap } from 'rxjs/operators';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import {
-  IndexPattern,
-  isCompleteResponse,
-  SearchSource,
-  tabifyAggResponse,
-} from '../../../../../../data/common';
+import { SearchSource } from '../../../../../../data/common';
 import { GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
-import { AutoRefreshDoneFn, search } from '../../../../../../data/public';
-import { calcFieldCounts } from '../utils/calc_field_counts';
+import { AutoRefreshDoneFn } from '../../../../../../data/public';
 import { validateTimeRange } from '../utils/validate_time_range';
-import { updateSearchSource } from '../utils/update_search_source';
-import { SortOrder } from '../../../../saved_searches/types';
-import { getDimensions, getChartAggConfigs } from '../utils';
-import { buildPointSeriesData, Chart } from '../components/chart/point_series';
+import { Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 import { useSingleton } from '../utils/use_singleton';
 import { FetchStatus } from '../../../types';
 
-export type SavedSearchDataSubject = BehaviorSubject<SavedSearchDataMessage>;
-export type SavedSearchRefetchSubject = Subject<SavedSearchRefetchMsg>;
+import { fetchAll } from '../utils/fetch_all';
+import { useBehaviorSubject } from '../utils/use_behavior_subject';
+import { sendResetMsg } from './use_saved_search_messages';
 
-export interface UseSavedSearch {
-  refetch$: SavedSearchRefetchSubject;
-  data$: SavedSearchDataSubject;
-  reset: () => void;
+export interface SavedSearchData {
+  main$: DataMain$;
+  documents$: DataDocuments$;
+  totalHits$: DataTotalHits$;
+  charts$: DataCharts$;
 }
 
-export type SavedSearchRefetchMsg = 'reset' | undefined;
+export type DataMain$ = BehaviorSubject<DataMainMsg>;
+export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
+export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
+export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
 
-export interface SavedSearchDataMessage {
+export type DataRefetch$ = Subject<DataRefetchMsg>;
+
+export interface UseSavedSearch {
+  refetch$: DataRefetch$;
+  data$: SavedSearchData;
+  reset: () => void;
+  inspectorAdapters: { requests: RequestAdapter };
+}
+
+export type DataRefetchMsg = 'reset' | undefined;
+
+export interface DataMsg {
+  fetchStatus: FetchStatus;
+  error?: Error;
+}
+
+export interface DataMainMsg extends DataMsg {
+  foundDocuments?: boolean;
+}
+
+export interface DataDocumentsMsg extends DataMsg {
+  result?: ElasticSearchHit[];
+}
+
+export interface DataTotalHitsMsg extends DataMsg {
+  fetchStatus: FetchStatus;
+  error?: Error;
+  result?: number;
+}
+
+export interface DataChartsMessage extends DataMsg {
   bucketInterval?: TimechartBucketInterval;
   chartData?: Chart;
-  fetchCounter?: number;
-  fetchError?: Error;
-  fieldCounts?: Record<string, number>;
-  hits?: number;
-  inspectorAdapters?: { requests: RequestAdapter };
-  rows?: ElasticSearchHit[];
-  state: FetchStatus;
 }
 
 /**
@@ -59,7 +77,6 @@ export interface SavedSearchDataMessage {
  * to the data fetching
  */
 export const useSavedSearch = ({
-  indexPattern,
   initialFetchStatus,
   searchSessionManager,
   searchSource,
@@ -67,244 +84,148 @@ export const useSavedSearch = ({
   stateContainer,
   useNewFieldsApi,
 }: {
-  indexPattern: IndexPattern;
   initialFetchStatus: FetchStatus;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: SearchSource;
   services: DiscoverServices;
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;
-}): UseSavedSearch => {
+}) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
 
+  const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
+
   /**
-   * The observable the UI (aka React component) subscribes to get notified about
+   * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const data$: SavedSearchDataSubject = useSingleton(
-    () =>
-      new BehaviorSubject<SavedSearchDataMessage>({
-        state: initialFetchStatus,
-      })
-  );
+  const main$: DataMain$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+
+  const documents$: DataDocuments$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+
+  const totalHits$: DataTotalHits$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+
+  const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
+
+  const dataSubjects = useMemo(() => {
+    return {
+      main$,
+      documents$,
+      totalHits$,
+      charts$,
+    };
+  }, [main$, charts$, documents$, totalHits$]);
+
   /**
    * The observable to trigger data fetching in UI
    * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
    * to be processed correctly
    */
-  const refetch$ = useSingleton(() => new Subject<SavedSearchRefetchMsg>());
+  const refetch$ = useSingleton(() => new Subject<DataRefetchMsg>());
 
   /**
    * Values that shouldn't trigger re-rendering when changed
    */
   const refs = useRef<{
     abortController?: AbortController;
-    /**
-     * handler emitted by `timefilter.getAutoRefreshFetch$()`
-     * to notify when data completed loading and to start a new autorefresh loop
-     */
-    autoRefreshDoneCb?: AutoRefreshDoneFn;
-    /**
-     * Number of fetches used for functional testing
-     */
-    fetchCounter: number;
-    /**
-     * needed to right auto refresh behavior, a new auto refresh shouldnt be triggered when
-     * loading is still ongoing
-     */
-    fetchStatus: FetchStatus;
-    /**
-     * needed for merging new with old field counts, high likely legacy, but kept this behavior
-     * because not 100% sure in this case
-     */
-    fieldCounts: Record<string, number>;
-  }>({
-    fetchCounter: 0,
-    fieldCounts: {},
-    fetchStatus: initialFetchStatus,
-  });
-
-  /**
-   * Resets the fieldCounts cache and sends a reset message
-   * It is set to initial state (no documents, fetchCounter to 0)
-   * Needed when index pattern is switched or a new runtime field is added
-   */
-  const sendResetMsg = useCallback(
-    (fetchStatus?: FetchStatus) => {
-      refs.current.fieldCounts = {};
-      refs.current.fetchStatus = fetchStatus ?? initialFetchStatus;
-      data$.next({
-        state: initialFetchStatus,
-        fetchCounter: 0,
-        rows: [],
-        fieldCounts: {},
-        chartData: undefined,
-        bucketInterval: undefined,
-      });
-    },
-    [data$, initialFetchStatus]
-  );
-  /**
-   * Function to fetch data from ElasticSearch
-   */
-  const fetchAll = useCallback(
-    (reset = false) => {
-      if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
-        return Promise.reject();
-      }
-      const inspectorAdapters = { requests: new RequestAdapter() };
-
-      if (refs.current.abortController) refs.current.abortController.abort();
-      refs.current.abortController = new AbortController();
-      const sessionId = searchSessionManager.getNextSearchSessionId();
-
-      if (reset) {
-        sendResetMsg(FetchStatus.LOADING);
-      } else {
-        // Let the UI know, data fetching started
-        data$.next({
-          state: FetchStatus.LOADING,
-          fetchCounter: ++refs.current.fetchCounter,
-        });
-        refs.current.fetchStatus = FetchStatus.LOADING;
-      }
-
-      const { sort, hideChart, interval } = stateContainer.appStateContainer.getState();
-      updateSearchSource(searchSource, false, {
-        indexPattern,
-        services,
-        sort: sort as SortOrder[],
-        useNewFieldsApi,
-      });
-      const chartAggConfigs =
-        indexPattern.timeFieldName && !hideChart && interval
-          ? getChartAggConfigs(searchSource, interval, data)
-          : undefined;
-
-      if (!chartAggConfigs) {
-        searchSource.removeField('aggs');
-      } else {
-        searchSource.setField('aggs', chartAggConfigs.toDsl());
-      }
-
-      const searchSourceFetch$ = searchSource.fetch$({
-        abortSignal: refs.current.abortController.signal,
-        sessionId,
-        inspector: {
-          adapter: inspectorAdapters.requests,
-          title: i18n.translate('discover.inspectorRequestDataTitle', {
-            defaultMessage: 'data',
-          }),
-          description: i18n.translate('discover.inspectorRequestDescriptionDocument', {
-            defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-          }),
-        },
-      });
-
-      searchSourceFetch$.pipe(filter((res) => isCompleteResponse(res))).subscribe(
-        (res) => {
-          const documents = res.rawResponse.hits.hits;
-
-          const message: SavedSearchDataMessage = {
-            state: FetchStatus.COMPLETE,
-            rows: documents,
-            inspectorAdapters,
-            fieldCounts: calcFieldCounts(refs.current.fieldCounts, documents, indexPattern),
-            hits: res.rawResponse.hits.total as number,
-          };
-
-          if (chartAggConfigs) {
-            const bucketAggConfig = chartAggConfigs.aggs[1];
-            const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
-            const dimensions = getDimensions(chartAggConfigs, data);
-            if (dimensions) {
-              if (bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)) {
-                message.bucketInterval = bucketAggConfig.buckets?.getInterval();
-              }
-              message.chartData = buildPointSeriesData(tabifiedData, dimensions);
-            }
-          }
-          refs.current.fieldCounts = message.fieldCounts!;
-          refs.current.fetchStatus = message.state;
-          data$.next(message);
-        },
-        (error) => {
-          if (error instanceof Error && error.name === 'AbortError') return;
-          data.search.showError(error);
-          refs.current.fetchStatus = FetchStatus.ERROR;
-          data$.next({
-            state: FetchStatus.ERROR,
-            inspectorAdapters,
-            fetchError: error,
-          });
-        },
-        () => {
-          refs.current.autoRefreshDoneCb?.();
-          refs.current.autoRefreshDoneCb = undefined;
-        }
-      );
-    },
-    [
-      timefilter,
-      services,
-      searchSessionManager,
-      stateContainer.appStateContainer,
-      searchSource,
-      indexPattern,
-      useNewFieldsApi,
-      data,
-      sendResetMsg,
-      data$,
-    ]
-  );
+  }>({});
 
   /**
    * This part takes care of triggering the data fetching by creating and subscribing
    * to an observable of various possible changes in state
    */
   useEffect(() => {
+    /**
+     * handler emitted by `timefilter.getAutoRefreshFetch$()`
+     * to notify when data completed loading and to start a new autorefresh loop
+     */
+    let autoRefreshDoneCb: AutoRefreshDoneFn | undefined;
     const fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),
       timefilter.getFetch$(),
       timefilter.getAutoRefreshFetch$().pipe(
         tap((done) => {
-          refs.current.autoRefreshDoneCb = done;
+          autoRefreshDoneCb = done;
         }),
-        filter(() => refs.current.fetchStatus !== FetchStatus.LOADING)
+        filter(() => {
+          /**
+           * filter to prevent auto-refresh triggered fetch when
+           * loading is still ongoing
+           */
+          const currentFetchStatus = main$.getValue().fetchStatus;
+          return (
+            currentFetchStatus !== FetchStatus.LOADING && currentFetchStatus !== FetchStatus.PARTIAL
+          );
+        })
       ),
       data.query.queryString.getUpdates$(),
       searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe((val) => {
+      if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
+        return;
+      }
+      inspectorAdapters.requests.reset();
+
+      refs.current.abortController?.abort();
+      refs.current.abortController = new AbortController();
       try {
-        fetchAll(val === 'reset');
+        fetchAll(dataSubjects, searchSource, val === 'reset', {
+          abortController: refs.current.abortController,
+          appStateContainer: stateContainer.appStateContainer,
+          inspectorAdapters,
+          data,
+          initialFetchStatus,
+          searchSessionId: searchSessionManager.getNextSearchSessionId(),
+          services,
+          useNewFieldsApi,
+        }).subscribe({
+          complete: () => {
+            // if this function was set and is executed, another refresh fetch can be triggered
+            autoRefreshDoneCb?.();
+            autoRefreshDoneCb = undefined;
+          },
+        });
       } catch (error) {
-        data$.next({
-          state: FetchStatus.ERROR,
-          fetchError: error,
+        main$.next({
+          fetchStatus: FetchStatus.ERROR,
+          error,
         });
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [
-    data$,
+    data,
     data.query.queryString,
+    dataSubjects,
     filterManager,
+    initialFetchStatus,
+    inspectorAdapters,
+    main$,
     refetch$,
+    searchSessionManager,
     searchSessionManager.newSearchSessionIdFromURL$,
+    searchSource,
+    services,
+    services.toastNotifications,
+    stateContainer.appStateContainer,
     timefilter,
-    fetchAll,
+    useNewFieldsApi,
+  ]);
+
+  const reset = useCallback(() => sendResetMsg(dataSubjects, initialFetchStatus), [
+    dataSubjects,
+    initialFetchStatus,
   ]);
 
   return {
     refetch$,
-    data$,
-    reset: sendResetMsg,
+    data$: dataSubjects,
+    reset,
+    inspectorAdapters,
   };
 };

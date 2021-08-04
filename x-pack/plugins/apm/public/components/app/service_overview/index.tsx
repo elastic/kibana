@@ -19,7 +19,7 @@ import { ServiceOverviewDependenciesTable } from './service_overview_dependencie
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
-import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
+import { TransactionsTable } from '../../shared/transactions_table';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -57,7 +57,7 @@ export function ServiceOverview() {
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
-                  <ServiceOverviewTransactionsTable />
+                  <TransactionsTable />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
