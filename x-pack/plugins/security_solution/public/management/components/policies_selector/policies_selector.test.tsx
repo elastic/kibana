@@ -11,6 +11,11 @@ import React from 'react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
 import { PoliciesSelector, PoliciesSelectorProps } from '.';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+
+// TODO: remove this mock when feature flag is removed
+jest.mock('../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 let onChangeSelectionMock: jest.Mock;
 
@@ -18,6 +23,7 @@ describe('Policies selector', () => {
   let getElement: (params: Partial<PoliciesSelectorProps>) => RenderResult;
   beforeEach(() => {
     onChangeSelectionMock = jest.fn();
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
     getElement = (params: Partial<PoliciesSelectorProps>) => {
       return render(
         <I18nProvider>
@@ -55,6 +61,7 @@ describe('Policies selector', () => {
     });
 
     it('should disable enabled default value', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const defaultIncludedPolicies = 'abc123';
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
