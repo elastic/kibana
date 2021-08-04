@@ -69,11 +69,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "url.original",
             "url.original",
             "url.original",
-            "url.original",
-            "url.original",
-            "url.original",
-            "url.original",
-            "url.original",
+            "user_agent.name",
+            "user_agent.name",
+            "user_agent.name",
             "user_agent.name",
             "user_agent.os.name",
           ]
@@ -84,8 +82,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { significantTerms } = response.body;
         expectSnapshot(significantTerms.map((term) => term.distribution.length)).toMatchInline(`
           Array [
-            15,
-            15,
             15,
             15,
             15,
