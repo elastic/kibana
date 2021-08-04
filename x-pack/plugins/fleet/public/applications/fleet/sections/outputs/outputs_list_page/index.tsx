@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiInMemoryTable,
   EuiFlexGroup,
@@ -27,6 +27,11 @@ export const OutputsListPage = () => {
   const outputs = useGetOutputs();
   const [isAddOutputFlyoutOpen, setIsAddOutputFlyoutOpen] = useState(false);
 
+  const onClose = useCallback(() => {
+    outputs.resendRequest();
+    setIsAddOutputFlyoutOpen(false);
+  }, [outputs]);
+
   const columns = useMemo(() => {
     return [
       {
@@ -39,20 +44,33 @@ export const OutputsListPage = () => {
       {
         field: 'type',
         sortable: true,
+        width: '180px',
         name: i18n.translate('xpack.fleet.outputsList.outputsTable.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
+      },
+      {
+        field: 'hosts',
+        sortable: true,
+        name: i18n.translate('xpack.fleet.outputsList.outputsTable.hostsColumnTitle', {
+          defaultMessage: 'Hosts',
+        }),
+        render: (hosts: string[]) => {
+          return (
+            <div>
+              {hosts.map((host) => (
+                <p key={host}>{host}</p>
+              ))}
+            </div>
+          );
+        },
       },
     ];
   }, []);
 
   return (
     <DefaultLayout section="outputs" rightColumn={undefined}>
-      <EuiPortal>
-        {isAddOutputFlyoutOpen && (
-          <AddOutputFlyout onClose={() => setIsAddOutputFlyoutOpen(false)} />
-        )}
-      </EuiPortal>
+      <EuiPortal>{isAddOutputFlyoutOpen && <AddOutputFlyout onClose={onClose} />}</EuiPortal>
       <EuiFlexGroup alignItems={'center'} gutterSize="m">
         <EuiFlexItem grow={4}>
           <SearchBar

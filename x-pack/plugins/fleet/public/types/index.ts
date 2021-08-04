@@ -81,6 +81,7 @@ export {
   // API schemas - Outputs
   GetOutputsResponse,
   PutOutputRequest,
+  PostOutputRequest,
   PutOutputResponse,
   // API schemas - Settings
   GetSettingsResponse,

@@ -17,6 +17,17 @@ export interface GetOneOutputRequest {
   };
 }
 
+export interface PostOutputRequest {
+  body: {
+    name: string;
+    type: 'elasticsearch';
+    hosts?: string[];
+    ca_sha256?: string;
+    config?: Record<string, any>;
+    config_yaml?: string;
+  };
+}
+
 export interface PutOutputRequest {
   params: {
     outputId: string;

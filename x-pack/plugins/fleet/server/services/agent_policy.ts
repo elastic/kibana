@@ -132,8 +132,13 @@ class AgentPolicyService {
     policy?: AgentPolicy;
   }> {
     const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
-    const newAgentPolicyDefaults: Pick<NewAgentPolicy, 'namespace' | 'monitoring_enabled'> = {
+    const newAgentPolicyDefaults: Pick<
+      NewAgentPolicy,
+      'namespace' | 'monitoring_enabled' | 'default_output' | 'monitoring_output'
+    > = {
       namespace: 'default',
+      default_output: 'default',
+      monitoring_output: 'default',
       monitoring_enabled: ['logs', 'metrics'],
     };
 
@@ -744,7 +749,18 @@ class AgentPolicyService {
     );
 
     if (!policyDefaultOutput) {
-      throw new Error('Output not found');
+      throw new Error('Data Output not found');
+    }
+
+    const monitoringDefaultOutput = outputs.find(
+      (output) =>
+        agentPolicy &&
+        ((agentPolicy.monitoring_output === 'default' && output.id === defaultOutputId) ||
+          output.id === agentPolicy.monitoring_output)
+    );
+
+    if (!monitoringDefaultOutput) {
+      throw new Error('Monitroing Output not found');
     }
 
     const fullAgentPolicy: FullAgentPolicy = {
@@ -783,7 +799,7 @@ class AgentPolicyService {
             agent: {
               monitoring: {
                 namespace: agentPolicy.namespace,
-                use_output: defaultOutput.name,
+                use_output: monitoringDefaultOutput.name,
                 enabled: true,
                 logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
                 metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),

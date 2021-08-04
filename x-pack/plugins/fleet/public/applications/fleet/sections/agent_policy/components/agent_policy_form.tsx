@@ -371,21 +371,39 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           />
         }
       >
-        <EuiFormRow
-          fullWidth
-          error={
-            touchedFields.unenroll_timeout && validation.unenroll_timeout
-              ? validation.unenroll_timeout
-              : null
-          }
-          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-        >
+        <EuiFormRow fullWidth>
           <EuiSelect
             fullWidth
             disabled={agentPolicy.is_managed === true}
             value={agentPolicy.default_output}
             options={outputsOptions}
             onChange={(e) => updateAgentPolicy({ default_output: e.target.value })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.monitoringOutputLabel"
+              defaultMessage="Monitoring output"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.monitoringOutputDescription"
+            defaultMessage="Ouptput used for monitoring logs and metrics."
+          />
+        }
+      >
+        <EuiFormRow fullWidth>
+          <EuiSelect
+            fullWidth
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.monitoring_output}
+            options={outputsOptions}
+            onChange={(e) => updateAgentPolicy({ monitoring_output: e.target.value })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

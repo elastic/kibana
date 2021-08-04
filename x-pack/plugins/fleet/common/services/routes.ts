@@ -154,6 +154,7 @@ export const outputRoutesService = {
   getUpdatePath: (outputId: string) =>
     OUTPUT_API_ROUTES.UPDATE_PATTERN.replace('{outputId}', outputId),
   getListPath: () => OUTPUT_API_ROUTES.LIST_PATTERN,
+  getCreatePath: () => OUTPUT_API_ROUTES.CREATE_PATTERN,
 };
 
 export const settingsRoutesService = {

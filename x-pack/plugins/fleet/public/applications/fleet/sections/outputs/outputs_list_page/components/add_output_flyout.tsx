@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiFlyout,
   EuiTitle,
@@ -21,8 +21,11 @@ import {
   EuiPanel,
   EuiFormRow,
   EuiCodeEditor,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { sendPostOutput } from '../../../../hooks';
 
 import { HostsInput } from './hosts_input';
 
@@ -30,7 +33,23 @@ interface Props {
   onClose: () => void;
 }
 export const AddOutputFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
+  const [name, setName] = useState<string>('');
   const [hosts, setHosts] = useState<string[]>([]);
+  const [yamlConfig, setYamlConfig] = useState<string>('');
+
+  const onSubmit = useCallback(() => {
+    async function submit() {
+      await sendPostOutput({
+        name,
+        type: 'elasticsearch',
+        hosts,
+        config_yaml: yamlConfig,
+      });
+      onClose();
+    }
+
+    submit();
+  }, [name, hosts, yamlConfig, onClose]);
 
   return (
     <EuiFlyout ownFocus onClose={onClose} hideCloseButton aria-labelledby="flyoutComplicatedTitle">
@@ -42,8 +61,23 @@ export const AddOutputFlyout: React.FunctionComponent<Props> = ({ onClose }) => 
       <EuiFlyoutBody>
         <EuiSpacer size="m" />
         <EuiSpacer />
-        <EuiForm>
+        <EuiForm onSubmit={onSubmit}>
           <EuiPanel hasShadow={false} hasBorder={true}>
+            <EuiFormRow
+              label={i18n.translate('xpack.fleet.outputForm.nameLabel', {
+                defaultMessage: 'Name',
+              })}
+              fullWidth
+            >
+              <EuiFieldText
+                fullWidth
+                compressed
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                }}
+              />
+            </EuiFormRow>
             <HostsInput
               helpText=""
               id="fleet-outputs-hosts-input"
@@ -51,18 +85,7 @@ export const AddOutputFlyout: React.FunctionComponent<Props> = ({ onClose }) => 
               onChange={setHosts}
               value={hosts}
             />
-          </EuiPanel>
-          <EuiPanel hasShadow={false} hasBorder={true}>
-            <HostsInput
-              helpText=""
-              id="fleet-outputs-hosts-input"
-              label="Elasticsearch hosts"
-              onChange={setHosts}
-              value={hosts}
-            />
-          </EuiPanel>
-          <EuiSpacer />
-          <EuiPanel hasShadow={false} hasBorder={true}>
+            <EuiSpacer />
             <EuiFormRow
               label={i18n.translate('xpack.fleet.settings.additionalYamlConfig', {
                 defaultMessage: 'Elasticsearch output configuration (YAML)',
@@ -81,8 +104,10 @@ export const AddOutputFlyout: React.FunctionComponent<Props> = ({ onClose }) => 
                   showGutter: false,
                   showPrintMargin: false,
                 }}
-                // {...inputs.additionalYamlConfig.props}
-                onChange={() => {}}
+                value={yamlConfig}
+                onChange={(val) => {
+                  setYamlConfig(val);
+                }}
               />
             </EuiFormRow>
           </EuiPanel>
@@ -96,7 +121,7 @@ export const AddOutputFlyout: React.FunctionComponent<Props> = ({ onClose }) => 
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onClose} fill>
+            <EuiButton onClick={onSubmit} fill>
               Save
             </EuiButton>
           </EuiFlexItem>
