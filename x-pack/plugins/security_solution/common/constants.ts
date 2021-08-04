@@ -64,20 +64,21 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
 export enum SecurityPageName {
-  overview = 'overview',
-  detections = 'detections',
+  administration = 'administration',
   alerts = 'alerts',
-  rules = 'rules',
+  case = 'case',
+  detections = 'detections',
+  endpoints = 'endpoints',
+  eventFilters = 'event_filters',
   exceptions = 'exceptions',
   hosts = 'hosts',
   network = 'network',
-  timelines = 'timelines',
-  case = 'case',
-  administration = 'administration',
-  endpoints = 'endpoints',
+  overview = 'overview',
   policies = 'policies',
+  rules = 'rules',
+  timelines = 'timelines',
   trustedApps = 'trusted_apps',
-  eventFilters = 'event_filters',
+  ueba = 'ueba',
 }
 
 export const TIMELINES_PATH = '/timelines';
@@ -88,6 +89,7 @@ export const ALERTS_PATH = '/alerts';
 export const RULES_PATH = '/rules';
 export const EXCEPTIONS_PATH = '/exceptions';
 export const HOSTS_PATH = '/hosts';
+export const UEBA_PATH = '/ueba';
 export const NETWORK_PATH = '/network';
 export const MANAGEMENT_PATH = '/administration';
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints`;
@@ -102,6 +104,7 @@ export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}`;
 export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}`;
 
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}`;
+export const APP_UEBA_PATH = `${APP_PATH}${UEBA_PATH}`;
 export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}`;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}`;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}`;
@@ -119,6 +122,11 @@ export const DEFAULT_INDEX_PATTERN = [
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
+];
+
+export const DEFAULT_INDEX_PATTERN_EXPERIMENTAL = [
+  // TODO: Steph/ueba TEMP for testing UEBA data
+  'ml_host_risk_score_*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
