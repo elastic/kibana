@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { isEsError, handleEsError, parseEsError } from '../../__packages_do_not_import__/errors';
+export { handleEsError, parseEsError } from '../../__packages_do_not_import__/errors';

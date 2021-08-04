@@ -93,6 +93,7 @@ export {
 } from './index_patterns';
 
 export {
+  IndexPatternField,
   IFieldType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,

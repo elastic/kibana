@@ -31,6 +31,7 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
+import { setupExpressions } from './setup_expressions';
 import { pluginServiceRegistry } from './services/kibana';
 
 export { CoreStart, CoreSetup };
@@ -87,11 +88,14 @@ export class CanvasPlugin
     const lastPath = getSessionStorage().get(
       `${SESSIONSTORAGE_LASTPATH}:${coreSetup.http.basePath.get()}`
     );
+
     if (lastPath) {
       this.appUpdater.next(() => ({
         defaultPath: `#${lastPath}`,
       }));
     }
+
+    setupExpressions({ coreSetup, setupPlugins });
 
     coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -124,7 +128,8 @@ export class CanvasPlugin
           setupPlugins,
           startPlugins,
           registries,
-          this.appUpdater
+          this.appUpdater,
+          pluginServices
         );
 
         const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });
@@ -145,6 +150,7 @@ export class CanvasPlugin
       const { argTypeSpecs } = await import('./expression_types/arg_types');
       return argTypeSpecs;
     });
+
     canvasApi.addTransitions(async () => {
       const { transitions } = await import('./transitions');
       return transitions;
