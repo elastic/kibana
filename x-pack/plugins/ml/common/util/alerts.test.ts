@@ -91,7 +91,7 @@ describe('getResultJobsHealthRuleConfig', () => {
         enabled: true,
       },
       delayedData: {
-        docsCount: 0,
+        docsCount: 1,
         enabled: true,
         timeInterval: null,
       },
