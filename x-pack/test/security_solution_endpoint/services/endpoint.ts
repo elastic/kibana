@@ -6,13 +6,70 @@
  */
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { Client } from '@elastic/elasticsearch';
 import { FtrService } from '../../functional/ftr_provider_context';
 import { metadataCurrentIndexPattern } from '../../../plugins/security_solution/common/endpoint/constants';
+import { EndpointError } from '../../../plugins/security_solution/server';
+import {
+  IndexedHostsAndAlertsResponse,
+  indexHostsAndAlerts,
+} from '../../../plugins/security_solution/common/endpoint/index_data';
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
   private readonly retry = this.ctx.getService('retry');
-  private readonly log = this.ctx.getService('log');
+  private readonly kbnClient = this.ctx.getService('kibanaServer');
+
+  async setMetadataTransformInterval() {
+    // FIXME:PT implement method
+  }
+
+  /**
+   * Loads endpoint host/alert/event data into elasticsearch
+   * @param [options]
+   * @param [options.numHosts=1] Number of Endpoint Hosts to be loaded
+   * @param [options.numHostDocs=1] Number of Document to be loaded per Endpoint Host (Endpoint hosts index uses a append-only index)
+   * @param [options.alertsPerHost=1] Number of Alerts and Events to be loaded per Endpoint Host
+   * @param [options.enableFleetIntegration=true] When set to `true`, Fleet data will also be loaded (ex. Integration Policies, Agent Policies, "fake" Agents)
+   * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
+   * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processd by the transform
+   */
+  async loadEndpointData({
+    numHosts = 1,
+    numHostDocs = 1,
+    alertsPerHost = 1,
+    enableFleetIntegration = 1,
+    generatorSeed = 'seed',
+    waitUntilTransformed = true,
+  }?: Partial<{
+    numHosts: number;
+    numHostDocs: number;
+    alertsPerHost: number;
+    enableFleetIntegration: boolean;
+    generatorSeed: string;
+    waitUntilTransformed: boolean;
+  }>): IndexedHostsAndAlertsResponse {
+    // load data into the system
+    const indexedData = await indexHostsAndAlerts(
+      this.esClient as Client,
+      this.kbnClient,
+      generatorSeed,
+      numHosts,
+      numHostDocs,
+      'metrics-endpoint.metadata-default',
+      'metrics-endpoint.policy-default',
+      'logs-endpoint.events.process-default',
+      'logs-endpoint.alerts-default',
+      alertsPerHost,
+      enableFleetIntegration
+    );
+
+    if (waitUntilTransformed) {
+      await endpointTestResources.waitForEndpoints(indexedData.hosts.map((host) => host.agent.id));
+    }
+
+    return indexedData;
+  }
 
   /**
    * Waits for endpoints to show up on the `metadata-current` index.
@@ -54,24 +111,16 @@ export class EndpointTestResources extends FtrService {
           rest_total_hits_as_int: true,
         });
 
-        if (searchResponse.body.hits.total === size) {
-          return true;
-        }
-
-        return false;
+        return searchResponse.body.hits.total === size;
       } catch (error) {
         // We ignore 404's (index might not exist)
         if (error instanceof ResponseError && error.statusCode === 404) {
           return false;
         }
 
-        // FIXME:PT use Endpoint here
-
         // Wrap the ES error so that we get a good stack trace
-        throw new Error(error.message);
+        throw new EndpointError(error.message, error);
       }
     });
   }
-
-  async setMetadataTransformInterval() {}
 }

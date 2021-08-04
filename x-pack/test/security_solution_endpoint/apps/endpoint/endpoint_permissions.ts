@@ -6,24 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
 } from '../../../common/services/security_solution';
-import {
-  IndexedHostsAndAlertsResponse,
-  indexHostsAndAlerts,
-} from '../../../../plugins/security_solution/common/endpoint/index_data';
+import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
-  const esClient = getService('es');
-  const kbnClient = getService('kibanaServer');
 
   describe('Endpoint permissions:', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -31,22 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       // todo: way to force an endpoint to be created in isolated mode
 
-      // load data into the system
-      indexedData = await indexHostsAndAlerts(
-        esClient as Client,
-        kbnClient,
-        'seed',
-        1,
-        1,
-        'metrics-endpoint.metadata-default',
-        'metrics-endpoint.policy-default',
-        'logs-endpoint.events.process-default',
-        'logs-endpoint.alerts-default',
-        1,
-        true
-      );
-
-      await endpointTestResources.waitForEndpoints(indexedData.hosts.map((host) => host.agent.id));
+      await endpointTestResources.loadEndpointData();
 
       // Force a logout so that we start from the login page
       await PageObjects.security.forceLogout();
