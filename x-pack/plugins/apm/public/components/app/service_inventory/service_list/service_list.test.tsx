@@ -28,13 +28,17 @@ describe('ServiceList', () => {
 
   it('renders empty state', () => {
     expect(() =>
-      renderWithTheme(<ServiceList items={[]} />, { wrapper: Wrapper })
+      renderWithTheme(<ServiceList isLoading={false} items={[]} />, {
+        wrapper: Wrapper,
+      })
     ).not.toThrowError();
   });
 
   it('renders with data', () => {
     expect(() =>
-      renderWithTheme(<ServiceList items={items} />, { wrapper: Wrapper })
+      renderWithTheme(<ServiceList isLoading={false} items={items} />, {
+        wrapper: Wrapper,
+      })
     ).not.toThrowError();
   });
 
@@ -70,18 +74,24 @@ describe('ServiceList', () => {
 
   describe('without ML data', () => {
     it('does not render the health column', () => {
-      const { queryByText } = renderWithTheme(<ServiceList items={items} />, {
-        wrapper: Wrapper,
-      });
+      const { queryByText } = renderWithTheme(
+        <ServiceList isLoading={false} items={items} />,
+        {
+          wrapper: Wrapper,
+        }
+      );
       const healthHeading = queryByText('Health');
 
       expect(healthHeading).toBeNull();
     });
 
     it('sorts by throughput', async () => {
-      const { findByTitle } = renderWithTheme(<ServiceList items={items} />, {
-        wrapper: Wrapper,
-      });
+      const { findByTitle } = renderWithTheme(
+        <ServiceList isLoading={false} items={items} />,
+        {
+          wrapper: Wrapper,
+        }
+      );
 
       expect(await findByTitle('Throughput')).toBeInTheDocument();
     });
@@ -91,6 +101,7 @@ describe('ServiceList', () => {
     it('renders the health column', async () => {
       const { findByTitle } = renderWithTheme(
         <ServiceList
+          isLoading={false}
           items={items.map((item) => ({
             ...item,
             healthStatus: ServiceHealthStatus.warning,
