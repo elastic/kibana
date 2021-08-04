@@ -51,7 +51,6 @@ import {
 } from '../../common';
 import { NormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import { resolveSavedObjectId } from '../saved_objects/resolve_id';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -242,14 +241,9 @@ export class TaskRunner<
       actions,
     } = alert;
     const {
+      params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
-    const alertId = await resolveSavedObjectId(
-      this.context.encryptedSavedObjectsClient,
-      this.logger,
-      this.taskInstance.params.alertId,
-      this.context.spaceIdToNamespace(spaceId)
-    );
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const alertType = this.ruleTypeRegistry.get(alertTypeId);
 
@@ -433,15 +427,8 @@ export class TaskRunner<
     event: Event
   ) {
     const {
-      params: { spaceId },
+      params: { alertId, spaceId },
     } = this.taskInstance;
-
-    const alertId = await resolveSavedObjectId(
-      this.context.encryptedSavedObjectsClient,
-      this.logger,
-      this.taskInstance.params.alertId,
-      this.context.spaceIdToNamespace(spaceId)
-    );
 
     // Validate
     const validatedParams = validateAlertTypeParams(alert.params, this.alertType.validate?.params);
@@ -467,14 +454,8 @@ export class TaskRunner<
 
   async loadAlertAttributesAndRun(event: Event): Promise<Resultable<AlertTaskRunResult, Error>> {
     const {
-      params: { spaceId },
+      params: { alertId, spaceId },
     } = this.taskInstance;
-    const alertId = await resolveSavedObjectId(
-      this.context.encryptedSavedObjectsClient,
-      this.logger,
-      this.taskInstance.params.alertId,
-      this.context.spaceIdToNamespace(spaceId)
-    );
     let apiKey: string | null;
     try {
       apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
@@ -511,18 +492,11 @@ export class TaskRunner<
 
   async run(): Promise<AlertTaskRunResult> {
     const {
-      params: { spaceId },
+      params: { alertId, spaceId },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
-
-    const alertId = await resolveSavedObjectId(
-      this.context.encryptedSavedObjectsClient,
-      this.logger,
-      this.taskInstance.params.alertId,
-      this.context.spaceIdToNamespace(spaceId)
-    );
 
     const runDate = new Date();
     const runDateString = runDate.toISOString();
