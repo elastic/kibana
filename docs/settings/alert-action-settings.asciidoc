@@ -8,7 +8,7 @@
 Alerts and actions are enabled by default in {kib}, but require you configure the following in order to use them:
 
 . <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
-. <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
+. {ref}/security-basic-setup-https.html#encrypt-kibana-elasticsearch[Encrypt traffic between {kib} and {es}].
 . If you are using an *on-premises* Elastic Stack deployment, <<general-alert-action-settings,specify a value for `xpack.encryptedSavedObjects.encryptionKey`>>.
 
 You can configure the following settings in the `kibana.yml` file.
@@ -117,13 +117,13 @@ xpack.actions.customHostSettings:
   The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 
 | `xpack.actions.customHostSettings[n]`
-`.ssl.rejectUnauthorized` {ess-icon}
+`.ssl.rejectUnauthorized`
   | Deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead. A boolean value indicating whether to bypass server certificate validation.
   Overrides the general `xpack.actions.rejectUnauthorized` configuration
   for requests made for this hostname/port.
 
 |[[action-config-custom-host-verification-mode]] `xpack.actions.customHostSettings[n]`
-`.ssl.verificationMode`
+`.ssl.verificationMode` {ess-icon}
   | Controls the verification of the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. 
  Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration
   for requests made for this hostname/port.

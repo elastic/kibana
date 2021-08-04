@@ -25,8 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/93354
-  describe.skip('BWC report generation urls', () => {
+  describe('BWC report generation urls', () => {
     before(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);

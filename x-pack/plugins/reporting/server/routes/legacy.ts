@@ -59,6 +59,7 @@ export function registerLegacy(
               savedObjectId,
               browserTimezone,
               queryString,
+              version: reporting.getKibanaVersion(),
             },
             context,
             req,
