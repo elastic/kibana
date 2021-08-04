@@ -59,7 +59,6 @@ export {
 export {
   Query,
   Filter,
-  FilterState,
   LatLon,
   FieldFilter,
   FilterMeta,

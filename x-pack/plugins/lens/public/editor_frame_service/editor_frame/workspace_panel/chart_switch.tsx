@@ -20,7 +20,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Visualization, FramePublicAPI, Datasource, VisualizationType } from '../../../types';
+import {
+  Visualization,
+  FramePublicAPI,
+  VisualizationType,
+  VisualizationMap,
+  DatasourceMap,
+} from '../../../types';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
@@ -44,9 +50,9 @@ interface VisualizationSelection {
 }
 
 interface Props {
-  visualizationMap: Record<string, Visualization>;
   framePublicAPI: FramePublicAPI;
-  datasourceMap: Record<string, Datasource>;
+  visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
 }
 
 type SelectableEntry = EuiSelectableOption<{ value: string }>;
@@ -55,7 +61,7 @@ function VisualizationSummary({
   visualizationMap,
   visualization,
 }: {
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   visualization: {
     activeId: string | null;
     state: unknown;
@@ -370,7 +376,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                                   'xpack.lens.chartSwitch.dataLossDescription',
                                   {
                                     defaultMessage:
-                                      'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
+                                      'Selecting this visualization type will result in a partial loss of currently applied configuration selections.',
                                   }
                                 )}
                                 iconProps={{
@@ -439,8 +445,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem>
-              {i18n.translate('xpack.lens.configPanel.chartType', {
-                defaultMessage: 'Chart type',
+              {i18n.translate('xpack.lens.configPanel.visualizationType', {
+                defaultMessage: 'Visualization type',
               })}
             </EuiFlexItem>
           </EuiFlexGroup>

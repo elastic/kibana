@@ -133,20 +133,23 @@ export class APMPlugin
             settings: {
               number_of_shards: 1,
             },
-            mappings: mappingFromFieldMap({
-              [SERVICE_NAME]: {
-                type: 'keyword',
+            mappings: mappingFromFieldMap(
+              {
+                [SERVICE_NAME]: {
+                  type: 'keyword',
+                },
+                [SERVICE_ENVIRONMENT]: {
+                  type: 'keyword',
+                },
+                [TRANSACTION_TYPE]: {
+                  type: 'keyword',
+                },
+                [PROCESSOR_EVENT]: {
+                  type: 'keyword',
+                },
               },
-              [SERVICE_ENVIRONMENT]: {
-                type: 'keyword',
-              },
-              [TRANSACTION_TYPE]: {
-                type: 'keyword',
-              },
-              [PROCESSOR_EVENT]: {
-                type: 'keyword',
-              },
-            }),
+              'strict'
+            ),
           },
         },
       });

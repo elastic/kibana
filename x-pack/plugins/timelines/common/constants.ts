@@ -5,4 +5,11 @@
  * 2.0.
  */
 
+import { AlertStatus } from './types/timeline/actions';
+
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
+export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
+
+export const FILTER_OPEN: AlertStatus = 'open';
+export const FILTER_CLOSED: AlertStatus = 'closed';
+export const FILTER_IN_PROGRESS: AlertStatus = 'in-progress';

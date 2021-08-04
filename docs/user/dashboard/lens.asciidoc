@@ -276,6 +276,16 @@ which is helpful when you want to make a comparison to the whole documentation s
 ====
 
 [discrete]
+[[when-do-i-use-runtime-fields-vs-formula]]
+.*When do I use runtime fields vs. formula?*
+[%collapsible]
+====
+Use runtime fields to format, concatenate, and extract document-level fields. Runtime fields work across all of {kib} and are best used for smaller computations without compromising performance.
+
+Use formulas to compare multiple {es} aggregations that can be filtered or shifted in time. Formulas apply only to *Lens* panels and are computationally intensive.
+====
+
+[discrete]
 [[is-it-possible-to-have-more-than-one-Y-axis-scale]]
 .*Can I add more than one y-axis scale to a visualization?*
 [%collapsible]
@@ -384,11 +394,3 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
 ====
-
-//[discrete]
-//[[when-do-i-use-runtime-fields-vs-formula]]
-//.*When do I use runtime fields vs. formula?*
-//[%collapsible]
-//====
-//
-//====
