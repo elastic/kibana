@@ -6,8 +6,9 @@
  */
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
-import { AlertTypeWithExecutor, LifecycleAlertService } from '../../../../rule_registry/server';
-import { AlertInstanceContext } from '../../../../alerting/common';
+import { AlertTypeWithExecutor } from '../../../../rule_registry/server';
+import { AlertInstanceContext, AlertTypeState } from '../../../../alerting/common';
+import { LifecycleAlertService } from '../../../../rule_registry/server';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,
@@ -17,9 +18,14 @@ import { AlertInstanceContext } from '../../../../alerting/common';
  */
 export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = AlertTypeWithExecutor<
   Record<string, any>,
+  Record<string, any>,
   AlertInstanceContext,
   {
-    alertWithLifecycle: LifecycleAlertService<AlertInstanceContext, TActionGroupIds>;
+    alertWithLifecycle: LifecycleAlertService<
+      AlertTypeState,
+      AlertInstanceContext,
+      TActionGroupIds
+    >;
   }
 >;
 

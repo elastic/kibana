@@ -1,0 +1,3 @@
+{
+  "presets": ["@kbn/babel-preset/webpack_preset"]
+}

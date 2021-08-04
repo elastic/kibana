@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 import React, { Ref } from 'react';
-import { ShapeDrawer, ShapeRef } from '../reusable';
+import { ShapeDrawer, ShapeRef, ShapeDrawerComponentProps } from '../reusable';
 import { getShape } from './shapes';
-import { ShapeDrawerComponentProps } from './types';
 
 const ShapeDrawerComponent = React.forwardRef(
   (props: ShapeDrawerComponentProps, ref: Ref<ShapeRef>) => (

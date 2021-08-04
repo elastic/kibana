@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterMeta, FilterState, FilterStateStore } from './types';
+import { Filter, FilterMeta, FilterStateStore } from './types';
 
 export const buildEmptyFilter = (isPinned: boolean, index?: string): Filter => {
   const meta: FilterMeta = {
@@ -15,7 +15,7 @@ export const buildEmptyFilter = (isPinned: boolean, index?: string): Filter => {
     alias: null,
     index,
   };
-  const $state: FilterState = {
+  const $state: Filter['$state'] = {
     store: isPinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
   };
 

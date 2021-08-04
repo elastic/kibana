@@ -97,10 +97,11 @@ export interface ReportDocument extends ReportDocumentHead {
 }
 
 export interface BaseParams {
-  browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
   layout?: LayoutParams;
   objectType: string;
   title: string;
+  browserTimezone: string; // to format dates in the user's time zone
+  version: string; // to handle any state migrations
 }
 
 export type JobId = string;

@@ -13,7 +13,6 @@ import {
   CurveType,
   LineAnnotation,
   niceTimeFormatter,
-  Placement,
   Position,
   ScaleType,
   Settings,
@@ -29,11 +28,11 @@ import {
   asPercent,
 } from '../../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../../charts/chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
@@ -73,6 +72,7 @@ export function TransactionBreakdownChartContents({
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
         <Settings
+          tooltip={{ stickTo: 'top' }}
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           showLegend
           showLegendExtra
@@ -82,7 +82,9 @@ export function TransactionBreakdownChartContents({
           flatLegend
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Bottom },
+            tooltip: {
+              visible: true,
+            },
           }}
         />
         <Axis
