@@ -76,6 +76,19 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
         },
         wait: true,
       });
+
+      await procs.run('copy responses.log to results folder', {
+        cmd: 'mv',
+        args: [
+          'target/response-*.log',
+          '$(find target/gatling/* -type d -prune -exec ls -d {} \; |tail -1)/response.log'
+        ],
+        cwd: gatlingProjectRootPath,
+        env: {
+          ...process.env,
+        },
+        wait: true,
+      })
       // wait a minute between simulations, skip for the last one
       if (i < simulationClasses.length - 1) {
         await delay(60 * 1000);
