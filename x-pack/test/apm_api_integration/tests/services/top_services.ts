@@ -72,8 +72,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(sortedItems.map((item) => item.serviceName)).toMatchInline(`
           Array [
             "auditbeat",
-            "kibana",
-            "kibana-frontend",
             "opbeans-dotnet",
             "opbeans-go",
             "opbeans-java",
@@ -87,115 +85,44 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct metrics averages', () => {
         expectSnapshot(
-          sortedItems.map((item) =>
-            pick(
-              item,
-              'transactionErrorRate.value',
-              'avgResponseTime.value',
-              'transactionsPerMinute.value'
-            )
-          )
+          sortedItems.map((item) => pick(item, 'transactionErrorRate', 'latency', 'throughput'))
         ).toMatchInline(`
           Array [
             Object {},
             Object {
-              "avgResponseTime": Object {
-                "value": 658101.291021672,
-              },
-              "transactionErrorRate": Object {
-                "value": 0,
-              },
-              "transactionsPerMinute": Object {
-                "value": 75.3666666666667,
-              },
+              "latency": 520294.126436782,
+              "throughput": 11.6,
+              "transactionErrorRate": 0.0316091954022989,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 3588095,
-              },
-              "transactionErrorRate": Object {
-                "value": null,
-              },
-              "transactionsPerMinute": Object {
-                "value": 0.133333333333333,
-              },
+              "latency": 74805.1452830189,
+              "throughput": 17.6666666666667,
+              "transactionErrorRate": 0.00566037735849057,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 586249.027027027,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.00337837837837838,
-              },
-              "transactionsPerMinute": Object {
-                "value": 9.86666666666667,
-              },
+              "latency": 411589.785714286,
+              "throughput": 7.46666666666667,
+              "transactionErrorRate": 0.0848214285714286,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 218838.954459203,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.0113851992409867,
-              },
-              "transactionsPerMinute": Object {
-                "value": 17.5666666666667,
-              },
+              "latency": 53906.6603773585,
+              "throughput": 7.06666666666667,
+              "transactionErrorRate": 0,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 17660.3103448276,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.0646551724137931,
-              },
-              "transactionsPerMinute": Object {
-                "value": 7.73333333333333,
-              },
+              "latency": 420634.9,
+              "throughput": 5.33333333333333,
+              "transactionErrorRate": 0.025,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 22281.4255319149,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.00531914893617021,
-              },
-              "transactionsPerMinute": Object {
-                "value": 6.26666666666667,
-              },
+              "latency": 40989.5802047782,
+              "throughput": 9.76666666666667,
+              "transactionErrorRate": 0.00341296928327645,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 243948.538461538,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.032051282051282,
-              },
-              "transactionsPerMinute": Object {
-                "value": 5.2,
-              },
-            },
-            Object {
-              "avgResponseTime": Object {
-                "value": 44571.2584615385,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.00307692307692308,
-              },
-              "transactionsPerMinute": Object {
-                "value": 10.8333333333333,
-              },
-            },
-            Object {
-              "avgResponseTime": Object {
-                "value": 1381526.7037037,
-              },
-              "transactionErrorRate": Object {
-                "value": null,
-              },
-              "transactionsPerMinute": Object {
-                "value": 1.8,
-              },
+              "latency": 1040880.77777778,
+              "throughput": 2.4,
+              "transactionErrorRate": null,
             },
           ]
         `);
@@ -204,12 +131,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns environments', () => {
         expectSnapshot(sortedItems.map((item) => item.environments ?? [])).toMatchInline(`
           Array [
-            Array [
-              "production",
-            ],
-            Array [
-              "production",
-            ],
             Array [
               "production",
             ],
@@ -246,7 +167,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(rumServices.length).to.be.greaterThan(0);
 
-        expect(rumServices.every((item) => isEmpty(item.transactionErrorRate?.value)));
+        expect(rumServices.every((item) => isEmpty(item.transactionErrorRate)));
       });
 
       it('non-RUM services all report transaction error rates', () => {
@@ -256,10 +177,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(
           nonRumServices.every((item) => {
-            return (
-              typeof item.transactionErrorRate?.value === 'number' &&
-              item.transactionErrorRate.timeseries.length > 0
-            );
+            return typeof item.transactionErrorRate === 'number';
           })
         ).to.be(true);
       });
@@ -345,12 +263,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "healthy",
                 "healthy",
                 "healthy",
-                undefined,
-                "healthy",
-                undefined,
                 "healthy",
                 "healthy",
-                undefined,
+                "healthy",
+                "healthy",
               ]
             `);
           });
