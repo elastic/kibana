@@ -59,12 +59,14 @@ export enum FIELD_FORMAT_IDS {
   HISTOGRAM = 'histogram',
 }
 
+/** @public */
 export interface FieldFormatConfig {
   id: FieldFormatId;
   params: Record<string, any>;
   es?: boolean;
 }
 
+/** @public */
 export type FieldFormatsGetConfigFn = GetConfigFn;
 
 export type IFieldFormat = FieldFormat;

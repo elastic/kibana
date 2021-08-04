@@ -4,6 +4,7 @@
 
 ## FieldFormatConfig interface
 
+
 <b>Signature:</b>
 
 ```typescript

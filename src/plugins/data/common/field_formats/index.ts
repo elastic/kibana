@@ -8,6 +8,8 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldFormatsRegistry } from './field_formats_registry';
+
+/** @public */
 type IFieldFormatsRegistry = PublicMethodsOf<FieldFormatsRegistry>;
 
 export { FieldFormatsRegistry, IFieldFormatsRegistry };

@@ -9,15 +9,12 @@
 ```typescript
 fieldFormats: {
     FieldFormat: typeof FieldFormat;
-    FieldFormatsRegistry: typeof FieldFormatsRegistry;
     DEFAULT_CONVERTER_COLOR: {
         range: string;
         regex: string;
         text: string;
         background: string;
     };
-    HTML_CONTEXT_TYPE: import("../common").FieldFormatsContentType;
-    TEXT_CONTEXT_TYPE: import("../common").FieldFormatsContentType;
     FIELD_FORMAT_IDS: typeof FIELD_FORMAT_IDS;
     BoolFormat: typeof BoolFormat;
     BytesFormat: typeof BytesFormat;

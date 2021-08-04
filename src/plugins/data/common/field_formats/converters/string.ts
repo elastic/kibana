@@ -64,6 +64,7 @@ const TRANSFORM_OPTIONS = [
 ];
 const DEFAULT_TRANSFORM_OPTION = false;
 
+/** @public */
 export class StringFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.STRING;
   static title = i18n.translate('data.fieldFormats.string.title', {

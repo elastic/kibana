@@ -4,6 +4,7 @@
 
 ## FieldFormatsGetConfigFn type
 
+
 <b>Signature:</b>
 
 ```typescript

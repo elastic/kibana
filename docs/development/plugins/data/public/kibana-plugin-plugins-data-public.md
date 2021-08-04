@@ -19,10 +19,7 @@
 |  [IndexPatternField](./kibana-plugin-plugins-data-public.indexpatternfield.md) |  |
 |  [IndexPatternsService](./kibana-plugin-plugins-data-public.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
-|  [PainlessError](./kibana-plugin-plugins-data-public.painlesserror.md) |  |
-|  [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) |  |
 |  [SearchSource](./kibana-plugin-plugins-data-public.searchsource.md) | \* |
-|  [SearchTimeoutError](./kibana-plugin-plugins-data-public.searchtimeouterror.md) | Request Failure - When an entire multi request fails |
 |  [TimeHistory](./kibana-plugin-plugins-data-public.timehistory.md) |  |
 
 ## Enumerations
@@ -35,7 +32,6 @@
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
 |  [SearchSessionState](./kibana-plugin-plugins-data-public.searchsessionstate.md) | Possible state that current session can be in |
 |  [SortDirection](./kibana-plugin-plugins-data-public.sortdirection.md) |  |
-|  [TimeoutErrorMode](./kibana-plugin-plugins-data-public.timeouterrormode.md) |  |
 
 ## Functions
 
@@ -45,7 +41,6 @@
 |  [generateFilters(filterManager, field, values, operation, index)](./kibana-plugin-plugins-data-public.generatefilters.md) | Generate filter objects, as a result of triggering a filter action on a specific index pattern field. |
 |  [getDefaultQuery(language)](./kibana-plugin-plugins-data-public.getdefaultquery.md) |  |
 |  [getDisplayValueFromFilter(filter, indexPatterns)](./kibana-plugin-plugins-data-public.getdisplayvaluefromfilter.md) |  |
-|  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
 |  [getEsQueryConfig(config)](./kibana-plugin-plugins-data-public.getesqueryconfig.md) |  |
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
@@ -69,12 +64,10 @@
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
 |  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
-|  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) | Interface for an index pattern saved object |
 |  [IndexPatternSpec](./kibana-plugin-plugins-data-public.indexpatternspec.md) | Static index pattern format Serialized data object, representing index pattern attributes and state |
-|  [IndexPatternTypeMeta](./kibana-plugin-plugins-data-public.indexpatterntypemeta.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-public.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
 |  [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md) | search service |
@@ -90,8 +83,6 @@
 |  [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md) |  |
 |  [SavedQuery](./kibana-plugin-plugins-data-public.savedquery.md) |  |
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
-|  [SearchError](./kibana-plugin-plugins-data-public.searcherror.md) |  |
-|  [SearchInterceptorDeps](./kibana-plugin-plugins-data-public.searchinterceptordeps.md) |  |
 |  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.md) | Provide info about current search session to be stored in the Search Session saved object |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
 |  [WaitUntilNextSessionCompletesOptions](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletesoptions.md) | Options for [waitUntilNextSessionCompletes$()](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletes_.md) |
@@ -104,7 +95,6 @@
 |  [AggGroupLabels](./kibana-plugin-plugins-data-public.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
 |  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-data-public.apply_filter_trigger.md) |  |
-|  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) |  |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
 |  [createSavedQueryService](./kibana-plugin-plugins-data-public.createsavedqueryservice.md) |  |
@@ -115,7 +105,6 @@
 |  [exporters](./kibana-plugin-plugins-data-public.exporters.md) |  |
 |  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
-|  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
 |  [FilterItem](./kibana-plugin-plugins-data-public.filteritem.md) |  |
 |  [FilterLabel](./kibana-plugin-plugins-data-public.filterlabel.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) |  |
@@ -143,6 +132,7 @@
 |  Type Alias | Description |
 |  --- | --- |
 |  [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md) |  |
+|  [AggConfigSerialized](./kibana-plugin-plugins-data-public.aggconfigserialized.md) | \* |
 |  [AggGroupName](./kibana-plugin-plugins-data-public.agggroupname.md) |  |
 |  [AggParam](./kibana-plugin-plugins-data-public.aggparam.md) |  |
 |  [AggsStart](./kibana-plugin-plugins-data-public.aggsstart.md) | AggsStart represents the actual external contract as AggsCommonStart is only used internally. The difference is that AggsStart includes the typings for the registry with initialized agg types. |
@@ -150,10 +140,8 @@
 |  [AutoRefreshDoneFn](./kibana-plugin-plugins-data-public.autorefreshdonefn.md) |  |
 |  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esaggsexpressionfunctiondefinition.md) |  |
-|  [EsdslExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esdslexpressionfunctiondefinition.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
-|  [EsRawResponseExpressionTypeDefinition](./kibana-plugin-plugins-data-public.esrawresponseexpressiontypedefinition.md) |  |
 |  [ExecutionContextSearch](./kibana-plugin-plugins-data-public.executioncontextsearch.md) |  |
 |  [ExistsFilter](./kibana-plugin-plugins-data-public.existsfilter.md) |  |
 |  [ExpressionFunctionKibana](./kibana-plugin-plugins-data-public.expressionfunctionkibana.md) |  |
@@ -177,7 +165,6 @@
 |  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.indexpatternloadexpressionfunctiondefinition.md) |  |
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
 |  [IndexPatternSelectProps](./kibana-plugin-plugins-data-public.indexpatternselectprops.md) |  |
-|  [InputTimeRange](./kibana-plugin-plugins-data-public.inputtimerange.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |
 |  [ISearchSource](./kibana-plugin-plugins-data-public.isearchsource.md) | search source interface |
 |  [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md) |  |
