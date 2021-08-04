@@ -59,6 +59,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const handleNumberChange = createNumberHandler(handleChange);
   const percentileRankSeries =
     panel.series.find((s) => s.id === props.series.id) || panel.series[0];
+  // If the series is grouped by, then these colors are not respected, no need to display the color picker */
   const isGroupedBy = panel.series.length > 0 && percentileRankSeries.split_mode !== 'everything';
   const enableColorPicker = !isGroupedBy && !['table', 'metric', 'markdown'].includes(panel.type);
 
