@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -18,23 +17,16 @@ import {
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { createCallObservabilityApi } from '../../services/call_observability_api';
-import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
-import { apmAlertResponseExample, dynamicIndexPattern } from './example_data';
-
-interface PageArgs {
-  items: ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>;
-}
+import { dynamicIndexPattern } from './example_data';
 
 export default {
   title: 'app/Alerts',
   component: AlertsPage,
   decorators: [
-    (Story: ComponentType, { args: { items = [] } }: StoryContext) => {
+    (Story: ComponentType) => {
       createCallObservabilityApi(({
         get: async (endpoint: string) => {
-          if (endpoint === '/api/observability/rules/alerts/top') {
-            return items;
-          } else if (endpoint === '/api/observability/rules/alerts/dynamic_index_pattern') {
+          if (endpoint === '/api/observability/rules/alerts/dynamic_index_pattern') {
             return dynamicIndexPattern;
           }
         },
@@ -83,16 +75,12 @@ export default {
   ],
 };
 
-export function Example(_args: PageArgs) {
+export function Example() {
   return (
     <AlertsPage routeParams={{ query: { rangeFrom: 'now-15m', rangeTo: 'now', kuery: '' } }} />
   );
 }
-Example.args = {
-  items: apmAlertResponseExample,
-} as PageArgs;
 
-export function EmptyState(_args: PageArgs) {
+export function EmptyState() {
   return <AlertsPage routeParams={{ query: {} }} />;
 }
-EmptyState.args = { items: [] } as PageArgs;
