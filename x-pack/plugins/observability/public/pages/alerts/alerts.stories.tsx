@@ -45,9 +45,12 @@ export default {
           <IntlProvider locale="en">
             <KibanaContextProvider
               services={{
+                application: { getUrlForApp: () => '' },
                 data: { autocomplete: { hasQuerySuggestions: () => false }, query: {} },
+                chrome: { docTitle: { change: () => {} } },
                 docLinks: { links: { query: {} } },
                 storage: { get: () => {} },
+                timelines: { getTGrid: () => <></> },
                 uiSettings: {
                   get: (setting: string) => {
                     if (setting === 'dateFormat') {

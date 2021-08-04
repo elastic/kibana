@@ -13,7 +13,7 @@ import { getRandomString } from './random';
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
 export const initElasticsearchHelpers = (getService) => {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   let indicesCreated = [];
@@ -42,11 +42,11 @@ export const initElasticsearchHelpers = (getService) => {
       componentTemplatesCreated.push(componentTemplate.name);
     }
 
-    return es.dataManagement.saveComponentTemplate(componentTemplate);
+    return es.cluster.putComponentTemplate(componentTemplate);
   };
 
   const deleteComponentTemplate = (componentTemplateName) => {
-    return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
+    return es.cluster.deleteComponentTemplate({ name: componentTemplateName });
   };
 
   const cleanUpComponentTemplates = () =>

@@ -6,11 +6,11 @@
  */
 
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
-import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
+import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
-  datasourceMap: Record<string, Datasource>,
+  datasourceMap: DatasourceMap,
   datasourceStates: Record<
     string,
     {
@@ -80,7 +80,7 @@ export function buildExpression({
   description?: string;
   visualization: Visualization | null;
   visualizationState: unknown;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {

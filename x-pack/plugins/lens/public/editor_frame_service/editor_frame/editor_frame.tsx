@@ -8,7 +8,7 @@
 import React, { useCallback, useRef, useMemo } from 'react';
 import { CoreStart } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import { Datasource, FramePublicAPI, Visualization } from '../../types';
+import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
@@ -22,8 +22,8 @@ import { trackUiEvent } from '../../lens_ui_telemetry';
 import { useLensSelector, useLensDispatch } from '../../state_management';
 
 export interface EditorFrameProps {
-  datasourceMap: Record<string, Datasource>;
-  visualizationMap: Record<string, Visualization>;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
@@ -125,11 +125,12 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           allLoaded && (
             <ConfigPanelWrapper
+              activeVisualization={
+                visualization.activeId ? props.visualizationMap[visualization.activeId] : null
+              }
               activeDatasourceId={activeDatasourceId!}
               datasourceMap={props.datasourceMap}
               datasourceStates={datasourceStates}
-              visualizationMap={props.visualizationMap}
-              activeVisualizationId={visualization.activeId}
               visualizationState={visualization.state}
               framePublicAPI={framePublicAPI}
               core={props.core}
