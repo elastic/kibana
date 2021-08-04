@@ -2228,6 +2228,6 @@ const isFoundGetResponse = <TDocument = unknown>(
  * @param headers Response headers
  * @returns boolean
  */
-const isSupportedEsServer = (headers: Record<string, unknown> | null) => {
+const isSupportedEsServer = (headers: Record<string, string> | null) => {
   return !!headers && headers['x-elastic-product'] === 'Elasticsearch';
 };

@@ -203,10 +203,7 @@ export class SavedObjectsErrorHelpers {
     return isSavedObjectsClientError(error) && error[code] === CODE_GENERAL_ERROR;
   }
 
-  public static createGenericNotFoundEsUnavailableError(
-    type: string | null = null,
-    id: string | null = null
-  ) {
+  public static createGenericNotFoundEsUnavailableError(type: string, id: string) {
     const notFoundError = this.createGenericNotFoundError(type, id);
     return this.decorateEsUnavailableError(
       new Error(`${notFoundError.message}`),
