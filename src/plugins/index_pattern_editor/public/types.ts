@@ -160,6 +160,15 @@ export interface IndexPatternConfig {
   type: INDEX_PATTERN_TYPE;
 }
 
+export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {
+  timestampField?: TimestampOption;
+}
+
+export interface TimestampOption {
+  display: string;
+  fieldName?: string;
+}
+
 export interface MatchedIndicesSet {
   allIndices: MatchedItem[];
   exactMatchedIndices: MatchedItem[];

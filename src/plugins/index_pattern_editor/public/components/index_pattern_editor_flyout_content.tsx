@@ -29,6 +29,8 @@ import {
   INDEX_PATTERN_TYPE,
   IndexPatternConfig,
   MatchedIndicesSet,
+  FormInternal,
+  TimestampOption,
 } from '../types';
 
 import {
@@ -54,14 +56,6 @@ export interface Props {
   onCancel: () => void;
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
-}
-export interface TimestampOption {
-  display: string;
-  fieldName?: string;
-}
-
-export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {
-  timestampField?: TimestampOption;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -295,6 +289,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
     <>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <TypeField onChange={onTypeChange} />
