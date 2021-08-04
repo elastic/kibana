@@ -13,6 +13,8 @@ import { useActions, useValues } from 'kea';
 
 import { EuiCode } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
@@ -26,7 +28,11 @@ export const CrawlerSingleDomain: React.FC = () => {
 
   const { fetchDomainData } = useActions(CrawlerSingleDomainLogic);
 
-  const displayDomainUrl = domain ? domain.url : '...';
+  const displayDomainUrl = domain
+    ? domain.url
+    : i18n.translate('xpack.enterpriseSearch.appSearch.crawler.singleDomain.loadingTitle', {
+        defaultMessage: 'Loading...',
+      });
 
   useEffect(() => {
     fetchDomainData(domainId);

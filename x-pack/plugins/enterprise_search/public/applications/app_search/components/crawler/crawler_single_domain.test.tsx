@@ -51,6 +51,6 @@ describe('CrawlerSingleDomain', () => {
 
     const wrapper = shallow(<CrawlerSingleDomain />);
 
-    expect(wrapper.prop('pageHeader')).toEqual({ pageTitle: '...' });
+    expect(wrapper.prop('pageHeader')).toEqual({ pageTitle: 'Loading...' });
   });
 });
