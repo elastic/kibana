@@ -20,11 +20,16 @@ export interface ActiveCursorPayload {
 }
 
 /** @internal **/
-export interface DateHistogramSyncOption {
+interface BaseSyncOptions {
+  debounce?: number;
+}
+
+/** @internal **/
+export interface DateHistogramSyncOption extends BaseSyncOptions {
   isDateHistogram: boolean;
 }
 
 /** @internal **/
-export interface DatatablesSyncOption {
+export interface DatatablesSyncOption extends BaseSyncOptions {
   datatables: Datatable[];
 }
