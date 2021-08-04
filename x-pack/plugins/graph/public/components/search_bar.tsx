@@ -42,7 +42,7 @@ export interface SearchBarProps {
   indexPatternProvider: IndexPatternProvider;
 }
 
-export interface StatefulSearchBarProps extends SearchBarProps {
+export interface SearchBarStateProps {
   currentDatasource?: IndexpatternDatasource;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
 }
@@ -66,7 +66,7 @@ function queryToString(query: Query, indexPattern: IndexPattern) {
   return JSON.stringify(query.query);
 }
 
-export function SearchBarComponent(props: StatefulSearchBarProps) {
+export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) {
   const {
     isLoading,
     initialQuery,

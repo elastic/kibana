@@ -7,11 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import {
-  GraphVisualization,
-  GroupAwareWorkspaceNode,
-  GroupAwareWorkspaceEdge,
-} from './graph_visualization';
+import { GroupAwareWorkspaceEdge, GroupAwareWorkspaceNode } from '../../types';
 
 describe('graph_visualization', () => {
   const nodes: GroupAwareWorkspaceNode[] = [

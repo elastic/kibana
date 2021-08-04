@@ -7,9 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { GraphDependencies } from '../../application';
-import { datasourceSelector, GraphStore, hasFieldsSelector } from '../../state_management';
-import { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import { Provider, useStore } from 'react-redux';
+import { AppMountParameters, CoreStart } from 'kibana/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../src/plugins/navigation/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { datasourceSelector, hasFieldsSelector } from '../../state_management';
+import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
+import { Settings } from '../settings';
 
 export interface MenuOptions {
   showSettings: boolean;
@@ -17,25 +21,31 @@ export interface MenuOptions {
 }
 
 interface GraphTopNavMenuProps {
-  deps: GraphDependencies;
-  store: GraphStore;
   location: angular.ILocationService;
-  savedWorkspace: GraphWorkspaceSavedObject;
   workspace: Workspace | undefined;
   onSetMenus: React.Dispatch<React.SetStateAction<MenuOptions>>;
-  canWipeWorkspace: (
+  confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
     options?: { confirmButtonText: string; title: string }
   ) => void;
+  savedWorkspace: GraphWorkspaceSavedObject;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  graphSavePolicy: GraphSavePolicy;
+  navigation: NavigationStart;
+  capabilities: Record<string, boolean | Record<string, boolean>>;
+  coreStart: CoreStart;
+  canEditDrillDownUrls: boolean;
 }
 
 export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
+  const store = useStore();
+
   // register things for legacy angular UI
-  const allSavingDisabled = props.deps.graphSavePolicy === 'none';
+  const allSavingDisabled = props.graphSavePolicy === 'none';
 
   // ===== Menubar configuration =========
-  const { TopNavMenu } = props.deps.navigation.ui;
+  const { TopNavMenu } = props.navigation.ui;
   const topNavMenu = [];
   topNavMenu.push({
     key: 'new',
@@ -49,7 +59,7 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
       defaultMessage: 'Create a new workspace',
     }),
     run() {
-      props.canWipeWorkspace(function () {
+      props.confirmWipeWorkspace(() => {
         if (props.location.url() === '/workspace/') {
           location.reload();
         } else {
@@ -62,7 +72,7 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
 
   // if saving is disabled using uiCapabilities, we don't want to render the save
   // button so it's consistent with all of the other applications
-  if (props.deps.capabilities.save) {
+  if (props.capabilities.save) {
     // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
 
     topNavMenu.push({
@@ -86,10 +96,10 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
         }
       },
       disableButton() {
-        return allSavingDisabled || !hasFieldsSelector(props.store.getState());
+        return allSavingDisabled || !hasFieldsSelector(store.getState());
       },
       run: () => {
-        props.store.dispatch({
+        store.dispatch({
           type: 'x-pack/graph/SAVE_WORKSPACE',
           payload: props.savedWorkspace,
         });
@@ -119,7 +129,7 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
   topNavMenu.push({
     key: 'settings',
     disableButton() {
-      return datasourceSelector(props.store.getState()).current.type === 'none';
+      return datasourceSelector(store.getState()).current.type === 'none';
     },
     label: i18n.translate('xpack.graph.topNavMenu.settingsLabel', {
       defaultMessage: 'Settings',
@@ -128,31 +138,27 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
       defaultMessage: 'Settings',
     }),
     run: () => {
-      //   const settingsObservable = asAngularSyncedObservable(
-      //     () => ({
-      //       blocklistedNodes: $scope.workspace ? [...$scope.workspace.blocklistedNodes] : undefined,
-      //       unblocklistNode: $scope.workspace ? $scope.workspace.unblocklist : undefined,
-      //       canEditDrillDownUrls,
-      //     }),
-      //     $scope.$digest.bind($scope)
-      //   );
-      //   props.deps.coreStart.overlays.openFlyout(
-      //     toMountPoint(
-      //       <Provider store={props.store}>
-      //         <Settings observable={settingsObservable} />
-      //       </Provider>
-      //     ),
-      //     {
-      //       size: 'm',
-      //       closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', {
-      //         defaultMessage: 'Close',
-      //       }),
-      //       'data-test-subj': 'graphSettingsFlyout',
-      //       ownFocus: true,
-      //       className: 'gphSettingsFlyout',
-      //       maxWidth: 520,
-      //     }
-      //   );
+      props.coreStart.overlays.openFlyout(
+        toMountPoint(
+          <Provider store={store}>
+            <Settings
+              blocklistedNodes={props.workspace?.blocklistedNodes}
+              unblocklistNode={props.workspace?.unblocklist}
+              canEditDrillDownUrls={props.canEditDrillDownUrls}
+            />
+          </Provider>
+        ),
+        {
+          size: 'm',
+          closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', {
+            defaultMessage: 'Close',
+          }),
+          'data-test-subj': 'graphSettingsFlyout',
+          ownFocus: true,
+          className: 'gphSettingsFlyout',
+          maxWidth: 520,
+        }
+      );
     },
   });
 
@@ -160,7 +166,7 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
     <TopNavMenu
       appName="workspacesTopNav"
       config={topNavMenu}
-      setMenuMountPoint={props.deps.setHeaderActionMenu}
+      setMenuMountPoint={props.setHeaderActionMenu}
     />
   );
 };

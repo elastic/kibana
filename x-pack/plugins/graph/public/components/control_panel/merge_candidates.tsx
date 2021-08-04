@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
-import { Detail } from './control_panel1';
+import { Detail } from './control_panel';
 
 interface MergeCandidatesProps {
   workspace: Workspace;

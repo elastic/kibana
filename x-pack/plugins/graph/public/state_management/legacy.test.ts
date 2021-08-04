@@ -99,9 +99,6 @@ describe('legacy sync sagas', () => {
     const workspace = env.mockedDeps.getWorkspace()!;
     expect(workspace.options.vertex_fields![0].name).toEqual('field1');
     expect(workspace.options.vertex_fields![0].hopSize).toEqual(22);
-    expect(env.mockedDeps.setLiveResponseFields).toHaveBeenCalledWith([
-      expect.objectContaining({ hopSize: 22 }),
-    ]);
   });
 
   it('syncs styles with nodes', () => {

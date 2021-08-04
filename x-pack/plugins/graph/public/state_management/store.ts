@@ -6,9 +6,18 @@
  */
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
-import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
+import {
+  combineReducers,
+  createStore,
+  Store,
+  AnyAction,
+  Dispatch,
+  applyMiddleware,
+  compose,
+} from 'redux';
 import { ChromeStart, I18nStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { CoreStart } from 'src/core/public';
+import { ReactElement } from 'react';
 import {
   fieldsReducer,
   FieldsState,
@@ -31,12 +40,10 @@ import {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
   AdvancedSettings,
-  WorkspaceField,
-  UrlTemplate,
 } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
 import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
-import { fillWorkspaceSaga } from './workspace';
+import { fillWorkspaceSaga, workspaceReducer, WorkspaceState } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;
@@ -44,28 +51,27 @@ export interface GraphState {
   advancedSettings: AdvancedSettingsState;
   datasource: DatasourceState;
   metaData: MetaDataState;
+  workspace: WorkspaceState;
 }
 
 export interface GraphStoreDependencies {
   addBasePath: (url: string) => string;
   indexPatternProvider: IndexPatternProvider;
   indexPatterns: IndexPatternSavedObject[];
-  createWorkspace: (index: string, advancedSettings: AdvancedSettings) => void;
-  getWorkspace: () => Workspace | null;
+  createWorkspace: (index: string, advancedSettings: AdvancedSettings) => Workspace;
+  getWorkspace: () => Workspace | undefined;
   getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   overlays: OverlayStart;
   savedObjectsClient: SavedObjectsClientContract;
-  showSaveModal: (el: React.ReactNode, I18nContext: I18nStart['Context']) => void;
+  showSaveModal: (el: ReactElement, I18nContext: I18nStart['Context']) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyAngular: () => void;
-  setLiveResponseFields: (fields: WorkspaceField[]) => void;
-  setUrlTemplates: (templates: UrlTemplate[]) => void;
-  setWorkspaceInitialized: () => void;
   chrome: ChromeStart;
   I18nContext: I18nStart['Context'];
+  basePath: string;
 }
 
 export function createRootReducer(addBasePath: (url: string) => string) {
@@ -75,6 +81,7 @@ export function createRootReducer(addBasePath: (url: string) => string) {
     advancedSettings: advancedSettingsReducer,
     datasource: datasourceReducer,
     metaData: metaDataReducer,
+    workspace: workspaceReducer,
   });
 }
 
@@ -96,7 +103,11 @@ export const createGraphStore = (deps: GraphStoreDependencies) => {
 
   const rootReducer = createRootReducer(deps.addBasePath);
 
-  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+  const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+  const enhancer = composeEnhancers(applyMiddleware(sagaMiddleware));
+
+  const store = createStore(rootReducer, enhancer);
 
   registerSagas(sagaMiddleware, deps);
 

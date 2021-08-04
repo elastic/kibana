@@ -30,6 +30,7 @@ const actionCreator = actionCreatorFactory('x-pack/graph');
 
 export const loadSavedWorkspace = actionCreator<GraphWorkspaceSavedObject>('LOAD_WORKSPACE');
 export const saveWorkspace = actionCreator<void>('SAVE_WORKSPACE');
+export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
 
 /**
  * Saga handling loading of a saved workspace.

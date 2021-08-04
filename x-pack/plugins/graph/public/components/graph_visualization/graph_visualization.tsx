@@ -9,7 +9,7 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
-import { GroupAwareWorkspaceNode, GroupAwareWorkspaceEdge, Workspace } from '../../types';
+import { GroupAwareWorkspaceNode, GroupAwareWorkspaceEdge } from '../../types';
 import { makeNodeId } from '../../services/persistence';
 
 export interface GraphVisualizationProps {

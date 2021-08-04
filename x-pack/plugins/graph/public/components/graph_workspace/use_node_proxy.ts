@@ -65,30 +65,29 @@ export const useNodeProxy = ({ coreStart, toastNotifications }: UseNodeProxyProp
   );
 
   // Helper function for the graphClientWorkspace to perform a query
-  const callSearchNodeProxy = function (
-    indexName: string,
-    query: SearchRequest,
-    responseHandler: GraphSearchCallback
-  ) {
-    const request = {
-      body: JSON.stringify({
-        index: indexName,
-        body: query,
-      }),
-    };
-    setLoading(true);
-    coreStart.http
-      .post('../api/graph/searchProxy', request)
-      .then(function (data) {
-        const response = data.resp;
-        responseHandler(response);
-      })
-      .catch(handleHttpError)
-      .finally(() => {
-        setLoading(false);
-        // $scope.$digest();
-      });
-  };
+  const callSearchNodeProxy = useCallback(
+    (indexName: string, query: SearchRequest, responseHandler: GraphSearchCallback) => {
+      const request = {
+        body: JSON.stringify({
+          index: indexName,
+          body: query,
+        }),
+      };
+      setLoading(true);
+      coreStart.http
+        .post('../api/graph/searchProxy', request)
+        .then(function (data) {
+          const response = data.resp;
+          responseHandler(response);
+        })
+        .catch(handleHttpError)
+        .finally(() => {
+          setLoading(false);
+          // $scope.$digest();
+        });
+    },
+    [coreStart.http, handleHttpError]
+  );
 
   return { loading, callNodeProxy, callSearchNodeProxy };
 };

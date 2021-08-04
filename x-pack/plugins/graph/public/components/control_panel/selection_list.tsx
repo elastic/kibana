@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { Workspace, WorkspaceNode } from '../../types';
-import { Detail } from './control_panel1';
+import { Detail } from './control_panel';
 
 interface SelectionListProps {
   workspace: Workspace;

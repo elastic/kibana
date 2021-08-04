@@ -82,9 +82,6 @@ export function createMockGraphStore({
     notifyAngular: jest.fn(),
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
-    setLiveResponseFields: jest.fn(),
-    setUrlTemplates: jest.fn(),
-    setWorkspaceInitialized: jest.fn(),
     overlays: ({
       openModal: jest.fn(),
     } as unknown) as OverlayStart,

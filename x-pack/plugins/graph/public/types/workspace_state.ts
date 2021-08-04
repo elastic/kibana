@@ -111,6 +111,7 @@ export interface Workspace {
   toggleNodeSelection: (node: WorkspaceNode) => boolean;
   mergeIds: (term1: string, term2: string) => void;
   changeHandler: () => void;
+  unblocklist: (node: WorkspaceNode) => void;
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];

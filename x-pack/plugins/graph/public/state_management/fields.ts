@@ -84,7 +84,7 @@ export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) 
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncFieldsSaga = ({ getWorkspace, setLiveResponseFields }: GraphStoreDependencies) => {
+export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies) => {
   function* syncFields() {
     const workspace = getWorkspace();
     if (!workspace) {
@@ -93,7 +93,6 @@ export const syncFieldsSaga = ({ getWorkspace, setLiveResponseFields }: GraphSto
 
     const currentState = yield select();
     workspace.options.vertex_fields = selectedFieldsSelector(currentState);
-    setLiveResponseFields(liveResponseFieldsSelector(currentState));
   }
   return function* () {
     yield takeEvery(

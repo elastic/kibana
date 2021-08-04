@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elastic/eui';
-import * as Rx from 'rxjs';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { AdvancedSettingsForm } from './advanced_settings_form';
@@ -47,16 +46,6 @@ const tabs = [
   },
 ];
 
-/**
- * These props are wired in the angular scope and are passed in via observable
- * to catch update outside updates
- */
-export interface AngularProps {
-  blocklistedNodes: WorkspaceNode[];
-  unblocklistNode: (node: WorkspaceNode) => void;
-  canEditDrillDownUrls: boolean;
-}
-
 export interface StateProps {
   advancedSettings: AdvancedSettings;
   urlTemplates: UrlTemplate[];
@@ -69,26 +58,30 @@ export interface DispatchProps {
   saveTemplate: (props: { index: number; template: UrlTemplate }) => void;
 }
 
-interface AsObservable<P> {
-  observable: Readonly<Rx.Observable<P>>;
+export interface SettingsProps {
+  blocklistedNodes?: WorkspaceNode[];
+  unblocklistNode?: (node: WorkspaceNode) => void;
+  canEditDrillDownUrls: boolean;
 }
 
-export interface SettingsProps extends AngularProps, StateProps, DispatchProps {}
+export interface SettingsStateProps extends SettingsProps, StateProps, DispatchProps {}
 
 export function SettingsComponent({
-  observable,
-  ...props
-}: AsObservable<AngularProps> & StateProps & DispatchProps) {
-  const [angularProps, setAngularProps] = useState<AngularProps | undefined>(undefined);
+  canEditDrillDownUrls,
+  blocklistedNodes,
+  unblocklistNode,
+  advancedSettings,
+  urlTemplates,
+  allFields,
+}: SettingsStateProps & SettingsProps) {
   const [activeTab, setActiveTab] = useState(0);
 
-  useEffect(() => {
-    observable.subscribe(setAngularProps);
-  }, [observable]);
-
-  if (!angularProps) return null;
+  if (!blocklistedNodes || !unblocklistNode) {
+    return null;
+  }
 
   const ActiveTabContent = tabs[activeTab].component;
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -97,7 +90,7 @@ export function SettingsComponent({
         </EuiTitle>
         <EuiTabs style={{ margin: '0 -16px -25px' }}>
           {tabs
-            .filter(({ id }) => id !== 'drillDowns' || angularProps.canEditDrillDownUrls)
+            .filter(({ id }) => id !== 'drillDowns' || canEditDrillDownUrls)
             .map(({ title }, index) => (
               <EuiTab
                 key={title}
@@ -112,13 +105,22 @@ export function SettingsComponent({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <ActiveTabContent {...angularProps} {...props} />
+        <ActiveTabContent
+          blocklistedNodes={blocklistedNodes}
+          unblocklistNode={unblocklistNode}
+          advancedSettings={advancedSettings}
+          urlTemplates={urlTemplates}
+          allFields={allFields}
+          updateSettings={updateSettings}
+          removeTemplate={removeTemplate}
+          saveTemplate={saveTemplate}
+        />
       </EuiFlyoutBody>
     </>
   );
 }
 
-export const Settings = connect<StateProps, DispatchProps, AsObservable<AngularProps>, GraphState>(
+export const Settings = connect<StateProps, DispatchProps, SettingsProps, GraphState>(
   (state: GraphState) => ({
     advancedSettings: settingsSelector(state),
     urlTemplates: templatesSelector(state),

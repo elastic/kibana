@@ -11,9 +11,7 @@ import {
   GroupAwareWorkspaceEdge,
   GroupAwareWorkspaceNode,
   TermIntersect,
-  UrlTemplate,
   Workspace,
-  WorkspaceField,
   WorkspaceNode,
 } from '../../types';
 import { GraphVisualization } from '../graph_visualization';
@@ -22,11 +20,9 @@ import { colorChoices } from '../../helpers/style_choices';
 
 interface GraphViewProps {
   workspace: Workspace;
-  liveResponseFields?: WorkspaceField[];
-  urlTemplates?: UrlTemplate[];
 }
 
-export const GraphView = ({ workspace, urlTemplates, liveResponseFields }: GraphViewProps) => {
+export const GraphView = ({ workspace }: GraphViewProps) => {
   const [detail, setDetail] = useState<Detail>();
   const [selectedSelectedVertex, setSelectedSelectedVertex] = useState<WorkspaceNode>();
 
@@ -96,11 +92,9 @@ export const GraphView = ({ workspace, urlTemplates, liveResponseFields }: Graph
 
       <ControlPanel
         workspace={workspace}
-        liveResponseFields={liveResponseFields}
         setDetail={setDetail}
         isSelectedSelected={isSelectedSelected}
         isColorDark={isHexColorDark}
-        urlTemplates={urlTemplates}
         detail={detail}
         colors={colorChoices}
         selectSelected={selectSelected}

@@ -7,14 +7,35 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
-import { takeLatest, select, call } from 'redux-saga/effects';
-import { GraphStoreDependencies, GraphState } from '.';
+import { takeLatest, select, call, put } from 'redux-saga/effects';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { createSelector } from 'reselect';
+import { GraphStoreDependencies, GraphState, fillWorkspace } from '.';
 import { datasourceSelector } from './datasource';
 import { selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
-const actionCreator = actionCreatorFactory('x-pack/graph');
 
-export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
+const actionCreator = actionCreatorFactory('x-pack/graph/workspace');
+
+export interface WorkspaceState {
+  isInitialized: boolean;
+}
+
+const initialWorkspaceState: WorkspaceState = {
+  isInitialized: false,
+};
+
+export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
+
+export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
+  .case(initializeWorkspace, () => ({ isInitialized: true }))
+  .build();
+
+export const workspaceSelector = (state: GraphState) => state.workspace;
+export const workspaceInitializedSelector = createSelector(
+  workspaceSelector,
+  (workspace: WorkspaceState) => workspace.isInitialized
+);
 
 /**
  * Saga handling filling in top terms into workspace.
@@ -23,7 +44,6 @@ export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
  */
 export const fillWorkspaceSaga = ({
   getWorkspace,
-  setWorkspaceInitialized,
   notifyAngular,
   http,
   notifications,
@@ -47,7 +67,7 @@ export const fillWorkspaceSaga = ({
         nodes: topTermNodes,
         edges: [],
       });
-      setWorkspaceInitialized();
+      yield put(initializeWorkspace());
       notifyAngular();
       workspace.fillInGraph(fields.length * 10);
     } catch (e) {

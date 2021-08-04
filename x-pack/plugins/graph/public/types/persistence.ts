@@ -54,7 +54,7 @@ export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type' | 
 }
 
 export interface SerializedNode
-  extends Omit<WorkspaceNode, 'icon' | 'data' | 'parent' | 'scaledSize'> {
+  extends Omit<WorkspaceNode, 'icon' | 'data' | 'parent' | 'scaledSize' | 'numChildren'> {
   field: string;
   term: string;
   parent: number | null;

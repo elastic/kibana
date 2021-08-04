@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { connect } from 'react-redux';
 import { TermIntersect, UrlTemplate, Workspace, WorkspaceField, WorkspaceNode } from '../../types';
 import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
@@ -17,6 +18,7 @@ import { LatestSelectionEditor } from './latest_selection_editor';
 import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { UrlTemplateButtons } from './url_template_buttons';
+import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 
 export type Detail = Partial<{
   showDrillDowns: boolean;
@@ -31,8 +33,6 @@ export interface TargetOptions {
 
 interface ControlPanelProps {
   workspace: Workspace;
-  liveResponseFields?: WorkspaceField[];
-  urlTemplates?: UrlTemplate[];
   detail?: Detail;
   colors: string[];
   setDetail: React.Dispatch<React.SetStateAction<Detail | undefined>>;
@@ -41,17 +41,22 @@ interface ControlPanelProps {
   isColorDark: (color: string) => boolean;
 }
 
-export const ControlPanel = ({
+interface ControlPanelStateProps {
+  urlTemplates: UrlTemplate[];
+  liveResponseFields: WorkspaceField[];
+}
+
+const ControlPanelComponent = ({
   workspace,
-  liveResponseFields = [],
-  urlTemplates = [],
+  liveResponseFields,
+  urlTemplates,
   detail,
   colors,
   setDetail,
   isSelectedSelected,
   selectSelected,
   isColorDark,
-}: ControlPanelProps) => {
+}: ControlPanelProps & ControlPanelStateProps) => {
   if (!workspace) {
     return null;
   }
@@ -114,3 +119,8 @@ export const ControlPanel = ({
     </div>
   );
 };
+
+export const ControlPanel = connect((state: GraphState) => ({
+  urlTemplates: templatesSelector(state),
+  liveResponseFields: liveResponseFieldsSelector(state),
+}))(ControlPanelComponent);
