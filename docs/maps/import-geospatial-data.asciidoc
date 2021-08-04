@@ -27,7 +27,7 @@ To upload CSV files in {kib} with the *{file-data-viz}*, you must have privilege
 
 * The `manage_pipeline` cluster privilege.
 * The `read` {kib} privilege for *Machine Learning*.
-* The `machine_learning_admin` or `machine_learning_user` role.
+* The `monitor` or `monitor_text_structure` cluster privileges
 
 
 [discrete]
