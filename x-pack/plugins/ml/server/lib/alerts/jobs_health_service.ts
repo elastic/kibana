@@ -222,8 +222,7 @@ export function jobsHealthServiceProvider(
      */
     async getTestsResults(
       ruleInstanceName: string,
-      { testsConfig, includeJobs, excludeJobs }: AnomalyDetectionJobsHealthRuleParams,
-      previousStartedAt: Date | null
+      { testsConfig, includeJobs, excludeJobs }: AnomalyDetectionJobsHealthRuleParams
     ): Promise<TestsResults> {
       const config = getResultJobsHealthRuleConfig(testsConfig);
 

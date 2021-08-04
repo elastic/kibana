@@ -127,7 +127,7 @@ export function registerJobsMonitoringRuleType({
         fakeRequest,
         logger
       );
-      const executionResult = await getTestsResults(name, params, previousStartedAt);
+      const executionResult = await getTestsResults(name, params);
 
       if (executionResult.length > 0) {
         logger.info(
