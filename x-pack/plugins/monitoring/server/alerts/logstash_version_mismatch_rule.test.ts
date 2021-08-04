@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LogstashVersionMismatchAlert } from './logstash_version_mismatch_alert';
-import { ALERT_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
+import { LogstashVersionMismatchRule } from './logstash_version_mismatch_rule';
+import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -37,10 +37,10 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-describe('LogstashVersionMismatchAlert', () => {
+describe('LogstashVersionMismatchRule', () => {
   it('should have defaults', () => {
-    const alert = new LogstashVersionMismatchAlert();
-    expect(alert.alertOptions.id).toBe(ALERT_LOGSTASH_VERSION_MISMATCH);
+    const alert = new LogstashVersionMismatchRule();
+    expect(alert.alertOptions.id).toBe(RULE_LOGSTASH_VERSION_MISMATCH);
     expect(alert.alertOptions.name).toBe('Logstash version mismatch');
     expect(alert.alertOptions.throttle).toBe('1d');
     expect(alert.alertOptions.actionVariables).toStrictEqual([
@@ -117,7 +117,7 @@ describe('LogstashVersionMismatchAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new LogstashVersionMismatchAlert();
+      const alert = new LogstashVersionMismatchRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -171,7 +171,7 @@ describe('LogstashVersionMismatchAlert', () => {
           },
         ];
       });
-      const alert = new LogstashVersionMismatchAlert();
+      const alert = new LogstashVersionMismatchRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,

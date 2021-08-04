@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { LargeShardSizeAlert } from './large_shard_size_alert';
-import { ALERT_LARGE_SHARD_SIZE } from '../../common/constants';
+import { LargeShardSizeRule } from './large_shard_size_rule';
+import { RULE_LARGE_SHARD_SIZE } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
-type ILargeShardSizeAlertMock = LargeShardSizeAlert & {
+type ILargeShardSizeRuleMock = LargeShardSizeRule & {
   defaultParams: {
     threshold: number;
     duration: string;
@@ -50,8 +50,8 @@ jest.mock('../static_globals', () => ({
 
 describe('LargeShardSizeAlert', () => {
   it('should have defaults', () => {
-    const alert = new LargeShardSizeAlert() as ILargeShardSizeAlertMock;
-    expect(alert.alertOptions.id).toBe(ALERT_LARGE_SHARD_SIZE);
+    const alert = new LargeShardSizeRule() as ILargeShardSizeRuleMock;
+    expect(alert.alertOptions.id).toBe(RULE_LARGE_SHARD_SIZE);
     expect(alert.alertOptions.name).toBe('Shard size');
     expect(alert.alertOptions.throttle).toBe('12h');
     expect(alert.alertOptions.defaultParams).toStrictEqual({
@@ -130,7 +130,7 @@ describe('LargeShardSizeAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new LargeShardSizeAlert() as ILargeShardSizeAlertMock;
+      const alert = new LargeShardSizeRule() as ILargeShardSizeRuleMock;
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -158,7 +158,7 @@ describe('LargeShardSizeAlert', () => {
           },
         ];
       });
-      const alert = new LargeShardSizeAlert() as ILargeShardSizeAlertMock;
+      const alert = new LargeShardSizeRule() as ILargeShardSizeRuleMock;
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,

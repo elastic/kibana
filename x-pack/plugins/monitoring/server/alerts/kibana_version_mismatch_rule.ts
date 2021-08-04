@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -19,9 +19,9 @@ import {
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
 import {
-  ALERT_LOGSTASH_VERSION_MISMATCH,
-  LEGACY_ALERT_DETAILS,
-  INDEX_PATTERN_LOGSTASH,
+  RULE_KIBANA_VERSION_MISMATCH,
+  LEGACY_RULE_DETAILS,
+  INDEX_PATTERN_KIBANA,
 } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
@@ -29,25 +29,38 @@ import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
+import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
-export class LogstashVersionMismatchAlert extends BaseAlert {
+export class KibanaVersionMismatchRule extends BaseRule {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
-      id: ALERT_LOGSTASH_VERSION_MISMATCH,
-      name: LEGACY_ALERT_DETAILS[ALERT_LOGSTASH_VERSION_MISMATCH].label,
+      id: RULE_KIBANA_VERSION_MISMATCH,
+      name: LEGACY_RULE_DETAILS[RULE_KIBANA_VERSION_MISMATCH].label,
       interval: '1d',
       actionVariables: [
         {
           name: 'versionList',
           description: i18n.translate(
-            'xpack.monitoring.alerts.logstashVersionMismatch.actionVariables.clusterHealth',
+            'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterHealth',
             {
-              defaultMessage: 'The versions of Logstash running in this cluster.',
+              defaultMessage: 'The versions of Kibana running in this cluster.',
             }
           ),
         },
-        ...Object.values(AlertingDefaults.ALERT_TYPE.context),
+        {
+          name: 'clusterName',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterName',
+            {
+              defaultMessage: 'The cluster to which the instances belong.',
+            }
+          ),
+        },
+        AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
+        AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
+        AlertingDefaults.ALERT_TYPE.context.state,
+        AlertingDefaults.ALERT_TYPE.context.action,
+        AlertingDefaults.ALERT_TYPE.context.actionPlain,
       ],
     });
   }
@@ -58,39 +71,36 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let logstashIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_LOGSTASH);
+    let kibanaIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_KIBANA);
     if (availableCcs) {
-      logstashIndexPattern = getCcsIndexPattern(logstashIndexPattern, availableCcs);
+      kibanaIndexPattern = getCcsIndexPattern(kibanaIndexPattern, availableCcs);
     }
-    const logstashVersions = await fetchLogstashVersions(
+    const kibanaVersions = await fetchKibanaVersions(
       esClient,
       clusters,
-      logstashIndexPattern,
+      kibanaIndexPattern,
       Globals.app.config.ui.max_bucket_size
     );
 
-    return logstashVersions.map((logstashVersion) => {
+    return kibanaVersions.map((kibanaVersion) => {
       return {
-        shouldFire: logstashVersion.versions.length > 1,
+        shouldFire: kibanaVersion.versions.length > 1,
         severity: AlertSeverity.Warning,
-        meta: logstashVersion,
-        clusterUuid: logstashVersion.clusterUuid,
-        ccs: logstashVersion.ccs,
+        meta: kibanaVersion,
+        clusterUuid: kibanaVersion.clusterUuid,
+        ccs: kibanaVersion.ccs,
       };
     });
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const { versions } = item.meta as AlertVersions;
-    const text = i18n.translate(
-      'xpack.monitoring.alerts.logstashVersionMismatch.ui.firingMessage',
-      {
-        defaultMessage: `Multiple versions of Logstash ({versions}) running in this cluster.`,
-        values: {
-          versions: versions.join(', '),
-        },
-      }
-    );
+    const text = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.ui.firingMessage', {
+      defaultMessage: `Multiple versions of Kibana ({versions}) running in this cluster.`,
+      values: {
+        versions: versions.join(', '),
+      },
+    });
 
     return {
       text,
@@ -112,45 +122,46 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
     const state = alertStates[0];
     const { versions } = state.meta as AlertVersions;
     const shortActionText = i18n.translate(
-      'xpack.monitoring.alerts.logstashVersionMismatch.shortAction',
+      'xpack.monitoring.alerts.kibanaVersionMismatch.shortAction',
       {
-        defaultMessage: 'Verify you have the same version across all nodes.',
+        defaultMessage: 'Verify you have the same version across all instances.',
       }
     );
     const fullActionText = i18n.translate(
-      'xpack.monitoring.alerts.logstashVersionMismatch.fullAction',
+      'xpack.monitoring.alerts.kibanaVersionMismatch.fullAction',
       {
-        defaultMessage: 'View nodes',
+        defaultMessage: 'View instances',
       }
     );
     const globalStateLink = this.createGlobalStateLink(
-      'logstash/nodes',
+      'kibana/instances',
       cluster.clusterUuid,
       state.ccs
     );
     const action = `[${fullActionText}](${globalStateLink})`;
+    const internalFullMessage = i18n.translate(
+      'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalFullMessage',
+      {
+        defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. Kibana is running {versions}. {action}`,
+        values: {
+          clusterName: cluster.clusterName,
+          versions: versions.join(', '),
+          action,
+        },
+      }
+    );
     instance.scheduleActions('default', {
       internalShortMessage: i18n.translate(
-        'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalShortMessage',
+        'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalShortMessage',
         {
-          defaultMessage: `Logstash version mismatch alert is firing for {clusterName}. {shortActionText}`,
+          defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. {shortActionText}`,
           values: {
             clusterName: cluster.clusterName,
             shortActionText,
           },
         }
       ),
-      internalFullMessage: i18n.translate(
-        'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalFullMessage',
-        {
-          defaultMessage: `Logstash version mismatch alert is firing for {clusterName}. Logstash is running {versions}. {action}`,
-          values: {
-            clusterName: cluster.clusterName,
-            versions: versions.join(', '),
-            action,
-          },
-        }
-      ),
+      internalFullMessage,
       state: AlertingDefaults.ALERT_STATE.firing,
       clusterName: cluster.clusterName,
       versionList: versions,

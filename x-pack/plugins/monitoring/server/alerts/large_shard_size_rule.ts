@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -24,8 +24,8 @@ import {
 import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_LARGE_SHARD_SIZE,
-  ALERT_DETAILS,
+  RULE_LARGE_SHARD_SIZE,
+  RULE_DETAILS,
 } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -35,11 +35,11 @@ import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
-export class LargeShardSizeAlert extends BaseAlert {
+export class LargeShardSizeRule extends BaseRule {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
-      id: ALERT_LARGE_SHARD_SIZE,
-      name: ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].label,
+      id: RULE_LARGE_SHARD_SIZE,
+      name: RULE_DETAILS[RULE_LARGE_SHARD_SIZE].label,
       throttle: '12h',
       defaultParams: { indexPattern: '-.*', threshold: 55 },
       actionVariables: [

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -20,11 +20,7 @@ import {
   AlertNodeState,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
-import {
-  INDEX_PATTERN,
-  ALERT_MISSING_MONITORING_DATA,
-  ALERT_DETAILS,
-} from '../../common/constants';
+import { INDEX_PATTERN, RULE_MISSING_MONITORING_DATA, RULE_DETAILS } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
@@ -37,11 +33,11 @@ import { Globals } from '../static_globals';
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 const LIMIT_BUFFER = 3 * 60 * 1000;
 
-export class MissingMonitoringDataAlert extends BaseAlert {
+export class MissingMonitoringDataRule extends BaseRule {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
-      id: ALERT_MISSING_MONITORING_DATA,
-      name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
+      id: RULE_MISSING_MONITORING_DATA,
+      name: RULE_DETAILS[RULE_MISSING_MONITORING_DATA].label,
       accessorKey: 'gapDuration',
       fetchClustersRange: LIMIT_BUFFER,
       defaultParams: {

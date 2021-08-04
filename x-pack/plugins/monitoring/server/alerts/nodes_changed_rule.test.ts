@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NodesChangedAlert } from './nodes_changed_alert';
-import { ALERT_NODES_CHANGED } from '../../common/constants';
+import { NodesChangedRule } from './nodes_changed_rule';
+import { RULE_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -44,8 +44,8 @@ jest.mock('../static_globals', () => ({
 
 describe('NodesChangedAlert', () => {
   it('should have defaults', () => {
-    const alert = new NodesChangedAlert();
-    expect(alert.alertOptions.id).toBe(ALERT_NODES_CHANGED);
+    const alert = new NodesChangedRule();
+    expect(alert.alertOptions.id).toBe(RULE_NODES_CHANGED);
     expect(alert.alertOptions.name).toBe('Nodes changed');
     expect(alert.alertOptions.throttle).toBe('1d');
     expect(alert.alertOptions.actionVariables).toStrictEqual([
@@ -168,7 +168,7 @@ describe('NodesChangedAlert', () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
         return nodesChanged;
       });
-      const alert = new NodesChangedAlert();
+      const alert = new NodesChangedRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -231,7 +231,7 @@ describe('NodesChangedAlert', () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
         return nodesAddedChangedRemoved;
       });
-      const alert = new NodesChangedAlert();
+      const alert = new NodesChangedRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -325,7 +325,7 @@ describe('NodesChangedAlert', () => {
           },
         ];
       });
-      const alert = new NodesChangedAlert();
+      const alert = new NodesChangedRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,

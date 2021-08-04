@@ -65,7 +65,7 @@ const defaultAlertOptions = (): AlertOptions => {
     actionVariables: [],
   };
 };
-export class BaseAlert {
+export class BaseRule {
   protected scopedLogger: Logger;
 
   constructor(

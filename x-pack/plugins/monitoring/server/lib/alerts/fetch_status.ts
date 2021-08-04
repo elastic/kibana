@@ -9,7 +9,7 @@ import { AlertInstanceState } from '../../../common/types/alerts';
 import { RulesClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import { CommonAlertState, CommonAlertFilter, RulesByType } from '../../../common/types/alerts';
-import { ALERTS } from '../../../common/constants';
+import { RULES } from '../../../common/constants';
 
 export async function fetchStatus(
   rulesClient: RulesClient,
@@ -18,7 +18,7 @@ export async function fetchStatus(
   filters: CommonAlertFilter[] = []
 ): Promise<RulesByType> {
   const rulesByType = await Promise.all(
-    (alertTypes || ALERTS).map(async (type) => AlertsFactory.getByType(type, rulesClient))
+    (alertTypes || RULES).map(async (type) => AlertsFactory.getByType(type, rulesClient))
   );
   if (!rulesByType.length) return {};
 
@@ -26,7 +26,7 @@ export async function fetchStatus(
   const rulesWithStates = await Promise.all(
     rulesFlattened.map(async (rule) => {
       // we should have a different class to distinguish between "alerts" where the rule exists
-      // and a BaseAlert created without an existing rule for better typing so we don't need to check here
+      // and a BaseRule created without an existing rule for better typing so we don't need to check here
       if (!rule.rawAlert) {
         throw new Error('alert missing rawAlert');
       }

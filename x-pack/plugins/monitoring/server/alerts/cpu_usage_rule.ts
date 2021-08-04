@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -23,11 +23,7 @@ import {
   CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_CPU_USAGE,
-  ALERT_DETAILS,
-} from '../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH, RULE_CPU_USAGE, RULE_DETAILS } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
@@ -39,11 +35,11 @@ import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
-export class CpuUsageAlert extends BaseAlert {
+export class CpuUsageRule extends BaseRule {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
-      id: ALERT_CPU_USAGE,
-      name: ALERT_DETAILS[ALERT_CPU_USAGE].label,
+      id: RULE_CPU_USAGE,
+      name: RULE_DETAILS[RULE_CPU_USAGE].label,
       accessorKey: 'cpuUsage',
       defaultParams: {
         threshold: 85,

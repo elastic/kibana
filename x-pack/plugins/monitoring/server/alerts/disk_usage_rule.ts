@@ -8,52 +8,47 @@
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertMemoryUsageState,
+  AlertDiskUsageState,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
   CommonAlertParams,
-  AlertMemoryUsageNodeStats,
+  AlertDiskUsageNodeStats,
   CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_MEMORY_USAGE,
-  ALERT_DETAILS,
-} from '../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH, RULE_DISK_USAGE, RULE_DETAILS } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
-import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
+import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
-export class MemoryUsageAlert extends BaseAlert {
+export class DiskUsageRule extends BaseRule {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
-      id: ALERT_MEMORY_USAGE,
-      name: ALERT_DETAILS[ALERT_MEMORY_USAGE].label,
-      accessorKey: 'memoryUsage',
+      id: RULE_DISK_USAGE,
+      name: RULE_DETAILS[RULE_DISK_USAGE].label,
+      accessorKey: 'diskUsage',
       defaultParams: {
-        threshold: 85,
+        threshold: 80,
         duration: '5m',
       },
       actionVariables: [
         {
           name: 'node',
-          description: i18n.translate('xpack.monitoring.alerts.memoryUsage.actionVariables.node', {
-            defaultMessage: 'The node reporting high memory usage.',
+          description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.node', {
+            defaultMessage: 'The node reporting high disk usage.',
           }),
         },
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
@@ -72,23 +67,18 @@ export class MemoryUsageAlert extends BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const { duration, threshold } = params;
-    const parsedDuration = parseDuration(duration as string);
-    const endMs = +new Date();
-    const startMs = endMs - parsedDuration;
-
-    const stats = await fetchMemoryUsageNodeStats(
+    const stats = await fetchDiskUsageNodeStats(
       esClient,
       clusters,
       esIndexPattern,
-      startMs,
-      endMs,
+      duration as string,
       Globals.app.config.ui.max_bucket_size
     );
 
     return stats.map((stat) => {
-      const { clusterUuid, memoryUsage, ccs } = stat;
+      const { clusterUuid, diskUsage, ccs } = stat;
       return {
-        shouldFire: memoryUsage > threshold!,
+        shouldFire: diskUsage > threshold!,
         severity: AlertSeverity.Danger,
         meta: stat,
         clusterUuid,
@@ -108,43 +98,43 @@ export class MemoryUsageAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertMemoryUsageNodeStats;
+    const stat = item.meta as AlertDiskUsageNodeStats;
     return {
-      text: i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.firingMessage', {
-        defaultMessage: `Node #start_link{nodeName}#end_link is reporting JVM memory usage of {memoryUsage}% at #absolute`,
+      text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.firingMessage', {
+        defaultMessage: `Node #start_link{nodeName}#end_link is reporting disk usage of {diskUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          memoryUsage: numeral(stat.memoryUsage).format(ROUNDED_FLOAT),
+          diskUsage: numeral(stat.diskUsage).format(ROUNDED_FLOAT),
         },
       }),
       nextSteps: [
         createLink(
-          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.tuneThreadPools', {
-            defaultMessage: '#start_linkTune thread pools#end_link',
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk', {
+            defaultMessage: '#start_linkTune for disk usage#end_link',
           }),
-          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html`
         ),
         createLink(
-          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.managingHeap', {
-            defaultMessage: '#start_linkManaging ES Heap#end_link',
-          }),
-          `{elasticWebsiteUrl}blog/a-heap-of-trouble`
-        ),
-        createLink(
-          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.identifyIndicesShards', {
-            defaultMessage: '#start_linkIdentify large indices/shards#end_link',
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.identifyIndices', {
+            defaultMessage: '#start_linkIdentify large indices#end_link',
           }),
           'elasticsearch/indices',
           AlertMessageTokenType.Link
         ),
         createLink(
-          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.addMoreNodes', {
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.ilmPolicies', {
+            defaultMessage: '#start_linkImplement ILM policies#end_link',
+          }),
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html`
+        ),
+        createLink(
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.addMoreNodes', {
             defaultMessage: '#start_linkAdd more data nodes#end_link',
           }),
           `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html`
         ),
         createLink(
-          i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.nextSteps.resizeYourDeployment', {
+          i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.resizeYourDeployment', {
             defaultMessage: '#start_linkResize your deployment (ECE)#end_link',
           }),
           `{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html`
@@ -177,19 +167,18 @@ export class MemoryUsageAlert extends BaseAlert {
     if (alertStates.length === 0) {
       return;
     }
-    const firingNode = alertStates[0] as AlertMemoryUsageState;
+    const firingNode = alertStates[0] as AlertDiskUsageState;
     if (!firingNode || !firingNode.ui.isFiring) {
       return;
     }
 
-    const shortActionText = i18n.translate('xpack.monitoring.alerts.memoryUsage.shortAction', {
-      defaultMessage: 'Verify memory usage level of node.',
+    const shortActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.shortAction', {
+      defaultMessage: 'Verify disk usage level of node.',
     });
-    const fullActionText = i18n.translate('xpack.monitoring.alerts.memoryUsage.fullAction', {
+    const fullActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.fullAction', {
       defaultMessage: 'View node',
     });
-
-    const ccs = alertStates.find((state) => state.ccs)?.ccs;
+    const ccs = firingNode.ccs;
     const globalStateLink = this.createGlobalStateLink(
       `elasticsearch/nodes/${firingNode.nodeId}`,
       cluster.clusterUuid,
@@ -197,9 +186,9 @@ export class MemoryUsageAlert extends BaseAlert {
     );
     const action = `[${fullActionText}](${globalStateLink})`;
     const internalShortMessage = i18n.translate(
-      'xpack.monitoring.alerts.memoryUsage.firing.internalShortMessage',
+      'xpack.monitoring.alerts.diskUsage.firing.internalShortMessage',
       {
-        defaultMessage: `Memory usage alert is firing for node {nodeName} in cluster: {clusterName}. {shortActionText}`,
+        defaultMessage: `Disk usage alert is firing for node {nodeName} in cluster: {clusterName}. {shortActionText}`,
         values: {
           clusterName: cluster.clusterName,
           nodeName: firingNode.nodeName,
@@ -208,9 +197,9 @@ export class MemoryUsageAlert extends BaseAlert {
       }
     );
     const internalFullMessage = i18n.translate(
-      'xpack.monitoring.alerts.memoryUsage.firing.internalFullMessage',
+      'xpack.monitoring.alerts.diskUsage.firing.internalFullMessage',
       {
-        defaultMessage: `Memory usage alert is firing for node {nodeName} in cluster: {clusterName}. {action}`,
+        defaultMessage: `Disk usage alert is firing for node {nodeName} in cluster: {clusterName}. {action}`,
         values: {
           clusterName: cluster.clusterName,
           nodeName: firingNode.nodeName,
@@ -224,11 +213,11 @@ export class MemoryUsageAlert extends BaseAlert {
       internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
       state: AlertingDefaults.ALERT_STATE.firing,
       /* continue to send "nodes" and "count" values for users before https://github.com/elastic/kibana/pull/102544 
-        see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
-        */
-      nodes: `${firingNode.nodeName}:${firingNode.memoryUsage.toFixed(2)}`,
+          see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
+          */
+      nodes: `${firingNode.nodeName}:${firingNode.diskUsage}`,
       count: 1,
-      node: `${firingNode.nodeName}:${firingNode.memoryUsage.toFixed(2)}`,
+      node: `${firingNode.nodeName}:${firingNode.diskUsage}`,
       clusterName: cluster.clusterName,
       action,
       actionPlain: shortActionText,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LicenseExpirationAlert } from './license_expiration_alert';
-import { ALERT_LICENSE_EXPIRATION } from '../../common/constants';
+import { LicenseExpirationRule } from './license_expiration_rule';
+import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
@@ -44,8 +44,8 @@ jest.mock('../static_globals', () => ({
 
 describe('LicenseExpirationAlert', () => {
   it('should have defaults', () => {
-    const alert = new LicenseExpirationAlert();
-    expect(alert.alertOptions.id).toBe(ALERT_LICENSE_EXPIRATION);
+    const alert = new LicenseExpirationRule();
+    expect(alert.alertOptions.id).toBe(RULE_LICENSE_EXPIRATION);
     expect(alert.alertOptions.name).toBe('License expiration');
     expect(alert.alertOptions.throttle).toBe('1d');
     expect(alert.alertOptions.actionVariables).toStrictEqual([
@@ -117,7 +117,7 @@ describe('LicenseExpirationAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new LicenseExpirationAlert();
+      const alert = new LicenseExpirationRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -196,7 +196,7 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationAlert();
+      const alert = new LicenseExpirationRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -218,7 +218,7 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationAlert();
+      const alert = new LicenseExpirationRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
@@ -239,7 +239,7 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationAlert();
+      const alert = new LicenseExpirationRule();
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
