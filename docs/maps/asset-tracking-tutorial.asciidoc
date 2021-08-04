@@ -202,11 +202,11 @@ Add a layer to show the bus routes for the last 15 minutes.
 . Click *Add layer*.
 . Click *Tracks*.
 . Select the *tri_met_tracks** index pattern.
-. To define the tracks, set:
+. Define the tracks:
 .. Set *Entity* to *vehicle_id*.
-.. Set *Sort* to *time*
+.. Set *Sort* to *time*.
 . Click *Add layer*.
-. In *Layer settings*, set:
+. In Layer settings:
 .. Set *Name* to *Buses*.
 .. Set *Opacity* to 80%.
 . Scroll to *Layer Style*, and set *Border color* to pink.
@@ -225,19 +225,19 @@ Add a layer that uses attributes in the data to set the style and orientation of
 
 . Click *Add layer*, and then select *Top Hits per entity*.
 . Select the *tri_met_tracks** index pattern.
-. To to display the most recent location per bus, set:
-.. Set *Entity* to *vehicle_id*
-.. Set *Documents per entity* to 1
-.. Set *Sort field* to *time*
-.. Set *Sort order* to *descending*
+. To display the most recent location per bus:
+.. Set *Entity* to *vehicle_id*.
+.. Set *Documents per entity* to 1.
+.. Set *Sort field* to *time*.
+.. Set *Sort order* to *descending*.
 . Click *Add layer*.
-. Scroll to *Layer Style* and set:
+. Scroll to *Layer Style*.
 .. Set *Symbol type* to *icon*.
 .. Set *Icon* to *arrow-es*.
 .. Set the *Fill color*:
 ... Select *By value* styling, and set the field to *in_congestion*.
 ... Use a *Custom color palette*.
-... Set *Other* color to black.
+... Set the *Other* color to black.
 ... Add a green class for *false*, meaning the bus is not in traffic.
 ... Add a red class for *true*, meaning the bus is in congestion.
 .. Set *Border width* to 0.
