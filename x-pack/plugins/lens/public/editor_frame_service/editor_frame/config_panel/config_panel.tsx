@@ -27,11 +27,8 @@ import {
 } from '../../../state_management';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
-  const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
-  const { visualizationState } = props;
-
-  return activeVisualization && visualizationState ? (
-    <LayerPanels {...props} activeVisualization={activeVisualization} />
+  return props.activeVisualization && props.visualizationState ? (
+    <LayerPanels {...props} activeVisualization={props.activeVisualization} />
   ) : null;
 });
 

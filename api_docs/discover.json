@@ -20,10 +20,7 @@
             "text": "SavedObjectLoader"
           }
         ],
-        "source": {
-          "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
-          "lineNumber": 18
-        },
+        "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
         "deprecated": false,
         "children": [
           {
@@ -36,10 +33,7 @@
             "signature": [
               "Services"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -59,10 +53,7 @@
           "src/plugins/discover/public/application/apps/main/utils/get_sharing_data",
           ">"
         ],
-        "source": {
-          "path": "src/plugins/discover/public/shared/index.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/discover/public/shared/index.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -94,10 +85,7 @@
             "text": "SerializableState"
           }
         ],
-        "source": {
-          "path": "src/plugins/discover/public/locator.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
         "children": [
           {
@@ -112,10 +100,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -130,10 +115,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -155,10 +137,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -189,10 +168,7 @@
               },
               ") | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -205,30 +181,26 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 41
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverAppLocatorParams.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [
               "\nOptionally set a query."
             ],
             "signature": [
-              "any"
+              "Query",
+              " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -243,10 +215,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 52
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -261,10 +230,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 57
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -279,10 +245,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 62
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -297,10 +260,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 67
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -323,10 +283,7 @@
               },
               ") | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 72
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           },
           {
@@ -341,10 +298,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/locator.ts",
-              "lineNumber": 77
-            },
+            "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false
           }
         ],
@@ -357,10 +311,7 @@
         "tags": [],
         "label": "DiscoverUrlGeneratorState",
         "description": [],
-        "source": {
-          "path": "src/plugins/discover/public/url_generator.ts",
-          "lineNumber": 16
-        },
+        "path": "src/plugins/discover/public/url_generator.ts",
         "deprecated": false,
         "children": [
           {
@@ -375,10 +326,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -393,10 +341,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -418,10 +363,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -443,10 +385,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -459,30 +398,26 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverUrlGeneratorState.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              "any"
+              "Query",
+              " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -497,10 +432,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 52
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -515,10 +447,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 57
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -533,10 +462,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 62
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -551,10 +477,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 67
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -569,10 +492,7 @@
             "signature": [
               "string[][] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 72
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           },
           {
@@ -587,10 +507,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 77
-            },
+            "path": "src/plugins/discover/public/url_generator.ts",
             "deprecated": false
           }
         ],
@@ -631,10 +548,7 @@
           "SearchOutput",
           ">"
         ],
-        "source": {
-          "path": "src/plugins/discover/public/application/embeddable/types.ts",
-          "lineNumber": 34
-        },
+        "path": "src/plugins/discover/public/application/embeddable/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -654,10 +568,7 @@
                 "text": "SavedSearch"
               }
             ],
-            "source": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/discover/public/application/embeddable/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -672,10 +583,7 @@
         "tags": [],
         "label": "SavedSearch",
         "description": [],
-        "source": {
-          "path": "src/plugins/discover/public/saved_searches/types.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/discover/public/saved_searches/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -685,10 +593,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -698,10 +603,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -720,10 +622,7 @@
                 "text": "SearchSource"
               }
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -736,10 +635,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -752,10 +648,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -769,10 +662,7 @@
               "SortOrder",
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -785,10 +675,7 @@
             "signature": [
               "DiscoverGridSettings"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -801,13 +688,10 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "discover",
@@ -827,16 +711,12 @@
               },
               ") => Promise<string>"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "discover",
-                "id": "def-public.saveOptions",
+                "id": "def-public.SavedSearch.save.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "saveOptions",
@@ -850,13 +730,12 @@
                     "text": "SavedObjectSaveOpts"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/discover/public/saved_searches/types.ts",
-                  "lineNumber": 23
-                },
-                "deprecated": false
+                "path": "src/plugins/discover/public/saved_searches/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "discover",
@@ -868,10 +747,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -884,10 +760,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           },
           {
@@ -900,10 +773,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false
           }
         ],
@@ -916,10 +786,7 @@
         "tags": [],
         "label": "SavedSearchLoader",
         "description": [],
-        "source": {
-          "path": "src/plugins/discover/public/saved_searches/types.ts",
-          "lineNumber": 28
-        },
+        "path": "src/plugins/discover/public/saved_searches/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -940,27 +807,25 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "discover",
-                "id": "def-public.id",
+                "id": "def-public.SavedSearchLoader.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/discover/public/saved_searches/types.ts",
-                  "lineNumber": 29
-                },
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/discover/public/saved_searches/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "discover",
@@ -972,27 +837,25 @@
             "signature": [
               "(id: string) => string"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "discover",
-                "id": "def-public.id",
+                "id": "def-public.SavedSearchLoader.urlFor.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "source": {
-                  "path": "src/plugins/discover/public/saved_searches/types.ts",
-                  "lineNumber": 30
-                },
-                "deprecated": false
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/discover/public/saved_searches/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1021,10 +884,7 @@
             "text": "EmbeddableInput"
           }
         ],
-        "source": {
-          "path": "src/plugins/discover/public/application/embeddable/types.ts",
-          "lineNumber": 19
-        },
+        "path": "src/plugins/discover/public/application/embeddable/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1037,26 +897,21 @@
             "signature": [
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/discover/public/application/embeddable/types.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "discover",
             "id": "def-public.SearchInput.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "any"
+              "Query",
+              " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/discover/public/application/embeddable/types.ts",
             "deprecated": false
           },
           {
@@ -1067,12 +922,10 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/discover/public/application/embeddable/types.ts",
             "deprecated": false
           },
           {
@@ -1085,10 +938,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/discover/public/application/embeddable/types.ts",
             "deprecated": false
           },
           {
@@ -1101,10 +951,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/discover/public/application/embeddable/types.ts",
             "deprecated": false
           },
           {
@@ -1118,10 +965,7 @@
               "SortOrder",
               "[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/discover/public/application/embeddable/types.ts",
             "deprecated": false
           }
         ],
@@ -1140,10 +984,7 @@
         "signature": [
           "\"DISCOVER_APP_URL_GENERATOR\""
         ],
-        "source": {
-          "path": "src/plugins/discover/public/url_generator.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/discover/public/url_generator.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1172,10 +1013,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/plugins/discover/public/locator.ts",
-          "lineNumber": 80
-        },
+        "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1189,10 +1027,7 @@
         "signature": [
           "\"search\""
         ],
-        "source": {
-          "path": "src/plugins/discover/public/application/embeddable/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/discover/public/application/embeddable/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1205,10 +1040,7 @@
       "tags": [],
       "label": "DiscoverSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 77
-      },
+      "path": "src/plugins/discover/public/plugin.tsx",
       "deprecated": false,
       "children": [
         {
@@ -1225,10 +1057,7 @@
             "DocViewInputFn",
             "): void; }"
           ],
-          "source": {
-            "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 78
-          },
+          "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -1250,10 +1079,7 @@
             },
             " | undefined"
           ],
-          "source": {
-            "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 117
-          },
+          "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false
         }
       ],
@@ -1267,10 +1093,7 @@
       "tags": [],
       "label": "DiscoverStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 120
-      },
+      "path": "src/plugins/discover/public/plugin.tsx",
       "deprecated": false,
       "children": [
         {
@@ -1289,10 +1112,7 @@
               "text": "SavedObjectLoader"
             }
           ],
-          "source": {
-            "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 121
-          },
+          "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -1314,32 +1134,20 @@
             },
             "<\"DISCOVER_APP_URL_GENERATOR\"> | undefined"
           ],
-          "source": {
-            "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 126
-          },
+          "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": true,
           "references": [
             {
               "plugin": "observability",
-              "link": {
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx",
-                "lineNumber": 29
-              }
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
             },
             {
               "plugin": "osquery",
-              "link": {
-                "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_table.tsx",
-                "lineNumber": 224
-              }
+              "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_table.tsx"
             },
             {
               "plugin": "osquery",
-              "link": {
-                "path": "x-pack/plugins/osquery/public/common/hooks/use_discover_link.tsx",
-                "lineNumber": 21
-              }
+              "path": "x-pack/plugins/osquery/public/common/hooks/use_discover_link.tsx"
             }
           ]
         },
@@ -1362,10 +1170,7 @@
             },
             " | undefined"
           ],
-          "source": {
-            "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 158
-          },
+          "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false
         }
       ],
@@ -1397,10 +1202,7 @@
         "signature": [
           "\"context:defaultSize\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1414,10 +1216,7 @@
         "signature": [
           "\"context:step\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 16
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1431,10 +1230,7 @@
         "signature": [
           "\"context:tieBreakerFields\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1448,10 +1244,7 @@
         "signature": [
           "\"defaultColumns\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1465,10 +1258,7 @@
         "signature": [
           "\"doc_table:hideTimeColumn\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1482,10 +1272,7 @@
         "signature": [
           "\"doc_table:legacy\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 18
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1499,10 +1286,7 @@
         "signature": [
           "\"fields:popularLimit\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1516,10 +1300,7 @@
         "signature": [
           "\"discover:maxDocFieldsDisplayed\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 21
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1533,10 +1314,7 @@
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 19
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1550,10 +1328,7 @@
         "signature": [
           "\"discover:sampleSize\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1567,10 +1342,7 @@
         "signature": [
           "\"discover:searchFieldsFromSource\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 20
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1584,10 +1356,7 @@
         "signature": [
           "\"discover:searchOnPageLoad\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1601,10 +1370,7 @@
         "signature": [
           "\"discover:showMultiFields\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 22
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1618,10 +1384,7 @@
         "signature": [
           "\"discover:sort:defaultOrder\""
         ],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
