@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ToastsApi } from 'kibana/public';
-import { SpacesApi } from 'src/plugins/spaces_oss/public';
-import { Alert, AlertType, ActionType } from '../../../../types';
+import { EuiSpacer } from '@elastic/eui';
+import { Alert, AlertType, ActionType, ResolvedAlert } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
 import {
@@ -46,21 +46,35 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   } = useKibana().services;
 
   const [alert, setAlert] = useState<Alert | null>(null);
+  const [resolvedAlertResult, setResolvedAlertResult] = useState<ResolvedAlert | null>(null);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
   const [refreshToken, requestRefresh] = React.useState<number>();
+
   useEffect(() => {
-    getAlertData(
-      ruleId,
-      loadAlert,
-      resolveAlert,
-      loadAlertTypes,
-      loadActionTypes,
-      setAlert,
-      setAlertType,
-      setActionTypes,
-      toasts,
-      spaces
+    async function resolveAlertId() {
+      const resolvedResult = await resolveAlert(ruleId);
+      setResolvedAlertResult(resolvedResult);
+      if (resolvedResult.outcome === 'aliasMatch' && spaces) {
+        // This index pattern has been resolved from a legacy URL, we should redirect the user to the new URL and display a toast.]
+        const path = `insightsAndAlerting/triggersActions/rule/${resolvedResult.savedObject.id}`;
+        const objectNoun = 'rule'; // TODO: i18n
+        spaces.ui.redirectLegacyUrl(path, objectNoun);
+        return;
+      }
+    }
+    resolveAlertId().then(() =>
+      getAlertData(
+        ruleId,
+        loadAlert,
+        resolveAlert,
+        loadAlertTypes,
+        loadActionTypes,
+        setAlert,
+        setAlertType,
+        setActionTypes,
+        toasts
+      )
     );
   }, [
     ruleId,
@@ -74,13 +88,41 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
     refreshToken,
   ]);
 
+  const getLegacyUrlConflictCallout = () => {
+    if (
+      resolvedAlertResult?.outcome === 'conflict' &&
+      resolvedAlertResult?.aliasTargetId &&
+      spaces
+    ) {
+      // We have resolved to one index pattern, but there is another one with a legacy URL associated with this page. We should display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other index pattern.
+      const otherObjectId = resolvedAlertResult.aliasTargetId;
+      const otherObjectPath = `insightsAndAlerting/triggersActions/alerts/rule/${resolvedAlertResult.savedObject.id}`;
+      return (
+        <>
+          <EuiSpacer />
+          {spaces.ui.components.getLegacyUrlConflict({
+            objectNoun: 'rule', // TODO: i18n
+            currentObjectId: ruleId,
+            otherObjectId,
+            otherObjectPath,
+          })}
+        </>
+      );
+    }
+    return null;
+  };
+
   return alert && alertType && actionTypes ? (
-    <AlertDetails
-      alert={alert}
-      alertType={alertType}
-      actionTypes={actionTypes}
-      requestRefresh={async () => requestRefresh(Date.now())}
-    />
+    <>
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        requestRefresh={async () => requestRefresh(Date.now())}
+        getLegacyUrlConflictCallout={getLegacyUrlConflictCallout}
+      />
+    </>
   ) : (
     <CenterJustifiedSpinner />
   );
@@ -95,18 +137,9 @@ export async function getAlertData(
   setAlert: React.Dispatch<React.SetStateAction<Alert | null>>,
   setAlertType: React.Dispatch<React.SetStateAction<AlertType | null>>,
   setActionTypes: React.Dispatch<React.SetStateAction<ActionType[] | null>>,
-  toasts: Pick<ToastsApi, 'addDanger'>,
-  spaces?: SpacesApi
+  toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
-    const resolvedResult = await resolveAlert(alertId);
-    if (resolvedResult.outcome === 'aliasMatch' && spaces) {
-      // This index pattern has been resolved from a legacy URL, we should redirect the user to the new URL and display a toast.]
-      const path = `insightsAndAlerting/triggersActions/alerts/rule/${resolvedResult.savedObject.id}`;
-      const objectNoun = 'rule'; // TODO: i18n
-      spaces.ui.redirectLegacyUrl(path, objectNoun);
-      return;
-    }
     const loadedAlert = await loadAlert(alertId);
     setAlert(loadedAlert);
 
