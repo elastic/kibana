@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiText } from '@elastic/eui';
 import React from 'react';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
@@ -14,18 +15,24 @@ export function ServiceListMetric({
   series,
   valueLabel,
   comparisonSeries,
+  hideSeries = false,
 }: {
   color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
   series?: Coordinate[];
   comparisonSeries?: Coordinate[];
   valueLabel: React.ReactNode;
+  hideSeries?: boolean;
 }) {
-  return (
-    <SparkPlot
-      valueLabel={valueLabel}
-      series={series}
-      color={color}
-      comparisonSeries={comparisonSeries}
-    />
-  );
+  if (!hideSeries) {
+    return (
+      <SparkPlot
+        valueLabel={valueLabel}
+        series={series}
+        color={color}
+        comparisonSeries={comparisonSeries}
+      />
+    );
+  }
+
+  return <EuiText>{valueLabel}</EuiText>;
 }

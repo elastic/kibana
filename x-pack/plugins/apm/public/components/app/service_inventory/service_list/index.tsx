@@ -16,6 +16,10 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { ValuesType } from 'utility-types';
+import {
+  BreakPoints,
+  useBreakPoints,
+} from '../../../../hooks/use_break_points';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
@@ -65,11 +69,16 @@ export function getServiceColumns({
   query,
   showTransactionTypeColumn,
   comparisonData,
+  breakPoints,
 }: {
   query: Record<string, string | undefined>;
   showTransactionTypeColumn: boolean;
+  breakPoints: BreakPoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
+  const { isSmall, isLarge, isXl } = breakPoints;
+  const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
+  const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
   return [
     {
       field: 'healthStatus',
@@ -110,18 +119,25 @@ export function getServiceColumns({
         </ToolTipWrapper>
       ),
     },
-    {
-      field: 'environments',
-      name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
-        defaultMessage: 'Environment',
-      }),
-      width: `${unit * 10}px`,
-      sortable: true,
-      render: (_, { environments }) => (
-        <EnvironmentBadge environments={environments ?? []} />
-      ),
-    },
-    ...(showTransactionTypeColumn
+    ...(showWhenSmallOrGreaterThanLarge
+      ? [
+          {
+            field: 'environments',
+            name: i18n.translate(
+              'xpack.apm.servicesTable.environmentColumnLabel',
+              {
+                defaultMessage: 'Environment',
+              }
+            ),
+            width: `${unit * 10}px`,
+            sortable: true,
+            render: (_, { environments }) => (
+              <EnvironmentBadge environments={environments ?? []} />
+            ),
+          } as ITableColumn<ServiceListItem>,
+        ]
+      : []),
+    ...(showTransactionTypeColumn && showWhenSmallOrGreaterThanXL
       ? [
           {
             field: 'transactionType',
@@ -147,12 +163,13 @@ export function getServiceColumns({
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.latency
           }
+          hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis1"
           valueLabel={asMillisecondDuration(latency || 0)}
         />
       ),
       align: 'left',
-      width: `${unit * 10}px`,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : undefined,
     },
     {
       field: 'throughput',
@@ -167,12 +184,13 @@ export function getServiceColumns({
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.throughput
           }
+          hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis0"
           valueLabel={asTransactionRate(throughput)}
         />
       ),
       align: 'left',
-      width: `${unit * 10}px`,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : undefined,
     },
     {
       field: 'transactionErrorRate',
@@ -191,13 +209,14 @@ export function getServiceColumns({
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
             }
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
             color="euiColorVis7"
             valueLabel={valueLabel}
           />
         );
       },
       align: 'left',
-      width: `${unit * 10}px`,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : undefined,
     },
   ];
 }
@@ -215,6 +234,7 @@ export function ServiceList({
   comparisonData,
   isLoading,
 }: Props) {
+  const breakPoints = useBreakPoints();
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
   const showTransactionTypeColumn = items.some(
@@ -227,8 +247,13 @@ export function ServiceList({
 
   const serviceColumns = useMemo(
     () =>
-      getServiceColumns({ query, showTransactionTypeColumn, comparisonData }),
-    [query, showTransactionTypeColumn, comparisonData]
+      getServiceColumns({
+        query,
+        showTransactionTypeColumn,
+        comparisonData,
+        breakPoints,
+      }),
+    [query, showTransactionTypeColumn, comparisonData, breakPoints]
   );
 
   const columns = displayHealthStatus
