@@ -919,7 +919,24 @@
               "((...args: any[]) => void) | undefined"
             ],
             "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaLegacy",
+                "id": "def-public.RouteConfiguration.resolveRedirectTo.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaLegacy",
@@ -999,7 +1016,24 @@
               "[]) | undefined"
             ],
             "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaLegacy",
+                "id": "def-public.RouteConfiguration.k7Breadcrumbs.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaLegacy",
@@ -1060,6 +1094,38 @@
         ],
         "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaLegacy",
+            "id": "def-public.provider",
+            "type": "Function",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "signature": [
+              "(...injectable: any[]) => T"
+            ],
+            "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaLegacy",
+                "id": "def-public.injectable",
+                "type": "Array",
+                "tags": [],
+                "label": "injectable",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {

@@ -398,8 +398,8 @@
             ],
             "path": "x-pack/plugins/global_search/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -948,11 +948,10 @@
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "globalSearch",
-                "id": "def-server.context",
+                "id": "def-server.GlobalSearchResultProvider.getSearchableTypes.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -967,9 +966,11 @@
                   }
                 ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1066,8 +1067,8 @@
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

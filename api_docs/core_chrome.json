@@ -212,7 +212,24 @@
               "((element: HTMLDivElement) => () => void) | undefined"
             ],
             "path": "src/core/public/chrome/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ChromeHelpExtension.content.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "HTMLDivElement"
+                ],
+                "path": "src/core/public/chrome/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -1154,11 +1154,10 @@
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.alertParams",
+                "id": "def-public.AlertTypeModel.validate.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "alertParams",
@@ -1167,9 +1166,11 @@
                   "Params"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -1312,11 +1313,10 @@
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.property",
+                "id": "def-public.AlertTypeParamsExpressionProps.setAlertParams.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "property",
@@ -1325,11 +1325,12 @@
                   "Key"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.value",
+                "id": "def-public.AlertTypeParamsExpressionProps.setAlertParams.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -1338,9 +1339,11 @@
                   "Params[Key] | undefined"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -1362,11 +1365,10 @@
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.key",
+                "id": "def-public.AlertTypeParamsExpressionProps.setAlertProperty.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "key",
@@ -1375,11 +1377,12 @@
                   "Prop"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.value",
+                "id": "def-public.AlertTypeParamsExpressionProps.setAlertProperty.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "value",
@@ -1396,9 +1399,11 @@
                   "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -1803,11 +1808,10 @@
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.crumbs",
+                "id": "def-public.TriggersAndActionsUiServices.setBreadcrumbs.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "crumbs",
@@ -1817,9 +1821,11 @@
                   "[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -3117,46 +3123,25 @@
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.props",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddConnectorFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "{ onClose: () => void; consumer?: string | undefined; actionTypes?: ",
-                {
-                  "pluginId": "actions",
-                  "scope": "common",
-                  "docId": "kibActionsPluginApi",
-                  "section": "def-common.ActionType",
-                  "text": "ActionType"
-                },
-                "[] | undefined; onTestConnector?: ((connector: ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.ActionConnector",
-                  "text": "ActionConnector"
-                },
-                "<Record<string, unknown>, Record<string, unknown>>) => void) | undefined; reloadConnectors?: (() => Promise<void | ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.ActionConnector",
-                  "text": "ActionConnector"
-                },
-                "<Record<string, unknown>, Record<string, unknown>>[]>) | undefined; }"
+                "Pick<",
+                "ConnectorAddFlyoutProps",
+                ", \"onClose\" | \"consumer\" | \"actionTypes\" | \"onTestConnector\" | \"reloadConnectors\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "triggersActionsUi",
@@ -3174,40 +3159,25 @@
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.props",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditConnectorFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "{ onClose: () => void; consumer?: string | undefined; reloadConnectors?: (() => Promise<void | ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.ActionConnector",
-                  "text": "ActionConnector"
-                },
-                "<Record<string, unknown>, Record<string, unknown>>[]>) | undefined; initialConnector: ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.ActionConnector",
-                  "text": "ActionConnector"
-                },
-                "<Record<string, unknown>, Record<string, unknown>>; tab?: ",
-                "EditConectorTabs",
-                " | undefined; }"
+                "Pick<",
+                "ConnectorEditFlyoutProps",
+                ", \"onClose\" | \"consumer\" | \"reloadConnectors\" | \"initialConnector\" | \"tab\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "triggersActionsUi",
@@ -3225,38 +3195,25 @@
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.props",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "{ onClose: (reason: ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.AlertFlyoutCloseReason",
-                  "text": "AlertFlyoutCloseReason"
-                },
-                ") => void; metadata?: Record<string, any> | undefined; onSave?: (() => Promise<void>) | undefined; alertTypeId?: string | undefined; consumer: string; canChangeTrigger?: boolean | undefined; initialValues?: Partial<Pick<",
-                {
-                  "pluginId": "alerting",
-                  "scope": "common",
-                  "docId": "kibAlertingPluginApi",
-                  "section": "def-common.Alert",
-                  "text": "Alert"
-                },
-                "<Record<string, unknown>>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">> | undefined; reloadAlerts?: (() => Promise<void>) | undefined; }"
+                "Pick<",
+                "AlertAddProps",
+                "<Record<string, any>>, \"onClose\" | \"metadata\" | \"onSave\" | \"alertTypeId\" | \"consumer\" | \"canChangeTrigger\" | \"initialValues\" | \"reloadAlerts\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "triggersActionsUi",
@@ -3274,38 +3231,25 @@
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.props",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "{ onClose: (reason: ",
-                {
-                  "pluginId": "triggersActionsUi",
-                  "scope": "public",
-                  "docId": "kibTriggersActionsUiPluginApi",
-                  "section": "def-public.AlertFlyoutCloseReason",
-                  "text": "AlertFlyoutCloseReason"
-                },
-                ") => void; metadata?: Record<string, any> | undefined; onSave?: (() => Promise<void>) | undefined; reloadAlerts?: (() => Promise<void>) | undefined; initialAlert: Pick<",
-                {
-                  "pluginId": "alerting",
-                  "scope": "common",
-                  "docId": "kibAlertingPluginApi",
-                  "section": "def-common.Alert",
-                  "text": "Alert"
-                },
-                "<Record<string, unknown>>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">; }"
+                "Pick<",
+                "AlertEditProps",
+                "<Record<string, any>>, \"onClose\" | \"metadata\" | \"onSave\" | \"reloadAlerts\" | \"initialAlert\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
