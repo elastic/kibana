@@ -72,7 +72,12 @@ const NoDataPageComponent = React.memo<NoDataPageProps>(
     }, [actions, actionsKeys]);
 
     return (
-      <KibanaPageTemplate restrictWidth={950} template="empty" {...rest}>
+      <KibanaPageTemplate
+        restrictWidth={950}
+        template="centeredBody"
+        pageContentProps={{ color: 'transparent' }}
+        {...rest}
+      >
         <EuiText textAlign="center">
           <div className="noDataPageLogo">
             <EuiIcon type={logo || `logo${solution}`} size="xxl" />
