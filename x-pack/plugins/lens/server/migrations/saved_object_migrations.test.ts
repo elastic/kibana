@@ -1057,21 +1057,27 @@ describe('Lens migrations', () => {
       const pieExample = cloneDeep(example);
       pieExample.attributes.visualizationType = 'lnsPie';
       (pieExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
-        layerId: '1',
-        groups: [],
-        metric: undefined,
-        numberDisplay: 'percent',
-        categoryDisplay: 'default',
-        legendDisplay: 'default',
-        nestedLegend: false,
+        shape: 'pie',
+        layers: [
+          {
+            layerId: '1',
+            groups: [],
+            metric: undefined,
+            numberDisplay: 'percent',
+            categoryDisplay: 'default',
+            legendDisplay: 'default',
+            nestedLegend: false,
+          },
+        ],
       } as unknown) as VisStatePre715;
       const result = migrations['7.15.0'](pieExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
-      expect('layerType' in state).toEqual(true);
-      if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+      if ('layers' in state) {
+        for (const layer of state.layers) {
+          expect(layer.layerType).toEqual(layerTypes.DATA);
+        }
       }
     });
     it('should add layer info to a metric visualization', () => {
