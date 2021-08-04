@@ -126,11 +126,10 @@
           ],
           "path": "src/plugins/security_oss/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "securityOss",
-              "id": "def-server.provider",
+              "id": "def-server.SecurityOssPluginSetup.setAnonymousAccessServiceProvider.$1",
               "type": "Function",
               "tags": [],
               "label": "provider",
@@ -140,9 +139,11 @@
                 "AnonymousAccessService"
               ],
               "path": "src/plugins/security_oss/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

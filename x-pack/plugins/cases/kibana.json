@@ -1,7 +1,7 @@
 {
   "configPath":[
-     "cases",
-     "xpack"
+     "xpack",
+     "cases"
   ],
   "description":"The Case management system in Kibana",
   "extraPublicDirs":[
