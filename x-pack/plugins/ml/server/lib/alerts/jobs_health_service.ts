@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
+import { memoize, keyBy } from 'lodash';
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
@@ -190,6 +190,9 @@ export function jobsHealthServiceProvider(
       const jobIds = getJobIds(jobs);
       const datafeeds = await getDatafeeds(jobIds);
 
+      const jobsMap = keyBy(jobs, 'job_id');
+      const datafeedsMap = keyBy(datafeeds, 'job_id');
+
       const defaultLookbackInterval = resolveLookbackInterval(jobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
 
@@ -214,10 +217,10 @@ export function jobsHealthServiceProvider(
           // As we retrieved annotations based on the longest bucket span and query delay,
           // we need to check end_timestamp against appropriate job configuration.
 
-          const job = jobs.find((j) => j.job_id === v.job_id);
-          const datafeed = datafeeds?.find((d) => d.job_id === v.job_id);
+          const job = jobsMap[v.job_id];
+          const datafeed = datafeedsMap[v.job_id];
 
-          const jobLookbackInterval = resolveLookbackInterval([job!], [datafeed!]);
+          const jobLookbackInterval = resolveLookbackInterval([job], [datafeed]);
           return (
             v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval)
           );
