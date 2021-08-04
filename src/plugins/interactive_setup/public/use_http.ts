@@ -7,6 +7,7 @@
  */
 
 import constate from 'constate';
+
 import type { HttpSetup } from 'src/core/public';
 
 export const [HttpProvider, useHttp] = constate(({ http }: { http: HttpSetup }) => {

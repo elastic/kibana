@@ -5,9 +5,25 @@
  * 2.0.
  */
 
-import { CrawlerPolicies, CrawlerRules, CrawlRule, CrawlerDomainFromServer } from './types';
+import {
+  CrawlerPolicies,
+  CrawlerRules,
+  CrawlRule,
+  CrawlerDomainFromServer,
+  CrawlerDomainValidationStep,
+  CrawlerDomainValidationResultFromServer,
+  CrawlRequestFromServer,
+  CrawlerStatus,
+  CrawlerData,
+  CrawlRequest,
+} from './types';
 
-import { crawlerDomainServerToClient, crawlerDataServerToClient } from './utils';
+import {
+  crawlerDomainServerToClient,
+  crawlerDataServerToClient,
+  crawlDomainValidationToResult,
+  crawlRequestServerToClient,
+} from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
   id: '-',
@@ -57,37 +73,153 @@ describe('crawlerDomainServerToClient', () => {
   });
 });
 
+describe('crawlRequestServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const id = '507f1f77bcf86cd799439011';
+
+    const defaultServerPayload: CrawlRequestFromServer = {
+      id,
+      status: CrawlerStatus.Pending,
+      created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      began_at: null,
+      completed_at: null,
+    };
+
+    const defaultClientPayload: CrawlRequest = {
+      id,
+      status: CrawlerStatus.Pending,
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+    };
+
+    expect(crawlRequestServerToClient(defaultServerPayload)).toStrictEqual(defaultClientPayload);
+    expect(
+      crawlRequestServerToClient({
+        ...defaultServerPayload,
+        began_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, beganAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+    expect(
+      crawlRequestServerToClient({
+        ...defaultServerPayload,
+        completed_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, completedAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+  });
+});
+
 describe('crawlerDataServerToClient', () => {
+  let output: CrawlerData;
+
+  const domains: CrawlerDomainFromServer[] = [
+    {
+      id: 'x',
+      name: 'moviedatabase.com',
+      document_count: 13,
+      created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      sitemaps: [],
+      entry_points: [],
+      crawl_rules: [],
+      default_crawl_rule: DEFAULT_CRAWL_RULE,
+    },
+    {
+      id: 'y',
+      name: 'swiftype.com',
+      last_visited_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      document_count: 40,
+      created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      sitemaps: [],
+      entry_points: [],
+      crawl_rules: [],
+    },
+  ];
+
+  beforeAll(() => {
+    output = crawlerDataServerToClient({
+      domains,
+    });
+  });
+
   it('converts all domains from the server form to their client form', () => {
-    const domains: CrawlerDomainFromServer[] = [
+    expect(output.domains).toEqual([
       {
         id: 'x',
-        name: 'moviedatabase.com',
-        document_count: 13,
-        created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+        url: 'moviedatabase.com',
+        documentCount: 13,
+        createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
         sitemaps: [],
-        entry_points: [],
-        crawl_rules: [],
-        default_crawl_rule: DEFAULT_CRAWL_RULE,
+        entryPoints: [],
+        crawlRules: [],
+        defaultCrawlRule: DEFAULT_CRAWL_RULE,
       },
       {
         id: 'y',
-        name: 'swiftype.com',
-        last_visited_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
-        document_count: 40,
-        created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+        url: 'swiftype.com',
+        lastCrawl: 'Mon, 31 Aug 2020 17:00:00 +0000',
+        documentCount: 40,
+        createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
         sitemaps: [],
-        entry_points: [],
-        crawl_rules: [],
+        entryPoints: [],
+        crawlRules: [],
       },
-    ];
+    ]);
+  });
+});
 
-    const output = crawlerDataServerToClient({
-      domains,
-    });
+describe('crawlDomainValidationToResult', () => {
+  it('handles results with warnings', () => {
+    const data: CrawlerDomainValidationResultFromServer = {
+      valid: true,
+      results: [
+        {
+          name: '-',
+          result: 'warning',
+          comment: 'A warning, not failure',
+        },
+      ],
+    };
 
-    expect(output.domains).toHaveLength(2);
-    expect(output.domains[0]).toEqual(crawlerDomainServerToClient(domains[0]));
-    expect(output.domains[1]).toEqual(crawlerDomainServerToClient(domains[1]));
+    expect(crawlDomainValidationToResult(data)).toEqual({
+      blockingFailure: false,
+      state: 'invalid',
+      message: 'A warning, not failure',
+    } as CrawlerDomainValidationStep);
+  });
+
+  it('handles valid results, without warnings', () => {
+    const data: CrawlerDomainValidationResultFromServer = {
+      valid: true,
+      results: [
+        {
+          name: '-',
+          result: 'ok',
+          comment: 'Something happened',
+        },
+      ],
+    };
+
+    expect(crawlDomainValidationToResult(data)).toEqual({
+      state: 'valid',
+    } as CrawlerDomainValidationStep);
+  });
+
+  it('handes invalid results', () => {
+    const data: CrawlerDomainValidationResultFromServer = {
+      valid: false,
+      results: [
+        {
+          name: '-',
+          result: 'failure',
+          comment: 'Something unexpected happened',
+        },
+      ],
+    };
+
+    expect(crawlDomainValidationToResult(data)).toEqual({
+      blockingFailure: true,
+      state: 'invalid',
+      message: 'Something unexpected happened',
+    } as CrawlerDomainValidationStep);
   });
 });

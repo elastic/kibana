@@ -6,27 +6,31 @@
  * Side Public License, v 1.
  */
 
+import type { errors as elasticsearchErrors } from '@elastic/elasticsearch';
 import {
-  EuiIcon,
-  EuiForm,
   EuiButton,
-  EuiFormRow,
-  EuiTextArea,
+  EuiButtonEmpty,
   EuiCallOut,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
   EuiText,
-  EuiButtonEmpty,
+  EuiTextArea,
 } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
-import { errors as elasticsearchErrors } from '@elastic/elasticsearch';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
-import { useForm, ValidationErrors } from './use_form';
-import { decodeEnrollmentToken, EnrollmentToken } from './decode_enrollment_token';
+
+import type { EnrollmentToken } from './decode_enrollment_token';
+import { decodeEnrollmentToken } from './decode_enrollment_token';
+import type { ValidationErrors } from './use_form';
+import { useForm } from './use_form';
 import { useHttp } from './use_http';
 
 export interface EnrollmentTokenFormValues {

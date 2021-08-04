@@ -43,6 +43,39 @@ describe('crawler routes', () => {
     });
   });
 
+  describe('GET /api/app_search/engines/{name}/crawler/crawl_requests', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+      });
+    });
+
+    it('validates correctly with name', () => {
+      const request = { params: { name: 'some-engine' } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = { params: {} };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
   describe('POST /api/app_search/engines/{name}/crawler/domains', () => {
     let mockRouter: MockRouter;
 

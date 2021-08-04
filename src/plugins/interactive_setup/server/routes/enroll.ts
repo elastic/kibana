@@ -5,20 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { constants } from 'fs';
+import fs from 'fs/promises';
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
-import fs from 'fs/promises';
-import { constants } from 'fs';
-import path from 'path';
-import { errors } from '@elastic/elasticsearch';
-import Boom from '@hapi/boom';
-import type { RouteDefinitionParams } from '.';
+import type { RouteDefinitionParams } from './';
 
-export function defineEnrollRoute({
+/**
+ * Defines routes to deal with Elasticsearch `enroll_kibana` APIs.
+ */
+export function defineEnrollRoutes({
   router,
-  core,
-  initializerContext,
   logger,
+  initializerContext,
+  core,
   completeSetup,
 }: RouteDefinitionParams) {
   router.post(
@@ -42,13 +45,8 @@ export function defineEnrollRoute({
       options: { authRequired: false },
     },
     async (context, request, response) => {
-      if (!core.preboot.isSetupOnHold()) {
-        logger.error('Invalid attempt to access enrollment endpoint outside of preboot phase');
-        return response.badRequest();
-      }
-
       const client = core.elasticsearch
-        .createClient('enrollment', {
+        .createClient('enroll', {
           hosts: request.body.hosts,
           ssl: { verificationMode: 'none' },
           // caFingerprint: request.body.caFingerprint,
@@ -109,7 +107,7 @@ export function defineEnrollRoute({
         return response.noContent();
       } catch (error) {
         logger.error(error);
-        return response.customError({ statusCode: 500, body: getDetailedErrorMessage(error) });
+        return response.customError({ statusCode: 500 });
       }
     }
   );
@@ -147,16 +145,4 @@ elasticsearch.ssl.certificateAuthorities: [ "${caPath}" ]
 
 export function btoa(str: string) {
   return Buffer.from(str, 'binary').toString('base64');
-}
-
-export function getDetailedErrorMessage(error: any): string {
-  if (error instanceof errors.ResponseError) {
-    return JSON.stringify(error.body);
-  }
-
-  if (Boom.isBoom(error)) {
-    return JSON.stringify(error.output.payload);
-  }
-
-  return error.message;
 }

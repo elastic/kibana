@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, HttpSetup, Plugin } from 'src/core/public';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
+import type { CoreSetup, CoreStart, HttpSetup, Plugin } from 'src/core/public';
+
 import { App } from './app';
 import { HttpProvider } from './use_http';
 

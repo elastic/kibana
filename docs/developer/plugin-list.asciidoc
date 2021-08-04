@@ -457,7 +457,7 @@ Index Management by running this series of requests in Console:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
-|Create a data stream using Console and you'll be able to view it in the UI:
+|Create an index with special characters and verify it renders correctly:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]

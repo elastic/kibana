@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiSteps, EuiPanel, EuiStepProps, EuiCallOut } from '@elastic/eui';
-import React, { useEffect, FunctionComponent } from 'react';
+import type { EuiStepProps } from '@elastic/eui';
+import { EuiCallOut, EuiPanel, EuiSteps } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import useTimeoutFn from 'react-use/lib/useTimeoutFn';
 import useTimeout from 'react-use/lib/useTimeout';
+import useTimeoutFn from 'react-use/lib/useTimeoutFn';
+
 import { i18n } from '@kbn/i18n';
+
 import { useHttp } from './use_http';
 
 export interface ProgressIndicatorProps {

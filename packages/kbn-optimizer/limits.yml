@@ -107,7 +107,7 @@ pageLoadAssetSize:
   dataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
-  timelines: 330000
+  timelines: 327300
   screenshotMode: 17856
   visTypePie: 35583
   expressionRevealImage: 25675
@@ -116,5 +116,6 @@ pageLoadAssetSize:
   expressionRepeatImage: 22341
   expressionImage: 19288
   expressionMetric: 22238
-  expressionShape: 30033
+  expressionShape: 34008
   interactiveSetup: 18532
+  

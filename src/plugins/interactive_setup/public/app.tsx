@@ -7,8 +7,11 @@
  */
 
 import { EuiPageTemplate } from '@elastic/eui';
-import React, { FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
+
 import { EnrollmentTokenForm } from './enrollment_token_form';
 import { ManualConfigurationForm } from './manual_configuration_form';
 import { ProgressIndicator } from './progress_indicator';

@@ -7,30 +7,34 @@
  */
 
 import {
-  EuiForm,
   EuiButton,
-  EuiFormRow,
-  EuiSpacer,
-  EuiPanel,
-  EuiIcon,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldText,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckableCard,
   EuiFieldPassword,
+  EuiFieldText,
   EuiFilePicker,
-  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
   EuiLink,
+  EuiPanel,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useForm, ValidationErrors } from './use_form';
+
+import type { ValidationErrors } from './use_form';
+import { useForm } from './use_form';
 import { useHttp } from './use_http';
 
 export interface ManualConfigurationFormValues {
@@ -211,6 +215,17 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
       noValidate
       style={{ width: euiThemeVars.euiFormMaxWidth }}
     >
+      {state.value?.statusCode === 200 && (
+        <>
+          <EuiCallOut color="warning" iconType="alert" title="This cluster is not secure">
+            <p>
+              Anyone with the address can access your data.
+              <EuiLink>Learn how to enable security features.</EuiLink>
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       <EuiFormRow
         label={i18n.translate('interactiveSetup.manualConfigurationForm.hostLabel', {
           defaultMessage: 'Address',

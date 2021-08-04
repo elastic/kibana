@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
 
-import tls from 'tls';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import tls from 'tls';
+
+import { schema } from '@kbn/config-schema';
+
 import type { RouteDefinitionParams } from '.';
 
 export function definePingRoute({ router, core, logger }: RouteDefinitionParams) {
