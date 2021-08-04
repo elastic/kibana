@@ -6,52 +6,51 @@
  */
 
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
-import { has, get } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import {
-  Logger,
-  PluginInitializerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
   CoreSetup,
-  ICustomClusterClient,
   CoreStart,
   CustomHttpResponseOptions,
-  ResponseError,
+  ICustomClusterClient,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
   Plugin,
+  PluginInitializerContext,
+  ResponseError,
   SharedGlobalConfig,
 } from 'kibana/server';
+import { get, has } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
-  LOGGING_TAG,
+  ALERTS,
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
-  ALERTS,
+  LOGGING_TAG,
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
-import { MonitoringConfig, createConfig, configSchema } from './config';
-import { requireUIRoutes } from './routes';
-import { initBulkUploader } from './kibana_monitoring';
-import { initInfraSource } from './lib/logs/init_infra_source';
-import { registerCollectors } from './kibana_monitoring/collectors';
-import { registerMonitoringTelemetryCollection } from './telemetry_collection';
-import { LicenseService } from './license_service';
 import { AlertsFactory } from './alerts';
+import { configSchema, createConfig, MonitoringConfig } from './config';
+import { instantiateClient } from './es_client/instantiate_client';
+import { initBulkUploader } from './kibana_monitoring';
+import { registerCollectors } from './kibana_monitoring/collectors';
+import { initInfraSource } from './lib/logs/init_infra_source';
+import { LicenseService } from './license_service';
+import { requireUIRoutes } from './routes';
+import { EndpointTypes, Globals } from './static_globals';
+import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import {
+  IBulkUploader,
+  LegacyRequest,
+  LegacyShimDependencies,
   MonitoringCore,
   MonitoringLicenseService,
   MonitoringPluginSetup,
-  LegacyShimDependencies,
-  IBulkUploader,
   PluginsSetup,
   PluginsStart,
-  LegacyRequest,
   RequestHandlerContextMonitoringPlugin,
 } from './types';
-
-import { Globals, EndpointTypes } from './static_globals';
-import { instantiateClient } from './es_client/instantiate_client';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -192,7 +191,11 @@ export class MonitoringPlugin
         plugins
       );
 
-      requireUIRoutes(this.monitoringCore, {
+      if (config.ui.debug_mode) {
+        this.log.info('MONITORING DEBUG MODE: ON');
+      }
+
+      requireUIRoutes(this.monitoringCore, config, {
         cluster,
         router,
         licenseService: this.licenseService,
