@@ -13,6 +13,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
@@ -23,14 +24,12 @@ interface Options {
   setup: Setup & SetupTimeRange;
   environment?: string;
   backendName: string;
-  searchAggregatedTransactions: boolean;
 }
 
 export function getServiceMapBackendNodeInfo({
   environment,
   backendName,
   setup,
-  searchAggregatedTransactions,
 }: Options) {
   return withApmSpan('get_service_map_backend_node_stats', async () => {
     const { apmEventClient, start, end } = setup;
@@ -39,11 +38,7 @@ export function getServiceMapBackendNodeInfo({
       'get_service_map_backend_node_stats',
       {
         apm: {
-          events: [
-            getProcessorEventForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-          ],
+          events: [ProcessorEvent.metric],
         },
         body: {
           size: 0,

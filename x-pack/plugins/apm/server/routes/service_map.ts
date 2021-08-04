@@ -126,15 +126,10 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
       query: { environment },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
-
     return getServiceMapBackendNodeInfo({
       environment,
       setup,
       backendName,
-      searchAggregatedTransactions,
     });
   },
 });
