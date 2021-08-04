@@ -91,6 +91,7 @@ describe('JobsHealthService', () => {
       return Promise.resolve(
         jobIds.map((j) => {
           return {
+            job_id: j,
             datafeed_id: j.replace('job', 'datafeed'),
             query_delay: '3m',
           };
@@ -142,50 +143,42 @@ describe('JobsHealthService', () => {
 
   test('returns empty results when no jobs provided', async () => {
     // act
-    const executionResult = await jobHealthService.getTestsResults(
-      'testRule',
-      {
-        testsConfig: null,
-        includeJobs: {
-          jobIds: ['*'],
-          groupIds: [],
-        },
-        excludeJobs: null,
+    const executionResult = await jobHealthService.getTestsResults('testRule', {
+      testsConfig: null,
+      includeJobs: {
+        jobIds: ['*'],
+        groupIds: [],
       },
-      null
-    );
+      excludeJobs: null,
+    });
     expect(logger.warn).toHaveBeenCalledWith('Rule "testRule" does not have associated jobs.');
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
     expect(executionResult).toEqual([]);
   });
 
   test('returns empty results and does not perform datafeed check when test is disabled', async () => {
-    const executionResult = await jobHealthService.getTestsResults(
-      'testRule',
-      {
-        testsConfig: {
-          datafeed: {
-            enabled: false,
-          },
-          behindRealtime: null,
-          delayedData: {
-            enabled: false,
-            docsCount: null,
-            timeInterval: null,
-          },
-          errorMessages: null,
-          mml: {
-            enabled: false,
-          },
+    const executionResult = await jobHealthService.getTestsResults('testRule', {
+      testsConfig: {
+        datafeed: {
+          enabled: false,
         },
-        includeJobs: {
-          jobIds: ['test_job_01'],
-          groupIds: [],
+        behindRealtime: null,
+        delayedData: {
+          enabled: false,
+          docsCount: null,
+          timeInterval: null,
         },
-        excludeJobs: null,
+        errorMessages: null,
+        mml: {
+          enabled: false,
+        },
       },
-      null
-    );
+      includeJobs: {
+        jobIds: ['test_job_01'],
+        groupIds: [],
+      },
+      excludeJobs: null,
+    });
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(`Performing health checks for job IDs: test_job_01`);
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
@@ -193,31 +186,27 @@ describe('JobsHealthService', () => {
   });
 
   test('takes into account delayed data params', async () => {
-    const executionResult = await jobHealthService.getTestsResults(
-      'testRule_04',
-      {
-        testsConfig: {
-          delayedData: {
-            enabled: true,
-            docsCount: 10,
-            timeInterval: '4h',
-          },
-          behindRealtime: { enabled: false, timeInterval: null },
-          mml: { enabled: false },
-          datafeed: { enabled: false },
-          errorMessages: { enabled: false },
+    const executionResult = await jobHealthService.getTestsResults('testRule_04', {
+      testsConfig: {
+        delayedData: {
+          enabled: true,
+          docsCount: 10,
+          timeInterval: '4h',
         },
-        includeJobs: {
-          jobIds: [],
-          groupIds: ['test_group'],
-        },
-        excludeJobs: {
-          jobIds: ['test_job_03'],
-          groupIds: [],
-        },
+        behindRealtime: { enabled: false, timeInterval: null },
+        mml: { enabled: false },
+        datafeed: { enabled: false },
+        errorMessages: { enabled: false },
       },
-      null
-    );
+      includeJobs: {
+        jobIds: [],
+        groupIds: ['test_group'],
+      },
+      excludeJobs: {
+        jobIds: ['test_job_03'],
+        groupIds: [],
+      },
+    });
 
     expect(annotationService.getDelayedDataAnnotations).toHaveBeenCalledWith({
       jobIds: ['test_job_01', 'test_job_02'],
@@ -245,21 +234,17 @@ describe('JobsHealthService', () => {
   });
 
   test('returns results based on provided selection', async () => {
-    const executionResult = await jobHealthService.getTestsResults(
-      'testRule_03',
-      {
-        testsConfig: null,
-        includeJobs: {
-          jobIds: [],
-          groupIds: ['test_group'],
-        },
-        excludeJobs: {
-          jobIds: ['test_job_03'],
-          groupIds: [],
-        },
+    const executionResult = await jobHealthService.getTestsResults('testRule_03', {
+      testsConfig: null,
+      includeJobs: {
+        jobIds: [],
+        groupIds: ['test_group'],
       },
-      null
-    );
+      excludeJobs: {
+        jobIds: ['test_job_03'],
+        groupIds: [],
+      },
+    });
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(
       `Performing health checks for job IDs: test_job_01, test_job_02`
