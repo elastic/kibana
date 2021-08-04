@@ -41,6 +41,7 @@ import {
   rangeRt,
 } from './default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
+import { getServicesDetailedStatistics } from '../lib/services/get_services_detailed_statistics';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
@@ -63,6 +64,42 @@ const servicesRoute = createApmServerRoute({
       setup,
       searchAggregatedTransactions,
       logger,
+    });
+  },
+});
+
+const servicesDetailedStatisticsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/detailed_statistics',
+  params: t.type({
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      offsetRt,
+      t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { environment, kuery, offset, serviceNames } = params.query;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
+
+    if (!serviceNames.length) {
+      throw Boom.badRequest(`serviceNames cannot be empty`);
+    }
+
+    return getServicesDetailedStatistics({
+      environment,
+      kuery,
+      setup,
+      searchAggregatedTransactions,
+      offset,
+      serviceNames,
     });
   },
 });
@@ -770,6 +807,7 @@ const serviceAlertsRoute = createApmServerRoute({
 
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
+  .add(servicesDetailedStatisticsRoute)
   .add(serviceMetadataDetailsRoute)
   .add(serviceMetadataIconsRoute)
   .add(serviceAgentNameRoute)

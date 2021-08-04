@@ -883,6 +883,28 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.RunContext",
+                "text": "RunContext"
+              }
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

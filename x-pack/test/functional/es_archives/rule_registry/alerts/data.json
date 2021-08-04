@@ -8,8 +8,8 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
-      "kibana.rac.alert.owner": "apm",
-      "kibana.rac.alert.status": "open",
+      "kibana.alert.owner": "apm",
+      "kibana.alert.status": "open",
       "kibana.space_ids": ["space1", "space2"]
     }
   }
@@ -25,8 +25,8 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
-      "kibana.rac.alert.owner": "apm",
-      "kibana.rac.alert.status": "open",
+      "kibana.alert.owner": "apm",
+      "kibana.alert.status": "open",
       "kibana.space_ids": ["space1"]
     }
   }
@@ -42,8 +42,8 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
-      "kibana.rac.alert.owner": "apm",
-      "kibana.rac.alert.status": "open",
+      "kibana.alert.owner": "apm",
+      "kibana.alert.status": "open",
       "kibana.space_ids": ["space2"]
     }
   }
@@ -59,8 +59,8 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "siem.signals",
       "message": "hello world security",
-      "kibana.rac.alert.owner": "siem",
-      "kibana.rac.alert.status": "open",
+      "kibana.alert.owner": "siem",
+      "kibana.alert.status": "open",
       "kibana.space_ids": ["space1", "space2"]
     }
   }
@@ -76,8 +76,8 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "siem.customRule",
       "message": "hello world security",
-      "kibana.rac.alert.owner": "siem",
-      "kibana.rac.alert.status": "open",
+      "kibana.alert.owner": "siem",
+      "kibana.alert.status": "open",
       "kibana.space_ids": ["space1", "space2"]
     }
   }

@@ -1065,7 +1065,24 @@
               "((data: any) => any) | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.UseRequestConfig.deserializer.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1148,8 +1165,8 @@
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1191,6 +1208,29 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.arg",
+            "type": "Object",
+            "tags": [],
+            "label": "arg",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "esUiShared",
+                "scope": "public",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-public.JsonEditorState",
+                "text": "JsonEditorState"
+              },
+              "<T>"
+            ],
+            "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -1357,37 +1397,6 @@
               "EsErrorHandlerParams"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "esUiShared",
-        "id": "def-server.isEsError",
-        "type": "Function",
-        "tags": [],
-        "label": "isEsError",
-        "description": [],
-        "signature": [
-          "(err: RequestError) => boolean"
-        ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-server.isEsError.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "err",
-            "description": [],
-            "signature": [
-              "RequestError"
-            ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/is_es_error.ts",
             "deprecated": false,
             "isRequired": true
           }
