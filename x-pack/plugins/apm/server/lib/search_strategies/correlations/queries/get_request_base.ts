@@ -13,6 +13,6 @@ export const getRequestBase = ({
 }: SearchServiceFetchParams) => ({
   index,
   // matches APM's event client settings
-  ignore_throttled: !includeFrozen,
+  ignore_throttled: includeFrozen === undefined ? true : !includeFrozen,
   ignore_unavailable: true,
 });
