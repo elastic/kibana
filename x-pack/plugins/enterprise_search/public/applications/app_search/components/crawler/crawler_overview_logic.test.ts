@@ -14,17 +14,22 @@ import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { CrawlerOverviewLogic } from './crawler_overview_logic';
+import { CrawlerOverviewLogic, CrawlerOverviewValues } from './crawler_overview_logic';
 import {
+  CrawlerData,
   CrawlerDataFromServer,
   CrawlerDomain,
   CrawlerPolicies,
   CrawlerRules,
+  CrawlerStatus,
+  CrawlRequest,
+  CrawlRequestFromServer,
   CrawlRule,
 } from './types';
-import { crawlerDataServerToClient } from './utils';
+import { crawlerDataServerToClient, crawlRequestServerToClient } from './utils';
 
-const DEFAULT_VALUES = {
+const DEFAULT_VALUES: CrawlerOverviewValues = {
+  crawlRequests: [],
   dataLoading: true,
   domains: [],
 };
@@ -36,7 +41,7 @@ const DEFAULT_CRAWL_RULE: CrawlRule = {
   pattern: '.*',
 };
 
-const MOCK_SERVER_DATA: CrawlerDataFromServer = {
+const MOCK_SERVER_CRAWLER_DATA: CrawlerDataFromServer = {
   domains: [
     {
       id: '507f1f77bcf86cd799439011',
@@ -50,7 +55,20 @@ const MOCK_SERVER_DATA: CrawlerDataFromServer = {
   ],
 };
 
-const MOCK_CLIENT_DATA = crawlerDataServerToClient(MOCK_SERVER_DATA);
+const MOCK_SERVER_CRAWL_REQUESTS_DATA: CrawlRequestFromServer[] = [
+  {
+    id: '618d0e66abe97bc688328900',
+    status: CrawlerStatus.Pending,
+    created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+    began_at: null,
+    completed_at: null,
+  },
+];
+
+const MOCK_CLIENT_CRAWLER_DATA = crawlerDataServerToClient(MOCK_SERVER_CRAWLER_DATA);
+const MOCK_CLIENT_CRAWL_REQUESTS_DATA = MOCK_SERVER_CRAWL_REQUESTS_DATA.map(
+  crawlRequestServerToClient
+);
 
 describe('CrawlerOverviewLogic', () => {
   const { mount } = new LogicMounter(CrawlerOverviewLogic);
@@ -68,7 +86,7 @@ describe('CrawlerOverviewLogic', () => {
 
   describe('actions', () => {
     describe('onReceiveCrawlerData', () => {
-      const crawlerData = {
+      const crawlerData: CrawlerData = {
         domains: [
           {
             id: '507f1f77bcf86cd799439011',
@@ -95,25 +113,68 @@ describe('CrawlerOverviewLogic', () => {
         expect(CrawlerOverviewLogic.values.dataLoading).toEqual(false);
       });
     });
+
+    describe('onReceiveCrawlRequests', () => {
+      const crawlRequests: CrawlRequest[] = [
+        {
+          id: '618d0e66abe97bc688328900',
+          status: CrawlerStatus.Pending,
+          createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+          beganAt: null,
+          completedAt: null,
+        },
+      ];
+
+      beforeEach(() => {
+        CrawlerOverviewLogic.actions.onReceiveCrawlRequests(crawlRequests);
+      });
+
+      it('should set the crawl requests', () => {
+        expect(CrawlerOverviewLogic.values.crawlRequests).toEqual(crawlRequests);
+      });
+    });
   });
 
   describe('listeners', () => {
     describe('fetchCrawlerData', () => {
-      it('calls onReceiveCrawlerData with retrieved data that has been converted from server to client', async () => {
+      it('updates logic with data that has been converted from server to client', async () => {
         jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlerData');
+        // TODO this spyOn should be removed when crawl request polling is added
+        jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlRequests');
 
-        http.get.mockReturnValue(Promise.resolve(MOCK_SERVER_DATA));
+        // TODO this first mock for MOCK_SERVER_CRAWL_REQUESTS_DATA should be removed when crawl request polling is added
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_SERVER_CRAWL_REQUESTS_DATA));
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_SERVER_CRAWLER_DATA));
         CrawlerOverviewLogic.actions.fetchCrawlerData();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/crawler');
+        expect(http.get).toHaveBeenNthCalledWith(
+          1,
+          '/api/app_search/engines/some-engine/crawler/crawl_requests'
+        );
+        expect(CrawlerOverviewLogic.actions.onReceiveCrawlRequests).toHaveBeenCalledWith(
+          MOCK_CLIENT_CRAWL_REQUESTS_DATA
+        );
+
+        expect(http.get).toHaveBeenNthCalledWith(2, '/api/app_search/engines/some-engine/crawler');
         expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
-          MOCK_CLIENT_DATA
+          MOCK_CLIENT_CRAWLER_DATA
         );
       });
 
-      it('calls flashApiErrors when there is an error', async () => {
-        http.get.mockReturnValue(Promise.reject('error'));
+      // TODO this test should be removed when crawl request polling is added
+      it('calls flashApiErrors when there is an error on the request for crawl results', async () => {
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+        CrawlerOverviewLogic.actions.fetchCrawlerData();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+
+      it('calls flashApiErrors when there is an error on the request for crawler data', async () => {
+        // TODO this first mock for MOCK_SERVER_CRAWL_REQUESTS_DATA should be removed when crawl request polling is added
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_SERVER_CRAWL_REQUESTS_DATA));
+        http.get.mockReturnValueOnce(Promise.reject('error'));
         CrawlerOverviewLogic.actions.fetchCrawlerData();
         await nextTick();
 
@@ -125,7 +186,7 @@ describe('CrawlerOverviewLogic', () => {
       it('calls onReceiveCrawlerData with retrieved data that has been converted from server to client', async () => {
         jest.spyOn(CrawlerOverviewLogic.actions, 'onReceiveCrawlerData');
 
-        http.delete.mockReturnValue(Promise.resolve(MOCK_SERVER_DATA));
+        http.delete.mockReturnValue(Promise.resolve(MOCK_SERVER_CRAWLER_DATA));
         CrawlerOverviewLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
         await nextTick();
 
@@ -136,7 +197,7 @@ describe('CrawlerOverviewLogic', () => {
           }
         );
         expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
-          MOCK_CLIENT_DATA
+          MOCK_CLIENT_CRAWLER_DATA
         );
         expect(flashSuccessToast).toHaveBeenCalled();
       });
