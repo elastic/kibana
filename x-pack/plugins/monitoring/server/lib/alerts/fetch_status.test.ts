@@ -33,7 +33,6 @@ jest.mock('../../static_globals', () => ({
 describe('fetchStatus', () => {
   const alertType = ALERT_CPU_USAGE;
   const alertTypes = [alertType];
-  const id = 1;
   const defaultClusterState = {
     clusterUuid: 'abc',
     clusterName: 'test',
@@ -51,7 +50,10 @@ describe('fetchStatus', () => {
       total: 1,
       data: [
         {
-          id,
+          id: 1,
+        },
+        {
+          id: 2,
         },
       ],
     })),
@@ -77,10 +79,16 @@ describe('fetchStatus', () => {
       defaultClusterState.clusterUuid,
     ]);
     expect(status).toEqual({
-      monitoring_alert_cpu_usage: {
-        rawAlert: { id: 1 },
-        states: [],
-      },
+      monitoring_alert_cpu_usage: [
+        {
+          rawAlert: { id: 1 },
+          states: [],
+        },
+        {
+          rawAlert: { id: 2 },
+          states: [],
+        },
+      ],
     });
   });
 
@@ -100,7 +108,7 @@ describe('fetchStatus', () => {
     ]);
     expect(Object.values(status).length).toBe(1);
     expect(Object.keys(status)).toEqual(alertTypes);
-    expect(status[alertType].states[0].state.ui.isFiring).toBe(true);
+    expect(status[alertType][0].states[0].state.ui.isFiring).toBe(true);
   });
 
   it('should pass in the right filter to the alerts client', async () => {
@@ -118,7 +126,7 @@ describe('fetchStatus', () => {
     const status = await fetchStatus(rulesClient as any, alertTypes, [
       defaultClusterState.clusterUuid,
     ]);
-    expect(status[alertType].states.length).toEqual(0);
+    expect(status[alertType][0].states.length).toEqual(0);
   });
 
   it('should return nothing if no alerts are found', async () => {
@@ -155,7 +163,7 @@ describe('fetchStatus', () => {
         total: 1,
         data: [
           {
-            id,
+            id: 1,
           },
         ],
       })),
