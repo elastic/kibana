@@ -129,9 +129,9 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           needsToUploadCert = !certificateChain?.length;
         } catch (error) {
           errors.host = i18n.translate(
-            'interactiveSetup.manualConfigurationForm.hostInvalidError',
+            'interactiveSetup.manualConfigurationForm.hostConnectionError',
             {
-              defaultMessage: 'Could not connect to cluster.',
+              defaultMessage: "Can't connect to this cluster.",
             }
           );
         }
@@ -147,7 +147,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           );
         } else if (values.username === 'elastic') {
           errors.username = i18n.translate(
-            'interactiveSetup.manualConfigurationForm.usernameRequiredError',
+            'interactiveSetup.manualConfigurationForm.usernameReservedError',
             {
               defaultMessage: "User 'elastic' can't be used as Kibana system user.",
             }
@@ -174,7 +174,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           );
         } else {
           errors.caCert = i18n.translate(
-            'interactiveSetup.manualConfigurationForm.caCertRequiredError',
+            'interactiveSetup.manualConfigurationForm.caCertConfirmationRequiredError',
             {
               defaultMessage: 'Confirm that you recognize and trust this certificate.',
             }
@@ -197,10 +197,9 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
         onSuccess?.();
       } catch (error) {
         if (error.body?.message.includes('self signed certificate in certificate chain')) {
-          form.setError('caCert', 'CA did not match Elasticsearch cluster');
+          form.setError('caCert', 'Certificate is not valid for this cluster.');
         } else if (error.body?.message.includes('unable to authenticate user')) {
-          form.setError('username', 'unable to authenticate user');
-          form.setError('password', 'unable to authenticate user');
+          form.setError('password', 'Invalid username or password.');
         } else {
           throw error;
         }
@@ -217,9 +216,9 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
     >
       {state.value?.statusCode === 200 && (
         <>
-          <EuiCallOut color="warning" iconType="alert" title="This cluster is not secure">
+          <EuiCallOut color="warning" title="Your cluster is not secure.">
+            <p>Anyone with the address could access your data.</p>
             <p>
-              Anyone with the address can access your data.
               <EuiLink>Learn how to enable security features.</EuiLink>
             </p>
           </EuiCallOut>
@@ -238,19 +237,11 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           value={form.values.host}
           isInvalid={form.touched.host && !!form.errors.host}
           isLoading={form.isValidating}
-          append={
-            state.loading || !state.value ? undefined : state.error ||
-              state.value?.statusCode !== 401 ? (
-              <EuiIcon type="cross" color="danger" />
-            ) : (
-              <EuiIcon type="check" color="success" />
-            )
-          }
         />
       </EuiFormRow>
       {state.value && (
         <>
-          {state.value?.statusCode === 401 && (
+          {state.value.statusCode === 401 && (
             <>
               <EuiFormRow
                 label={i18n.translate('interactiveSetup.manualConfigurationForm.usernameLabel', {
@@ -260,6 +251,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
                 isInvalid={form.touched.username && !!form.errors.username}
               >
                 <EuiFieldText
+                  icon="user"
                   name="username"
                   value={form.values.username}
                   isInvalid={form.touched.username && !!form.errors.username}
@@ -289,7 +281,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
               error={form.errors.caCert}
               isInvalid={form.touched.caCert && !!form.errors.caCert}
             >
-              {state.value.certificateChain[0] ? (
+              {state.value.certificateChain ? (
                 <EuiCheckableCard
                   id="trustCaCert"
                   label="I recognize and trust this certificate:"
@@ -338,7 +330,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
       <EuiSpacer />
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="left" iconType="arrowLeft" onClick={onCancel}>
+          <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
             <FormattedMessage
               id="interactiveSetup.manualConfigurationForm.cancelButton"
               defaultMessage="Back"
@@ -346,19 +338,42 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            type={state.value ? 'submit' : 'button'}
-            onClick={state.value ? undefined : () => form.setTouched('host')}
-            isLoading={state.value ? form.isSubmitting : form.isSubmitting || form.isValidating}
-            isDisabled={form.isSubmitted && form.isInvalid}
-            fill
-          >
-            <FormattedMessage
-              id="interactiveSetup.manualConfigurationForm.submitButton"
-              defaultMessage="{isSubmitting, select, true{Connecting to cluster…} other{Connect to cluster}}"
-              values={{ isSubmitting: form.isSubmitting }}
-            />
-          </EuiButton>
+          {state.value ? (
+            <EuiButton
+              type="submit"
+              isLoading={form.isSubmitting}
+              isDisabled={form.isSubmitted && form.isInvalid}
+              color={state.value.statusCode === 200 ? 'warning' : 'primary'}
+              fill
+            >
+              {state.value.statusCode === 200 ? (
+                <FormattedMessage
+                  id="interactiveSetup.manualConfigurationForm.submitWarningButton"
+                  defaultMessage="{isSubmitting, select, true{Connecting to cluster…} other{Connect anyways}}"
+                  values={{ isSubmitting: form.isSubmitting }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="interactiveSetup.manualConfigurationForm.submitButton"
+                  defaultMessage="{isSubmitting, select, true{Connecting to cluster…} other{Connect to cluster}}"
+                  values={{ isSubmitting: form.isSubmitting }}
+                />
+              )}
+            </EuiButton>
+          ) : (
+            <EuiButton
+              type="button"
+              onClick={() => form.setTouched('host')}
+              isLoading={form.isValidating}
+              fill
+            >
+              <FormattedMessage
+                id="interactiveSetup.manualConfigurationForm.validateButton"
+                defaultMessage="{isValidating, select, true{Getting cluster info…} other{Get cluster info}}"
+                values={{ isValidating: form.isValidating }}
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiForm>

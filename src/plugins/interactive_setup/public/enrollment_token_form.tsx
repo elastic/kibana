@@ -124,10 +124,6 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           placeholder={i18n.translate('interactiveSetup.enrollmentTokenForm.tokenPlaceholder', {
             defaultMessage: 'Paste enrollment token from terminal',
           })}
-          style={{
-            fontFamily: euiThemeVars.euiCodeFontFamily,
-            fontSize: euiThemeVars.euiFontSizeXS,
-          }}
           onKeyUp={() =>
             form.setValue(
               'token',
@@ -148,7 +144,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
       <EuiSpacer />
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="left" iconType="gear" onClick={onCancel}>
+          <EuiButtonEmpty flush="right" iconType="gear" onClick={onCancel}>
             <FormattedMessage
               id="interactiveSetup.enrollmentTokenForm.cancelButton"
               defaultMessage="Configure manually"
