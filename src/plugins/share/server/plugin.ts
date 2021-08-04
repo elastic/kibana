@@ -15,6 +15,7 @@ import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/const
 import { UrlService } from '../common/url_service';
 import { ServerUrlService, ServerShortUrlClientFactory } from './url_service';
 import { registerUrlServiceRoutes } from './url_service/http/register_url_service_routes';
+import { LegacyShortUrlLocatorDefinition } from './url_service/short_urls/legacy_short_url_locator';
 
 /** @public */
 export interface SharePluginSetup {
@@ -46,6 +47,8 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         currentVersion: this.version,
       }),
     });
+
+    this.url.locators.create(new LegacyShortUrlLocatorDefinition());
 
     const router = core.http.createRouter();
 
