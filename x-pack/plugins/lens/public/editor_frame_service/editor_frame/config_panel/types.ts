@@ -8,17 +8,16 @@
 import {
   Visualization,
   FramePublicAPI,
-  Datasource,
   DatasourceDimensionEditorProps,
   VisualizationDimensionGroupConfig,
+  DatasourceMap,
 } from '../../../types';
 export interface ConfigPanelWrapperProps {
   activeDatasourceId: string;
   visualizationState: unknown;
-  visualizationMap: Record<string, Visualization>;
-  activeVisualizationId: string | null;
+  activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
@@ -33,7 +32,7 @@ export interface ConfigPanelWrapperProps {
 export interface LayerPanelProps {
   activeDatasourceId: string;
   visualizationState: unknown;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   activeVisualization: Visualization;
   framePublicAPI: FramePublicAPI;
   datasourceStates: Record<

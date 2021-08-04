@@ -38,6 +38,8 @@ export const useHostIsolationStatus = ({
     // isMounted tracks if a component is mounted before changing state
     let isMounted = true;
     let fleetAgentId: string;
+    setLoading(true);
+
     const fetchData = async () => {
       try {
         const metadataResponse = await getHostMetadata({ agentId, signal: abortCtrl.signal });
@@ -73,15 +75,9 @@ export const useHostIsolationStatus = ({
       }
     };
 
-    setLoading((prevState) => {
-      if (prevState) {
-        return prevState;
-      }
-      if (!isEmpty(agentId)) {
-        fetchData();
-      }
-      return true;
-    });
+    if (!isEmpty(agentId)) {
+      fetchData();
+    }
     return () => {
       // updates to show component is unmounted
       isMounted = false;

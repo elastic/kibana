@@ -237,7 +237,8 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const newAst = this.walkAst(cloneDeep(ast), (fn, link) => {
       const { state, references } = fn.extract(link.arguments);
       link.arguments = state;
-      allReferences.push(...references.map((r) => ({ ...r, name: `l${linkId++}_${r.name}` })));
+      allReferences.push(...references.map((r) => ({ ...r, name: `l${linkId}_${r.name}` })));
+      linkId = linkId + 1;
     });
     return { state: newAst, references: allReferences };
   }

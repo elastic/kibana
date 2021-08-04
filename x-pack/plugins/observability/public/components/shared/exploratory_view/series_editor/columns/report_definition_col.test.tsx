@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import {
   mockAppIndexPattern,
@@ -29,14 +29,16 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   mockUseValuesList([{ label: 'elastic-co', count: 10 }]);
 
-  it('should render properly', async function () {
+  it('renders', async () => {
     render(
       <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={mockUxSeries} />
     );
 
-    screen.getByText('Web Application');
-    screen.getByText('Environment');
-    screen.getByText('Search Environment');
+    await waitFor(() => {
+      expect(screen.getByText('Web Application')).toBeInTheDocument();
+      expect(screen.getByText('Environment')).toBeInTheDocument();
+      expect(screen.getByText('Search Environment')).toBeInTheDocument();
+    });
   });
 
   it('should render selected report definitions', async function () {
