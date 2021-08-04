@@ -73,23 +73,15 @@ const ORIENTATIONS = {
   },
 };
 
-const isDatatableColumn = (datatableColumn: unknown): datatableColumn is DatatableColumn =>
-  !!datatableColumn &&
-  typeof datatableColumn === 'object' &&
-  Object.prototype.hasOwnProperty.call(datatableColumn, 'id') &&
-  Object.prototype.hasOwnProperty.call(datatableColumn, 'name') &&
-  Object.prototype.hasOwnProperty.call(datatableColumn, 'meta') &&
-  typeof (datatableColumn as any).meta === 'object';
-
 const getColumn = (
   accessor: ExpressionValueVisDimension['accessor'],
   columns: Datatable['columns']
 ): DatatableColumn => {
-  if (isDatatableColumn(accessor)) {
-    return columns.filter(({ id }) => id === accessor.id)[0];
+  if (typeof accessor === 'number') {
+    return columns[accessor];
   }
 
-  return columns[accessor];
+  return columns.filter(({ id }) => id === accessor.id)[0];
 };
 
 export const TagCloudChart = ({
