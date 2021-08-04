@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'expressionShape';
-export const PLUGIN_NAME = 'expressionShape';
+import uuid from 'uuid/v4';
 
-export const SVG = 'SVG';
-export const CSS = 'CSS';
-export const FONT_FAMILY = '`font-family`';
-export const FONT_WEIGHT = '`font-weight`';
-export const BOOLEAN_TRUE = '`true`';
-export const BOOLEAN_FALSE = '`false`';
+export function getId(type: string): string {
+  return `${type}-${uuid()}`;
+}
