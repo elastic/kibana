@@ -80,7 +80,7 @@ export function Filtering({
 
       updateLayer(setFilter(columnId, layer, filter));
     }
-  }, [columnId, layer, queryInput, indexPattern, updateLayer, inputFilter, defaultFilter]);
+  }, [columnId, layer, queryInput, indexPattern, updateLayer, inputFilter]);
 
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
 
