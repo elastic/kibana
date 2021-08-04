@@ -132,12 +132,10 @@ export const createDetectionIndex = async (
     // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
     // and not .alerts-security.alerts (the alias). From the security solution perspective, all .siem-signals-<space id>-*
     // indices should have an alias to .alerts-security.alerts-<space id> so it's safe to add those aliases as the internal user.
-    await context.core.elasticsearch.client.asInternalUser.indices.putAlias({
-      index: `${index}-*`,
-      name: aadIndexAliasName,
-      body: {
-        is_write_index: false,
-      },
+    await addIndexAliases({
+      esClient: context.core.elasticsearch.client.asInternalUser,
+      index,
+      aadIndexAliasName,
     });
     const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
@@ -181,4 +179,28 @@ const addFieldAliasesToIndices = async ({
       allow_no_indices: true,
     } as estypes.IndicesPutMappingRequest);
   }
+};
+
+const addIndexAliases = async ({
+  esClient,
+  index,
+  aadIndexAliasName,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  aadIndexAliasName: string;
+}) => {
+  const { body: indices } = await esClient.indices.getAlias({ name: index });
+  const aliasActions = {
+    actions: Object.keys(indices).map((concreteIndexName) => {
+      return {
+        add: {
+          index: concreteIndexName,
+          alias: aadIndexAliasName,
+          is_write_index: false,
+        },
+      };
+    }),
+  };
+  await esClient.indices.updateAliases({ body: aliasActions });
 };
