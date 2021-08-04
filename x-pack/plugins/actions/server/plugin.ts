@@ -86,6 +86,7 @@ import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
+import { getMustacheLambdas } from './lib/mustache_lambdas';
 
 export interface PluginSetupContract {
   registerType<
@@ -541,9 +542,10 @@ export function renderActionParameterTemplates<Params extends ActionTypeParams =
   variables: Record<string, unknown>
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
+  const variablesAndLambdas = { ...variables, ...getMustacheLambdas() };
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
+    return actionType.renderParameterTemplates(params, variablesAndLambdas, actionId) as Params;
   } else {
-    return renderMustacheObject(params, variables);
+    return renderMustacheObject(params, variablesAndLambdas);
   }
 }
