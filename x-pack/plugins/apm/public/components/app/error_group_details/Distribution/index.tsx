@@ -75,6 +75,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
   );
 
   const tooltipProps: SettingsSpec['tooltip'] = {
+    stickTo: 'top',
     headerFormatter: (tooltip: TooltipValue) => {
       const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
       if (serie) {
