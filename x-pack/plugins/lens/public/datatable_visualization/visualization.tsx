@@ -310,8 +310,10 @@ export const getDatatableVisualization = ({
     ];
   },
 
-  getLayerType(state) {
-    return state.layerType;
+  getLayerType(layerId, state) {
+    if (state?.layerId === layerId) {
+      return state.layerType;
+    }
   },
 
   toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {

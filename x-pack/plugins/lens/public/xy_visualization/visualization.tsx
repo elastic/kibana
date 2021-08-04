@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
-import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
+import { XyToolbar, DimensionEditor, LayerHeader } from './xy_config_panel';
 import type {
   Visualization,
   OperationMetadata,
@@ -187,17 +187,11 @@ export const getXyVisualization = ({
     );
   },
 
-  getLayerType(state, layerId) {
-    return state.layers.find(({ layerId: id }) => id === layerId)?.layerType || layerTypes.DATA;
+  getLayerType(layerId, state) {
+    return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
-  getLayerTypes(state, { activeData, datasourceLayers }) {
-    const filledDataLayers = state.layers.filter(
-      ({ accessors, xAccessor }) => accessors.length || xAccessor
-    );
-
-    const isHorizontal = isHorizontalChart(state.layers);
-
+  getLayerTypes(state, frame) {
     const thresholdGroupIds = [
       {
         id: 'yThresholdLeft',
@@ -213,11 +207,22 @@ export const getXyVisualization = ({
       },
     ];
 
-    const dataLayers = state.layers.filter(
-      ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
+    const dataLayers =
+      state?.layers.filter(({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA) ||
+      [];
+    const filledDataLayers = dataLayers.filter(
+      ({ accessors, xAccessor }) => accessors.length || xAccessor
     );
-    const layerHasDateHistogramFn = checkScaleOperation('interval', 'date', datasourceLayers);
-    const thresholdGroups = getGroupsToShow(thresholdGroupIds, state, datasourceLayers);
+    const layerHasDateHistogramFn = checkScaleOperation(
+      'interval',
+      'date',
+      frame?.datasourceLayers || {}
+    );
+    const thresholdGroups = getGroupsToShow(
+      thresholdGroupIds,
+      state,
+      frame?.datasourceLayers || {}
+    );
 
     const layers = [
       {
@@ -242,13 +247,20 @@ export const getXyVisualization = ({
           : i18n.translate('xpack.lens.xyChart.addThresholdLayerLabelDisabledHelp', {
               defaultMessage: 'Add some data to enable threshold layer',
             }),
-        initialDimensions: thresholdGroups.map(({ id, label }) => ({
-          groupId: id,
-          columnId: generateId(),
-          dataType: 'number',
-          label: getAxisName(label, { isHorizontal }),
-          staticValue: getStaticValue(dataLayers, label, { activeData }, layerHasDateHistogramFn),
-        })),
+        initialDimensions: state
+          ? thresholdGroups.map(({ id, label }) => ({
+              groupId: id,
+              columnId: generateId(),
+              dataType: 'number',
+              label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+              staticValue: getStaticValue(
+                dataLayers,
+                label,
+                { activeData: frame?.activeData },
+                layerHasDateHistogramFn
+              ),
+            }))
+          : undefined,
       },
     ];
 
@@ -480,19 +492,10 @@ export const getXyVisualization = ({
     };
   },
 
-  getLayerContextMenuIcon({ state, layerId }) {
-    const layer = state.layers.find((l) => l.layerId === layerId);
-    const visualizationType = visualizationTypes.find((t) => t.id === layer?.seriesType);
-    return {
-      icon: visualizationType?.icon || 'gear',
-      label: visualizationType?.label || '',
-    };
-  },
-
-  renderLayerContextMenu(domElement, props) {
+  renderLayerHeader(domElement, props) {
     render(
       <I18nProvider>
-        <LayerContextMenu {...props} />
+        <LayerHeader {...props} />
       </I18nProvider>,
       domElement
     );
@@ -815,9 +818,12 @@ function getLayersByType(state: State, byType?: string) {
 
 function getGroupsToShow<T extends ThresholdBase>(
   thresholdLayers: T[],
-  state: State,
+  state: State | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ): T[] {
+  if (!state) {
+    return [];
+  }
   const dataLayers = state.layers.filter(
     ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
   );
@@ -922,7 +928,7 @@ function computeStaticValueForGroup(
         (max, row) => Math.max(row[columnId], max),
         -Infinity
       );
-      return (columnMax * 3) / 4;
+      return Number(((columnMax * 3) / 4).toFixed(2));
     }
   }
 }

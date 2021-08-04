@@ -276,8 +276,10 @@ export const getHeatmapVisualization = ({
     ];
   },
 
-  getLayerType(state) {
-    return state.layerType;
+  getLayerType(layerId, state) {
+    if (state?.layerId === layerId) {
+      return state.layerType;
+    }
   },
 
   toExpression(state, datasourceLayers, attributes): Ast | null {

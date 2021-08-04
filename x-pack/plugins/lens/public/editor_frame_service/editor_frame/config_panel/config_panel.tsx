@@ -24,7 +24,7 @@ import {
   updateVisualizationState,
   setToggleFullscreen,
 } from '../../../state_management';
-import { AddLayerButton } from './add_layer';
+import { AddLayerButton, getLayerType } from './add_layer';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
@@ -175,7 +175,7 @@ export function LayerPanels(
               addMaybeDefaultThreshold({
                 ...props,
                 layerId,
-                layerType: activeVisualization.getLayerType(visualizationState, layerId),
+                layerType: getLayerType(activeVisualization, visualizationState, layerId),
                 columnId,
                 updateAll,
               })

@@ -6,7 +6,7 @@
  */
 
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
-import type { MetricState } from '../../common/expressions';
+import { layerTypes, MetricState } from '../../common/expressions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 
 /**
@@ -22,7 +22,7 @@ export function getSuggestions({
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
     table.isMultiRow ||
-    keptLayerIds.length > 1 ||
+    keptLayerIds.length !== 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.columns.length !== 1 ||
     table.columns[0].operation.dataType !== 'number'
@@ -49,6 +49,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<MetricSt
     state: {
       layerId: table.layerId,
       accessor: col.columnId,
+      layerType: layerTypes.DATA,
     },
   };
 }

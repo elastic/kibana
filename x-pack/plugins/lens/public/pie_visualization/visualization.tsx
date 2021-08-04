@@ -243,8 +243,8 @@ export const getPieVisualization = ({
     ];
   },
 
-  getLayerType(state, layerId) {
-    return state.layers.find(({ layerId: id }) => id === layerId)?.layerType || layerTypes.DATA;
+  getLayerType(layerId, state) {
+    return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
   toExpression: (state, layers, attributes) =>

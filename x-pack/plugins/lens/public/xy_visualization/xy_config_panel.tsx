@@ -22,6 +22,7 @@ import {
   EuiIcon,
   EuiComboBox,
   EuiRange,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {
@@ -32,7 +33,7 @@ import type {
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
 import type { FormatFactory } from '../../common';
-import type {
+import {
   SeriesType,
   YAxisMode,
   AxesSettingsConfig,
@@ -40,6 +41,7 @@ import type {
   YConfig,
   LineStyle,
   FillStyle,
+  layerTypes,
 } from '../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -50,6 +52,7 @@ import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
+import { LensIconChartBarThreshold } from '../assets/chart_bar_threshold';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -91,6 +94,69 @@ const legendOptions: Array<{
     }),
   },
 ];
+
+export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
+  const { state, layerId } = props;
+  const horizontalOnly = isHorizontalChart(state.layers);
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index];
+
+  if (!layer) {
+    return null;
+  }
+
+  // if it's a threshold just draw a static text
+  if (layer.layerType === layerTypes.THRESHOLD) {
+    return (
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        className={'lnsLayerPanel__settingsStaticHeader'}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={LensIconChartBarThreshold} />{' '}
+        </EuiFlexItem>
+        <EuiFlexItem grow className={'lnsLayerPanel__settingsTitle'}>
+          {i18n.translate('xpack.lens.xyChart.layerThresholdLabel', {
+            defaultMessage: 'Thresholds',
+          })}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  const options = visualizationTypes
+    .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+    .map((t) => ({
+      value: t.id,
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={t.icon} />
+          </EuiFlexItem>
+          <EuiFlexItem grow>{t.label}</EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': `lnsXY_seriesType-${t.id}`,
+    }));
+
+  // else show a super select with the chart options to pick from
+  return (
+    <EuiSuperSelect
+      className="lnsLayerChartSwitch"
+      compressed
+      fullWidth
+      options={options}
+      valueOfSelected={layer.seriesType}
+      onChange={(seriesType) => {
+        trackUiEvent('xy_change_layer_display');
+        props.setState(
+          updateLayer(state, { ...layer, seriesType: seriesType as SeriesType }, index)
+        );
+      }}
+    />
+  );
+}
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;

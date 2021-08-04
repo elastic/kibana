@@ -121,8 +121,10 @@ export const metricVisualization: Visualization<MetricState> = {
     ];
   },
 
-  getLayerType(state) {
-    return state.layerType;
+  getLayerType(layerId, state) {
+    if (state?.layerId === layerId) {
+      return state.layerType;
+    }
   },
 
   toExpression,

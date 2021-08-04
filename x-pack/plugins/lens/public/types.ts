@@ -610,8 +610,8 @@ export interface Visualization<T = unknown> {
 
   /** Retrieve a list of supported layer types with initialization data */
   getLayerTypes: (
-    state: T,
-    frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
+    state?: T,
+    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
   ) => Array<{
     type: LayerType;
     label: string;
@@ -626,7 +626,7 @@ export interface Visualization<T = unknown> {
       staticValue: unknown;
     }>;
   }>;
-  getLayerType: (state: T, layerId: string) => string | undefined;
+  getLayerType: (layerId: string, state?: T) => LayerType | undefined;
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 
@@ -638,10 +638,10 @@ export interface Visualization<T = unknown> {
   ) => { groups: VisualizationDimensionGroupConfig[]; supportStaticValue?: boolean };
 
   /**
-   * Popover contents that open when the user clicks the contextMenuIcon. This can be used
-   * for extra configurability, such as for styling the legend or axis
+   * Header rendered as layer title This can be used for both static and dynamic content lioke
+   * for extra configurability, such as for switch chart type
    */
-  renderLayerContextMenu?: (
+  renderLayerHeader?: (
     domElement: Element,
     props: VisualizationLayerWidgetProps<T>
   ) => ((cleanupElement: Element) => void) | void;
@@ -653,14 +653,6 @@ export interface Visualization<T = unknown> {
     domElement: Element,
     props: VisualizationToolbarProps<T>
   ) => ((cleanupElement: Element) => void) | void;
-  /**
-   * Visualizations can provide a custom icon which will open a layer-specific popover
-   * If no icon is provided, gear icon is default
-   */
-  getLayerContextMenuIcon?: (opts: {
-    state: T;
-    layerId: string;
-  }) => { icon: IconType | 'gear'; label: string } | undefined;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction

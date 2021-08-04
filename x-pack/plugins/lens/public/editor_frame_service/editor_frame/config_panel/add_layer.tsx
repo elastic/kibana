@@ -17,13 +17,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FramePublicAPI, Visualization } from '../../../types';
+import { layerTypes } from '../../../../common/expressions';
+import type { FramePublicAPI, Visualization } from '../../../types';
 
 interface AddLayerButtonProps {
   visualization: Visualization;
   visualizationState: unknown;
   onAddLayerClick: (layerType: string) => void;
   layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+}
+
+export function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
+  return visualization.getLayerType(layerId, state) || layerTypes.DATA;
 }
 
 export function AddLayerButton({
@@ -38,8 +43,8 @@ export function AddLayerButton({
   if (!hasMultipleLayers) {
     return null;
   }
-  const layerTypes = visualization.getLayerTypes?.(visualizationState, layersMeta);
-  if (layerTypes?.length === 1) {
+  const supportedLayers = visualization.getLayerTypes?.(visualizationState, layersMeta);
+  if (supportedLayers?.length === 1) {
     return (
       <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
         <EuiToolTip
@@ -63,7 +68,7 @@ export function AddLayerButton({
             })}
             fill
             color="text"
-            onClick={() => onAddLayerClick(layerTypes[0].type)}
+            onClick={() => onAddLayerClick(supportedLayers[0].type)}
             iconType="layers"
           >
             {i18n.translate('xpack.lens.configPanel.addLayerButton', {
@@ -104,7 +109,7 @@ export function AddLayerButton({
       >
         <EuiContextMenuPanel
           size="s"
-          items={layerTypes.map(({ type, label, icon, disabled, tooltipContent }) => {
+          items={supportedLayers.map(({ type, label, icon, disabled, tooltipContent }) => {
             return (
               <EuiContextMenuItem
                 key={type}

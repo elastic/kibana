@@ -285,7 +285,7 @@ export function LayerPanel(
       >
         <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="s">
           <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
+            <EuiFlexItem grow className="lnsLayerPanel__settingsFlexItem">
               <LayerSettings
                 layerId={layerId}
                 layerConfigProps={{
@@ -295,7 +295,16 @@ export function LayerPanel(
                 activeVisualization={activeVisualization}
               />
             </EuiFlexItem>
-
+            <EuiFlexItem grow={false} className="lnsLayerPanel__settingsRemoveIcon">
+              <RemoveLayerButton
+                onRemoveLayer={onRemoveLayer}
+                layerIndex={layerIndex}
+                isOnlyLayer={isOnlyLayer}
+                activeVisualization={activeVisualization}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             {layerDatasource && (
               <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
                 <NativeRenderer
@@ -475,19 +484,6 @@ export function LayerPanel(
               </EuiFormRow>
             );
           })}
-
-          <EuiSpacer size="m" />
-
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <RemoveLayerButton
-                onRemoveLayer={onRemoveLayer}
-                layerIndex={layerIndex}
-                isOnlyLayer={isOnlyLayer}
-                activeVisualization={activeVisualization}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </EuiPanel>
       </section>
 
