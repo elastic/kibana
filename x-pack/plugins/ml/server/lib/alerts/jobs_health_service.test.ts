@@ -12,6 +12,8 @@ import { MlClient } from '../ml_client';
 import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
 import { AnnotationService } from '../../models/annotation_service/annotation';
 
+const MOCK_DATE_NOW = 1487076708000;
+
 describe('JobsHealthService', () => {
   const mlClient = ({
     getJobs: jest.fn().mockImplementation(({ job_id: jobIds = [] }) => {
@@ -21,12 +23,15 @@ describe('JobsHealthService', () => {
         jobs = [
           ({
             job_id: 'test_job_01',
+            analysis_config: { bucket_span: '1h' },
           } as unknown) as MlJob,
           ({
             job_id: 'test_job_02',
+            analysis_config: { bucket_span: '15m' },
           } as unknown) as MlJob,
           ({
             job_id: 'test_job_03',
+            analysis_config: { bucket_span: '8m' },
           } as unknown) as MlJob,
         ];
       }
@@ -35,6 +40,7 @@ describe('JobsHealthService', () => {
         jobs = [
           ({
             job_id: jobIds[0],
+            analysis_config: { bucket_span: '1h' },
           } as unknown) as MlJob,
         ];
       }
@@ -125,7 +131,7 @@ describe('JobsHealthService', () => {
   let dateNowSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => 1487076708000);
+    dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
   });
 
   afterEach(() => {
@@ -193,7 +199,7 @@ describe('JobsHealthService', () => {
           delayedData: {
             enabled: true,
             docsCount: 10,
-            timeInterval: '10m',
+            timeInterval: '4h',
           },
           behindRealtime: { enabled: false, timeInterval: null },
           mml: { enabled: false },
@@ -211,6 +217,12 @@ describe('JobsHealthService', () => {
       },
       null
     );
+
+    expect(annotationService.getDelayedDataAnnotations).toHaveBeenCalledWith({
+      jobIds: ['test_job_01', 'test_job_02'],
+      // 1487076708000 - 4h
+      earliestMs: 1487062308000,
+    });
 
     expect(executionResult).toEqual([
       {
@@ -262,7 +274,8 @@ describe('JobsHealthService', () => {
     expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
     expect(annotationService.getDelayedDataAnnotations).toHaveBeenCalledWith({
       jobIds: ['test_job_01', 'test_job_02'],
-      earliestMs: undefined,
+      // 1487076708000 - 3600 * 1000 * 2
+      earliestMs: 1487069508000,
     });
 
     expect(executionResult).toEqual([

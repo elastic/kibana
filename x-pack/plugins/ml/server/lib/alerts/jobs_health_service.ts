@@ -29,6 +29,7 @@ import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
+import { isDefined } from '../../../common/types/guards';
 
 interface TestResult {
   name: string;
@@ -106,6 +107,7 @@ export function jobsHealthServiceProvider(
     const maxBucketLengthInSeconds = resolveMaxTimeInterval(bucketSpans) ?? 0;
 
     if (!maxBucketLengthInSeconds) {
+      // technically it is only possible if the ML backend contains invalid bucket spans.
       logger.error('Unable to resolve resulting bucket length.');
     }
 
@@ -113,14 +115,16 @@ export function jobsHealthServiceProvider(
 
     const customIntervalOffsetTimestamp = timeInterval
       ? currentTimestamp - parseInterval(timeInterval)!.asMilliseconds()
-      : 0;
+      : null;
 
-    const previousCheckTimestamp = previousStartedAt ? previousStartedAt.getTime() : 0;
+    const previousCheckTimestamp = previousStartedAt ? previousStartedAt.getTime() : null;
 
     return Math.min(
-      doubleBucketOffsetTimestamp,
-      customIntervalOffsetTimestamp,
-      previousCheckTimestamp
+      ...[
+        doubleBucketOffsetTimestamp,
+        customIntervalOffsetTimestamp,
+        previousCheckTimestamp,
+      ].filter(isDefined)
     );
   };
 
