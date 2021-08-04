@@ -33,6 +33,7 @@ export interface ContextValue {
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   deprecations: DeprecationsServiceStart;
   isCloudEnabled: boolean;
+  cloudDeploymentUrl: string;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

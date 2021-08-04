@@ -43,6 +43,9 @@ export class UpgradeAssistantUIPlugin implements Plugin {
     });
 
     const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
+    const cloudDeploymentUrl: string = `${cloud?.baseUrl ?? ''}/deployments/${
+      cloud?.cloudId ?? ''
+    }`;
 
     appRegistrar.registerApp({
       id: 'upgrade_assistant',
@@ -63,7 +66,8 @@ export class UpgradeAssistantUIPlugin implements Plugin {
           params,
           kibanaVersionInfo,
           readonly,
-          isCloudEnabled
+          isCloudEnabled,
+          cloudDeploymentUrl
         );
 
         return () => {

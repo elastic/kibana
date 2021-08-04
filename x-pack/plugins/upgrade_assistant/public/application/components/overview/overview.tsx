@@ -77,7 +77,14 @@ interface Props {
 }
 
 export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
-  const { kibanaVersionInfo, breadcrumbs, docLinks, api, isCloudEnabled } = useAppContext();
+  const {
+    kibanaVersionInfo,
+    breadcrumbs,
+    docLinks,
+    api,
+    isCloudEnabled,
+    cloudDeploymentUrl,
+  } = useAppContext();
   const { currentMajor } = kibanaVersionInfo;
 
   useEffect(() => {
@@ -128,7 +135,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
             steps={[
               getResolveStep({ history }),
               getObserveStep({ docLinks }),
-              getUpgradeStep({ docLinks, isCloudEnabled }),
+              getUpgradeStep({ docLinks, isCloudEnabled, cloudDeploymentUrl }),
             ]}
           />
         </>

@@ -44,9 +44,11 @@ const i18nTexts = {
 export const getUpgradeStep = ({
   docLinks,
   isCloudEnabled,
+  cloudDeploymentUrl,
 }: {
   docLinks: DocLinksStart;
   isCloudEnabled: boolean;
+  cloudDeploymentUrl: string;
 }): EuiStepProps => {
   let callToAction;
 
@@ -54,7 +56,7 @@ export const getUpgradeStep = ({
     callToAction = (
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton href={docLinks.links.elasticsearch.migrating8}>
+          <EuiButton href={cloudDeploymentUrl} target="_blank">
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.upgradeStepCloudLink"
               defaultMessage="Upgrade on Cloud"
@@ -74,7 +76,7 @@ export const getUpgradeStep = ({
     );
   } else {
     callToAction = (
-      <EuiButton href={docLinks.links.elasticsearch.migrating8}>
+      <EuiButton href={docLinks.links.elasticsearch.migrating8} target="_blank">
         {i18nTexts.upgradeStepLink}
         <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
       </EuiButton>
