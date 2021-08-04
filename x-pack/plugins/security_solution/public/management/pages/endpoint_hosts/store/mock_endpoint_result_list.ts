@@ -30,6 +30,8 @@ import {
 import { GetPolicyListResponse } from '../../policy/types';
 import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
 import { ACTION_STATUS_ROUTE } from '../../../../../common/endpoint/constants';
+import { TRANSFORM_STATS_URL } from '../../../../../common/constants';
+import { TransformStats, TransformStatsResponse } from '../types';
 
 const generator = new EndpointDocGenerator('seed');
 
@@ -87,6 +89,7 @@ const endpointListApiPathHandlerMocks = ({
   policyResponse = generator.generatePolicyResponse(),
   agentPolicy = generator.generateAgentPolicy(),
   totalAgentsUsingEndpoint = 0,
+  transforms = [],
 }: {
   /** route handlers will be setup for each individual host in this array */
   endpointsResults?: HostResultList['hosts'];
@@ -95,6 +98,7 @@ const endpointListApiPathHandlerMocks = ({
   policyResponse?: HostPolicyResponse;
   agentPolicy?: GetAgentPoliciesResponseItem;
   totalAgentsUsingEndpoint?: number;
+  transforms?: TransformStats[];
 } = {}) => {
   const apiHandlers = {
     // endpoint package info
@@ -158,6 +162,11 @@ const endpointListApiPathHandlerMocks = ({
     [ACTION_STATUS_ROUTE]: (): PendingActionsResponse => {
       return pendingActionsResponseMock();
     },
+
+    [TRANSFORM_STATS_URL]: (): TransformStatsResponse => ({
+      count: transforms.length,
+      transforms,
+    }),
   };
 
   // Build a GET route handler for each endpoint details based on the list of Endpoints passed on input

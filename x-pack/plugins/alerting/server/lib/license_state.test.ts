@@ -272,6 +272,42 @@ describe('ensureLicenseForAlertType()', () => {
   });
 });
 
+describe('getIsSecurityEnabled()', () => {
+  let license: Subject<ILicense>;
+  let licenseState: ILicenseState;
+  beforeEach(() => {
+    license = new Subject();
+    licenseState = new LicenseState(license);
+  });
+
+  test('should return null when license is not defined', () => {
+    expect(licenseState.getIsSecurityEnabled()).toBeNull();
+  });
+
+  test('should return null when license is unavailable', () => {
+    license.next(createUnavailableLicense());
+    expect(licenseState.getIsSecurityEnabled()).toBeNull();
+  });
+
+  test('should return true if security is enabled', () => {
+    const basicLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'basic' },
+      features: { security: { isEnabled: true, isAvailable: true } },
+    });
+    license.next(basicLicense);
+    expect(licenseState.getIsSecurityEnabled()).toEqual(true);
+  });
+
+  test('should return false if security is not enabled', () => {
+    const basicLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'basic' },
+      features: { security: { isEnabled: false, isAvailable: true } },
+    });
+    license.next(basicLicense);
+    expect(licenseState.getIsSecurityEnabled()).toEqual(false);
+  });
+});
+
 function createUnavailableLicense() {
   const unavailableLicense = licensingMock.createLicenseMock();
   unavailableLicense.isAvailable = false;
