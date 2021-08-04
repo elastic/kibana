@@ -26,6 +26,8 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
 import {
@@ -66,6 +68,8 @@ import {
   NOTIFICATIONS_ID,
   REFERENCE_RULE_ALERT_TYPE_ID,
   REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+  CUSTOM_ALERT_TYPE_ID,
+  DEFAULT_SPACE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -88,7 +92,9 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
+import { EndpointMetadataService } from './endpoint/services/metadata';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -180,6 +186,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       APP_ID,
       (context, request, response) => ({
         getAppClient: () => this.appClientFactory.create(request),
+        getSpaceId: () => plugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
+        getExecutionLogClient: () =>
+          new RuleExecutionLogClient({
+            ruleDataService: plugins.ruleRegistry.ruleDataService,
+            // TODO check if savedObjects.client contains spaceId
+            savedObjectsClient: context.core.savedObjects.client,
+          }),
       })
     );
 
@@ -198,11 +211,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
 
       const initializeRuleDataTemplates = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
-
         if (!ruleDataService.isWriteEnabled()) {
           return;
         }
+        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
         await ruleDataService.createOrUpdateComponentTemplate({
           name: componentTemplateName,
@@ -211,7 +223,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
+              mappings: { dynamic: false, ...mappingFromFieldMap(technicalRuleFieldMap) },
             },
           },
         });
@@ -241,8 +253,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         () => initializeRuleDataTemplatesPromise
       );
 
-      // sec
-
       // Register reference rule types via rule-registry
       this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
       this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
@@ -270,6 +280,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const referenceRuleTypes = [
       REFERENCE_RULE_ALERT_TYPE_ID,
       REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+      CUSTOM_ALERT_TYPE_ID,
     ];
     const ruleTypes = [
       SIGNALS_ID,
@@ -290,6 +301,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ml: plugins.ml,
         lists: plugins.lists,
         mergeStrategy: this.config.alertMergeStrategy,
+        experimentalFeatures,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
@@ -385,11 +397,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher.start(licenseService);
     }
 
+    const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
+
     this.endpointAppContextService.start({
       agentService: plugins.fleet?.agentService,
       packageService: plugins.fleet?.packageService,
       packagePolicyService: plugins.fleet?.packagePolicyService,
       agentPolicyService: plugins.fleet?.agentPolicyService,
+      endpointMetadataService: new EndpointMetadataService(
+        core.savedObjects,
+        plugins.fleet?.agentService!,
+        plugins.fleet?.agentPolicyService!,
+        logger
+      ),
       appClientFactory: this.appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
@@ -398,16 +418,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       logger,
       manifestManager,
       registerIngestCallback,
-      savedObjectsStart: core.savedObjects,
       licenseService,
-      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
+      exceptionListsClient: exceptionListClient,
     });
 
     this.telemetryEventsSender.start(
       core,
       plugins.telemetry,
       plugins.taskManager,
-      this.endpointAppContextService
+      this.endpointAppContextService,
+      exceptionListClient
     );
     return {};
   }

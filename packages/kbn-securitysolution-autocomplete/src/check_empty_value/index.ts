@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternFieldBase } from '@kbn/es-query';
 import * as i18n from '../translations';
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType } from '../../../../../../../src/plugins/data/common';
-type IFieldType = any;
 
 /**
  * Determines if empty value is ok
  */
 export const checkEmptyValue = (
   param: string | undefined,
-  field: IFieldType | undefined,
+  field: IndexPatternFieldBase | undefined,
   isRequired: boolean,
   touched: boolean
 ): string | undefined | null => {

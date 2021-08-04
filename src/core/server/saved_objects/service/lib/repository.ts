@@ -1705,8 +1705,20 @@ export class SavedObjectsRepository {
     } = options;
 
     const normalizedCounterFields = counterFields.map((counterField) => {
-      const fieldName = typeof counterField === 'string' ? counterField : counterField.fieldName;
-      const incrementBy = typeof counterField === 'string' ? 1 : counterField.incrementBy || 1;
+      /**
+       * no counterField configs provided, instead a field name string was passed.
+       * ie `incrementCounter(so_type, id, ['my_field_name'])`
+       * Using the default of incrementing by 1
+       */
+      if (typeof counterField === 'string') {
+        return {
+          fieldName: counterField,
+          incrementBy: initialize ? 0 : 1,
+        };
+      }
+
+      const { incrementBy = 1, fieldName } = counterField;
+
       return {
         fieldName,
         incrementBy: initialize ? 0 : incrementBy,

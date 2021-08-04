@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType } from '../../../../../../../src/plugins/data/common';
-type IFieldType = any;
+import { IndexPatternFieldBase } from '@kbn/es-query';
 
 import {
   EXCEPTION_OPERATORS,
@@ -22,10 +20,10 @@ import {
 /**
  * Returns the appropriate operators given a field type
  *
- * @param field IFieldType selected field
+ * @param field IndexPatternFieldBase selected field
  *
  */
-export const getOperators = (field: IFieldType | undefined): OperatorOption[] => {
+export const getOperators = (field: IndexPatternFieldBase | undefined): OperatorOption[] => {
   if (field == null) {
     return [isOperator];
   } else if (field.type === 'boolean') {

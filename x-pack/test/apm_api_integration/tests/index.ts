@@ -119,6 +119,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./services/error_groups_detailed_statistics'));
     });
 
+    describe('services/detailed_statistics', function () {
+      loadTestFile(require.resolve('./services/services_detailed_statistics'));
+    });
+
     // Settinges
     describe('settings/anomaly_detection/basic', function () {
       loadTestFile(require.resolve('./settings/anomaly_detection/basic'));
@@ -164,14 +168,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('transactions/latency', function () {
       loadTestFile(require.resolve('./transactions/latency'));
-    });
-
-    describe('transactions/throughput', function () {
-      loadTestFile(require.resolve('./transactions/throughput'));
-    });
-
-    describe('transactions/top_transaction_groups', function () {
-      loadTestFile(require.resolve('./transactions/top_transaction_groups'));
     });
 
     describe('transactions/transactions_groups_main_statistics', function () {

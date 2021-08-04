@@ -11,6 +11,9 @@ import {
   EuiSpacer,
   EuiLoadingContent,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -142,6 +145,8 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 {enrichmentCount > 0 && (
                   <ThreatSummaryView
+                    browserFields={browserFields}
+                    data={data}
                     eventId={id}
                     timelineId={timelineId}
                     enrichments={allEnrichments}
@@ -175,10 +180,25 @@ const EventDetailsComponent: React.FC<Props> = ({
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
             name: (
-              <span>
-                {`${i18n.THREAT_INTEL} `}
-                {enrichmentsLoading ? <EuiLoadingSpinner /> : `(${enrichmentCount})`}
-              </span>
+              <EuiFlexGroup
+                direction="row"
+                alignItems={'center'}
+                justifyContent={'spaceAround'}
+                gutterSize="xs"
+              >
+                <EuiFlexItem>
+                  <span>{i18n.THREAT_INTEL}</span>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {enrichmentsLoading ? (
+                    <EuiLoadingSpinner />
+                  ) : (
+                    <EuiNotificationBadge data-test-subj="enrichment-count-notification">
+                      {enrichmentCount}
+                    </EuiNotificationBadge>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ),
             content: (
               <>

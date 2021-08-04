@@ -5,29 +5,43 @@
  * 2.0.
  */
 
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { compose, withState, lifecycle } from 'recompose';
+import { useSelector } from 'react-redux';
 import { getAssets } from '../../state/selectors/assets';
 import { getWorkpadInfo } from '../../state/selectors/workpad';
 import { ArgForm as Component } from './arg_form';
 
-export const ArgForm = compose(
-  withState('label', 'setLabel', ({ label, argTypeInstance }) => {
-    return label || argTypeInstance.displayName || argTypeInstance.name;
-  }),
-  withState('resolvedArgValue', 'setResolvedArgValue'),
-  withState('renderError', 'setRenderError', false),
-  lifecycle({
-    componentDidUpdate(prevProps) {
-      if (prevProps.templateProps.argValue !== this.props.templateProps.argValue) {
-        this.props.setRenderError(false);
-        this.props.setResolvedArgValue();
-      }
-    },
-  }),
-  connect((state) => ({ workpad: getWorkpadInfo(state), assets: getAssets(state) }))
-)(Component);
+const getLabel = (label, argTypeInstance) =>
+  label || argTypeInstance.displayName || argTypeInstance.name;
+
+export const ArgForm = (props) => {
+  const { argTypeInstance, label: labelFromProps, templateProps } = props;
+  const [label, setLabel] = useState(getLabel(labelFromProps, argTypeInstance));
+  const [resolvedArgValue, setResolvedArgValue] = useState(null);
+  const [renderError, setRenderError] = useState(false);
+  const workpad = useSelector(getWorkpadInfo);
+  const assets = useSelector(getAssets);
+
+  useEffect(() => {
+    setRenderError(false);
+    setResolvedArgValue();
+  }, [templateProps?.argValue]);
+
+  return (
+    <Component
+      {...props}
+      workpad={workpad}
+      assets={assets}
+      label={label}
+      setLabel={setLabel}
+      resolvedArgValue={resolvedArgValue}
+      setResolvedArgValue={setResolvedArgValue}
+      renderError={renderError}
+      setRenderError={setRenderError}
+    />
+  );
+};
 
 ArgForm.propTypes = {
   label: PropTypes.string,

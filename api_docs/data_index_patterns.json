@@ -388,7 +388,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-          "lineNumber": 84
+          "lineNumber": 85
         },
         "deprecated": false,
         "children": [
@@ -424,7 +424,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-              "lineNumber": 85
+              "lineNumber": 86
             },
             "deprecated": false,
             "children": [
@@ -457,7 +457,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                  "lineNumber": 86
+                  "lineNumber": 87
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -474,7 +474,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                  "lineNumber": 87
+                  "lineNumber": 88
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -528,7 +528,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-              "lineNumber": 98
+              "lineNumber": 100
             },
             "deprecated": false,
             "children": [
@@ -550,7 +550,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                  "lineNumber": 98
+                  "lineNumber": 100
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -567,7 +567,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                  "lineNumber": 98
+                  "lineNumber": 100
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -588,7 +588,7 @@
         "label": "getCapabilitiesForRollupIndices",
         "description": [],
         "signature": [
-          "(indices: { [key: string]: any; }) => { [key: string]: any; }"
+          "(indices: Record<string, { rollup_jobs: any; }>) => { [key: string]: any; }"
         ],
         "source": {
           "path": "src/plugins/data/server/index_patterns/fetcher/lib/map_capabilities.ts",
@@ -598,34 +598,20 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-server.getCapabilitiesForRollupIndices.$1.indices",
+            "id": "def-server.getCapabilitiesForRollupIndices.$1",
             "type": "Object",
             "tags": [],
             "label": "indices",
             "description": [],
+            "signature": [
+              "Record<string, { rollup_jobs: any; }>"
+            ],
             "source": {
               "path": "src/plugins/data/server/index_patterns/fetcher/lib/map_capabilities.ts",
               "lineNumber": 11
             },
             "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.getCapabilitiesForRollupIndices.$1.indices.Unnamed",
-                "type": "Any",
-                "tags": [],
-                "label": "Unnamed",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "source": {
-                  "path": "src/plugins/data/server/index_patterns/fetcher/lib/map_capabilities.ts",
-                  "lineNumber": 11
-                },
-                "deprecated": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -639,7 +625,15 @@
         "label": "mergeCapabilitiesWithFields",
         "description": [],
         "signature": [
-          "(rollupIndexCapabilities: { [key: string]: any; }, fieldsFromFieldCapsApi: { [key: string]: any; }, previousFields?: ",
+          "(rollupIndexCapabilities: { [key: string]: any; }, fieldsFromFieldCapsApi: Record<string, ",
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-server.FieldDescriptor",
+            "text": "FieldDescriptor"
+          },
+          ">, previousFields?: ",
           {
             "pluginId": "data",
             "scope": "server",
@@ -696,34 +690,28 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-server.mergeCapabilitiesWithFields.$2.fieldsFromFieldCapsApi",
+            "id": "def-server.mergeCapabilitiesWithFields.$2",
             "type": "Object",
             "tags": [],
             "label": "fieldsFromFieldCapsApi",
             "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "data",
+                "scope": "server",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-server.FieldDescriptor",
+                "text": "FieldDescriptor"
+              },
+              ">"
+            ],
             "source": {
               "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
               "lineNumber": 15
             },
             "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.mergeCapabilitiesWithFields.$2.fieldsFromFieldCapsApi.Unnamed",
-                "type": "Any",
-                "tags": [],
-                "label": "Unnamed",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "source": {
-                  "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
-                  "lineNumber": 15
-                },
-                "deprecated": false
-              }
-            ]
+            "isRequired": true
           },
           {
             "parentPluginId": "data",
@@ -3193,13 +3181,7 @@
             "label": "subType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
+              "IFieldSubType",
               " | undefined"
             ],
             "source": {
@@ -3292,13 +3274,7 @@
             "description": [],
             "signature": [
               "() => { count: number; script: string | undefined; lang: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
+              "IFieldSubType",
               " | undefined; customLabel: string | undefined; }"
             ],
             "source": {
@@ -4941,7 +4917,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 75
+          "lineNumber": 76
         },
         "deprecated": false,
         "children": [
@@ -4957,7 +4933,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 76
+              "lineNumber": 77
             },
             "deprecated": false
           }
@@ -4973,7 +4949,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 79
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -4989,7 +4965,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -5005,7 +4981,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 81
+              "lineNumber": 82
             },
             "deprecated": false
           }
@@ -5021,9 +4997,20 @@
         "description": [
           "\nSerialized version of IndexPatternField"
         ],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          " extends ",
+          "IndexPatternFieldBase"
+        ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 197
+          "lineNumber": 200
         },
         "deprecated": false,
         "children": [
@@ -5041,43 +5028,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 201
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.script",
-            "type": "string",
-            "tags": [],
-            "label": "script",
-            "description": [
-              "\nScripted field painless script"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 205
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.lang",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "lang",
-            "description": [
-              "\nScripted field langauge\nPainless is the only valid scripted field language"
-            ],
-            "signature": [
-              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 210
+              "lineNumber": 204
             },
             "deprecated": false
           },
@@ -5093,7 +5044,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 211
+              "lineNumber": 205
             },
             "deprecated": false
           },
@@ -5116,33 +5067,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 212
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 213
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 214
+              "lineNumber": 206
             },
             "deprecated": false
           },
@@ -5158,23 +5083,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 215
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.scripted",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "scripted",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 216
+              "lineNumber": 207
             },
             "deprecated": false
           },
@@ -5187,7 +5096,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 217
+              "lineNumber": 208
             },
             "deprecated": false
           },
@@ -5200,7 +5109,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 218
+              "lineNumber": 209
             },
             "deprecated": false
           },
@@ -5216,30 +5125,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 219
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.subType",
-            "type": "Object",
-            "tags": [],
-            "label": "subType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
-              " | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 220
+              "lineNumber": 210
             },
             "deprecated": false
           },
@@ -5255,7 +5141,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 221
+              "lineNumber": 211
             },
             "deprecated": false
           },
@@ -5271,7 +5157,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 222
+              "lineNumber": 212
             },
             "deprecated": false
           },
@@ -5294,7 +5180,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 223
+              "lineNumber": 213
             },
             "deprecated": false
           },
@@ -5310,7 +5196,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 225
+              "lineNumber": 215
             },
             "deprecated": false
           },
@@ -5326,7 +5212,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 226
+              "lineNumber": 216
             },
             "deprecated": false
           }
@@ -5342,7 +5228,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 177
+          "lineNumber": 180
         },
         "deprecated": false,
         "children": [
@@ -5358,7 +5244,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 178
+              "lineNumber": 181
             },
             "deprecated": false
           },
@@ -5374,7 +5260,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 179
+              "lineNumber": 182
             },
             "deprecated": false
           },
@@ -5390,7 +5276,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 180
+              "lineNumber": 183
             },
             "deprecated": false
           },
@@ -5406,7 +5292,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 181
+              "lineNumber": 184
             },
             "deprecated": false
           },
@@ -5419,7 +5305,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 182
+              "lineNumber": 185
             },
             "deprecated": false
           },
@@ -5431,17 +5317,11 @@
             "label": "type",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.KBN_FIELD_TYPES",
-                "text": "KBN_FIELD_TYPES"
-              }
+              "KBN_FIELD_TYPES"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 183
+              "lineNumber": 186
             },
             "deprecated": false
           },
@@ -5457,7 +5337,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 184
+              "lineNumber": 187
             },
             "deprecated": false
           },
@@ -5470,7 +5350,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 185
+              "lineNumber": 188
             },
             "deprecated": false
           },
@@ -5483,7 +5363,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 186
+              "lineNumber": 189
             },
             "deprecated": false
           },
@@ -5496,7 +5376,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 187
+              "lineNumber": 190
             },
             "deprecated": false
           },
@@ -5512,7 +5392,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 188
+              "lineNumber": 191
             },
             "deprecated": false
           },
@@ -5524,18 +5404,12 @@
             "label": "subType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
+              "IFieldSubType",
               " | undefined"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 189
+              "lineNumber": 192
             },
             "deprecated": false
           },
@@ -5558,7 +5432,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 190
+              "lineNumber": 193
             },
             "deprecated": false
           },
@@ -5574,7 +5448,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 191
+              "lineNumber": 194
             },
             "deprecated": false
           }
@@ -5590,7 +5464,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 129
+          "lineNumber": 130
         },
         "deprecated": false,
         "children": [
@@ -5603,7 +5477,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 130
+              "lineNumber": 131
             },
             "deprecated": false
           },
@@ -5619,7 +5493,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 131
+              "lineNumber": 132
             },
             "deprecated": false
           },
@@ -5635,7 +5509,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 132
+              "lineNumber": 133
             },
             "deprecated": false
           },
@@ -5651,7 +5525,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 133
+              "lineNumber": 134
             },
             "deprecated": false
           },
@@ -5667,7 +5541,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 134
+              "lineNumber": 135
             },
             "deprecated": false
           },
@@ -5683,7 +5557,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 135
+              "lineNumber": 136
             },
             "deprecated": false
           }
@@ -5699,7 +5573,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 138
+          "lineNumber": 139
         },
         "deprecated": false,
         "children": [
@@ -5712,7 +5586,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 139
+              "lineNumber": 140
             },
             "deprecated": false
           },
@@ -5728,7 +5602,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 140
+              "lineNumber": 141
             },
             "deprecated": false
           },
@@ -5741,7 +5615,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 141
+              "lineNumber": 142
             },
             "deprecated": false
           },
@@ -5754,55 +5628,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 142
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.IFieldSubType",
-        "type": "Interface",
-        "tags": [],
-        "label": "IFieldSubType",
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 164
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IFieldSubType.multi",
-            "type": "Object",
-            "tags": [],
-            "label": "multi",
-            "description": [],
-            "signature": [
-              "{ parent: string; } | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 165
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IFieldSubType.nested",
-            "type": "Object",
-            "tags": [],
-            "label": "nested",
-            "description": [],
-            "signature": [
-              "{ path: string; } | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 166
+              "lineNumber": 143
             },
             "deprecated": false
           }
@@ -5818,6 +5644,17 @@
         ],
         "label": "IFieldType",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IFieldType",
+            "text": "IFieldType"
+          },
+          " extends ",
+          "IndexPatternFieldBase"
+        ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/fields/types.ts",
           "lineNumber": 15
@@ -5825,10 +5662,24 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "discover",
+            "plugin": "fleet",
             "link": {
-              "path": "src/plugins/discover/public/kibana_services.ts",
-              "lineNumber": 104
+              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx",
+              "lineNumber": 10
+            }
+          },
+          {
+            "plugin": "fleet",
+            "link": {
+              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx",
+              "lineNumber": 33
+            }
+          },
+          {
+            "plugin": "fleet",
+            "link": {
+              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx",
+              "lineNumber": 51
             }
           },
           {
@@ -6212,34 +6063,6 @@
           {
             "plugin": "infra",
             "link": {
-              "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/group_by.tsx",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/group_by.tsx",
-              "lineNumber": 18
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_row.tsx",
-              "lineNumber": 21
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_row.tsx",
-              "lineNumber": 49
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
               "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/metric_control/custom_metric_form.tsx",
               "lineNumber": 23
             }
@@ -6408,6 +6231,34 @@
           {
             "plugin": "infra",
             "link": {
+              "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/group_by.tsx",
+              "lineNumber": 12
+            }
+          },
+          {
+            "plugin": "infra",
+            "link": {
+              "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/group_by.tsx",
+              "lineNumber": 18
+            }
+          },
+          {
+            "plugin": "infra",
+            "link": {
+              "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_row.tsx",
+              "lineNumber": 21
+            }
+          },
+          {
+            "plugin": "infra",
+            "link": {
+              "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_row.tsx",
+              "lineNumber": 49
+            }
+          },
+          {
+            "plugin": "infra",
+            "link": {
               "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/metrics.tsx",
               "lineNumber": 12
             }
@@ -6417,27 +6268,6 @@
             "link": {
               "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/metrics.tsx",
               "lineNumber": 21
-            }
-          },
-          {
-            "plugin": "fleet",
-            "link": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "fleet",
-            "link": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx",
-              "lineNumber": 33
-            }
-          },
-          {
-            "plugin": "fleet",
-            "link": {
-              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx",
-              "lineNumber": 51
             }
           },
           {
@@ -6529,20 +6359,6 @@
             "link": {
               "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/single_field_select.tsx",
               "lineNumber": 66
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/save.test.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/save.test.ts",
-              "lineNumber": 18
             }
           },
           {
@@ -6994,17 +6810,17 @@
             }
           },
           {
-            "plugin": "discover",
+            "plugin": "lens",
             "link": {
-              "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx",
-              "lineNumber": 25
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
+              "lineNumber": 8
             }
           },
           {
-            "plugin": "discover",
+            "plugin": "lens",
             "link": {
-              "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx",
-              "lineNumber": 53
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
+              "lineNumber": 60
             }
           },
           {
@@ -7073,524 +6889,6 @@
           {
             "plugin": "lens",
             "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-              "lineNumber": 60
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 141
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 250
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 290
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/server/routes/field_stats.ts",
-              "lineNumber": 332
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts",
-              "lineNumber": 30
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts",
-              "lineNumber": 54
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts",
-              "lineNumber": 84
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.ts",
-              "lineNumber": 150
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 26
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 28
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 57
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 95
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 96
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 101
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 114
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 121
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 125
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 125
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 130
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 131
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 133
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 134
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/operator.tsx",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/operator.tsx",
-              "lineNumber": 27
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 32
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match.tsx",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match.tsx",
-              "lineNumber": 36
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match_any.tsx",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match_any.tsx",
-              "lineNumber": 23
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_lists.tsx",
-              "lineNumber": 14
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_lists.tsx",
-              "lineNumber": 29
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_renderer.tsx",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_renderer.tsx",
-              "lineNumber": 91
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/types.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/types.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/types.ts",
-              "lineNumber": 15
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/helpers.tsx",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/helpers.tsx",
-              "lineNumber": 90
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/helpers.tsx",
-              "lineNumber": 113
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.ts",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.ts",
-              "lineNumber": 30
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.ts",
-              "lineNumber": 54
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.ts",
-              "lineNumber": 84
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.ts",
-              "lineNumber": 150
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 17
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 25
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 54
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 88
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 89
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 94
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 107
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 114
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 118
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 118
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 123
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 124
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 126
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 127
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/entry_item.tsx",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/entry_item.tsx",
-              "lineNumber": 43
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/threat_match/entry_item.tsx",
-              "lineNumber": 51
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field_value_match.tsx",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field_value_match.tsx",
-              "lineNumber": 28
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
               "path": "x-pack/plugins/lens/target/types/public/indexpattern_datasource/types.d.ts",
               "lineNumber": 1
             }
@@ -7600,258 +6898,6 @@
             "link": {
               "path": "x-pack/plugins/lens/target/types/public/indexpattern_datasource/types.d.ts",
               "lineNumber": 22
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts",
-              "lineNumber": 3
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts",
-              "lineNumber": 7
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.test.ts",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.test.ts",
-              "lineNumber": 333
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.test.ts",
-              "lineNumber": 339
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.test.ts",
-              "lineNumber": 347
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.test.ts",
-              "lineNumber": 355
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.test.ts",
-              "lineNumber": 363
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.test.ts",
-              "lineNumber": 371
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/helpers.test.ts",
-              "lineNumber": 380
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 62
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 166
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 167
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 629
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 666
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 691
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.test.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.test.ts",
-              "lineNumber": 333
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.test.ts",
-              "lineNumber": 339
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.test.ts",
-              "lineNumber": 347
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.test.ts",
-              "lineNumber": 355
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.test.ts",
-              "lineNumber": 363
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.test.ts",
-              "lineNumber": 371
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/helpers.test.ts",
-              "lineNumber": 380
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/target/types/public/common/components/exceptions/helpers.test.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/target/types/public/common/components/exceptions/helpers.test.d.ts",
-              "lineNumber": 2
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/severity_mapping/index.tsx",
-              "lineNumber": 32
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/severity_mapping/index.tsx",
-              "lineNumber": 86
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/severity_mapping/index.tsx",
-              "lineNumber": 305
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/risk_score_mapping/index.tsx",
-              "lineNumber": 27
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/risk_score_mapping/index.tsx",
-              "lineNumber": 82
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/risk_score_mapping/index.tsx",
-              "lineNumber": 242
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/autocomplete_field/index.tsx",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/autocomplete_field/index.tsx",
-              "lineNumber": 35
             }
           },
           {
@@ -7984,64 +7030,6 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.IFieldType.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 16
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IFieldType.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IFieldType.script",
-            "type": "string",
-            "tags": [],
-            "label": "script",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 18
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IFieldType.lang",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "lang",
-            "description": [],
-            "signature": [
-              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 19
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.IFieldType.count",
             "type": "number",
             "tags": [],
@@ -8052,7 +7040,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 20
+              "lineNumber": 16
             },
             "deprecated": false
           },
@@ -8068,7 +7056,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 23
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -8084,7 +7072,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 24
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -8100,7 +7088,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 25
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -8116,7 +7104,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 26
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -8132,7 +7120,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 27
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -8148,7 +7136,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 28
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -8164,46 +7152,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 29
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IFieldType.scripted",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "scripted",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 30
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IFieldType.subType",
-            "type": "Object",
-            "tags": [],
-            "label": "subType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
-              " | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 31
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -8219,7 +7168,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 32
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -8235,7 +7184,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 33
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -8251,7 +7200,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 34
+              "lineNumber": 28
             },
             "deprecated": false
           },
@@ -8307,7 +7256,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-              "lineNumber": 35
+              "lineNumber": 29
             },
             "deprecated": false
           }
@@ -8332,13 +7281,7 @@
             "text": "IIndexPattern"
           },
           " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.IndexPatternBase",
-            "text": "IndexPatternBase"
-          }
+          "IndexPatternBase"
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -8368,150 +7311,136 @@
             }
           },
           {
-            "plugin": "discover",
+            "plugin": "observability",
             "link": {
-              "path": "src/plugins/discover/public/kibana_services.ts",
-              "lineNumber": 101
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 20
             }
           },
           {
-            "plugin": "discover",
+            "plugin": "observability",
             "link": {
-              "path": "src/plugins/discover/public/application/angular/doc_table/create_doc_table_react.tsx",
-              "lineNumber": 15
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 95
             }
           },
           {
-            "plugin": "discover",
+            "plugin": "observability",
             "link": {
-              "path": "src/plugins/discover/public/application/angular/doc_table/create_doc_table_react.tsx",
-              "lineNumber": 25
+              "path": "x-pack/plugins/observability/public/pages/alerts/alerts_search_bar.tsx",
+              "lineNumber": 10
             }
           },
           {
-            "plugin": "discover",
+            "plugin": "observability",
             "link": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
+              "path": "x-pack/plugins/observability/public/pages/alerts/alerts_search_bar.tsx",
+              "lineNumber": 20
+            }
+          },
+          {
+            "plugin": "timelines",
+            "link": {
+              "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+              "lineNumber": 12
+            }
+          },
+          {
+            "plugin": "timelines",
+            "link": {
+              "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
               "lineNumber": 16
             }
           },
           {
-            "plugin": "discover",
+            "plugin": "timelines",
             "link": {
-              "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 30
+              "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+              "lineNumber": 31
             }
           },
           {
-            "plugin": "visualizations",
+            "plugin": "timelines",
             "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-              "lineNumber": 22
+              "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+              "lineNumber": 74
             }
           },
           {
-            "plugin": "visualizations",
+            "plugin": "timelines",
             "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts",
-              "lineNumber": 96
+              "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
+              "lineNumber": 18
             }
           },
           {
-            "plugin": "visualizations",
+            "plugin": "timelines",
             "link": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 14
+              "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
+              "lineNumber": 148
             }
           },
           {
-            "plugin": "visualizations",
+            "plugin": "timelines",
             "link": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 50
+              "path": "x-pack/plugins/timelines/public/components/t_grid/integrated/index.tsx",
+              "lineNumber": 29
             }
           },
           {
-            "plugin": "visualizations",
+            "plugin": "timelines",
             "link": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 72
+              "path": "x-pack/plugins/timelines/public/components/t_grid/integrated/index.tsx",
+              "lineNumber": 120
             }
           },
           {
-            "plugin": "savedObjectsManagement",
+            "plugin": "timelines",
             "link": {
-              "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx",
-              "lineNumber": 37
+              "path": "x-pack/plugins/timelines/public/container/source/index.tsx",
+              "lineNumber": 24
             }
           },
           {
-            "plugin": "savedObjectsManagement",
+            "plugin": "timelines",
             "link": {
-              "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx",
-              "lineNumber": 89
+              "path": "x-pack/plugins/timelines/public/container/source/index.tsx",
+              "lineNumber": 40
             }
           },
           {
-            "plugin": "lens",
+            "plugin": "timelines",
             "link": {
-              "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable.tsx",
-              "lineNumber": 14
+              "path": "x-pack/plugins/timelines/public/container/source/index.tsx",
+              "lineNumber": 93
             }
           },
           {
-            "plugin": "lens",
+            "plugin": "infra",
             "link": {
-              "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable.tsx",
-              "lineNumber": 85
+              "path": "x-pack/plugins/infra/public/containers/with_kuery_autocompletion.tsx",
+              "lineNumber": 9
             }
           },
           {
-            "plugin": "lens",
+            "plugin": "infra",
             "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-              "lineNumber": 25
+              "path": "x-pack/plugins/infra/public/containers/with_kuery_autocompletion.tsx",
+              "lineNumber": 24
             }
           },
           {
-            "plugin": "lens",
+            "plugin": "infra",
             "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-              "lineNumber": 102
+              "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/kuery_bar.tsx",
+              "lineNumber": 15
             }
           },
           {
-            "plugin": "lens",
+            "plugin": "infra",
             "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/field_item.tsx",
-              "lineNumber": 47
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/field_item.tsx",
-              "lineNumber": 172
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/datapanel.tsx",
-              "lineNumber": 42
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/datapanel.tsx",
-              "lineNumber": 96
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/datapanel.tsx",
-              "lineNumber": 166
+              "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/kuery_bar.tsx",
+              "lineNumber": 28
             }
           },
           {
@@ -8587,29 +7516,15 @@
           {
             "plugin": "infra",
             "link": {
-              "path": "x-pack/plugins/infra/public/containers/with_kuery_autocompletion.tsx",
-              "lineNumber": 9
+              "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/toolbars/toolbar.tsx",
+              "lineNumber": 21
             }
           },
           {
             "plugin": "infra",
             "link": {
-              "path": "x-pack/plugins/infra/public/containers/with_kuery_autocompletion.tsx",
-              "lineNumber": 24
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/kuery_bar.tsx",
-              "lineNumber": 15
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/kuery_bar.tsx",
-              "lineNumber": 28
+              "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/toolbars/toolbar.tsx",
+              "lineNumber": 27
             }
           },
           {
@@ -8666,20 +7581,6 @@
             "link": {
               "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_chart.tsx",
               "lineNumber": 37
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/toolbars/toolbar.tsx",
-              "lineNumber": 21
-            }
-          },
-          {
-            "plugin": "infra",
-            "link": {
-              "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/toolbars/toolbar.tsx",
-              "lineNumber": 27
             }
           },
           {
@@ -8749,161 +7650,49 @@
             "plugin": "infra",
             "link": {
               "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/index.tsx",
-              "lineNumber": 24
-            }
-          },
-          {
-            "plugin": "apm",
-            "link": {
-              "path": "x-pack/plugins/apm/public/components/shared/KueryBar/index.tsx",
-              "lineNumber": 14
-            }
-          },
-          {
-            "plugin": "apm",
-            "link": {
-              "path": "x-pack/plugins/apm/public/components/shared/KueryBar/index.tsx",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_items_renderer.tsx",
-              "lineNumber": 34
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_items_renderer.tsx",
-              "lineNumber": 78
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_items_renderer.tsx",
-              "lineNumber": 86
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_items_renderer.tsx",
-              "lineNumber": 88
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 86
+              "lineNumber": 27
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 8
+              "lineNumber": 9
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-              "lineNumber": 86
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
-              "lineNumber": 17
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
-              "lineNumber": 22
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
-              "lineNumber": 37
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
-              "lineNumber": 80
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
-              "lineNumber": 20
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx",
-              "lineNumber": 153
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/public/components/t_grid/integrated/index.tsx",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/public/components/t_grid/integrated/index.tsx",
-              "lineNumber": 121
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/types.ts",
-              "lineNumber": 23
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/types.ts",
               "lineNumber": 81
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/action.ts",
-              "lineNumber": 20
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/types.ts",
+              "lineNumber": 22
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/types.ts",
+              "lineNumber": 82
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/action.ts",
-              "lineNumber": 100
+              "lineNumber": 19
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/action.ts",
+              "lineNumber": 98
             }
           },
           {
@@ -8966,7 +7755,28 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx",
-              "lineNumber": 158
+              "lineNumber": 154
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts",
+              "lineNumber": 128
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts",
+              "lineNumber": 168
             }
           },
           {
@@ -9043,7 +7853,7 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/overview/components/events_by_dataset/index.tsx",
-              "lineNumber": 48
+              "lineNumber": 49
             }
           },
           {
@@ -9057,7 +7867,7 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/common/components/top_n/top_n.tsx",
-              "lineNumber": 55
+              "lineNumber": 56
             }
           },
           {
@@ -9071,7 +7881,7 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/common/components/top_n/index.tsx",
-              "lineNumber": 79
+              "lineNumber": 80
             }
           },
           {
@@ -9093,27 +7903,6 @@
             "link": {
               "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts",
               "lineNumber": 82
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts",
-              "lineNumber": 128
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/url_state/types.ts",
-              "lineNumber": 168
             }
           },
           {
@@ -9183,21 +7972,21 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/overview/components/alerts_by_category/index.tsx",
-              "lineNumber": 44
+              "lineNumber": 45
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/overview/components/event_counts/index.tsx",
-              "lineNumber": 21
+              "lineNumber": 22
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/public/overview/components/event_counts/index.tsx",
-              "lineNumber": 33
+              "lineNumber": 35
             }
           },
           {
@@ -9243,17 +8032,17 @@
             }
           },
           {
-            "plugin": "uptime",
+            "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts",
-              "lineNumber": 8
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts",
+              "lineNumber": 15
             }
           },
           {
-            "plugin": "uptime",
+            "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts",
-              "lineNumber": 28
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts",
+              "lineNumber": 54
             }
           },
           {
@@ -9271,58 +8060,16 @@
             }
           },
           {
-            "plugin": "lens",
+            "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/save.test.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/save.test.ts",
-              "lineNumber": 17
-            }
-          },
-          {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/target/types/public/editor_frame_service/embeddable/embeddable.d.ts",
+              "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts",
               "lineNumber": 2
             }
           },
           {
-            "plugin": "lens",
-            "link": {
-              "path": "x-pack/plugins/lens/target/types/public/editor_frame_service/embeddable/embeddable.d.ts",
-              "lineNumber": 36
-            }
-          },
-          {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/target/types/common/search_strategy/index_fields/index.d.ts",
-              "lineNumber": 66
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/target/types/common/search_strategy/index_fields/index.d.ts",
-              "lineNumber": 1
-            }
-          },
-          {
-            "plugin": "timelines",
-            "link": {
-              "path": "x-pack/plugins/timelines/target/types/common/search_strategy/index_fields/index.d.ts",
               "lineNumber": 66
             }
           },
@@ -9645,231 +8392,21 @@
             "plugin": "infra",
             "link": {
               "path": "x-pack/plugins/infra/public/pages/metrics/index.tsx",
-              "lineNumber": 162
-            }
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "link": {
-              "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "link": {
-              "path": "src/plugins/vis_type_timeseries/common/index_patterns_utils.ts",
-              "lineNumber": 20
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 21
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 100
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field.tsx",
-              "lineNumber": 121
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 17
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 29
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match.tsx",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match.tsx",
-              "lineNumber": 38
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match_any.tsx",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/autocomplete/field_value_match_any.tsx",
-              "lineNumber": 25
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_renderer.tsx",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_renderer.tsx",
-              "lineNumber": 53
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_renderer.tsx",
-              "lineNumber": 58
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_renderer.tsx",
-              "lineNumber": 61
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_item_renderer.tsx",
-              "lineNumber": 22
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_item_renderer.tsx",
-              "lineNumber": 50
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_item_renderer.tsx",
-              "lineNumber": 55
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_item_renderer.tsx",
-              "lineNumber": 58
+              "lineNumber": 144
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
-              "lineNumber": 9
+              "path": "x-pack/plugins/security_solution/public/common/store/sourcerer/model.ts",
+              "lineNumber": 8
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/common/detection_engine/get_query_filter.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/common/detection_engine/get_query_filter.ts",
-              "lineNumber": 31
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/exceptions/helpers.tsx",
-              "lineNumber": 39
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/exceptions/helpers.tsx",
-              "lineNumber": 49
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/exceptions/helpers.tsx",
-              "lineNumber": 52
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/exceptions/helpers.tsx",
-              "lineNumber": 504
+              "path": "x-pack/plugins/security_solution/public/common/store/sourcerer/model.ts",
+              "lineNumber": 30
             }
           },
           {
@@ -9896,92 +8433,36 @@
           {
             "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 11
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
+              "lineNumber": 9
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 18
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 93
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field.tsx",
-              "lineNumber": 114
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/hooks/use_field_value_autocomplete.ts",
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
               "lineNumber": 12
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 19
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
+              "lineNumber": 12
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/hooks/use_field_value_autocomplete.ts",
-              "lineNumber": 31
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
+              "lineNumber": 12
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field_value_match.tsx",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/components/autocomplete/field_value_match.tsx",
-              "lineNumber": 30
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts",
+              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/models/index_pattern.ts",
               "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts",
-              "lineNumber": 53
-            }
-          },
-          {
-            "plugin": "stackAlerts",
-            "link": {
-              "path": "x-pack/plugins/stack_alerts/server/alert_types/geo_containment/es_query_builder.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "stackAlerts",
-            "link": {
-              "path": "x-pack/plugins/stack_alerts/server/alert_types/geo_containment/es_query_builder.ts",
-              "lineNumber": 25
             }
           },
           {
@@ -9996,6 +8477,20 @@
             "link": {
               "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts",
               "lineNumber": 30
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts",
+              "lineNumber": 8
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts",
+              "lineNumber": 10
             }
           },
           {
@@ -10013,178 +8508,38 @@
             }
           },
           {
-            "plugin": "lists",
+            "plugin": "observability",
             "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 62
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 10
             }
           },
           {
-            "plugin": "lists",
+            "plugin": "observability",
             "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 96
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 59
             }
           },
           {
-            "plugin": "lists",
+            "plugin": "observability",
             "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 169
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 67
             }
           },
           {
-            "plugin": "lists",
+            "plugin": "observability",
             "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 169
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 75
             }
           },
           {
-            "plugin": "lists",
+            "plugin": "observability",
             "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 184
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 187
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 196
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 199
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 208
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 214
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 226
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 229
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 239
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 267
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 285
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 320
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 336
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 1026
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 1045
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 1095
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 1251
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 1302
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts",
-              "lineNumber": 1352
-            }
-          },
-          {
-            "plugin": "maps",
-            "link": {
-              "path": "x-pack/plugins/maps/public/embeddable/types.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "maps",
-            "link": {
-              "path": "x-pack/plugins/maps/public/embeddable/types.ts",
-              "lineNumber": 44
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+              "lineNumber": 92
             }
           },
           {
@@ -10241,125 +8596,6 @@
             "link": {
               "path": "x-pack/plugins/ml/public/application/jobs/jobs_list/components/edit_job_flyout/tabs/custom_urls.tsx",
               "lineNumber": 57
-            }
-          },
-          {
-            "plugin": "observability",
-            "link": {
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 19
-            }
-          },
-          {
-            "plugin": "observability",
-            "link": {
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 94
-            }
-          },
-          {
-            "plugin": "observability",
-            "link": {
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "observability",
-            "link": {
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 56
-            }
-          },
-          {
-            "plugin": "observability",
-            "link": {
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 64
-            }
-          },
-          {
-            "plugin": "observability",
-            "link": {
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 72
-            }
-          },
-          {
-            "plugin": "observability",
-            "link": {
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 89
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/store/sourcerer/model.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/store/sourcerer/model.ts",
-              "lineNumber": 30
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/severity_mapping/index.tsx",
-              "lineNumber": 33
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/severity_mapping/index.tsx",
-              "lineNumber": 58
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/severity_mapping/index.tsx",
-              "lineNumber": 304
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/risk_score_mapping/index.tsx",
-              "lineNumber": 28
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/risk_score_mapping/index.tsx",
-              "lineNumber": 50
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/risk_score_mapping/index.tsx",
-              "lineNumber": 242
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/autocomplete_field/index.tsx",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/detections/components/rules/autocomplete_field/index.tsx",
-              "lineNumber": 19
             }
           },
           {
@@ -10468,34 +8704,6 @@
             }
           },
           {
-            "plugin": "uptime",
-            "link": {
-              "path": "x-pack/plugins/uptime/public/state/reducers/index_pattern.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "uptime",
-            "link": {
-              "path": "x-pack/plugins/uptime/public/state/reducers/index_pattern.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts",
-              "lineNumber": 10
-            }
-          },
-          {
             "plugin": "ml",
             "link": {
               "path": "x-pack/plugins/ml/public/application/explorer/components/explorer_query_bar/explorer_query_bar.tsx",
@@ -10513,7 +8721,7 @@
             "plugin": "ml",
             "link": {
               "path": "x-pack/plugins/ml/public/application/explorer/components/explorer_query_bar/explorer_query_bar.tsx",
-              "lineNumber": 100
+              "lineNumber": 99
             }
           },
           {
@@ -10547,6 +8755,29 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.IIndexPattern.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IFieldType",
+                "text": "IFieldType"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/types.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.IIndexPattern.type",
             "type": "string",
             "tags": [],
@@ -10559,7 +8790,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -10575,7 +8806,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -10591,7 +8822,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -10615,7 +8846,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             },
             "deprecated": false,
             "children": [],
@@ -10641,7 +8872,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 42
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -10691,7 +8922,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 46
+              "lineNumber": 47
             },
             "deprecated": false
           }
@@ -11196,7 +9427,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 145
+          "lineNumber": 146
         },
         "deprecated": false,
         "children": [
@@ -11220,7 +9451,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 146
+              "lineNumber": 147
             },
             "deprecated": false,
             "returnComment": [],
@@ -11243,7 +9474,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 146
+                  "lineNumber": 147
                 },
                 "deprecated": false
               }
@@ -11269,7 +9500,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 147
+              "lineNumber": 148
             },
             "deprecated": false,
             "returnComment": [],
@@ -11292,7 +9523,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 147
+                  "lineNumber": 148
                 },
                 "deprecated": false
               }
@@ -11312,7 +9543,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 54
+          "lineNumber": 55
         },
         "deprecated": false,
         "children": [
@@ -11325,7 +9556,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -11338,7 +9569,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 56
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -11351,7 +9582,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 57
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -11364,7 +9595,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 58
+              "lineNumber": 59
             },
             "deprecated": false
           },
@@ -11380,7 +9611,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 59
+              "lineNumber": 60
             },
             "deprecated": false
           },
@@ -11396,7 +9627,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 60
+              "lineNumber": 61
             },
             "deprecated": false
           },
@@ -11412,7 +9643,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             },
             "deprecated": false
           },
@@ -11428,7 +9659,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             },
             "deprecated": false
           },
@@ -11444,7 +9675,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             },
             "deprecated": false
           },
@@ -11460,7 +9691,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 64
+              "lineNumber": 65
             },
             "deprecated": false
           },
@@ -11478,7 +9709,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 68
+              "lineNumber": 69
             },
             "deprecated": false
           }
@@ -11550,7 +9781,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 235
+          "lineNumber": 225
         },
         "deprecated": false,
         "children": [
@@ -11568,7 +9799,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 239
+              "lineNumber": 229
             },
             "deprecated": false
           },
@@ -11586,7 +9817,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 243
+              "lineNumber": 233
             },
             "deprecated": false
           },
@@ -11602,7 +9833,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 244
+              "lineNumber": 234
             },
             "deprecated": false
           },
@@ -11620,7 +9851,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 249
+              "lineNumber": 239
             },
             "deprecated": true,
             "references": []
@@ -11637,7 +9868,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 250
+              "lineNumber": 240
             },
             "deprecated": false
           },
@@ -11660,7 +9891,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 251
+              "lineNumber": 241
             },
             "deprecated": false
           },
@@ -11684,7 +9915,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 252
+              "lineNumber": 242
             },
             "deprecated": false
           },
@@ -11707,7 +9938,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 253
+              "lineNumber": 243
             },
             "deprecated": false
           },
@@ -11723,7 +9954,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 254
+              "lineNumber": 244
             },
             "deprecated": false
           },
@@ -11747,7 +9978,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 255
+              "lineNumber": 245
             },
             "deprecated": false
           },
@@ -11771,7 +10002,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 256
+              "lineNumber": 246
             },
             "deprecated": false
           },
@@ -11794,7 +10025,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 257
+              "lineNumber": 247
             },
             "deprecated": false
           },
@@ -11810,7 +10041,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 258
+              "lineNumber": 248
             },
             "deprecated": false
           }
@@ -11874,7 +10105,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 112
+          "lineNumber": 113
         },
         "deprecated": false,
         "children": [
@@ -11900,7 +10131,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 113
+              "lineNumber": 114
             },
             "deprecated": false,
             "returnComment": [],
@@ -11923,7 +10154,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 113
+                  "lineNumber": 114
                 },
                 "deprecated": false
               }
@@ -11943,7 +10174,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 114
+              "lineNumber": 115
             },
             "deprecated": false,
             "returnComment": [],
@@ -11957,7 +10188,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 114
+                  "lineNumber": 115
                 },
                 "deprecated": false
               },
@@ -11970,7 +10201,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 114
+                  "lineNumber": 115
                 },
                 "deprecated": false
               }
@@ -11990,7 +10221,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 115
+              "lineNumber": 116
             },
             "deprecated": false,
             "returnComment": [],
@@ -12004,7 +10235,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 116
+                  "lineNumber": 117
                 },
                 "deprecated": false
               },
@@ -12017,7 +10248,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 117
+                  "lineNumber": 118
                 },
                 "deprecated": false
               },
@@ -12033,7 +10264,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 118
+                  "lineNumber": 119
                 },
                 "deprecated": false
               },
@@ -12049,7 +10280,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 119
+                  "lineNumber": 120
                 },
                 "deprecated": false
               }
@@ -12069,7 +10300,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 121
+              "lineNumber": 122
             },
             "deprecated": false,
             "returnComment": [],
@@ -12083,7 +10314,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 122
+                  "lineNumber": 123
                 },
                 "deprecated": false
               },
@@ -12099,7 +10330,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 123
+                  "lineNumber": 124
                 },
                 "deprecated": false
               },
@@ -12115,7 +10346,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 124
+                  "lineNumber": 125
                 },
                 "deprecated": false
               }
@@ -12133,7 +10364,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 126
+              "lineNumber": 127
             },
             "deprecated": false,
             "returnComment": [],
@@ -12147,7 +10378,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 126
+                  "lineNumber": 127
                 },
                 "deprecated": false
               },
@@ -12160,7 +10391,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 126
+                  "lineNumber": 127
                 },
                 "deprecated": false
               }
@@ -12178,7 +10409,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 104
+          "lineNumber": 105
         },
         "deprecated": false,
         "children": [
@@ -12194,7 +10425,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 105
+              "lineNumber": 106
             },
             "deprecated": false
           },
@@ -12210,7 +10441,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 106
+              "lineNumber": 107
             },
             "deprecated": false
           },
@@ -12226,7 +10457,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 107
+              "lineNumber": 108
             },
             "deprecated": false
           },
@@ -12242,7 +10473,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 108
+              "lineNumber": 109
             },
             "deprecated": false
           },
@@ -12258,7 +10489,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 109
+              "lineNumber": 110
             },
             "deprecated": false
           }
@@ -12274,7 +10505,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 261
+          "lineNumber": 251
         },
         "deprecated": false,
         "children": [
@@ -12287,7 +10518,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 262
+              "lineNumber": 252
             },
             "deprecated": false
           }
@@ -12303,7 +10534,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 169
+          "lineNumber": 165
         },
         "deprecated": false,
         "children": [
@@ -12319,23 +10550,23 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 170
+              "lineNumber": 166
             },
             "deprecated": false
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.TypeMeta.Unnamed",
-            "type": "Any",
+            "id": "def-common.TypeMeta.params",
+            "type": "Object",
             "tags": [],
-            "label": "Unnamed",
+            "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "{ rollup_index: string; } | undefined"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 171
+              "lineNumber": 167
             },
             "deprecated": false
           }
@@ -12351,7 +10582,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 97
+          "lineNumber": 98
         },
         "deprecated": false,
         "children": [
@@ -12367,7 +10598,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 98
+              "lineNumber": 99
             },
             "deprecated": false,
             "returnComment": [],
@@ -12381,7 +10612,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 98
+                  "lineNumber": 99
                 },
                 "deprecated": false
               }
@@ -12399,7 +10630,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 99
+              "lineNumber": 100
             },
             "deprecated": false,
             "returnComment": [],
@@ -12414,54 +10645,6 @@
             "description": [],
             "signature": [
               "(key: string, value: any) => Promise<void>"
-            ],
-            "source": {
-              "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 100
-            },
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.key",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "source": {
-                  "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 100
-                },
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.value",
-                "type": "Any",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "source": {
-                  "path": "src/plugins/data/common/index_patterns/types.ts",
-                  "lineNumber": 100
-                },
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.UiSettingsCommon.remove",
-            "type": "Function",
-            "tags": [],
-            "label": "remove",
-            "description": [],
-            "signature": [
-              "(key: string) => Promise<void>"
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
@@ -12482,6 +10665,54 @@
                   "lineNumber": 101
                 },
                 "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.value",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "src/plugins/data/common/index_patterns/types.ts",
+                  "lineNumber": 101
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.UiSettingsCommon.remove",
+            "type": "Function",
+            "tags": [],
+            "label": "remove",
+            "description": [],
+            "signature": [
+              "(key: string) => Promise<void>"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/types.ts",
+              "lineNumber": 102
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.key",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/index_patterns/types.ts",
+                  "lineNumber": 102
+                },
+                "deprecated": false
               }
             ]
           }
@@ -12489,7 +10720,22 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "data",
+        "id": "def-common.IndexPatternType",
+        "type": "Enum",
+        "tags": [],
+        "label": "IndexPatternType",
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/index_patterns/types.ts",
+          "lineNumber": 172
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "data",
@@ -12503,7 +10749,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 152
+          "lineNumber": 153
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -12545,7 +10791,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 174
+          "lineNumber": 177
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -12570,7 +10816,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 229
+          "lineNumber": 219
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -12838,7 +11084,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 85
+          "lineNumber": 86
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -12863,7 +11109,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 84
+          "lineNumber": 85
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -12880,7 +11126,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 87
+          "lineNumber": 88
         },
         "deprecated": false,
         "initialIsOpen": false

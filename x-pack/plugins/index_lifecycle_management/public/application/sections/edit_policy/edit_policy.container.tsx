@@ -24,27 +24,15 @@ interface RouterProps {
   policyName: string;
 }
 
-interface Props {
-  getUrlForApp: (
-    appId: string,
-    options?: {
-      path?: string;
-      absolute?: boolean;
-    }
-  ) => string;
-}
-
-export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<RouterProps>> = ({
+export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps>> = ({
   match: {
     params: { policyName },
   },
-  getUrlForApp,
-  history,
 }) => {
   const {
     services: { breadcrumbService, license },
   } = useKibana();
-  const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList(false);
+  const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('editPolicy');
@@ -105,13 +93,12 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
         policyName: attemptToURIDecode(policyName),
         policy: existingPolicy?.policy ?? defaultPolicy,
         existingPolicies: policies,
-        getUrlForApp,
         license: {
           canUseSearchableSnapshot: () => license.hasAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE),
         },
       }}
     >
-      <PresentationComponent history={history} />
+      <PresentationComponent />
     </EditPolicyContextProvider>
   );
 };

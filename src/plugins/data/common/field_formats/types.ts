@@ -82,6 +82,7 @@ export type FieldFormatInstanceType = (new (
   // Static properties:
   id: FieldFormatId;
   title: string;
+  hidden?: boolean;
   fieldType: string | string[];
 };
 
@@ -94,4 +95,4 @@ export interface IFieldFormatMetaParams {
   };
 }
 
-export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'register'>;

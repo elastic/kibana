@@ -214,6 +214,7 @@ export class DocLinksService {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
+          autocompleteChanges: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
         },
         search: {
           sessions: `${KIBANA_DOCS}search-sessions.html`,
@@ -229,6 +230,7 @@ export class DocLinksService {
           kibanaGeneralSettings: `${KIBANA_DOCS}advanced-options.html#kibana-general-settings`,
           kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
           visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
+          timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
         },
         ml: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/index.html`,
@@ -579,6 +581,7 @@ export interface DocLinksStart {
       readonly luceneQuerySyntax: string;
       readonly percolate: string;
       readonly queryDsl: string;
+      readonly autocompleteChanges: string;
     };
     readonly date: {
       readonly dateMath: string;

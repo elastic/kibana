@@ -5,36 +5,37 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import { serializeTemplate, serializeLegacyTemplate } from '../../../../common/lib';
 import { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
-import { CallAsCurrentUser } from '../../../types';
 
 export const doesTemplateExist = async ({
   name,
-  callAsCurrentUser,
+  client,
   isLegacy,
 }: {
   name: string;
-  callAsCurrentUser: CallAsCurrentUser;
+  client: IScopedClusterClient;
   isLegacy?: boolean;
 }) => {
   if (isLegacy) {
-    return await callAsCurrentUser('indices.existsTemplate', { name });
+    return await client.asCurrentUser.indices.existsTemplate({ name });
   }
-  return await callAsCurrentUser('dataManagement.existsTemplate', { name });
+
+  return await client.asCurrentUser.indices.existsIndexTemplate({ name });
 };
 
 export const saveTemplate = async ({
   template,
-  callAsCurrentUser,
+  client,
   isLegacy,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   include_type_name,
 }: {
   template: TemplateDeserialized;
-  callAsCurrentUser: CallAsCurrentUser;
+  client: IScopedClusterClient;
   isLegacy?: boolean;
-  include_type_name?: string;
+  include_type_name?: boolean;
 }) => {
   const serializedTemplate = isLegacy
     ? serializeLegacyTemplate(template)
@@ -51,8 +52,9 @@ export const saveTemplate = async ({
       aliases,
     } = serializedTemplate as LegacyTemplateSerialized;
 
-    return await callAsCurrentUser('indices.putTemplate', {
+    return await client.asCurrentUser.indices.putTemplate({
       name: template.name,
+      // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/533
       order,
       include_type_name,
       body: {
@@ -65,8 +67,9 @@ export const saveTemplate = async ({
     });
   }
 
-  return await callAsCurrentUser('dataManagement.saveComposableIndexTemplate', {
+  return await client.asCurrentUser.indices.putIndexTemplate({
     name: template.name,
+    // @ts-expect-error LegacyTemplateSerialized | TemplateSerialized conflicts with @elastic/elasticsearch IndicesPutIndexTemplateRequest
     body: serializedTemplate,
   });
 };

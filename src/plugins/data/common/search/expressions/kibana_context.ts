@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
 import { Filter } from '@kbn/es-query';
+import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '../../../../expressions/common';
-import { Query, uniqFilters } from '../../query';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
@@ -146,7 +146,7 @@ export const getKibanaContextFn = (
       return {
         type: 'kibana_context',
         query: queries,
-        filters: uniqFilters(filters).filter((f: any) => !f.meta?.disabled),
+        filters: uniqFilters(filters.filter((f: any) => !f.meta?.disabled)),
         timeRange,
       };
     },

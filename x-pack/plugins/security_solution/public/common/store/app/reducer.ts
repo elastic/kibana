@@ -17,6 +17,13 @@ export type AppState = AppModel;
 export const initialAppState: AppState = {
   notesById: {},
   errors: [],
+  enableExperimental: {
+    trustedAppsByPolicyEnabled: false,
+    metricsEntitiesEnabled: false,
+    ruleRegistryEnabled: false,
+    tGridEnabled: false,
+    uebaEnabled: false,
+  },
 };
 
 interface UpdateNotesByIdParams {
