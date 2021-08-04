@@ -145,39 +145,38 @@
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "usageCollection",
-              "id": "def-public.appName",
+              "id": "def-public.UsageCollectionSetup.reportUiCounter.$1",
               "type": "string",
               "tags": [],
               "label": "appName",
               "description": [],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "usageCollection",
-              "id": "def-public.type",
+              "id": "def-public.UsageCollectionSetup.reportUiCounter.$2",
               "type": "CompoundType",
               "tags": [],
               "label": "type",
               "description": [],
               "signature": [
-                "METRIC_TYPE",
-                ".COUNT | ",
-                "METRIC_TYPE",
-                ".LOADED | ",
-                "METRIC_TYPE",
-                ".CLICK"
+                "UiCounterMetricType"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "usageCollection",
-              "id": "def-public.eventNames",
+              "id": "def-public.UsageCollectionSetup.reportUiCounter.$3",
               "type": "CompoundType",
               "tags": [],
               "label": "eventNames",
@@ -186,11 +185,12 @@
                 "string | string[]"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "usageCollection",
-              "id": "def-public.count",
+              "id": "def-public.UsageCollectionSetup.reportUiCounter.$4",
               "type": "number",
               "tags": [],
               "label": "count",
@@ -199,9 +199,11 @@
                 "number | undefined"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": false
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -235,39 +237,38 @@
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "usageCollection",
-              "id": "def-public.appName",
+              "id": "def-public.UsageCollectionStart.reportUiCounter.$1",
               "type": "string",
               "tags": [],
               "label": "appName",
               "description": [],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "usageCollection",
-              "id": "def-public.type",
+              "id": "def-public.UsageCollectionStart.reportUiCounter.$2",
               "type": "CompoundType",
               "tags": [],
               "label": "type",
               "description": [],
               "signature": [
-                "METRIC_TYPE",
-                ".COUNT | ",
-                "METRIC_TYPE",
-                ".LOADED | ",
-                "METRIC_TYPE",
-                ".CLICK"
+                "UiCounterMetricType"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "usageCollection",
-              "id": "def-public.eventNames",
+              "id": "def-public.UsageCollectionStart.reportUiCounter.$3",
               "type": "CompoundType",
               "tags": [],
               "label": "eventNames",
@@ -276,11 +277,12 @@
                 "string | string[]"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "usageCollection",
-              "id": "def-public.count",
+              "id": "def-public.UsageCollectionStart.reportUiCounter.$4",
               "type": "number",
               "tags": [],
               "label": "count",
@@ -289,9 +291,11 @@
                 "number | undefined"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": false
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -553,11 +557,10 @@
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "usageCollection",
-                "id": "def-server.params",
+                "id": "def-server.IUsageCounter.incrementCounter.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -572,9 +575,11 @@
                   }
                 ],
                 "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -742,6 +747,46 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "usageCollection",
+            "id": "def-server.context",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "{ esClient: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
+              "; soClient: Pick<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsClient",
+                "text": "SavedObjectsClient"
+              },
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined; } : {})"
+            ],
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -963,19 +1008,23 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "usageCollection",
-              "id": "def-server.type",
+              "id": "def-server.UsageCollectionSetup.createUsageCounter.$1",
               "type": "string",
               "tags": [],
               "label": "type",
               "description": [],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "usageCollection",
@@ -999,19 +1048,23 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "usageCollection",
-              "id": "def-server.type",
+              "id": "def-server.UsageCollectionSetup.getUsageCounterByType.$1",
               "type": "string",
               "tags": [],
               "label": "type",
               "description": [],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "usageCollection",
@@ -1043,62 +1096,30 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "usageCollection",
-              "id": "def-server.options",
+              "id": "def-server.UsageCollectionSetup.makeUsageCollector.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "options",
               "description": [],
               "signature": [
-                "{ type: string; isReady: () => boolean | Promise<boolean>; schema?: ",
                 {
                   "pluginId": "usageCollection",
                   "scope": "server",
                   "docId": "kibUsageCollectionPluginApi",
-                  "section": "def-server.MakeSchemaFrom",
-                  "text": "MakeSchemaFrom"
+                  "section": "def-server.UsageCollectorOptions",
+                  "text": "UsageCollectorOptions"
                 },
-                "<TFetchReturn> | undefined; fetch: ",
-                {
-                  "pluginId": "usageCollection",
-                  "scope": "server",
-                  "docId": "kibUsageCollectionPluginApi",
-                  "section": "def-server.CollectorFetchMethod",
-                  "text": "CollectorFetchMethod"
-                },
-                "<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: ",
-                {
-                  "pluginId": "usageCollection",
-                  "scope": "server",
-                  "docId": "kibUsageCollectionPluginApi",
-                  "section": "def-server.CollectorOptionsFetchExtendedContext",
-                  "text": "CollectorOptionsFetchExtendedContext"
-                },
-                "<WithKibanaRequest>; } : { extendFetchContext?: ",
-                {
-                  "pluginId": "usageCollection",
-                  "scope": "server",
-                  "docId": "kibUsageCollectionPluginApi",
-                  "section": "def-server.CollectorOptionsFetchExtendedContext",
-                  "text": "CollectorOptionsFetchExtendedContext"
-                },
-                "<WithKibanaRequest> | undefined; }) & Required<Pick<",
-                {
-                  "pluginId": "usageCollection",
-                  "scope": "server",
-                  "docId": "kibUsageCollectionPluginApi",
-                  "section": "def-server.CollectorOptions",
-                  "text": "CollectorOptions"
-                },
-                "<TFetchReturn, boolean, {}>, \"schema\">>"
+                "<TFetchReturn, WithKibanaRequest, ExtraOptions>"
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "usageCollection",
@@ -1122,11 +1143,10 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "usageCollection",
-              "id": "def-server.collector",
+              "id": "def-server.UsageCollectionSetup.registerCollector.$1",
               "type": "Object",
               "tags": [],
               "label": "collector",
@@ -1142,9 +1162,11 @@
                 "<TFetchReturn, ExtraOptions>"
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "usageCollection",
@@ -1168,19 +1190,23 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "usageCollection",
-              "id": "def-server.type",
+              "id": "def-server.UsageCollectionSetup.getCollectorByType.$1",
               "type": "string",
               "tags": [],
               "label": "type",
               "description": [],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

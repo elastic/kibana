@@ -1973,7 +1973,9 @@
             "label": "getSearchSourceTimeFilter",
             "description": [],
             "signature": [
-              "(forceNow?: Date | undefined) => any[]"
+              "(forceNow?: Date | undefined) => ",
+              "RangeFilter",
+              "[] | { meta: { index: string | undefined; params: {}; alias: string; disabled: boolean; negate: boolean; }; query: { bool: { should: { bool: { filter: { range: { [x: string]: { gte: string; lte: string; }; }; }[]; }; }[]; minimum_should_match: number; }; }; }[]"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
             "deprecated": false,
@@ -7554,7 +7556,9 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => any"
+          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
+          "RangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -7818,7 +7822,8 @@
         "label": "isFilter",
         "description": [],
         "signature": [
-          "(x: unknown) => x is any"
+          "(x: unknown) => x is ",
+          "Filter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -7851,7 +7856,9 @@
         "label": "isFilters",
         "description": [],
         "signature": [
-          "(x: unknown) => x is any[]"
+          "(x: unknown) => x is ",
+          "Filter",
+          "[]"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -7939,7 +7946,8 @@
         "label": "isQuery",
         "description": [],
         "signature": [
-          "(x: unknown) => x is any"
+          "(x: unknown) => x is ",
+          "Query"
         ],
         "path": "src/plugins/data/common/query/is_query.ts",
         "deprecated": false,
@@ -8109,7 +8117,17 @@
                 "section": "def-common.GeoPoint",
                 "text": "GeoPoint"
               },
-              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: any; }, \"filter\" | \"geo_bounding_box\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
+              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueBoxed",
+                "text": "ExpressionValueBoxed"
+              },
+              "<\"kibana_query\", ",
+              "Query",
+              "> | undefined; }, \"filter\" | \"geo_bounding_box\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -8141,7 +8159,17 @@
                 "section": "def-common.GeoPoint",
                 "text": "GeoPoint"
               },
-              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: any; }, never>, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"timeShift\">, ",
+              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueBoxed",
+                "text": "ExpressionValueBoxed"
+              },
+              "<\"kibana_query\", ",
+              "Query",
+              "> | undefined; }, never>, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"timeShift\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -10294,7 +10322,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[]"
+              "Filter",
+              "[]"
             ],
             "path": "src/plugins/data/public/actions/apply_filter_action.ts",
             "deprecated": false
@@ -10363,7 +10392,9 @@
             "signature": [
               "({ data, negate, }: ",
               "ValueClickDataContext",
-              ") => Promise<any[]>"
+              ") => Promise<",
+              "Filter",
+              "[]>"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false,
@@ -10394,7 +10425,9 @@
             "signature": [
               "(event: ",
               "RangeSelectDataContext",
-              ") => Promise<any[]>"
+              ") => Promise<",
+              "Filter",
+              "[]>"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false,
@@ -11767,7 +11800,67 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.IFieldType.toSpec.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.IFieldType.toSpec.$1.options.getFormatterForField",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "getFormatterForField",
+                    "description": [],
+                    "signature": [
+                      "((field: ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IFieldType",
+                        "text": "IFieldType"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IndexPatternField",
+                        "text": "IndexPatternField"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.FieldSpec",
+                        "text": "FieldSpec"
+                      },
+                      ") => ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataFieldFormatsPluginApi",
+                        "section": "def-common.FieldFormat",
+                        "text": "FieldFormat"
+                      },
+                      ") | undefined"
+                    ],
+                    "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11796,18 +11889,6 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/types.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
           },
@@ -12526,14 +12607,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
           },
           {
             "plugin": "ml",
@@ -12796,7 +12869,46 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.IIndexPattern.getFormatterForField.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IFieldType",
+                    "text": "IFieldType"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPatternField",
+                    "text": "IndexPatternField"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/plugins/data/common/index_patterns/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14002,11 +14114,10 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.fields",
+                "id": "def-public.ISearchStartSearchSource.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "fields",
@@ -14022,9 +14133,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/data/common/search/search_source/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -14048,8 +14161,8 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14117,11 +14230,10 @@
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.agg",
+                "id": "def-public.OptionedValueProp.isCompatible.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "agg",
@@ -14136,9 +14248,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14277,14 +14391,15 @@
           {
             "parentPluginId": "data",
             "id": "def-public.SearchSourceFields.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [
               "\n{@link Query}"
             ],
             "signature": [
-              "any"
+              "Query",
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -14292,14 +14407,21 @@
           {
             "parentPluginId": "data",
             "id": "def-public.SearchSourceFields.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [
               "\n{@link Filter}"
             ],
             "signature": [
-              "any"
+              "Filter",
+              " | ",
+              "Filter",
+              "[] | (() => ",
+              "Filter",
+              " | ",
+              "Filter",
+              "[] | undefined) | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -14955,7 +15077,8 @@
         "label": "CustomFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { query: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -15171,7 +15294,13 @@
         "label": "ExecutionContextSearch",
         "description": [],
         "signature": [
-          "{ filters?: any[] | undefined; query?: any; timeRange?: ",
+          "{ filters?: ",
+          "Filter",
+          "[] | undefined; query?: ",
+          "Query",
+          " | ",
+          "Query",
+          "[] | undefined; timeRange?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -15195,7 +15324,10 @@
         "label": "ExistsFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "FilterMeta",
+          "; exists?: { field: string; } | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -15408,6 +15540,32 @@
         ],
         "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.defaultOverride",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -15420,7 +15578,11 @@
         "label": "Filter",
         "description": [],
         "signature": [
-          "any"
+          "{ $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; meta: ",
+          "FilterMeta",
+          "; query?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -17737,6 +17899,42 @@
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.request",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "SearchStrategyRequest"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -18284,7 +18482,10 @@
         "label": "MatchAllFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "MatchAllFilterMeta",
+          "; match_all: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -18326,7 +18527,10 @@
         "label": "PhraseFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "PhraseFilterMeta",
+          "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -18343,11 +18547,28 @@
         "label": "PhrasesFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "PhrasesFilterMeta",
+          "; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.Query",
+        "type": "Type",
+        "tags": [],
+        "label": "Query",
+        "description": [],
+        "signature": [
+          "{ query: string | { [key: string]: any; }; language: string; }"
+        ],
+        "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/types.d.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -18360,7 +18581,14 @@
         "label": "RangeFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & ",
+          "EsRangeFilter",
+          " & { meta: ",
+          "RangeFilterMeta",
+          "; script?: { script: { params: any; lang: ",
+          "ScriptLanguage",
+          "; source: string; }; } | undefined; match_all?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -18386,7 +18614,10 @@
         "label": "RangeFilterMeta",
         "description": [],
         "signature": [
-          "any"
+          "FilterMeta",
+          " & { params: ",
+          "RangeFilterParams",
+          "; field?: string | undefined; formattedValue?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -18403,7 +18634,7 @@
         "label": "RangeFilterParams",
         "description": [],
         "signature": [
-          "any"
+          "RangeFilterParams"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -19036,171 +19267,755 @@
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.buildEmptyFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildEmptyFilter",
             "description": [],
             "signature": [
-              "any"
+              "(isPinned: boolean, index?: string | undefined) => ",
+              "Filter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.isPinned",
+                "type": "boolean",
+                "tags": [],
+                "label": "isPinned",
+                "description": [],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_empty_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.index",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_empty_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.buildPhrasesFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildPhrasesFilter",
             "description": [],
             "signature": [
-              "any"
+              "(field: ",
+              "IndexPatternFieldBase",
+              ", params: string[], indexPattern: ",
+              "IndexPatternBase",
+              ") => ",
+              "PhrasesFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "IndexPatternFieldBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.params",
+                "type": "Array",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "IndexPatternBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.buildExistsFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildExistsFilter",
             "description": [],
             "signature": [
-              "any"
+              "(field: ",
+              "IndexPatternFieldBase",
+              ", indexPattern: ",
+              "IndexPatternBase",
+              ") => ",
+              "ExistsFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "IndexPatternFieldBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "IndexPatternBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.buildPhraseFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildPhraseFilter",
             "description": [],
             "signature": [
-              "any"
+              "(field: ",
+              "IndexPatternFieldBase",
+              ", value: PhraseFilterValue, indexPattern: ",
+              "IndexPatternBase",
+              ") => ",
+              "PhraseFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "IndexPatternFieldBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.value",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string | number | boolean"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "IndexPatternBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.buildQueryFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildQueryFilter",
             "description": [],
             "signature": [
-              "any"
+              "(query: any, index: string, alias: string) => ",
+              "QueryStringFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.query",
+                "type": "Any",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.index",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.alias",
+                "type": "string",
+                "tags": [],
+                "label": "alias",
+                "description": [],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.buildRangeFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildRangeFilter",
             "description": [],
             "signature": [
-              "any"
+              "(field: ",
+              "IndexPatternFieldBase",
+              ", params: ",
+              "RangeFilterParams",
+              ", indexPattern: ",
+              "IndexPatternBase",
+              ", formattedValue?: string | undefined) => ",
+              "RangeFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "IndexPatternFieldBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "RangeFilterParams"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "IndexPatternBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.formattedValue",
+                "type": "string",
+                "tags": [],
+                "label": "formattedValue",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.isPhraseFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "isPhraseFilter",
             "description": [],
             "signature": [
-              "any"
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
+              "PhraseFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.isExistsFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "isExistsFilter",
             "description": [],
             "signature": [
-              "any"
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
+              "ExistsFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.isPhrasesFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "isPhrasesFilter",
             "description": [],
             "signature": [
-              "any"
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
+              "PhrasesFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.isRangeFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "isRangeFilter",
             "description": [],
             "signature": [
-              "any"
+              "(filter?: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              " | undefined) => filter is ",
+              "RangeFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter",
+                  " | undefined"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.isMatchAllFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "isMatchAllFilter",
             "description": [],
             "signature": [
-              "any"
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
+              "MatchAllFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/match_all_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.isMissingFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "isMissingFilter",
             "description": [],
             "signature": [
-              "any"
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
+              "MissingFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/missing_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.isQueryStringFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "isQueryStringFilter",
             "description": [],
             "signature": [
-              "any"
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
+              "QueryStringFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -19210,7 +20025,9 @@
             "label": "isFilterPinned",
             "description": [],
             "signature": [
-              "(filter: any) => boolean | undefined"
+              "(filter: ",
+              "Filter",
+              ") => boolean | undefined"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19219,12 +20036,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: any; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
                 "deprecated": false
@@ -19239,7 +20060,11 @@
             "label": "toggleFilterNegated",
             "description": [],
             "signature": [
-              "(filter: any) => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: any; } | undefined; query?: any; }"
+              "(filter: ",
+              "Filter",
+              ") => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; query?: any; }"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19248,12 +20073,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: any; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
                 "deprecated": false
@@ -19268,7 +20097,10 @@
             "label": "disableFilter",
             "description": [],
             "signature": [
-              "(filter: any) => any"
+              "(filter: ",
+              "Filter",
+              ") => ",
+              "Filter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19277,12 +20109,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: any; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
                 "deprecated": false
@@ -19292,28 +20128,70 @@
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.getPhraseFilterField",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "getPhraseFilterField",
             "description": [],
             "signature": [
-              "any"
+              "(filter: ",
+              "PhraseFilter",
+              ") => string"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "Filter",
+                  " & { meta: ",
+                  "PhraseFilterMeta",
+                  "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.getPhraseFilterValue",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "getPhraseFilterValue",
             "description": [],
             "signature": [
-              "any"
+              "(filter: ",
+              "PhraseFilter",
+              ") => PhraseFilterValue"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "Filter",
+                  " & { meta: ",
+                  "PhraseFilterMeta",
+                  "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -19323,7 +20201,9 @@
             "label": "getDisplayValueFromFilter",
             "description": [],
             "signature": [
-              "(filter: any, indexPatterns: ",
+              "(filter: ",
+              "Filter",
+              ", indexPatterns: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -19340,12 +20220,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: any; }"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
                 "deprecated": false
@@ -19380,7 +20264,15 @@
             "label": "compareFilters",
             "description": [],
             "signature": [
-              "(first: any, second: any, comparatorOptions?: ",
+              "(first: ",
+              "Filter",
+              " | ",
+              "Filter",
+              "[], second: ",
+              "Filter",
+              " | ",
+              "Filter",
+              "[], comparatorOptions?: ",
               "FilterCompareOptions",
               " | undefined) => boolean"
             ],
@@ -19391,12 +20283,15 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.first",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "first",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Filter",
+                  " | ",
+                  "Filter",
+                  "[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/compare_filters.d.ts",
                 "deprecated": false
@@ -19404,12 +20299,15 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.second",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "second",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Filter",
+                  " | ",
+                  "Filter",
+                  "[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/compare_filters.d.ts",
                 "deprecated": false
@@ -19467,7 +20365,9 @@
                 "section": "def-common.IFieldType",
                 "text": "IFieldType"
               },
-              ", values: any, operation: string, index: string) => any[]"
+              ", values: any, operation: string, index: string) => ",
+              "Filter",
+              "[]"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19555,7 +20455,11 @@
             "label": "onlyDisabledFiltersChanged",
             "description": [],
             "signature": [
-              "(newFilters?: any[] | undefined, oldFilters?: any[] | undefined) => boolean"
+              "(newFilters?: ",
+              "Filter",
+              "[] | undefined, oldFilters?: ",
+              "Filter",
+              "[] | undefined) => boolean"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19569,7 +20473,8 @@
                 "label": "newFilters",
                 "description": [],
                 "signature": [
-                  "any[] | undefined"
+                  "Filter",
+                  "[] | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/only_disabled.d.ts",
                 "deprecated": false
@@ -19582,7 +20487,8 @@
                 "label": "oldFilters",
                 "description": [],
                 "signature": [
-                  "any[] | undefined"
+                  "Filter",
+                  "[] | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/only_disabled.d.ts",
                 "deprecated": false
@@ -19599,7 +20505,9 @@
             "signature": [
               "(timeFilter: Pick<",
               "Timefilter",
-              ", \"isTimeRangeSelectorEnabled\" | \"isAutoRefreshSelectorEnabled\" | \"isTimeTouched\" | \"getEnabledUpdated$\" | \"getTimeUpdate$\" | \"getRefreshIntervalUpdate$\" | \"getAutoRefreshFetch$\" | \"getFetch$\" | \"getTime\" | \"getAbsoluteTime\" | \"setTime\" | \"getRefreshInterval\" | \"setRefreshInterval\" | \"createFilter\" | \"getBounds\" | \"calculateBounds\" | \"getActiveBounds\" | \"enableTimeRangeSelector\" | \"disableTimeRangeSelector\" | \"enableAutoRefreshSelector\" | \"disableAutoRefreshSelector\" | \"getTimeDefaults\" | \"getRefreshIntervalDefaults\">, filter: any) => void"
+              ", \"isTimeRangeSelectorEnabled\" | \"isAutoRefreshSelectorEnabled\" | \"isTimeTouched\" | \"getEnabledUpdated$\" | \"getTimeUpdate$\" | \"getRefreshIntervalUpdate$\" | \"getAutoRefreshFetch$\" | \"getFetch$\" | \"getTime\" | \"getAbsoluteTime\" | \"setTime\" | \"getRefreshInterval\" | \"setRefreshInterval\" | \"createFilter\" | \"getBounds\" | \"calculateBounds\" | \"getActiveBounds\" | \"enableTimeRangeSelector\" | \"disableTimeRangeSelector\" | \"enableAutoRefreshSelector\" | \"disableAutoRefreshSelector\" | \"getTimeDefaults\" | \"getRefreshIntervalDefaults\">, filter: ",
+              "RangeFilter",
+              ") => void"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19687,7 +20595,9 @@
                     "section": "def-common.TimeRange",
                     "text": "TimeRange"
                   },
-                  " | undefined) => any; getBounds: () => ",
+                  " | undefined) => ",
+                  "RangeFilter",
+                  " | undefined; getBounds: () => ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -19743,12 +20653,19 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Filter",
+                  " & ",
+                  "EsRangeFilter",
+                  " & { meta: ",
+                  "RangeFilterMeta",
+                  "; script?: { script: { params: any; lang: ",
+                  "ScriptLanguage",
+                  "; source: string; }; } | undefined; match_all?: any; }"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/change_time_filter.ts",
                 "deprecated": false
@@ -19763,7 +20680,9 @@
             "label": "convertRangeFilterToTimeRangeString",
             "description": [],
             "signature": [
-              "(filter: any) => ",
+              "(filter: ",
+              "RangeFilter",
+              ") => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -19779,12 +20698,19 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Filter",
+                  " & ",
+                  "EsRangeFilter",
+                  " & { meta: ",
+                  "RangeFilterMeta",
+                  "; script?: { script: { params: any; lang: ",
+                  "ScriptLanguage",
+                  "; source: string; }; } | undefined; match_all?: any; }"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/change_time_filter.ts",
                 "deprecated": false
@@ -19799,7 +20725,11 @@
             "label": "mapAndFlattenFilters",
             "description": [],
             "signature": [
-              "(filters: any[]) => any[]"
+              "(filters: ",
+              "Filter",
+              "[]) => ",
+              "Filter",
+              "[]"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19813,7 +20743,8 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "any[]"
+                  "Filter",
+                  "[]"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/lib/map_and_flatten_filters.ts",
                 "deprecated": false
@@ -19828,7 +20759,13 @@
             "label": "extractTimeFilter",
             "description": [],
             "signature": [
-              "(timeFieldName: string, filters: any[]) => { restOfFilters: any[]; timeRangeFilter: any; }"
+              "(timeFieldName: string, filters: ",
+              "Filter",
+              "[]) => { restOfFilters: ",
+              "Filter",
+              "[]; timeRangeFilter: ",
+              "RangeFilter",
+              " | undefined; }"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19852,7 +20789,8 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "any[]"
+                  "Filter",
+                  "[]"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
                 "deprecated": false
@@ -19867,7 +20805,11 @@
             "label": "extractTimeRange",
             "description": [],
             "signature": [
-              "(filters: any[], timeFieldName?: string | undefined) => { restOfFilters: any[]; timeRange?: ",
+              "(filters: ",
+              "Filter",
+              "[], timeFieldName?: string | undefined) => { restOfFilters: ",
+              "Filter",
+              "[]; timeRange?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -19889,7 +20831,8 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "any[]"
+                  "Filter",
+                  "[]"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
                 "deprecated": false
@@ -20751,11 +21694,23 @@
             "signature": [
               "(indexPattern: ",
               "IndexPatternBase",
-              " | undefined, queries: any, filters: any, config?: ",
+              " | undefined, queries: ",
+              "Query",
+              " | ",
+              "Query",
+              "[], filters: ",
+              "Filter",
+              " | ",
+              "Filter",
+              "[], config?: ",
               "EsQueryConfig",
               " | undefined) => { bool: { must: ",
               "DslQuery",
-              "[]; filter: any[]; should: never[]; must_not: any[]; }; }"
+              "[]; filter: ",
+              "Filter",
+              "[]; should: never[]; must_not: ",
+              "Filter",
+              "[]; }; }"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -20778,12 +21733,15 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.queries",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "queries",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Query",
+                  " | ",
+                  "Query",
+                  "[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/es_query/build_es_query.d.ts",
                 "deprecated": false
@@ -20791,12 +21749,15 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filters",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Filter",
+                  " | ",
+                  "Filter",
+                  "[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/es_query/build_es_query.d.ts",
                 "deprecated": false
@@ -20855,9 +21816,15 @@
             "label": "buildQueryFromFilters",
             "description": [],
             "signature": [
-              "(filters: any[] | undefined, indexPattern: ",
+              "(filters: ",
+              "Filter",
+              "[] | undefined, indexPattern: ",
               "IndexPatternBase",
-              " | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => { must: never[]; filter: any[]; should: never[]; must_not: any[]; }"
+              " | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => { must: never[]; filter: ",
+              "Filter",
+              "[]; should: never[]; must_not: ",
+              "Filter",
+              "[]; }"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -20871,7 +21838,8 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "any[] | undefined"
+                  "Filter",
+                  "[] | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/es_query/from_filters.d.ts",
                 "deprecated": false
@@ -23191,7 +24159,9 @@
             "\nquery service\n{@link QueryStart}"
           ],
           "signature": [
-            "{ addToQueryLog: (appName: string, { language, query }: any) => void; filterManager: ",
+            "{ addToQueryLog: (appName: string, { language, query }: ",
+            "Query",
+            ") => void; filterManager: ",
             {
               "pluginId": "data",
               "scope": "public",
@@ -23247,7 +24217,11 @@
             },
             " | undefined) => { bool: { must: ",
             "DslQuery",
-            "[]; filter: any[]; should: never[]; must_not: any[]; }; }; }"
+            "[]; filter: ",
+            "Filter",
+            "[]; should: never[]; must_not: ",
+            "Filter",
+            "[]; }; }; }"
           ],
           "path": "src/plugins/data/public/types.ts",
           "deprecated": false
@@ -27350,9 +28324,15 @@
         "label": "buildQueryFromFilters",
         "description": [],
         "signature": [
-          "(filters: any[] | undefined, indexPattern: ",
+          "(filters: ",
+          "Filter",
+          "[] | undefined, indexPattern: ",
           "IndexPatternBase",
-          " | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => { must: never[]; filter: any[]; should: never[]; must_not: any[]; }"
+          " | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => { must: never[]; filter: ",
+          "Filter",
+          "[]; should: never[]; must_not: ",
+          "Filter",
+          "[]; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -27367,7 +28347,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/es_query/from_filters.d.ts",
             "deprecated": false
@@ -27507,7 +28488,9 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => any"
+          ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
+          "RangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -27697,7 +28680,17 @@
                 "section": "def-common.GeoPoint",
                 "text": "GeoPoint"
               },
-              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: any; }, \"filter\" | \"geo_bounding_box\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
+              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueBoxed",
+                "text": "ExpressionValueBoxed"
+              },
+              "<\"kibana_query\", ",
+              "Query",
+              "> | undefined; }, \"filter\" | \"geo_bounding_box\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -27729,7 +28722,17 @@
                 "section": "def-common.GeoPoint",
                 "text": "GeoPoint"
               },
-              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: any; }, never>, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"timeShift\">, ",
+              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; filter?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueBoxed",
+                "text": "ExpressionValueBoxed"
+              },
+              "<\"kibana_query\", ",
+              "Query",
+              "> | undefined; }, never>, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"timeShift\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -30964,7 +31967,67 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.IFieldType.toSpec.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IFieldType.toSpec.$1.options.getFormatterForField",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "getFormatterForField",
+                    "description": [],
+                    "signature": [
+                      "((field: ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IFieldType",
+                        "text": "IFieldType"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IndexPatternField",
+                        "text": "IndexPatternField"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.FieldSpec",
+                        "text": "FieldSpec"
+                      },
+                      ") => ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataFieldFormatsPluginApi",
+                        "section": "def-common.FieldFormat",
+                        "text": "FieldFormat"
+                      },
+                      ") | undefined"
+                    ],
+                    "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -31341,11 +32404,10 @@
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.agg",
+                "id": "def-server.OptionedValueProp.isCompatible.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "agg",
@@ -31360,9 +32422,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -31616,7 +32680,13 @@
         "label": "ExecutionContextSearch",
         "description": [],
         "signature": [
-          "{ filters?: any[] | undefined; query?: any; timeRange?: ",
+          "{ filters?: ",
+          "Filter",
+          "[] | undefined; query?: ",
+          "Query",
+          " | ",
+          "Query",
+          "[] | undefined; timeRange?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -31785,6 +32855,32 @@
         ],
         "path": "src/plugins/data/common/field_formats/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-server.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.defaultOverride",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -31797,7 +32893,11 @@
         "label": "Filter",
         "description": [],
         "signature": [
-          "any"
+          "{ $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; meta: ",
+          "FilterMeta",
+          "; query?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -34219,6 +35319,20 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-server.Query",
+        "type": "Type",
+        "tags": [],
+        "label": "Query",
+        "description": [],
+        "signature": [
+          "{ query: string | { [key: string]: any; }; language: string; }"
+        ],
+        "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/types.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-server.TimeRange",
         "type": "Type",
         "tags": [],
@@ -34303,15 +35417,52 @@
           {
             "parentPluginId": "data",
             "id": "def-server.esFilters.buildQueryFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildQueryFilter",
             "description": [],
             "signature": [
-              "any"
+              "(query: any, index: string, alias: string) => ",
+              "QueryStringFilter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.query",
+                "type": "Any",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.index",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.alias",
+                "type": "string",
+                "tags": [],
+                "label": "alias",
+                "description": [],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -34323,7 +35474,8 @@
             "signature": [
               "(indexPatternString: string, queryDsl: any, disabled: boolean, negate: boolean, alias: string | null, store: ",
               "FilterStateStore",
-              ") => any"
+              ") => ",
+              "Filter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
             "deprecated": false,
@@ -34336,7 +35488,7 @@
                 "tags": [],
                 "label": "indexPatternString",
                 "description": [],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -34349,7 +35501,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -34359,7 +35511,7 @@
                 "tags": [],
                 "label": "disabled",
                 "description": [],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -34369,7 +35521,7 @@
                 "tags": [],
                 "label": "negate",
                 "description": [],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -34382,7 +35534,7 @@
                 "signature": [
                   "string | null"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -34395,7 +35547,7 @@
                 "signature": [
                   "FilterStateStore"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               }
             ]
@@ -34403,28 +35555,89 @@
           {
             "parentPluginId": "data",
             "id": "def-server.esFilters.buildEmptyFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildEmptyFilter",
             "description": [],
             "signature": [
-              "any"
+              "(isPinned: boolean, index?: string | undefined) => ",
+              "Filter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.isPinned",
+                "type": "boolean",
+                "tags": [],
+                "label": "isPinned",
+                "description": [],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_empty_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.index",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_empty_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-server.esFilters.buildExistsFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildExistsFilter",
             "description": [],
             "signature": [
-              "any"
+              "(field: ",
+              "IndexPatternFieldBase",
+              ", indexPattern: ",
+              "IndexPatternBase",
+              ") => ",
+              "ExistsFilter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "IndexPatternFieldBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "IndexPatternBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -34442,7 +35655,8 @@
               "FILTERS",
               ", negate: boolean, disabled: boolean, params: any, alias: string | null, store?: ",
               "FilterStateStore",
-              " | undefined) => any"
+              " | undefined) => ",
+              "Filter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
             "deprecated": false,
@@ -34458,7 +35672,7 @@
                 "signature": [
                   "IndexPatternBase"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
               },
               {
@@ -34471,7 +35685,7 @@
                 "signature": [
                   "IndexPatternFieldBase"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
               },
               {
@@ -34484,7 +35698,7 @@
                 "signature": [
                   "FILTERS"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
               },
               {
@@ -34494,7 +35708,7 @@
                 "tags": [],
                 "label": "negate",
                 "description": [],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
               },
               {
@@ -34504,7 +35718,7 @@
                 "tags": [],
                 "label": "disabled",
                 "description": [],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
               },
               {
@@ -34517,7 +35731,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
               },
               {
@@ -34530,7 +35744,7 @@
                 "signature": [
                   "string | null"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
               },
               {
@@ -34544,7 +35758,7 @@
                   "FilterStateStore",
                   " | undefined"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
               }
             ]
@@ -34552,41 +35766,197 @@
           {
             "parentPluginId": "data",
             "id": "def-server.esFilters.buildPhraseFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildPhraseFilter",
             "description": [],
             "signature": [
-              "any"
+              "(field: ",
+              "IndexPatternFieldBase",
+              ", value: PhraseFilterValue, indexPattern: ",
+              "IndexPatternBase",
+              ") => ",
+              "PhraseFilter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "IndexPatternFieldBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.value",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string | number | boolean"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "IndexPatternBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-server.esFilters.buildPhrasesFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildPhrasesFilter",
             "description": [],
             "signature": [
-              "any"
+              "(field: ",
+              "IndexPatternFieldBase",
+              ", params: string[], indexPattern: ",
+              "IndexPatternBase",
+              ") => ",
+              "PhrasesFilter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "IndexPatternFieldBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.params",
+                "type": "Array",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "IndexPatternBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
             "id": "def-server.esFilters.buildRangeFilter",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "buildRangeFilter",
             "description": [],
             "signature": [
-              "any"
+              "(field: ",
+              "IndexPatternFieldBase",
+              ", params: ",
+              "RangeFilterParams",
+              ", indexPattern: ",
+              "IndexPatternBase",
+              ", formattedValue?: string | undefined) => ",
+              "RangeFilter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.field",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "IndexPatternFieldBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "RangeFilterParams"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "IndexPatternBase"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.formattedValue",
+                "type": "string",
+                "tags": [],
+                "label": "formattedValue",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -34596,7 +35966,9 @@
             "label": "isFilterDisabled",
             "description": [],
             "signature": [
-              "(filter: any) => boolean"
+              "(filter: ",
+              "Filter",
+              ") => boolean"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
             "deprecated": false,
@@ -34605,12 +35977,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.filter",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: any; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
                 "deprecated": false
@@ -34785,9 +36161,15 @@
             "label": "buildQueryFromFilters",
             "description": [],
             "signature": [
-              "(filters: any[] | undefined, indexPattern: ",
+              "(filters: ",
+              "Filter",
+              "[] | undefined, indexPattern: ",
               "IndexPatternBase",
-              " | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => { must: never[]; filter: any[]; should: never[]; must_not: any[]; }"
+              " | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => { must: never[]; filter: ",
+              "Filter",
+              "[]; should: never[]; must_not: ",
+              "Filter",
+              "[]; }"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
             "deprecated": false,
@@ -34801,7 +36183,8 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "any[] | undefined"
+                  "Filter",
+                  "[] | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/es_query/from_filters.d.ts",
                 "deprecated": false
@@ -34875,11 +36258,23 @@
             "signature": [
               "(indexPattern: ",
               "IndexPatternBase",
-              " | undefined, queries: any, filters: any, config?: ",
+              " | undefined, queries: ",
+              "Query",
+              " | ",
+              "Query",
+              "[], filters: ",
+              "Filter",
+              " | ",
+              "Filter",
+              "[], config?: ",
               "EsQueryConfig",
               " | undefined) => { bool: { must: ",
               "DslQuery",
-              "[]; filter: any[]; should: never[]; must_not: any[]; }; }"
+              "[]; filter: ",
+              "Filter",
+              "[]; should: never[]; must_not: ",
+              "Filter",
+              "[]; }; }"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
             "deprecated": false,
@@ -34902,12 +36297,15 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.queries",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "queries",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Query",
+                  " | ",
+                  "Query",
+                  "[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/es_query/build_es_query.d.ts",
                 "deprecated": false
@@ -34915,12 +36313,15 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.filters",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "any"
+                  "Filter",
+                  " | ",
+                  "Filter",
+                  "[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/es_query/build_es_query.d.ts",
                 "deprecated": false
@@ -36385,7 +37786,8 @@
         "signature": [
           "(indexPatternString: string, queryDsl: any, disabled: boolean, negate: boolean, alias: string | null, store: ",
           "FilterStateStore",
-          ") => any"
+          ") => ",
+          "Filter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -36399,7 +37801,7 @@
             "tags": [],
             "label": "indexPatternString",
             "description": [],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -36412,7 +37814,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -36422,7 +37824,7 @@
             "tags": [],
             "label": "disabled",
             "description": [],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -36432,7 +37834,7 @@
             "tags": [],
             "label": "negate",
             "description": [],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -36445,7 +37847,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -36458,7 +37860,51 @@
             "signature": [
               "FilterStateStore"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.buildEmptyFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "buildEmptyFilter",
+        "description": [],
+        "signature": [
+          "(isPinned: boolean, index?: string | undefined) => ",
+          "Filter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.isPinned",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPinned",
+            "description": [],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_empty_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_empty_filter.d.ts",
             "deprecated": false
           }
         ],
@@ -36476,11 +37922,23 @@
         "signature": [
           "(indexPattern: ",
           "IndexPatternBase",
-          " | undefined, queries: any, filters: any, config?: ",
+          " | undefined, queries: ",
+          "Query",
+          " | ",
+          "Query",
+          "[], filters: ",
+          "Filter",
+          " | ",
+          "Filter",
+          "[], config?: ",
           "EsQueryConfig",
           " | undefined) => { bool: { must: ",
           "DslQuery",
-          "[]; filter: any[]; should: never[]; must_not: any[]; }; }"
+          "[]; filter: ",
+          "Filter",
+          "[]; should: never[]; must_not: ",
+          "Filter",
+          "[]; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -36504,12 +37962,15 @@
           {
             "parentPluginId": "data",
             "id": "def-common.queries",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "queries",
             "description": [],
             "signature": [
-              "any"
+              "Query",
+              " | ",
+              "Query",
+              "[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/es_query/build_es_query.d.ts",
             "deprecated": false
@@ -36517,12 +37978,15 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filters",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filters",
             "description": [],
             "signature": [
-              "any"
+              "Filter",
+              " | ",
+              "Filter",
+              "[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/es_query/build_es_query.d.ts",
             "deprecated": false
@@ -36546,6 +38010,57 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.buildExistsFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "buildExistsFilter",
+        "description": [],
+        "signature": [
+          "(field: ",
+          "IndexPatternFieldBase",
+          ", indexPattern: ",
+          "IndexPatternBase",
+          ") => ",
+          "ExistsFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "IndexPatternFieldBase"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "IndexPatternBase"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.buildFilter",
         "type": "Function",
         "tags": [
@@ -36562,7 +38077,8 @@
           "FILTERS",
           ", negate: boolean, disabled: boolean, params: any, alias: string | null, store?: ",
           "FilterStateStore",
-          " | undefined) => any"
+          " | undefined) => ",
+          "Filter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -36579,7 +38095,7 @@
             "signature": [
               "IndexPatternBase"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
             "deprecated": false
           },
           {
@@ -36592,7 +38108,7 @@
             "signature": [
               "IndexPatternFieldBase"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
             "deprecated": false
           },
           {
@@ -36605,7 +38121,7 @@
             "signature": [
               "FILTERS"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
             "deprecated": false
           },
           {
@@ -36615,7 +38131,7 @@
             "tags": [],
             "label": "negate",
             "description": [],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
             "deprecated": false
           },
           {
@@ -36625,7 +38141,7 @@
             "tags": [],
             "label": "disabled",
             "description": [],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
             "deprecated": false
           },
           {
@@ -36638,7 +38154,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
             "deprecated": false
           },
           {
@@ -36651,7 +38167,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
             "deprecated": false
           },
           {
@@ -36665,7 +38181,189 @@
               "FilterStateStore",
               " | undefined"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.buildPhraseFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "buildPhraseFilter",
+        "description": [],
+        "signature": [
+          "(field: ",
+          "IndexPatternFieldBase",
+          ", value: PhraseFilterValue, indexPattern: ",
+          "IndexPatternBase",
+          ") => ",
+          "PhraseFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "IndexPatternFieldBase"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string | number | boolean"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "IndexPatternBase"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.buildPhrasesFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "buildPhrasesFilter",
+        "description": [],
+        "signature": [
+          "(field: ",
+          "IndexPatternFieldBase",
+          ", params: string[], indexPattern: ",
+          "IndexPatternBase",
+          ") => ",
+          "PhrasesFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "IndexPatternFieldBase"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.params",
+            "type": "Array",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "IndexPatternBase"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.buildQueryFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "buildQueryFilter",
+        "description": [],
+        "signature": [
+          "(query: any, index: string, alias: string) => ",
+          "QueryStringFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.query",
+            "type": "Any",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.alias",
+            "type": "string",
+            "tags": [],
+            "label": "alias",
+            "description": [],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
             "deprecated": false
           }
         ],
@@ -36681,9 +38379,15 @@
         "label": "buildQueryFromFilters",
         "description": [],
         "signature": [
-          "(filters: any[] | undefined, indexPattern: ",
+          "(filters: ",
+          "Filter",
+          "[] | undefined, indexPattern: ",
           "IndexPatternBase",
-          " | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => { must: never[]; filter: any[]; should: never[]; must_not: any[]; }"
+          " | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => { must: never[]; filter: ",
+          "Filter",
+          "[]; should: never[]; must_not: ",
+          "Filter",
+          "[]; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -36698,7 +38402,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/es_query/from_filters.d.ts",
             "deprecated": false
@@ -36728,6 +38433,85 @@
               "boolean | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/es_query/from_filters.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.buildRangeFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "buildRangeFilter",
+        "description": [],
+        "signature": [
+          "(field: ",
+          "IndexPatternFieldBase",
+          ", params: ",
+          "RangeFilterParams",
+          ", indexPattern: ",
+          "IndexPatternBase",
+          ", formattedValue?: string | undefined) => ",
+          "RangeFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "IndexPatternFieldBase"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "RangeFilterParams"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "IndexPatternBase"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.formattedValue",
+            "type": "string",
+            "tags": [],
+            "label": "formattedValue",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
             "deprecated": false
           }
         ],
@@ -36823,7 +38607,15 @@
         "label": "compareFilters",
         "description": [],
         "signature": [
-          "(first: any, second: any, comparatorOptions?: ",
+          "(first: ",
+          "Filter",
+          " | ",
+          "Filter",
+          "[], second: ",
+          "Filter",
+          " | ",
+          "Filter",
+          "[], comparatorOptions?: ",
           "FilterCompareOptions",
           " | undefined) => boolean"
         ],
@@ -36835,12 +38627,15 @@
           {
             "parentPluginId": "data",
             "id": "def-common.first",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "first",
             "description": [],
             "signature": [
-              "any"
+              "Filter",
+              " | ",
+              "Filter",
+              "[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/compare_filters.d.ts",
             "deprecated": false
@@ -36848,12 +38643,15 @@
           {
             "parentPluginId": "data",
             "id": "def-common.second",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "second",
             "description": [],
             "signature": [
-              "any"
+              "Filter",
+              " | ",
+              "Filter",
+              "[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/compare_filters.d.ts",
             "deprecated": false
@@ -37059,9 +38857,15 @@
         "label": "dedupFilters",
         "description": [],
         "signature": [
-          "(existingFilters: any[], filters: any[], comparatorOptions?: ",
+          "(existingFilters: ",
+          "Filter",
+          "[], filters: ",
+          "Filter",
+          "[], comparatorOptions?: ",
           "FilterCompareOptions",
-          " | undefined) => any[]"
+          " | undefined) => ",
+          "Filter",
+          "[]"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37076,7 +38880,8 @@
             "label": "existingFilters",
             "description": [],
             "signature": [
-              "any[]"
+              "Filter",
+              "[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/dedup_filters.d.ts",
             "deprecated": false
@@ -37089,7 +38894,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[]"
+              "Filter",
+              "[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/dedup_filters.d.ts",
             "deprecated": false
@@ -37121,7 +38927,10 @@
         "label": "disableFilter",
         "description": [],
         "signature": [
-          "(filter: any) => any"
+          "(filter: ",
+          "Filter",
+          ") => ",
+          "Filter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37131,12 +38940,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -37154,7 +38967,10 @@
         "label": "enableFilter",
         "description": [],
         "signature": [
-          "(filter: any) => any"
+          "(filter: ",
+          "Filter",
+          ") => ",
+          "Filter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37164,12 +38980,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -37334,6 +39154,146 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getPhraseFilterField",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "getPhraseFilterField",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "PhraseFilter",
+          ") => string"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "Filter",
+              " & { meta: ",
+              "PhraseFilterMeta",
+              "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.getPhraseFilterValue",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "getPhraseFilterValue",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "PhraseFilter",
+          ") => PhraseFilterValue"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "Filter",
+              " & { meta: ",
+              "PhraseFilterMeta",
+              "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isExistsFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isExistsFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
+          "ExistsFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.isFilter",
         "type": "Function",
         "tags": [
@@ -37342,7 +39302,8 @@
         "label": "isFilter",
         "description": [],
         "signature": [
-          "(x: unknown) => x is any"
+          "(x: unknown) => x is ",
+          "Filter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37375,7 +39336,9 @@
         "label": "isFilterDisabled",
         "description": [],
         "signature": [
-          "(filter: any) => boolean"
+          "(filter: ",
+          "Filter",
+          ") => boolean"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37385,12 +39348,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -37408,7 +39375,9 @@
         "label": "isFilterPinned",
         "description": [],
         "signature": [
-          "(filter: any) => boolean | undefined"
+          "(filter: ",
+          "Filter",
+          ") => boolean | undefined"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37418,12 +39387,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -37441,7 +39414,9 @@
         "label": "isFilters",
         "description": [],
         "signature": [
-          "(x: unknown) => x is any[]"
+          "(x: unknown) => x is ",
+          "Filter",
+          "[]"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37468,6 +39443,519 @@
               "unknown"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isGeoBoundingBoxFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isGeoBoundingBoxFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
+          "GeoBoundingBoxFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/geo_bounding_box_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isGeoPolygonFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isGeoPolygonFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
+          "GeoPolygonFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/geo_polygon_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isMatchAllFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isMatchAllFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
+          "MatchAllFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/match_all_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isMissingFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isMissingFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
+          "MissingFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/missing_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isPhraseFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isPhraseFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
+          "PhraseFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isPhrasesFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isPhrasesFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
+          "PhrasesFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isQueryStringFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isQueryStringFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
+          "QueryStringFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isRangeFilter",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "isRangeFilter",
+        "description": [],
+        "signature": [
+          "(filter?: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          " | undefined) => filter is ",
+          "RangeFilter"
+        ],
+        "path": "src/plugins/data/common/es_query/index.ts",
+        "deprecated": true,
+        "references": [],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              " | undefined"
+            ],
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
             "deprecated": false
           }
         ],
@@ -37517,7 +40005,11 @@
         "label": "onlyDisabledFiltersChanged",
         "description": [],
         "signature": [
-          "(newFilters?: any[] | undefined, oldFilters?: any[] | undefined) => boolean"
+          "(newFilters?: ",
+          "Filter",
+          "[] | undefined, oldFilters?: ",
+          "Filter",
+          "[] | undefined) => boolean"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37532,7 +40024,8 @@
             "label": "newFilters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/only_disabled.d.ts",
             "deprecated": false
@@ -37545,7 +40038,8 @@
             "label": "oldFilters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/only_disabled.d.ts",
             "deprecated": false
@@ -37563,7 +40057,10 @@
         "label": "pinFilter",
         "description": [],
         "signature": [
-          "(filter: any) => any"
+          "(filter: ",
+          "Filter",
+          ") => ",
+          "Filter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37573,12 +40070,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -37769,7 +40270,11 @@
         "label": "toggleFilterDisabled",
         "description": [],
         "signature": [
-          "(filter: any) => { meta: { disabled: boolean; alias: string | null; negate: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: any; } | undefined; query?: any; }"
+          "(filter: ",
+          "Filter",
+          ") => { meta: { disabled: boolean; alias: string | null; negate: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; query?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37779,12 +40284,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -37802,7 +40311,11 @@
         "label": "toggleFilterNegated",
         "description": [],
         "signature": [
-          "(filter: any) => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: any; } | undefined; query?: any; }"
+          "(filter: ",
+          "Filter",
+          ") => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; query?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37812,12 +40325,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: any; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -37835,7 +40352,11 @@
         "label": "uniqFilters",
         "description": [],
         "signature": [
-          "(filters: any[], comparatorOptions?: any) => any[]"
+          "(filters: ",
+          "Filter",
+          "[], comparatorOptions?: any) => ",
+          "Filter",
+          "[]"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -37850,7 +40371,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[]"
+              "Filter",
+              "[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/uniq_filters.d.ts",
             "deprecated": false
@@ -37924,19 +40446,23 @@
             ],
             "path": "src/plugins/data/common/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.type",
+                "id": "def-common.FilterValueFormatter.getConverterFor.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -38228,108 +40754,6 @@
     "misc": [
       {
         "parentPluginId": "data",
-        "id": "def-common.buildEmptyFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "buildEmptyFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.buildExistsFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "buildExistsFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.buildPhraseFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "buildPhraseFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.buildPhrasesFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "buildPhrasesFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.buildQueryFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "buildQueryFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.buildRangeFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "buildRangeFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.CSV_FORMULA_CHARS",
         "type": "Array",
         "tags": [],
@@ -38366,7 +40790,8 @@
         "label": "CustomFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { query: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -38431,7 +40856,10 @@
         "label": "ExistsFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "FilterMeta",
+          "; exists?: { field: string; } | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -38469,7 +40897,11 @@
         "label": "Filter",
         "description": [],
         "signature": [
-          "any"
+          "{ $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; meta: ",
+          "FilterMeta",
+          "; query?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40219,7 +42651,7 @@
         "label": "FilterMeta",
         "description": [],
         "signature": [
-          "any"
+          "{ alias: string | null; disabled: boolean; negate: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40245,7 +42677,10 @@
         "label": "GeoBoundingBoxFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "GeoBoundingBoxFilterMeta",
+          "; geo_bounding_box: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40262,7 +42697,10 @@
         "label": "GeoPolygonFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "GeoPolygonFilterMeta",
+          "; geo_polygon: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40283,40 +42721,32 @@
         ],
         "path": "src/plugins/data/common/types.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.getPhraseFilterField",
-        "type": "Any",
-        "tags": [
-          "deprecated"
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.defaultOverride",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          }
         ],
-        "label": "getPhraseFilterField",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.getPhraseFilterValue",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "getPhraseFilterValue",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
         "initialIsOpen": false
       },
       {
@@ -40357,159 +42787,6 @@
         ],
         "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isExistsFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isExistsFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isGeoBoundingBoxFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isGeoBoundingBoxFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isGeoPolygonFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isGeoPolygonFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isMatchAllFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isMatchAllFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isMissingFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isMissingFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isPhraseFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isPhraseFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isPhrasesFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isPhrasesFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isQueryStringFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isQueryStringFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.isRangeFilter",
-        "type": "Any",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "isRangeFilter",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "references": [],
         "initialIsOpen": false
       },
       {
@@ -40858,7 +43135,10 @@
         "label": "MatchAllFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "MatchAllFilterMeta",
+          "; match_all: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40884,7 +43164,10 @@
         "label": "MissingFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "FilterMeta",
+          "; missing: { field: string; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40901,7 +43184,10 @@
         "label": "PhraseFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "PhraseFilterMeta",
+          "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40918,11 +43204,28 @@
         "label": "PhrasesFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & { meta: ",
+          "PhrasesFilterMeta",
+          "; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.Query",
+        "type": "Type",
+        "tags": [],
+        "label": "Query",
+        "description": [],
+        "signature": [
+          "{ query: string | { [key: string]: any; }; language: string; }"
+        ],
+        "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/types.d.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -40935,7 +43238,14 @@
         "label": "RangeFilter",
         "description": [],
         "signature": [
-          "any"
+          "Filter",
+          " & ",
+          "EsRangeFilter",
+          " & { meta: ",
+          "RangeFilterMeta",
+          "; script?: { script: { params: any; lang: ",
+          "ScriptLanguage",
+          "; source: string; }; } | undefined; match_all?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40961,7 +43271,10 @@
         "label": "RangeFilterMeta",
         "description": [],
         "signature": [
-          "any"
+          "FilterMeta",
+          " & { params: ",
+          "RangeFilterParams",
+          "; field?: string | undefined; formattedValue?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40978,7 +43291,7 @@
         "label": "RangeFilterParams",
         "description": [],
         "signature": [
-          "any"
+          "RangeFilterParams"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
