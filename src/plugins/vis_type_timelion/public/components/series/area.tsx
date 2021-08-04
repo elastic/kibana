@@ -26,7 +26,7 @@ const getPointFillColor = (points: VisSeries['points'], color: string | undefine
   return (
     pointFillColor &&
     chroma(pointFillColor)
-      .alpha((points?.fill ?? 1))
+      .alpha(points?.fill ?? 1)
       .css()
   );
 };
