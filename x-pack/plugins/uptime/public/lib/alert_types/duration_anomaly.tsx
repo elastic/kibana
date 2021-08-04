@@ -8,12 +8,12 @@
 import React from 'react';
 import moment from 'moment';
 
+import { ALERT_END, ALERT_STATUS } from '@kbn/rule-data-utils';
+
+import { AlertTypeInitializer } from '.';
+import { getMonitorRouteFromMonitorId } from './common';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from '../../../common/translations';
-import { AlertTypeInitializer } from '.';
-
-import { getMonitorRouteFromMonitorId } from './common';
-
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 
 const { defaultActionMessage, description } = DurationAnomalyTranslations;
@@ -39,8 +39,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
     reason: fields.reason,
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
-      dateRangeEnd:
-        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end']!,
+      dateRangeEnd: fields[ALERT_STATUS] === 'open' ? 'now' : fields[ALERT_END]!,
       dateRangeStart: moment(new Date(fields['anomaly.start']!)).subtract('5', 'm').toISOString(),
     }),
   }),
