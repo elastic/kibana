@@ -30,7 +30,6 @@ import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
-import { fireEvent } from '@testing-library/dom';
 import {
   createFailedResourceState,
   createLoadedResourceState,
@@ -42,6 +41,8 @@ import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 import { APP_PATH, MANAGEMENT_PATH } from '../../../../../common/constants';
+import { TransformStats, TRANSFORM_STATE } from '../types';
+import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -68,7 +69,7 @@ jest.mock('../../../../common/hooks/use_license');
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
-  const act = reactTestingLibrary.act;
+  const { act, screen, fireEvent } = reactTestingLibrary;
 
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -1260,6 +1261,44 @@ describe('when on the endpoint list page', () => {
       expect(agentPolicyReassignLink.getAttribute('href')).toEqual(
         `/app/fleet/agents/${agentId}?openReassignFlyout=true`
       );
+    });
+  });
+
+  describe('required transform failed banner', () => {
+    it('is not displayed when transform state is not failed', () => {
+      const transforms: TransformStats[] = [
+        {
+          id: `${metadataTransformPrefix}-0.20.0`,
+          state: TRANSFORM_STATE.STARTED,
+        } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeNull();
+    });
+
+    it('is not displayed when non-relevant transform is failing', () => {
+      const transforms: TransformStats[] = [
+        { id: 'not-metadata', state: TRANSFORM_STATE.FAILED } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeNull();
+    });
+
+    it('is displayed when relevant transform state is failed state', async () => {
+      const transforms: TransformStats[] = [
+        {
+          id: `${metadataTransformPrefix}-0.20.0`,
+          state: TRANSFORM_STATE.FAILED,
+        } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeInTheDocument();
     });
   });
 });

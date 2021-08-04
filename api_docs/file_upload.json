@@ -102,11 +102,10 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.geojsonFile",
+                "id": "def-public.FileUploadComponentProps.onFileSelect.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "geojsonFile",
@@ -115,29 +114,39 @@
                   "GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"
                 ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.name",
+                "id": "def-public.FileUploadComponentProps.onFileSelect.$2",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.previewCoverage",
+                "id": "def-public.FileUploadComponentProps.onFileSelect.$3",
                 "type": "number",
                 "tags": [],
                 "label": "previewCoverage",
                 "description": [],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -151,8 +160,8 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -166,8 +175,8 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -181,8 +190,8 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -204,11 +213,10 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.results",
+                "id": "def-public.FileUploadComponentProps.onUploadComplete.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "results",
@@ -223,9 +231,11 @@
                   }
                 ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -239,8 +249,8 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -791,21 +801,24 @@
             ],
             "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.name",
+                "id": "def-public.Props.onIndexNameChange.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "fileUpload",
-                "id": "def-public.error",
+                "id": "def-public.Props.onIndexNameChange.$2",
                 "type": "string",
                 "tags": [],
                 "label": "error",
@@ -814,9 +827,11 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -830,8 +845,8 @@
             ],
             "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "fileUpload",
@@ -845,8 +860,8 @@
             ],
             "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

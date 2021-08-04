@@ -244,7 +244,49 @@ describe('objects', () => {
   });
 });
 
-describe('Misc types', () => {
+describe('Types', () => {
+  it('Generic type pointing to a function', () => {
+    const api = doc.client.find((c) => c.label === 'FnTypeWithGeneric');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(2);
+
+    expect(api?.children).toBeDefined();
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "(t: T, p: ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.MyProps",
+          "text": "MyProps",
+        },
+        ") => ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.TypeWithGeneric",
+          "text": "TypeWithGeneric",
+        },
+        "<T>",
+      ]
+    `);
+  });
+
+  it('Generic type pointing to an array', () => {
+    const api = doc.client.find((c) => c.label === 'TypeWithGeneric');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(0);
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "T[]",
+      ]
+    `);
+  });
+
   it('Type using ReactElement has the right signature', () => {
     const api = doc.client.find((c) => c.label === 'AReactElementFn');
     expect(api).toBeDefined();
@@ -322,6 +364,14 @@ describe('Misc types', () => {
       ]
     `);
     expect(linkCount(fnType?.signature!)).toBe(1);
+
+    expect(fnType?.children).toBeDefined();
+    expect(fnType?.children?.length).toBe(1);
+    expect(fnType?.children![0].description).toMatchInlineSnapshot(`
+      Array [
+        "This is a generic T type. It can be anything.",
+      ]
+    `);
   });
 
   it('Union type is exported correctly', () => {
@@ -417,6 +467,20 @@ describe('interfaces and classes', () => {
     `);
   });
 
+  /**
+   * Coverage for https://github.com/elastic/kibana/issues/107145
+   */
+  it('Optional function on interface includes children', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface!.children?.find((c) => c.label === 'anOptionalFn');
+    expect(fn).toBeDefined();
+    expect(fn?.type).toBe(TypeKind.FunctionKind);
+    expect(fn?.children).toBeDefined();
+    expect(fn?.children?.length).toBe(1);
+  });
+
   it('Non arrow function on interface is exported as function type', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
@@ -462,7 +526,7 @@ describe('interfaces and classes', () => {
     expect(linkCount(clss?.signature!)).toBe(3);
   });
 
-  it('Function with generic inside interface is exported with function type', () => {
+  it('Generic function inside interface is exported as a function', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
 
@@ -479,6 +543,47 @@ describe('interfaces and classes', () => {
     expect(param?.description).toBeDefined();
     expect(param?.description?.length).toBe(1);
     expect(param!.description![0]).toBe('This a parameter.');
+  });
+
+  it('Property on interface pointing to generic function type exported with link', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface?.children?.find((c) => c.label === 'fnTypeWithGeneric');
+    expect(fn).toBeDefined();
+
+    // `fnTypeWithGeneric` is defined as:
+    //  fnTypeWithGeneric: FnTypeWithGeneric<string>;
+    // and `GenericTypeFn` is defined as:
+    // type FnTypeWithGeneric<T> = (t: T, p: MyProps) => TypeWithGeneric<T>;
+    // In get_signature.ts, we use the `TypeFormatFlags.InTypeAlias` flag which ends up expanding the type
+    // to be a function, and thus this doesn't show up as a single referenced type with no kids. If we ever fixed that,
+    // it would be find to change expectations here to be no children and TypeKind instead of FunctionKind.
+    expect(fn?.children).toBeDefined();
+    expect(fn?.type).toBe(TypeKind.FunctionKind);
+    expect(fn?.signature).toBeDefined();
+    expect(linkCount(fn!.signature!)).toBe(2);
+    expect(fn?.children?.length).toBe(2);
+
+    // This will fail! It actually shows up as Uncategorized. It would be some effort to get it to show up as string, which may involve
+    // trying to fix the above issue so it's not expanded.
+    // expect(fn?.children[0]!.type).toBe(TypeKind.StringKind);
+  });
+
+  // Optional code path is different than non-optional properties.
+  it('Optional interface property pointing to generic function type', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface?.children?.find(
+      (c) => c.label === 'fnTypeWithGenericThatIsOptional'
+    );
+    expect(fn).toBeDefined();
+
+    // Unlike the above, the type is _not_ expanded inline, so we make sure it has no children, but does link to the property.
+    expect(fn?.children).toBeUndefined();
+    expect(fn?.signature).toBeDefined();
+    expect(linkCount(fn!.signature!)).toBe(1);
   });
 
   it('interfaces with internal tags are not exported', () => {
