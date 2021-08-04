@@ -66,11 +66,16 @@ const elementSpecs = [
 
 const initializeElementFactories = [metricElementInitializer];
 
+const excludeElementsForDisabledPlugins = (element: ElementFactory, functions: string[]) => {
+  return !element().external || functions.find((fn) => element().expression_name === fn);
+};
+
 export const initializeElements: SetupInitializer<ElementFactory[]> = (core, plugins) => {
+  const availableFunctions = Object.keys(plugins.expressions.getFunctions());
   const specs = [
     ...elementSpecs,
     ...initializeElementFactories.map((factory) => factory(core, plugins)),
-  ];
+  ].filter((element) => excludeElementsForDisabledPlugins(element, availableFunctions));
 
   return applyElementStrings(specs);
 };
