@@ -8,20 +8,17 @@
 import { useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
-import { isWithinMaxBreakpoint } from '@elastic/eui';
+import { isWithinMaxBreakpoint, isWithinMinBreakpoint } from '@elastic/eui';
 
-function isMinXXL(windowWidth: number) {
-  return windowWidth >= 1600;
-}
-
-function getScreenSizes(windowWidth: number) {
-  const isXXL = isMinXXL(windowWidth);
+export function getScreenSizes(windowWidth: number) {
   return {
+    isXSmall: isWithinMaxBreakpoint(windowWidth, 'xs'),
     isSmall: isWithinMaxBreakpoint(windowWidth, 's'),
     isMedium: isWithinMaxBreakpoint(windowWidth, 'm'),
     isLarge: isWithinMaxBreakpoint(windowWidth, 'l'),
-    isXl: isWithinMaxBreakpoint(windowWidth, 'xl') && !isXXL,
-    isXXL,
+    isXl: isWithinMaxBreakpoint(windowWidth, 1599),
+    isXXL: isWithinMaxBreakpoint(windowWidth, 1999),
+    isXXXL: isWithinMinBreakpoint(windowWidth, 2000),
   };
 }
 

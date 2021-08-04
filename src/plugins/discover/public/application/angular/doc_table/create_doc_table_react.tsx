@@ -12,7 +12,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getServices, IIndexPattern } from '../../../kibana_services';
+import { getServices, IndexPattern } from '../../../kibana_services';
 import { IndexPatternField } from '../../../../../data/common';
 import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
 
@@ -22,7 +22,7 @@ export interface DocTableLegacyProps {
   searchTitle?: string;
   onFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   rows: estypes.SearchHit[];
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   minimumVisibleRows?: number;
   onAddColumn?: (column: string) => void;
   onBackToTop: () => void;
