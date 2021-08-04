@@ -99,7 +99,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       isOnEndpointPage(getState()) &&
       hasSelectedEndpoint(getState()) !== true
     ) {
-      someRandomFunction({ store, coreStart, depsStart });
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
@@ -258,32 +257,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       hasSelectedEndpoint(getState()) === true &&
       getIsOnEndpointDetailsActivityLog(getState())
     ) {
-      // call the activity log api
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        // ts error to be fixed when AsyncResourceState is refactored (#830)
-        // @ts-expect-error
-        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
-      });
-
-      try {
-        const { page, pageSize } = getActivityLogDataPaging(getState());
-        const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-          agent_id: selectedAgent(getState()),
-        });
-        const activityLog = await coreStart.http.get<ActivityLog>(route, {
-          query: { page, page_size: pageSize },
-        });
-        dispatch({
-          type: 'endpointDetailsActivityLogChanged',
-          payload: createLoadedResourceState<ActivityLog>(activityLog),
-        });
-      } catch (error) {
-        dispatch({
-          type: 'endpointDetailsActivityLogChanged',
-          payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-        });
-      }
+      endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
     }
 
     // page activity log API
@@ -291,7 +265,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       action.type === 'endpointDetailsActivityLogUpdatePaging' &&
       hasSelectedEndpoint(getState())
     ) {
-      endpointDetailsActivityLogMiddleware({ store, coreStart });
+      endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
     }
 
     // Isolate Host
@@ -521,7 +495,7 @@ const loadEndpointsPendingActions = async ({
   }
 };
 
-async function endpointDetailsActivityLogMiddleware({
+async function endpointDetailsActivityLogPagingMiddleware({
   store,
   coreStart,
 }: {
@@ -734,6 +708,41 @@ async function endpointDetailsMiddleware({
     dispatch({
       type: 'serverFailedToReturnEndpointPolicyResponse',
       payload: error,
+    });
+  }
+}
+async function endpointDetailsActivityLogChangedMiddleware({
+  store,
+  coreStart,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: CoreStart;
+}) {
+  const { getState, dispatch } = store;
+  // call the activity log api
+  dispatch({
+    type: 'endpointDetailsActivityLogChanged',
+    // ts error to be fixed when AsyncResourceState is refactored (#830)
+    // @ts-expect-error
+    payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+  });
+
+  try {
+    const { page, pageSize } = getActivityLogDataPaging(getState());
+    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+      agent_id: selectedAgent(getState()),
+    });
+    const activityLog = await coreStart.http.get<ActivityLog>(route, {
+      query: { page, page_size: pageSize },
+    });
+    dispatch({
+      type: 'endpointDetailsActivityLogChanged',
+      payload: createLoadedResourceState<ActivityLog>(activityLog),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'endpointDetailsActivityLogChanged',
+      payload: createFailedResourceState<ActivityLog>(error.body ?? error),
     });
   }
 }
