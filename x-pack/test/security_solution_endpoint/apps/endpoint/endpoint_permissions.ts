@@ -21,6 +21,7 @@ import {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
   const testSubjects = getService('testSubjects');
+  const endpointTestResources = getService('endpointTestResources');
   const esClient = getService('es');
   const kbnClient = getService('kibanaServer');
 
@@ -28,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
-      // FIXME: need to index an Endpoint that is Isolated!
+      // todo: way to force an endpoint to be created in isolated mode
 
       // load data into the system
       indexedData = await indexHostsAndAlerts(
@@ -37,13 +38,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'seed',
         1,
         1,
-        'metrics-endpoint.metadata-default', // TODO: are there `const`'s for these indexes so that we don't use static names here?
+        'metrics-endpoint.metadata-default',
         'metrics-endpoint.policy-default',
         'logs-endpoint.events.process-default',
         'logs-endpoint.alerts-default',
         1,
         true
       );
+
+      await endpointTestResources.waitForEndpoints(indexedData.hosts.map((host) => host.agent.id));
 
       // Force a logout so that we start from the login page
       await PageObjects.security.forceLogout();

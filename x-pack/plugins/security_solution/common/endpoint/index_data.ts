@@ -11,6 +11,7 @@ import seedrandom from 'seedrandom';
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
 import { cloneDeep, merge } from 'lodash';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, Event, TreeOptions } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
@@ -38,7 +39,12 @@ import { FleetActionGenerator } from './data_generators/fleet_action_generator';
 const fleetAgentGenerator = new FleetAgentGenerator();
 const fleetActionGenerator = new FleetActionGenerator();
 
-export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
+export type IndexedHostsAndAlertsResponse = IndexedHostsResponse & {
+  /**
+   * Will delete the data that was loaded
+   */
+  deleteData: () => Promise<void>;
+};
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -60,6 +66,13 @@ export async function indexHostsAndAlerts(
     hosts: [],
     policies: [],
     agents: [],
+
+    async deleteData(): Promise<void> {
+      await deleteIndices(client, [metadataIndex, policyResponseIndex, eventIndex, alertIndex]);
+
+      // FIXME: should delete individual documents rather than the entire set of indexes (using esClinet.bulk())
+      // TODO: need to also delete data from Fleet indexes
+    },
   };
 
   // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
@@ -547,4 +560,23 @@ const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<A
     path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
     method: 'GET',
   })) as AxiosResponse<GetOneAgentResponse>).data.item;
+};
+
+// FIXME:PT remove this. too distructive. Need to delete individual items created instead.
+// Temporary until individual item deletion is supported. this is the same code that is in the loader script when using the `--delete` option
+const deleteIndices = async (esClient: Client, indices: string[]): Promise<void> => {
+  for (const index of indices) {
+    try {
+      // The index could be a data stream so let's try deleting that first
+      // The ES client in Kibana doesn't support data streams yet so we need to make a raw request to the ES route
+      await esClient.transport.request({ method: 'DELETE', path: `_data_stream/${index}` });
+    } catch (err) {
+      // only throw if the error is NOT 404
+      if (!(err instanceof ResponseError) || err.statusCode === 404) {
+        const wrappedError: Error & { meta?: unknown } = new Error(err.message);
+        wrappedError.meta = err;
+        throw wrappedError;
+      }
+    }
+  }
 };

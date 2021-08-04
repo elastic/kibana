@@ -27,6 +27,7 @@ export default function (providerContext: FtrProviderContext) {
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {
+      log.info('calling Fleet setup');
       await ingestManager.setup();
     });
     loadTestFile(require.resolve('./endpoint_list'));
