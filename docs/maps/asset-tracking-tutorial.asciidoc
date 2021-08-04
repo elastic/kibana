@@ -259,7 +259,7 @@ image::maps/images/asset-tracking-tutorial/tracks_and_top_hits.png[]
 [float]
 ==== Step 1. Add a construction zone
 
-Add a layer for construction zones. You will draw the construction zones on a map. This construction zones will be used as your geofence boundary or threshold that serves as the basis for triggering alerts.
+Add a layer for construction zones, which you will draw on the map. The construction zones will be used as your geofence boundary or threshold that serves as the basis for triggering alerts.
 
 . Click *Add layer*.
 . Click *Create index*.
