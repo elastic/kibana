@@ -14,6 +14,7 @@ import {
 } from '../../../plugins/security_solution/common/endpoint/constants';
 import { EndpointError } from '../../../plugins/security_solution/server';
 import {
+  deleteIndexedHostsAndAlerts,
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
 } from '../../../plugins/security_solution/common/endpoint/index_data';
@@ -120,6 +121,14 @@ export class EndpointTestResources extends FtrService {
     }
 
     return indexedData;
+  }
+
+  /**
+   * Deletes the loaded data created via `loadEndpointData()`
+   * @param indexedData
+   */
+  async unloadEndpointData(indexedData: IndexedHostsAndAlertsResponse) {
+    return deleteIndexedHostsAndAlerts(this.esClient as Client, this.kbnClient, indexedData);
   }
 
   /**
