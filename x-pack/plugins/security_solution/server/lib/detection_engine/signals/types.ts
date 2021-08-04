@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { DslQuery, Filter } from '@kbn/es-query';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
@@ -111,6 +111,8 @@ export interface SignalSource {
     };
     rule: {
       id: string;
+      false_positives?: string[];
+      immutable?: boolean;
     };
     /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
     depth?: number;
@@ -275,7 +277,7 @@ export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCrea
 
 export type SimpleHit = BaseHit<{ '@timestamp': string }>;
 
-export type WrapHits = (hits: Array<estypes.SearchHit<SignalSource>>) => SimpleHit[];
+export type WrapHits = (hits: estypes.SearchHit[]) => SimpleHit[];
 
 export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
 
@@ -314,11 +316,6 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignals: unknown[];
   errors: string[];
   warningMessages: string[];
-  totalToFromTuples?: Array<{
-    to: Moment | undefined;
-    from: Moment | undefined;
-    maxSignals: number;
-  }>;
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {
