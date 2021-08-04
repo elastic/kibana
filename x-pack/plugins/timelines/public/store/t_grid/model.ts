@@ -31,6 +31,7 @@ export interface TGridModelSettings {
   queryFields: string[];
   selectAll: boolean;
   showCheckboxes?: boolean;
+  sort: SortColumnTimeline[];
   title: string;
   unit?: (n: number) => string | React.ReactNode;
 }

@@ -24,7 +24,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import {
   TimelineId,
@@ -43,8 +43,7 @@ import type {
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
-import { getEventIdToDataMapping } from './helpers';
-import { Sort } from './sort';
+import { getEventIdToDataMapping, mapSortDirectionToDirection, mapSortingColumns } from './helpers';
 
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -71,9 +70,9 @@ interface OwnProps {
   isEventViewer?: boolean;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  sort: Sort[];
   tabType: TimelineTabs;
   leadingControlColumns?: ControlColumnProps[];
+  loadPage: (newActivePage: number) => void;
   trailingControlColumns?: ControlColumnProps[];
   totalPages: number;
   totalItems: number;
@@ -217,6 +216,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     isEventViewer = false,
     isSelectAllChecked,
     loadingEventIds,
+    loadPage,
     selectedEventIds,
     setSelected,
     clearSelected,
@@ -235,6 +235,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     refetch,
   }) => {
+    const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
@@ -366,13 +367,41 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       ]
     );
 
-    const [sortingColumns, setSortingColumns] = useState([]);
+    const sortingColumns: Array<{
+      id: string;
+      direction: 'asc' | 'desc';
+    }> = useMemo(
+      () =>
+        sort.map((x) => ({
+          id: x.columnId,
+          direction: mapSortDirectionToDirection(x.sortDirection),
+        })),
+      [sort]
+    );
 
     const onSort = useCallback(
-      (columns) => {
-        setSortingColumns(columns);
+      (
+        nextSortingColumns: Array<{
+          id: string;
+          direction: 'asc' | 'desc';
+        }>
+      ) => {
+        dispatch(
+          tGridActions.updateSort({
+            id,
+            sort: mapSortingColumns({ columns: nextSortingColumns, columnHeaders }),
+          })
+        );
+
+        setTimeout(() => {
+          // schedule the query to be re-executed from page 0, (but only after the
+          // store has been updated with the new sort):
+          if (loadPage != null) {
+            loadPage(0);
+          }
+        }, 0);
       },
-      [setSortingColumns]
+      [columnHeaders, dispatch, id, loadPage]
     );
 
     const [visibleColumns, setVisibleColumns] = useState(() =>
@@ -498,6 +527,7 @@ const makeMapStateToProps = () => {
       loadingEventIds,
       selectedEventIds,
       showCheckboxes,
+      sort,
     } = timeline;
 
     return {
@@ -508,6 +538,7 @@ const makeMapStateToProps = () => {
       id,
       selectedEventIds,
       showCheckboxes,
+      sort,
     };
   };
   return mapStateToProps;
