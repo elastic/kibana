@@ -70,130 +70,6 @@ type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 // eslint-disable-next-line no-console
 const logError = console.error;
 
-async function endpointDetailsMiddleware({
-  store,
-  coreStart,
-}: {
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-  coreStart: CoreStart;
-}) {
-  const { getState, dispatch } = store;
-  dispatch({
-    type: 'serverCancelledPolicyItemsLoading',
-  });
-
-  // If user navigated directly to a endpoint details page, load the endpoint list
-  if (listData(getState()).length === 0) {
-    const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-    try {
-      const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-        }),
-      });
-      response.request_page_index = Number(pageIndex);
-      dispatch({
-        type: 'serverReturnedEndpointList',
-        payload: response,
-      });
-
-      try {
-        const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-          coreStart.http,
-          response.hosts,
-          nonExistingPolicies(getState())
-        );
-        if (ingestPolicies?.packagePolicy !== undefined) {
-          dispatch({
-            type: 'serverReturnedEndpointNonExistingPolicies',
-            payload: ingestPolicies.packagePolicy,
-          });
-        }
-        if (ingestPolicies?.agentPolicy !== undefined) {
-          dispatch({
-            type: 'serverReturnedEndpointAgentPolicies',
-            payload: ingestPolicies.agentPolicy,
-          });
-        }
-      } catch (error) {
-        // TODO should handle the error instead of logging it to the browser
-        // Also this is an anti-pattern we shouldn't use
-        // Ignore Errors, since this should not hinder the user's ability to use the UI
-        logError(error);
-      }
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnEndpointList',
-        payload: error,
-      });
-    }
-  } else {
-    dispatch({
-      type: 'serverCancelledEndpointListLoading',
-    });
-  }
-
-  // call the endpoint details api
-  const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
-  try {
-    const response = await coreStart.http.get<HostInfo>(
-      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
-    );
-    dispatch({
-      type: 'serverReturnedEndpointDetails',
-      payload: response,
-    });
-
-    try {
-      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-        coreStart.http,
-        [response],
-        nonExistingPolicies(getState())
-      );
-      if (ingestPolicies !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointNonExistingPolicies',
-          payload: ingestPolicies.packagePolicy,
-        });
-      }
-      if (ingestPolicies?.agentPolicy !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointAgentPolicies',
-          payload: ingestPolicies.agentPolicy,
-        });
-      }
-    } catch (error) {
-      // TODO should handle the error instead of logging it to the browser
-      // Also this is an anti-pattern we shouldn't use
-      // Ignore Errors, since this should not hinder the user's ability to use the UI
-      logError(error);
-    }
-  } catch (error) {
-    dispatch({
-      type: 'serverFailedToReturnEndpointDetails',
-      payload: error,
-    });
-  }
-
-  loadEndpointsPendingActions(store);
-
-  // call the policy response api
-  try {
-    const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
-      query: { agentId: selectedEndpoint },
-    });
-    dispatch({
-      type: 'serverReturnedEndpointPolicyResponse',
-      payload: policyResponse,
-    });
-  } catch (error) {
-    dispatch({
-      type: 'serverFailedToReturnEndpointPolicyResponse',
-      payload: error,
-    });
-  }
-}
-
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
   depsStart
@@ -223,6 +99,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       isOnEndpointPage(getState()) &&
       hasSelectedEndpoint(getState()) !== true
     ) {
+      someRandomFunction({ store, coreStart, depsStart });
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
@@ -373,7 +250,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
     // Endpoint Details
     if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState()) === true) {
-      await endpointDetailsMiddleware({ store, coreStart });
+      endpointDetailsMiddleware({ store, coreStart });
     }
 
     if (
@@ -414,91 +291,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       action.type === 'endpointDetailsActivityLogUpdatePaging' &&
       hasSelectedEndpoint(getState())
     ) {
-      try {
-        const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(
-          getState()
-        );
-        // don't page when paging is disabled or when date ranges are invalid
-        if (disabled) {
-          return;
-        }
-        if (getIsInvalidDateRange({ startDate, endDate })) {
-          dispatch({
-            type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-            payload: {
-              isInvalidDateRange: true,
-            },
-          });
-          return;
-        }
-
-        dispatch({
-          type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-          payload: {
-            isInvalidDateRange: false,
-          },
-        });
-        dispatch({
-          type: 'endpointDetailsActivityLogChanged',
-          // ts error to be fixed when AsyncResourceState is refactored (#830)
-          // @ts-expect-error
-          payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
-        });
-        const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-          agent_id: selectedAgent(getState()),
-        });
-        const activityLog = await coreStart.http.get<ActivityLog>(route, {
-          query: {
-            page,
-            page_size: pageSize,
-            start_date: startDate,
-            end_date: endDate,
-          },
-        });
-
-        const lastLoadedLogData = getLastLoadedActivityLogData(getState());
-        if (lastLoadedLogData !== undefined) {
-          const updatedLogDataItems = ([
-            ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
-          ] as ActivityLog['data']).sort((a, b) =>
-            new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
-          );
-
-          const updatedLogData = {
-            page: activityLog.page,
-            pageSize: activityLog.pageSize,
-            startDate: activityLog.startDate,
-            endDate: activityLog.endDate,
-            data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
-          };
-          dispatch({
-            type: 'endpointDetailsActivityLogChanged',
-            payload: createLoadedResourceState<ActivityLog>(updatedLogData),
-          });
-          if (!activityLog.data.length) {
-            dispatch({
-              type: 'endpointDetailsActivityLogUpdatePaging',
-              payload: {
-                disabled: true,
-                page: activityLog.page > 1 ? activityLog.page - 1 : 1,
-                pageSize: activityLog.pageSize,
-                startDate: activityLog.startDate,
-                endDate: activityLog.endDate,
-              },
-            });
-          }
-        } else {
-          dispatch({
-            type: 'endpointDetailsActivityLogChanged',
-            payload: createLoadedResourceState<ActivityLog>(activityLog),
-          });
-        }
-      } catch (error) {
-        dispatch({
-          type: 'endpointDetailsActivityLogChanged',
-          payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-        });
-      }
+      endpointDetailsActivityLogMiddleware({ store, coreStart });
     }
 
     // Isolate Host
@@ -727,3 +520,220 @@ const loadEndpointsPendingActions = async ({
     logError(error);
   }
 };
+
+async function endpointDetailsActivityLogMiddleware({
+  store,
+  coreStart,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: CoreStart;
+}) {
+  const { getState, dispatch } = store;
+  try {
+    const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
+    // don't page when paging is disabled or when date ranges are invalid
+    if (disabled) {
+      return;
+    }
+    if (getIsInvalidDateRange({ startDate, endDate })) {
+      dispatch({
+        type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+        payload: {
+          isInvalidDateRange: true,
+        },
+      });
+      return;
+    }
+
+    dispatch({
+      type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+      payload: {
+        isInvalidDateRange: false,
+      },
+    });
+    dispatch({
+      type: 'endpointDetailsActivityLogChanged',
+      // ts error to be fixed when AsyncResourceState is refactored (#830)
+      // @ts-expect-error
+      payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+    });
+    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+      agent_id: selectedAgent(getState()),
+    });
+    const activityLog = await coreStart.http.get<ActivityLog>(route, {
+      query: {
+        page,
+        page_size: pageSize,
+        start_date: startDate,
+        end_date: endDate,
+      },
+    });
+
+    const lastLoadedLogData = getLastLoadedActivityLogData(getState());
+    if (lastLoadedLogData !== undefined) {
+      const updatedLogDataItems = ([
+        ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
+      ] as ActivityLog['data']).sort((a, b) =>
+        new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
+      );
+
+      const updatedLogData = {
+        page: activityLog.page,
+        pageSize: activityLog.pageSize,
+        startDate: activityLog.startDate,
+        endDate: activityLog.endDate,
+        data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
+      };
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        payload: createLoadedResourceState<ActivityLog>(updatedLogData),
+      });
+      if (!activityLog.data.length) {
+        dispatch({
+          type: 'endpointDetailsActivityLogUpdatePaging',
+          payload: {
+            disabled: true,
+            page: activityLog.page > 1 ? activityLog.page - 1 : 1,
+            pageSize: activityLog.pageSize,
+            startDate: activityLog.startDate,
+            endDate: activityLog.endDate,
+          },
+        });
+      }
+    } else {
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        payload: createLoadedResourceState<ActivityLog>(activityLog),
+      });
+    }
+  } catch (error) {
+    dispatch({
+      type: 'endpointDetailsActivityLogChanged',
+      payload: createFailedResourceState<ActivityLog>(error.body ?? error),
+    });
+  }
+}
+
+async function endpointDetailsMiddleware({
+  store,
+  coreStart,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: CoreStart;
+}) {
+  const { getState, dispatch } = store;
+  dispatch({
+    type: 'serverCancelledPolicyItemsLoading',
+  });
+
+  // If user navigated directly to a endpoint details page, load the endpoint list
+  if (listData(getState()).length === 0) {
+    const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
+    try {
+      const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
+        body: JSON.stringify({
+          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+        }),
+      });
+      response.request_page_index = Number(pageIndex);
+      dispatch({
+        type: 'serverReturnedEndpointList',
+        payload: response,
+      });
+
+      try {
+        const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+          coreStart.http,
+          response.hosts,
+          nonExistingPolicies(getState())
+        );
+        if (ingestPolicies?.packagePolicy !== undefined) {
+          dispatch({
+            type: 'serverReturnedEndpointNonExistingPolicies',
+            payload: ingestPolicies.packagePolicy,
+          });
+        }
+        if (ingestPolicies?.agentPolicy !== undefined) {
+          dispatch({
+            type: 'serverReturnedEndpointAgentPolicies',
+            payload: ingestPolicies.agentPolicy,
+          });
+        }
+      } catch (error) {
+        // TODO should handle the error instead of logging it to the browser
+        // Also this is an anti-pattern we shouldn't use
+        // Ignore Errors, since this should not hinder the user's ability to use the UI
+        logError(error);
+      }
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnEndpointList',
+        payload: error,
+      });
+    }
+  } else {
+    dispatch({
+      type: 'serverCancelledEndpointListLoading',
+    });
+  }
+
+  // call the endpoint details api
+  const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
+  try {
+    const response = await coreStart.http.get<HostInfo>(
+      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
+    );
+    dispatch({
+      type: 'serverReturnedEndpointDetails',
+      payload: response,
+    });
+
+    try {
+      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+        coreStart.http,
+        [response],
+        nonExistingPolicies(getState())
+      );
+      if (ingestPolicies !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointNonExistingPolicies',
+          payload: ingestPolicies.packagePolicy,
+        });
+      }
+      if (ingestPolicies?.agentPolicy !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointAgentPolicies',
+          payload: ingestPolicies.agentPolicy,
+        });
+      }
+    } catch (error) {
+      // TODO should handle the error instead of logging it to the browser
+      // Also this is an anti-pattern we shouldn't use
+      // Ignore Errors, since this should not hinder the user's ability to use the UI
+      logError(error);
+    }
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointDetails',
+      payload: error,
+    });
+  }
+
+  loadEndpointsPendingActions(store);
+
+  // call the policy response api
+  try {
+    const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
+      query: { agentId: selectedEndpoint },
+    });
+    dispatch({
+      type: 'serverReturnedEndpointPolicyResponse',
+      payload: policyResponse,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointPolicyResponse',
+      payload: error,
+    });
+  }
+}
