@@ -22,6 +22,7 @@ import { ServiceMap } from '../../app/service_map';
 import { TransactionDetails } from '../../app/transaction_details';
 import { ServiceProfiling } from '../../app/service_profiling';
 import { ServiceDependencies } from '../../app/service_dependencies';
+import { ServiceLogs } from '../../app/service_logs';
 
 function page<TPath extends string>({
   path,
@@ -222,6 +223,14 @@ export const serviceDetail = {
       searchBarOptions: {
         hidden: true,
       },
+    }),
+    page({
+      path: '/logs',
+      tab: 'logs',
+      title: i18n.translate('xpack.apm.views.logs.title', {
+        defaultMessage: 'Logs',
+      }),
+      element: <ServiceLogs />,
     }),
     page({
       path: '/profiling',

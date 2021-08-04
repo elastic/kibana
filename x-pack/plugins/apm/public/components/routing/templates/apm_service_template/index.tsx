@@ -42,6 +42,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'metrics'
     | 'nodes'
     | 'service-map'
+    | 'logs'
     | 'profiling';
   hidden?: boolean;
 };
@@ -218,6 +219,16 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
         defaultMessage: 'Service Map',
+      }),
+    },
+    {
+      key: 'logs',
+      href: router.link('/services/:serviceName/logs', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
+        defaultMessage: 'Logs',
       }),
     },
     {
