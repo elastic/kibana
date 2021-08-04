@@ -945,7 +945,7 @@ export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert =>
   return (event as WrappedRACAlert)._source['kibana.rac.alert.id'] != null;
 };
 
-export const getF = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
+export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
   if (isWrappedRACAlert(event)) {
     return event._source, field.replace('signal', 'kibana.alert') as T; // TODO: handle special cases
   } else if (isWrappedSignalHit(event)) {
