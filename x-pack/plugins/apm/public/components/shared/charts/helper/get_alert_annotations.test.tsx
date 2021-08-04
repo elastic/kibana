@@ -16,6 +16,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
+  SPACE_IDS,
 } from '@kbn/rule-data-utils';
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -33,6 +34,7 @@ const theme = ({
   eui: { euiColorDanger, euiColorWarning },
 } as unknown) as EuiTheme;
 const alert: Alert = {
+  [SPACE_IDS]: ['space-id'],
   'rule.id': ['apm.transaction_duration'],
   [ALERT_EVALUATION_VALUE]: [2057657.39],
   'service.name': ['frontend-rum'],
