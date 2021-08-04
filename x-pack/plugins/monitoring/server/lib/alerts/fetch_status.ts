@@ -32,7 +32,7 @@ export async function fetchStatus(
       }
       const id = rule.getId();
       if (!id) {
-        throw new Error('alert missing id');
+        throw new Error('rule missing id');
       }
 
       // Now that we have the id, we can get the state
@@ -63,7 +63,7 @@ export async function fetchStatus(
         []
       );
 
-      const type = rule.alertOptions.id;
+      const type = rule.ruleOptions.id;
       const result = {
         states: alertStates,
         rawAlert: rule.rawAlert,

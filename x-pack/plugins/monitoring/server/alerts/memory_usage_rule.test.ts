@@ -38,11 +38,11 @@ jest.mock('../static_globals', () => ({
 describe('MemoryUsageRule', () => {
   it('should have defaults', () => {
     const rule = new MemoryUsageRule();
-    expect(rule.alertOptions.id).toBe(RULE_MEMORY_USAGE);
-    expect(rule.alertOptions.name).toBe('Memory Usage (JVM)');
-    expect(rule.alertOptions.throttle).toBe('1d');
-    expect(rule.alertOptions.defaultParams).toStrictEqual({ threshold: 85, duration: '5m' });
-    expect(rule.alertOptions.actionVariables).toStrictEqual([
+    expect(rule.ruleOptions.id).toBe(RULE_MEMORY_USAGE);
+    expect(rule.ruleOptions.name).toBe('Memory Usage (JVM)');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.defaultParams).toStrictEqual({ threshold: 85, duration: '5m' });
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       { name: 'node', description: 'The node reporting high memory usage.' },
       {
         name: 'internalShortMessage',
@@ -115,10 +115,10 @@ describe('MemoryUsageRule', () => {
 
     it('should fire actions', async () => {
       const rule = new MemoryUsageRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
       expect(replaceState).toHaveBeenCalledWith({
@@ -246,10 +246,10 @@ describe('MemoryUsageRule', () => {
         ];
       });
       const rule = new MemoryUsageRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [],
@@ -268,10 +268,10 @@ describe('MemoryUsageRule', () => {
         ];
       });
       const rule = new MemoryUsageRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {

@@ -40,11 +40,11 @@ jest.mock('../static_globals', () => ({
 describe('ThreadpoolWriteRejectionsAlert', () => {
   it('should have defaults', () => {
     const rule = new ThreadPoolWriteRejectionsRule();
-    expect(rule.alertOptions.id).toBe(RULE_THREAD_POOL_WRITE_REJECTIONS);
-    expect(rule.alertOptions.name).toBe(`Thread pool write rejections`);
-    expect(rule.alertOptions.throttle).toBe('1d');
-    expect(rule.alertOptions.defaultParams).toStrictEqual({ threshold: 300, duration: '5m' });
-    expect(rule.alertOptions.actionVariables).toStrictEqual([
+    expect(rule.ruleOptions.id).toBe(RULE_THREAD_POOL_WRITE_REJECTIONS);
+    expect(rule.ruleOptions.name).toBe(`Thread pool write rejections`);
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.defaultParams).toStrictEqual({ threshold: 300, duration: '5m' });
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       { name: 'node', description: 'The node reporting high thread pool write rejections.' },
       {
         name: 'internalShortMessage',
@@ -121,10 +121,10 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
 
     it('should fire actions', async () => {
       const rule = new ThreadPoolWriteRejectionsRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -252,11 +252,11 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
         ];
       });
       const rule = new ThreadPoolWriteRejectionsRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [],
@@ -275,11 +275,11 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
         ];
       });
       const rule = new ThreadPoolWriteRejectionsRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {

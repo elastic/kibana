@@ -45,10 +45,10 @@ jest.mock('../static_globals', () => ({
 describe('LicenseExpirationRule', () => {
   it('should have defaults', () => {
     const rule = new LicenseExpirationRule();
-    expect(rule.alertOptions.id).toBe(RULE_LICENSE_EXPIRATION);
-    expect(rule.alertOptions.name).toBe('License expiration');
-    expect(rule.alertOptions.throttle).toBe('1d');
-    expect(rule.alertOptions.actionVariables).toStrictEqual([
+    expect(rule.ruleOptions.id).toBe(RULE_LICENSE_EXPIRATION);
+    expect(rule.ruleOptions.name).toBe('License expiration');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       { name: 'expiredDate', description: 'The date when the license expires.' },
       { name: 'clusterName', description: 'The cluster to which the license belong.' },
       {
@@ -118,10 +118,10 @@ describe('LicenseExpirationRule', () => {
 
     it('should fire actions', async () => {
       const alert = new LicenseExpirationRule();
-      const type = alert.getAlertType();
+      const type = alert.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: alert.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -197,11 +197,11 @@ describe('LicenseExpirationRule', () => {
         ];
       });
       const rule = new LicenseExpirationRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
@@ -219,11 +219,11 @@ describe('LicenseExpirationRule', () => {
         ];
       });
       const rule = new LicenseExpirationRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Danger);
     });
@@ -240,11 +240,11 @@ describe('LicenseExpirationRule', () => {
         ];
       });
       const rule = new LicenseExpirationRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Warning);
     });

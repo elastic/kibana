@@ -126,7 +126,7 @@ export class MonitoringPlugin
 
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      plugins.alerting?.registerType(alert.getAlertType());
+      plugins.alerting?.registerType(alert.getRuleType());
     }
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
 

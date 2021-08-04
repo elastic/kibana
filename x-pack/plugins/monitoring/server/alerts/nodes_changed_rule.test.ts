@@ -45,10 +45,10 @@ jest.mock('../static_globals', () => ({
 describe('NodesChangedAlert', () => {
   it('should have defaults', () => {
     const rule = new NodesChangedRule();
-    expect(rule.alertOptions.id).toBe(RULE_NODES_CHANGED);
-    expect(rule.alertOptions.name).toBe('Nodes changed');
-    expect(rule.alertOptions.throttle).toBe('1d');
-    expect(rule.alertOptions.actionVariables).toStrictEqual([
+    expect(rule.ruleOptions.id).toBe(RULE_NODES_CHANGED);
+    expect(rule.ruleOptions.name).toBe('Nodes changed');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       { name: 'added', description: 'The list of nodes added to the cluster.' },
       { name: 'removed', description: 'The list of nodes removed from the cluster.' },
       { name: 'restarted', description: 'The list of nodes restarted in the cluster.' },
@@ -169,11 +169,11 @@ describe('NodesChangedAlert', () => {
         return nodesChanged;
       });
       const rule = new NodesChangedRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -232,11 +232,11 @@ describe('NodesChangedAlert', () => {
         return nodesAddedChangedRemoved;
       });
       const rule = new NodesChangedRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -326,11 +326,11 @@ describe('NodesChangedAlert', () => {
         ];
       });
       const rule = new NodesChangedRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

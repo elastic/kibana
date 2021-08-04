@@ -38,10 +38,10 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
 describe('ClusterHealthRule', () => {
   it('should have defaults', () => {
     const rule = new ClusterHealthRule();
-    expect(rule.alertOptions.id).toBe(RULE_CLUSTER_HEALTH);
-    expect(rule.alertOptions.name).toBe('Cluster health');
-    expect(rule.alertOptions.throttle).toBe('1d');
-    expect(rule.alertOptions.actionVariables).toStrictEqual([
+    expect(rule.ruleOptions.id).toBe(RULE_CLUSTER_HEALTH);
+    expect(rule.ruleOptions.name).toBe('Cluster health');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       { name: 'clusterHealth', description: 'The health of the cluster.' },
       {
         name: 'internalShortMessage',
@@ -113,7 +113,7 @@ describe('ClusterHealthRule', () => {
 
     it('should fire actions', async () => {
       const rule = new ClusterHealthRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         params: {},
@@ -180,7 +180,7 @@ describe('ClusterHealthRule', () => {
         ];
       });
       const rule = new ClusterHealthRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         params: {},

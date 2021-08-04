@@ -51,14 +51,14 @@ jest.mock('../static_globals', () => ({
 describe('LargeShardSizeRule', () => {
   it('should have defaults', () => {
     const rule = new LargeShardSizeRule() as ILargeShardSizeRuleMock;
-    expect(rule.alertOptions.id).toBe(RULE_LARGE_SHARD_SIZE);
-    expect(rule.alertOptions.name).toBe('Shard size');
-    expect(rule.alertOptions.throttle).toBe('12h');
-    expect(rule.alertOptions.defaultParams).toStrictEqual({
+    expect(rule.ruleOptions.id).toBe(RULE_LARGE_SHARD_SIZE);
+    expect(rule.ruleOptions.name).toBe('Shard size');
+    expect(rule.ruleOptions.throttle).toBe('12h');
+    expect(rule.ruleOptions.defaultParams).toStrictEqual({
       threshold: 55,
       indexPattern: '-.*',
     });
-    expect(rule.alertOptions.actionVariables).toStrictEqual([
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       { name: 'shardIndex', description: 'The index experiencing large average shard size.' },
       {
         name: 'internalShortMessage',
@@ -131,10 +131,10 @@ describe('LargeShardSizeRule', () => {
 
     it('should fire actions', async () => {
       const rule = new LargeShardSizeRule() as ILargeShardSizeRuleMock;
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         internalFullMessage: `Large shard size alert is firing for the following index: ${shardIndex}. [View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:${clusterUuid}))`,
@@ -159,10 +159,10 @@ describe('LargeShardSizeRule', () => {
         ];
       });
       const rule = new LargeShardSizeRule() as ILargeShardSizeRuleMock;
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         internalFullMessage: `Large shard size alert is firing for the following index: ${shardIndex}. [View index shard size stats](http://localhost:5601/app/monitoring#/elasticsearch/indices/${shardIndex}?_g=(cluster_uuid:${clusterUuid},ccs:testCluster))`,

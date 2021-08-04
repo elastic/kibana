@@ -40,10 +40,10 @@ jest.mock('../static_globals', () => ({
 describe('LogstashVersionMismatchRule', () => {
   it('should have defaults', () => {
     const rule = new LogstashVersionMismatchRule();
-    expect(rule.alertOptions.id).toBe(RULE_LOGSTASH_VERSION_MISMATCH);
-    expect(rule.alertOptions.name).toBe('Logstash version mismatch');
-    expect(rule.alertOptions.throttle).toBe('1d');
-    expect(rule.alertOptions.actionVariables).toStrictEqual([
+    expect(rule.ruleOptions.id).toBe(RULE_LOGSTASH_VERSION_MISMATCH);
+    expect(rule.ruleOptions.name).toBe('Logstash version mismatch');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Logstash running in this cluster.',
@@ -118,11 +118,11 @@ describe('LogstashVersionMismatchRule', () => {
 
     it('should fire actions', async () => {
       const rule = new LogstashVersionMismatchRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -172,11 +172,11 @@ describe('LogstashVersionMismatchRule', () => {
         ];
       });
       const rule = new LogstashVersionMismatchRule();
-      const type = rule.getAlertType();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: rule.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
