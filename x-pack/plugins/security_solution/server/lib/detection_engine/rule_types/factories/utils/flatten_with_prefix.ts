@@ -7,7 +7,7 @@
 
 import { SearchTypes } from '../../../../../../common/detection_engine/types';
 
-export const flatten = (
+export const flattenWithPrefix = (
   prefix: string,
   obj: Record<string, SearchTypes>
 ): Record<string, SearchTypes> => {

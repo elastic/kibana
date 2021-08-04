@@ -23,13 +23,14 @@ import {
 } from '../../../signals/utils';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { RACAlert } from '../../types';
-import { flatten } from './flatten';
+import { flattenWithPrefix } from './flatten_with_prefix';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_TIME,
 } from '../../field_maps/field_names';
+import { SERVER_APP_ID } from '../../../../../../common/constants';
 
 /**
  * Takes an event document and extracts the information needed for the corresponding entry in the child
@@ -42,7 +43,7 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
     index: doc._index,
-    depth: (isSignal ? getF(doc, 'signal.depth') : getF(doc, 'signal.parent.depth')) ?? 0,
+    depth: isSignal ? getF(doc, 'signal.depth') ?? 1 : 0,
   };
   if (isSignal) {
     parent.rule = getF(doc, 'signal.rule.id');
@@ -57,15 +58,8 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  */
 export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
   const newAncestor = buildParent(doc);
-  if (newAncestor != null) {
-    const existingAncestors: Ancestor[] | undefined = getF(doc, 'signal.ancestors');
-    if (existingAncestors != null) {
-      return [...existingAncestors, newAncestor];
-    } else {
-      return [newAncestor];
-    }
-  }
-  return [];
+  const existingAncestors: Ancestor[] = getF(doc, 'signal.ancestors') ?? [];
+  return [...existingAncestors, newAncestor];
 };
 
 /**
@@ -101,7 +95,7 @@ export const buildAlert = (
   spaceId: string | null | undefined
 ): RACAlert => {
   const removedClashes = docs.map(removeClashes);
-  const parents = removedClashes.map(buildParent).filter((parent) => parent != null) as Ancestor[];
+  const parents = removedClashes.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = removedClashes.reduce(
     (acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)),
@@ -110,13 +104,13 @@ export const buildAlert = (
 
   return ({
     '@timestamp': new Date().toISOString(),
-    [ALERT_OWNER]: 'siem',
+    [ALERT_OWNER]: SERVER_APP_ID,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [ALERT_ANCESTORS]: ancestors,
     [ALERT_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
-    ...flatten(ALERT_RULE_NAMESPACE, rule),
+    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, rule),
   } as unknown) as RACAlert;
 };
 

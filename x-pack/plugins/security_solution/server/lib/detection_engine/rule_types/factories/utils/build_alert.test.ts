@@ -14,7 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
-import { flatten } from './flatten';
+import { flattenWithPrefix } from './flatten_with_prefix';
 import {
   buildAlert,
   buildParent,
@@ -33,6 +33,7 @@ import {
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_TIME,
 } from '../../field_maps/field_names';
+import { SERVER_APP_ID } from '../../../../../../common/constants';
 
 type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
@@ -57,7 +58,7 @@ describe('buildAlert', () => {
     const expected = {
       '@timestamp': timestamp,
       [SPACE_IDS]: [SPACE_ID],
-      [ALERT_OWNER]: 'siem',
+      [ALERT_OWNER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -69,7 +70,7 @@ describe('buildAlert', () => {
       [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
       [ALERT_STATUS]: 'open',
       [ALERT_WORKFLOW_STATUS]: 'open',
-      ...flatten(ALERT_RULE_NAMESPACE, {
+      ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
         id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
@@ -126,7 +127,7 @@ describe('buildAlert', () => {
     const expected = {
       '@timestamp': timestamp,
       [SPACE_IDS]: [SPACE_ID],
-      [ALERT_OWNER]: 'siem',
+      [ALERT_OWNER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -144,7 +145,7 @@ describe('buildAlert', () => {
       },
       [ALERT_STATUS]: 'open',
       [ALERT_WORKFLOW_STATUS]: 'open',
-      ...flatten(ALERT_RULE_NAMESPACE, {
+      ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
         id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
