@@ -135,6 +135,7 @@ export function TransactionDistribution({
   const bucketsMap = keyBy(buckets, 'x0');
 
   const tooltip: SettingsSpec['tooltip'] = {
+    stickTo: 'top',
     customTooltip: (props: TooltipInfo) => {
       const datum = props.header?.datum as IChartPoint;
       const selectedDistribution = distributionMap[datum?.x0];

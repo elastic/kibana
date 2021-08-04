@@ -36,10 +36,6 @@ export const CATEGORY_FIELDS_TABLE_CAPTION = (categoryId: string) =>
     },
   });
 
-export const COPY_TO_CLIPBOARD = i18n.translate('xpack.timelines.fieldBrowser.copyToClipboard', {
-  defaultMessage: 'Copy to Clipboard',
-});
-
 export const CLOSE = i18n.translate('xpack.timelines.fieldBrowser.closeButton', {
   defaultMessage: 'Close',
 });
@@ -101,13 +97,6 @@ export const VIEW_ALL_CATEGORY_FIELDS = (categoryId: string) =>
       categoryId,
     },
   });
-
-export const YOU_ARE_IN_A_POPOVER = i18n.translate(
-  'xpack.timelines.fieldBrowser.youAreInAPopoverScreenReaderOnly',
-  {
-    defaultMessage: 'You are in the Customize Columns popup. To exit this popup, press Escape.',
-  }
-);
 
 export const VIEW_COLUMN = (field: string) =>
   i18n.translate('xpack.timelines.fieldBrowser.viewColumnCheckboxAriaLabel', {
