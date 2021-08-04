@@ -27,6 +27,10 @@ export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
     row: i18n.translate('xpack.canvas.functions.getCell.args.rowHelpText', {
       defaultMessage: 'The row number, starting at 0.',
     }),
+    onError: i18n.translate('xpack.canvas.functions.getCell.args.onErrorHelpText', {
+      defaultMessage:
+        "In case of an error retrieving the cell, the return value is specified by onError. When `'throw'`, it will throw an exception, terminating expression execution (default).",
+    }),
   },
 };
 

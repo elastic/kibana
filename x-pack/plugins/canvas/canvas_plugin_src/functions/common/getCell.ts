@@ -12,7 +12,15 @@ import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 interface Arguments {
   column: string;
   row: number;
+  onError: 'null' | 'zero' | 'false' | 'throw' | 'emptyString';
 }
+
+const fallbackValue = {
+  null: null,
+  zero: 0,
+  false: false,
+  emptyString: '',
+} as const;
 
 export function getCell(): ExpressionFunctionDefinition<'getCell', Datatable, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().getCell;
@@ -34,21 +42,35 @@ export function getCell(): ExpressionFunctionDefinition<'getCell', Datatable, Ar
         help: argHelp.row,
         default: 0,
       },
+      onError: {
+        types: ['string'],
+        options: ['throw', 'false', 'zero', 'null', 'emptyString'],
+        help: argHelp.onError,
+        default: 'throw',
+      },
     },
     fn: (input, args) => {
-      const row = input.rows[args.row];
-      if (!row) {
-        throw errors.rowNotFound(args.row);
+      try {
+        const row = input.rows[args.row];
+        if (!row) {
+          throw errors.rowNotFound(args.row);
+        }
+
+        const { column = input.columns[0].name } = args;
+        const value = row[column];
+
+        if (typeof value === 'undefined') {
+          throw errors.columnNotFound(column);
+        }
+
+        return value;
+      } catch (e) {
+        if (args.onError !== 'throw' && args.onError in fallbackValue) {
+          return fallbackValue[args.onError];
+        }
+
+        throw e;
       }
-
-      const { column = input.columns[0].name } = args;
-      const value = row[column];
-
-      if (typeof value === 'undefined') {
-        throw errors.columnNotFound(column);
-      }
-
-      return value;
     },
   };
 }
