@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Provider } from 'react-redux';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -31,8 +31,6 @@ export interface GraphWorkspaceProps {
   deps: GraphDependencies;
   location: angular.ILocationService;
 }
-
-const GraphWorkspaceMemoized = memo(GraphWorkspace);
 
 export const GraphApp = (props: GraphWorkspaceProps) => {
   /**
@@ -120,7 +118,7 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <Provider store={store}>
-          <GraphWorkspaceMemoized
+          <GraphWorkspace
             counter={renderCounter}
             setHeaderActionMenu={props.deps.setHeaderActionMenu}
             graphSavePolicy={props.deps.graphSavePolicy}
