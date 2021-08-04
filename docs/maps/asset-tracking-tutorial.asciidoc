@@ -298,7 +298,7 @@ Create a new alert by defining a rule and a connector. The rule includes the con
 +
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/rule_configuration.png[]
-. Select *Tracking containment* rule type.
+. Select the *Tracking containment* rule type.
 . Set *Select entity*:
 .. Set *INDEX* to *tri_met_tracks**.
 .. Set *BY* to *vehicle_id*.
