@@ -71,7 +71,7 @@ export const fetchTransactionDurationFieldValuePairs = async (
         .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
         key: string;
       }>)?.buckets;
-      if (buckets.length >= 0) {
+      if (buckets?.length >= 1) {
         fieldValuePairs.push(
           ...buckets.map((d) => ({
             field: fieldName,
