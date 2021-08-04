@@ -70,6 +70,130 @@ type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 // eslint-disable-next-line no-console
 const logError = console.error;
 
+async function endpointDetailsMiddleware({
+  store,
+  coreStart,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: coreStart;
+}) {
+  const { getState, dispatch } = store;
+  dispatch({
+    type: 'serverCancelledPolicyItemsLoading',
+  });
+
+  // If user navigated directly to a endpoint details page, load the endpoint list
+  if (listData(getState()).length === 0) {
+    const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
+    try {
+      const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
+        body: JSON.stringify({
+          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+        }),
+      });
+      response.request_page_index = Number(pageIndex);
+      dispatch({
+        type: 'serverReturnedEndpointList',
+        payload: response,
+      });
+
+      try {
+        const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+          coreStart.http,
+          response.hosts,
+          nonExistingPolicies(getState())
+        );
+        if (ingestPolicies?.packagePolicy !== undefined) {
+          dispatch({
+            type: 'serverReturnedEndpointNonExistingPolicies',
+            payload: ingestPolicies.packagePolicy,
+          });
+        }
+        if (ingestPolicies?.agentPolicy !== undefined) {
+          dispatch({
+            type: 'serverReturnedEndpointAgentPolicies',
+            payload: ingestPolicies.agentPolicy,
+          });
+        }
+      } catch (error) {
+        // TODO should handle the error instead of logging it to the browser
+        // Also this is an anti-pattern we shouldn't use
+        // Ignore Errors, since this should not hinder the user's ability to use the UI
+        logError(error);
+      }
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnEndpointList',
+        payload: error,
+      });
+    }
+  } else {
+    dispatch({
+      type: 'serverCancelledEndpointListLoading',
+    });
+  }
+
+  // call the endpoint details api
+  const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
+  try {
+    const response = await coreStart.http.get<HostInfo>(
+      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
+    );
+    dispatch({
+      type: 'serverReturnedEndpointDetails',
+      payload: response,
+    });
+
+    try {
+      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+        coreStart.http,
+        [response],
+        nonExistingPolicies(getState())
+      );
+      if (ingestPolicies !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointNonExistingPolicies',
+          payload: ingestPolicies.packagePolicy,
+        });
+      }
+      if (ingestPolicies?.agentPolicy !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointAgentPolicies',
+          payload: ingestPolicies.agentPolicy,
+        });
+      }
+    } catch (error) {
+      // TODO should handle the error instead of logging it to the browser
+      // Also this is an anti-pattern we shouldn't use
+      // Ignore Errors, since this should not hinder the user's ability to use the UI
+      logError(error);
+    }
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointDetails',
+      payload: error,
+    });
+  }
+
+  loadEndpointsPendingActions(store);
+
+  // call the policy response api
+  try {
+    const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
+      query: { agentId: selectedEndpoint },
+    });
+    dispatch({
+      type: 'serverReturnedEndpointPolicyResponse',
+      payload: policyResponse,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointPolicyResponse',
+      payload: error,
+    });
+  }
+}
+
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
   depsStart
@@ -249,120 +373,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
     // Endpoint Details
     if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState()) === true) {
-      dispatch({
-        type: 'serverCancelledPolicyItemsLoading',
-      });
-
-      // If user navigated directly to a endpoint details page, load the endpoint list
-      if (listData(getState()).length === 0) {
-        const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-        try {
-          const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
-            body: JSON.stringify({
-              paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-            }),
-          });
-          response.request_page_index = Number(pageIndex);
-          dispatch({
-            type: 'serverReturnedEndpointList',
-            payload: response,
-          });
-
-          try {
-            const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-              coreStart.http,
-              response.hosts,
-              nonExistingPolicies(getState())
-            );
-            if (ingestPolicies?.packagePolicy !== undefined) {
-              dispatch({
-                type: 'serverReturnedEndpointNonExistingPolicies',
-                payload: ingestPolicies.packagePolicy,
-              });
-            }
-            if (ingestPolicies?.agentPolicy !== undefined) {
-              dispatch({
-                type: 'serverReturnedEndpointAgentPolicies',
-                payload: ingestPolicies.agentPolicy,
-              });
-            }
-          } catch (error) {
-            // TODO should handle the error instead of logging it to the browser
-            // Also this is an anti-pattern we shouldn't use
-            // Ignore Errors, since this should not hinder the user's ability to use the UI
-            logError(error);
-          }
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnEndpointList',
-            payload: error,
-          });
-        }
-      } else {
-        dispatch({
-          type: 'serverCancelledEndpointListLoading',
-        });
-      }
-
-      // call the endpoint details api
-      const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
-      try {
-        const response = await coreStart.http.get<HostInfo>(
-          resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
-        );
-        dispatch({
-          type: 'serverReturnedEndpointDetails',
-          payload: response,
-        });
-
-        try {
-          const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-            coreStart.http,
-            [response],
-            nonExistingPolicies(getState())
-          );
-          if (ingestPolicies !== undefined) {
-            dispatch({
-              type: 'serverReturnedEndpointNonExistingPolicies',
-              payload: ingestPolicies.packagePolicy,
-            });
-          }
-          if (ingestPolicies?.agentPolicy !== undefined) {
-            dispatch({
-              type: 'serverReturnedEndpointAgentPolicies',
-              payload: ingestPolicies.agentPolicy,
-            });
-          }
-        } catch (error) {
-          // TODO should handle the error instead of logging it to the browser
-          // Also this is an anti-pattern we shouldn't use
-          // Ignore Errors, since this should not hinder the user's ability to use the UI
-          logError(error);
-        }
-      } catch (error) {
-        dispatch({
-          type: 'serverFailedToReturnEndpointDetails',
-          payload: error,
-        });
-      }
-
-      loadEndpointsPendingActions(store);
-
-      // call the policy response api
-      try {
-        const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
-          query: { agentId: selectedEndpoint },
-        });
-        dispatch({
-          type: 'serverReturnedEndpointPolicyResponse',
-          payload: policyResponse,
-        });
-      } catch (error) {
-        dispatch({
-          type: 'serverFailedToReturnEndpointPolicyResponse',
-          payload: error,
-        });
-      }
+      await endpointDetailsMiddleware({ store, coreStart });
     }
 
     if (
