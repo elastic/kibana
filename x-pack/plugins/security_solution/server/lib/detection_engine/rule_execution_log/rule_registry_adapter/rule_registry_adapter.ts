@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { RuleRegistryLogClient } from '../rule_registry_log_client/rule_registry_log_client';
+import { RuleRegistryLogClient } from './rule_registry_log_client/rule_registry_log_client';
 import {
   CreateExecutionLogArgs,
   ExecutionMetric,
@@ -59,7 +59,7 @@ export class RuleRegistryAdapter implements IRuleExecutionLogClient {
     return merge(statusesById, lastErrorsById);
   }
 
-  public async create({ attributes, spaceId }: CreateExecutionLogArgs) {
+  private async create({ attributes, spaceId }: CreateExecutionLogArgs) {
     if (attributes.status) {
       await this.ruleRegistryClient.logStatusChange({
         ruleId: attributes.alertId,
@@ -85,14 +85,6 @@ export class RuleRegistryAdapter implements IRuleExecutionLogClient {
         spaceId,
       });
     }
-
-    return {
-      id: '',
-      type: '',
-      score: 0,
-      attributes,
-      references: [],
-    };
   }
 
   public async update({ attributes, spaceId }: UpdateExecutionLogArgs) {
