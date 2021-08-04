@@ -13,9 +13,9 @@ export class ThreadPoolSearchRejectionsRule extends ThreadPoolRejectionsRuleBase
   private static TYPE = RULE_THREAD_POOL_SEARCH_REJECTIONS;
   private static THREAD_POOL_TYPE = 'search';
   private static readonly LABEL = RULE_DETAILS[RULE_THREAD_POOL_SEARCH_REJECTIONS].label;
-  constructor(rawAlert?: Alert) {
+  constructor(sanitizedRule?: Alert) {
     super(
-      rawAlert,
+      sanitizedRule,
       ThreadPoolSearchRejectionsRule.TYPE,
       ThreadPoolSearchRejectionsRule.THREAD_POOL_TYPE,
       ThreadPoolSearchRejectionsRule.LABEL,

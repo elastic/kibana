@@ -88,7 +88,7 @@ describe('getAlertPanelsByNode', () => {
     }
 
     return {
-      rawAlert: {
+      sanitizedRule: {
         id: `${type}_${firingCount}`,
         alertTypeId: type,
         name: `${type}_label`,
@@ -110,7 +110,7 @@ describe('getAlertPanelsByNode', () => {
         states: [
           { firing: true, meta: {}, state: { cluster, ui, nodeId: 'es1', nodeName: 'es_name_1' } },
         ],
-        rawAlert: {
+        sanitizedRule: {
           id: `${RULE_NODES_CHANGED}_3`,
           alertTypeId: RULE_NODES_CHANGED,
           name: `${RULE_NODES_CHANGED}_label_2`,

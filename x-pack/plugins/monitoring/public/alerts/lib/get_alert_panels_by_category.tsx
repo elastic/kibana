@@ -42,7 +42,7 @@ export function getAlertPanelsByCategory(
     ? RULE_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
         // check if we have any rules with that match this category
         const alertsInCategory = category.rules.filter((rule) =>
-          alerts.find(({ rawAlert }) => rawAlert.alertTypeId === rule.ruleName)
+          alerts.find(({ sanitizedRule }) => sanitizedRule.alertTypeId === rule.ruleName)
         );
         // return all the categories that have rules and the rules
         if (alertsInCategory.length > 0) {
@@ -53,10 +53,10 @@ export function getAlertPanelsByCategory(
             alerts: alertsInCategory
               .map(({ ruleName }) => {
                 return alerts
-                  .filter(({ rawAlert }) => rawAlert.alertTypeId === ruleName)
+                  .filter(({ sanitizedRule }) => sanitizedRule.alertTypeId === ruleName)
                   .map((alert) => {
                     return {
-                      alert: alert.rawAlert,
+                      alert: alert.sanitizedRule,
                       states: [],
                       ruleName,
                     };
@@ -74,7 +74,8 @@ export function getAlertPanelsByCategory(
         let categoryFiringAlertCount = 0;
         for (const { ruleName } of category.rules) {
           const foundAlerts = alerts.filter(
-            ({ rawAlert, states }) => ruleName === rawAlert.alertTypeId && states.length > 0
+            ({ sanitizedRule, states }) =>
+              ruleName === sanitizedRule.alertTypeId && states.length > 0
           );
           if (foundAlerts.length > 0) {
             foundAlerts.forEach((foundAlert) => {
@@ -82,7 +83,7 @@ export function getAlertPanelsByCategory(
               const states = foundAlert.states.filter(({ state }) => stateFilter(state));
               if (states.length > 0) {
                 firingAlertsInCategory.push({
-                  alert: foundAlert.rawAlert,
+                  alert: foundAlert.sanitizedRule,
                   states,
                   ruleName,
                 });

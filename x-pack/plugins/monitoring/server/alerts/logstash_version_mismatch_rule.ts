@@ -32,8 +32,8 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
 
 export class LogstashVersionMismatchRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_LOGSTASH_VERSION_MISMATCH,
       name: LEGACY_RULE_DETAILS[RULE_LOGSTASH_VERSION_MISMATCH].label,
       interval: '1d',

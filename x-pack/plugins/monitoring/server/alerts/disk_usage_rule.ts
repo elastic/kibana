@@ -35,8 +35,8 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class DiskUsageRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_DISK_USAGE,
       name: RULE_DETAILS[RULE_DISK_USAGE].label,
       accessorKey: 'diskUsage',

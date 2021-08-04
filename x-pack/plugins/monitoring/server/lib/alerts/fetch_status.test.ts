@@ -81,11 +81,11 @@ describe('fetchStatus', () => {
     expect(status).toEqual({
       monitoring_alert_cpu_usage: [
         {
-          rawAlert: { id: 1 },
+          sanitizedRule: { id: 1 },
           states: [],
         },
         {
-          rawAlert: { id: 2 },
+          sanitizedRule: { id: 2 },
           states: [],
         },
       ],

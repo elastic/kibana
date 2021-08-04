@@ -64,8 +64,8 @@ function getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
 }
 
 export class NodesChangedRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_NODES_CHANGED,
       name: LEGACY_RULE_DETAILS[RULE_NODES_CHANGED].label,
       actionVariables: [

@@ -69,7 +69,7 @@ export class BaseRule {
   protected scopedLogger: Logger;
 
   constructor(
-    public rawAlert?: SanitizedAlert,
+    public sanitizedRule?: SanitizedAlert,
     public ruleOptions: RuleOptions = defaultRuleOptions()
   ) {
     const defaultOptions = defaultRuleOptions();
@@ -110,7 +110,7 @@ export class BaseRule {
   }
 
   public getId() {
-    return this.rawAlert?.id;
+    return this.sanitizedRule?.id;
   }
 
   public async createIfDoesNotExist(

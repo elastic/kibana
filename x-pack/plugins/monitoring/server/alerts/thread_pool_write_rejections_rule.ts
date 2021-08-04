@@ -13,9 +13,9 @@ export class ThreadPoolWriteRejectionsRule extends ThreadPoolRejectionsRuleBase 
   private static TYPE = RULE_THREAD_POOL_WRITE_REJECTIONS;
   private static THREAD_POOL_TYPE = 'write';
   private static readonly LABEL = RULE_DETAILS[RULE_THREAD_POOL_WRITE_REJECTIONS].label;
-  constructor(rawAlert?: Alert) {
+  constructor(sanitizedRule?: Alert) {
     super(
-      rawAlert,
+      sanitizedRule,
       ThreadPoolWriteRejectionsRule.TYPE,
       ThreadPoolWriteRejectionsRule.THREAD_POOL_TYPE,
       ThreadPoolWriteRejectionsRule.LABEL,

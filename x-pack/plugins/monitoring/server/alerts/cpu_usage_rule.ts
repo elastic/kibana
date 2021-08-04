@@ -36,8 +36,8 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class CpuUsageRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_CPU_USAGE,
       name: RULE_DETAILS[RULE_CPU_USAGE].label,
       accessorKey: 'cpuUsage',

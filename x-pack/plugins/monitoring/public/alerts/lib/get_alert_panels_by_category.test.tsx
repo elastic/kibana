@@ -93,7 +93,7 @@ describe('getAlertPanelsByCategory', () => {
 
     return {
       states,
-      rawAlert: {
+      sanitizedRule: {
         alertTypeId: type,
         name: `${type}_label`,
         ...mockAlert,

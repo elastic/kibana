@@ -27,8 +27,8 @@ export async function fetchStatus(
     rulesFlattened.map(async (rule) => {
       // we should have a different class to distinguish between "alerts" where the rule exists
       // and a BaseRule created without an existing rule for better typing so we don't need to check here
-      if (!rule.rawAlert) {
-        throw new Error('alert missing rawAlert');
+      if (!rule.sanitizedRule) {
+        throw new Error('alert missing sanitizedRule');
       }
       const id = rule.getId();
       if (!id) {
@@ -66,7 +66,7 @@ export async function fetchStatus(
       const type = rule.ruleOptions.id;
       const result = {
         states: alertStates,
-        rawAlert: rule.rawAlert,
+        sanitizedRule: rule.sanitizedRule,
       };
       return { type, result };
     })

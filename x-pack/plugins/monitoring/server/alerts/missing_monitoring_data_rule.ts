@@ -34,8 +34,8 @@ import { Globals } from '../static_globals';
 const LIMIT_BUFFER = 3 * 60 * 1000;
 
 export class MissingMonitoringDataRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_MISSING_MONITORING_DATA,
       name: RULE_DETAILS[RULE_MISSING_MONITORING_DATA].label,
       accessorKey: 'gapDuration',

@@ -32,8 +32,8 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 
 export class ElasticsearchVersionMismatchRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_ELASTICSEARCH_VERSION_MISMATCH,
       name: LEGACY_RULE_DETAILS[RULE_ELASTICSEARCH_VERSION_MISMATCH].label,
       interval: '1d',

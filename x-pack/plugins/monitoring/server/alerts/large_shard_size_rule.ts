@@ -36,8 +36,8 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class LargeShardSizeRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_LARGE_SHARD_SIZE,
       name: RULE_DETAILS[RULE_LARGE_SHARD_SIZE].label,
       throttle: '12h',

@@ -50,13 +50,13 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule {
   }
 
   constructor(
-    rawAlert: Alert | undefined = undefined,
+    sanitizedRule: Alert | undefined = undefined,
     public readonly id: string,
     public readonly threadPoolType: string,
     public readonly name: string,
     public readonly actionVariables: ActionVariables
   ) {
-    super(rawAlert, {
+    super(sanitizedRule, {
       id,
       name,
       defaultParams: {

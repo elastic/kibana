@@ -37,8 +37,8 @@ import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export class LicenseExpirationRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_LICENSE_EXPIRATION,
       name: LEGACY_RULE_DETAILS[RULE_LICENSE_EXPIRATION].label,
       interval: '1d',

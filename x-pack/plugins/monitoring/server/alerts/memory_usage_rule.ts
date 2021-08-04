@@ -40,8 +40,8 @@ import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
 export class MemoryUsageRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_MEMORY_USAGE,
       name: RULE_DETAILS[RULE_MEMORY_USAGE].label,
       accessorKey: 'memoryUsage',

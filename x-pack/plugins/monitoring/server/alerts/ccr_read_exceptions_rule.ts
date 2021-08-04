@@ -37,8 +37,8 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class CCRReadExceptionsRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_CCR_READ_EXCEPTIONS,
       name: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].label,
       throttle: '6h',

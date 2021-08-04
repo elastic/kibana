@@ -32,8 +32,8 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
 export class KibanaVersionMismatchRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_KIBANA_VERSION_MISMATCH,
       name: LEGACY_RULE_DETAILS[RULE_KIBANA_VERSION_MISMATCH].label,
       interval: '1d',

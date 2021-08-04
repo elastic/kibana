@@ -44,8 +44,8 @@ const YELLOW_STATUS_MESSAGE = i18n.translate(
 );
 
 export class ClusterHealthRule extends BaseRule {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
       id: RULE_CLUSTER_HEALTH,
       name: LEGACY_RULE_DETAILS[RULE_CLUSTER_HEALTH].label,
       actionVariables: [
