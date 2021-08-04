@@ -11,12 +11,13 @@ import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import type { LensMultiTable } from '../../common';
-import type { LayerArgs } from '../../common/expressions';
+import { LayerArgs, layerTypes } from '../../common/expressions';
 import { getLegendAction } from './get_legend_action';
 import { LegendActionPopover } from '../shared_components';
 
 const sampleLayer = {
   layerId: 'first',
+  layerType: layerTypes.DATA,
   seriesType: 'line',
   xAccessor: 'c',
   accessors: ['a', 'b'],

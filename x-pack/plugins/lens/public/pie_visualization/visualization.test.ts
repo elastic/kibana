@@ -6,8 +6,10 @@
  */
 
 import { getPieVisualization } from './visualization';
-import type { PieVisualizationState } from '../../common/expressions';
+import { layerTypes, PieVisualizationState } from '../../common/expressions';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
+import { FramePublicAPI } from '../types';
 
 jest.mock('../id_generator');
 
@@ -23,6 +25,7 @@ function getExampleState(): PieVisualizationState {
     layers: [
       {
         layerId: LAYER_ID,
+        layerType: layerTypes.DATA,
         groups: [],
         metric: undefined,
         numberDisplay: 'percent',
@@ -31,6 +34,16 @@ function getExampleState(): PieVisualizationState {
         nestedLegend: false,
       },
     ],
+  };
+}
+
+function mockFrame(): FramePublicAPI {
+  return {
+    ...createMockFramePublicAPI(),
+    datasourceLayers: {
+      l1: createMockDatasource('l1').publicAPIMock,
+      l42: createMockDatasource('l42').publicAPIMock,
+    },
   };
 }
 
@@ -50,6 +63,7 @@ describe('pie_visualization', () => {
           {
             groups: ['a'],
             layerId: LAYER_ID,
+            layerType: layerTypes.DATA,
             numberDisplay: 'percent',
             categoryDisplay: 'default',
             legendDisplay: 'default',
@@ -64,6 +78,7 @@ describe('pie_visualization', () => {
         columnId: 'x',
         layerId: LAYER_ID,
         groupId: 'a',
+        frame: mockFrame(),
       });
 
       expect(setDimensionResult).toEqual(
