@@ -60,33 +60,30 @@ export function TransactionDetails() {
     }),
   });
 
-  const selectedSample = flatten(
-    distributionData.buckets.map((bucket) => bucket.samples)
-  ).find(
-    (sample) =>
-      sample.transactionId === urlParams.transactionId &&
-      sample.traceId === urlParams.traceId
-  );
+  const { sampleRangeFrom, sampleRangeTo } = urlParams;
 
-  const bucketWithSample =
-    selectedSample &&
-    distributionData.buckets.find((bucket) =>
-      bucket.samples.includes(selectedSample)
-    );
-
-  const traceSamples = bucketWithSample?.samples ?? [];
-  const bucketIndex = bucketWithSample
-    ? distributionData.buckets.indexOf(bucketWithSample)
-    : -1;
-
-  const selectionFrom = bucketWithSample?.key;
-  const bucketTo = distributionData.buckets[bucketIndex + 1];
-  const selectionTo = bucketTo?.key;
+  const traceSamples: Sample[] =
+    sampleRangeFrom !== undefined && sampleRangeTo !== undefined
+      ? flatten(
+          distributionData.buckets
+            .filter((b) => b.key >= sampleRangeFrom && b.key <= sampleRangeTo)
+            .map((bucket) => bucket.samples)
+        )
+      : flatten(distributionData.buckets.map((bucket) => bucket.samples));
 
   const selectSampleFromChartSelection = (selection: XYBrushArea) => {
     if (selection !== undefined) {
       const { x } = selection;
-      if (x !== undefined) {
+      if (Array.isArray(x)) {
+        history.push({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(history.location.search),
+            sampleRangeFrom: Math.round(x[0]),
+            sampleRangeTo: Math.round(x[1]),
+          }),
+        });
+
         const filteredSamples: Sample[] = flatten(
           distributionData.buckets
             .filter((b) => b.key > x[0] && b.key < x[1])
@@ -132,8 +129,8 @@ export function TransactionDetails() {
           <MlLatencyCorrelations
             onChartSelection={selectSampleFromChartSelection}
             selection={
-              selectionFrom !== undefined && selectionTo !== undefined
-                ? [selectionFrom, selectionTo]
+              sampleRangeFrom !== undefined && sampleRangeTo !== undefined
+                ? [sampleRangeFrom, sampleRangeTo]
                 : undefined
             }
           />
