@@ -12,14 +12,23 @@ import {
 } from '@elastic/charts';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_DURATION,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_START,
-  ALERT_UUID,
-  RULE_ID,
-  RULE_NAME,
+import type {
+  ALERT_DURATION as ALERT_DURATION_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_START as ALERT_START_TYPED,
+  ALERT_UUID as ALERT_UUID_TYPED,
+  RULE_ID as RULE_ID_TYPED,
+  RULE_NAME as RULE_NAME_TYPED,
 } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_START as ALERT_START_NON_TYPED,
+  ALERT_UUID as ALERT_UUID_NON_TYPED,
+  RULE_ID as RULE_ID_NON_TYPED,
+  RULE_NAME as RULE_NAME_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
@@ -27,6 +36,13 @@ import type { ObservabilityRuleTypeRegistry } from '../../../../../../observabil
 import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { asDuration, asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+
+const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
+const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
+const RULE_ID: typeof RULE_ID_TYPED = RULE_ID_NON_TYPED;
+const RULE_NAME: typeof RULE_NAME_TYPED = RULE_NAME_NON_TYPED;
 
 type Alert = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']

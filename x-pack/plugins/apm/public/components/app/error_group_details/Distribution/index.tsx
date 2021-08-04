@@ -19,7 +19,9 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
 import React, { Suspense, useState } from 'react';
-import { RULE_ID } from '@kbn/rule-data-utils';
+import type { RULE_ID as RULE_ID_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { RULE_ID as RULE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
@@ -28,6 +30,8 @@ import { AlertType } from '../../../../../common/alert_types';
 import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
+
+const RULE_ID: typeof RULE_ID_TYPED = RULE_ID_NON_TYPED;
 
 type ErrorDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
 

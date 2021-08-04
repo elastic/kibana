@@ -9,7 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { RULE_ID } from '@kbn/rule-data-utils';
+import type { RULE_ID as RULE_ID_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { RULE_ID as RULE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { AlertType } from '../../../../../common/alert_types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -26,6 +28,8 @@ import {
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
 import * as urlHelpers from '../../../shared/Links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
+
+const RULE_ID: typeof RULE_ID_TYPED = RULE_ID_NON_TYPED;
 
 interface Props {
   height?: number;
