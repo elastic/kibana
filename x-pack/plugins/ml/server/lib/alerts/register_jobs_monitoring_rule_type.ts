@@ -49,7 +49,7 @@ export interface DelayedDataResponse {
   /** Number of missed documents */
   missed_docs_count: number;
   /** Timestamp of the latest finalized bucket with missing docs */
-  end_timestamp?: number;
+  end_timestamp: number;
 }
 
 export type AnomalyDetectionJobHealthResult =

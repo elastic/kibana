@@ -198,16 +198,30 @@ export function jobsHealthServiceProvider(
           jobIds,
           earliestMs,
         })
-      ).map<DelayedDataResponse>((v) => {
-        const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
-        const missedDocsCount = match ? parseInt(match[1], 10) : 0;
-        return {
-          annotation: v.annotation,
-          end_timestamp: v.end_timestamp,
-          missed_docs_count: missedDocsCount,
-          job_id: v.job_id,
-        };
-      });
+      )
+        .map<DelayedDataResponse>((v) => {
+          const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
+          const missedDocsCount = match ? parseInt(match[1], 10) : 0;
+          return {
+            annotation: v.annotation,
+            // end_timestamp is always defined for delayed_data annotation
+            end_timestamp: v.end_timestamp!,
+            missed_docs_count: missedDocsCount,
+            job_id: v.job_id,
+          };
+        })
+        .filter((v) => {
+          // As we retrieved annotations based on the longest bucket span and query delay,
+          // we need to check end_timestamp against appropriate job configuration.
+
+          const job = jobs.find((j) => j.job_id === v.job_id);
+          const datafeed = datafeeds?.find((d) => d.job_id === v.job_id);
+
+          const jobLookbackInterval = resolveLookbackInterval([job!], [datafeed!]);
+          return (
+            v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval)
+          );
+        });
 
       if (docsCount) {
         annotations = annotations.filter(
