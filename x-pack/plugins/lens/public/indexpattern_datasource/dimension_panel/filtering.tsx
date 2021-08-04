@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
@@ -64,19 +64,11 @@ export function Filtering({
   const [queryInput, setQueryInput] = useState(inputFilter ?? defaultFilter);
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(isInitiallyOpen);
 
-  const onQueryInputChange = useCallback(
-    (newQuery) => {
-      setQueryInput(newQuery);
-    },
-    [setQueryInput]
-  );
-
   useEffect(() => {
     const { isValid } = validateQuery(queryInput, indexPattern);
-    const filter: Query = isValid ? queryInput : defaultFilter;
 
-    if (!isEqual(inputFilter, filter)) {
-      updateLayer(setFilter(columnId, layer, filter));
+    if (isValid && !isEqual(inputFilter, queryInput)) {
+      updateLayer(setFilter(columnId, layer, queryInput));
     }
   }, [columnId, layer, queryInput, indexPattern, updateLayer, inputFilter]);
 
@@ -152,7 +144,7 @@ export function Filtering({
                 indexPatternTitle={indexPattern.title}
                 data-test-subj="indexPattern-filter-by-input"
                 value={queryInput}
-                onChange={onQueryInputChange}
+                onChange={setQueryInput}
                 isInvalid={!isQueryInputValid}
                 onSubmit={() => {}}
               />
