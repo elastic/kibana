@@ -87,7 +87,7 @@ export const asyncSearchServiceProvider = (
 
       addLogMessage(`Loaded histogram range steps.`);
 
-      if (state.getState().isCancelled) {
+      if (state.getIsCancelled()) {
         state.setIsRunning(false);
         return;
       }
@@ -102,7 +102,7 @@ export const asyncSearchServiceProvider = (
 
       addLogMessage(`Loaded overall histogram chart data.`);
 
-      if (state.getState().isCancelled) {
+      if (state.getIsCancelled()) {
         state.setIsRunning(false);
         return;
       }
@@ -116,7 +116,7 @@ export const asyncSearchServiceProvider = (
 
       addLogMessage(`Loaded percentiles.`);
 
-      if (state.getState().isCancelled) {
+      if (state.getIsCancelled()) {
         state.setIsRunning(false);
         return;
       }
@@ -139,7 +139,7 @@ export const asyncSearchServiceProvider = (
 
       addLogMessage(`Identified ${fieldValuePairs.length} fieldValuePairs.`);
 
-      if (state.getState().isCancelled) {
+      if (state.getIsCancelled()) {
         state.setIsRunning(false);
         return;
       }

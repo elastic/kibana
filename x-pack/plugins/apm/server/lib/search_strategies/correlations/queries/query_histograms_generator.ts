@@ -34,11 +34,7 @@ export async function* fetchTransactionDurationHistograms(
   fieldValuePairs: FieldValuePairs
 ) {
   for (const item of getPrioritizedFieldValuePairs(fieldValuePairs)) {
-    if (
-      params === undefined ||
-      item === undefined ||
-      state.getState().isCancelled
-    ) {
+    if (params === undefined || item === undefined || state.getIsCancelled()) {
       state.setIsRunning(false);
       return;
     }
@@ -57,7 +53,7 @@ export async function* fetchTransactionDurationHistograms(
         item.value
       );
 
-      if (state.getState().isCancelled) {
+      if (state.getIsCancelled()) {
         state.setIsRunning(false);
         return;
       }

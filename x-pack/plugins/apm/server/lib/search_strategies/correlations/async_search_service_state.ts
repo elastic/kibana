@@ -24,6 +24,9 @@ export const asyncSearchServiceStateProvider = () => {
   }
 
   let isCancelled = false;
+  function getIsCancelled() {
+    return isCancelled;
+  }
   function setIsCancelled(d: boolean) {
     isCancelled = d;
   }
@@ -93,6 +96,7 @@ export const asyncSearchServiceStateProvider = () => {
 
   return {
     addValue,
+    getIsCancelled,
     getOverallProgress,
     getState,
     getValuesSortedByCorrelation,
