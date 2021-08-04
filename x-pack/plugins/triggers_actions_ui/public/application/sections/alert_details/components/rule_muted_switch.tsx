@@ -24,7 +24,7 @@ export const RuleMutedSwitch: React.FunctionComponent<ComponentOpts> = ({
   const [isMuted, setIsMuted] = useState<boolean>(alertInstance?.isMuted);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-  const res = isUpdating ? (
+  return isUpdating ? (
     <EuiLoadingSpinner size="m" />
   ) : (
     <EuiSwitch
@@ -43,5 +43,4 @@ export const RuleMutedSwitch: React.FunctionComponent<ComponentOpts> = ({
       label="mute"
     />
   );
-  return res;
 };
