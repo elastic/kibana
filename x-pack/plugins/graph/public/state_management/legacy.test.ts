@@ -78,12 +78,12 @@ describe('legacy sync sagas', () => {
   it('syncs templates with workspace', () => {
     env.store.dispatch(loadTemplates([]));
     expect(env.mockedDeps.setUrlTemplates).toHaveBeenCalledWith([]);
-    expect(env.mockedDeps.notifyAngular).toHaveBeenCalled();
+    expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
   });
 
   it('notifies angular when fields are selected', () => {
     env.store.dispatch(selectField('field1'));
-    expect(env.mockedDeps.notifyAngular).toHaveBeenCalled();
+    expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
   });
 
   it('syncs field list with workspace', () => {

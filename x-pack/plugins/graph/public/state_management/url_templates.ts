@@ -102,9 +102,9 @@ export const templatesSelector = (state: GraphState) => state.urlTemplates;
  *
  * Won't be necessary once the side bar is moved to redux
  */
-export const syncTemplatesSaga = ({ notifyAngular }: GraphStoreDependencies) => {
+export const syncTemplatesSaga = ({ notifyReact }: GraphStoreDependencies) => {
   function* syncTemplates() {
-    notifyAngular();
+    notifyReact();
   }
 
   return function* () {

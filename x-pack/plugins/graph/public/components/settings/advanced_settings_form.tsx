@@ -29,6 +29,7 @@ export function AdvancedSettingsForm({
 }: Pick<SettingsStateProps, 'advancedSettings' | 'updateSettings' | 'allFields'>) {
   // keep a local state during changes
   const [formState, updateFormState] = useState({ ...advancedSettings });
+
   // useEffect update localState only based on the main store
   useEffect(() => {
     updateFormState(advancedSettings);

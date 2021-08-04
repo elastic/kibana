@@ -44,7 +44,7 @@ export const workspaceInitializedSelector = createSelector(
  */
 export const fillWorkspaceSaga = ({
   getWorkspace,
-  notifyAngular,
+  notifyReact,
   http,
   notifications,
 }: GraphStoreDependencies) => {
@@ -68,7 +68,7 @@ export const fillWorkspaceSaga = ({
         edges: [],
       });
       yield put(initializeWorkspace());
-      notifyAngular();
+      notifyReact();
       workspace.fillInGraph(fields.length * 10);
     } catch (e) {
       const message = 'body' in e ? e.body.message : e.message;

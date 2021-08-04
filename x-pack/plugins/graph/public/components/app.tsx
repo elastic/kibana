@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
+import { IHttpFetchError } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import {
+  ExploreRequest,
+  GraphExploreCallback,
+  GraphSearchCallback,
   GraphWorkspaceSavedObject,
   IndexPatternProvider,
   IndexPatternSavedObject,
+  SearchRequest,
   Workspace,
 } from '../types';
 import { createGraphStore, GraphStore } from '../state_management';
 import { createWorkspace } from '../angular/graph_client_workspace';
 import { GraphWorkspace } from './graph_workspace';
 import { GraphDependencies } from '../application';
-import { useNodeProxy } from './graph_workspace/use_node_proxy';
+import { formatHttpError } from '../helpers/format_http_error';
 
 export interface GraphWorkspaceProps {
   indexPatternProvider: IndexPatternProvider;
@@ -35,20 +41,84 @@ export interface GraphWorkspaceProps {
 export const GraphApp = (props: GraphWorkspaceProps) => {
   /**
    * It's temporary workaround, which should be removed
-   * after migration Workspace to redux.
-   * `workspaceRef` holds mutable workspace object
+   * after migration `workspace` to redux.
+   * Ref holds mutable `workspace` object. After each `workspace.methodName(...)` call,
+   * which might mutate `workspace` somehow, we need to update react state using
+   * `workspace.changeHandler()`.
    */
   const workspaceRef = useRef<Workspace>();
   const workspace = workspaceRef.current;
   /**
-   * counter only needs to force react state update on workspace changes
+   * `renderCounter` needs to force react state update on workspace changes
    */
   const [renderCounter, setRenderCounter] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const { loading, callNodeProxy, callSearchNodeProxy } = useNodeProxy({
-    coreStart: props.deps.coreStart,
-    toastNotifications: props.deps.toastNotifications,
-  });
+  const handleHttpError = useCallback(
+    (error: IHttpFetchError) => {
+      props.deps.toastNotifications.addDanger(formatHttpError(error));
+    },
+    [props.deps.toastNotifications]
+  );
+
+  // Replacement function for graphClientWorkspace's comms so
+  // that it works with Kibana.
+  const callNodeProxy = useCallback(
+    (indexName: string, query: ExploreRequest, responseHandler: GraphExploreCallback) => {
+      const request = {
+        body: JSON.stringify({
+          index: indexName,
+          query,
+        }),
+      };
+      setLoading(true);
+      return props.deps.coreStart.http
+        .post('../api/graph/graphExplore', request)
+        .then(function (data) {
+          const response = data.resp;
+          if (response.timed_out) {
+            props.deps.toastNotifications.addWarning(
+              i18n.translate('xpack.graph.exploreGraph.timedOutWarningText', {
+                defaultMessage: 'Exploration timed out',
+              })
+            );
+          }
+          responseHandler(response);
+        })
+        .catch(handleHttpError)
+        .finally(() => {
+          setLoading(false);
+          // $scope.$digest();
+        });
+    },
+    [props.deps.coreStart.http, props.deps.toastNotifications, handleHttpError]
+  );
+
+  // Helper function for the graphClientWorkspace to perform a query
+  const callSearchNodeProxy = useCallback(
+    (indexName: string, query: SearchRequest, responseHandler: GraphSearchCallback) => {
+      const request = {
+        body: JSON.stringify({
+          index: indexName,
+          body: query,
+        }),
+      };
+      setLoading(true);
+      props.deps.coreStart.http
+        .post('../api/graph/searchProxy', request)
+        .then(function (data) {
+          const response = data.resp;
+          responseHandler(response);
+        })
+        .catch(handleHttpError)
+        .finally(() => {
+          setLoading(false);
+          // $scope.$digest();
+        });
+    },
+    [props.deps.coreStart.http, handleHttpError]
+  );
+
   const store = useMemo<GraphStore>(
     () =>
       createGraphStore({
@@ -87,7 +157,7 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
         changeUrl: (newUrl) => {
           props.location.url(newUrl);
         },
-        notifyAngular: () => {
+        notifyReact: () => {
           setRenderCounter((cur) => ++cur);
         },
         chrome: props.deps.chrome,
@@ -120,6 +190,8 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
         <Provider store={store}>
           <GraphWorkspace
             counter={renderCounter}
+            workspace={workspace}
+            loading={loading}
             setHeaderActionMenu={props.deps.setHeaderActionMenu}
             graphSavePolicy={props.deps.graphSavePolicy}
             navigation={props.deps.navigation}
@@ -133,8 +205,6 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
             indexPatterns={props.indexPatterns}
             savedWorkspace={props.savedWorkspace}
             indexPatternProvider={props.indexPatternProvider}
-            loading={loading}
-            workspace={workspace}
           />
         </Provider>
       </KibanaContextProvider>

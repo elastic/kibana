@@ -8,13 +8,14 @@
 import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { connect, useStore } from 'react-redux';
+import { connect } from 'react-redux';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
   hasFieldsSelector,
   initializeWorkspace,
   liveResponseFieldsSelector,
+  loadSavedWorkspace,
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
@@ -36,7 +37,6 @@ import { GraphDependencies } from '../../application';
 const SearchBarMemoized = memo(SearchBar);
 const FieldManagerMemoized = memo(FieldManager);
 const GuidancePanelMemoized = memo(GuidancePanel);
-const InspectPanelMemoized = memo(InspectPanel);
 
 type GraphWorkspaceProps = Pick<
   GraphDependencies,
@@ -62,38 +62,54 @@ type GraphWorkspaceProps = Pick<
 interface GraphWorkspaceStateProps {
   liveResponseFields: WorkspaceField[];
   workspaceInitialized: boolean;
+  hasFields: boolean;
 }
 
 interface GraphWorkspaceDispatchProps {
   initializeWorkspace: () => void;
+  loadSavedWorkspace: (savedWorkspace: GraphWorkspaceSavedObject) => void;
 }
 
-const GraphWorkspaceComponent = (
-  props: GraphWorkspaceProps & GraphWorkspaceStateProps & GraphWorkspaceDispatchProps
-) => {
-  const store = useStore();
+const GraphWorkspaceComponent = ({
+  workspace,
+  loading,
+  location,
+  savedWorkspace,
+  liveResponseFields,
+  query,
+  hasFields,
+  overlays,
+  workspaceInitialized,
+  indexPatterns,
+  indexPatternProvider,
+  toastNotifications,
+  capabilities,
+  coreStart,
+  graphSavePolicy,
+  navigation,
+  initializeWorkspace: initializeWorkspaceAction,
+  loadSavedWorkspace: loadSavedWorkspaceAction,
+  setHeaderActionMenu,
+  canEditDrillDownUrls,
+}: GraphWorkspaceProps & GraphWorkspaceStateProps & GraphWorkspaceDispatchProps) => {
   const [initialQuery, setInitialQuery] = useState<string>();
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
   const [noIndexPatterns, setNoIndexPatterns] = useState<boolean>(false);
-  const isInitialized = Boolean(props.workspaceInitialized || props.savedWorkspace.id);
-
   const [menus, setMenus] = useState<MenuOptions>({
     showSettings: false,
     showInspect: false,
   });
   const [pickerOpen, setPickerOpen] = useState(false);
+  const isInitialized = Boolean(workspaceInitialized || savedWorkspace.id);
 
   // Deal with situation of request to open saved workspace
   useEffect(() => {
-    if (props.savedWorkspace.id) {
-      store.dispatch({
-        type: 'x-pack/graph/LOAD_WORKSPACE',
-        payload: props.savedWorkspace,
-      });
+    if (savedWorkspace.id) {
+      loadSavedWorkspaceAction(savedWorkspace);
     } else {
-      setNoIndexPatterns(props.indexPatterns.length === 0);
+      setNoIndexPatterns(indexPatterns.length === 0);
     }
-  }, [props.indexPatterns.length, props.savedWorkspace, store]);
+  }, [loadSavedWorkspaceAction, indexPatterns.length, savedWorkspace]);
 
   const handleError = useCallback(
     (err: Error | string) => {
@@ -102,54 +118,54 @@ const GraphWorkspaceComponent = (
         description: '"Graph" is a product name and should not be translated.',
       });
       if (err instanceof Error) {
-        props.toastNotifications.addError(err, {
+        toastNotifications.addError(err, {
           title: toastTitle,
         });
       } else {
-        props.toastNotifications.addDanger({
+        toastNotifications.addDanger({
           title: toastTitle,
           text: String(err),
         });
       }
     },
-    [props.toastNotifications]
+    [toastNotifications]
   );
 
   const submit = useCallback(
     (searchTerm: string) => {
-      props.initializeWorkspace();
+      initializeWorkspaceAction();
       // type casting is safe, at this point workspace should be loaded
       const numHops = 2;
-      const curWorkspace = props.workspace as Workspace;
+      const curWorkspace = workspace as Workspace;
       if (searchTerm.startsWith('{')) {
         try {
-          const query = JSON.parse(searchTerm);
-          if (query.vertices) {
+          const searchQuery = JSON.parse(searchTerm);
+          if (searchQuery.vertices) {
             // Is a graph explore request
             curWorkspace.callElasticsearch(query);
           } else {
             // Is a regular query DSL query
-            curWorkspace.search(query, props.liveResponseFields, numHops);
+            curWorkspace.search(query, liveResponseFields, numHops);
           }
         } catch (err) {
           handleError(err);
         }
         return;
       }
-      curWorkspace.simpleSearch(searchTerm, props.liveResponseFields, numHops);
+      curWorkspace.simpleSearch(searchTerm, liveResponseFields, numHops);
     },
-    [props, handleError]
+    [handleError, initializeWorkspaceAction, liveResponseFields, query, workspace]
   );
 
   // Allow URLs to include a user-defined text query
   useEffect(() => {
-    if (props.query) {
-      setInitialQuery(props.query);
-      if (props.workspace) {
-        submit(props.query);
+    if (query) {
+      setInitialQuery(query);
+      if (workspace) {
+        submit(query);
       }
     }
-  }, [props.query, submit, props.workspace]);
+  }, [query, submit, workspace]);
 
   const onIndexPatternChange = useCallback(
     (indexPattern?: IndexPattern) => setCurrentIndexPattern(indexPattern),
@@ -166,7 +182,7 @@ const GraphWorkspaceComponent = (
       text?: string,
       options?: { confirmButtonText: string; title: string }
     ) => {
-      if (!hasFieldsSelector(store.getState())) {
+      if (!hasFields) {
         onConfirm();
         return;
       }
@@ -181,7 +197,7 @@ const GraphWorkspaceComponent = (
         ...options,
       };
 
-      props.overlays
+      overlays
         .openConfirm(
           text ||
             i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
@@ -195,39 +211,39 @@ const GraphWorkspaceComponent = (
           }
         });
     },
-    [props.overlays, store]
+    [hasFields, overlays]
   );
 
   return (
     <Fragment>
       <GraphTopNavMenu
-        location={props.location}
-        workspace={props.workspace}
-        savedWorkspace={props.savedWorkspace}
+        location={location}
+        workspace={workspace}
+        savedWorkspace={savedWorkspace}
         onSetMenus={setMenus}
         confirmWipeWorkspace={confirmWipeWorkspace}
-        setHeaderActionMenu={props.setHeaderActionMenu}
-        graphSavePolicy={props.graphSavePolicy}
-        navigation={props.navigation}
-        capabilities={props.capabilities}
-        coreStart={props.coreStart}
-        canEditDrillDownUrls={props.canEditDrillDownUrls}
+        setHeaderActionMenu={setHeaderActionMenu}
+        graphSavePolicy={graphSavePolicy}
+        navigation={navigation}
+        capabilities={capabilities}
+        coreStart={coreStart}
+        canEditDrillDownUrls={canEditDrillDownUrls}
       />
 
-      <InspectPanelMemoized
+      <InspectPanel
         showInspect={menus.showInspect}
-        lastRequest={props.workspace?.lastRequest}
-        lastResponse={props.workspace?.lastResponse}
+        lastRequest={workspace?.lastRequest}
+        lastResponse={workspace?.lastResponse}
         indexPattern={currentIndexPattern}
       />
 
       {isInitialized && <GraphTitle />}
       <div className="gphGraph__bar">
         <SearchBarMemoized
-          isLoading={props.loading}
+          isLoading={loading}
           initialQuery={initialQuery}
           currentIndexPattern={currentIndexPattern}
-          indexPatternProvider={props.indexPatternProvider}
+          indexPatternProvider={indexPatternProvider}
           onQuerySubmit={submit}
           confirmWipeWorkspace={confirmWipeWorkspace}
           onIndexPatternChange={onIndexPatternChange}
@@ -236,13 +252,15 @@ const GraphWorkspaceComponent = (
         <FieldManagerMemoized pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
       </div>
       {!isInitialized && (
-        <GuidancePanelMemoized
-          noIndexPatterns={noIndexPatterns}
-          onOpenFieldPicker={onOpenFieldPicker}
-        />
+        <div>
+          <GuidancePanelMemoized
+            noIndexPatterns={noIndexPatterns}
+            onOpenFieldPicker={onOpenFieldPicker}
+          />
+        </div>
       )}
 
-      {isInitialized && props.workspace && <GraphView workspace={props.workspace} />}
+      {isInitialized && workspace && <GraphView workspace={workspace} />}
     </Fragment>
   );
 };
@@ -255,11 +273,15 @@ export const GraphWorkspace = connect<
 >(
   (state: GraphState) => ({
     workspaceInitialized: workspaceInitializedSelector(state),
+    hasFields: hasFieldsSelector(state),
     liveResponseFields: liveResponseFieldsSelector(state),
   }),
   (dispatch) => ({
     initializeWorkspace: () => {
       dispatch(initializeWorkspace());
+    },
+    loadSavedWorkspace: (savedWorkspace: GraphWorkspaceSavedObject) => {
+      dispatch(loadSavedWorkspace(savedWorkspace));
     },
   })
 )(GraphWorkspaceComponent);

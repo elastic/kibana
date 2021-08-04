@@ -79,7 +79,7 @@ export function createMockGraphStore({
       },
     } as unknown) as NotificationsStart,
     http: {} as HttpStart,
-    notifyAngular: jest.fn(),
+    notifyReact: jest.fn(),
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
     overlays: ({

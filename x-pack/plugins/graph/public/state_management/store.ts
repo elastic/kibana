@@ -68,7 +68,7 @@ export interface GraphStoreDependencies {
   showSaveModal: (el: ReactElement, I18nContext: I18nStart['Context']) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
-  notifyAngular: () => void;
+  notifyReact: () => void;
   chrome: ChromeStart;
   I18nContext: I18nStart['Context'];
   basePath: string;

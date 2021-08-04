@@ -73,6 +73,9 @@ export function SettingsComponent({
   advancedSettings,
   urlTemplates,
   allFields,
+  saveTemplate: saveTemplateAction,
+  updateSettings: updateSettingsAction,
+  removeTemplate: removeTemplateAction,
 }: SettingsStateProps & SettingsProps) {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -111,9 +114,9 @@ export function SettingsComponent({
           advancedSettings={advancedSettings}
           urlTemplates={urlTemplates}
           allFields={allFields}
-          updateSettings={updateSettings}
-          removeTemplate={removeTemplate}
-          saveTemplate={saveTemplate}
+          updateSettings={updateSettingsAction}
+          removeTemplate={removeTemplateAction}
+          saveTemplate={saveTemplateAction}
         />
       </EuiFlyoutBody>
     </>

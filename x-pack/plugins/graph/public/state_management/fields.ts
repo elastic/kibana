@@ -69,9 +69,9 @@ export const hasFieldsSelector = createSelector(
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) => {
+export const updateSaveButtonSaga = ({ notifyReact }: GraphStoreDependencies) => {
   function* notify(): IterableIterator<void> {
-    notifyAngular();
+    notifyReact();
   }
   return function* () {
     yield takeLatest(matchesOne(selectField, deselectField), notify);
@@ -108,7 +108,7 @@ export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies) => {
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) => {
+export const syncNodeStyleSaga = ({ getWorkspace, notifyReact }: GraphStoreDependencies) => {
   function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
     const workspace = getWorkspace();
     if (!workspace) {
@@ -131,7 +131,7 @@ export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDep
         }
       });
     }
-    notifyAngular();
+    notifyReact();
 
     const selectedFields = selectedFieldsSelector(yield select());
     workspace.options.vertex_fields = selectedFields;
