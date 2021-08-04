@@ -48,7 +48,7 @@ pageLoadAssetSize:
   lists: 22900
   logstash: 53548
   management: 46112
-  maps: 80000
+  maps: 90000
   ml: 82187
   monitoring: 80000
   navigation: 37269
