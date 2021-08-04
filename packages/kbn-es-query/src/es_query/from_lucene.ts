@@ -10,6 +10,7 @@ import { Query } from '..';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
 
+/** @internal */
 export function buildQueryFromLucene(
   queries: Query[],
   queryStringOptions: Record<string, any>,

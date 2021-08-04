@@ -37,6 +37,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
     | 'overview'
     | 'transactions'
+    | 'dependencies'
     | 'errors'
     | 'metrics'
     | 'nodes'
@@ -161,6 +162,16 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       label: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
         defaultMessage: 'Transactions',
+      }),
+    },
+    {
+      key: 'dependencies',
+      href: router.link('/services/:serviceName/dependencies', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
+        defaultMessage: 'Dependencies',
       }),
     },
     {
