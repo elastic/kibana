@@ -78,6 +78,7 @@ export const migrations = {
   '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
     ...doc,
     ...(doc.attributes && {
+      // owner: Team:Geo
       attributes: Object.keys(doc.attributes).reduce(
         (acc, key) =>
           [
