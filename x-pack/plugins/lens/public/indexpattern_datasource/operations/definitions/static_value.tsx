@@ -22,7 +22,7 @@ function ofName(value: number | string | undefined) {
   if (value == null) {
     return defaultLabel;
   }
-  return i18n.translate('xpack.lens.indexPattern.staticValueLabel', {
+  return i18n.translate('xpack.lens.indexPattern.staticValueLabelWithValue', {
     defaultMessage: 'Static Value: {value}',
     values: { value },
   });

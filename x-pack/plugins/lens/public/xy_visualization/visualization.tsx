@@ -685,10 +685,10 @@ function getAxisName(
   const verticalRight = i18n.translate('xpack.lens.xyChart.verticalRightAxisLabel', {
     defaultMessage: 'Vertical right axis',
   });
-  const horizontalTop = i18n.translate('xpack.lens.xyChart.verticalLeftAxisLabel', {
+  const horizontalTop = i18n.translate('xpack.lens.xyChart.horizontalLeftAxisLabel', {
     defaultMessage: 'Horizontal top axis',
   });
-  const horizontalBottom = i18n.translate('xpack.lens.xyChart.verticalRightAxisLabel', {
+  const horizontalBottom = i18n.translate('xpack.lens.xyChart.horizontalRightAxisLabel', {
     defaultMessage: 'Horizontal bottom axis',
   });
   if (axis === 'yLeft') {

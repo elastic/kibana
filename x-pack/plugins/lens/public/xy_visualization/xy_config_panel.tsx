@@ -1019,7 +1019,7 @@ const ThresholdPanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+        label={i18n.translate('xpack.lens.xyChart.axisSide.icon', {
           defaultMessage: 'Icon',
         })}
       >
