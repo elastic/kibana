@@ -160,7 +160,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const ParamEditor =
     selectedOperationDefinition?.paramEditor ||
-    (supportStaticValue ? operationDefinitionMap[staticValueOperationName].paramEditor : null);
+    (supportStaticValue && !showQuickFunctions
+      ? operationDefinitionMap[staticValueOperationName].paramEditor
+      : null);
 
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
