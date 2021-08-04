@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { PointerEvent } from '@elastic/charts';
+import type { ActiveCursor } from './active_cursor';
 
-export const activeCursor$ = new Subject<PointerEvent>();
+export const activeCursorMock: ActiveCursor = {
+  activeCursor$: {
+    subscribe: jest.fn(),
+    pipe: jest.fn(() => ({
+      subscribe: jest.fn(),
+    })),
+  },
+  setup: jest.fn(),
+} as any;

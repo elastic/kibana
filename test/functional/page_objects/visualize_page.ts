@@ -181,6 +181,10 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('pie');
   }
 
+  public async clickTimelion() {
+    await this.clickVisType('timelion');
+  }
+
   public async clickTagCloud() {
     await this.clickVisType('tagcloud');
   }
