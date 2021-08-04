@@ -8,9 +8,12 @@
 import { isEmpty } from 'lodash';
 import { flow } from 'fp-ts/lib/function';
 import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
+
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toError } from '@kbn/securitysolution-list-api';
+
 import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { ruleStatusServiceFactory } from '../signals/rule_status_service';
@@ -106,9 +109,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             checkPrivilegesFromEsClient(esClient, inputIndices),
             esClient.fieldCaps({
               index: index ?? ['*'],
-              fields: hasTimestampOverride
-                ? ['@timestamp', timestampOverride as string]
-                : ['@timestamp'],
+              fields: hasTimestampOverride ? [TIMESTAMP, timestampOverride as string] : [TIMESTAMP],
               include_unmapped: true,
             }),
           ]);
@@ -129,7 +130,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
                   () =>
                     hasTimestampFields(
                       wroteStatus as boolean,
-                      hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                      hasTimestampOverride ? (timestampOverride as string) : TIMESTAMP,
                       name,
                       timestampFieldCaps,
                       inputIndices,

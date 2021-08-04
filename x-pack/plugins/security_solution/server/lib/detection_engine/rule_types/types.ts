@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { Moment } from 'moment';
+
 import { SearchHit } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Moment } from 'moment';
+
 import { SavedObject } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,

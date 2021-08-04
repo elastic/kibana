@@ -11,6 +11,7 @@ import {
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
@@ -36,7 +37,7 @@ import {
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 
 type SignalDoc = SignalSourceHit & {
-  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+  _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
 };
 
 const SPACE_ID = 'space';
@@ -54,9 +55,9 @@ describe('buildAlert', () => {
       ...buildAlert([doc], rule, SPACE_ID),
       ...additionalAlertFields(doc),
     };
-    const timestamp = alert['@timestamp'];
+    const timestamp = alert[TIMESTAMP];
     const expected = {
-      '@timestamp': timestamp,
+      [TIMESTAMP]: timestamp,
       [SPACE_IDS]: [SPACE_ID],
       [ALERT_OWNER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
@@ -123,9 +124,9 @@ describe('buildAlert', () => {
       ...buildAlert([doc], rule, SPACE_ID),
       ...additionalAlertFields(doc),
     };
-    const timestamp = alert['@timestamp'];
+    const timestamp = alert[TIMESTAMP];
     const expected = {
-      '@timestamp': timestamp,
+      [TIMESTAMP]: timestamp,
       [SPACE_IDS]: [SPACE_ID],
       [ALERT_OWNER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
@@ -250,7 +251,7 @@ describe('buildAlert', () => {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
-        '@timestamp': new Date().toISOString(),
+        [TIMESTAMP]: new Date().toISOString(),
       },
     };
     doc._source.event = {
@@ -277,7 +278,7 @@ describe('buildAlert', () => {
       ...sampleDoc,
       _source: {
         ...sampleDoc._source,
-        '@timestamp': new Date().toISOString(),
+        [TIMESTAMP]: new Date().toISOString(),
       },
     };
     doc._source.event = {
@@ -334,7 +335,7 @@ describe('buildAlert', () => {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          '@timestamp': new Date().toISOString(),
+          [TIMESTAMP]: new Date().toISOString(),
         },
       };
       const output = removeClashes(doc);
@@ -347,7 +348,7 @@ describe('buildAlert', () => {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          '@timestamp': new Date().toISOString(),
+          [TIMESTAMP]: new Date().toISOString(),
         },
       };
       const output = removeClashes(doc);
@@ -364,12 +365,12 @@ describe('buildAlert', () => {
         },
       } as unknown) as SignalDoc;
       const output = removeClashes(doc);
-      const timestamp = output._source['@timestamp'];
+      const timestamp = output._source[TIMESTAMP];
       expect(output).toEqual({
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          '@timestamp': timestamp,
+          [TIMESTAMP]: timestamp,
         },
       });
     });
@@ -384,12 +385,12 @@ describe('buildAlert', () => {
         },
       } as unknown) as SignalDoc;
       const output = removeClashes(doc);
-      const timestamp = output._source['@timestamp'];
+      const timestamp = output._source[TIMESTAMP];
       expect(output).toEqual({
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          '@timestamp': timestamp,
+          TIMESTAMP: timestamp,
         },
       });
     });
@@ -404,13 +405,13 @@ describe('buildAlert', () => {
         },
       } as unknown) as SignalDoc;
       const output = removeClashes(doc);
-      const timestamp = output._source['@timestamp'];
+      const timestamp = output._source[TIMESTAMP];
       const expected = {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
           signal: { rule: { id: '123' } },
-          '@timestamp': timestamp,
+          [TIMESTAMP]: timestamp,
         },
       };
       expect(output).toEqual(expected);

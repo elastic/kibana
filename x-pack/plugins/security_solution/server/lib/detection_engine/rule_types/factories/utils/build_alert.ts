@@ -11,6 +11,7 @@ import {
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
@@ -103,7 +104,7 @@ export const buildAlert = (
   );
 
   return ({
-    '@timestamp': new Date().toISOString(),
+    [TIMESTAMP]: new Date().toISOString(),
     [ALERT_OWNER]: SERVER_APP_ID,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [ALERT_ANCESTORS]: ancestors,

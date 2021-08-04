@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SavedObject } from 'src/core/types';
 import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
@@ -47,7 +48,7 @@ export const buildBulkBody = (
       ...filteredSource,
       ...buildAlert([mergedDoc], rule, spaceId),
       ...additionalAlertFields(mergedDoc),
-      '@timestamp': new Date().toISOString(),
+      [TIMESTAMP]: new Date().toISOString(),
     };
   }
 
