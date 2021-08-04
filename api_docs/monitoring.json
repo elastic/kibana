@@ -19,10 +19,7 @@
         "tags": [],
         "label": "IBulkUploader",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/monitoring/server/types.ts",
-          "lineNumber": 95
-        },
+        "path": "x-pack/plugins/monitoring/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -35,13 +32,10 @@
             "signature": [
               "() => any"
             ],
-            "source": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 96
-            },
+            "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "monitoring",
@@ -53,13 +47,10 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 97
-            },
+            "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "monitoring",
@@ -79,40 +70,31 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 98
-            },
+            "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "monitoring",
-                "id": "def-server.esClient",
+                "id": "def-server.IBulkUploader.start.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "Pick<",
-                  "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"helpers\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
-                  "TransportRequestParams",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): ",
-                  "TransportRequestPromise",
-                  "<",
-                  "ApiResponse",
-                  "<Record<string, any>, unknown>>; }; }"
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/monitoring/server/types.ts",
-                  "lineNumber": 98
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/monitoring/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "monitoring",
@@ -124,13 +106,10 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 99
-            },
+            "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -156,10 +135,7 @@
           "<EmailSettingData | undefined, {}> & ",
           "KibanaSettingsCollectorExtraOptions"
         ],
-        "source": {
-          "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
-          "lineNumber": 53
-        },
+        "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -175,10 +151,7 @@
           "MonitoringElasticsearchConfig",
           "; enabled: boolean; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; logs: Readonly<{} & { index: string; }>; metricbeat: Readonly<{} & { index: string; }>; ccs: Readonly<{} & { enabled: boolean; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; licensing: Readonly<{} & { api_polling_frequency: moment.Duration; }>; agent: Readonly<{} & { interval: string; }>; cluster_alerts: Readonly<{} & { enabled: boolean; allowedSpaces: string[]; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; tests: Readonly<{} & { cloud_detector: Readonly<{} & { enabled: boolean; }>; }>; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/monitoring/server/config.ts",
-          "lineNumber": 93
-        },
+        "path": "x-pack/plugins/monitoring/server/config.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -191,10 +164,7 @@
       "tags": [],
       "label": "MonitoringPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/monitoring/server/types.ts",
-        "lineNumber": 102
-      },
+      "path": "x-pack/plugins/monitoring/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -207,10 +177,7 @@
           "signature": [
             "() => any"
           ],
-          "source": {
-            "path": "x-pack/plugins/monitoring/server/types.ts",
-            "lineNumber": 103
-          },
+          "path": "x-pack/plugins/monitoring/server/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": []

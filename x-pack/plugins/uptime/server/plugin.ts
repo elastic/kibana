@@ -50,7 +50,7 @@ export class Plugin implements PluginType {
             settings: {
               number_of_shards: 1,
             },
-            mappings: mappingFromFieldMap(uptimeRuleFieldMap),
+            mappings: mappingFromFieldMap(uptimeRuleFieldMap, 'strict'),
           },
         },
       });
