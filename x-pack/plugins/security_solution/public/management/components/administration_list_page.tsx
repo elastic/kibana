@@ -6,7 +6,14 @@
  */
 
 import React, { FC, memo, useMemo } from 'react';
-import { CommonProps, EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
+import {
+  CommonProps,
+  EuiPageHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 
@@ -21,12 +28,16 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
   ({ title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
     const header = useMemo(() => {
       return (
-        <>
-          {headerBackComponent && <>{headerBackComponent}</>}
-          <EuiTitle size="l" data-test-subj="header-page-title">
-            <>{title}</>
-          </EuiTitle>
-        </>
+        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+          <EuiFlexItem grow={false}>
+            {headerBackComponent && <>{headerBackComponent}</>}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l" data-test-subj="header-page-title">
+              <>{title}</>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }, [headerBackComponent, title]);
 
@@ -40,11 +51,10 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           pageTitle={header}
           description={description}
           bottomBorder={true}
+          rightSideItems={[actions]}
           restrictWidth={false}
           {...otherProps}
-        >
-          {actions}
-        </EuiPageHeader>
+        />
         <EuiSpacer size="l" />
         {children}
 
