@@ -94,7 +94,7 @@ describe('interpreter/functions#tagcloud', () => {
         },
       },
     };
-    await fn(context, visConfig, handlers as any);
+    await fn(context, { ...visConfig, ...numberAccessors }, handlers as any);
 
     expect(loggedTable!).toMatchSnapshot();
   });
