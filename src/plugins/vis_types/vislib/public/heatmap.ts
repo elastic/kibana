@@ -13,7 +13,7 @@ import { RangeValues } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
 import { ColorSchemas, ColorSchemaParams } from '../../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../visualizations/public';
-import { ValueAxis, ScaleType, AxisType } from '../../../vis_types/xy/public';
+import { ValueAxis, ScaleType, AxisType } from '../../xy/public';
 
 import { HeatmapOptions } from './editor';
 import { TimeMarker } from './vislib/visualizations/time_marker';

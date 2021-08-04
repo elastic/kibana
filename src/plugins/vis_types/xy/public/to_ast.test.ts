@@ -13,8 +13,8 @@ import { sampleAreaVis } from './sample_vis.test.mocks';
 import { toExpressionAst } from './to_ast';
 import { VisParams } from './types';
 
-jest.mock('../../expressions/public', () => ({
-  ...(jest.requireActual('../../expressions/public') as any),
+jest.mock('../../../expressions/public', () => ({
+  ...(jest.requireActual('../../../expressions/public') as any),
   buildExpression: jest.fn().mockImplementation(() => ({
     toAst: () => ({
       type: 'expression',

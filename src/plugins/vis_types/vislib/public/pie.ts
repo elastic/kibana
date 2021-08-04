@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { pieVisType } from '../../../vis_types/pie/public';
+import { pieVisType } from '../../pie/public';
 import { VisTypeDefinition } from '../../../visualizations/public';
 import { CommonVislibParams } from './types';
 import { toExpressionAst } from './to_ast_pie';

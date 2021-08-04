@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { SwitchOption } from '../../../../../../vis_default_editor/public';
-import { ValueAxis } from '../../../../../../vis_types/xy/public';
+import { ValueAxis } from '../../../../../xy/public';
 
 import { HeatmapVisParams } from '../../../heatmap';
 

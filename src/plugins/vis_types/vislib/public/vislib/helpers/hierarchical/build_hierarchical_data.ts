@@ -9,7 +9,7 @@
 import { toArray } from 'lodash';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';
-import type { Dimensions } from '../../../../../../vis_types/pie/public';
+import type { Dimensions } from '../../../../../pie/public';
 
 interface Slice {
   name: string;

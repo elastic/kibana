@@ -11,10 +11,10 @@ import { buildExpression } from '../../../expressions/public';
 
 import { BasicVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
-import { sampleAreaVis } from '../../../vis_types/xy/public/sample_vis.test.mocks';
+import { sampleAreaVis } from '../../xy/public/sample_vis.test.mocks';
 
-jest.mock('../../expressions/public', () => ({
-  ...(jest.requireActual('../../expressions/public') as any),
+jest.mock('../../../expressions/public', () => ({
+  ...(jest.requireActual('../../../expressions/public') as any),
   buildExpression: jest.fn().mockImplementation(() => ({
     toAst: () => ({
       type: 'expression',

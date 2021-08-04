@@ -15,7 +15,7 @@ import {
   VisParams,
 } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import type { Dimensions } from '../../../vis_types/xy/public';
+import type { Dimensions } from '../../xy/public';
 import type { DateHistogramParams, HistogramParams } from '../../../visualizations/public';
 
 import { BUCKET_TYPES } from '../../../data/public';

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { colorSchemas } from '../../../../charts/public';
-import { getPositions, getScaleTypes } from '../../../../vis_types/xy/public';
+import { getPositions, getScaleTypes } from '../../../xy/public';
 
 import { Alignment, GaugeType } from '../types';
 

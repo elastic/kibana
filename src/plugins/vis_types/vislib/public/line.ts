@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { xyVisTypes } from '../../../vis_types/xy/public';
+import { xyVisTypes } from '../../xy/public';
 import { VisTypeDefinition } from '../../../visualizations/public';
 
 import { toExpressionAst } from './to_ast';
