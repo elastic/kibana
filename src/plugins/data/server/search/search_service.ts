@@ -89,6 +89,7 @@ import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
+import { searchSourceStrategyProvider } from './strategies/search_source/search_source_strategy';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -164,6 +165,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         usage
       )
     );
+
+    core.getStartServices().then(([, , dataStart]) => {
+      this.registerSearchStrategy(
+        'search_source',
+        searchSourceStrategyProvider(this.logger, dataStart)
+      );
+    });
 
     // We don't want to register this because we don't want the client to be able to access this
     // strategy, but we do want to expose it to other server-side plugins
