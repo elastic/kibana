@@ -31,6 +31,7 @@ import {
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   ALERT_ANCESTORS,
+  ALERT_DEPTH,
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_TIME,
 } from '../../field_maps/field_names';
@@ -106,7 +107,7 @@ describe('buildAlert', () => {
         interval: '5m',
         exceptions_list: getListArrayMock(),
       }),
-      'kibana.alert.depth': 1,
+      [ALERT_DEPTH]: 1,
     };
     expect(alert).toEqual(expected);
   });
@@ -181,7 +182,7 @@ describe('buildAlert', () => {
         interval: '5m',
         exceptions_list: getListArrayMock(),
       }),
-      'kibana.alert.depth': 1,
+      [ALERT_DEPTH]: 1,
     };
     expect(alert).toEqual(expected);
   });
