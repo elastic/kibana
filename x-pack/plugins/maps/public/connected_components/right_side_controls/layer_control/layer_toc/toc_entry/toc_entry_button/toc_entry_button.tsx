@@ -136,7 +136,7 @@ export class TOCEntryButton extends Component<Props, State> {
       ) {
         footnotes.push({
           icon: <EuiIcon color="subdued" type="stop" size="s" />,
-          message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
+          message: i18n.translate('xpack.maps.layer.isUsingBoundsFilter', {
             defaultMessage: 'Results narrowed by visible map area',
           }),
         });
