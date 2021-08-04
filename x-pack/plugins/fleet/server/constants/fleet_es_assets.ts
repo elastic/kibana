@@ -23,6 +23,7 @@ export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
           properties: {
             ingested: {
               type: 'date',
+              format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
             },
             agent_id_status: {
               ignore_above: 1024,
@@ -42,7 +43,12 @@ processors:
   - set:
       description: Add time when event was ingested.
       field: event.ingested
-      value: '{{{_ingest.timestamp}}}'
+      copy_from: _ingest.timestamp
+  - script:
+      description: Remove sub-seconds from event.ingested to improve storage efficiency.
+      tag: truncate-subseconds-event-ingested
+      source: ctx.event.ingested = ctx.event.ingested.withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+      ignore_failure: true
   - remove:
       description: Remove any pre-existing untrusted values.
       field:

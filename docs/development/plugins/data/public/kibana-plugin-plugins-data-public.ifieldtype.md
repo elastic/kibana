@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use IndexPatternField or FieldSpec instead
+> Use [IndexPatternField](./kibana-plugin-plugins-data-public.indexpatternfield.md)  8.0
 > 
 
 <b>Signature:</b>
