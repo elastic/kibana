@@ -43,6 +43,15 @@ import type { Series } from '../helpers/timelion_request_handler';
 
 import './timelion_vis.scss';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
+
 interface TimelionVisComponentProps {
   interval: string;
   seriesList: Sheet;
@@ -174,7 +183,7 @@ const TimelionVisComponent = ({
   }, [chart]);
 
   return (
-    <div className="timelionChart">
+    <div className="timelionChart" data-test-subj="visTypeXyChart">
       {title && (
         <EuiTitle className="timelionChart__topTitle" size="xxxs">
           <h4>{title}</h4>
@@ -182,6 +191,7 @@ const TimelionVisComponent = ({
       )}
       <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
         <Settings
+          debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
           showLegendExtra={true}
