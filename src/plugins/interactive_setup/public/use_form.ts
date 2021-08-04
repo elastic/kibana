@@ -8,7 +8,7 @@
 
 import { cloneDeep, cloneDeepWith, get, set } from 'lodash';
 import type { ChangeEventHandler, FocusEventHandler, ReactEventHandler } from 'react';
-import { useState } from 'react';
+import { useRef } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 export type FormReturnTuple<Values, Result> = [FormState<Values, Result>, FormProps];
@@ -80,11 +80,12 @@ export type ValidationErrors<Values> = DeepMap<Values, string>;
 export type TouchedFields<Values> = DeepMap<Values, boolean>;
 
 export interface FormState<Values, Result> {
-  setValue(name: string, value: any): Promise<void>;
+  setValue(name: string, value: any, revalidate?: boolean): Promise<void>;
   setError(name: string, message: string): void;
-  setTouched(name: string): Promise<void>;
+  setTouched(name: string, touched?: boolean, revalidate?: boolean): Promise<void>;
   reset(values: Values): void;
   submit(): Promise<Result | undefined>;
+  validate(): Promise<ValidationErrors<Values>>;
   values: Values;
   errors: ValidationErrors<Values>;
   touched: TouchedFields<Values>;
@@ -121,64 +122,63 @@ export function useFormState<Values extends FormValues, Result>({
   validate,
   defaultValues,
 }: FormOptions<Values, Result>): FormState<Values, Result> {
-  const [values, setValues] = useState<Values>(defaultValues);
-  const [errors, setErrors] = useState<ValidationErrors<Values>>({});
-  const [touched, setTouched] = useState<TouchedFields<Values>>({});
-  const [submitCount, setSubmitCount] = useState(0);
+  const valuesRef = useRef<Values>(defaultValues);
+  const errorsRef = useRef<ValidationErrors<Values>>({});
+  const touchedRef = useRef<TouchedFields<Values>>({});
+  const submitCountRef = useRef(0);
 
-  const [validationState, validateForm] = useAsyncFn(
-    async (formValues: Values) => {
-      const nextErrors = await validate(formValues);
-      setErrors(nextErrors);
-      if (Object.keys(nextErrors).length === 0) {
-        setSubmitCount(0);
-      }
-      return nextErrors;
-    },
-    [validate]
-  );
+  const [validationState, validateForm] = useAsyncFn(async (formValues: Values) => {
+    const nextErrors = await validate(formValues);
+    errorsRef.current = nextErrors;
+    if (Object.keys(nextErrors).length === 0) {
+      submitCountRef.current = 0;
+    }
+    return nextErrors;
+  }, []);
 
-  const [submitState, submitForm] = useAsyncFn(
-    async (formValues: Values) => {
-      const nextErrors = await validateForm(formValues);
-      setTouched(mapDeep(formValues, true));
-      setSubmitCount(submitCount + 1);
-      if (Object.keys(nextErrors).length === 0) {
-        return onSubmit(formValues);
-      }
-    },
-    [validateForm, onSubmit]
-  );
+  const [submitState, submitForm] = useAsyncFn(async (formValues: Values) => {
+    const nextErrors = await validateForm(formValues);
+    touchedRef.current = mapDeep(formValues, true);
+    submitCountRef.current += 1;
+    if (Object.keys(nextErrors).length === 0) {
+      return onSubmit(formValues);
+    }
+  }, []);
 
   return {
-    setValue: async (name, value) => {
-      const nextValues = setDeep(values, name, value);
-      setValues(nextValues);
-      await validateForm(nextValues);
+    setValue: async (name, value, revalidate = true) => {
+      const nextValues = setDeep(valuesRef.current, name, value);
+      valuesRef.current = nextValues;
+      if (revalidate) {
+        await validateForm(nextValues);
+      }
     },
-    setTouched: async (name, value = true) => {
-      setTouched(setDeep(touched, name, value));
-      await validateForm(values);
+    setTouched: async (name, touched = true, revalidate = true) => {
+      touchedRef.current = setDeep(touchedRef.current, name, touched);
+      if (revalidate) {
+        await validateForm(valuesRef.current);
+      }
     },
     setError: (name, message) => {
-      setErrors(setDeep(errors, name, message));
-      setTouched(setDeep(touched, name, true));
+      errorsRef.current = setDeep(errorsRef.current, name, message);
+      touchedRef.current = setDeep(touchedRef.current, name, true);
     },
     reset: (nextValues) => {
-      setValues(nextValues);
-      setErrors({});
-      setTouched({});
-      setSubmitCount(0);
+      valuesRef.current = nextValues;
+      errorsRef.current = {};
+      touchedRef.current = {};
+      submitCountRef.current = 0;
     },
-    submit: () => submitForm(values),
-    values,
-    errors,
-    touched,
+    submit: () => submitForm(valuesRef.current),
+    validate: () => validateForm(valuesRef.current),
+    values: valuesRef.current,
+    errors: errorsRef.current,
+    touched: touchedRef.current,
     isValidating: validationState.loading,
     isSubmitting: submitState.loading,
     submitError: submitState.error,
-    isInvalid: Object.keys(errors).length > 0,
-    isSubmitted: submitCount > 0,
+    isInvalid: Object.keys(errorsRef.current).length > 0,
+    isSubmitted: submitCountRef.current > 0,
   };
 }
 

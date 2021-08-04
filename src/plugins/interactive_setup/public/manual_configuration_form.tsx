@@ -349,7 +349,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           <EuiButton
             type={state.value ? 'submit' : 'button'}
             onClick={state.value ? undefined : () => form.setTouched('host')}
-            isLoading={form.isSubmitting}
+            isLoading={state.value ? form.isSubmitting : form.isSubmitting || form.isValidating}
             isDisabled={form.isSubmitted && form.isInvalid}
             fill
           >
