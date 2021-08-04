@@ -1,4 +1,4 @@
-const { USES_STYLED_COMPONENTS } = require('@kbn/dev-utils'); 
+const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
 module.exports = {
   extends: [

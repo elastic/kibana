@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { ConnectorTypes } from '../../../common';
+import { ActionTypeConnector, ConnectorTypes } from '../../../common';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
@@ -32,6 +32,7 @@ const EuiFormRowExtended = styled(EuiFormRow)`
 `;
 
 export interface Props {
+  actionTypes: ActionTypeConnector[];
   connectors: ActionConnector[];
   disabled: boolean;
   handleShowEditFlyout: () => void;
@@ -42,6 +43,7 @@ export interface Props {
   updateConnectorDisabled: boolean;
 }
 const ConnectorsComponent: React.FC<Props> = ({
+  actionTypes,
   connectors,
   disabled,
   handleShowEditFlyout,
@@ -54,6 +56,11 @@ const ConnectorsComponent: React.FC<Props> = ({
   const connectorsName = useMemo(
     () => connectors.find((c) => c.id === selectedConnector.id)?.name ?? 'none',
     [connectors, selectedConnector.id]
+  );
+
+  const actionTypeName = useMemo(
+    () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? 'Unknown',
+    [actionTypes, selectedConnector.type]
   );
 
   const dropDownLabel = useMemo(
@@ -103,7 +110,7 @@ const ConnectorsComponent: React.FC<Props> = ({
             {selectedConnector.type !== ConnectorTypes.none ? (
               <EuiFlexItem grow={false}>
                 <Mapping
-                  connectorActionTypeId={selectedConnector.type}
+                  actionTypeName={actionTypeName}
                   isLoading={isLoading}
                   mappings={mappings}
                 />

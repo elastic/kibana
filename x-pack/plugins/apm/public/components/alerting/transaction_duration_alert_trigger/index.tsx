@@ -7,18 +7,16 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { map, defaults } from 'lodash';
+import { defaults, map, omit } from 'lodash';
 import React from 'react';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { getTransactionType } from '../../../context/apm_service/apm_service_context';
-import { useServiceAgentNameFetcher } from '../../../context/apm_service/use_service_agent_name_fetcher';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { useServiceName } from '../../../hooks/use_service_name';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -30,18 +28,18 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
-interface AlertParams {
+export interface AlertParams {
+  aggregationType: 'avg' | '95th' | '99th';
+  environment: string;
+  serviceName: string;
+  threshold: number;
+  transactionType: string;
   windowSize: number;
   windowUnit: string;
-  threshold: number;
-  aggregationType: 'avg' | '95th' | '99th';
-  serviceName: string;
-  transactionType: string;
-  environment: string;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES = {
@@ -67,48 +65,38 @@ const TRANSACTION_ALERT_AGGREGATION_TYPES = {
 
 interface Props {
   alertParams: AlertParams;
+  metadata?: AlertMetadata;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
 export function TransactionDurationAlertTrigger(props: Props) {
-  const { setAlertParams, alertParams, setAlertProperty } = props;
-  const { urlParams } = useUrlParams();
+  const { services } = useKibana();
+  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  const { start, end, environment: environmentFromUrl } = urlParams;
-
-  const serviceNameFromUrl = useServiceName();
+  createCallApmApi(services as CoreStart);
 
   const transactionTypes = useServiceTransactionTypesFetcher(
-    serviceNameFromUrl
+    metadata?.serviceName
   );
-  const { agentName } = useServiceAgentNameFetcher(serviceNameFromUrl);
-
-  const transactionTypeFromUrl = getTransactionType({
-    transactionType: urlParams.transactionType,
-    transactionTypes,
-    agentName,
-  });
 
   const params = defaults(
     {
+      ...omit(metadata, ['start', 'end']),
       ...alertParams,
     },
     {
       aggregationType: 'avg',
-      environment: environmentFromUrl || ENVIRONMENT_ALL.value,
       threshold: 1500,
       windowSize: 5,
       windowUnit: 'm',
-      transactionType: transactionTypeFromUrl,
-      serviceName: serviceNameFromUrl,
     }
   );
 
   const { environmentOptions } = useEnvironmentsFetcher({
     serviceName: params.serviceName,
-    start,
-    end,
+    start: metadata?.start,
+    end: metadata?.end,
   });
 
   const { data } = useFetcher(
@@ -155,7 +143,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />
   );
 
-  if (!transactionTypes.length || !params.serviceName) {
+  if (!params.serviceName) {
     return null;
   }
 

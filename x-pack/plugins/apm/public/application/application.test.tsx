@@ -49,7 +49,7 @@ describe('renderApp', () => {
 
     const plugins = {
       licensing: { license$: new Observable() },
-      triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
+      triggersActionsUi: { actionTypeRegistry: {}, ruleTypeRegistry: {} },
       data: {
         query: {
           timefilter: {
@@ -80,7 +80,7 @@ describe('renderApp', () => {
       },
       triggersActionsUi: {
         actionTypeRegistry: {},
-        alertTypeRegistry: {},
+        ruleTypeRegistry: {},
         getAddAlertFlyout: jest.fn(),
         getEditAlertFlyout: jest.fn(),
       },

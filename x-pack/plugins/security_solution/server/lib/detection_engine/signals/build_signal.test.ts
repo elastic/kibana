@@ -20,6 +20,7 @@ import {
 } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -84,7 +85,7 @@ describe('buildSignal', () => {
         type: 'query',
         threat: [],
         version: 1,
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
@@ -171,7 +172,7 @@ describe('buildSignal', () => {
         type: 'query',
         threat: [],
         version: 1,
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',

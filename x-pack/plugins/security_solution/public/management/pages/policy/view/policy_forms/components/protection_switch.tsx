@@ -19,7 +19,7 @@ import {
   ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection } from '../../../types';
+import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
 export const ProtectionSwitch = React.memo(
   ({
@@ -44,12 +44,17 @@ export const ProtectionSwitch = React.memo(
                 newPayload[os][protection].mode = ProtectionModes.off;
               } else if (os === 'mac') {
                 newPayload[os][protection as MacPolicyProtection].mode = ProtectionModes.off;
+              } else if (os === 'linux') {
+                newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.off;
               }
               if (isPlatinumPlus) {
                 if (os === 'windows') {
                   newPayload[os].popup[protection].enabled = event.target.checked;
                 } else if (os === 'mac') {
                   newPayload[os].popup[protection as MacPolicyProtection].enabled =
+                    event.target.checked;
+                } else if (os === 'linux') {
+                  newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
                     event.target.checked;
                 }
               }
@@ -60,12 +65,17 @@ export const ProtectionSwitch = React.memo(
                 newPayload[os][protection].mode = ProtectionModes.prevent;
               } else if (os === 'mac') {
                 newPayload[os][protection as MacPolicyProtection].mode = ProtectionModes.prevent;
+              } else if (os === 'linux') {
+                newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.prevent;
               }
               if (isPlatinumPlus) {
                 if (os === 'windows') {
                   newPayload[os].popup[protection].enabled = event.target.checked;
                 } else if (os === 'mac') {
                   newPayload[os].popup[protection as MacPolicyProtection].enabled =
+                    event.target.checked;
+                } else if (os === 'linux') {
+                  newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
                     event.target.checked;
                 }
               }

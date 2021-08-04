@@ -204,6 +204,7 @@ export class DeprecationsService
               message,
               correctiveActions,
               documentationUrl,
+              requireRestart: true,
             };
           });
         },

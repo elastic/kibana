@@ -69,16 +69,6 @@ export const RendererStrings = {
         },
       }),
   },
-  metric: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.metric.displayName', {
-        defaultMessage: 'Metric',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.metric.helpDescription', {
-        defaultMessage: 'Render a number over a label',
-      }),
-  },
   pie: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.pie.displayName', {
@@ -97,16 +87,6 @@ export const RendererStrings = {
     getHelpDescription: () =>
       i18n.translate('xpack.canvas.renderer.plot.helpDescription', {
         defaultMessage: 'Render an XY plot from your data',
-      }),
-  },
-  progress: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.progress.displayName', {
-        defaultMessage: 'Progress indicator',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.progress.helpDescription', {
-        defaultMessage: 'Render a progress indicator that reveals a percentage of an element',
       }),
   },
   table: {

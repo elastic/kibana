@@ -134,7 +134,10 @@ export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={remindLaterClick}>
+        <EuiButtonEmpty
+          onClick={remindLaterClick}
+          data-test-subj="alerts-modal-remind-later-button"
+        >
           <FormattedMessage
             id="xpack.monitoring.alerts.modal.remindLater"
             defaultMessage="Remind me later"

@@ -372,7 +372,7 @@ export const config: {
             healthCheck: import("@kbn/config-schema").ObjectType<{
                 delay: Type<import("moment").Duration>;
             }>;
-            ignoreVersionMismatch: import("@kbn/config-schema/target/types").ConditionalType<false, boolean, boolean>;
+            ignoreVersionMismatch: import("@kbn/config-schema/target_types/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
     logging: {
@@ -917,6 +917,8 @@ export interface DeprecationsDetails {
     level: 'warning' | 'critical' | 'fetch_error';
     // (undocumented)
     message: string;
+    // (undocumented)
+    requireRestart?: boolean;
 }
 
 // @public
@@ -2278,6 +2280,7 @@ export interface SavedObjectExportBaseOptions {
 // @public
 export interface SavedObjectMigrationContext {
     readonly convertToMultiNamespaceTypeVersion?: string;
+    readonly isSingleNamespaceType: boolean;
     readonly log: SavedObjectsMigrationLogger;
     readonly migrationVersion: string;
 }
@@ -3090,6 +3093,7 @@ export interface SavedObjectStatusMeta {
 export interface SavedObjectsType<Attributes = any> {
     convertToAliasScript?: string;
     convertToMultiNamespaceTypeVersion?: string;
+    excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
     hidden: boolean;
     indexPattern?: string;
     management?: SavedObjectsTypeManagementDefinition<Attributes>;
@@ -3175,6 +3179,13 @@ export class SavedObjectsUtils {
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
+
+// Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
+//
+// @public
+export type SavedObjectTypeExcludeFromUpgradeFilterHook = (toolkit: {
+    readonlyEsClient: Pick<ElasticsearchClient, 'search'>;
+}) => estypes.QueryDslQueryContainer | Promise<estypes.QueryDslQueryContainer>;
 
 // @public
 export class SavedObjectTypeRegistry {
