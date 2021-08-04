@@ -9,7 +9,6 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import { find } from 'lodash/fp';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
 import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
@@ -29,6 +28,7 @@ import { CHANGE_ALERT_STATUS } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
 
 interface ActionsData {
   alertStatus: Status;
@@ -96,15 +96,7 @@ export const TakeActionDropdown = React.memo(
       if (detailsData == null) {
         return false;
       }
-
-      const eventModules = find(
-        { category: 'signal', field: 'signal.original_event.module' },
-        detailsData
-      )?.values;
-      const kinds = find({ category: 'signal', field: 'signal.original_event.kind' }, detailsData)
-        ?.values;
-
-      return !!(eventModules?.includes('endpoint') && kinds?.includes('alert'));
+      return endpointAlertCheck({ data: detailsData });
     }, [detailsData]);
 
     const togglePopoverHandler = useCallback(() => {
