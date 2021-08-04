@@ -24,7 +24,7 @@ import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { AuditLogger } from '../../../security/server';
 import {
   ALERT_STATUS,
-  OWNER,
+  ALERT_OWNER,
   RULE_ID,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
@@ -33,10 +33,10 @@ import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
   { [K in Props]-?: NonNullable<Obj[K]> };
-type AlertType = NonNullableProps<ParsedTechnicalFields, 'rule.id' | 'kibana.rac.alert.owner'>;
+type AlertType = NonNullableProps<ParsedTechnicalFields, 'rule.id' | 'kibana.alert.owner'>;
 
 const isValidAlert = (source?: ParsedTechnicalFields): source is AlertType => {
-  return source?.[RULE_ID] != null && source?.[OWNER] != null;
+  return source?.[RULE_ID] != null && source?.[ALERT_OWNER] != null;
 };
 export interface ConstructorOptions {
   logger: Logger;
@@ -156,7 +156,7 @@ export class AlertsClient {
       // client exposed to us for reuse
       await this.authorization.ensureAuthorized({
         ruleTypeId: alert[RULE_ID],
-        consumer: alert[OWNER],
+        consumer: alert[ALERT_OWNER],
         operation: ReadOperations.Get,
         entity: AlertingAuthorizationEntity.Alert,
       });
@@ -200,7 +200,7 @@ export class AlertsClient {
 
       await this.authorization.ensureAuthorized({
         ruleTypeId: alert[RULE_ID],
-        consumer: alert[OWNER],
+        consumer: alert[ALERT_OWNER],
         operation: WriteOperations.Update,
         entity: AlertingAuthorizationEntity.Alert,
       });

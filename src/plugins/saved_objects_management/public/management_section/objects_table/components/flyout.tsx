@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { OverlayStart, HttpStart, IBasePath } from 'src/core/public';
 import {
   IndexPatternsContract,
-  IIndexPattern,
+  IndexPattern,
   DataPublicPluginStart,
 } from '../../../../../data/public';
 import {
@@ -86,7 +86,7 @@ export interface FlyoutState {
   error?: string;
   file?: File;
   importCount: number;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   importMode: ImportMode;
   loadingMessage?: string;
   isLegacyFile: boolean;
