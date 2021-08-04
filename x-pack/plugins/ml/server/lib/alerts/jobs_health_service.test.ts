@@ -92,6 +92,7 @@ describe('JobsHealthService', () => {
         jobIds.map((j) => {
           return {
             datafeed_id: j.replace('job', 'datafeed'),
+            query_delay: '3m',
           };
         })
       );
@@ -267,6 +268,7 @@ describe('JobsHealthService', () => {
       'test_job_01',
       'test_job_02',
     ]);
+    expect(datafeedsService.getDatafeedByJobId).toHaveBeenCalledTimes(1);
     expect(mlClient.getJobStats).toHaveBeenCalledWith({ job_id: 'test_job_01,test_job_02' });
     expect(mlClient.getDatafeedStats).toHaveBeenCalledWith({
       datafeed_id: 'test_datafeed_01,test_datafeed_02',
@@ -274,8 +276,7 @@ describe('JobsHealthService', () => {
     expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
     expect(annotationService.getDelayedDataAnnotations).toHaveBeenCalledWith({
       jobIds: ['test_job_01', 'test_job_02'],
-      // 1487076708000 - 3600 * 1000 * 2
-      earliestMs: 1487069508000,
+      earliestMs: 1487069268000,
     });
 
     expect(executionResult).toEqual([

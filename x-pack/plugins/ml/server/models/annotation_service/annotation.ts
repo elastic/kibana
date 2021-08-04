@@ -345,6 +345,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   /**
    * Fetches the latest delayed data annotation per job.
    * @param jobIds
+   * @param earliestMs - Timestamp for the end_timestamp range query.
    */
   async function getDelayedDataAnnotations({
     jobIds,
@@ -389,7 +390,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
                   size: 1,
                   sort: [
                     {
-                      modified_time: {
+                      end_timestamp: {
                         order: 'desc',
                       },
                     },

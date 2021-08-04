@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
-import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
+import { MlJob } from '@elastic/elasticsearch/api/types';
 import { MlClient } from '../ml_client';
 import {
   AnomalyDetectionJobsHealthRuleParams,
@@ -24,11 +25,13 @@ import {
   MmlTestResponse,
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
-import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
+import {
+  getResultJobsHealthRuleConfig,
+  resolveLookbackInterval,
+} from '../../../common/util/alerts';
 import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
 
 interface TestResult {
@@ -88,67 +91,32 @@ export function jobsHealthServiceProvider(
   /**
    * Resolves the timestamp for delayed data check.
    *
-   * Takes the longest interval between:
-   *  - the longest bucket span for provided jobs
-   *  - custom interval specified by the user
-   *  - the time passed since the previous rule execution
-   *
-   * @param timeInterval - Custom time interval provided by the user
-   * @param bucketSpans - Bucket spans from the jobs configurations.
-   * @param previousStartedAt - Date object of the previous rule execution time
+   * @param timeInterval - Custom time interval provided by the user.
+   * @param defaultLookbackInterval - Interval derived from the jobs and datefeeds configs.
    */
   const getDelayedDataLookbackTimestamp = (
     timeInterval: string | null,
-    bucketSpans: string[],
-    previousStartedAt: Date | null
+    defaultLookbackInterval: string
   ): number => {
     const currentTimestamp = Date.now();
 
-    const maxBucketLengthInSeconds = resolveMaxTimeInterval(bucketSpans) ?? 0;
-
-    if (!maxBucketLengthInSeconds) {
-      // technically it is only possible if the ML backend contains invalid bucket spans.
-      logger.error('Unable to resolve resulting bucket length.');
-    }
-
-    const doubleBucketOffsetTimestamp = currentTimestamp - maxBucketLengthInSeconds * 1000 * 2;
+    const defaultLookbackTimestamp =
+      currentTimestamp - parseInterval(defaultLookbackInterval)!.asMilliseconds();
 
     const customIntervalOffsetTimestamp = timeInterval
       ? currentTimestamp - parseInterval(timeInterval)!.asMilliseconds()
       : null;
 
-    const previousCheckTimestamp = previousStartedAt ? previousStartedAt.getTime() : null;
-
-    return Math.min(
-      ...[
-        doubleBucketOffsetTimestamp,
-        customIntervalOffsetTimestamp,
-        previousCheckTimestamp,
-      ].filter(isDefined)
-    );
+    return Math.min(...[defaultLookbackTimestamp, customIntervalOffsetTimestamp].filter(isDefined));
   };
 
-  const getJobStats: (jobIds: string[]) => Promise<MlJobStats[]> = (() => {
-    const cachedStats = new Map<string, MlJobStats>();
+  const getJobIds = memoize((jobs: MlJob[]) => jobs.map((j) => j.job_id));
 
-    return async (jobIds: string[]) => {
-      if (jobIds.every((j) => cachedStats.has(j))) {
-        logger.debug(`Return jobs stats from cache`);
-        return Array.from(cachedStats.values());
-      }
+  const getDatafeeds = memoize(datafeedsService.getDatafeedByJobId);
 
-      const {
-        body: { jobs: jobsStats },
-      } = await mlClient.getJobStats({ job_id: jobIds.join(',') });
-
-      // update cache
-      jobsStats.forEach((v) => {
-        cachedStats.set(v.job_id, v);
-      });
-
-      return jobsStats;
-    };
-  })();
+  const getJobStats = memoize(
+    async (jobIds: string[]) => (await mlClient.getJobStats({ job_id: jobIds.join(',') })).body.jobs
+  );
 
   return {
     /**
@@ -156,7 +124,7 @@ export function jobsHealthServiceProvider(
      * @param jobIds
      */
     async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse[] | void> {
-      const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+      const datafeeds = await getDatafeeds(jobIds);
 
       if (datafeeds) {
         const jobsStats = await getJobStats(jobIds);
@@ -210,24 +178,20 @@ export function jobsHealthServiceProvider(
     /**
      * Returns annotations about delayed data.
      *
-     * @param jobIds
+     * @param jobs
      * @param timeInterval - Custom time interval provided by the user.
-     * @param previousStartedAt - Date object of the previous rule execution time.
-     * @param bucketSpans - Bucket spans from the jobs configurations.
      * @param docsCount - The threshold for a number of missing documents to alert upon.
      */
     async getDelayedDataReport(
-      jobIds: string[],
+      jobs: MlJob[],
       timeInterval: string | null,
-      previousStartedAt: Date | null,
-      bucketSpans: string[],
       docsCount: number | null
     ): Promise<DelayedDataResponse[]> {
-      const earliestMs = getDelayedDataLookbackTimestamp(
-        timeInterval,
-        bucketSpans,
-        previousStartedAt
-      );
+      const jobIds = getJobIds(jobs);
+      const datafeeds = await getDatafeeds(jobIds);
+
+      const defaultLookbackInterval = resolveLookbackInterval(jobs, datafeeds!);
+      const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
 
       let annotations: DelayedDataResponse[] = (
         await annotationService.getDelayedDataAnnotations({
@@ -266,7 +230,7 @@ export function jobsHealthServiceProvider(
       const results: TestsResults = [];
 
       const jobs = await getResultJobs(includeJobs, excludeJobs);
-      const jobIds = jobs.map((job) => job.job_id);
+      const jobIds = getJobIds(jobs);
 
       if (jobIds.length === 0) {
         logger.warn(`Rule "${ruleInstanceName}" does not have associated jobs.`);
@@ -328,13 +292,9 @@ export function jobsHealthServiceProvider(
       }
 
       if (config.delayedData.enabled) {
-        const bucketsLength = jobs.map((v) => v.analysis_config.bucket_span);
-
         const response = await this.getDelayedDataReport(
-          jobIds,
+          jobs,
           config.delayedData.timeInterval,
-          previousStartedAt,
-          bucketsLength,
           config.delayedData.docsCount
         );
 
