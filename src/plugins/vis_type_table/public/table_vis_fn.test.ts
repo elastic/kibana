@@ -10,6 +10,7 @@ import { createTableVisFn } from './table_vis_fn';
 import { tableVisResponseHandler } from './utils';
 
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { Datatable } from '../../expressions/common/expression_types/specs';
 
 jest.mock('./utils', () => ({
   tableVisResponseHandler: jest.fn().mockReturnValue({
@@ -66,5 +67,21 @@ describe('interpreter/functions#table', () => {
     await fn(context, visConfig, undefined);
     expect(tableVisResponseHandler).toHaveBeenCalledTimes(1);
     expect(tableVisResponseHandler).toHaveBeenCalledWith(context, visConfig);
+  });
+
+  it('logs correct datatable to inspector', async () => {
+    let loggedTable: Datatable;
+    const handlers = {
+      inspectorAdapters: {
+        tables: {
+          logDatatable: (name: string, datatable: Datatable) => {
+            loggedTable = datatable;
+          },
+        },
+      },
+    };
+    await fn(context, visConfig, handlers as any);
+
+    expect(loggedTable!).toMatchSnapshot();
   });
 });

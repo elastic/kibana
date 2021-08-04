@@ -9,39 +9,21 @@
 import { updateSearchSource } from './update_search_source';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { IUiSettingsClient } from 'kibana/public';
-import { DiscoverServices } from '../../../../build_services';
-import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { SortOrder } from '../../../../saved_searches/types';
+import { discoverServiceMock } from '../../../../__mocks__/services';
 
 describe('updateSearchSource', () => {
   test('updates a given search source', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    const sampleSize = 250;
     updateSearchSource(volatileSearchSourceMock, false, {
       indexPattern: indexPatternMock,
-      services: ({
-        data: dataPluginMock.createStartContract(),
-        timefilter: {
-          createFilter: jest.fn(),
-        },
-        uiSettings: ({
-          get: (key: string) => {
-            if (key === SAMPLE_SIZE_SETTING) {
-              return sampleSize;
-            }
-            return false;
-          },
-        } as unknown) as IUiSettingsClient,
-      } as unknown) as DiscoverServices,
+      services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: false,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
-    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
     expect(volatileSearchSourceMock.getField('fields')).toBe(undefined);
   });
 
@@ -49,28 +31,13 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    const sampleSize = 250;
     updateSearchSource(volatileSearchSourceMock, false, {
       indexPattern: indexPatternMock,
-      services: ({
-        data: dataPluginMock.createStartContract(),
-        timefilter: {
-          createFilter: jest.fn(),
-        },
-        uiSettings: ({
-          get: (key: string) => {
-            if (key === SAMPLE_SIZE_SETTING) {
-              return sampleSize;
-            }
-            return false;
-          },
-        } as unknown) as IUiSettingsClient,
-      } as unknown) as DiscoverServices,
+      services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: true,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
-    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: 'true' },
     ]);
@@ -81,28 +48,13 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    const sampleSize = 250;
     updateSearchSource(volatileSearchSourceMock, false, {
       indexPattern: indexPatternMock,
-      services: ({
-        data: dataPluginMock.createStartContract(),
-        timefilter: {
-          createFilter: jest.fn(),
-        },
-        uiSettings: ({
-          get: (key: string) => {
-            if (key === SAMPLE_SIZE_SETTING) {
-              return sampleSize;
-            }
-            return false;
-          },
-        } as unknown) as IUiSettingsClient,
-      } as unknown) as DiscoverServices,
+      services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: true,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
-    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: 'true' },
     ]);
@@ -113,28 +65,13 @@ describe('updateSearchSource', () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    const sampleSize = 250;
     updateSearchSource(volatileSearchSourceMock, false, {
       indexPattern: indexPatternMock,
-      services: ({
-        data: dataPluginMock.createStartContract(),
-        timefilter: {
-          createFilter: jest.fn(),
-        },
-        uiSettings: ({
-          get: (key: string) => {
-            if (key === SAMPLE_SIZE_SETTING) {
-              return sampleSize;
-            }
-            return false;
-          },
-        } as unknown) as IUiSettingsClient,
-      } as unknown) as DiscoverServices,
+      services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: false,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
-    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
     expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });
