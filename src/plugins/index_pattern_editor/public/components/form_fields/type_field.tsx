@@ -13,13 +13,15 @@ import { euiColorAccent } from '@elastic/eui/dist/eui_theme_light.json';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiFormRow,
+  EuiSuperSelect,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiBadge,
 } from '@elastic/eui';
 
-import { UseField, SuperSelectField } from '../../shared_imports';
+import { UseField } from '../../shared_imports';
 
 import { INDEX_PATTERN_TYPE, IndexPatternConfig } from '../../types';
 
@@ -65,34 +67,48 @@ const rollupSelectItem = (
   </EuiDescriptionList>
 );
 
-export const TypeField = ({ onChange }: TypeFieldProps) => (
-  <UseField<INDEX_PATTERN_TYPE, IndexPatternConfig>
-    path="type"
-    data-test-subj="typeField"
-    onChange={onChange}
-    component={SuperSelectField}
-    componentProps={{
-      euiFieldProps: {
-        options: [
-          {
-            value: INDEX_PATTERN_TYPE.DEFAULT,
-            inputDisplay: i18n.translate('indexPatternEditor.typeSelect.standard', {
-              defaultMessage: 'Standard',
-            }),
-            dropdownDisplay: standardSelectItem,
-          },
-          {
-            value: INDEX_PATTERN_TYPE.ROLLUP,
-            inputDisplay: i18n.translate('indexPatternEditor.typeSelect.rollup', {
-              defaultMessage: 'Rollup',
-            }),
-            dropdownDisplay: rollupSelectItem,
-          },
-        ],
-        'aria-label': i18n.translate('indexPatternEditor.editor.form.typeSelectAriaLabel', {
-          defaultMessage: 'Type field',
-        }),
-      },
-    }}
-  />
-);
+export const TypeField = ({ onChange }: TypeFieldProps) => {
+  return (
+    <UseField<INDEX_PATTERN_TYPE, IndexPatternConfig> path="type">
+      {({ label, value, setValue }) => {
+        if (value === undefined) {
+          return null;
+        }
+        return (
+          <>
+            <EuiFormRow label={label} fullWidth>
+              <EuiSuperSelect
+                data-test-subj="typeField"
+                options={[
+                  {
+                    value: INDEX_PATTERN_TYPE.DEFAULT,
+                    inputDisplay: i18n.translate('indexPatternEditor.typeSelect.standard', {
+                      defaultMessage: 'Standard',
+                    }),
+                    dropdownDisplay: standardSelectItem,
+                  },
+                  {
+                    value: INDEX_PATTERN_TYPE.ROLLUP,
+                    inputDisplay: i18n.translate('indexPatternEditor.typeSelect.rollup', {
+                      defaultMessage: 'Rollup',
+                    }),
+                    dropdownDisplay: rollupSelectItem,
+                  },
+                ]}
+                valueOfSelected={value}
+                onChange={(newValue) => {
+                  setValue(newValue);
+                  onChange(newValue);
+                }}
+                aria-label={i18n.translate('indexPatternEditor.editor.form.typeSelectAriaLabel', {
+                  defaultMessage: 'Type field',
+                })}
+                fullWidth
+              />
+            </EuiFormRow>
+          </>
+        );
+      }}
+    </UseField>
+  );
+};
