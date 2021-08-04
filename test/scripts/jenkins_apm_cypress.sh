@@ -6,10 +6,7 @@ echo " -> Running APM cypress tests"
 cd "$XPACK_DIR"
 
 checks-reporter-with-killswitch "APM Cypress Tests" \
- node scripts/functional_tests \
-   --debug --bail \
-   --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-   --config plugins/apm/ftr_e2e/config.ts
+ node plugins/apm/scripts/ftr_e2e/cypress_run
 
 echo ""
 echo ""
