@@ -6,6 +6,7 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import {
   EuiButtonIcon,
   EuiLink,
@@ -71,13 +72,10 @@ export function Filtering({
   );
 
   useEffect(() => {
-    if (inputFilter !== queryInput) {
-      let filter: Query = defaultFilter;
+    const { isValid } = validateQuery(queryInput, indexPattern);
+    const filter: Query = isValid ? queryInput : defaultFilter;
 
-      if (validateQuery(queryInput, indexPattern).isValid) {
-        filter = queryInput;
-      }
-
+    if (!isEqual(inputFilter, filter)) {
       updateLayer(setFilter(columnId, layer, filter));
     }
   }, [columnId, layer, queryInput, indexPattern, updateLayer, inputFilter]);
