@@ -6,11 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { esTestConfig } from '@kbn/test';
+import * as http from 'http';
+
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+export const logger = loggingSystemMock.create();
+jest.doMock('../../logging/logging_system', () => ({
+  LoggingSystem: jest.fn(() => logger),
+}));
+
 import {
+  createRootWithCorePlugins,
   createTestServers,
   TestElasticsearchUtils,
   TestKibanaUtils,
 } from '../../../test_helpers/kbn_server';
+import { Root } from '../../root';
+import { Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
+import supertest from 'supertest';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
@@ -53,5 +67,69 @@ describe('elasticsearch clients', () => {
 
     expect(resp.headers).toHaveProperty('warning');
     expect(resp.headers!.warning).toMatch('system indices');
+  });
+});
+
+function createFakeElasticsearchServer() {
+  const firstRequestReceived$ = new Subject<boolean>();
+
+  const requestHandler = jest.fn((req, res) => {
+    // Reply with a 200 and empty response by default (intentionally malformed response)
+    res.writeHead(200);
+    res.end();
+
+    firstRequestReceived$.next(true);
+  });
+
+  const server = http.createServer(requestHandler);
+  server.listen(esTestConfig.getPort());
+  return { server, requestHandler, firstRequestReceived$ };
+}
+
+describe('fake elasticsearch', () => {
+  let esServer: http.Server;
+  let requestHandler: jest.Mock;
+  let kibanaServer: Root;
+
+  beforeAll(async () => {
+    kibanaServer = createRootWithCorePlugins(
+      {
+        logging: { silent: false },
+        status: { allowAnonymous: true },
+      },
+      { verbose: true }
+    );
+    const fakeServer = await createFakeElasticsearchServer();
+    esServer = fakeServer.server;
+    requestHandler = fakeServer.requestHandler;
+
+    await kibanaServer.preboot();
+    await kibanaServer.setup();
+    kibanaServer.start();
+    await fakeServer.firstRequestReceived$.pipe(first()).toPromise(); // Waiting for the first ES request instead of the start to complete, because start can't never complete due to waiting for ES to be ready
+  });
+
+  afterAll(async () => {
+    await kibanaServer.shutdown();
+    await esServer.close();
+  });
+
+  test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
+    expect(requestHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: '/',
+      }),
+      expect.anything()
+    );
+
+    // eslint-disable-next-line
+    const resp = await supertest(kibanaServer['server']['http']['prebootServer']['server']!.listener) // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
+      .get('/api/status')
+      .expect(503);
+    expect(resp.body.status.overall.state).toBe('red');
+    expect(resp.body.status.statuses[0].message).toBe(
+      'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
+    );
   });
 });
