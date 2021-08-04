@@ -31,12 +31,16 @@ export type PutPackagePolicyUpdateCallback = (
   request: KibanaRequest
 ) => Promise<UpdatePackagePolicy>;
 
+export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
+export type ExternalCallbackDelete = ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback];
+export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
+
 /**
  * Callbacks supported by the Fleet plugin
  */
 export type ExternalCallback =
-  | ['packagePolicyCreate', PostPackagePolicyCreateCallback]
-  | ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback]
-  | ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
+  | ExternalCallbackCreate
+  | ExternalCallbackDelete
+  | ExternalCallbackUpdate;
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

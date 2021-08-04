@@ -82,7 +82,6 @@ export class EndpointAppContextService {
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
-      // TODO: Fix this type errors
       dependencies.registerIngestCallback(
         'packagePolicyCreate',
         getPackagePolicyCreateCallback(
@@ -99,7 +98,6 @@ export class EndpointAppContextService {
         )
       );
 
-      // TODO: Fix this type errors
       dependencies.registerIngestCallback(
         'packagePolicyUpdate',
         getPackagePolicyUpdateCallback(dependencies.logger, dependencies.licenseService)

@@ -59,7 +59,6 @@ export async function createCloudApmPackgePolicy({
   const apmPackagePolicy = await fleetPluginStart.packagePolicyService.create(
     savedObjectsClient,
     esClient,
-    // TODO: Fix this type error
     mergedAPMPackagePolicy,
     { force: true, bumpRevision: true }
   );
