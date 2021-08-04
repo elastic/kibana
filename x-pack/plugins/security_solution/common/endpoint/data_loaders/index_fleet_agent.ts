@@ -5,18 +5,33 @@
  * 2.0.
  */
 
-import { Client, estypes } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
+import { AxiosResponse } from 'axios';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { KbnClient } from '@kbn/test';
 import { HostMetadata } from '../types';
-import { FleetServerAgent } from '../../../../fleet/common';
+import {
+  Agent,
+  AGENT_API_ROUTES,
+  FleetServerAgent,
+  GetOneAgentResponse,
+} from '../../../../fleet/common';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
+
+export interface IndexedFleetAgent {
+  agents: Agent[];
+  readonly index: string;
+}
 
 /**
  * Indexes a Fleet Agent
  * (NOTE: ensure that fleet is setup first before calling this loading function)
  *
  * @param esClient
+ * @param kbnClient
  * @param endpointHost
  * @param agentPolicyId
  * @param [kibanaVersion]
@@ -24,11 +39,12 @@ const defaultFleetAgentGenerator = new FleetAgentGenerator();
  */
 export const indexFleetAgentForHost = async (
   esClient: Client,
+  kbnClient: KbnClient,
   endpointHost: HostMetadata,
   agentPolicyId: string,
   kibanaVersion: string = '8.0.0',
   fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
-): Promise<estypes.SearchHit<FleetServerAgent>> => {
+): Promise<IndexedFleetAgent> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
     _source: {
       local_metadata: {
@@ -48,12 +64,42 @@ export const indexFleetAgentForHost = async (
     },
   });
 
-  await esClient.index<FleetServerAgent>({
+  const createdFleetAgent = await esClient.index<FleetServerAgent>({
     index: agentDoc._index,
     id: agentDoc._id,
     body: agentDoc._source!,
     op_type: 'create',
   });
 
-  return agentDoc;
+  return {
+    agents: [await fetchFleetAgent(kbnClient, createdFleetAgent.body._id)],
+    index: agentDoc._index,
+  };
+};
+
+const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<Agent> => {
+  return ((await kbnClient.request({
+    path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
+    method: 'GET',
+  })) as AxiosResponse<GetOneAgentResponse>).data.item;
+};
+
+export const deleteIndexedFleetAgents = async (
+  esClient: Client,
+  indexedFleetAgents: IndexedFleetAgent
+): Promise<DeleteByQueryResponse | undefined> => {
+  if (indexedFleetAgents.agents.length) {
+    return (
+      await esClient.deleteByQuery({
+        index: indexedFleetAgents.index,
+        body: {
+          query: {
+            ids: {
+              values: indexedFleetAgents.agents.map((agent) => agent.id),
+            },
+          },
+        },
+      })
+    ).body;
+  }
 };

@@ -11,23 +11,21 @@ import seedrandom from 'seedrandom';
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
 import { merge } from 'lodash';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, TreeOptions } from './generate_data';
 import {
   CreatePackagePolicyResponse,
   EPM_API_ROUTES,
   GetPackagesResponse,
 } from '../../../fleet/common';
-import { IndexedHostsResponse, indexEndpointHostDocs } from './data_loaders/index_endpoint_hosts';
-import { enableFleetServerIfNecessary } from './data_loaders/fleet_utils';
+import {
+  deleteIndexedEndpointHosts,
+  IndexedHostsResponse,
+  indexEndpointHostDocs,
+} from './data_loaders/index_endpoint_hosts';
+import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
 
-export type IndexedHostsAndAlertsResponse = IndexedHostsResponse & {
-  /**
-   * Will delete the data that was loaded
-   */
-  deleteData: () => Promise<void>;
-};
+export type IndexedHostsAndAlertsResponse = IndexedHostsResponse & {};
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -49,13 +47,9 @@ export async function indexHostsAndAlerts(
     hosts: [],
     policies: [],
     agents: [],
-
-    async deleteData(): Promise<void> {
-      await deleteIndices(client, [metadataIndex, policyResponseIndex, eventIndex, alertIndex]);
-
-      // FIXME: should delete individual documents rather than the entire set of indexes (using esClient.bulk())
-      // TODO: need to also delete data from Fleet indexes
-    },
+    fleetAgentsIndex: undefined,
+    metadataIndex,
+    policyResponseIndex,
   };
 
   // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
@@ -125,21 +119,10 @@ const getEndpointPackageInfo = async (
   return endpointPackage;
 };
 
-// FIXME:PT remove this. too distructive. Need to delete individual items created instead.
-// Temporary until individual item deletion is supported. this is the same code that is in the loader script when using the `--delete` option
-const deleteIndices = async (esClient: Client, indices: string[]): Promise<void> => {
-  for (const index of indices) {
-    try {
-      // The index could be a data stream so let's try deleting that first
-      // The ES client in Kibana doesn't support data streams yet so we need to make a raw request to the ES route
-      await esClient.transport.request({ method: 'DELETE', path: `_data_stream/${index}` });
-    } catch (err) {
-      // only throw if the error is NOT 404
-      if (!(err instanceof ResponseError) || err.statusCode === 404) {
-        const wrappedError: Error & { meta?: unknown } = new Error(err.message);
-        wrappedError.meta = err;
-        throw wrappedError;
-      }
-    }
-  }
+export const deleteIndexedHostsAndAlerts = async (
+  esClient: Client,
+  kbnClient: KbnClient,
+  indexedData: IndexedHostsAndAlertsResponse
+) => {
+  await deleteIndexedEndpointHosts(esClient, kbnClient, indexedData);
 };

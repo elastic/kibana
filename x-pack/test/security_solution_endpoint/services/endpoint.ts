@@ -8,7 +8,10 @@
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { Client } from '@elastic/elasticsearch';
 import { FtrService } from '../../functional/ftr_provider_context';
-import { metadataCurrentIndexPattern } from '../../../plugins/security_solution/common/endpoint/constants';
+import {
+  metadataCurrentIndexPattern,
+  metadataTransformPrefix,
+} from '../../../plugins/security_solution/common/endpoint/constants';
 import { EndpointError } from '../../../plugins/security_solution/server';
 import {
   IndexedHostsAndAlertsResponse,
@@ -25,7 +28,7 @@ export class EndpointTestResources extends FtrService {
   private readonly transform = this.ctx.getService('transform');
 
   private generateTransformId(endpointPackageVersion?: string): string {
-    return `endpoint.metadata_current-default-${endpointPackageVersion ?? ''}`;
+    return `${metadataTransformPrefix}-${endpointPackageVersion ?? ''}`;
   }
 
   /**

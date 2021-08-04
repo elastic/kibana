@@ -5,34 +5,48 @@
  * 2.0.
  */
 
-import { Client, estypes } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { cloneDeep } from 'lodash';
 import { AxiosResponse } from 'axios';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
 import {
   Agent,
-  AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
-  FleetServerAgent,
-  GetOneAgentResponse,
   GetPackagesResponse,
   PACKAGE_POLICY_API_ROUTES,
 } from '../../../../fleet/common';
 import { EndpointDocGenerator } from '../generate_data';
 import { HostMetadata } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
-import { indexFleetAgentForHost } from './index_fleet_agent';
+import { deleteIndexedFleetAgents, indexFleetAgentForHost } from './index_fleet_agent';
 import { indexFleetActionsForHost } from './index_fleet_actions';
 
 export interface IndexedHostsResponse {
+  /**
+   * The documents (1 or more) that were generated for the (single) endpoint host.
+   * If consuming this data and wanting only the last one created, just access the
+   * last item in the array
+   */
   hosts: HostMetadata[];
+
+  /**
+   * Any policy created during processing of creating metadata documents for the endpoint host
+   */
   policies: Array<CreatePackagePolicyResponse['item']>;
+
+  /**
+   * Any Fleet Agent created for the endpoint host
+   */
   agents: Agent[];
+  readonly metadataIndex: string;
+  readonly policyResponseIndex: string;
+  readonly fleetAgentsIndex: string | undefined;
 }
 
 /**
@@ -78,10 +92,13 @@ export async function indexEndpointHostDocs({
     hosts: [],
     policies: [],
     agents: [],
+    metadataIndex,
+    policyResponseIndex,
+    fleetAgentsIndex: undefined,
   };
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
-  let enrolledAgent: undefined | estypes.SearchHit<FleetServerAgent>;
+  let enrolledAgent: undefined | Agent;
 
   for (let j = 0; j < numDocs; j++) {
     generator.updateHostData();
@@ -111,14 +128,19 @@ export async function indexEndpointHostDocs({
       if (!wasAgentEnrolled) {
         wasAgentEnrolled = true;
 
-        enrolledAgent = await indexFleetAgentForHost(
+        const enrollAgentResponse = await indexFleetAgentForHost(
           client,
+          kbnClient,
           hostMetadata!,
           realPolicies[appliedPolicyId].policy_id,
           kibanaVersion
         );
 
-        response.agents.push(await fetchFleetAgent(kbnClient, enrolledAgent?._id));
+        enrolledAgent = enrollAgentResponse.agents[0];
+        // ok to ignore within this function since we only get the index name after creating the first agent
+        // @ts-ignore
+        response.fleetAgentsIndex = enrollAgentResponse.index;
+        response.agents.push(enrolledAgent);
       }
       // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
       hostMetadata = {
@@ -127,7 +149,7 @@ export async function indexEndpointHostDocs({
           ...hostMetadata.elastic,
           agent: {
             ...hostMetadata.elastic.agent,
-            id: enrolledAgent?._id ?? hostMetadata.elastic.agent.id,
+            id: enrolledAgent?.id ?? hostMetadata.elastic.agent.id,
           },
         },
         Endpoint: {
@@ -162,7 +184,7 @@ export async function indexEndpointHostDocs({
     });
 
     // Clone the hostMetadata document to ensure that no shared state (as a result of using the
-    // generator) is returned across docs
+    // generator) is returned across docs.
     response.hosts.push(cloneDeep(hostMetadata));
   }
 
@@ -240,9 +262,49 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   return version;
 };
 
-const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<Agent> => {
-  return ((await kbnClient.request({
-    path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
-    method: 'GET',
-  })) as AxiosResponse<GetOneAgentResponse>).data.item;
+export interface DeleteIndexedEndpointHosts {
+  hosts: DeleteByQueryResponse | undefined;
+  agents: DeleteByQueryResponse | undefined;
+}
+
+export const deleteIndexedEndpointHosts = async (
+  esClient: Client,
+  kbnClient: KbnClient,
+  indexedData: IndexedHostsResponse
+): Promise<DeleteIndexedEndpointHosts> => {
+  const response: DeleteIndexedEndpointHosts = {
+    hosts: undefined,
+    agents: undefined,
+  };
+
+  if (indexedData.hosts.length) {
+    response.hosts = (
+      await esClient.deleteByQuery({
+        index: indexedData.metadataIndex,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
+            },
+          },
+        },
+      })
+    ).body;
+
+    // FIXME:PT Delete data from the `_current` (transform destination) index as well?
+  }
+
+  if (indexedData.agents.length) {
+    response.agents = await deleteIndexedFleetAgents(esClient, {
+      agents: indexedData.agents,
+      index: indexedData.fleetAgentsIndex!,
+    });
+  }
+
+  // FIXME:PT delete actions
+
+  // FIXME:PT delete policies
+
+  return response;
 };
