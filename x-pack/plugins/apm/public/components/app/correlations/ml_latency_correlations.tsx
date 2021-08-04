@@ -87,16 +87,14 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     cancelFetch,
     overallHistogram: originalOverallHistogram,
   } = useCorrelations({
-    ...{
-      ...{
-        environment,
-        kuery,
-        serviceName,
-        transactionName,
-        transactionType,
-        start,
-        end,
-      },
+    params: {
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     },
   });

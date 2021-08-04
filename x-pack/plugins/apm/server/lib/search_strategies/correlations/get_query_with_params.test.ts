@@ -40,7 +40,6 @@ describe('correlations', () => {
           start: '2020',
           end: '2021',
           environment: 'dev',
-          percentileThresholdValue: 75,
         },
       });
       expect(query).toEqual({
