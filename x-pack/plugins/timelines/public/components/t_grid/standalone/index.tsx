@@ -143,7 +143,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   rowRenderers,
   setRefetch,
   start,
-  sort,
+  sort: initialSort,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -161,6 +161,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
     queryFields,
+    sort: sortFromRedux,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
 
@@ -200,6 +201,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     ],
     [columnsHeader, queryFields]
   );
+
+  const [sort, setSort] = useState(initialSort);
+  useEffect(() => setSort(sortFromRedux), [sortFromRedux]);
 
   const sortField = useMemo(
     () =>
@@ -267,7 +271,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        sort,
         itemsPerPage,
         itemsPerPageOptions,
         showCheckboxes: true,
@@ -279,6 +282,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         defaultColumns: columns,
         footerText,
         loadingText,
+        sort,
         unit,
       })
     );
@@ -320,10 +324,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     data={nonDeletedEvents}
                     id={STANDALONE_ID}
                     isEventViewer={true}
+                    loadPage={loadPage}
                     onRuleChange={onRuleChange}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    sort={sort}
                     tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,

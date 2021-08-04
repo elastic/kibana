@@ -31,6 +31,7 @@ const isSourceDoc = (
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
 export const buildBulkBody = (
+  spaceId: string | null | undefined,
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
@@ -44,11 +45,11 @@ export const buildBulkBody = (
   if (isSourceDoc(mergedDoc)) {
     return {
       ...filteredSource,
-      ...buildAlert([mergedDoc], rule),
+      ...buildAlert([mergedDoc], rule, spaceId),
       ...additionalAlertFields(mergedDoc),
       '@timestamp': new Date().toISOString(),
     };
   }
 
-  throw Error("This shouldn't happen");
+  throw Error('Error building alert from source document.');
 };

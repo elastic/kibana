@@ -38,7 +38,6 @@ import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
 import { TimelineEventsDetailsItem } from '../../../../common';
-import { EventFieldsData } from './types';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -95,15 +94,11 @@ const getDescription = ({
     return <StyledEmptyComponent>{getEmptyValue()}</StyledEmptyComponent>;
   }
 
-  const eventFieldsData = {
-    ...data,
-    ...(fieldFromBrowserField ? fieldFromBrowserField : {}),
-  } as EventFieldsData;
   return (
     <>
       <FieldValueCell
         contextId={timelineId}
-        data={eventFieldsData}
+        data={data}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
@@ -111,7 +106,7 @@ const getDescription = ({
       />
       <ActionCell
         contextId={timelineId}
-        data={eventFieldsData}
+        data={data}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
@@ -178,7 +173,13 @@ const getSummaryRows = ({
         const browserField = get([category, 'fields', fieldName], browserFields);
         const description = {
           ...initialDescription,
-          data: { ...field, ...(item.overrideField ? { field: item.overrideField } : {}) },
+          data: {
+            field: field.field,
+            format: browserField?.format ?? '',
+            type: browserField?.type ?? '',
+            isObjectArray: field.isObjectArray,
+            ...(item.overrideField ? { field: item.overrideField } : {}),
+          },
           values: field.values,
           linkValue: linkValue ?? undefined,
           fieldFromBrowserField: browserField,

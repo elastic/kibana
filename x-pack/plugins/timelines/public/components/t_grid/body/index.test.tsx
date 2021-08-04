@@ -67,6 +67,7 @@ describe('Body', () => {
     id: 'timeline-test',
     isSelectAllChecked: false,
     loadingEventIds: [],
+    loadPage: jest.fn(),
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     selectedEventIds: {},

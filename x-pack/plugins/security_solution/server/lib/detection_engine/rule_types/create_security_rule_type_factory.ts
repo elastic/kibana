@@ -189,8 +189,10 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         );
 
         const wrapHits = wrapHitsFactory({
-          ruleSO,
+          logger,
           mergeStrategy,
+          ruleSO,
+          spaceId,
         });
 
         for (const tuple of tuples) {

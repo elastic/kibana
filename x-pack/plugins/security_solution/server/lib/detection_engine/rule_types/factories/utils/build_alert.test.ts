@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import {
+  ALERT_OWNER,
+  ALERT_RULE_NAMESPACE,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
+
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
-import { flatten } from './flatten';
+import { flattenWithPrefix } from './flatten_with_prefix';
 import {
   buildAlert,
   buildParent,
@@ -20,10 +28,18 @@ import {
   ANCHOR_DATE,
 } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
+import {
+  ALERT_ANCESTORS,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+} from '../../field_maps/field_names';
+import { SERVER_APP_ID } from '../../../../../../common/constants';
 
 type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
 };
+
+const SPACE_ID = 'space';
 
 describe('buildAlert', () => {
   beforeEach(() => {
@@ -35,13 +51,15 @@ describe('buildAlert', () => {
     delete doc._source.event;
     const rule = getRulesSchemaMock();
     const alert = {
-      ...buildAlert([doc], rule),
+      ...buildAlert([doc], rule, SPACE_ID),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert['@timestamp'];
     const expected = {
       '@timestamp': timestamp,
-      'kibana.alert.ancestors': [
+      [SPACE_IDS]: [SPACE_ID],
+      [ALERT_OWNER]: SERVER_APP_ID,
+      [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
           type: 'event',
@@ -49,10 +67,10 @@ describe('buildAlert', () => {
           depth: 0,
         },
       ],
-      'kibana.alert.original_time': '2020-04-20T21:27:45.000Z',
-      'kibana.alert.status': 'open',
-      'kibana.alert.workflow_status': 'open',
-      ...flatten('kibana.alert.rule', {
+      [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
+      [ALERT_STATUS]: 'open',
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
         id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
@@ -102,13 +120,15 @@ describe('buildAlert', () => {
     };
     const rule = getRulesSchemaMock();
     const alert = {
-      ...buildAlert([doc], rule),
+      ...buildAlert([doc], rule, SPACE_ID),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert['@timestamp'];
     const expected = {
       '@timestamp': timestamp,
-      'kibana.alert.ancestors': [
+      [SPACE_IDS]: [SPACE_ID],
+      [ALERT_OWNER]: SERVER_APP_ID,
+      [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
           type: 'event',
@@ -116,16 +136,16 @@ describe('buildAlert', () => {
           depth: 0,
         },
       ],
-      'kibana.alert.original_time': '2020-04-20T21:27:45.000Z',
-      'kibana.alert.original_event': {
+      [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
+      [ALERT_ORIGINAL_EVENT]: {
         action: 'socket_opened',
         dataset: 'socket',
         kind: 'event',
         module: 'system',
       },
-      'kibana.alert.status': 'open',
-      'kibana.alert.workflow_status': 'open',
-      ...flatten('kibana.alert.rule', {
+      [ALERT_STATUS]: 'open',
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
         id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
