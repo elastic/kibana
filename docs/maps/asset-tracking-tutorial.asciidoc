@@ -310,7 +310,7 @@ image::maps/images/asset-tracking-tutorial/tracking_containment_configuration.pn
 . Click *Create a connector*.
 . In the *Server log connector*, set:
 .. *Connector name* to *Bus alert connector*
-.. Click Save.
+.. Click *Save*.
 . Complete the *Actions* configuration.
 .. Set *Message* to :
 +
