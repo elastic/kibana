@@ -98,7 +98,7 @@ const CalendarJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => {
                   <h5>{jobId}</h5>
                   {calendarIds.length > 0 && (
                     <FormattedMessage
-                      id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarDependencies"
+                      id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarList"
                       defaultMessage="{num, plural, one {calendar} other {calendars}}: {calendars}"
                       values={{ num: calendarIds.length, calendars: calendarIds.join(', ') }}
                     />
@@ -125,7 +125,7 @@ const FilterJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
                 <h5>{jobId}</h5>
                 {filterIds.length > 0 && (
                   <FormattedMessage
-                    id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterDependencies"
+                    id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterList"
                     defaultMessage="{num, plural, one {filter} other {filters}}: {filters}"
                     values={{ num: filterIds.length, filters: filterIds.join(', ') }}
                   />
