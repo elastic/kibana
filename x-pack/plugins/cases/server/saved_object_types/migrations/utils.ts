@@ -18,7 +18,10 @@ import {
 
 export const transformConnectorIdToReference = (connector?: {
   id?: string;
-}): { transformedConnector: Record<string, unknown>; references: SavedObjectReference[] } => {
+}): {
+  transformedConnector: { connector: unknown };
+  references: SavedObjectReference[];
+} => {
   const { id: connectorId, ...restConnector } = connector ?? {};
 
   const references = createConnectorReference(

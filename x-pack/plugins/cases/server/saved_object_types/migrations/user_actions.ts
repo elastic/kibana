@@ -7,8 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { isRight } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import * as rt from 'io-ts';
 
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import {
@@ -20,10 +19,10 @@ import {
   CaseAttributes,
   CaseConnector,
   CaseConnectorRt,
-  CaseUserActionAttributesRt,
+  CaseExternalServiceBasicRt,
   ConnectorTypes,
 } from '../../../common';
-import { transformConnectorIdToReference } from './utils';
+import { transformConnectorIdToReference, transformPushConnectorIdToReference } from './utils';
 
 interface UserActions {
   action_field: string[];
@@ -75,34 +74,33 @@ function isPush(action?: string, actionFields?: string[]): boolean {
   return action === 'push-to-service' && actionFields?.includes('pushed') === true;
 }
 
+interface ExtractedConnector {
+  transformedJson: string;
+  references: SavedObjectReference[];
+}
+
 export function extractConnectorIdFromJson({
   action,
   actionFields,
-  jsonBlob,
+  stringifiedJson,
 }: {
   action?: string;
   actionFields?: string[];
-  jsonBlob?: string | null;
-} = {}): { transformedJson: string; references: SavedObjectReference[] } | undefined {
-  if (!action || !actionFields || !jsonBlob) {
+  stringifiedJson?: string | null;
+} = {}): ExtractedConnector | undefined {
+  if (!action || !actionFields || !stringifiedJson) {
     return;
   }
 
   try {
-    const decodedJson = JSON.parse(jsonBlob);
+    const decodedJson = JSON.parse(stringifiedJson);
 
     if (isCreateCaseConnector(action, actionFields, decodedJson)) {
-      const { transformedConnector, references } = transformConnectorIdToReference(decodedJson);
-      return {
-        transformedJson: JSON.stringify(transformedConnector),
-        references,
-      };
+      return transformCreateConnector(decodedJson.connector);
     } else if (isUpdateCaseConnector(action, actionFields, decodedJson)) {
-      const { transformedConnector, references } = transformConnectorIdToReference(decodedJson);
-      return {
-        transformedJson: JSON.stringify(transformedConnector),
-        references,
-      };
+      return transformUpdateConnector(decodedJson);
+    } else if (isPushConnector(action, actionFields, decodedJson)) {
+      return transformPushConnector(decodedJson);
     }
   } catch (error) {
     return;
@@ -113,7 +111,7 @@ function isCreateCaseConnector(
   action: string,
   actionFields: string[],
   decodedJson: unknown
-): decodedJson is CaseConnector {
+): decodedJson is { connector: CaseConnector } {
   try {
     const unsafeCase = decodedJson as CaseAttributes;
 
@@ -127,6 +125,15 @@ function isCreateCaseConnector(
   }
 }
 
+function transformCreateConnector(connector: CaseConnector): ExtractedConnector {
+  const { transformedConnector, references } = transformConnectorIdToReference(connector);
+
+  return {
+    transformedJson: JSON.stringify(transformedConnector),
+    references,
+  };
+}
+
 function isUpdateCaseConnector(
   action: string,
   actionFields: string[],
@@ -137,6 +144,40 @@ function isUpdateCaseConnector(
   } catch {
     return false;
   }
+}
+
+function transformUpdateConnector(connector: CaseConnector): ExtractedConnector {
+  const { transformedConnector, references } = transformConnectorIdToReference(connector);
+
+  return {
+    transformedJson: JSON.stringify(transformedConnector.connector),
+    references,
+  };
+}
+
+type CaseExternalService = rt.TypeOf<typeof CaseExternalServiceBasicRt>;
+
+function isPushConnector(
+  action: string,
+  actionFields: string[],
+  decodedJson: unknown
+): decodedJson is CaseExternalService {
+  try {
+    return isPush(action, actionFields) && CaseExternalServiceBasicRt.is(decodedJson);
+  } catch {
+    return false;
+  }
+}
+
+function transformPushConnector(externalService: CaseExternalService): ExtractedConnector {
+  const { transformedPushConnector, references } = transformPushConnectorIdToReference(
+    externalService
+  );
+
+  return {
+    transformedJson: JSON.stringify(transformedPushConnector),
+    references,
+  };
 }
 
 export const userActionsMigrations = {
