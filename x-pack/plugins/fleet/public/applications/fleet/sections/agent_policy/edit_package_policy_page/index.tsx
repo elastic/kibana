@@ -67,7 +67,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -641,7 +641,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
 
   return (
     <>
-      {isPreviousVersionFlyoutOpen && (
+      {isPreviousVersionFlyoutOpen && currentPackagePolicy && (
         <EuiPortal>
           <EuiFlyout onClose={() => setIsPreviousVersionFlyoutOpen(false)} size="l" maxWidth={640}>
             <EuiFlyoutHeader hasBorder>
@@ -657,7 +657,11 @@ const UpgradeStatusCallout: React.FunctionComponent<{
             </EuiFlyoutHeader>
             <FlyoutBody>
               <EuiCodeBlock isCopyable fontSize="m" whiteSpace="pre">
-                {JSON.stringify(currentPackagePolicy, null, 2)}
+                {JSON.stringify(
+                  storedPackagePoliciesToAgentInputs([currentPackagePolicy]),
+                  null,
+                  2
+                )}
               </EuiCodeBlock>
             </FlyoutBody>
           </EuiFlyout>
