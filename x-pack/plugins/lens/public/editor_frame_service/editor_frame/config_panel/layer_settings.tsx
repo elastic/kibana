@@ -44,55 +44,7 @@ export function LayerSettings({
     );
   }
 
-  // const a11yText = (chartType?: string) => {
-  //   if (chartType) {
-  //     return i18n.translate('xpack.lens.editLayerSettingsChartType', {
-  //       defaultMessage: 'Edit layer settings, {chartType}',
-  //       values: {
-  //         chartType,
-  //       },
-  //     });
-  //   }
-  //   return i18n.translate('xpack.lens.editLayerSettings', {
-  //     defaultMessage: 'Edit layer settings',
-  //   });
-  // };
-
   return (
     <NativeRenderer render={activeVisualization.renderLayerHeader} nativeProps={layerConfigProps} />
   );
 }
-
-//   const contextMenuIcon = activeVisualization.getLayerContextMenuIcon?.(layerConfigProps);
-//   return (
-//     <EuiPopover
-//       id={`lnsLayerPopover_${layerId}`}
-//       panelPaddingSize="m"
-//       ownFocus
-//       button={
-//         <EuiToolTip
-//           content={i18n.translate('xpack.lens.editLayerSettings', {
-//             defaultMessage: 'Edit layer settings',
-//           })}
-//         >
-//           <ToolbarButton
-//             size="s"
-//             iconType={contextMenuIcon?.icon || 'gear'}
-//             aria-label={a11yText(contextMenuIcon?.label || '')}
-//             title={a11yText(contextMenuIcon?.label || '')}
-//             onClick={() => setIsOpen(!isOpen)}
-//             data-test-subj="lns_layer_settings"
-//           />
-//         </EuiToolTip>
-//       }
-//       isOpen={isOpen}
-//       closePopover={() => setIsOpen(false)}
-//       anchorPosition="downLeft"
-//     >
-//       <NativeRenderer
-//         render={activeVisualization.renderLayerContextMenu}
-//         nativeProps={layerConfigProps}
-//       />
-//     </EuiPopover>
-//   );
-// }
