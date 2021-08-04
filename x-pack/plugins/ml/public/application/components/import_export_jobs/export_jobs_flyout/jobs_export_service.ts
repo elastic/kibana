@@ -11,6 +11,7 @@ import type { MlApiServices } from '../../../services/ml_api_service';
 import type { JobType } from '../../../../../common/types/saved_objects';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
+import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 
 export type JobDependencies = Array<{ jobId: string; calendarIds: string[]; filterIds: string[] }>;
 export type FiltersPerJob = Array<{ jobId: string; filterIds: string[] }>;
@@ -58,6 +59,7 @@ export class JobsExportService {
   public async getJobDependencies(jobs: Job[]): Promise<JobDependencies> {
     const calendars = await this._mlApiServices.calendars();
 
+    // create a map of all jobs in groups
     const groups = jobs.reduce((acc, cur) => {
       if (Array.isArray(cur.groups)) {
         cur.groups.forEach((g) => {
@@ -72,25 +74,35 @@ export class JobsExportService {
 
     const isGroup = (id: string) => groups[id] !== undefined;
 
+    // create a map of all calendars in jobs
     const calendarsPerJob = calendars.reduce((acc, cur) => {
-      cur.job_ids.forEach((j) => {
-        if (isGroup(j)) {
-          groups[j].forEach((j2) => {
-            if (acc[j2] === undefined) {
-              acc[j2] = [];
+      cur.job_ids.forEach((jId) => {
+        if (jId === GLOBAL_CALENDAR) {
+          // add the calendar to all jobs
+          jobs.forEach((j) => {
+            acc[j.job_id].push(cur.calendar_id);
+          });
+        } else if (isGroup(jId)) {
+          // add the calendar to every job in this group
+          groups[jId].forEach((jId2) => {
+            if (acc[jId2] === undefined) {
+              acc[jId2] = [];
             }
-            acc[j2].push(cur.calendar_id);
+            acc[jId2].push(cur.calendar_id);
           });
         } else {
-          if (acc[j] === undefined) {
-            acc[j] = [];
+          // add the calendar to just this job
+          if (acc[jId] === undefined) {
+            acc[jId] = [];
           }
-          acc[j].push(cur.calendar_id);
+          acc[jId].push(cur.calendar_id);
         }
       });
       return acc;
     }, {} as Record<string, string[]>);
 
+    // create a map of all filters in jobs,
+    // by extracting the filters from the job's detectors
     const filtersPerJob = jobs.reduce((acc, cur) => {
       if (acc[cur.job_id] === undefined) {
         acc[cur.job_id] = [];
