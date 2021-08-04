@@ -16,7 +16,10 @@ import type {
   ServerRouteRepository,
   ServerRoute,
 } from '@kbn/server-route-repository';
-// @ts-expect-error
+// @ts-expect-error cannot find module or correspondent type declarations
+// The code and types are at separated folders on @kbn/server-route-repository
+// so in order to do targeted imports they must me imported separately, and
+// an error is expected here
 import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
