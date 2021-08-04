@@ -50,14 +50,12 @@ const UtilityBarFlexGroup = styled(EuiFlexGroup)`
   min-width: 175px;
 `;
 
-const BuildingBlockContainer = styled(EuiFlexItem)`
-  background: repeating-linear-gradient(
-    127deg,
-    rgba(245, 167, 0, 0.2),
-    rgba(245, 167, 0, 0.2) 1px,
-    rgba(245, 167, 0, 0.05) 2px,
-    rgba(245, 167, 0, 0.05) 10px
-  );
+const AdditionalFiltersItem = styled(EuiFlexItem)`
+  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
+const BuildingBlockContainer = styled(AdditionalFiltersItem)`
+  background: ${({ theme }) => theme.eui.euiColorHighlight};
 `;
 
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
@@ -147,7 +145,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   );
 
   const UtilityBarAdditionalFiltersContent = (closePopover: () => void) => (
-    <UtilityBarFlexGroup direction="column" gutterSize="m">
+    <UtilityBarFlexGroup direction="column" gutterSize="none">
       <BuildingBlockContainer>
         <EuiCheckbox
           id="showBuildingBlockAlertsCheckbox"
@@ -162,7 +160,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
         />
       </BuildingBlockContainer>
-      <EuiFlexItem>
+      <AdditionalFiltersItem>
         <EuiCheckbox
           id="showOnlyThreatIndicatorAlertsCheckbox"
           aria-label="showOnlyThreatIndicatorAlerts"
@@ -175,7 +173,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"
           label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_ONLY_THREAT_INDICATOR_ALERTS}
         />
-      </EuiFlexItem>
+      </AdditionalFiltersItem>
     </UtilityBarFlexGroup>
   );
 
