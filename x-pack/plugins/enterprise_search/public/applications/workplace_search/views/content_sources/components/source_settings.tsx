@@ -17,6 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiForm,
+  EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -45,6 +48,9 @@ import {
   SOURCE_CONFIG_TITLE,
   SOURCE_CONFIG_DESCRIPTION,
   SOURCE_CONFIG_LINK,
+  SYNC_MANAGEMENT_TITLE,
+  SYNC_MANAGEMENT_DESCRIPTION,
+  SYNC_MANAGEMENT_SYNCHRONIZE_LABEL,
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
   SYNC_DIAGNOSTICS_TITLE,
@@ -63,7 +69,7 @@ export const SourceSettings: React.FC = () => {
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
-    contentSource: { name, id, serviceType },
+    contentSource: { name, id, serviceType, indexing },
     buttonLoading,
   } = useValues(SourceLogic);
 
@@ -89,6 +95,8 @@ export const SourceSettings: React.FC = () => {
 
   const showConfig = isOrganization && !isEmpty(configuredFields);
 
+  const [synchronizeChecked, setSynchronize] = useState(indexing.enabled);
+
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
   const diagnosticsPath = isOrganization
@@ -98,6 +106,11 @@ export const SourceSettings: React.FC = () => {
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
   const submitNameChange = (e: FormEvent) => {
+    e.preventDefault();
+    updateContentSource(id, { name: inputValue });
+  };
+
+  const syncManagementChanged = (e: EuiSwitchEvent) => {
     e.preventDefault();
     updateContentSource(id, { name: inputValue });
   };
@@ -180,6 +193,17 @@ export const SourceSettings: React.FC = () => {
           </EuiFormRow>
         </ContentSection>
       )}
+      <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
+        <EuiForm>
+          <EuiFormRow>
+            <EuiSwitch
+              label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
+              checked={synchronizeChecked}
+              onChange={syncManagementChanged}
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </ContentSection>
       <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
         <EuiButton
           target="_blank"

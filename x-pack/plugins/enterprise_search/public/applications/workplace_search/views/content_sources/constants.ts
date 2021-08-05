@@ -292,6 +292,27 @@ export const SOURCE_CONFIG_DESCRIPTION = i18n.translate(
   }
 );
 
+export const SYNC_MANAGEMENT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sync.management.title',
+  {
+    defaultMessage: 'Sync management',
+  }
+);
+
+export const SYNC_MANAGEMENT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sync.management.description',
+  {
+    defaultMessage: 'Enable and disable extraction of specific content for this source.',
+  }
+);
+
+export const SYNC_MANAGEMENT_SYNCHRONIZE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sync.management.synchronize.label',
+  {
+    defaultMessage: 'Synchronize this source',
+  }
+);
+
 export const SOURCE_CONFIG_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.config.link',
   {

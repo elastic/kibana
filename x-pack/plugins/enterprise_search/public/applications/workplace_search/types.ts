@@ -129,11 +129,16 @@ interface SourceActivity {
   status: string;
 }
 
+interface IndexingConfig {
+  enabled: boolean;
+}
+
 export interface ContentSourceFullData extends ContentSourceDetails {
   activities: SourceActivity[];
   details: DescriptionList[];
   summary: DocumentSummaryItem[];
   groups: Group[];
+  indexing: IndexingConfig;
   custom: boolean;
   accessToken: string;
   urlField: string;
