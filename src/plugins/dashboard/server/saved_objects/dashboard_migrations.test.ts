@@ -16,7 +16,7 @@ import {
   createInject,
 } from '../../common/embeddable/dashboard_container_persistable_state';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
-import { SerializableState } from '../../../kibana_utils/common';
+import { SerializableState } from '@kbn/common-utils';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
 const extract = createExtract(embeddableSetupMock);

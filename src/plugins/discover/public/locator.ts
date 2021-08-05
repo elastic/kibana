@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import { esFilters } from '../../data/public';

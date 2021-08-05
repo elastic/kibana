@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { SerializableState } from '@kbn/common-utils';
 import type { IExecutionContextContainer } from 'src/core/public';
 import { Adapters } from '../../../inspector/public';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
   ExpressionsService,
-  SerializableState,
   RenderMode,
 } from '../../common';
 import { ExpressionRenderHandlerParams } from '../render';

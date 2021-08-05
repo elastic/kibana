@@ -9,8 +9,8 @@
 import type { CoreSetup } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import type { SerializableState } from '@kbn/common-utils';
 import { migrateToLatest } from '../../../../kibana_utils/common';
-import type { SerializableState } from '../../../../kibana_utils/common';
 import type { UrlService } from '../../../common/url_service';
 import { render } from './render';
 import { parseSearchParams } from './util/parse_search_params';

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import type { SavedObjectReference } from 'kibana/server';
 import { DependencyList } from 'react';
-import type { PersistableState, SerializableState } from 'src/plugins/kibana_utils/common';
+import type { PersistableState } from 'src/plugins/kibana_utils/common';
 import { useLocatorUrl } from './use_locator_url';
 import type {
   LocatorDefinition,

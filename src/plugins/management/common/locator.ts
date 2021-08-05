@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
 import { MANAGEMENT_APP_ID } from './contants';
 

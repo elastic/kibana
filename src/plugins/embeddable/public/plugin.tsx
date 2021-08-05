@@ -9,6 +9,7 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
+import type { SerializableState } from '@kbn/common-utils';
 import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
@@ -39,11 +40,7 @@ import {
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
 import { Storage } from '../../kibana_utils/public';
-import {
-  migrateToLatest,
-  PersistableStateService,
-  SerializableState,
-} from '../../kibana_utils/common';
+import { migrateToLatest, PersistableStateService } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
 import { EmbeddableStateWithType } from '../common/types';

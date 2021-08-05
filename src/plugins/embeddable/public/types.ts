@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { SavedObjectAttributes } from 'kibana/public';
 import {
   EmbeddableFactory,
@@ -14,11 +15,7 @@ import {
   IEmbeddable,
   EmbeddableFactoryDefinition,
 } from './lib/embeddables';
-import {
-  PersistableState,
-  PersistableStateDefinition,
-  SerializableState,
-} from '../../kibana_utils/common';
+import { PersistableState, PersistableStateDefinition } from '../../kibana_utils/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;

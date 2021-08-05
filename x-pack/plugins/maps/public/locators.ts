@@ -8,6 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import rison from 'rison-node';
+import type { SerializableState } from '@kbn/common-utils';
 import type {
   TimeRange,
   Filter,
@@ -17,7 +18,6 @@ import type {
 } from '../../../../src/plugins/data/public';
 import { esFilters } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 import type { LocatorDefinition, LocatorPublic } from '../../../../src/plugins/share/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY, APP_ID } from '../common/constants';

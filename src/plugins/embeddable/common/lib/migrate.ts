@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { CommonEmbeddableStartContract } from '../types';
 import { baseEmbeddableMigrations } from './migrate_base_input';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 
 export type MigrateFunction = (state: SerializableState, version: string) => SerializableState;
 

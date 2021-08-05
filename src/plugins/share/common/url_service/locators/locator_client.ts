@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import type { LocatorDependencies } from './locator';
 import type { LocatorDefinition, LocatorPublic, ILocatorClient } from './types';
 import { Locator } from './locator';

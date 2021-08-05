@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { EnhancementRegistryDefinition } from '../../../../../src/plugins/embeddable/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 import { DynamicActionsState } from '../../../ui_actions_enhanced/public';
 import { UiActionsServiceEnhancements } from '../services';
 

@@ -7,7 +7,8 @@
  */
 
 import { mergeWith } from 'lodash';
-import { MigrateFunctionsObject, MigrateFunction, SerializableState } from './types';
+import type { SerializableState } from '@kbn/common-utils';
+import { MigrateFunctionsObject, MigrateFunction } from './types';
 
 export const mergeMigrationFunctionMaps = (
   obj1: MigrateFunctionsObject,

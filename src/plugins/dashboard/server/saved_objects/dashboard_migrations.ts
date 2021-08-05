@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SerializableValue } from '@kbn/common-utils';
 import { get, flow, mapValues } from 'lodash';
 import {
   SavedObjectAttributes,
@@ -29,7 +30,6 @@ import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
-  SerializableValue,
 } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 

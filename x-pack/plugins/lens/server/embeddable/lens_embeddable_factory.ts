@@ -6,7 +6,7 @@
  */
 
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
-import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import { DOC_TYPE } from '../../common';
 import {
   commonRemoveTimezoneDateHistogramParam,

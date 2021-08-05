@@ -8,7 +8,7 @@
 
 import { flow } from 'lodash';
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
-import { SerializableState } from '../../../kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,

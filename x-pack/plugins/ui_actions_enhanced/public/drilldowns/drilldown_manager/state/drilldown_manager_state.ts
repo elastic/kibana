@@ -8,7 +8,7 @@
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,

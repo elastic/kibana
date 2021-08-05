@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SerializableState, MigrateFunction } from './types';
+import { SerializableState } from '@kbn/common-utils';
+import { MigrateFunction } from './types';
 import { migrateToLatest } from './migrate_to_latest';
 
 interface StateV1 extends SerializableState {

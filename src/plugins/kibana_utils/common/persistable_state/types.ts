@@ -6,17 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { SavedObjectReference } from '../../../../core/types';
-
-/**
- * Serializable state is something is a POJO JavaScript object that can be
- * serialized to a JSON string.
- */
-export type SerializableState = {
-  [key: string]: Serializable;
-};
-export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
-export type Serializable = SerializableValue | SerializableValue[];
 
 /**
  * Versioned state is a POJO JavaScript object that can be serialized to JSON,

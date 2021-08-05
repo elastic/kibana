@@ -6,19 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { map, pick, zipObject } from 'lodash';
 
 import { ExpressionTypeDefinition } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
 import { SerializedFieldFormat } from '../../types';
-
-type State = string | number | boolean | null | undefined | SerializableState;
-
-/** @internal **/
-export interface SerializableState {
-  [key: string]: State | State[];
-}
 
 const name = 'datatable';
 

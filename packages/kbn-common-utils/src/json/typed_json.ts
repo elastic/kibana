@@ -14,3 +14,18 @@ export interface JsonObject {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface JsonArray extends Array<JsonValue> {}
+
+export type SerializableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SerializableArray
+  | SerializableState;
+
+// we need interfaces instead of types here to allow cyclic references
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SerializableArray extends Array<SerializableValue> {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SerializableState extends Record<string, SerializableValue> {}

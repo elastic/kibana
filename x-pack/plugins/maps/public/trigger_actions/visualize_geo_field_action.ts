@@ -7,7 +7,7 @@
 
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,

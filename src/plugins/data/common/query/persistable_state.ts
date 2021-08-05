@@ -8,7 +8,7 @@
 
 import uuid from 'uuid';
 import { Filter } from '@kbn/es-query';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
+import type { SerializableState } from '@kbn/common-utils';
 import { SavedObjectReference } from '../../../../core/types';
 
 export const extract = (filters: Filter[]) => {

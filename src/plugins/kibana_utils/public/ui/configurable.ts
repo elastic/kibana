@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { UiComponent } from '../../common/ui/ui_component';
-import { SerializableState } from '../../common';
 
 /**
  * Represents something that can be configured by user using UI.

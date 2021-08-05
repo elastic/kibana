@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { moveAttribution } from '../common/migrations/move_attribution';
 

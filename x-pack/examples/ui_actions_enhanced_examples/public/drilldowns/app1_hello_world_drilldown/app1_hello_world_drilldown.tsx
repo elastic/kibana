@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import type { SerializableState } from '@kbn/common-utils';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import { SAMPLE_APP1_CLICK_TRIGGER, SampleApp1ClickContext } from '../../triggers';
-import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
 
 export interface Config extends SerializableState {
   name: string;

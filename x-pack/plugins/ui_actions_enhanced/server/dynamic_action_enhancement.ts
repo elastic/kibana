@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { EnhancementRegistryDefinition } from '../../../../src/plugins/embeddable/server';
 import { SavedObjectReference } from '../../../../src/core/types';
 import { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
 import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';
 

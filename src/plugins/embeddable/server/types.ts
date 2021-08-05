@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  PersistableState,
-  PersistableStateDefinition,
-  SerializableState,
-} from '../../kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
+import { PersistableState, PersistableStateDefinition } from '../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;

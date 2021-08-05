@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableState } from '@kbn/common-utils';
 import type { LocatorPublic } from 'src/plugins/share/public';
 import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';

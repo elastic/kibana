@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { ExpressionValueRender } from './render';
 import { getType } from '../get_type';
-import { SerializableState } from '../../../../kibana_utils/common';
 import { ErrorLike } from '../../util';
 
 const name = 'error';

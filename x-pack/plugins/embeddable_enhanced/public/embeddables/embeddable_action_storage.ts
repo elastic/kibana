@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import {
   DynamicActionsState,
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
@@ -15,7 +16,6 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
-import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
   enhancements?: {

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { SerializableState } from '@kbn/common-utils';
 import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
-import { Datatable, ExecutionContext, SerializableState } from 'src/plugins/expressions';
+import { Datatable, ExecutionContext } from 'src/plugins/expressions';
 import { Adapters } from 'src/plugins/inspector';
 
 const errors = getFunctionErrors().csv;

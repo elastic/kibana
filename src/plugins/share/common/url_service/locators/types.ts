@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { DependencyList } from 'react';
-import { PersistableState, SerializableState } from 'src/plugins/kibana_utils/common';
+import { PersistableState } from 'src/plugins/kibana_utils/common';
 
 /**
  * URL locator registry.

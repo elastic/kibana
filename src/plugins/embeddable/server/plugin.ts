@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from '@kbn/common-utils';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { identity } from 'lodash';
 import {
@@ -23,7 +24,6 @@ import {
 } from '../common/lib';
 import {
   PersistableStateService,
-  SerializableState,
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
 } from '../../kibana_utils/common';

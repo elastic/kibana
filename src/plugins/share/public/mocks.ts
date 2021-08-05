@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import { SerializableState } from '@kbn/common-utils';
 import { SharePluginSetup, SharePluginStart } from '.';
 import { LocatorPublic, UrlService } from '../common/url_service';
 

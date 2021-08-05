@@ -10,6 +10,7 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
+import type { SerializableState } from '@kbn/common-utils';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -25,7 +26,6 @@ import {
   MigrateFunctionsObject,
   migrateToLatest,
   PersistableStateService,
-  SerializableState,
   VersionedState,
 } from '../../../kibana_utils/common';
 import { ExpressionExecutionParams } from '../service';

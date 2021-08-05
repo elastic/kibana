@@ -9,6 +9,7 @@
 import moment from 'moment';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { SerializableState } from '@kbn/common-utils';
 import { Assign, Ensure } from '@kbn/utility-types';
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
@@ -22,13 +23,6 @@ import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
-
-type State = string | number | boolean | null | undefined | SerializableState;
-
-/** @internal **/
-export interface SerializableState {
-  [key: string]: State | State[];
-}
 
 /** @internal **/
 export type AggConfigSerialized = Ensure<
