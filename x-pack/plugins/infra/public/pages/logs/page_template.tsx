@@ -9,7 +9,10 @@ import React from 'react';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
 import { useLogSourceContext } from '../../containers/logs/log_source';
-import { NoDataPage } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  NoDataPage,
+  NO_DATA_PAGE_MAX_WIDTH,
+} from '../../../../../../src/plugins/kibana_react/public';
 
 export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
   pageTemplateProps
@@ -28,12 +31,12 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
     <PageTemplate {...pageTemplateProps} />
   ) : (
     <PageTemplate
+      restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
       template="centeredBody"
       pageContentProps={{
         hasShadow: false,
         color: 'transparent',
       }}
-      paddingSize="none"
     >
       <NoDataPage
         solution="Observability"

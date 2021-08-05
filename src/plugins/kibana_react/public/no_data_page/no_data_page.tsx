@@ -20,13 +20,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-  KibanaPageTemplateSolutionNavAvatar,
-} from '../page_template';
+import { KibanaPageTemplateProps, KibanaPageTemplateSolutionNavAvatar } from '../page_template';
 
 import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
+
+export const NO_DATA_PAGE_MAX_WIDTH = 950;
 
 export const NO_DATA_RECOMMENDED = i18n.translate('kbn.noDataPage.recommended', {
   defaultMessage: 'Recommended',
@@ -103,19 +101,13 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   }, [actions, sortedData, actionsKeys]);
 
   return (
-    <KibanaPageTemplate
-      restrictWidth={950}
-      template="centeredBody"
-      pageContentProps={{ color: 'transparent' }}
-      {...rest}
-    >
+    <div className="kbnNoDataPageContents">
       <EuiText textAlign="center">
         <KibanaPageTemplateSolutionNavAvatar
           name={solution}
           iconType={logo || `logo${solution}`}
           size="xxl"
         />
-
         <EuiSpacer />
         <h1>
           <FormattedMessage
@@ -146,27 +138,29 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
       <EuiFlexGrid columns={2} style={{ justifyContent: 'space-around' }}>
         {renderActions}
       </EuiFlexGrid>
-      <EuiSpacer size="xxl" />
       {actionsKeys.length > 1 ? (
-        <EuiText textAlign="center" color="subdued">
-          <p>
-            <FormattedMessage
-              id="kbn.noDataPage.cantDecide"
-              defaultMessage="Confused on which to use? {link}"
-              values={{
-                link: (
-                  <EuiLink href="https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html">
-                    <FormattedMessage
-                      id="kbn.noDataPage.cantDecide.link"
-                      defaultMessage="Check our docs for more information."
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
+        <>
+          <EuiSpacer size="xxl" />
+          <EuiText textAlign="center" color="subdued">
+            <p>
+              <FormattedMessage
+                id="kbn.noDataPage.cantDecide"
+                defaultMessage="Confused on which to use? {link}"
+                values={{
+                  link: (
+                    <EuiLink href="https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html">
+                      <FormattedMessage
+                        id="kbn.noDataPage.cantDecide.link"
+                        defaultMessage="Check our docs for more information."
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        </>
       ) : undefined}
-    </KibanaPageTemplate>
+    </div>
   );
 };

@@ -16,7 +16,10 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakPoints } from '../../../hooks/use_break_points';
-import { NoDataPage } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  NoDataPage,
+  NO_DATA_PAGE_MAX_WIDTH,
+} from '../../../../../../../src/plugins/kibana_react/public';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'User Experience',
@@ -61,12 +64,12 @@ export function RumHome() {
         </PageTemplateComponent>
       ) : (
         <PageTemplateComponent
+          restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
           template="centeredBody"
           pageContentProps={{
             hasShadow: false,
             color: 'transparent',
           }}
-          paddingSize="none"
         >
           <NoDataPage
             solution="Observability"

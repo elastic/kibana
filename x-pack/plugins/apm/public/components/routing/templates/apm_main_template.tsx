@@ -9,6 +9,7 @@ import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import React from 'react';
 import {
   NoDataPage,
+  NO_DATA_PAGE_MAX_WIDTH,
   useKibana,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -53,12 +54,12 @@ export function ApmMainTemplate({
   ) : (
     <ObservabilityPageTemplate
       {...pageTemplateProps}
+      restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
       template="centeredBody"
       pageContentProps={{
         hasShadow: false,
         color: 'transparent',
       }}
-      paddingSize="none"
     >
       <NoDataPage
         solution="Observability"

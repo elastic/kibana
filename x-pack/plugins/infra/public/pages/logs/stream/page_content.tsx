@@ -15,6 +15,7 @@ import { LogsPageNoIndicesContent } from './page_no_indices_content';
 import { LogsPageTemplate } from '../page_template';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
+import { NO_DATA_PAGE_MAX_WIDTH } from '../../../../../../../src/plugins/kibana_react/public';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
@@ -49,12 +50,12 @@ export const StreamPageContent: React.FunctionComponent = () => {
   } else {
     return (
       <LogsPageTemplate
+        restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
         template="centeredBody"
         pageContentProps={{
           hasShadow: false,
           color: 'transparent',
         }}
-        paddingSize="none"
       >
         <LogsPageNoIndicesContent />
       </LogsPageTemplate>
