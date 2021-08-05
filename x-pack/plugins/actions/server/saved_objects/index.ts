@@ -13,7 +13,7 @@ import type {
 } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
-import { getMigrations } from './migrations';
+import { getActionTaskParamsMigrations, getMigrations } from './migrations';
 import { RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
@@ -72,6 +72,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
+    migrations: getActionTaskParamsMigrations(encryptedSavedObjects),
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
       const oldestIdleActionTask = await getOldestIdleActionTask(
