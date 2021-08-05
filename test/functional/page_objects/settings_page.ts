@@ -516,14 +516,16 @@ export class SettingsPageObject extends FtrService {
     await this.clickSaveScriptedField();
   }
 
-  async addRuntimeField(name: string, type: string, script: string) {
+  async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldType(type);
     if (script) {
       await this.setFieldScript(script);
     }
-    await this.clickSaveField();
+    if (doSaveField) {
+      await this.clickSaveField();
+    }
   }
 
   public async confirmSave() {
