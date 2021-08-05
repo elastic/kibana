@@ -9,7 +9,7 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
-import { htmlIdGenerator, EuiText } from '@elastic/eui';
+import { htmlIdGenerator, EuiText, EuiToolTip } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
@@ -171,10 +171,6 @@ export const CodeEditor: React.FC<Props> = ({
 
   const onKeydownMonaco = useCallback(
     (ev) => {
-      // Make sure the textarea is not directly accesible with TAB
-      const textbox = ev.target;
-      textbox.tabIndex = -1;
-
       if (ev.keyCode === monaco.KeyCode.Escape) {
         // If the autocompletion context menu is open then we want to let ESCAPE close it but
         // **not** exit out of editing mode.
@@ -190,35 +186,46 @@ export const CodeEditor: React.FC<Props> = ({
   );
 
   const renderPrompt = useCallback(() => {
-    return (
-      <div
-        className={promptClasses}
-        id={htmlIdGenerator('codeEditor')()}
-        ref={editorHint}
-        tabIndex={0}
-        role="button"
-        onClick={startEditing}
-        onKeyDown={onKeyDownHint}
-        data-test-subj="codeEditorHint"
-      >
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="kibana-react.kibanaCodeEditor.startEditing"
-              defaultMessage="Press Enter to start editing."
-            />
-          </p>
-        </EuiText>
+    const tooltipId = htmlIdGenerator()();
 
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="kibana-react.kibanaCodeEditor.stopEditing"
-              defaultMessage="When you're done, press Escape to stop editing."
-            />
-          </p>
-        </EuiText>
-      </div>
+    return (
+      <EuiToolTip
+        display="block"
+        id={tooltipId}
+        content={
+          <div>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="kibana-react.kibanaCodeEditor.startEditing"
+                  defaultMessage="Press Enter to start editing."
+                />
+              </p>
+            </EuiText>
+
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="kibana-react.kibanaCodeEditor.stopEditing"
+                  defaultMessage="Press Escape to stop editing."
+                />
+              </p>
+            </EuiText>
+          </div>
+        }
+      >
+        <div
+          className={promptClasses}
+          id={htmlIdGenerator('codeEditor')()}
+          aria-describedby={tooltipId}
+          ref={editorHint}
+          tabIndex={0}
+          role="button"
+          onClick={startEditing}
+          onKeyDown={onKeyDownHint}
+          data-test-subj="codeEditorHint"
+        />
+      </EuiToolTip>
     );
   }, [onKeyDownHint, promptClasses, startEditing]);
 
@@ -279,6 +286,12 @@ export const CodeEditor: React.FC<Props> = ({
       }
 
       _editor.current = editor;
+
+      const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
+      if (textbox) {
+        // Make sure the textarea is not directly accesible with TAB
+        textbox.tabIndex = -1;
+      }
 
       editor.onKeyDown(onKeydownMonaco);
 
