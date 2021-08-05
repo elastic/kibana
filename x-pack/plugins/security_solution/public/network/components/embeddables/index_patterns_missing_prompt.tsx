@@ -39,7 +39,7 @@ export const IndexPatternsMissingPromptComponent = () => {
                 ),
                 beats: (
                   <a
-                    href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/beats/libbeat/${docLinks.DOC_LINK_VERSION}/getting-started.html`}
+                    href={`${docLinks.links.libbeat.getStarted}`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
