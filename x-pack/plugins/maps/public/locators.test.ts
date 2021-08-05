@@ -8,7 +8,7 @@
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../common/constants';
 import { esFilters } from '../../../../src/plugins/data/public';
 import { MapsAppLocatorDefinition } from './locators';
-import { Serializable } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/common-utils';
 import { LayerDescriptor } from '../common/descriptor_types';
 
 const MAP_ID: string = '2c9c1f60-1909-11e9-919b-ffe5949a18d2';
@@ -65,7 +65,7 @@ describe('visualize url generator', () => {
       },
     ];
     const location = await locator.getLocation({
-      initialLayers: (initialLayers as unknown) as LayerDescriptor[] & Serializable,
+      initialLayers: (initialLayers as unknown) as LayerDescriptor[] & SerializableRecord,
     });
 
     expect(location).toMatchObject({

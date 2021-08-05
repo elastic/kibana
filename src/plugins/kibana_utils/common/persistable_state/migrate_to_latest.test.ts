@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/common-utils';
 import { MigrateFunction } from './types';
 import { migrateToLatest } from './migrate_to_latest';
 
-interface StateV1 extends Serializable {
+interface StateV1 extends SerializableRecord {
   name: string;
 }
 
-interface StateV2 extends Serializable {
+interface StateV2 extends SerializableRecord {
   firstName: string;
   lastName: string;
 }
 
-interface StateV3 extends Serializable {
+interface StateV3 extends SerializableRecord {
   firstName: string;
   lastName: string;
   isAdmin: boolean;

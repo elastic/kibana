@@ -107,6 +107,7 @@ import { SavedObjectsFindOptions } from 'kibana/public';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { SchemaTypeError } from '@kbn/config-schema';
+import { SerializableRecord } from '@kbn/common-utils';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { StartServicesAccessor } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
@@ -206,8 +207,7 @@ export class AggConfig {
     //
     // @deprecated (undocumented)
     toJSON(): AggConfigSerialized;
-    // Warning: (ae-forgotten-export) The symbol "Serializable" needs to be exported by the entry point index.d.ts
-    toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_2<SerializableState_2>, SerializableState_2>;
+    toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_2<SerializableRecord>, SerializableRecord>;
     // (undocumented)
     get type(): IAggType;
     set type(type: IAggType);
@@ -234,7 +234,7 @@ export class AggConfigs {
         type: string;
         enabled?: boolean | undefined;
         id?: string | undefined;
-        params?: {} | import("./agg_config").Serializable | undefined;
+        params?: {} | import("@kbn/common-utils").SerializableRecord | undefined;
         schema?: string | undefined;
     }, "schema" | "enabled" | "id" | "params"> & Pick<{
         type: string | IAggType;
@@ -337,9 +337,9 @@ export type AggConfigSerialized = Ensure<{
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: {} | SerializableState_2;
+    params?: {} | SerializableRecord;
     schema?: string;
-}, SerializableState_2>;
+}, SerializableRecord>;
 
 // Warning: (ae-missing-release-tag) "AggFunctionsMapping" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1078,7 +1078,7 @@ export class FilterManager implements PersistableStateService {
     static setFiltersStore(filters: Filter_2[], store: FilterStateStore, shouldOverrideStore?: boolean): void;
     setGlobalFilters(newGlobalFilters: Filter_2[]): void;
     // (undocumented)
-    telemetry: (filters: import("../../../../kibana_utils/common/persistable_state").Serializable, collector: unknown) => {};
+    telemetry: (filters: import("@kbn/common-utils").SerializableRecord, collector: unknown) => {};
     }
 
 // Warning: (ae-missing-release-tag) "generateFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
