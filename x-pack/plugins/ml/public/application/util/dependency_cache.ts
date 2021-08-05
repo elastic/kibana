@@ -21,6 +21,7 @@ import type {
 } from 'kibana/public';
 import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
 import type { DataVisualizerPluginStart } from '../../../../data_visualizer/public';
@@ -45,6 +46,7 @@ export interface DependencyCache {
   urlGenerators: SharePluginStart['urlGenerators'] | null;
   maps: MapsStartApi | null;
   dataVisualizer: DataVisualizerPluginStart | null;
+  usageCollection: UsageCollectionSetup | null;
 }
 
 const cache: DependencyCache = {
@@ -67,6 +69,7 @@ const cache: DependencyCache = {
   urlGenerators: null,
   maps: null,
   dataVisualizer: null,
+  usageCollection: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -88,6 +91,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
   cache.dataVisualizer = deps.dataVisualizer || null;
+  cache.usageCollection = deps.usageCollection || null;
 }
 
 export function getTimefilter() {
@@ -219,4 +223,11 @@ export function getFileDataVisualizer() {
     throw new Error("dataVisualizer hasn't been initialized");
   }
   return cache.dataVisualizer;
+}
+
+export function getUsageCollection() {
+  if (cache.usageCollection === null) {
+    throw new Error("usageCollection hasn't been initialized");
+  }
+  return cache.usageCollection;
 }
