@@ -182,7 +182,7 @@ export function TableHeaderColumn({
   return (
     <th data-test-subj="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`} className="kbnDocTableHeader__actions">
-        {showScoreSortWarning && <DocViewTableScoreSortWarning />}&nbsp;
+        {showScoreSortWarning && <DocViewTableScoreSortWarning />}
         {displayName}
         {buttons
           .filter((button) => button.active)
