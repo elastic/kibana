@@ -9,5 +9,5 @@
 <b>Signature:</b>
 
 ```typescript
-sort?: EsQuerySortValue | EsQuerySortValue[];
+sort?: EsQuerySortValue[];
 ```

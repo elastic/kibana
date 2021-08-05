@@ -2399,17 +2399,17 @@ export class SearchSource {
 // @public
 export interface SearchSourceFields {
     // (undocumented)
-    aggs?: object | IAggConfigs_2 | (() => object);
+    aggs?: object | IAggConfigs_2;
     // Warning: (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
     fields?: SearchFieldValue[];
     // @deprecated
     fieldsFromSource?: estypes.Fields;
     // (undocumented)
-    filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
+    filter?: Filter[];
     // (undocumented)
     from?: number;
     // (undocumented)
-    highlight?: any;
+    highlight?: boolean;
     // (undocumented)
     highlightAll?: boolean;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IndexPatternService"
@@ -2429,7 +2429,7 @@ export interface SearchSourceFields {
     // (undocumented)
     size?: number;
     // (undocumented)
-    sort?: EsQuerySortValue | EsQuerySortValue[];
+    sort?: EsQuerySortValue[];
     // (undocumented)
     source?: boolean | estypes.Fields;
     // (undocumented)

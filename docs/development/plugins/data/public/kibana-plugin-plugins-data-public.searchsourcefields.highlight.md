@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-highlight?: any;
+highlight?: boolean;
 ```

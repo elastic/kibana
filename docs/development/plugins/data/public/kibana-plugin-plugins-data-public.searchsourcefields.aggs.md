@@ -9,5 +9,5 @@
 <b>Signature:</b>
 
 ```typescript
-aggs?: object | IAggConfigs | (() => object);
+aggs?: object | IAggConfigs;
 ```

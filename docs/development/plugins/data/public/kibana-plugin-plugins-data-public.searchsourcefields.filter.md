@@ -9,5 +9,5 @@
 <b>Signature:</b>
 
 ```typescript
-filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
+filter?: Filter[];
 ```
