@@ -14,6 +14,11 @@ import {
 import React, { Fragment } from 'react';
 import { ContentsProps } from '.';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import {
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
 import { ExternalConnectionNode } from '../../../../../common/service_map';
 
 const ExternalResourcesList = euiStyled.section`
@@ -29,8 +34,8 @@ export function ExternalsListContents({ nodeData }: ContentsProps) {
           {nodeData.groupedConnections.map(
             (resource: ExternalConnectionNode) => {
               const title =
-                resource.label || resource['span.destination.service.resource'];
-              const desc = `${resource['span.type']} (${resource['span.subtype']})`;
+                resource.label || resource[SPAN_DESTINATION_SERVICE_RESOURCE];
+              const desc = `${resource[SPAN_TYPE]} (${resource[SPAN_SUBTYPE]})`;
               return (
                 <Fragment key={resource.id}>
                   <EuiDescriptionListTitle

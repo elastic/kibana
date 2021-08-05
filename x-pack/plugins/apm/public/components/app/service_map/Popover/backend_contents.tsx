@@ -50,7 +50,7 @@ export function BackendContents({ nodeData }: ContentsProps) {
   const isLoading = status === FETCH_STATUS.LOADING;
   const detailsUrl = apmRouter.link('/backends/:backendName/overview', {
     path: { backendName },
-    query,
+    query: query as any,
   });
 
   return (
