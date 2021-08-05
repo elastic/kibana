@@ -194,6 +194,14 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
+        // TODO: @elastic/es-clients - The new client will attempt a Product check and it will `process.emitWarning`
+        //  that the security features are blocking such check.
+        //  Such emit is causing Node.js to crash unless we explicitly catch it.
+        process.on('warning', (warn) => {
+          // eslint-disable-next-line no-console
+          console.warn(warn);
+        });
+
         const { body: privileges } = await getEsClientForAPIKey(
           providerContext,
           apiResponse.item.api_key
