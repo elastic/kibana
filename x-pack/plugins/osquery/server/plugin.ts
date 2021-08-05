@@ -27,11 +27,7 @@ import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
-import {
-  packSavedObjectType,
-  savedQuerySavedObjectType,
-  usageMetricSavedObjectType,
-} from '../common/types';
+import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
 import { PLUGIN_ID } from '../common';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
@@ -43,13 +39,14 @@ const registerFeatures = (features: SetupPlugins['features']) => {
     category: DEFAULT_APP_CATEGORIES.management,
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
+    excludeFromBasePrivileges: true,
     privileges: {
       all: {
         api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-write`],
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         savedObject: {
-          all: [PACKAGE_POLICY_SAVED_OBJECT_TYPE, usageMetricSavedObjectType],
+          all: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
           read: [PACKAGES_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE],
         },
         ui: ['write'],
@@ -84,7 +81,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 includeIn: 'all',
                 name: 'All',
                 savedObject: {
-                  all: [usageMetricSavedObjectType],
+                  all: [],
                   read: [],
                 },
                 ui: ['writeLiveQueries', 'readLiveQueries'],
@@ -113,7 +110,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 }),
                 includeIn: 'all',
                 savedObject: {
-                  all: [usageMetricSavedObjectType],
+                  all: [],
                   read: [],
                 },
                 ui: ['runSavedQueries'],
@@ -217,6 +214,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     const osqueryContext: OsqueryAppContext = {
       logFactory: this.context.logger,
+      getStartServices: core.getStartServices,
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
       security: plugins.security,
