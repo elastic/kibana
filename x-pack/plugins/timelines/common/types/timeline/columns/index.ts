@@ -17,7 +17,13 @@ export type ColumnId = string;
 /** The specification of a column header */
 export type ColumnHeaderOptions = Pick<
   EuiDataGridColumn,
-  'display' | 'displayAsText' | 'id' | 'initialWidth'
+  | 'actions'
+  | 'defaultSortDirection'
+  | 'display'
+  | 'displayAsText'
+  | 'id'
+  | 'initialWidth'
+  | 'isSortable'
 > & {
   aggregatable?: boolean;
   category?: string;
