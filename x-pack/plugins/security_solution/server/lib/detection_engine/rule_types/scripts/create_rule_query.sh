@@ -14,11 +14,30 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
      -d '
 {
   "params":{
-     "indexPatterns": ["*"],
-     "customQuery": "*:*"
+     "author": [],
+     "description": "Basic custom query rule",
+     "exceptionsList": [],
+     "falsePositives": [],
+     "from": "now-300s",
+     "query": "*:*",
+     "immutable": false,
+     "index": ["*"],
+     "language": "kuery",
+     "maxSignals": 10,
+     "outputIndex": "",
+     "references": [],
+     "riskScore": 21,
+     "riskScoreMapping": [],
+     "ruleId": "81dec1ba-b779-469c-9667-6b0e865fb86b",
+     "severity": "low",
+     "severityMapping": [],
+     "threat": [],
+     "to": "now",
+     "type": "query",
+     "version": 1
    },
    "consumer":"alerts",
-   "alertTypeId":"siem.customRule",
+   "alertTypeId":"siem.queryRule",
    "schedule":{
       "interval":"1m"
    },
