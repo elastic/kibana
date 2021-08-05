@@ -2228,6 +2228,7 @@ const isFoundGetResponse = <TDocument = unknown>(
  * @param headers Response headers
  * @returns boolean
  */
+// This check belongs to the elasticsearch service as a dedicated helper method.
 const isSupportedEsServer = (headers: Record<string, string> | null) => {
   return !!headers && headers['x-elastic-product'] === 'Elasticsearch';
 };
