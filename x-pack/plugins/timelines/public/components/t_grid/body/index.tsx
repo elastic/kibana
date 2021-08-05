@@ -7,6 +7,7 @@
 
 import {
   EuiDataGrid,
+  EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
   EuiDataGridStyle,
@@ -27,6 +28,7 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import {
+  TGridCellAction,
   TimelineId,
   TimelineTabs,
   BulkActionsProp,
@@ -66,6 +68,7 @@ interface OwnProps {
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
   data: TimelineItem[];
+  defaultCellActions?: TGridCellAction[];
   id: string;
   isEventViewer?: boolean;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -211,6 +214,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     browserFields,
     columnHeaders,
     data,
+    defaultCellActions,
     excludedRowRendererIds,
     id,
     isEventViewer = false,
@@ -461,6 +465,24 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       sort,
     ]);
 
+    const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
+      () =>
+        columnHeaders.map((header) => {
+          const buildAction = (tGridCellAction: TGridCellAction) =>
+            tGridCellAction({
+              data: data.map((row) => row.data),
+              browserFields,
+            });
+
+          return {
+            ...header,
+            cellActions:
+              header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
+          };
+        }),
+      [browserFields, columnHeaders, data, defaultCellActions]
+    );
+
     const renderTGridCellValue: (x: EuiDataGridCellValueElementProps) => React.ReactNode = ({
       columnId,
       rowIndex,
@@ -494,7 +516,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       <EuiDataGrid
         data-test-subj="body-data-grid"
         aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-        columns={columnHeaders}
+        columns={columnsWithCellActions}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         gridStyle={gridStyle}
         leadingControlColumns={leadingTGridControlColumns}
