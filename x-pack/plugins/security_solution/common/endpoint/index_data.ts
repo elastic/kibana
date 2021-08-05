@@ -68,7 +68,7 @@ export async function indexHostsAndAlerts(
     fleetAgentsIndex: '',
     metadataIndex,
     policyResponseIndex,
-    responses: [],
+    actionResponses: [],
     responsesIndex: '',
     actions: [],
     actionsIndex: '',

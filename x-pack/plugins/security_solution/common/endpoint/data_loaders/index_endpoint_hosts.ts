@@ -103,7 +103,7 @@ export async function indexEndpointHostDocs({
     metadataIndex,
     policyResponseIndex,
     fleetAgentsIndex: '',
-    responses: [],
+    actionResponses: [],
     responsesIndex: '',
     actions: [],
     actionsIndex: '',

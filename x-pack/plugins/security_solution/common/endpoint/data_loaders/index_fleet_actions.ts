@@ -16,7 +16,7 @@ const defaultFleetActionGenerator = new FleetActionGenerator();
 
 export interface IndexedFleetActionsForHostResponse {
   actions: EndpointAction[];
-  responses: EndpointActionResponse[];
+  actionResponses: EndpointActionResponse[];
   actionsIndex: string;
   responsesIndex: string;
 }
@@ -39,7 +39,7 @@ export const indexFleetActionsForHost = async (
   const total = fleetActionGenerator.randomN(5);
   const response: IndexedFleetActionsForHostResponse = {
     actions: [],
-    responses: [],
+    actionResponses: [],
     actionsIndex: AGENT_ACTIONS_INDEX,
     responsesIndex: AGENT_ACTIONS_RESULTS_INDEX,
   };
@@ -80,7 +80,7 @@ export const indexFleetActionsForHost = async (
       .catch(wrapErrorAndRejectPromise);
 
     response.actions.push(action);
-    response.responses.push(actionResponse);
+    response.actionResponses.push(actionResponse);
   }
 
   // Add edge cases (maybe)
@@ -190,7 +190,7 @@ export const deleteIndexedFleetActions = async (
     ).body;
   }
 
-  if (indexedData.responses) {
+  if (indexedData.actionResponses) {
     response.responses = (
       await esClient
         .deleteByQuery({
@@ -200,7 +200,11 @@ export const deleteIndexedFleetActions = async (
             query: {
               bool: {
                 filter: [
-                  { terms: { action_id: indexedData.responses.map((action) => action.action_id) } },
+                  {
+                    terms: {
+                      action_id: indexedData.actionResponses.map((action) => action.action_id),
+                    },
+                  },
                 ],
               },
             },
