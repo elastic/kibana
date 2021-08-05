@@ -158,7 +158,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : undefined,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : 'auto',
     },
     {
       field: 'throughput',
@@ -179,7 +179,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : undefined,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : 'auto',
     },
     {
       field: 'transactionErrorRate',
@@ -205,7 +205,7 @@ export function getServiceColumns({
         );
       },
       align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : undefined,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : 'auto',
     },
   ];
 }

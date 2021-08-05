@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
@@ -34,5 +34,13 @@ export function ServiceListMetric({
     );
   }
 
-  return <EuiText>{valueLabel}</EuiText>;
+  return (
+    <EuiFlexGroup gutterSize="none" alignItems="flexEnd">
+      <EuiFlexItem>
+        <EuiText size="s" textAlign="right">
+          {valueLabel}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
