@@ -25,8 +25,12 @@ export default function ({ getService }) {
         .expect(404);
     });
 
-    it('should return 404 when file is not in font folder', async () => {
+    it('should return 404 when file is not in font folder (../)', async () => {
       await supertest.get(`/api/maps/fonts/open_sans/..%2fopen_sans%2f0-255`).expect(404);
+    });
+
+    it('should return 404 when file is not in font folder (./../)', async () => {
+      await supertest.get(`/api/maps/fonts/open_sans/.%2f..%2fopen_sans%2f0-255`).expect(404);
     });
   });
 }
