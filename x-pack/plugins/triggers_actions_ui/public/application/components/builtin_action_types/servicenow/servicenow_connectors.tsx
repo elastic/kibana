@@ -30,6 +30,8 @@ import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
+import { MigrationConfirmationModal } from './migration_confirmation_modal';
+import { updateActionConnector } from '../../../lib/action_connector_api';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
@@ -44,6 +46,7 @@ const ServiceNowConnectorFields: React.FC<
   isEdit,
 }) => {
   const {
+    http,
     docLinks,
     notifications: { toasts },
   } = useKibana().services;
@@ -51,13 +54,21 @@ const ServiceNowConnectorFields: React.FC<
 
   const isApiUrlInvalid: boolean =
     errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
-
   const { username, password } = action.secrets;
-
   const isUsernameInvalid: boolean =
     errors.username !== undefined && errors.username.length > 0 && username !== undefined;
   const isPasswordInvalid: boolean =
     errors.password !== undefined && errors.password.length > 0 && password !== undefined;
+
+  const hasErrorsOrEmptyFields =
+    apiUrl === undefined ||
+    username === undefined ||
+    password === undefined ||
+    isApiUrlInvalid ||
+    isUsernameInvalid ||
+    isPasswordInvalid;
+
+  const [showModal, setShowModal] = useState(false);
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
@@ -73,20 +84,26 @@ const ServiceNowConnectorFields: React.FC<
 
   const [applicationRequired, setApplicationRequired] = useState<boolean>(false);
 
+  const getApplicationInfo = useCallback(async () => {
+    try {
+      const res = await fetchAppInfo(action);
+      if (isRESTApiError(res)) {
+        setApplicationRequired(true);
+        return;
+      }
+
+      return res;
+    } catch (e) {
+      // We need to throw here so the connector will be not be saved.
+      throw e;
+    }
+  }, [action, fetchAppInfo]);
+
   const beforeActionConnectorSave = useCallback(async () => {
     if (!isLegacy) {
-      try {
-        const res = await fetchAppInfo(action);
-        if (isRESTApiError(res)) {
-          setApplicationRequired(true);
-          return;
-        }
-      } catch (e) {
-        // We need to throw here so the connector will be not be saved.
-        throw e;
-      }
+      await getApplicationInfo;
     }
-  }, [action, fetchAppInfo, isLegacy]);
+  }, [getApplicationInfo, isLegacy]);
 
   const afterActionConnectorSave = useCallback(async () => {
     // TODO: Implement
@@ -98,9 +115,56 @@ const ServiceNowConnectorFields: React.FC<
     setCallbacks,
   ]);
 
+  const onMigrateClick = useCallback(() => setShowModal(true), []);
+  const onModalCancel = useCallback(() => setShowModal(false), []);
+
+  const onModalConfirm = useCallback(async () => {
+    // TODO: Handle properly
+    if (hasErrorsOrEmptyFields) {
+      return;
+    }
+
+    setShowModal(false);
+    await getApplicationInfo();
+    await updateActionConnector({
+      http,
+      connector: {
+        name: action.name,
+        config: { apiUrl, isLegacy: false },
+        secrets: { username, password },
+      },
+      id: action.id,
+    });
+
+    editActionConfig('isLegacy', false);
+    toasts.addSuccess({
+      title: i18n.MIGRATION_SUCCESS_TOAST_TITLE(action.name),
+      text: i18n.MIGRATION_SUCCESS_TOAST_TEXT,
+    });
+  }, [
+    hasErrorsOrEmptyFields,
+    getApplicationInfo,
+    http,
+    action.name,
+    action.id,
+    apiUrl,
+    username,
+    password,
+    editActionConfig,
+    toasts,
+  ]);
+
   return (
     <>
+      {showModal && (
+        <MigrationConfirmationModal
+          onConfirm={onModalConfirm}
+          onCancel={onModalCancel}
+          hasErrors={hasErrorsOrEmptyFields}
+        />
+      )}
       {!isLegacy && <InstallationCallout />}
+      {isLegacy && <DeprecatedCallout onMigrate={onMigrateClick} />}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -215,7 +279,6 @@ const ServiceNowConnectorFields: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isLegacy && <DeprecatedCallout />}
       {applicationRequired && <ApplicationRequiredCallout />}
     </>
   );

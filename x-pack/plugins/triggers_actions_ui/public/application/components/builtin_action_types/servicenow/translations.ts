@@ -217,3 +217,21 @@ export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
     defaultMessage: 'Elastic ServiceNow Application',
   }
 );
+
+export const MIGRATION_SUCCESS_TOAST_TITLE = (connectorName: string) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.migrationSuccessToastTitle',
+    {
+      defaultMessage: 'Migrated connector {connectorName}',
+      values: {
+        connectorName,
+      },
+    }
+  );
+
+export const MIGRATION_SUCCESS_TOAST_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutInfo',
+  {
+    defaultMessage: 'Connector has been successfully migrated.',
+  }
+);
