@@ -9,16 +9,17 @@
   }
 }
 
-.lnsLayerPanel__sourceFlexItem {
-  max-width: calc(100% - #{$euiSize * 3.625});
+.lnsLayerPanel__settingsStaticHeader {
+  padding-left: 4px;
+  line-height: $euiButtonHeightSmall;
 }
 
-.lnsLayerPanel__settingsFlexItem:empty + .lnsLayerPanel__sourceFlexItem {
-  max-width: calc(100% - #{$euiSizeS});
+.lnsLayerPanel__settingsTitle {
+  font-weight: $euiFontWeightBold;
 }
 
-.lnsLayerPanel__settingsFlexItem:empty {
-  margin: 0;
+.lnsLayerPanel__settingsRemoveIcon {
+  align-self: center;
 }
 
 .lnsLayerPanel__row {

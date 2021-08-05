@@ -6,7 +6,8 @@
  */
 
 import { metricVisualization } from './visualization';
-import type { MetricState } from '../../common/expressions';
+import { MetricState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
@@ -17,6 +18,7 @@ function exampleState(): MetricState {
   return {
     accessor: 'a',
     layerId: 'l1',
+    layerType: layerTypes.DATA,
   };
 }
 
@@ -41,6 +43,7 @@ describe('metric_visualization', () => {
         Object {
           "accessor": undefined,
           "layerId": "test-id1",
+          "layerType": "data",
         }
       `);
     });
@@ -73,6 +76,7 @@ describe('metric_visualization', () => {
           state: {
             accessor: undefined,
             layerId: 'l1',
+            layerType: layerTypes.DATA,
           },
           layerId: 'l1',
           frame: mockFrame(),
@@ -92,6 +96,7 @@ describe('metric_visualization', () => {
           state: {
             accessor: 'a',
             layerId: 'l1',
+            layerType: layerTypes.DATA,
           },
           layerId: 'l1',
           frame: mockFrame(),
@@ -113,10 +118,12 @@ describe('metric_visualization', () => {
           prevState: {
             accessor: undefined,
             layerId: 'l1',
+            layerType: layerTypes.DATA,
           },
           layerId: 'l1',
           groupId: '',
           columnId: 'newDimension',
+          frame: mockFrame(),
         })
       ).toEqual({
         accessor: 'newDimension',
@@ -132,9 +139,11 @@ describe('metric_visualization', () => {
           prevState: {
             accessor: 'a',
             layerId: 'l1',
+            layerType: layerTypes.DATA,
           },
           layerId: 'l1',
           columnId: 'a',
+          frame: mockFrame(),
         })
       ).toEqual({
         accessor: undefined,

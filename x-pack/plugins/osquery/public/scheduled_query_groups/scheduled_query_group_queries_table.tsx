@@ -22,6 +22,7 @@ import {
   PersistedIndexPatternLayer,
   PieVisualizationState,
 } from '../../../lens/public';
+import { layerTypes } from '../../../lens/common';
 import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { PlatformIcons } from './queries/platforms';
@@ -80,6 +81,7 @@ function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'
         legendDisplay: 'default',
         nestedLegend: false,
         layerId: 'layer1',
+        layerType: layerTypes.DATA,
         metric: 'ed999e9d-204c-465b-897f-fe1a125b39ed',
         numberDisplay: 'percent',
         groups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],

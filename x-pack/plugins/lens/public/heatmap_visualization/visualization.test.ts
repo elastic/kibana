@@ -22,10 +22,12 @@ import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
 import type { DatasourcePublicAPI, Operation } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { layerTypes } from '../../common';
 
 function exampleState(): HeatmapVisualizationState {
   return {
     layerId: 'test-layer',
+    layerType: layerTypes.DATA,
     legend: {
       isVisible: true,
       position: Position.Right,
@@ -214,6 +216,7 @@ describe('heatmap', () => {
           layerId: 'first',
           columnId: 'new-x-accessor',
           groupId: 'x',
+          frame,
         })
       ).toEqual({
         ...prevState,
@@ -236,6 +239,7 @@ describe('heatmap', () => {
           prevState,
           layerId: 'first',
           columnId: 'x-accessor',
+          frame,
         })
       ).toEqual({
         ...exampleState(),

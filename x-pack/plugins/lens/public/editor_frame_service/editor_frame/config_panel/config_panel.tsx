@@ -8,8 +8,7 @@
 import './config_panel.scss';
 
 import React, { useMemo, memo } from 'react';
-import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiForm } from '@elastic/eui';
 import { mapValues } from 'lodash';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
@@ -25,6 +24,7 @@ import {
   updateVisualizationState,
   setToggleFullscreen,
 } from '../../../state_management';
+import { AddLayerButton, getLayerType } from './add_layer';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   return props.activeVisualization && props.visualizationState ? (
@@ -32,6 +32,18 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
+function getRemoveOperation(
+  activeVisualization: Visualization,
+  visualizationState: ConfigPanelWrapperProps['visualizationState'],
+  layerId: string,
+  layerCount: number
+) {
+  if (activeVisualization.getRemoveOperation) {
+    return activeVisualization.getRemoveOperation(visualizationState, layerId);
+  }
+  // fallback to generic count check
+  return layerCount === 1 ? 'clear' : 'remove';
+}
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
     activeDatasourceId: string;
@@ -96,6 +108,10 @@ export function LayerPanels(
                 typeof newDatasourceState === 'function'
                   ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
                   : newDatasourceState;
+              const updatedVisualizationState =
+                typeof newVisualizationState === 'function'
+                  ? newVisualizationState(prevState.visualization.state)
+                  : newVisualizationState;
               return {
                 ...prevState,
                 datasourceStates: {
@@ -107,7 +123,7 @@ export function LayerPanels(
                 },
                 visualization: {
                   ...prevState.visualization,
-                  state: newVisualizationState,
+                  state: updatedVisualizationState,
                 },
                 stagedPreview: undefined,
               };
@@ -144,15 +160,35 @@ export function LayerPanels(
             updateDatasource={updateDatasource}
             updateDatasourceAsync={updateDatasourceAsync}
             updateAll={updateAll}
-            isOnlyLayer={layerIds.length === 1}
+            isOnlyLayer={
+              getRemoveOperation(
+                activeVisualization,
+                visualizationState,
+                layerId,
+                layerIds.length
+              ) === 'clear'
+            }
+            onEmptyDimensionAdd={(columnId: string) =>
+              addMaybeDefaultThreshold({
+                ...props,
+                layerId,
+                layerType: getLayerType(activeVisualization, visualizationState, layerId),
+                columnId,
+                updateAll,
+              })
+            }
             onRemoveLayer={() => {
               dispatchLens(
                 updateState({
                   subType: 'REMOVE_OR_CLEAR_LAYER',
                   updater: (state) => {
-                    const isOnlyLayer = activeVisualization
-                      .getLayerIds(state.visualization.state)
-                      .every((id) => id === layerId);
+                    const isOnlyLayer =
+                      getRemoveOperation(
+                        activeVisualization,
+                        state.visualization.state,
+                        layerId,
+                        layerIds.length
+                      ) === 'clear';
 
                     return {
                       ...state,
@@ -187,51 +223,80 @@ export function LayerPanels(
           />
         ) : null
       )}
-      {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
-          <EuiToolTip
-            className="eui-fullWidth"
-            title={i18n.translate('xpack.lens.xyChart.addLayer', {
-              defaultMessage: 'Add a layer',
-            })}
-            content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-              defaultMessage:
-                'Use multiple layers to combine visualization types or visualize different index patterns.',
-            })}
-            position="bottom"
-          >
-            <EuiButton
-              className="lnsConfigPanel__addLayerBtn"
-              fullWidth
-              size="s"
-              data-test-subj="lnsLayerAddButton"
-              aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              fill
-              color="text"
-              onClick={() => {
-                const id = generateId();
-                dispatchLens(
-                  updateState({
-                    subType: 'ADD_LAYER',
-                    updater: (state) =>
-                      appendLayer({
-                        activeVisualization,
-                        generateId: () => id,
-                        trackUiEvent,
-                        activeDatasource: datasourceMap[activeDatasourceId],
-                        state,
-                      }),
-                  })
-                );
-                setNextFocusedLayerId(id);
-              }}
-              iconType="plusInCircleFilled"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <AddLayerButton
+        visualization={activeVisualization}
+        visualizationState={visualizationState}
+        layersMeta={props.framePublicAPI}
+        onAddLayerClick={(layerType) => {
+          const id = generateId();
+          dispatchLens(
+            updateState({
+              subType: 'ADD_LAYER',
+              updater: (state) =>
+                appendLayer({
+                  activeVisualization,
+                  generateId: () => id,
+                  trackUiEvent,
+                  activeDatasource: datasourceMap[activeDatasourceId],
+                  state,
+                  layerType,
+                }),
+            })
+          );
+
+          addMaybeDefaultThreshold({ ...props, layerId: id, layerType, updateAll });
+          setNextFocusedLayerId(id);
+        }}
+      />
     </EuiForm>
   );
+}
+
+function addMaybeDefaultThreshold({
+  activeVisualization,
+  visualizationState,
+  framePublicAPI,
+  layerType,
+  activeDatasourceId,
+  datasourceMap,
+  updateAll,
+  layerId,
+  columnId,
+}: ConfigPanelWrapperProps & {
+  activeDatasourceId: string;
+  activeVisualization: Visualization;
+  layerId: string;
+  layerType: string;
+  columnId?: string;
+  updateAll: (
+    datasourceId: string,
+    newDatasourceState: unknown,
+    newVisualizationState: unknown
+  ) => void;
+}) {
+  const layerInfo = activeVisualization
+    .getLayerTypes(visualizationState, framePublicAPI)
+    .find(({ type }) => type === layerType);
+  if (layerInfo?.initialDimensions && datasourceMap[activeDatasourceId]?.initializeDimension) {
+    // pick the first available dimension
+    const [info] = layerInfo.initialDimensions;
+    updateAll(
+      activeDatasourceId,
+      (currentState: unknown) => {
+        return datasourceMap[activeDatasourceId].initializeDimension?.(currentState, layerId, {
+          ...info,
+          columnId: columnId || info.columnId,
+        });
+      },
+      (currentState: unknown) => {
+        return activeVisualization.setDimension({
+          groupId: info.groupId,
+          layerId,
+          columnId: columnId || info.columnId,
+          prevState: currentState,
+          frame: framePublicAPI,
+        });
+      }
+    );
+  }
 }

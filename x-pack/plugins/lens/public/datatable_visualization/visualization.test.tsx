@@ -17,6 +17,7 @@ import {
   VisualizationDimensionGroupConfig,
 } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { layerTypes } from '../../common';
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -47,6 +48,7 @@ describe('Datatable Visualization', () => {
     it('should initialize from a persisted state', () => {
       const expectedState: DatatableVisualizationState = {
         layerId: 'foo',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'saved' }],
       };
       expect(datatableVisualization.initialize(() => 'foo', expectedState)).toEqual(expectedState);
@@ -57,6 +59,7 @@ describe('Datatable Visualization', () => {
     it('return the layer ids', () => {
       const state: DatatableVisualizationState = {
         layerId: 'baz',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'a' }, { columnId: 'b' }, { columnId: 'c' }],
       };
       expect(datatableVisualization.getLayerIds(state)).toEqual(['baz']);
@@ -67,6 +70,7 @@ describe('Datatable Visualization', () => {
     it('should reset the layer', () => {
       const state: DatatableVisualizationState = {
         layerId: 'baz',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'a' }, { columnId: 'b' }, { columnId: 'c' }],
       };
       expect(datatableVisualization.clearLayer(state, 'baz')).toMatchObject({
@@ -103,6 +107,7 @@ describe('Datatable Visualization', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {
           layerId: 'first',
+          layerType: layerTypes.DATA,
           columns: [{ columnId: 'col1' }],
         },
         table: {
@@ -121,6 +126,7 @@ describe('Datatable Visualization', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {
           layerId: 'first',
+          layerType: layerTypes.DATA,
           columns: [
             { columnId: 'col1', width: 123 },
             { columnId: 'col2', hidden: true },
@@ -155,6 +161,7 @@ describe('Datatable Visualization', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {
           layerId: 'first',
+          layerType: layerTypes.DATA,
           columns: [{ columnId: 'col1' }],
         },
         table: {
@@ -173,6 +180,7 @@ describe('Datatable Visualization', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {
           layerId: 'first',
+          layerType: layerTypes.DATA,
           columns: [{ columnId: 'col1' }],
         },
         table: {
@@ -191,6 +199,7 @@ describe('Datatable Visualization', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {
           layerId: 'older',
+          layerType: layerTypes.DATA,
           columns: [{ columnId: 'col1' }],
         },
         table: {
@@ -231,6 +240,7 @@ describe('Datatable Visualization', () => {
           layerId: 'first',
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             columns: [],
           },
           frame,
@@ -246,6 +256,7 @@ describe('Datatable Visualization', () => {
         layerId: 'first',
         state: {
           layerId: 'first',
+          layerType: layerTypes.DATA,
           columns: [],
         },
         frame,
@@ -285,6 +296,7 @@ describe('Datatable Visualization', () => {
         layerId: 'first',
         state: {
           layerId: 'first',
+          layerType: layerTypes.DATA,
           columns: [],
         },
         frame,
@@ -319,6 +331,7 @@ describe('Datatable Visualization', () => {
           layerId: 'a',
           state: {
             layerId: 'a',
+            layerType: layerTypes.DATA,
             columns: [{ columnId: 'b' }, { columnId: 'c' }],
           },
           frame,
@@ -333,28 +346,37 @@ describe('Datatable Visualization', () => {
         datatableVisualization.removeDimension({
           prevState: {
             layerId: 'layer1',
+            layerType: layerTypes.DATA,
             columns: [{ columnId: 'b' }, { columnId: 'c' }],
           },
           layerId: 'layer1',
           columnId: 'b',
+          frame: mockFrame(),
         })
       ).toEqual({
         layerId: 'layer1',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'c' }],
       });
     });
 
     it('should handle correctly the sorting state on removing dimension', () => {
-      const state = { layerId: 'layer1', columns: [{ columnId: 'b' }, { columnId: 'c' }] };
+      const state = {
+        layerId: 'layer1',
+        layerType: layerTypes.DATA,
+        columns: [{ columnId: 'b' }, { columnId: 'c' }],
+      };
       expect(
         datatableVisualization.removeDimension({
           prevState: { ...state, sorting: { columnId: 'b', direction: 'asc' } },
           layerId: 'layer1',
           columnId: 'b',
+          frame: mockFrame(),
         })
       ).toEqual({
         sorting: undefined,
         layerId: 'layer1',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'c' }],
       });
 
@@ -363,10 +385,12 @@ describe('Datatable Visualization', () => {
           prevState: { ...state, sorting: { columnId: 'c', direction: 'asc' } },
           layerId: 'layer1',
           columnId: 'b',
+          frame: mockFrame(),
         })
       ).toEqual({
         sorting: { columnId: 'c', direction: 'asc' },
         layerId: 'layer1',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'c' }],
       });
     });
@@ -376,13 +400,19 @@ describe('Datatable Visualization', () => {
     it('allows columns to be added', () => {
       expect(
         datatableVisualization.setDimension({
-          prevState: { layerId: 'layer1', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
+          prevState: {
+            layerId: 'layer1',
+            layerType: layerTypes.DATA,
+            columns: [{ columnId: 'b' }, { columnId: 'c' }],
+          },
           layerId: 'layer1',
           columnId: 'd',
           groupId: '',
+          frame: mockFrame(),
         })
       ).toEqual({
         layerId: 'layer1',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'b' }, { columnId: 'c' }, { columnId: 'd', isTransposed: false }],
       });
     });
@@ -390,10 +420,15 @@ describe('Datatable Visualization', () => {
     it('does not set a duplicate dimension', () => {
       expect(
         datatableVisualization.setDimension({
-          prevState: { layerId: 'layer1', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
+          prevState: {
+            layerId: 'layer1',
+            layerType: layerTypes.DATA,
+            columns: [{ columnId: 'b' }, { columnId: 'c' }],
+          },
           layerId: 'layer1',
           columnId: 'b',
           groupId: '',
+          frame: mockFrame(),
         })
       ).toEqual({
         layerId: 'layer1',
@@ -415,7 +450,11 @@ describe('Datatable Visualization', () => {
       });
 
       const expression = datatableVisualization.toExpression(
-        { layerId: 'a', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
+        {
+          layerId: 'a',
+          layerType: layerTypes.DATA,
+          columns: [{ columnId: 'b' }, { columnId: 'c' }],
+        },
         frame.datasourceLayers
       ) as Ast;
 
@@ -466,7 +505,11 @@ describe('Datatable Visualization', () => {
       });
 
       const expression = datatableVisualization.toExpression(
-        { layerId: 'a', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
+        {
+          layerId: 'a',
+          layerType: layerTypes.DATA,
+          columns: [{ columnId: 'b' }, { columnId: 'c' }],
+        },
         frame.datasourceLayers
       );
 
@@ -488,6 +531,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({
         layerId: 'a',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'b' }, { columnId: 'c' }],
       });
 
@@ -507,6 +551,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({
         layerId: 'a',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'b' }, { columnId: 'c' }],
       });
 
@@ -518,6 +563,7 @@ describe('Datatable Visualization', () => {
     it('should add a sort column to the state', () => {
       const currentState: DatatableVisualizationState = {
         layerId: 'foo',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'saved' }],
       };
       expect(
@@ -537,6 +583,7 @@ describe('Datatable Visualization', () => {
     it('should add a custom width to a column in the state', () => {
       const currentState: DatatableVisualizationState = {
         layerId: 'foo',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'saved' }],
       };
       expect(
@@ -553,6 +600,7 @@ describe('Datatable Visualization', () => {
     it('should clear custom width value for the column from the state', () => {
       const currentState: DatatableVisualizationState = {
         layerId: 'foo',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'saved', width: 5000 }],
       };
       expect(

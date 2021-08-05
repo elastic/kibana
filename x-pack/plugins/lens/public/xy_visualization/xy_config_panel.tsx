@@ -20,6 +20,7 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {
@@ -30,7 +31,7 @@ import type {
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
 import type { FormatFactory } from '../../common';
-import type {
+import {
   SeriesType,
   YAxisMode,
   AxesSettingsConfig,
@@ -86,6 +87,49 @@ const legendOptions: Array<{
     }),
   },
 ];
+
+export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
+  const { state, layerId } = props;
+  const horizontalOnly = isHorizontalChart(state.layers);
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index];
+
+  if (!layer) {
+    return null;
+  }
+
+  const options = visualizationTypes
+    .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+    .map((t) => ({
+      value: t.id,
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={t.icon} />
+          </EuiFlexItem>
+          <EuiFlexItem grow>{t.label}</EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': `lnsXY_seriesType-${t.id}`,
+    }));
+
+  // else show a super select with the chart options to pick from
+  return (
+    <EuiSuperSelect
+      className="lnsLayerChartSwitch"
+      compressed
+      fullWidth
+      options={options}
+      valueOfSelected={layer.seriesType}
+      onChange={(seriesType) => {
+        trackUiEvent('xy_change_layer_display');
+        props.setState(
+          updateLayer(state, { ...layer, seriesType: seriesType as SeriesType }, index)
+        );
+      }}
+    />
+  );
+}
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;

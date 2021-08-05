@@ -117,7 +117,7 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
-  const { groups } = useMemo(
+  const { groups, supportStaticValue } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -187,6 +187,7 @@ export function LayerPanel(
           layerId: targetLayerId,
           prevState: props.visualizationState,
           previousColumn: typeof droppedItem.column === 'string' ? droppedItem.column : undefined,
+          frame: framePublicAPI,
         });
 
         if (typeof dropResult === 'object') {
@@ -196,6 +197,7 @@ export function LayerPanel(
               columnId: dropResult.deleted,
               layerId: targetLayerId,
               prevState: newVisState,
+              frame: framePublicAPI,
             })
           );
         } else {
@@ -204,6 +206,7 @@ export function LayerPanel(
       }
     };
   }, [
+    framePublicAPI,
     groups,
     layerDatasourceOnDrop,
     props.visualizationState,
@@ -235,6 +238,7 @@ export function LayerPanel(
               layerId,
               columnId: activeId,
               prevState: visualizationState,
+              frame: framePublicAPI,
             })
           );
         }
@@ -247,6 +251,7 @@ export function LayerPanel(
             groupId: activeGroup.groupId,
             columnId: activeId,
             prevState: visualizationState,
+            frame: framePublicAPI,
           })
         );
         setActiveDimension({ ...activeDimension, isNew: false });
@@ -265,6 +270,7 @@ export function LayerPanel(
       updateAll,
       updateDatasourceAsync,
       visualizationState,
+      framePublicAPI,
     ]
   );
 
@@ -278,7 +284,7 @@ export function LayerPanel(
       >
         <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="s">
           <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
+            <EuiFlexItem grow className="lnsLayerPanel__settingsFlexItem">
               <LayerSettings
                 layerId={layerId}
                 layerConfigProps={{
@@ -288,7 +294,16 @@ export function LayerPanel(
                 activeVisualization={activeVisualization}
               />
             </EuiFlexItem>
-
+            <EuiFlexItem grow={false} className="lnsLayerPanel__settingsRemoveIcon">
+              <RemoveLayerButton
+                onRemoveLayer={onRemoveLayer}
+                layerIndex={layerIndex}
+                isOnlyLayer={isOnlyLayer}
+                activeVisualization={activeVisualization}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             {layerDatasource && (
               <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
                 <NativeRenderer
@@ -318,6 +333,7 @@ export function LayerPanel(
                           layerId,
                           columnId,
                           prevState: nextVisState,
+                          frame: framePublicAPI,
                         });
                       });
 
@@ -422,6 +438,7 @@ export function LayerPanel(
                                     layerId,
                                     columnId: id,
                                     prevState: props.visualizationState,
+                                    frame: framePublicAPI,
                                   })
                                 );
                                 removeButtonRef(id);
@@ -455,7 +472,7 @@ export function LayerPanel(
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
-                          isNew: true,
+                          isNew: !supportStaticValue,
                         });
                       }}
                       onDrop={onDrop}
@@ -465,19 +482,6 @@ export function LayerPanel(
               </EuiFormRow>
             );
           })}
-
-          <EuiSpacer size="m" />
-
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <RemoveLayerButton
-                onRemoveLayer={onRemoveLayer}
-                layerIndex={layerIndex}
-                isOnlyLayer={isOnlyLayer}
-                activeVisualization={activeVisualization}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </EuiPanel>
       </section>
 
@@ -525,6 +529,7 @@ export function LayerPanel(
                   toggleFullscreen,
                   isFullscreen,
                   setState: updateDataLayerState,
+                  layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 }}
               />
             )}
