@@ -81,14 +81,14 @@ export const JIRA_EMAIL_REQUIRED = i18n.translate(
 export const JIRA_API_TOKEN_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiTokenTextFieldLabel',
   {
-    defaultMessage: 'API token or password',
+    defaultMessage: 'API token',
   }
 );
 
 export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredApiTokenTextField',
   {
-    defaultMessage: 'API token or password is required',
+    defaultMessage: 'API token is required',
   }
 );
 
