@@ -168,15 +168,16 @@ export function LayerPanels(
                 layerIds.length
               ) === 'clear'
             }
-            onEmptyDimensionAdd={(columnId: string) =>
+            onEmptyDimensionAdd={(columnId, { groupId }) => {
               addMaybeDefaultThreshold({
                 ...props,
                 layerId,
                 layerType: getLayerType(activeVisualization, visualizationState, layerId),
                 columnId,
                 updateAll,
-              })
-            }
+                groupId,
+              });
+            }}
             onRemoveLayer={() => {
               dispatchLens(
                 updateState({
@@ -262,12 +263,14 @@ function addMaybeDefaultThreshold({
   updateAll,
   layerId,
   columnId,
+  groupId,
 }: ConfigPanelWrapperProps & {
   activeDatasourceId: string;
   activeVisualization: Visualization;
   layerId: string;
   layerType: string;
   columnId?: string;
+  groupId?: string;
   updateAll: (
     datasourceId: string,
     newDatasourceState: unknown,
@@ -278,25 +281,29 @@ function addMaybeDefaultThreshold({
     .getLayerTypes(visualizationState, framePublicAPI)
     .find(({ type }) => type === layerType);
   if (layerInfo?.initialDimensions && datasourceMap[activeDatasourceId]?.initializeDimension) {
-    // pick the first available dimension
-    const [info] = layerInfo.initialDimensions;
-    updateAll(
-      activeDatasourceId,
-      (currentState: unknown) => {
-        return datasourceMap[activeDatasourceId].initializeDimension?.(currentState, layerId, {
-          ...info,
-          columnId: columnId || info.columnId,
-        });
-      },
-      (currentState: unknown) => {
-        return activeVisualization.setDimension({
-          groupId: info.groupId,
-          layerId,
-          columnId: columnId || info.columnId,
-          prevState: currentState,
-          frame: framePublicAPI,
-        });
-      }
-    );
+    const info = groupId
+      ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
+      : // pick the first available one if not passed
+        layerInfo.initialDimensions[0];
+    if (info) {
+      updateAll(
+        activeDatasourceId,
+        (currentState: unknown) => {
+          return datasourceMap[activeDatasourceId].initializeDimension?.(currentState, layerId, {
+            ...info,
+            columnId: columnId || info.columnId,
+          });
+        },
+        (currentState: unknown) => {
+          return activeVisualization.setDimension({
+            groupId: info.groupId,
+            layerId,
+            columnId: columnId || info.columnId,
+            prevState: currentState,
+            frame: framePublicAPI,
+          });
+        }
+      );
+    }
   }
 }
