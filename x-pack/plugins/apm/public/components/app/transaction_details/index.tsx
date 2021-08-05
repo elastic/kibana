@@ -93,6 +93,8 @@ export function TransactionDetails() {
               traceId: filteredSamples[0].traceId,
             }),
           });
+        } else {
+          clearChartSelecton();
         }
       }
     }
@@ -102,6 +104,11 @@ export function TransactionDetails() {
     const currentQuery = toQuery(history.location.search);
     delete currentQuery.sampleRangeFrom;
     delete currentQuery.sampleRangeTo;
+
+    const firstSample = distributionData.buckets[0].samples[0];
+    currentQuery.transactionId = firstSample.transactionId;
+    currentQuery.traceId = firstSample.traceId;
+
     history.push({
       ...history.location,
       search: fromQuery(currentQuery),
