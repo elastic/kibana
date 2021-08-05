@@ -23,7 +23,7 @@ const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
 export interface IndexedFleetAgent {
   agents: Agent[];
-  readonly index: string;
+  fleetAgentsIndex: string;
 }
 
 /**
@@ -73,7 +73,7 @@ export const indexFleetAgentForHost = async (
 
   return {
     agents: [await fetchFleetAgent(kbnClient, createdFleetAgent.body._id)],
-    index: agentDoc._index,
+    fleetAgentsIndex: agentDoc._index,
   };
 };
 
@@ -84,14 +84,22 @@ const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<A
   })) as AxiosResponse<GetOneAgentResponse>).data.item;
 };
 
+interface DeleteIndexedFleetAgentsResponse {
+  agents: DeleteByQueryResponse | undefined;
+}
+
 export const deleteIndexedFleetAgents = async (
   esClient: Client,
   indexedFleetAgents: IndexedFleetAgent
-): Promise<DeleteByQueryResponse | undefined> => {
+): Promise<DeleteIndexedFleetAgentsResponse> => {
+  const response: DeleteIndexedFleetAgentsResponse = {
+    agents: undefined,
+  };
+
   if (indexedFleetAgents.agents.length) {
-    return (
+    response.agents = (
       await esClient.deleteByQuery({
-        index: indexedFleetAgents.index,
+        index: indexedFleetAgents.fleetAgentsIndex,
         body: {
           query: {
             ids: {
@@ -102,4 +110,6 @@ export const deleteIndexedFleetAgents = async (
       })
     ).body;
   }
+
+  return response;
 };

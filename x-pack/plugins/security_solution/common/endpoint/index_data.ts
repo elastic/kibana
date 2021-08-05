@@ -25,7 +25,7 @@ import {
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
 
-export type IndexedHostsAndAlertsResponse = IndexedHostsResponse & {};
+export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -47,9 +47,13 @@ export async function indexHostsAndAlerts(
     hosts: [],
     policies: [],
     agents: [],
-    fleetAgentsIndex: undefined,
+    fleetAgentsIndex: '',
     metadataIndex,
     policyResponseIndex,
+    responses: [],
+    responsesIndex: '',
+    actions: [],
+    actionsIndex: '',
   };
 
   // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
@@ -86,20 +90,7 @@ export async function indexHostsAndAlerts(
     });
   }
 
-  await client.indices.refresh({
-    index: eventIndex,
-  });
-
-  // TODO: Unclear why the documents are not showing up after the call to refresh.
-  // Waiting 5 seconds allows the indices to refresh automatically and
-  // the documents become available in API/integration tests.
-  await delay(5000);
-
   return response;
-}
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const getEndpointPackageInfo = async (

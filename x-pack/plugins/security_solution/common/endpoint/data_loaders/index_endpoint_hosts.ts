@@ -24,10 +24,21 @@ import {
 import { EndpointDocGenerator } from '../generate_data';
 import { HostMetadata } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
-import { deleteIndexedFleetAgents, indexFleetAgentForHost } from './index_fleet_agent';
-import { indexFleetActionsForHost } from './index_fleet_actions';
+import {
+  deleteIndexedFleetAgents,
+  IndexedFleetAgent,
+  indexFleetAgentForHost,
+} from './index_fleet_agent';
+import {
+  deleteIndexedFleetActions,
+  DeleteIndexedFleetActionsResponse,
+  IndexedFleetActionsForHostResponse,
+  indexFleetActionsForHost,
+} from './index_fleet_actions';
 
-export interface IndexedHostsResponse {
+export interface IndexedHostsResponse
+  extends IndexedFleetAgent,
+    IndexedFleetActionsForHostResponse {
   /**
    * The documents (1 or more) that were generated for the (single) endpoint host.
    * If consuming this data and wanting only the last one created, just access the
@@ -39,14 +50,8 @@ export interface IndexedHostsResponse {
    * Any policy created during processing of creating metadata documents for the endpoint host
    */
   policies: Array<CreatePackagePolicyResponse['item']>;
-
-  /**
-   * Any Fleet Agent created for the endpoint host
-   */
-  agents: Agent[];
-  readonly metadataIndex: string;
-  readonly policyResponseIndex: string;
-  readonly fleetAgentsIndex: string | undefined;
+  metadataIndex: string;
+  policyResponseIndex: string;
 }
 
 /**
@@ -94,7 +99,11 @@ export async function indexEndpointHostDocs({
     agents: [],
     metadataIndex,
     policyResponseIndex,
-    fleetAgentsIndex: undefined,
+    fleetAgentsIndex: '',
+    responses: [],
+    responsesIndex: '',
+    actions: [],
+    actionsIndex: '',
   };
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
@@ -262,7 +271,7 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   return version;
 };
 
-export interface DeleteIndexedEndpointHosts {
+export interface DeleteIndexedEndpointHosts extends DeleteIndexedFleetActionsResponse {
   hosts: DeleteByQueryResponse | undefined;
   agents: DeleteByQueryResponse | undefined;
 }
@@ -275,6 +284,8 @@ export const deleteIndexedEndpointHosts = async (
   const response: DeleteIndexedEndpointHosts = {
     hosts: undefined,
     agents: undefined,
+    responses: undefined,
+    actions: undefined,
   };
 
   if (indexedData.hosts.length) {
@@ -295,14 +306,11 @@ export const deleteIndexedEndpointHosts = async (
     // FIXME:PT Delete data from the `_current` (transform destination) index as well?
   }
 
-  if (indexedData.agents.length) {
-    response.agents = await deleteIndexedFleetAgents(esClient, {
-      agents: indexedData.agents,
-      index: indexedData.fleetAgentsIndex!,
-    });
-  }
-
-  // FIXME:PT delete actions
+  Object.assign(
+    response,
+    await deleteIndexedFleetAgents(esClient, indexedData),
+    await deleteIndexedFleetActions(esClient, indexedData)
+  );
 
   // FIXME:PT delete policies
 

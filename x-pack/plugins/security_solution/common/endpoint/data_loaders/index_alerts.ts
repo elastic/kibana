@@ -9,6 +9,20 @@ import { Client } from '@elastic/elasticsearch';
 import { EndpointDocGenerator, Event, TreeOptions } from '../generate_data';
 import { firstNonNullValue } from '../models/ecs_safety_helpers';
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Indexes Alerts/Events into elasticsarch
+ *
+ * @param client
+ * @param eventIndex
+ * @param alertIndex
+ * @param generator
+ * @param numAlerts
+ * @param options
+ */
 export async function indexAlerts({
   client,
   eventIndex,
@@ -48,4 +62,13 @@ export async function indexAlerts({
     );
     await client.bulk({ body, refresh: true });
   }
+
+  await client.indices.refresh({
+    index: eventIndex,
+  });
+
+  // TODO: Unclear why the documents are not showing up after the call to refresh.
+  // Waiting 5 seconds allows the indices to refresh automatically and
+  // the documents become available in API/integration tests.
+  await delay(5000);
 }

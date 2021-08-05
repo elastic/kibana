@@ -24,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
-      // todo: way to force an endpoint to be created in isolated mode
+      // todo: way to force an endpoint to be created in isolated mode so we can check that state in the UI
       const endpointPackage = await policyTestResources.getEndpointPackage();
       await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();

@@ -6,14 +6,22 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { EndpointAction, HostMetadata } from '../types';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import { EndpointAction, EndpointActionResponse, HostMetadata } from '../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import { FleetActionGenerator } from '../data_generators/fleet_action_generator';
 
 const defaultFleetActionGenerator = new FleetActionGenerator();
 
+export interface IndexedFleetActionsForHostResponse {
+  actions: EndpointAction[];
+  responses: EndpointActionResponse[];
+  actionsIndex: string;
+  responsesIndex: string;
+}
+
 /**
- * Indexes Fleet Actions for a given host
+ * Indexes a randome number of Endpoint (via Fleet) Actions for a given host
  * (NOTE: ensure that fleet is setup first before calling this loading function)
  *
  * @param esClient
@@ -24,10 +32,16 @@ export const indexFleetActionsForHost = async (
   esClient: Client,
   endpointHost: HostMetadata,
   fleetActionGenerator: FleetActionGenerator = defaultFleetActionGenerator
-): Promise<void> => {
+): Promise<IndexedFleetActionsForHostResponse> => {
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
   const agentId = endpointHost.elastic.agent.id;
   const total = fleetActionGenerator.randomN(5);
+  const response: IndexedFleetActionsForHostResponse = {
+    actions: [],
+    responses: [],
+    actionsIndex: AGENT_ACTIONS_INDEX,
+    responsesIndex: AGENT_ACTIONS_RESULTS_INDEX,
+  };
 
   for (let i = 0; i < total; i++) {
     // create an action
@@ -59,6 +73,9 @@ export const indexFleetActionsForHost = async (
       },
       ES_INDEX_OPTIONS
     );
+
+    response.actions.push(action);
+    response.responses.push(actionResponse);
   }
 
   // Add edge cases (maybe)
@@ -90,6 +107,8 @@ export const indexFleetActionsForHost = async (
         },
         ES_INDEX_OPTIONS
       );
+
+      response.actions.push(action);
     } else {
       // Else (40% of the time) add a pending isolate AND pending un-isolate
       const action1 = fleetActionGenerator.generateIsolateAction({
@@ -118,6 +137,63 @@ export const indexFleetActionsForHost = async (
           ES_INDEX_OPTIONS
         ),
       ]);
+
+      response.actions.push(action1, action2);
     }
   }
+
+  return response;
+};
+
+export interface DeleteIndexedFleetActionsResponse {
+  actions: DeleteByQueryResponse | undefined;
+  responses: DeleteByQueryResponse | undefined;
+}
+
+export const deleteIndexedFleetActions = async (
+  esClient: Client,
+  indexedData: IndexedFleetActionsForHostResponse
+): Promise<DeleteIndexedFleetActionsResponse> => {
+  const response: DeleteIndexedFleetActionsResponse = {
+    actions: undefined,
+    responses: undefined,
+  };
+
+  if (indexedData.actions.length) {
+    response.actions = (
+      await esClient.deleteByQuery({
+        index: indexedData.actionsIndex,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
+              ],
+            },
+          },
+        },
+      })
+    ).body;
+  }
+
+  if (indexedData.responses) {
+    response.responses = (
+      await esClient.deleteByQuery({
+        index: indexedData.responsesIndex,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: indexedData.responses.map((action) => action.action_id) } },
+              ],
+            },
+          },
+        },
+      })
+    ).body;
+  }
+
+  return response;
 };
