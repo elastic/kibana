@@ -55,7 +55,7 @@ function migrationSavedObjectIds(doc: SavedObjectUnsanitizedDoc<TaskInstanceWith
     if (params.actionTaskParamsId && params.spaceId && params.spaceId !== 'default') {
       const newId = deterministicallyRegenerateObjectId(
         params.spaceId,
-        'action',
+        'action_task_params',
         params.actionTaskParamsId
       );
       return {
