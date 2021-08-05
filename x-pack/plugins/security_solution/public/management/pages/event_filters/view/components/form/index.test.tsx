@@ -11,7 +11,7 @@ import { fireEvent, waitFor } from '@testing-library/dom';
 import { stubIndexPatternWithFields } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { useFetchIndex } from '../../../../../../common/containers/source';
-import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils';
+import { ecsEventMock } from '../../../test_utils';
 import { NAME_ERROR, NAME_PLACEHOLDER } from './translations';
 import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
 import {
@@ -19,7 +19,6 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { EventFiltersListPageState } from '../../../types';
-import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/containers/source');
@@ -27,15 +26,12 @@ jest.mock('../../../../../../common/containers/source');
 describe('Event filter form', () => {
   let component: RenderResult;
   let mockedContext: AppContextTestRender;
-  let store: ReturnType<typeof createGlobalNoMiddlewareStore>;
-  let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let getState: () => EventFiltersListPageState;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    waitForAction = mockedContext.middlewareSpy.waitForAction;
     getState = () => mockedContext.store.getState().management.eventFilters;
     render = () => mockedContext.render(<EventFiltersForm />);
     renderWithData = async () => {
@@ -67,8 +63,8 @@ describe('Event filter form', () => {
         notifications: {},
       },
     });
-    // store = createGlobalNoMiddlewareStore();
   });
+
   it('should renders correctly without data', () => {
     component = render();
     expect(component.getByTestId('loading-spinner')).not.toBeNull();
