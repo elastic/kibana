@@ -21,7 +21,7 @@ import {
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { mlUsageCollectionProvider } from './services/usage_collector';
+import { mlUsageCollectionProvider } from './services/usage_collection';
 
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
