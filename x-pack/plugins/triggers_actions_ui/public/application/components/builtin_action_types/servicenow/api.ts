@@ -31,8 +31,11 @@ export async function getChoices({
   );
 }
 
-// TODO: When app is certified change x_463134_elastic to the published namespace.
-const getAppInfoUrl = (url: string) => `${url}/api/x_463134_elastic/elastic/health`;
+/**
+ * The app info url should be the same as at:
+ * x-pack/plugins/actions/server/builtin_action_types/servicenow/service.ts
+ */
+const getAppInfoUrl = (url: string) => `${url}/api/x_elas2_inc_int/elastic_api/health`;
 
 export async function getAppInfo({
   signal,

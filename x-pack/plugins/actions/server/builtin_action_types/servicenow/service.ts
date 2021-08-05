@@ -62,8 +62,11 @@ export const createExternalService = (
   const tableApiIncidentUrl = `${urlWithoutTrailingSlash}/api/now/table/${table}`;
   const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
   const choicesUrl = `${urlWithoutTrailingSlash}/api/now/table/sys_choice`;
-  // TODO: Change it to production when the app is ready
-  const getVersionUrl = `${urlWithoutTrailingSlash}/api/x_463134_elastic/elastic/health`;
+  /**
+   * Need to be set the same at:
+   * x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/api.ts
+   */
+  const getVersionUrl = `${urlWithoutTrailingSlash}/api/x_elas2_inc_int/elastic_api/health`;
 
   const axiosInstance = axios.create({
     auth: { username, password },
