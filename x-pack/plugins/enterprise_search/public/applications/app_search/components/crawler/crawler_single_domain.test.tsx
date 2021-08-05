@@ -15,6 +15,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCode } from '@elastic/eui';
 
+import { DeleteDomainPanel } from './components/delete_domain_panel';
 import { CrawlerSingleDomain } from './crawler_single_domain';
 
 const MOCK_VALUES = {
@@ -39,8 +40,9 @@ describe('CrawlerSingleDomain', () => {
   it('renders', () => {
     const wrapper = shallow(<CrawlerSingleDomain />);
 
-    expect(wrapper.find(EuiCode).render().text()).toContain('https://elastic.co');
     expect(wrapper.prop('pageHeader')).toEqual({ pageTitle: 'https://elastic.co' });
+    expect(wrapper.find(DeleteDomainPanel)).toHaveLength(1);
+    expect(wrapper.find(EuiCode).render().text()).toContain('https://elastic.co');
   });
 
   it('uses a placeholder for the page title and page chrome if a domain has not been', () => {
