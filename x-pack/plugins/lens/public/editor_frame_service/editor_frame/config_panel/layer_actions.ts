@@ -6,6 +6,7 @@
  */
 
 import { mapValues } from 'lodash';
+import type { LayerType } from '../../../../common';
 import { LensAppState } from '../../../state_management';
 
 import { Datasource, Visualization } from '../../../types';
@@ -24,7 +25,7 @@ interface AppendLayerOptions {
   generateId: () => string;
   activeDatasource: Pick<Datasource, 'insertLayer' | 'id'>;
   activeVisualization: Pick<Visualization, 'appendLayer'>;
-  layerType: string;
+  layerType: LayerType;
 }
 
 export function removeLayer(opts: RemoveLayerOptions): LensAppState {

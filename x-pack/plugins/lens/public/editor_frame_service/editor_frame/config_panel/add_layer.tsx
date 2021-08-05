@@ -17,13 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { layerTypes } from '../../../../common';
+import { LayerType, layerTypes } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
 
 interface AddLayerButtonProps {
   visualization: Visualization;
   visualizationState: unknown;
-  onAddLayerClick: (layerType: string) => void;
+  onAddLayerClick: (layerType: LayerType) => void;
   layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
 

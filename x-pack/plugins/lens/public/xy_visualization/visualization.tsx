@@ -133,7 +133,7 @@ export const getXyVisualization = ({
         newLayerState(
           usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
           layerId,
-          layerType as LayerType
+          layerType
         ),
       ],
     };

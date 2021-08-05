@@ -931,17 +931,23 @@ const ThresholdPanel = (
           options={[
             {
               id: `${idPrefix}solid`,
-              label: 'Solid',
+              label: i18n.translate('xpack.lens.xyChart.lineStyle.solid', {
+                defaultMessage: 'Solid',
+              }),
               'data-test-subj': 'lnsXY_line_style_solid',
             },
             {
               id: `${idPrefix}dashed`,
-              label: 'Dashed',
+              label: i18n.translate('xpack.lens.xyChart.lineStyle.dashed', {
+                defaultMessage: 'Dashed',
+              }),
               'data-test-subj': 'lnsXY_line_style_dashed',
             },
             {
               id: `${idPrefix}dotted`,
-              label: 'Dotted',
+              label: i18n.translate('xpack.lens.xyChart.lineStyle.dotted', {
+                defaultMessage: 'Dotted',
+              }),
               'data-test-subj': 'lnsXY_line_style_dotted',
             },
           ]}
@@ -991,7 +997,9 @@ const ThresholdPanel = (
           options={[
             {
               id: `${idPrefix}none`,
-              label: 'None',
+              label: i18n.translate('xpack.lens.xyChart.fillThreshold.none', {
+                defaultMessage: 'None',
+              }),
               'data-test-subj': 'lnsXY_fill_none',
             },
             {
