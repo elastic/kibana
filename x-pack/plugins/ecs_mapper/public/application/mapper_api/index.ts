@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MapperProxy } from './mapperProxy';
+export { MapperProxy } from './mapper_proxy';

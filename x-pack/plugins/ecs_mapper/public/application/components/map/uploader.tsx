@@ -9,10 +9,10 @@ import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { NavigateToAppOptions } from 'kibana/public';
-import { UploadPanel } from './uploadPanel';
-import { ConfirmationPanel } from './confirmationPanel';
-import { ResultsPanel } from './resultsPanel';
-import { ErrorPanel } from './errorPanel';
+import { UploadPanel } from './upload_panel';
+import { ConfirmationPanel } from './confirmation_panel';
+import { ResultsPanel } from './results_panel';
+import { ErrorPanel } from './error_panel';
 import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
 import { MapperProxy } from '../../mapper_api';
@@ -39,6 +39,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
   };
 
   const onFileUpload = async (action: FieldCopyAction, files: FileList, name: string) => {
+    setError('');
     setPipelineName(name);
 
     if (files.length > 0) {
@@ -54,47 +55,42 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
       setIsLoading(false);
       setIsUploaded(true);
     } catch (e) {
-      if (e.body?.statusCode == 400){
+      if (e.body?.statusCode === 400) {
         setError(e.body.message);
       } else {
         setError(
-          i18n.translate(
-            'xpack.ecsMapper.fetchPipeline.unexpectedError',
-            {
-              defaultMessage: "Unexpected error {e}",
-              values: { e }
-            }
-          )
+          i18n.translate('xpack.ecsMapper.fetchPipeline.unexpectedError', {
+            defaultMessage: 'Unexpected error {e}',
+            values: { e },
+          })
         );
       }
 
       setIsLoading(false);
       setIsUploaded(false);
     }
-  }
+  };
 
   const onCreatePipeline = async () => {
     try {
       await mapper.createIngestNodePipeline(pipelineName, pipelineProcessors);
       setIsPipelineCreated(true);
     } catch (e) {
-      if (e.body?.statusCode == 409){
-        setError("There is already an existing Ingest Node Pipeline named " + pipelineName);
+      if (e.body?.statusCode === 409) {
+        setError('There is already an existing Ingest Node Pipeline named ' + pipelineName);
       } else {
         setError(
-          i18n.translate(
-            'xpack.ecsMapper.createIngestNodePipeline.unexpectedError',
-            {
-              defaultMessage: "Unexpected error {e}",
-              values: { e }
-            }
-          )
+          i18n.translate('xpack.ecsMapper.createIngestNodePipeline.unexpectedError', {
+            defaultMessage: 'Unexpected error {e}',
+            values: { e },
+          })
         );
       }
-    } 
+    }
   };
 
   const onCancelCreate = () => {
+    setError('');
     setIsUploaded(false);
     setPipelineName('');
     setPipelineProcessors([]);
@@ -108,19 +104,15 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
       try {
         const fileContents = await readFile(file, maxBytes);
 
-        fetchPipelineFromMapping(fileContents, action)        
-
+        fetchPipelineFromMapping(fileContents, action);
       } catch (e) {
         setIsLoading(false);
         setIsUploaded(false);
         setError(
-          i18n.translate(
-            'xpack.ecsMapper.createIngestNodePipeline.unexpectedError',
-            {
-              defaultMessage: "Unexpected error {e}",
-              values: { e }
-            }
-          )
+          i18n.translate('xpack.ecsMapper.createIngestNodePipeline.unexpectedError', {
+            defaultMessage: 'Unexpected error {e}',
+            values: { e },
+          })
         );
       }
     } else {
@@ -132,7 +124,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
     <EuiPage className="prfDevTool__page" data-test-subj="ecsMapperFileUpload">
       <EuiPageBody className="prfDevTool__page__pageBody">
         <EuiPageContent className="prfDevTool__page__pageBodyContent">
-          {!isUploaded && ( !isPipelineCreated || !!error ) && (
+          {!isUploaded && (!isPipelineCreated || !!error) && (
             <UploadPanel
               onFileUpload={onFileUpload}
               actionOptions={Object.values(FieldCopyAction)}

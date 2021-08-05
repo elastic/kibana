@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { getPluginsStart } from '../../../kibanaServices';
+import { getPluginsStart } from '../../../kibana_services';
 
 export const Instructions: FC = () => {
   const { fileUpload } = getPluginsStart();

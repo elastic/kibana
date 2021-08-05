@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { getCoreStart, getPluginsStart } from '../../kibanaServices';
+import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import { EcsMapperUploadView } from '../components/map/uploader';
@@ -24,11 +24,7 @@ export const EcsMapperMainUi: FC = () => {
 
   return (
     <KibanaContextProvider services={{ ...services }}>
-      <EcsMapperUploadView 
-        fileUpload={fileUpload}
-        mapper={mapper}
-        navigateToApp={navigateToApp}
-      />
+      <EcsMapperUploadView fileUpload={fileUpload} mapper={mapper} navigateToApp={navigateToApp} />
     </KibanaContextProvider>
   );
 };

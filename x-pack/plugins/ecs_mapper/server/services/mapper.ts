@@ -38,16 +38,13 @@ export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
 
   const includesCheck = (arr: string[], target: string[]) => target.every((v) => arr.includes(v));
   if (!includesCheck(meta.fields, REQUIRED_CSV_HEADERS)) {
-    const required = REQUIRED_CSV_HEADERS.join(",");
-    
+    const required = REQUIRED_CSV_HEADERS.join(',');
+
     throw new Error(
-      i18n.translate(
-        'xpack.ecsMapper.mapToIngestPipeline.error.missingHeaders',
-        {
-          defaultMessage: "Required headers are missing in the CSV.\n Required: {required}.",
-          values: { required }
-        }
-      )
+      i18n.translate('xpack.ecsMapper.mapToIngestPipeline.error.missingHeaders', {
+        defaultMessage: 'Required headers are missing in the CSV.\n Required: {required}.',
+        values: { required },
+      })
     );
   }
 
