@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toMountPoint } from '../../../../../kibana_react/public';
+import { toMountPoint } from 'src/plugins/kibana_react/public';
 import { DiscoverServices } from '../../../build_services';
 
 export interface NotFoundRouteProps {
@@ -28,34 +28,36 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
     const path = window.location.hash.substr(1);
     restorePreviousUrl();
     const { navigated } = urlForwarding.navigateToLegacyKibanaUrl(path);
-    if (!navigated) {
-      const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
-        defaultMessage: 'Page not found',
-      });
-
-      bannerId = services.core.overlays.banners.replace(
-        bannerId,
-        toMountPoint(
-          <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
-            <p>
-              <FormattedMessage
-                id="discover.noMatchRoute.bannerText"
-                defaultMessage="Invalid URL for Discover application."
-              />
-            </p>
-          </EuiCallOut>
-        )
-      );
-
-      // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
-      setTimeout(() => {
-        if (bannerId) {
-          services.core.overlays.banners.remove(bannerId);
-        }
-      }, 15000);
-
-      urlForwarding.navigateToDefaultApp();
+    if (navigated) {
+      return;
     }
+
+    const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
+      defaultMessage: 'Page not found',
+    });
+
+    bannerId = services.core.overlays.banners.replace(
+      bannerId,
+      toMountPoint(
+        <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
+          <p>
+            <FormattedMessage
+              id="discover.noMatchRoute.bannerText"
+              defaultMessage="Invalid URL for Discover application."
+            />
+          </p>
+        </EuiCallOut>
+      )
+    );
+
+    // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
+    setTimeout(() => {
+      if (bannerId) {
+        services.core.overlays.banners.remove(bannerId);
+      }
+    }, 15000);
+
+    urlForwarding.navigateToDefaultApp();
   }, [restorePreviousUrl, services.core.overlays.banners, urlForwarding]);
 
   return null;
