@@ -6,20 +6,32 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { EVENT_ACTION, EVENT_KIND, RULE_ID, SPACE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_OWNER,
+  EVENT_ACTION,
+  EVENT_KIND,
+  RULE_ID,
+  SPACE_IDS,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import { once } from 'lodash/fp';
 import moment from 'moment';
-import { RuleDataClient, RuleDataPluginService } from '../../../../../../rule_registry/server';
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { invariant } from '../../../../../common/utils/invariant';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 import { makeFloatString } from '../../signals/utils';
-import { ExecutionMetric, ExecutionMetricArgs, LogStatusChangeArgs } from '../types';
+import {
+  ExecutionMetric,
+  ExecutionMetricArgs,
+  IRuleDataPluginService,
+  LogStatusChangeArgs,
+} from '../types';
 import {
   EVENTS_INDEX_PREFIX,
-  MESSAGE,
   EVENT_SEQUENCE,
+  MESSAGE,
   RULE_STATUS,
   RULE_STATUS_SEVERITY,
 } from './constants';
@@ -65,7 +77,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
   private sequence = 0;
   private ruleDataClient: RuleDataClient;
 
-  constructor(ruleDataService: RuleDataPluginService) {
+  constructor(ruleDataService: IRuleDataPluginService) {
     this.ruleDataClient = ruleDataService.getRuleDataClient(
       SERVER_APP_ID,
       EVENTS_INDEX_PREFIX,
@@ -73,7 +85,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
     );
   }
 
-  private initialize = once(async (ruleDataService: RuleDataPluginService, indexAlias: string) => {
+  private initialize = once(async (ruleDataService: IRuleDataPluginService, indexAlias: string) => {
     await bootstrapRuleExecutionLog(ruleDataService, indexAlias);
   });
 
@@ -216,6 +228,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [getMetricField(metric)]: value,
         [RULE_ID]: ruleId,
         [TIMESTAMP]: new Date().toISOString(),
+        [ALERT_OWNER]: 'siem',
       },
       namespace
     );
@@ -239,6 +252,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [RULE_STATUS_SEVERITY]: statusSeverityDict[newStatus],
         [RULE_STATUS]: newStatus,
         [TIMESTAMP]: new Date().toISOString(),
+        [ALERT_OWNER]: 'siem',
       },
       namespace
     );
