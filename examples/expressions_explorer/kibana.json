@@ -1,5 +1,6 @@
 {
   "id": "expressionsExplorer",
+  "kibanaVersion": "kibana",
   "version": "0.0.1",
   "server": false,
   "ui": true,

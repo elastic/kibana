@@ -1,5 +1,6 @@
 {
   "id": "prebootExample",
+  "kibanaVersion": "kibana",
   "owner": {
     "name": "Core",
     "githubTeam": "kibana-core"

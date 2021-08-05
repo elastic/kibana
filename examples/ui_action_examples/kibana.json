@@ -1,5 +1,6 @@
 {
   "id": "uiActionsExamples",
+  "kibanaVersion": "kibana",
   "version": "0.0.1",
   "owner": {
     "name": "App Services",

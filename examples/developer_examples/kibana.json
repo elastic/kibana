@@ -1,5 +1,6 @@
 {
   "id": "developerExamples",
+  "kibanaVersion": "kibana",
   "version": "0.0.1",
   "ui": true
 }

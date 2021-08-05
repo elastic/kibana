@@ -1,5 +1,6 @@
 {
   "id": "screenshotModeExample",
+  "kibanaVersion": "kibana",
   "version": "1.0.0",
   "server": true,
   "ui": true,

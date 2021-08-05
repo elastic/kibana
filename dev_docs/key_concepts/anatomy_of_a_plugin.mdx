@@ -59,9 +59,9 @@ plugins/
 
 `id` - [Required] The id of your plugin can be anything, though it should be fairly unique, as every plugin in an installation needs to be unique. It must be snakeCase.
 
-`version` - [Required] Note the version of your plugin. Kibana doesn't use this field, but it is required.
+`version` - [Required] Note the version of your plugin. For internal plugins that don't specify a `kibanaVersion`, this will have to match the version of Kibana or ci will fail. Because teams won't want to be bumping this number for every release, internal plugins should set `kibanaVersion` to "kibana", and set this to anything.
 
-`kibanaVersion` - [Optional] If your plugin is only compatible with a specific version of Kibana, put it here. Note that internal, first-party plugins shouldn't use this, as they are expected to be compatible with every Kibana version.
+`kibanaVersion` - [Optional] If your plugin is only compatible with a specific version of Kibana, put it here. Internal, first-party plugins should set this to "kibana", otherwise they will need to bump this value, or the one in `version`, every time the Kibana version is bumped. When [#61087](https://github.com/elastic/kibana/issues/61087) is fixed, we will stop requiring this field for internal plugins.
 
 `server` - [Optional] If your plugin contains server-side code, this must be true.
 
