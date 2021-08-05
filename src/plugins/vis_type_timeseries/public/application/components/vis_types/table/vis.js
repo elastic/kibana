@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable react/no-danger */
+
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
