@@ -4,6 +4,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "legacyId": {
+        "type": "keyword"
+      },
       "name": {
         "type": "text",
         "fields": {

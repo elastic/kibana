@@ -193,6 +193,7 @@ export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Pa
   Partial<Omit<Alert<Params>, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
+  legacyId: string;
   enabled: boolean;
   name: string;
   tags: string[];

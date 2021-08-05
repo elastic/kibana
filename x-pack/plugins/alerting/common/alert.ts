@@ -57,6 +57,7 @@ export interface AlertAggregations {
 
 export interface Alert<Params extends AlertTypeParams = never> {
   id: string;
+  legacyId: string;
   enabled: boolean;
   name: string;
   tags: string[];

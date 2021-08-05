@@ -85,6 +85,12 @@ export function getMigrations(
     pipeMigrations(removeNullsFromSecurityRules)
   );
 
+  const migrationRetainExistingId = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    pipeMigrations(retainExistingId)
+  );
+
   // This empty migration is necessary to ensure that the saved object is decrypted with its old descriptor/ and re-encrypted with its new
   // descriptor, if necessary. This is included because the saved object is being converted to `namespaceType: 'multiple-isolated'` in 8.0
   // (see the `convertToMultiNamespaceTypeVersion` field in the saved object type registration process).
@@ -99,6 +105,7 @@ export function getMigrations(
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
     '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
+    '7.15.0': executeMigrationWithErrorHandling(migrationRetainExistingId, '7.15.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
   };
 }
@@ -376,6 +383,18 @@ function restructureConnectorsThatSupportIncident(
 
 function convertNullToUndefined(attribute: SavedObjectAttribute) {
   return attribute != null ? attribute : undefined;
+}
+
+function retainExistingId(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      legacyId: doc.id,
+    },
+  };
 }
 
 function removeNullsFromSecurityRules(

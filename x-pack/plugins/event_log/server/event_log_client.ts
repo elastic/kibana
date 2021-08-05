@@ -83,6 +83,7 @@ export class EventLogClient implements IEventLogClient {
   async findEventsBySavedObjectIds(
     type: string,
     ids: string[],
+    legacyIds?: string[],
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult> {
     const findOptions = findOptionsSchema.validate(options ?? {});
@@ -93,11 +94,15 @@ export class EventLogClient implements IEventLogClient {
     // verify the user has the required permissions to view this saved objects
     await this.savedObjectGetter(type, ids);
 
+    const queryIds = ids;
+    if (legacyIds && legacyIds.filter(Boolean).length) {
+      queryIds.push(...legacyIds);
+    }
     return await this.esContext.esAdapter.queryEventsBySavedObjects(
       this.esContext.esNames.indexPattern,
       namespace,
       type,
-      ids,
+      queryIds,
       findOptions
     );
   }

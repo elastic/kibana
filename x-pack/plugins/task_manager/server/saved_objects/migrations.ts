@@ -8,6 +8,7 @@ import uuidv5 from 'uuid/v5';
 import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '../../../../../src/core/server';
 import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
 
+// TODO: Use https://github.com/elastic/kibana/issues/107744 when it's available
 function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
   return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
 }
@@ -18,10 +19,10 @@ export const migrations: SavedObjectMigrationMap = {
     updated_at: new Date().toISOString(),
   }),
   '7.6.0': moveIntervalIntoSchedule,
-  '8.0.0': updateSavedObjectIds,
+  '8.0.0': migrationSavedObjectIds,
 };
 
-function updateSavedObjectIds(doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>) {
+function migrationSavedObjectIds(doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>) {
   if (doc.attributes.taskType.startsWith('alerting:')) {
     let params: { spaceId?: string; alertId?: string } = {};
     try {
