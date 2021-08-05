@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   CrawlerDomain,
   CrawlerDomainFromServer,
@@ -101,3 +103,15 @@ export function crawlDomainValidationToResult(
     state: 'valid',
   };
 }
+
+export const getDeleteDomainSuccessMessage = (domainUrl: string) => {
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.action.deleteDomain.successMessage',
+    {
+      defaultMessage: "Domain '{domainUrl}' was deleted",
+      values: {
+        domainUrl,
+      },
+    }
+  );
+};
