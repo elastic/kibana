@@ -44,10 +44,7 @@ export class MapperProxy {
     }
   };
 
-  public createIngestNodePipeline = async (
-    name: string, 
-    processors: object[]
-  ): Promise<void> => {
+  public createIngestNodePipeline = async (name: string, processors: object[]): Promise<void> => {
     try {
       return this.http.post('/api/ingest_pipelines', {
         body: JSON.stringify({

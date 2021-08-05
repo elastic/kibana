@@ -18,7 +18,7 @@ import {
   EuiSelect,
   EuiFormRow,
   EuiDescribedFormGroup,
-  EuiFieldText
+  EuiFieldText,
 } from '@elastic/eui';
 import { FieldCopyAction } from '../../../../common';
 import { Instructions } from './instructions';
@@ -29,7 +29,7 @@ interface Props {
   actionOptions: FieldCopyAction[];
   onFileUpload(action: string | null, files: FileList | null, pipeline: string): void;
   isLoading: boolean;
-  isLoaded: boolean;
+  isUploaded: boolean;
 }
 
 function getOptions(actions: FieldCopyAction[]) {
@@ -41,11 +41,11 @@ function getOptions(actions: FieldCopyAction[]) {
   return [...actionOptions];
 }
 
-export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading, isLoaded }) => {
+export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading, isUploaded }) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
   const [file, setFile] = useState<FileList | null>(null);
   const [pipelineName, setPipelineName] = useState('');
-  
+
   const selectedAction = [];
   if (action) {
     selectedAction.push({ value: action, label: action });
@@ -116,10 +116,8 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
 
         <EuiSpacer size="l" />
 
-        <EuiFormRow
-          fullWidth
-        >
-        <EuiFilePicker
+        <EuiFormRow fullWidth>
+          <EuiFilePicker
             id="filePicker"
             initialPromptText={i18n.translate(
               'xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription',
@@ -135,7 +133,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
 
         <EuiSpacer size="l" />
 
-        {!isLoaded && (
+        {!isUploaded && (
           <EuiButton
             target="_self"
             onClick={() => onFileUpload(action, file, pipelineName)}

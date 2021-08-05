@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiButton, EuiPanel } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiLink } from '@elastic/eui';
 
 interface Props {
   pipelineName: string;
@@ -16,32 +16,27 @@ interface Props {
 
 export const ResultsPanel: FC<Props> = ({ pipelineName, onManageIngestPipeline }) => {
   return (
-    <EuiPanel color="subdued" borderRadius="none">
-      <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={true}>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.ecsMapper.results.success"
-                defaultMessage="Import successful!"
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiButton
-            className="euiButton--success"
-            target="_self"
-            onClick={() => onManageIngestPipeline()}
-            data-test-subj="ecsMapperManagePipelineButton"
-          >
-            <FormattedMessage
-              id="xpack.ecsMapper.manageIngestPipeline"
-              defaultMessage="Manage {pipelineName}"
-              values={{ pipelineName }}
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiCallOut title="Import complete" color="success" iconType="check">
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.ecsMapper.results.information"
+            defaultMessage="ECS Mapper has imported new ingest node pipeline. 
+            Click&nbsp;{managementLink} to manage it within Stack Management."
+            values={{
+              managementLink: (
+                <EuiLink
+                  target="_blank"
+                  onClick={() => {onManageIngestPipeline()}}
+                >
+                  here
+                </EuiLink>
+              ),
+              pipelineName
+            }}
+          />
+        </p>
+      </EuiText>
+    </EuiCallOut>
   );
 };

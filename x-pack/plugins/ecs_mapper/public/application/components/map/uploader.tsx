@@ -6,17 +6,16 @@
  */
 
 import React, { FC, useState } from 'react';
-
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { NavigateToAppOptions } from 'kibana/public';
 import { UploadPanel } from './uploadPanel';
 import { ConfirmationPanel } from './confirmationPanel';
 import { ResultsPanel } from './resultsPanel';
 import { ErrorPanel } from './errorPanel';
 import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { MapperProxy } from '../../mapper_api';
 import { FileUploadPluginStart } from '../../../../../file_upload/public';
-import { NavigateToAppOptions } from 'kibana/public';
 
 export interface Props {
   fileUpload: FileUploadPluginStart;
@@ -24,7 +23,7 @@ export interface Props {
   navigateToApp(app: string, options: NavigateToAppOptions): void; // todo object type
 }
 
-export const EcsMapperUploadView: FC<Props> = ({fileUpload, mapper, navigateToApp}) => {
+export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToApp }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isPipelineCreated, setIsPipelineCreated] = useState<boolean>(false);
@@ -37,7 +36,7 @@ export const EcsMapperUploadView: FC<Props> = ({fileUpload, mapper, navigateToAp
       checkCreateIndexPattern: false,
       checkHasManagePipeline: true,
     });
-  }
+  };
 
   const onManageIngestPipeline = () => {
     navigateToApp('management', {
@@ -45,64 +44,63 @@ export const EcsMapperUploadView: FC<Props> = ({fileUpload, mapper, navigateToAp
     });
   };
 
-  const onFileUpload = async (action: FieldCopyAction, files: FileList, pipelineName: string) => {
-    setPipelineName(pipelineName);
+  const onFileUpload = async (action: FieldCopyAction, files: FileList, name: string) => {
+    setPipelineName(name);
+
     if (files.length > 0) {
       setIsLoading(true);
-      processFile(files[0], action, pipelineName);
+      processFile(files[0], action);
     }
-  }
+  };
 
   const onCreatePipeline = async () => {
     await mapper.createIngestNodePipeline(pipelineName, pipelineProcessors);
     setIsPipelineCreated(true);
-  }
+  };
 
   const onCancelCreate = () => {
     setIsUploaded(false);
     setPipelineName('');
     setPipelineProcessors([]);
     setIsPipelineCreated(false);
-  }
+  };
 
-  const processFile = async (file: File, action: FieldCopyAction, pipelineName: string) => {
+  const processFile = async (file: File, action: FieldCopyAction) => {
     const maxBytes = fileUpload.getMaxBytes();
-    
+
     if (file.size <= maxBytes) {
       try {
         const fileContents = await readFile(file, maxBytes);
-        
+
         const processors = await mapper.fetchPipelineFromMapping(fileContents, action);
 
         if (processors.length === 0) {
-          setError("error"); // todo
+          setError('error'); // todo
         }
 
         setIsLoading(false);
         setIsUploaded(true);
         setPipelineProcessors(processors);
-      } catch (error) {
+      } catch (e) {
         setIsLoading(false);
         setIsUploaded(false);
-        setError("error"); // todo
+        setError('error'); // todo
       }
+    } else {
+      setError('File is greater than allowed size of ' + maxBytes + 'bytes.');
     }
-    else {
-      setError("File is greater than allowed size of " + maxBytes + "bytes.");
-    }
-  }
-    
+  };
+
   return (
     <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperFileUpload">
       <EuiPageBody className="prfDevTool__page__pageBody">
         <EuiPageContent className="prfDevTool__page__pageBodyContent">
-          
           {!isUploaded && !isPipelineCreated && (
             <UploadPanel
               onFileUpload={onFileUpload}
               actionOptions={Object.values(FieldCopyAction)}
               isLoading={isLoading}
-              isLoaded={isUploaded}
+              isUploaded={isUploaded}
             />
           )}
 
@@ -114,6 +112,7 @@ export const EcsMapperUploadView: FC<Props> = ({fileUpload, mapper, navigateToAp
               processors={pipelineProcessors}
               onCreatePipeline={onCreatePipeline}
               onCancel={onCancelCreate}
+              isPipelineCreated={isPipelineCreated}
             />
           )}
 
@@ -124,14 +123,9 @@ export const EcsMapperUploadView: FC<Props> = ({fileUpload, mapper, navigateToAp
             />
           )}
 
-          {error && (
-            <ErrorPanel
-              error={error}
-            />
-          )}
-
+          {error && <ErrorPanel error={error} />}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
-}
+};
