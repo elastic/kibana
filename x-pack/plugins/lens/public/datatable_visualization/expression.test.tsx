@@ -8,7 +8,7 @@
 import { DatatableProps } from '../../common/expressions';
 import type { LensMultiTable } from '../../common';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
 import { getDatatable } from './expression';
 
 function sampleArgs() {
