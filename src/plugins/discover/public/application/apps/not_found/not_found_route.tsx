@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toMountPoint } from 'src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../kibana_react/public';
 import { DiscoverServices } from '../../../build_services';
 
 export interface NotFoundRouteProps {
