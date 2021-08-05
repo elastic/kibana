@@ -124,7 +124,7 @@ describe('policy table', () => {
     rendered.update();
     snapshot(getPolicyNames(rendered));
   });
-  test('shows more when per page value is increased', () => {
+  test('shows more policies when "Rows per page" value is increased', () => {
     const rendered = mountWithIntl(component);
     const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
     perPageButton.simulate('click');
