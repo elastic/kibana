@@ -25,7 +25,7 @@ export default function ({ getService }) {
         .expect(404);
     });
 
-    it('should sanitize URL perameters', async () => {
+    it('should return 404 when file is not in font folder', async () => {
       await supertest
         .get(`/api/maps/fonts/open_sans/..%2fopen_sans%2f0-255`)
         .expect(404);
