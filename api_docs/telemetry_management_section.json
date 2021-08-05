@@ -191,19 +191,23 @@
           ],
           "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "telemetryManagementSection",
-              "id": "def-public.enabled",
+              "id": "def-public.TelemetryManagementSectionPluginSetup.toggleSecuritySolutionExample.$1",
               "type": "boolean",
               "tags": [],
               "label": "enabled",
               "description": [],
+              "signature": [
+                "boolean"
+              ],
               "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

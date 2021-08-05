@@ -30,7 +30,7 @@ import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { getLatencyColumnLabel } from '../get_latency_column_label';
+import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
 import { MainStatsServiceInstanceItem } from '../service_overview_instances_chart_and_table';
 import { InstanceActionsMenu } from './instance_actions_menu';
 
