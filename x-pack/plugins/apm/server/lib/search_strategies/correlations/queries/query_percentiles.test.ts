@@ -10,28 +10,31 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import {
-  fetchTransactionDurationHistogramRangeSteps,
-  getHistogramIntervalRequest,
-} from './query_histogram_range_steps';
+  fetchTransactionDurationPercentiles,
+  getTransactionDurationPercentilesRequest,
+} from './query_percentiles';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 
-describe('query_histogram_range_steps', () => {
-  describe('getHistogramIntervalRequest', () => {
-    it('returns the request body for the histogram interval request', () => {
-      const req = getHistogramIntervalRequest(params);
+describe('query_percentiles', () => {
+  describe('getTransactionDurationPercentilesRequest', () => {
+    it('returns the request body for the duration percentiles request', () => {
+      const req = getTransactionDurationPercentilesRequest(params);
 
       expect(req).toEqual({
         body: {
           aggs: {
-            transaction_duration_max: {
-              max: {
+            transaction_duration_percentiles: {
+              percentiles: {
                 field: 'transaction.duration.us',
-              },
-            },
-            transaction_duration_min: {
-              min: {
-                field: 'transaction.duration.us',
+                hdr: {
+                  number_of_significant_value_digits: 3,
+                },
               },
             },
           },
@@ -56,26 +59,37 @@ describe('query_histogram_range_steps', () => {
             },
           },
           size: 0,
+          track_total_hits: true,
         },
         index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });
 
-  describe('fetchTransactionDurationHistogramRangeSteps', () => {
-    it('fetches the range steps for the log histogram', async () => {
+  describe('fetchTransactionDurationPercentiles', () => {
+    it('fetches the percentiles', async () => {
+      const totalDocs = 10;
+      const percentilesValues = {
+        '1.0': 5.0,
+        '5.0': 25.0,
+        '25.0': 165.0,
+        '50.0': 445.0,
+        '75.0': 725.0,
+        '95.0': 945.0,
+        '99.0': 985.0,
+      };
+
       const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
         body: estypes.SearchResponse;
       } => {
         return {
           body: ({
-            hits: { total: { value: 10 } },
+            hits: { total: { value: totalDocs } },
             aggregations: {
-              transaction_duration_max: {
-                value: 10000,
-              },
-              transaction_duration_min: {
-                value: 10,
+              transaction_duration_percentiles: {
+                values: percentilesValues,
               },
             },
           } as unknown) as estypes.SearchResponse,
@@ -86,14 +100,12 @@ describe('query_histogram_range_steps', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationHistogramRangeSteps(
+      const resp = await fetchTransactionDurationPercentiles(
         esClientMock,
         params
       );
 
-      expect(resp.length).toEqual(100);
-      expect(resp[0]).toEqual(9.260965422132594);
-      expect(resp[99]).toEqual(18521.930844265193);
+      expect(resp).toEqual({ percentiles: percentilesValues, totalDocs });
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });

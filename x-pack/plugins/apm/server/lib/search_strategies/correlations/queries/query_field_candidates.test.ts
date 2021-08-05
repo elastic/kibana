@@ -9,14 +9,20 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
+import { hasPrefixToInclude } from '../utils/has_prefix_to_include';
+
 import {
   fetchTransactionDurationFieldCandidates,
   getRandomDocsRequest,
-  hasPrefixToInclude,
   shouldBeExcluded,
 } from './query_field_candidates';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 
 describe('query_field_candidates', () => {
   describe('shouldBeExcluded', () => {
@@ -79,6 +85,8 @@ describe('query_field_candidates', () => {
           size: 1000,
         },
         index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });
