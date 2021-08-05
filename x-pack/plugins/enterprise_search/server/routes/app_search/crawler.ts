@@ -94,6 +94,21 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+    })
+  );
+
   router.delete(
     {
       path: '/api/app_search/engines/{name}/crawler/domains/{id}',
