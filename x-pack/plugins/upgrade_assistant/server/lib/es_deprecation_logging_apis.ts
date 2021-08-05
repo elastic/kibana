@@ -32,7 +32,7 @@ export async function setDeprecationLogging(
 ): Promise<DeprecationLoggingStatus> {
   const { body: loggerDeprecationResponse } = await dataClient.asCurrentUser.cluster.putSettings({
     body: {
-      transient: {
+      persistent: {
         'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
       },
     },
@@ -40,7 +40,7 @@ export async function setDeprecationLogging(
 
   await dataClient.asCurrentUser.cluster.putSettings({
     body: {
-      transient: {
+      persistent: {
         'cluster.deprecation_indexing.enabled': isEnabled,
       },
     },
