@@ -416,22 +416,31 @@
                 ],
                 "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
                 "deprecated": false,
-                "returnComment": [],
                 "children": [
                   {
                     "parentPluginId": "pluginA",
-                    "id": "def-public.foo",
+                    "id": "def-public.crazyFunction.$2.fn.fn.$1.foo",
                     "type": "Object",
                     "tags": [],
                     "label": "foo",
                     "description": [],
-                    "signature": [
-                      "{ param: string; }"
-                    ],
                     "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "children": [
+                      {
+                        "parentPluginId": "pluginA",
+                        "id": "def-public.crazyFunction.$2.fn.fn.$1.foo.param",
+                        "type": "string",
+                        "tags": [],
+                        "label": "param",
+                        "description": [],
+                        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+                        "deprecated": false
+                      }
+                    ]
                   }
-                ]
+                ],
+                "returnComment": []
               }
             ]
           },
@@ -732,8 +741,8 @@
             ],
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "pluginA",
@@ -749,13 +758,10 @@
             ],
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false,
-            "returnComment": [
-              "nothing!"
-            ],
             "children": [
               {
                 "parentPluginId": "pluginA",
-                "id": "def-public.t",
+                "id": "def-public.ExampleInterface.aFnWithGen.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "t",
@@ -766,9 +772,45 @@
                   "T"
                 ],
                 "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "nothing!"
             ]
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.ExampleInterface.anOptionalFn",
+            "type": "Function",
+            "tags": [],
+            "label": "anOptionalFn",
+            "description": [
+              "\nAdd coverage for this bug report: https://github.com/elastic/kibana/issues/107145"
+            ],
+            "signature": [
+              "((foo: string) => string) | undefined"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.ExampleInterface.anOptionalFn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "foo",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "pluginA",
@@ -786,6 +828,94 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.ExampleInterface.fnTypeWithGeneric",
+            "type": "Function",
+            "tags": [],
+            "label": "fnTypeWithGeneric",
+            "description": [
+              "\nThis one is slightly different than the above `aFnWithGen`. The generic is part of the type, not the function (it's before the = sign).\nIdeally, we can still capture the children."
+            ],
+            "signature": [
+              "(t: string, p: ",
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.MyProps",
+                "text": "MyProps"
+              },
+              ") => ",
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.TypeWithGeneric",
+                "text": "TypeWithGeneric"
+              },
+              "<string>"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.t",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "t",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.p",
+                "type": "Object",
+                "tags": [],
+                "label": "p",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "pluginA",
+                    "scope": "public",
+                    "docId": "kibPluginAPluginApi",
+                    "section": "def-public.MyProps",
+                    "text": "MyProps"
+                  }
+                ],
+                "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.ExampleInterface.fnTypeWithGenericThatIsOptional",
+            "type": "Function",
+            "tags": [],
+            "label": "fnTypeWithGenericThatIsOptional",
+            "description": [
+              "\nOptional code path is different than others."
+            ],
+            "signature": [
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.FnTypeWithGeneric",
+                "text": "FnTypeWithGeneric"
+              },
+              "<string> | undefined"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1074,6 +1204,8 @@
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -1131,6 +1263,79 @@
       },
       {
         "parentPluginId": "pluginA",
+        "id": "def-public.FnTypeWithGeneric",
+        "type": "Type",
+        "tags": [
+          "return"
+        ],
+        "label": "FnTypeWithGeneric",
+        "description": [
+          "\nEver so slightly different than above. Users of this type must specify the generic.\n"
+        ],
+        "signature": [
+          "(t: T, p: ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.MyProps",
+            "text": "MyProps"
+          },
+          ") => ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.TypeWithGeneric",
+            "text": "TypeWithGeneric"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+        "deprecated": false,
+        "returnComment": [
+          "something!"
+        ],
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.t",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t",
+            "description": [
+              "something!"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.p",
+            "type": "Object",
+            "tags": [],
+            "label": "p",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.MyProps",
+                "text": "MyProps"
+              }
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "pluginA",
         "id": "def-public.FnWithGeneric",
         "type": "Type",
         "tags": [],
@@ -1151,6 +1356,24 @@
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.t",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t",
+            "description": [
+              "This is a generic T type. It can be anything."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1309,6 +1532,94 @@
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.a",
+            "type": "string",
+            "tags": [],
+            "label": "a",
+            "description": [],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.b",
+            "type": "number",
+            "tags": [],
+            "label": "b",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.c",
+            "type": "Array",
+            "tags": [],
+            "label": "c",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.d",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "d",
+            "description": [],
+            "signature": [
+              "string | number | ",
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAFooPluginApi",
+                "section": "def-public.FooType",
+                "text": "FooType"
+              },
+              " | ",
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.TypeWithGeneric",
+                "text": "TypeWithGeneric"
+              },
+              "<string> | ",
+              {
+                "pluginId": "pluginA",
+                "scope": "common",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-common.ImACommonType",
+                "text": "ImACommonType"
+              }
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.e",
+            "type": "string",
+            "tags": [],
+            "label": "e",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1738,13 +2049,10 @@
           ],
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [
-            "the id of the search service."
-          ],
           "children": [
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.searchSpec",
+              "id": "def-public.Setup.getSearchService.$1",
               "type": "Object",
               "tags": [],
               "label": "searchSpec",
@@ -1761,8 +2069,12 @@
                 }
               ],
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "the id of the search service."
           ]
         },
         {
@@ -1779,24 +2091,41 @@
           ],
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.searchSpec",
+              "id": "def-public.Setup.getSearchService2.$1.searchSpec",
               "type": "Object",
               "tags": [],
               "label": "searchSpec",
-              "description": [
-                "Provide the settings neccessary to create a new Search Service"
-              ],
-              "signature": [
-                "{ username: string; password: string; }"
-              ],
+              "description": [],
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "children": [
+                {
+                  "parentPluginId": "pluginA",
+                  "id": "def-public.Setup.getSearchService2.$1.searchSpec.username",
+                  "type": "string",
+                  "tags": [],
+                  "label": "username",
+                  "description": [],
+                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                  "deprecated": false
+                },
+                {
+                  "parentPluginId": "pluginA",
+                  "id": "def-public.Setup.getSearchService2.$1.searchSpec.password",
+                  "type": "string",
+                  "tags": [],
+                  "label": "password",
+                  "description": [],
+                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                  "deprecated": false
+                }
+              ]
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "pluginA",
@@ -1815,48 +2144,63 @@
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
           "deprecated": true,
           "references": [],
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.thingOne",
+              "id": "def-public.Setup.doTheThing.$1",
               "type": "number",
               "tags": [],
               "label": "thingOne",
               "description": [
                 "Thing one comment"
               ],
+              "signature": [
+                "number"
+              ],
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.thingTwo",
+              "id": "def-public.Setup.doTheThing.$2",
               "type": "string",
               "tags": [],
               "label": "thingTwo",
               "description": [
                 "ThingTwo comment"
               ],
+              "signature": [
+                "string"
+              ],
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.thingThree",
+              "id": "def-public.Setup.doTheThing.$3.thingThree",
               "type": "Object",
               "tags": [],
               "label": "thingThree",
-              "description": [
-                "Thing three is an object with a nested var"
-              ],
-              "signature": [
-                "{ nestedVar: number; }"
-              ],
+              "description": [],
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "children": [
+                {
+                  "parentPluginId": "pluginA",
+                  "id": "def-public.Setup.doTheThing.$3.thingThree.nestedVar",
+                  "type": "number",
+                  "tags": [],
+                  "label": "nestedVar",
+                  "description": [],
+                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                  "deprecated": false
+                }
+              ]
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "pluginA",
@@ -1872,25 +2216,60 @@
           ],
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [
-            "It's hard to tell but I think this returns a function that returns an object with a\nproperty that is a function that returns a string. Whoa."
-          ],
           "children": [
             {
               "parentPluginId": "pluginA",
-              "id": "def-public.obj",
+              "id": "def-public.Setup.fnWithInlineParams.$1.obj",
               "type": "Object",
               "tags": [],
               "label": "obj",
-              "description": [
-                "A funky parameter."
-              ],
-              "signature": [
-                "{ fn: (foo: { param: string; }) => number; }"
-              ],
+              "description": [],
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "children": [
+                {
+                  "parentPluginId": "pluginA",
+                  "id": "def-public.Setup.fnWithInlineParams.$1.obj.fn",
+                  "type": "Function",
+                  "tags": [],
+                  "label": "fn",
+                  "description": [],
+                  "signature": [
+                    "(foo: { param: string; }) => number"
+                  ],
+                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                  "deprecated": false,
+                  "children": [
+                    {
+                      "parentPluginId": "pluginA",
+                      "id": "def-public.Setup.fnWithInlineParams.$1.obj.fn.$1.foo",
+                      "type": "Object",
+                      "tags": [],
+                      "label": "foo",
+                      "description": [],
+                      "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                      "deprecated": false,
+                      "children": [
+                        {
+                          "parentPluginId": "pluginA",
+                          "id": "def-public.Setup.fnWithInlineParams.$1.obj.fn.$1.foo.param",
+                          "type": "string",
+                          "tags": [],
+                          "label": "param",
+                          "description": [],
+                          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                          "deprecated": false
+                        }
+                      ]
+                    }
+                  ],
+                  "returnComment": []
+                }
+              ]
             }
+          ],
+          "returnComment": [
+            "It's hard to tell but I think this returns a function that returns an object with a\nproperty that is a function that returns a string. Whoa."
           ]
         },
         {
@@ -1934,10 +2313,10 @@
           ],
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
           "deprecated": false,
+          "children": [],
           "returnComment": [
             "The currently selected {@link SearchLanguage}"
-          ],
-          "children": []
+          ]
         }
       ],
       "lifecycle": "start",

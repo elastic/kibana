@@ -9,9 +9,11 @@ export const ALERT_FLYOUT = '[data-test-subj="timeline:details-panel:flyout"]';
 
 export const CELL_TEXT = '.euiText';
 
+export const JSON_VIEW_WRAPPER = '[data-test-subj="jsonViewWrapper"]';
+
 export const JSON_CONTENT = '[data-test-subj="jsonView"]';
 
-export const JSON_LINES = '.ace_line';
+export const JSON_LINES = '.euiCodeBlock__line';
 
 export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 

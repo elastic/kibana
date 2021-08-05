@@ -69,6 +69,24 @@
 #CC# /x-pack/plugins/drilldowns/ @elastic/kibana-app-services
 #CC# /packages/kbn-interpreter/ @elastic/kibana-app-services
 
+### Observability Plugins
+
+# Observability Shared
+/x-pack/plugins/observability/ @elastic/observability-ui
+
+# Logs and Metrics (Infra)
+/x-pack/plugins/infra/ @elastic/logs-metrics-ui
+/x-pack/plugins/infra/server/routes/log* @elastic/logs-metrics-ui @elastic/logs-ui
+/x-pack/plugins/infra/public/pages/logs/ @elastic/logs-metrics-ui @elastic/logs-ui
+/x-pack/plugins/infra/server/routes/metrics* @elastic/logs-metrics-ui @elastic/metrics-ui
+/x-pack/plugins/infra/public/pages/metrics/ @elastic/logs-metrics-ui @elastic/metrics-ui
+
+# Stack Monitoring
+/x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui @elastic/logs-metrics-ui @elastic/metrics-ui
+
+# Fleet
+/x-pack/plugins/fleet/ @elastic/fleet
+
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
@@ -97,6 +115,7 @@
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
+### END Observability Plugins
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
@@ -109,13 +128,6 @@
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 #CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
-
-
-# Observability UIs
-/x-pack/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/plugins/fleet/ @elastic/fleet
-/x-pack/plugins/observability/ @elastic/observability-ui
-/x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui

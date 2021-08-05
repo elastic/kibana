@@ -444,11 +444,10 @@
             ],
             "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "cases",
-                "id": "def-public.theCase",
+                "id": "def-public.AllCasesSelectorModalProps.onRowClick.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "theCase",
@@ -472,9 +471,11 @@
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -495,7 +496,30 @@
               ") => void) | undefined"
             ],
             "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.AllCasesSelectorModalProps.updateCase.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newCase",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.Case",
+                    "text": "Case"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -550,7 +574,30 @@
               ") => void) | undefined"
             ],
             "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CaseViewProps.onCaseDataSuccess.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.Case",
+                    "text": "Case"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -643,7 +690,44 @@
               ", postComment: (args: PostComment) => Promise<void>) => Promise<void>) | undefined"
             ],
             "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CreateCaseProps.afterCaseCreated.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "theCase",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.Case",
+                    "text": "Case"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/public/components/create/index.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CreateCaseProps.afterCaseCreated.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "postComment",
+                "description": [],
+                "signature": [
+                  "(args: PostComment) => Promise<void>"
+                ],
+                "path": "x-pack/plugins/cases/public/components/create/index.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -703,8 +787,8 @@
             ],
             "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -726,11 +810,10 @@
             ],
             "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "cases",
-                "id": "def-public.theCase",
+                "id": "def-public.CreateCaseProps.onSuccess.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "theCase",
@@ -745,9 +828,11 @@
                   }
                 ],
                 "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -911,13 +996,10 @@
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component that displays all cases"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getAllCases.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -934,8 +1016,12 @@
                 }
               ],
               "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component that displays all cases"
           ]
         },
         {
@@ -968,13 +1054,10 @@
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component that is a modal for selecting a case"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getAllCasesSelectorModal.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -991,8 +1074,12 @@
                 }
               ],
               "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component that is a modal for selecting a case"
           ]
         },
         {
@@ -1025,13 +1112,10 @@
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component for viewing a specific case"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getCaseView.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1048,8 +1132,12 @@
                 }
               ],
               "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component for viewing a specific case"
           ]
         },
         {
@@ -1082,13 +1170,10 @@
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component for configuring a specific case"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getConfigureCases.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1105,8 +1190,12 @@
                 }
               ],
               "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component for configuring a specific case"
           ]
         },
         {
@@ -1139,13 +1228,10 @@
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component for creating a new case"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getCreateCase.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1162,8 +1248,12 @@
                 }
               ],
               "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component for creating a new case"
           ]
         },
         {
@@ -1196,13 +1286,10 @@
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component for showing recent cases"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getRecentCases.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1219,8 +1306,12 @@
                 }
               ],
               "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component for showing recent cases"
           ]
         }
       ],
@@ -3941,7 +4032,52 @@
               "((caseId: string, caseConnectorId: string, subCaseId?: string | undefined) => void) | undefined"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-common.UpdateByKey.fetchCaseUserActions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "caseId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/cases/common/ui/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-common.UpdateByKey.fetchCaseUserActions.$2",
+                "type": "string",
+                "tags": [],
+                "label": "caseConnectorId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/cases/common/ui/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-common.UpdateByKey.fetchCaseUserActions.$3",
+                "type": "string",
+                "tags": [],
+                "label": "subCaseId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/cases/common/ui/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -3962,7 +4098,30 @@
               ") => void) | undefined"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-common.UpdateByKey.updateCase.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newCase",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.Case",
+                    "text": "Case"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/common/ui/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -3994,7 +4153,9 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -4007,7 +4168,9 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
