@@ -25,6 +25,7 @@ import AppSearchImage from '../../assets/app_search.png';
 import WorkplaceSearchImage from '../../assets/workplace_search.png';
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
+import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 interface ProductSelectorProps {
@@ -95,7 +96,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
 
       <EuiSpacer size="xxl" />
 
-      {config.host ? <LicenseCallout /> : <LicenseCallout />}
+      {config.host ? <LicenseCallout /> : <SetupGuideCta />}
     </KibanaPageTemplate>
   );
 };
