@@ -23,13 +23,13 @@ export interface DocTableLegacyProps {
   onFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   rows: estypes.SearchHit[];
   indexPattern: IndexPattern;
-  minimumVisibleRows?: number;
+  minimumVisibleRows: number;
   onAddColumn?: (column: string) => void;
-  onBackToTop: () => void;
+  onBackToTop?: () => void;
   onSort?: (sort: string[][]) => void;
   onMoveColumn?: (columns: string, newIdx: number) => void;
   onRemoveColumn?: (column: string) => void;
-  sampleSize: number;
+  sampleSize?: number;
   sort?: string[][];
   useNewFieldsApi?: boolean;
 }
@@ -102,7 +102,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   const ref = useRef<HTMLDivElement>(null);
   const scope = useRef<AngularScope | undefined>();
   const [rows, setRows] = useState(renderProps.rows);
-  const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
+  const [minimumVisibleRows, setMinimumVisibleRows] = useState(renderProps.minimumVisibleRows);
   const onSkipBottomButtonClick = useCallback(async () => {
     // delay scrolling to after the rows have been rendered
     const bottomMarker = document.getElementById('discoverBottomMarker');
@@ -119,9 +119,9 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   }, [setMinimumVisibleRows, renderProps.rows]);
 
   useEffect(() => {
-    setMinimumVisibleRows(50);
+    setMinimumVisibleRows(renderProps.minimumVisibleRows);
     setRows(renderProps.rows);
-  }, [renderProps.rows, setMinimumVisibleRows]);
+  }, [renderProps.rows, setMinimumVisibleRows, renderProps.minimumVisibleRows]);
 
   useEffect(() => {
     if (ref && ref.current && !scope.current) {
@@ -146,7 +146,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
     <div>
       <SkipBottomButton onClick={onSkipBottomButtonClick} />
       <div ref={ref} />
-      {renderProps.rows.length === renderProps.sampleSize ? (
+      {renderProps.onBackToTop && renderProps.rows.length === renderProps.sampleSize ? (
         <div
           className="dscTable__footer"
           data-test-subj="discoverDocTableFooter"

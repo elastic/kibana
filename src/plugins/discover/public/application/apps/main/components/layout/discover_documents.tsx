@@ -145,6 +145,7 @@ function DiscoverDocumentsComponent({
           <DocTableLegacyMemoized
             columns={columns}
             indexPattern={indexPattern}
+            minimumVisibleRows={50}
             rows={rows}
             sort={state.sort || []}
             searchDescription={savedSearch.description}
