@@ -37,7 +37,7 @@ const requireTimestampOptionValidator = (options: Props['options']): ValidationC
         message: i18n.translate(
           'indexPatternEditor.requireTimestampOption.ValidationErrorMessage',
           {
-            defaultMessage: 'Select a timestamp field option.',
+            defaultMessage: 'Select a timestamp field.',
           }
         ),
       };
