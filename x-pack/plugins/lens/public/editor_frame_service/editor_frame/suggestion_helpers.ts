@@ -21,7 +21,7 @@ import {
   VisualizationMap,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
-import type { LayerType } from '../../../common';
+import { LayerType, layerTypes } from '../../../common';
 import { LensDispatch, selectSuggestion, switchVisualization } from '../../state_management';
 import { getLayerType } from './config_panel/add_layer';
 
@@ -99,7 +99,7 @@ export function getSuggestions({
   }, {} as Record<string, LayerType>);
 
   const isLayerSupportedByVisualization = (layerId: string, supportedTypes: LayerType[]) =>
-    supportedTypes.includes(layerTypesMap[layerId]);
+    supportedTypes.includes(layerTypesMap[layerId] ?? layerTypes.DATA);
 
   // Collect all table suggestions from available datasources
   const datasourceTableSuggestions = datasources.flatMap(([datasourceId, datasource]) => {
@@ -128,12 +128,14 @@ export function getSuggestions({
     .flatMap(([visualizationId, visualization]) => {
       const supportedLayerTypes = visualization.getLayerTypes().map(({ type }) => type);
       return datasourceTableSuggestions
-        .filter(
-          (datasourceSuggestion) =>
-            datasourceSuggestion.keptLayerIds.filter((layerId) =>
-              isLayerSupportedByVisualization(layerId, supportedLayerTypes)
-            ).length
-        )
+        .filter((datasourceSuggestion) => {
+          const filteredCount = datasourceSuggestion.keptLayerIds.filter((layerId) =>
+            isLayerSupportedByVisualization(layerId, supportedLayerTypes)
+          ).length;
+          // make it pass either suggestions with some ids left after filtering
+          // or suggestion with already 0 ids before the filtering (testing purposes)
+          return filteredCount || filteredCount === datasourceSuggestion.keptLayerIds.length;
+        })
         .flatMap((datasourceSuggestion) => {
           const table = datasourceSuggestion.table;
           const currentVisualizationState =

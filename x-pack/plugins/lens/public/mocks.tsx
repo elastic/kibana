@@ -21,7 +21,7 @@ import { LensPublicStart } from '.';
 import { visualizationTypes } from './xy_visualization/types';
 import { navigationPluginMock } from '../../../../src/plugins/navigation/public/mocks';
 import { LensAppServices } from './app_plugin/types';
-import { DOC_TYPE } from '../common';
+import { DOC_TYPE, layerTypes } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
 import {
@@ -47,8 +47,8 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     clearLayer: jest.fn((state, _layerId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
-    getLayerTypes: jest.fn(),
-    getLayerType: jest.fn(),
+    getLayerTypes: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+    getLayerType: jest.fn((_state, _layerId) => layerTypes.DATA),
     visualizationTypes: [
       {
         icon: 'empty',

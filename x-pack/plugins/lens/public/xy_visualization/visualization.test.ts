@@ -265,6 +265,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -293,6 +294,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -349,6 +351,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: undefined,
         accessors: [],

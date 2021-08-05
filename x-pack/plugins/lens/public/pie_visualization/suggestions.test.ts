@@ -508,6 +508,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: ['a'],
                 metric: 'b',
 
@@ -696,6 +697,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: ['a'],
                 metric: 'b',
 

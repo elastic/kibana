@@ -56,6 +56,7 @@ describe('heatmap', () => {
     test('returns a default state', () => {
       expect(getHeatmapVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
+        layerType: layerTypes.DATA,
         title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
         legend: {

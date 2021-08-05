@@ -65,6 +65,7 @@ describe('metric_visualization', () => {
       expect(metricVisualization.clearLayer(exampleState(), 'l1')).toEqual({
         accessor: undefined,
         layerId: 'l1',
+        layerType: layerTypes.DATA,
       });
     });
   });
@@ -128,6 +129,7 @@ describe('metric_visualization', () => {
       ).toEqual({
         accessor: 'newDimension',
         layerId: 'l1',
+        layerType: layerTypes.DATA,
       });
     });
   });
@@ -148,6 +150,7 @@ describe('metric_visualization', () => {
       ).toEqual({
         accessor: undefined,
         layerId: 'l1',
+        layerType: layerTypes.DATA,
       });
     });
   });

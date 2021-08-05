@@ -41,6 +41,7 @@ describe('Datatable Visualization', () => {
     it('should initialize from the empty state', () => {
       expect(datatableVisualization.initialize(() => 'aaa', undefined)).toEqual({
         layerId: 'aaa',
+        layerType: layerTypes.DATA,
         columns: [],
       });
     });
@@ -75,6 +76,7 @@ describe('Datatable Visualization', () => {
       };
       expect(datatableVisualization.clearLayer(state, 'baz')).toMatchObject({
         layerId: 'baz',
+        layerType: layerTypes.DATA,
         columns: [],
       });
     });
@@ -432,6 +434,7 @@ describe('Datatable Visualization', () => {
         })
       ).toEqual({
         layerId: 'layer1',
+        layerType: layerTypes.DATA,
         columns: [{ columnId: 'b', isTransposed: false }, { columnId: 'c' }],
       });
     });
