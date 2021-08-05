@@ -24,15 +24,18 @@ import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '..
 export const ProtectionSwitch = React.memo(
   ({
     protection,
+    protectionLabel,
     osList,
   }: {
     protection: PolicyProtection;
+    protectionLabel?: string;
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const dispatch = useDispatch<(action: AppAction) => void>();
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
+    const protectionName = protectionLabel ?? protection;
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -96,7 +99,7 @@ export const ProtectionSwitch = React.memo(
           defaultMessage:
             '{protectionName} protections {mode, select, true {enabled} false {disabled}}',
           values: {
-            protectionName: protection.charAt(0).toUpperCase() + protection.substring(1),
+            protectionName: protectionName.charAt(0).toUpperCase() + protectionName.substring(1),
             mode: selected !== ProtectionModes.off,
           },
         })}
