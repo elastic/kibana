@@ -23,7 +23,7 @@ export interface CanvasSpecificRendererHandlers {
   /** Handler to invoke when a rendered embeddable is destroyed */
   onEmbeddableDestroyed: () => void;
   /** Handler to invoke when the input to a function has changed internally */
-  onEmbeddableInputChange: (expression: string) => void;
+  onEmbeddableInputChange: (expression: string, embeddableInput?: string) => void;
   /** Handler to invoke when an element's dimensions have changed*/
   onResize: GenericRendererCallback;
   /** Handler to invoke when an element should be resized. */

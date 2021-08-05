@@ -59,7 +59,6 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType }, handlers) => {
-      console.log(handlers);
       const uniqueId = handlers.getElementId();
 
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
@@ -99,28 +98,19 @@ export const embeddableRendererFactory = (
         ReactDOM.unmountComponentAtNode(domNode);
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
-          console.log(JSON.stringify(updatedInput));
           const updatedExpression = embeddableInputToExpression(
             updatedInput,
             embeddableType,
             palettes,
             isByValueEnabled
           );
-          console.log(updatedExpression);
 
-          if (isByValueEnabled) {
-            const oldSerializedInput = handlers.getInput();
-            const oldInput = { ...decode(oldSerializedInput), input };
-
-            if (!isEqual(oldInput, updatedInput)) {
-              handlers.setInput(encode(updatedInput));
-            }
-
-            if (updatedExpression) {
+          if (updatedExpression) {
+            if (isByValueEnabled) {
+              handlers.onEmbeddableInputChange(updatedExpression, encode(updatedInput));
+            } else {
               handlers.onEmbeddableInputChange(updatedExpression);
             }
-          } else if (updatedExpression) {
-            handlers.onEmbeddableInputChange(updatedExpression);
           }
         });
 

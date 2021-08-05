@@ -130,8 +130,14 @@ export const createDispatchedHandlerFactory = (
 
       getElementId: () => element.id,
 
-      onEmbeddableInputChange(embeddableExpression: string) {
-        dispatch(updateEmbeddableExpression({ elementId: element.id, embeddableExpression }));
+      onEmbeddableInputChange(embeddableExpression: string, embeddableInput?: string) {
+        if (element.expression !== embeddableExpression) {
+          dispatch(updateEmbeddableExpression({ elementId: element.id, embeddableExpression }));
+        }
+
+        if (embeddableInput && element.input !== embeddableInput) {
+          this.setInput(embeddableInput);
+        }
       },
 
       onEmbeddableDestroyed() {
