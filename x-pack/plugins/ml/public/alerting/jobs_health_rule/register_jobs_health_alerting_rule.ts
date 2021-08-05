@@ -95,6 +95,9 @@ export function registerJobsHealthAlertingRule(
   \\{\\{#memory_status\\}\\}Memory status: \\{\\{memory_status\\}\\}  \\{\\{/memory_status\\}\\}
   \\{\\{#log_time\\}\\}Memory logging time: \\{\\{log_time\\}\\}  \\{\\{/log_time\\}\\}
   \\{\\{#failed_category_count\\}\\}Failed category count: \\{\\{failed_category_count\\}\\}  \\{\\{/failed_category_count\\}\\}
+  \\{\\{#annotation\\}\\}Annotation: \\{\\{annotation\\}\\}  \\{\\{/annotation\\}\\}
+  \\{\\{#missed_docs_count\\}\\}Number of missed documents: \\{\\{missed_docs_count\\}\\}  \\{\\{/missed_docs_count\\}\\}
+  \\{\\{#end_timestamp\\}\\}Latest finalized bucket with missing docs: \\{\\{end_timestamp\\}\\}  \\{\\{/end_timestamp\\}\\}
 \\{\\{/context.results\\}\\}
 `,
       }
