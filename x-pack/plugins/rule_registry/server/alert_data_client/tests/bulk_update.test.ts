@@ -12,6 +12,7 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
 import { AuditLogger } from '../../../../security/server';
+import { AlertingAuthorizationEntity } from '../../../../alerting/server';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
@@ -35,244 +36,419 @@ beforeEach(() => {
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
   );
+  alertingAuthMock.ensureAuthorized.mockImplementation(
+    // @ts-expect-error
+    async ({
+      ruleTypeId,
+      consumer,
+      operation,
+      entity,
+    }: {
+      ruleTypeId: string;
+      consumer: string;
+      operation: string;
+      entity: typeof AlertingAuthorizationEntity.Alert;
+    }) => {
+      if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
+        return Promise.resolve();
+      }
+      return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+    }
+  );
 });
+
+const fakeAlertId = 'myfakeid1';
+const successfulAuthzHit = 'successfulAuthzHit';
+const unsuccessfulAuthzHit = 'unsuccessfulAuthzHit';
+// fakeRuleTypeId will cause authz to fail
+const fakeRuleTypeId = 'fake.rule';
 
 describe('bulkUpdate()', () => {
   describe('ids', () => {
-    test('logs successful event in audit logger', async () => {
-      const fakeAlertId = 'myfakeid1';
-      const indexName = '.alerts-observability-apm.alerts';
-      const alertsClient = new AlertsClient(alertsClientParams);
-      esClientMock.mget.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            docs: [
-              {
-                _id: fakeAlertId,
-                _index: indexName,
-                _source: {
-                  [RULE_ID]: 'apm.error_rate',
-                  [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
-                  [SPACE_IDS]: [DEFAULT_SPACE],
-                },
-              },
-            ],
-          },
-        })
-      );
-      esClientMock.bulk.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            errors: false,
-            took: 1,
-            items: [
-              {
-                update: {
+    describe('audit log', () => {
+      test('logs successful event in audit logger', async () => {
+        const indexName = '.alerts-observability-apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.mget.mockResolvedValueOnce(
+          elasticsearchClientMock.createApiResponse({
+            body: {
+              docs: [
+                {
                   _id: fakeAlertId,
-                  _index: '.alerts-observability-apm.alerts',
-                  result: 'updated',
-                  status: 200,
+                  _index: indexName,
+                  _source: {
+                    [RULE_ID]: 'apm.error_rate',
+                    [ALERT_OWNER]: 'apm',
+                    [ALERT_STATUS]: 'open',
+                    [SPACE_IDS]: [DEFAULT_SPACE],
+                  },
                 },
-              },
-            ],
-          },
-        })
-      );
-      await alertsClient.bulkUpdate({
-        ids: [fakeAlertId],
-        query: undefined,
-        index: indexName,
-        status: 'closed',
-      });
-      expect(auditLogger.log).toHaveBeenLastCalledWith({
-        message: `User is updating alert [id=${fakeAlertId}]`,
-        event: {
-          action: 'alert_update',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['change'],
-        },
-        error: undefined,
-      });
-    });
-
-    test('audit error access if user is unauthorized for given alert', async () => {
-      const fakeAlertId = 'myfakeid1';
-      const indexName = '.alerts-observability-apm.alerts';
-      const alertsClient = new AlertsClient(alertsClientParams);
-      esClientMock.mget.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            docs: [
-              {
-                _id: fakeAlertId,
-                _index: indexName,
-                _source: {
-                  [RULE_ID]: 'apm.error_rate',
-                  [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
-                  [SPACE_IDS]: [DEFAULT_SPACE],
+              ],
+            },
+          })
+        );
+        esClientMock.bulk.mockResolvedValueOnce(
+          elasticsearchClientMock.createApiResponse({
+            body: {
+              errors: false,
+              took: 1,
+              items: [
+                {
+                  update: {
+                    _id: fakeAlertId,
+                    _index: '.alerts-observability-apm.alerts',
+                    result: 'updated',
+                    status: 200,
+                  },
                 },
-              },
-            ],
-          },
-        })
-      );
-      alertingAuthMock.ensureAuthorized.mockRejectedValueOnce(
-        new Error('bulk update by ids test error')
-      );
-      await expect(
-        alertsClient.bulkUpdate({
+              ],
+            },
+          })
+        );
+        await alertsClient.bulkUpdate({
           ids: [fakeAlertId],
           query: undefined,
           index: indexName,
           status: 'closed',
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"bulk update by ids test error"`);
+        });
+        expect(auditLogger.log).toHaveBeenLastCalledWith({
+          message: `User is updating alert [id=${fakeAlertId}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'unknown',
+            type: ['change'],
+          },
+          error: undefined,
+        });
+      });
 
-      expect(auditLogger.log).toHaveBeenLastCalledWith({
-        message: `Failed attempt to update alert [id=${fakeAlertId}]`,
-        event: {
-          action: 'alert_update',
-          category: ['database'],
-          outcome: 'failure',
-          type: ['change'],
-        },
-        error: {
-          code: 'Error',
-          message: 'bulk update by ids test error',
-        },
+      test('audit error access if user is unauthorized for given alert', async () => {
+        const indexName = '.alerts-observability-apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.mget.mockResolvedValueOnce(
+          elasticsearchClientMock.createApiResponse({
+            body: {
+              docs: [
+                {
+                  _id: fakeAlertId,
+                  _index: indexName,
+                  _source: {
+                    [RULE_ID]: fakeRuleTypeId,
+                    [ALERT_OWNER]: 'apm',
+                    [ALERT_STATUS]: 'open',
+                    [SPACE_IDS]: [DEFAULT_SPACE],
+                  },
+                },
+              ],
+            },
+          })
+        );
+
+        await expect(
+          alertsClient.bulkUpdate({
+            ids: [fakeAlertId],
+            query: undefined,
+            index: indexName,
+            status: 'closed',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized for fake.rule and apm"`);
+
+        expect(auditLogger.log).toHaveBeenLastCalledWith({
+          message: `Failed attempt to update alert [id=${fakeAlertId}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'failure',
+            type: ['change'],
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized for fake.rule and apm',
+          },
+        });
+      });
+
+      test('logs multiple error events in audit logger', async () => {
+        const indexName = '.alerts-observability-apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.mget.mockResolvedValueOnce(
+          elasticsearchClientMock.createApiResponse({
+            body: {
+              docs: [
+                {
+                  _id: successfulAuthzHit,
+                  _index: indexName,
+                  _source: {
+                    [RULE_ID]: 'apm.error_rate',
+                    [ALERT_OWNER]: 'apm',
+                    [ALERT_STATUS]: 'open',
+                    [SPACE_IDS]: [DEFAULT_SPACE],
+                  },
+                },
+                {
+                  _id: unsuccessfulAuthzHit,
+                  _index: indexName,
+                  _source: {
+                    [RULE_ID]: fakeRuleTypeId,
+                    [ALERT_OWNER]: 'apm',
+                    [ALERT_STATUS]: 'open',
+                    [SPACE_IDS]: [DEFAULT_SPACE],
+                  },
+                },
+              ],
+            },
+          })
+        );
+
+        await expect(
+          alertsClient.bulkUpdate({
+            ids: [successfulAuthzHit, unsuccessfulAuthzHit],
+            query: undefined,
+            index: indexName,
+            status: 'closed',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized for fake.rule and apm"`);
+        expect(auditLogger.log.mock.calls).toHaveLength(2);
+        expect(auditLogger.log.mock.calls[0][0]).toEqual({
+          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'failure',
+            type: ['change'],
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized for fake.rule and apm',
+          },
+        });
+        expect(auditLogger.log.mock.calls[1][0]).toEqual({
+          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'failure',
+            type: ['change'],
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized for fake.rule and apm',
+          },
+        });
       });
     });
+
     // test('throws an error if ES client fetch fails', async () => {});
     // test('throws an error if ES client bulk update fails', async () => {});
     // test('throws an error if ES client updateByQuery fails', async () => {});
   });
   describe('query', () => {
-    test('logs successful event in audit logger', async () => {
-      const fakeAlertId = 'myfakeid1';
-      const indexName = '.alerts-observability-apm.alerts';
-      const alertsClient = new AlertsClient(alertsClientParams);
-      esClientMock.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            took: 5,
-            timed_out: false,
-            _shards: {
-              total: 1,
-              successful: 1,
-              failed: 0,
-              skipped: 0,
-            },
-            hits: {
-              total: 1,
-              max_score: 999,
-              hits: [
-                {
-                  _id: fakeAlertId,
-                  _index: '.alerts-observability-apm.alerts',
-                  _source: {
-                    [RULE_ID]: 'apm.error_rate',
-                    [ALERT_OWNER]: 'apm',
-                    [ALERT_STATUS]: 'open',
-                    [SPACE_IDS]: [DEFAULT_SPACE],
+    describe('audit log', () => {
+      test('logs successful event in audit logger', async () => {
+        const indexName = '.alerts-observability-apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.search.mockResolvedValueOnce(
+          elasticsearchClientMock.createApiResponse({
+            body: {
+              took: 5,
+              timed_out: false,
+              _shards: {
+                total: 1,
+                successful: 1,
+                failed: 0,
+                skipped: 0,
+              },
+              hits: {
+                total: 1,
+                max_score: 999,
+                hits: [
+                  {
+                    _id: fakeAlertId,
+                    _index: '.alerts-observability-apm.alerts',
+                    _source: {
+                      [RULE_ID]: 'apm.error_rate',
+                      [ALERT_OWNER]: 'apm',
+                      [ALERT_STATUS]: 'open',
+                      [SPACE_IDS]: [DEFAULT_SPACE],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-        })
-      );
+          })
+        );
 
-      esClientMock.updateByQuery.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            updated: 1,
-          },
-        })
-      );
-
-      await alertsClient.bulkUpdate({
-        ids: undefined,
-        query: `${ALERT_STATUS}: open`,
-        index: indexName,
-        status: 'closed',
-      });
-      expect(auditLogger.log).toHaveBeenCalledWith({
-        message: `User is updating alert [id=${fakeAlertId}]`,
-        event: {
-          action: 'alert_update',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['change'],
-        },
-        error: undefined,
-      });
-    });
-
-    test('audit error access if user is unauthorized for given alert', async () => {
-      const fakeAlertId = 'myfakeid1';
-      const indexName = '.alerts-observability-apm.alerts';
-      const alertsClient = new AlertsClient(alertsClientParams);
-      esClientMock.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            took: 5,
-            timed_out: false,
-            _shards: {
-              total: 1,
-              successful: 1,
-              failed: 0,
-              skipped: 0,
+        esClientMock.updateByQuery.mockResolvedValueOnce(
+          elasticsearchClientMock.createApiResponse({
+            body: {
+              updated: 1,
             },
-            hits: {
-              total: 1,
-              max_score: 999,
-              hits: [
-                {
-                  _id: fakeAlertId,
-                  _index: '.alerts-observability-apm.alerts',
-                  _source: {
-                    [RULE_ID]: 'apm.error_rate',
-                    [ALERT_OWNER]: 'apm',
-                    [ALERT_STATUS]: 'open',
-                    [SPACE_IDS]: [DEFAULT_SPACE],
-                  },
-                },
-              ],
-            },
-          },
-        })
-      );
-      alertingAuthMock.ensureAuthorized.mockRejectedValueOnce(
-        new Error('bulk update by query test error')
-      );
-      await expect(
-        alertsClient.bulkUpdate({
+          })
+        );
+
+        await alertsClient.bulkUpdate({
           ids: undefined,
           query: `${ALERT_STATUS}: open`,
           index: indexName,
           status: 'closed',
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`
-              "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update 
-               Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update 
-              Error: Error: bulk update by query test error"
-            `);
+        });
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          message: `User is updating alert [id=${fakeAlertId}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'unknown',
+            type: ['change'],
+          },
+          error: undefined,
+        });
+      });
 
-      expect(auditLogger.log).toHaveBeenLastCalledWith({
-        message: `Failed attempt to update alert [id=${fakeAlertId}]`,
-        event: {
-          action: 'alert_update',
-          category: ['database'],
-          outcome: 'failure',
-          type: ['change'],
-        },
-        error: {
-          code: 'Error',
-          message: 'bulk update by query test error',
-        },
+      test('audit error access if user is unauthorized for given alert', async () => {
+        const indexName = '.alerts-observability-apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.search.mockResolvedValueOnce(
+          elasticsearchClientMock.createApiResponse({
+            body: {
+              took: 5,
+              timed_out: false,
+              _shards: {
+                total: 1,
+                successful: 1,
+                failed: 0,
+                skipped: 0,
+              },
+              hits: {
+                total: 1,
+                max_score: 999,
+                hits: [
+                  {
+                    _id: fakeAlertId,
+                    _index: '.alerts-observability-apm.alerts',
+                    _source: {
+                      [RULE_ID]: fakeRuleTypeId,
+                      [ALERT_OWNER]: 'apm',
+                      [ALERT_STATUS]: 'open',
+                      [SPACE_IDS]: [DEFAULT_SPACE],
+                    },
+                  },
+                ],
+              },
+            },
+          })
+        );
+        await expect(
+          alertsClient.bulkUpdate({
+            ids: undefined,
+            query: `${ALERT_STATUS}: open`,
+            index: indexName,
+            status: 'closed',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`
+                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update
+                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update
+                Error: Error: Unauthorized for fake.rule and apm"
+              `);
+
+        expect(auditLogger.log).toHaveBeenLastCalledWith({
+          message: `Failed attempt to update alert [id=${fakeAlertId}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'failure',
+            type: ['change'],
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized for fake.rule and apm',
+          },
+        });
+      });
+
+      test('logs multiple error events in audit logger', async () => {
+        const indexName = '.alerts-observability-apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.search.mockResolvedValueOnce(
+          elasticsearchClientMock.createApiResponse({
+            body: {
+              took: 5,
+              timed_out: false,
+              _shards: {
+                total: 1,
+                successful: 1,
+                failed: 0,
+                skipped: 0,
+              },
+              hits: {
+                total: 2,
+                max_score: 999,
+                hits: [
+                  {
+                    _id: successfulAuthzHit,
+                    _index: '.alerts-observability-apm.alerts',
+                    _source: {
+                      [RULE_ID]: 'apm.error_rate',
+                      [ALERT_OWNER]: 'apm',
+                      [ALERT_STATUS]: 'open',
+                      [SPACE_IDS]: [DEFAULT_SPACE],
+                    },
+                  },
+                  {
+                    _id: unsuccessfulAuthzHit,
+                    _index: '.alerts-observability-apm.alerts',
+                    _source: {
+                      [RULE_ID]: fakeRuleTypeId,
+                      [ALERT_OWNER]: 'apm',
+                      [ALERT_STATUS]: 'open',
+                      [SPACE_IDS]: [DEFAULT_SPACE],
+                    },
+                  },
+                ],
+              },
+            },
+          })
+        );
+        await expect(
+          alertsClient.bulkUpdate({
+            ids: undefined,
+            query: `${ALERT_STATUS}: open`,
+            index: indexName,
+            status: 'closed',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`
+                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update
+                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update
+                Error: Error: Unauthorized for fake.rule and apm"
+              `);
+
+        expect(auditLogger.log.mock.calls).toHaveLength(2);
+        expect(auditLogger.log.mock.calls[0][0]).toEqual({
+          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'failure',
+            type: ['change'],
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized for fake.rule and apm',
+          },
+        });
+        expect(auditLogger.log.mock.calls[1][0]).toEqual({
+          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'failure',
+            type: ['change'],
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized for fake.rule and apm',
+          },
+        });
       });
     });
     // test('throws an error if ES client fetch fails', async () => {});
