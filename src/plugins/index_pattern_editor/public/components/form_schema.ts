@@ -35,7 +35,7 @@ export const schema = {
       defaultMessage: 'Timestamp field',
     }),
     helpText: i18n.translate('indexPatternEditor.editor.form.timestampFieldHelp', {
-      defaultMessage: 'Select a primary timestamp field for use with the global time filter.',
+      defaultMessage: 'Select a timestamp field for use with the global time filter.',
     }),
     validations: [],
   },

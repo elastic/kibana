@@ -31,7 +31,7 @@ exports[`StatusMessage should render with no partial matches 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="The index pattern you've entered doesn't match any indices. You can match {strongIndices}, below."
+        defaultMessage="The index pattern you've entered doesn't match any indices, data streams, or index aliases. You can match {strongIndices}, below."
         id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
         values={
           Object {
@@ -62,7 +62,7 @@ exports[`StatusMessage should render with partial matches 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your index pattern doesn't match any sources, but you have {strongIndices} which {matchedIndicesLength, plural, one {source looks} other {sources look} } similar."
+        defaultMessage="Your index pattern doesn't match any sources, but you have {strongIndices} which {matchedIndicesLength, plural, one {is} other {are} } similar."
         id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
         values={
           Object {
@@ -94,7 +94,7 @@ exports[`StatusMessage should render without a query 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your index pattern can match {sourceCount, plural, one {# source} other {# sources} }."
+        defaultMessage="Your index pattern has {sourceCount, plural, one {# match} other {# matches} }."
         id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
         values={
           Object {

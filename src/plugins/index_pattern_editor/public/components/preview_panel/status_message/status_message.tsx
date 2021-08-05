@@ -25,7 +25,7 @@ const NoMatchStatusMessage = (allIndicesLength: number) => (
   <span>
     <FormattedMessage
       id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
-      defaultMessage="The index pattern you've entered doesn't match any indices.
+      defaultMessage="The index pattern you've entered doesn't match any indices, data streams, or index aliases.
   You can match {strongIndices}, below."
       values={{
         strongIndices: (
@@ -75,9 +75,9 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
-            defaultMessage="Your index pattern can match {sourceCount, plural,
-              one {# source}
-              other {# sources}
+            defaultMessage="Your index pattern has {sourceCount, plural,
+              one {# match}
+              other {# matches}
             }."
             values={{ sourceCount: allIndicesLength }}
           />
@@ -129,8 +129,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
           id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
           defaultMessage="Your index pattern doesn't match any sources, but you have {strongIndices} which
           {matchedIndicesLength, plural,
-            one {source looks}
-            other {sources look}
+            one {is}
+            other {are}
           } similar."
           values={{
             matchedIndicesLength: partialMatchedIndices.length,

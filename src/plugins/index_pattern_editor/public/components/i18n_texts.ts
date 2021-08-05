@@ -17,7 +17,7 @@ export const geti18nTexts = () => {
       }
     ),
     timestampFieldHelp: i18n.translate('indexPatternEditor.editor.form.timeFieldHelp', {
-      defaultMessage: 'Select a primary timestamp field for use with the global time filter.',
+      defaultMessage: 'Select a timestamp field for use with the global time filter.',
     }),
     rollupLabel: i18n.translate('indexPatternEditor.rollupIndexPattern.createIndex.indexLabel', {
       defaultMessage: 'Rollup',
