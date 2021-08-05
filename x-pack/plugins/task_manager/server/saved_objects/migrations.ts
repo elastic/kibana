@@ -44,6 +44,31 @@ function migrationSavedObjectIds(doc: SavedObjectUnsanitizedDoc<TaskInstanceWith
         },
       };
     }
+  } else if (doc.attributes.taskType.startsWith('actions:')) {
+    let params: { spaceId?: string; actionTaskParamsId?: string } = {};
+    try {
+      params = JSON.parse((doc.attributes.params as unknown) as string);
+    } catch (err) {
+      // Do nothing?
+    }
+
+    if (params.actionTaskParamsId && params.spaceId && params.spaceId !== 'default') {
+      const newId = deterministicallyRegenerateObjectId(
+        params.spaceId,
+        'action',
+        params.actionTaskParamsId
+      );
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          params: JSON.stringify({
+            ...params,
+            actionTaskParamsId: newId,
+          }),
+        },
+      };
+    }
   }
 
   return doc;
