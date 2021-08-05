@@ -54,6 +54,7 @@ export const TypeField = ({ isDisabled = false }: Props) => {
                     defaultMessage: 'Type select',
                   }
                 )}
+                aria-controls="runtimeFieldScript"
                 fullWidth
               />
             </EuiFormRow>

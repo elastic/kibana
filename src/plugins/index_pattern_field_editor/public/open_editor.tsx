@@ -132,6 +132,9 @@ export const getFieldEditorOpener = ({
         size: 'l',
         ownFocus: true,
         hideCloseButton: true,
+        'aria-label': i18n.translate('indexPatternFieldEditor.flyoutAriaLabel', {
+          defaultMessage: 'Create or edit field',
+        }),
         onClose: (flyout) => {
           const canClose = canCloseValidator.current();
           if (canClose) {
