@@ -29,6 +29,7 @@ import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
+import { InstallationCallout } from './installation_callout';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
@@ -99,6 +100,7 @@ const ServiceNowConnectorFields: React.FC<
 
   return (
     <>
+      {!isLegacy && <InstallationCallout />}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -213,19 +215,6 @@ const ServiceNowConnectorFields: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <FormattedMessage
-        defaultMessage="To use the connector you had to {install} the Elastic App from the ServiceNow Store."
-        id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
-        values={{
-          install: (
-            <EuiLink href="https://store.servicenow.com/" target="_blank">
-              {i18n.INSTALL}
-            </EuiLink>
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
       {isLegacy && <DeprecatedCallout />}
       {applicationRequired && <ApplicationRequiredCallout />}
     </>

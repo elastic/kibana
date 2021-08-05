@@ -210,3 +210,10 @@ export const INSTALL = i18n.translate(
     defaultMessage: 'install',
   }
 );
+
+export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutInfo',
+  {
+    defaultMessage: 'Elastic ServiceNow Application',
+  }
+);
