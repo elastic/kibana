@@ -62,6 +62,7 @@ export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
       return [...acc, value];
     }
   }, []);
+
 export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
   Object.entries(snakeCase).reduce((acc, [key, value]) => {
     if (isArray(value)) {
@@ -73,6 +74,7 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
     }
     return acc;
   }, {} as U);
+
 export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   const isMounted = useRef(false);
   const [user, setUser] = useState<AuthenticatedElasticUser | null>(null);

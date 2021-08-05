@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
 import { mockUxSeries, mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
@@ -16,7 +16,7 @@ describe('FilterExpanded', function () {
 
   const mockSeries = { ...mockUxSeries, filters };
 
-  it('should render properly', async function () {
+  it('render', async () => {
     const initSeries = { filters };
     mockAppIndexPattern();
 
@@ -31,8 +31,11 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    screen.getByText('Browser Family');
+    await waitFor(() => {
+      screen.getByText('Browser Family');
+    });
   });
+
   it('should call go back on click', async function () {
     const initSeries = { filters };
 
@@ -47,10 +50,12 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    fireEvent.click(screen.getByText('Browser Family'));
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Browser Family'));
+    });
   });
 
-  it('should call useValuesList on load', async function () {
+  it('calls useValuesList on load', async () => {
     const initSeries = { filters };
 
     const { spy } = mockUseValuesList([
@@ -69,15 +74,18 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toBeCalledWith(
-      expect.objectContaining({
-        time: { from: 'now-15m', to: 'now' },
-        sourceField: USER_AGENT_NAME,
-      })
-    );
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toBeCalledWith(
+        expect.objectContaining({
+          time: { from: 'now-15m', to: 'now' },
+          sourceField: USER_AGENT_NAME,
+        })
+      );
+    });
   });
-  it('should filter display values', async function () {
+
+  it('filters display values', async () => {
     const initSeries = { filters };
 
     mockUseValuesList([
@@ -96,13 +104,15 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    fireEvent.click(screen.getByText('Browser Family'));
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Browser Family'));
 
-    expect(screen.queryByText('Firefox')).toBeTruthy();
+      expect(screen.queryByText('Firefox')).toBeTruthy();
 
-    fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'ch' } });
+      fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'ch' } });
 
-    expect(screen.queryByText('Firefox')).toBeFalsy();
-    expect(screen.getByText('Chrome')).toBeTruthy();
+      expect(screen.queryByText('Firefox')).toBeFalsy();
+      expect(screen.getByText('Chrome')).toBeTruthy();
+    });
   });
 });

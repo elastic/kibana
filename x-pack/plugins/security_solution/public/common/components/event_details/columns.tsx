@@ -16,7 +16,7 @@ import { BrowserFields } from '../../containers/source';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import * as i18n from './translations';
 import { EventFieldsData } from './types';
-import { ColumnHeaderOptions } from '../../../../common';
+import { BrowserField, ColumnHeaderOptions } from '../../../../common';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
 import { ActionCell } from './table/action_cell';
@@ -36,7 +36,7 @@ const HoverActionsContainer = styled(EuiPanel)`
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 export const getFieldFromBrowserField = memoizeOne(
-  (keys: string[], browserFields: BrowserFields): BrowserFields => get(browserFields, keys),
+  (keys: string[], browserFields: BrowserFields): BrowserField => get(browserFields, keys),
   (newArgs, lastArgs) => newArgs[0].join() === lastArgs[0].join()
 );
 export const getColumns = ({

@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use fetch$ instead
+> Use the `fetch$` method instead  8.0
 > 
 
 Fetch this source and reject the returned Promise on error

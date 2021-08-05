@@ -9,7 +9,7 @@ import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/api/types'
 import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
-import { JobStatus } from '../../../common/types';
+import { JobStatus, ReportOutput } from '../../../common/types';
 
 import { ILM_POLICY_NAME } from '../../../common/constants';
 
@@ -36,12 +36,12 @@ export type ReportProcessingFields = Required<{
 
 export type ReportFailedFields = Required<{
   completed_at: Report['completed_at'];
-  output: Report['output'];
+  output: ReportOutput | null;
 }>;
 
 export type ReportCompletedFields = Required<{
   completed_at: Report['completed_at'];
-  output: Report['output'];
+  output: Omit<ReportOutput, 'content'> | null;
 }>;
 
 /*
@@ -354,7 +354,7 @@ export class ReportingStore {
     const doc = sourceDoc({
       ...completedInfo,
       status,
-    });
+    } as ReportSource);
 
     try {
       checkReportIsEditable(report);

@@ -24,7 +24,11 @@
       "level": "critical",
       "message": "model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded",
       "url": "",
-      "details": "details"
+      "details": "details",
+      "_meta": {
+        "snapshot_id": "1",
+        "job_id": "deprecation_check_job"
+      }
     }
   ],
   "node_settings": [
