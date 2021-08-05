@@ -145,9 +145,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
             />
           )}
 
-          {isPipelineCreated &&
-            <ResultsPanel onManageIngestPipeline={onManageIngestPipeline} />
-          }
+          {isPipelineCreated && <ResultsPanel onManageIngestPipeline={onManageIngestPipeline} />}
 
           <EuiSpacer size="m" />
 
