@@ -20,30 +20,25 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
         <div
           className="kibanaCodeEditor"
         >
-          <div
-            className="kibanaCodeEditor__keyboardHint"
-            data-test-subj="codeEditorHint"
-            id="generated-id"
-            onClick={[Function]}
-            onKeyDown={[Function]}
-            role="button"
-            tabIndex={0}
+          <span
+            className="euiToolTipAnchor euiToolTipAnchor--displayBlock"
+            onKeyUp={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
           >
             <div
-              className="euiText euiText--medium"
-            >
-              <p>
-                Press Enter to start editing.
-              </p>
-            </div>
-            <div
-              className="euiText euiText--medium"
-            >
-              <p>
-                When you're done, press Escape to stop editing.
-              </p>
-            </div>
-          </div>
+              aria-describedby="generated-id"
+              className="kibanaCodeEditor__keyboardHint"
+              data-test-subj="codeEditorHint"
+              id="generated-id"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
+          </span>
           <div
             className="react-monaco-editor-container"
             style={
