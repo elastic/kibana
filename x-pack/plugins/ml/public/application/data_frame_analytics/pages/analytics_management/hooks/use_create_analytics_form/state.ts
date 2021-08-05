@@ -61,12 +61,13 @@ export interface State {
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
-    earlyStoppingEnabled: undefined | boolean;
     downsampleFactor: undefined | number;
+    earlyStoppingEnabled: undefined | boolean;
     eta: undefined | number;
     etaGrowthRatePerTree: undefined | number;
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
+    featureProcessors: undefined | Array<Record<string, any>>;
     gamma: undefined | number;
     includes: string[];
     jobId: DataFrameAnalyticsId;
@@ -78,6 +79,8 @@ export interface State {
     jobConfigQuery: any;
     jobConfigQueryString: string | undefined;
     lambda: number | undefined;
+    lossFunction: string | undefined;
+    lossFunctionParameter: number | undefined;
     loadingFieldOptions: boolean;
     maxNumThreads: undefined | number;
     maxOptimizationRoundsPerHyperparameter: undefined | number;
@@ -147,6 +150,7 @@ export const getInitialState = (): State => ({
     etaGrowthRatePerTree: undefined,
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
+    featureProcessors: undefined,
     gamma: undefined,
     includes: [],
     jobId: '',
@@ -158,6 +162,8 @@ export const getInitialState = (): State => ({
     jobConfigQuery: defaultSearchQuery,
     jobConfigQueryString: undefined,
     lambda: undefined,
+    lossFunction: undefined,
+    lossFunctionParameter: undefined,
     loadingFieldOptions: false,
     maxNumThreads: DEFAULT_MAX_NUM_THREADS,
     maxOptimizationRoundsPerHyperparameter: undefined,
@@ -268,8 +274,15 @@ export const getJobConfigFromFormState = (
       formState.featureBagFraction && {
         feature_bag_fraction: formState.featureBagFraction,
       },
+      formState.featureProcessors && {
+        feature_processors: formState.featureProcessors,
+      },
       formState.gamma && { gamma: formState.gamma },
       formState.lambda && { lambda: formState.lambda },
+      formState.lossFunction && { loss_function: formState.lossFunction },
+      formState.lossFunctionParameter && {
+        loss_function_parameter: formState.lossFunctionParameter,
+      },
       formState.maxOptimizationRoundsPerHyperparameter && {
         max_optimization_rounds_per_hyperparameter:
           formState.maxOptimizationRoundsPerHyperparameter,
