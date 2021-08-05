@@ -337,4 +337,4 @@ The *Bus Alert connector* is added to the *Rules and Connectors* page. For more 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/rules_and_connectors.png[]
 
-Congratulations! You have completed the tutorial and have the recipe for tracking assets. Now try replicating this same analysis with your own data.
+Congratulations! You have completed the tutorial and have the recipe for tracking assets. You can now try replicating this same analysis with your own data.
