@@ -6,16 +6,26 @@
  */
 
 import React from 'react';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 
 export function ServiceListMetric({
   color,
   series,
   valueLabel,
+  comparisonSeries,
 }: {
   color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
-  series?: Array<{ x: number; y: number | null }>;
+  series?: Coordinate[];
+  comparisonSeries?: Coordinate[];
   valueLabel: React.ReactNode;
 }) {
-  return <SparkPlot valueLabel={valueLabel} series={series} color={color} />;
+  return (
+    <SparkPlot
+      valueLabel={valueLabel}
+      series={series}
+      color={color}
+      comparisonSeries={comparisonSeries}
+    />
+  );
 }
