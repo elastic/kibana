@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use serialize() instead.  8.0
+> Use serialize() instead.  8.1
 > 
 
 <b>Signature:</b>

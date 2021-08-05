@@ -17,7 +17,7 @@ import { Direction } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -108,6 +108,7 @@ export interface TGridIntegratedProps {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
+  defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
@@ -142,6 +143,7 @@ export interface TGridIntegratedProps {
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   browserFields,
   columns,
+  defaultCellActions,
   dataProviders,
   deletedEventIds,
   docValueFields,
@@ -314,12 +316,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
                     id={id}
                     isEventViewer={true}
+                    loadPage={loadPage}
                     onRuleChange={onRuleChange}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    sort={sort}
                     tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,

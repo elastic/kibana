@@ -14,7 +14,7 @@ import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -100,6 +100,7 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
 export interface TGridStandaloneProps {
   alertConsumers: AlertConsumers[];
   columns: ColumnHeaderOptions[];
+  defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   end: string;
   loadingText: React.ReactNode;
@@ -130,6 +131,7 @@ const basicUnit = (n: number) => i18n.UNIT(n);
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   alertConsumers,
   columns,
+  defaultCellActions,
   deletedEventIds,
   end,
   loadingText,
@@ -146,7 +148,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   rowRenderers,
   setRefetch,
   start,
-  sort,
+  sort: initialSort,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -164,6 +166,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
     queryFields,
+    sort: sortFromRedux,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
 
@@ -203,6 +206,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     ],
     [columnsHeader, queryFields]
   );
+
+  const [sort, setSort] = useState(initialSort);
+  useEffect(() => setSort(sortFromRedux), [sortFromRedux]);
 
   const sortField = useMemo(
     () =>
@@ -271,7 +277,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        sort,
         itemsPerPage,
         itemsPerPageOptions,
         showCheckboxes: true,
@@ -283,6 +288,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         defaultColumns: columns,
         footerText,
         loadingText,
+        sort,
         unit,
       })
     );
@@ -322,12 +328,13 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
                     id={STANDALONE_ID}
                     isEventViewer={true}
+                    loadPage={loadPage}
                     onRuleChange={onRuleChange}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    sort={sort}
                     tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,

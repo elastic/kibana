@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Used by time range index patterns  8.0
+> Used by time range index patterns  8.1
 > 
 
 <b>Signature:</b>
