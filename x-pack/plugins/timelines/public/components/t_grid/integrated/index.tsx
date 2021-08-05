@@ -311,10 +311,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     data={nonDeletedEvents}
                     id={id}
                     isEventViewer={true}
+                    loadPage={loadPage}
                     onRuleChange={onRuleChange}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    sort={sort}
                     tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
