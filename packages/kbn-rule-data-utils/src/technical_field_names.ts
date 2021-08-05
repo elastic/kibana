@@ -10,8 +10,8 @@ import { ValuesType } from 'utility-types';
 
 const KIBANA_NAMESPACE = 'kibana' as const;
 
-export const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
-export const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
+const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
+const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
 
 const CONSUMERS = `${KIBANA_NAMESPACE}.consumers` as const;
 const ECS_VERSION = 'ecs.version' as const;
