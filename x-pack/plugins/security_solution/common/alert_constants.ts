@@ -7,14 +7,9 @@
 
 import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE } from '@kbn/rule-data-utils';
 
-// could prefix these with SECURITY or similar, but matching the existing naming pattern with
-// technical names could provide the advantage of preventing duplicates when attempting to import
-
-// TODO: DO NOT ADD RULE_TYPE_ID or CONSUMERS: will be in rule-data-utils
-// @ts-ignore
-const ALERT_RULE_TYPE_ID = 'do not do. Is in Marshalls PR';
-// @ts-ignore
-const ALERT_RULE_CONSUMERS = 'do not do. Is in Marshalls PR';
+/**
+ * This file contains the security solution specific Alert fields not contained in the @kbn/rule-data-utils package
+ */
 
 // Cast to `as const` to preserve the exact string value when using as a type rather than a value
 export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors` as const;
@@ -23,9 +18,10 @@ export const ALERT_ANCESTORS_ID = `${ALERT_ANCESTORS}.id` as const;
 export const ALERT_ANCESTORS_INDEX = `${ALERT_ANCESTORS}.index` as const;
 export const ALERT_ANCESTORS_RULE = `${ALERT_ANCESTORS}.rule` as const;
 export const ALERT_ANCESTORS_TYPE = `${ALERT_ANCESTORS}.type` as const;
-
 export const ALERT_DEPTH = `${ALERT_NAMESPACE}.depth` as const;
-
+export const ALERT_GROUP = `${ALERT_NAMESPACE}.group` as const;
+export const ALERT_GROUP_ID = `${ALERT_GROUP}.id` as const;
+export const ALERT_GROUP_INDEX = `${ALERT_GROUP}.index` as const;
 export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event` as const;
 export const ALERT_ORIGINAL_EVENT_ACTION = `${ALERT_ORIGINAL_EVENT}.action` as const;
 export const ALERT_ORIGINAL_EVENT_AGENT_ID_STATUS = `${ALERT_ORIGINAL_EVENT}.agent_id_status` as const;
@@ -53,42 +49,30 @@ export const ALERT_ORIGINAL_EVENT_START = `${ALERT_ORIGINAL_EVENT}.start` as con
 export const ALERT_ORIGINAL_EVENT_TIMEZONE = `${ALERT_ORIGINAL_EVENT}.timezone` as const;
 export const ALERT_ORIGINAL_EVENT_TYPE = `${ALERT_ORIGINAL_EVENT}.type` as const;
 export const ALERT_ORIGINAL_EVENT_URL = `${ALERT_ORIGINAL_EVENT}.url` as const;
-
 export const ALERT_ORIGINAL_TIME = `${ALERT_NAMESPACE}.original_time` as const;
-
-export const ALERT_GROUP = `${ALERT_NAMESPACE}.group` as const;
-export const ALERT_GROUP_ID = `${ALERT_GROUP}.id` as const;
-export const ALERT_GROUP_INDEX = `${ALERT_GROUP}.index` as const;
-
 export const ALERT_THREAT = `${ALERT_NAMESPACE}.threat` as const;
 export const ALERT_THREAT_FRAMEWORK = `${ALERT_THREAT}.framework` as const;
 export const ALERT_THREAT_TACTIC = `${ALERT_THREAT}.tactic` as const;
 export const ALERT_THREAT_TACTIC_ID = `${ALERT_THREAT_TACTIC}.id` as const;
 export const ALERT_THREAT_TACTIC_NAME = `${ALERT_THREAT_TACTIC}.name` as const;
 export const ALERT_THREAT_TACTIC_REFERENCE = `${ALERT_THREAT_TACTIC}.reference` as const;
-
 export const ALERT_THREAT_TECHNIQUE = `${ALERT_THREAT}.technique` as const;
-
 export const ALERT_THREAT_TECHNIQUE_ID = `${ALERT_THREAT_TECHNIQUE}.id` as const;
 export const ALERT_THREAT_TECHNIQUE_NAME = `${ALERT_THREAT_TECHNIQUE}.name` as const;
 export const ALERT_THREAT_TECHNIQUE_REFERENCE = `${ALERT_THREAT_TECHNIQUE}.reference` as const;
-
 export const ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE = `${ALERT_THREAT_TECHNIQUE}.subtechnique` as const;
 export const ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_ID = `${ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE}.id` as const;
 export const ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_NAME = `${ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE}.name` as const;
 export const ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE = `${ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE}.reference` as const;
-
 export const ALERT_THRESHOLD_RESULT = `${ALERT_NAMESPACE}.threshold_result` as const;
 export const ALERT_THRESHOLD_RESULT_CARDINALITY = `${ALERT_THRESHOLD_RESULT}.cardinality` as const;
 export const ALERT_THRESHOLD_RESULT_CARDINALITY_FIELD = `${ALERT_THRESHOLD_RESULT_CARDINALITY}.field` as const;
 export const ALERT_THRESHOLD_RESULT_CARDINALITY_VALUE = `${ALERT_THRESHOLD_RESULT_CARDINALITY}.value` as const;
-
 export const ALERT_THRESHOLD_RESULT_COUNT = `${ALERT_THRESHOLD_RESULT}.count` as const;
 export const ALERT_THRESHOLD_RESULT_FROM = `${ALERT_THRESHOLD_RESULT}.from` as const;
 export const ALERT_THRESHOLD_RESULT_TERMS = `${ALERT_THRESHOLD_RESULT}.terms` as const;
 export const ALERT_THRESHOLD_RESULT_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT_TERMS}.field` as const;
 export const ALERT_THRESHOLD_RESULT_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT_TERMS}.value` as const;
-
 export const ALERT_RULE_BUILDING_BLOCK_TYPE = `${ALERT_RULE_NAMESPACE}.building_block_type` as const;
 // TODO: not accounted for in the excel doc
 export const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
@@ -110,30 +94,13 @@ export const ALERT_RULE_SIZE = `${ALERT_RULE_NAMESPACE}.size` as const;
 export const ALERT_RULE_THRESHOLD = `${ALERT_RULE_NAMESPACE}.threshold` as const;
 export const ALERT_RULE_TIMELINE_ID = `${ALERT_RULE_NAMESPACE}.timeline_id` as const;
 export const ALERT_RULE_TIMELINE_TITLE = `${ALERT_RULE_NAMESPACE}.timeline_title` as const;
-
 export const ALERT_RULE_THREAT = `${ALERT_RULE_NAMESPACE}.threat` as const;
 export const ALERT_RULE_THREAT_FRAMEWORK = `${ALERT_RULE_THREAT}.framework` as const;
 export const ALERT_RULE_THREAT_TACTIC = `${ALERT_RULE_THREAT}.tactic` as const;
 export const ALERT_RULE_THREAT_TACTIC_ID = `${ALERT_RULE_THREAT_TACTIC}.id` as const;
 export const ALERT_RULE_THREAT_TACTIC_NAME = `${ALERT_RULE_THREAT_TACTIC}.name` as const;
 export const ALERT_RULE_THREAT_TACTIC_REFERENCE = `${ALERT_RULE_THREAT_TACTIC}.reference` as const;
-
 export const ALERT_RULE_THREAT_TECHNIQUE = `${ALERT_RULE_THREAT}.technique` as const;
 export const ALERT_RULE_THREAT_TECHNIQUE_ID = `${ALERT_RULE_THREAT_TECHNIQUE}.id` as const;
 export const ALERT_RULE_THREAT_TECHNIQUE_NAME = `${ALERT_RULE_THREAT_TECHNIQUE}.name` as const;
 export const ALERT_RULE_THREAT_TECHNIQUE_REFERENCE = `${ALERT_RULE_THREAT_TECHNIQUE}.reference` as const;
-
-/**
- * TODO: OTHER signal.* not mentioned:
- * signal.name
- * signal.rule.actions?
- * signal.rule.meta.*
- * signal.original_event.lag.*
- * signal.rule.id.keyword
- * signal.rule.threat_mapping
- */
-
-/**
- * TODO:
- * DONE: Removed signal.parent.* references / replaced with signal.ancestors.* where not already existing
- */
