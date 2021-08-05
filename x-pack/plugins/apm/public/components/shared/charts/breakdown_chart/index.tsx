@@ -16,19 +16,21 @@ import {
   Position,
   ScaleType,
   Settings,
+  TickFormatter,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { Annotation } from '../../../../../common/annotations';
 import { useChartTheme } from '../../../../../../observability/public';
 import {
   asAbsoluteDateTime,
+  asDuration,
   asPercent,
 } from '../../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
-import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -41,17 +43,23 @@ interface Props {
   fetchStatus: FETCH_STATUS;
   height?: number;
   showAnnotations: boolean;
+  annotations: Annotation[];
   timeseries?: Array<TimeSeries<Coordinate>>;
+  yAxisType: 'duration' | 'percentage';
 }
 
-export function TransactionBreakdownChartContents({
+const asPercentBound = (y: number | null) => asPercent(y, 1);
+const asDurationBound = (y: number | null) => asDuration(y);
+
+export function BreakdownChart({
   fetchStatus,
   height = unit * 16,
   showAnnotations,
+  annotations,
   timeseries,
+  yAxisType,
 }: Props) {
   const history = useHistory();
-  const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
 
   const { chartRef, setPointerEvent } = useChartPointerEventContext();
@@ -67,6 +75,9 @@ export function TransactionBreakdownChartContents({
   const annotationColor = theme.eui.euiColorSecondary;
 
   const isEmpty = isTimeseriesEmpty(timeseries);
+
+  const yTickFormat: TickFormatter =
+    yAxisType === 'duration' ? asDurationBound : asPercentBound;
 
   return (
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
@@ -98,7 +109,7 @@ export function TransactionBreakdownChartContents({
           id="y-axis"
           ticks={3}
           position={Position.Left}
-          tickFormat={(y: number) => asPercent(y ?? 0, 1)}
+          tickFormat={yTickFormat}
         />
 
         {showAnnotations && (
@@ -133,7 +144,9 @@ export function TransactionBreakdownChartContents({
                 yAccessors={['y']}
                 data={serie.data}
                 stackAccessors={['x']}
-                stackMode={'percentage'}
+                stackMode={
+                  yAxisType === 'percentage' ? 'percentage' : undefined
+                }
                 color={serie.areaColor}
                 curve={CurveType.CURVE_MONOTONE_X}
               />
