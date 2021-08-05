@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, ALERT_STATUS, SPACE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_OWNER, ALERT_STATUS, SPACE_IDS, RULE_ID } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -26,9 +26,15 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
 };
 
+const DEFAULT_SPACE = 'test_default_space_id';
+
 beforeEach(() => {
   jest.resetAllMocks();
-  alertingAuthMock.getSpaceId.mockImplementation(() => 'test_default_space_id');
+  alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
+  // @ts-expect-error
+  alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
+    Promise.resolve({ filter: [] })
+  );
 });
 
 describe('update()', () => {
@@ -55,11 +61,11 @@ describe('update()', () => {
                 _index: '.alerts-observability-apm',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [RULE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_OWNER]: 'apm',
                   [ALERT_STATUS]: 'open',
-                  [SPACE_IDS]: ['test_default_space_id'],
+                  [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
             ],
@@ -145,7 +151,7 @@ describe('update()', () => {
                   message: 'hello world 1',
                   [ALERT_OWNER]: 'apm',
                   [ALERT_STATUS]: 'open',
-                  [SPACE_IDS]: ['test_default_space_id'],
+                  [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
             ],
@@ -167,7 +173,7 @@ describe('update()', () => {
       })
     );
     await alertsClient.update({
-      id: '1',
+      id: 'NoxgpHkBqbdrfX07MqXV',
       status: 'closed',
       _version: undefined,
       index: '.alerts-observability-apm',
@@ -181,33 +187,26 @@ describe('update()', () => {
         outcome: 'unknown',
         type: ['change'],
       },
-      message: 'User is updating alert [id=1]',
+      message: 'User is updating alert [id=NoxgpHkBqbdrfX07MqXV]',
     });
   });
 
   test(`throws an error if ES client get fails`, async () => {
-    const error = new Error('something went wrong on get');
+    const error = new Error('something went wrong on update');
     const alertsClient = new AlertsClient(alertsClientParams);
     esClientMock.search.mockRejectedValue(error);
 
     await expect(
       alertsClient.update({
-        id: '1',
+        id: 'NoxgpHkBqbdrfX07MqXV',
         status: 'closed',
         _version: undefined,
         index: '.alerts-observability-apm',
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong on get"`);
-    expect(auditLogger.log).toHaveBeenCalledWith({
-      error: { code: 'Error', message: 'something went wrong on get' },
-      event: {
-        action: 'alert_update',
-        category: ['database'],
-        outcome: 'failure',
-        type: ['change'],
-      },
-      message: 'Failed attempt to update alert [id=1]',
-    });
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"null\\" and operation update 
+            Error: Error: something went wrong on update"
+          `);
   });
 
   test(`throws an error if ES client update fails`, async () => {
@@ -238,7 +237,7 @@ describe('update()', () => {
                   message: 'hello world 1',
                   [ALERT_OWNER]: 'apm',
                   [ALERT_STATUS]: 'open',
-                  [SPACE_IDS]: ['test_default_space_id'],
+                  [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
             ],
@@ -250,21 +249,21 @@ describe('update()', () => {
 
     await expect(
       alertsClient.update({
-        id: '1',
+        id: 'NoxgpHkBqbdrfX07MqXV',
         status: 'closed',
         _version: undefined,
         index: '.alerts-observability-apm',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong on update"`);
     expect(auditLogger.log).toHaveBeenCalledWith({
-      error: { code: 'Error', message: 'something went wrong on update' },
+      error: undefined,
       event: {
         action: 'alert_update',
         category: ['database'],
-        outcome: 'failure',
+        outcome: 'unknown',
         type: ['change'],
       },
-      message: 'Failed attempt to update alert [id=1]',
+      message: 'User is updating alert [id=NoxgpHkBqbdrfX07MqXV]',
     });
   });
 
@@ -298,7 +297,7 @@ describe('update()', () => {
                     message: 'hello world 1',
                     [ALERT_OWNER]: 'apm',
                     [ALERT_STATUS]: 'open',
-                    [SPACE_IDS]: ['test_default_space_id'],
+                    [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
               ],
@@ -325,18 +324,12 @@ describe('update()', () => {
     test('returns alert if user is authorized to update alert under the consumer', async () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       const result = await alertsClient.update({
-        id: '1',
+        id: 'NoxgpHkBqbdrfX07MqXV',
         status: 'closed',
         _version: undefined,
         index: '.alerts-observability-apm',
       });
 
-      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'alert',
-        consumer: 'apm',
-        operation: 'update',
-        ruleTypeId: 'apm.error_rate',
-      });
       expect(result).toMatchInlineSnapshot(`
         Object {
           "_id": "NoxgpHkBqbdrfX07MqXV",
@@ -352,31 +345,6 @@ describe('update()', () => {
           "result": "updated",
         }
       `);
-    });
-
-    test('throws when user is not authorized to update this type of alert', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
-      alertingAuthMock.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "apm.error_rate" alert for "apm"`)
-      );
-
-      await expect(
-        alertsClient.update({
-          id: '1',
-          status: 'closed',
-          _version: undefined,
-          index: '.alerts-observability-apm',
-        })
-      ).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "apm.error_rate" alert for "apm"]`
-      );
-
-      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'alert',
-        consumer: 'apm',
-        operation: 'update',
-        ruleTypeId: 'apm.error_rate',
-      });
     });
   });
 });
