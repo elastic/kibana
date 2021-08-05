@@ -892,6 +892,35 @@
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.props",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.context",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1835,8 +1864,8 @@
             ],
             "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1992,7 +2021,9 @@
               "(() => void) | undefined"
             ],
             "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2381,24 +2412,24 @@
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaReact",
-                "id": "def-public.node",
+                "id": "def-public.KibanaReactOverlays.openFlyout.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               },
               {
                 "parentPluginId": "kibanaReact",
-                "id": "def-public.options",
+                "id": "def-public.KibanaReactOverlays.openFlyout.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2414,9 +2445,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2445,24 +2478,24 @@
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaReact",
-                "id": "def-public.node",
+                "id": "def-public.KibanaReactOverlays.openModal.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               },
               {
                 "parentPluginId": "kibanaReact",
-                "id": "def-public.options",
+                "id": "def-public.KibanaReactOverlays.openModal.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2478,9 +2511,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3199,7 +3234,25 @@
               ".IStandaloneCodeEditor) => void) | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaReact",
+                "id": "def-public.UrlTemplateEditorProps.onEditor.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "editor",
+                "description": [],
+                "signature": [
+                  "editor",
+                  ".IStandaloneCodeEditor"
+                ],
+                "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaReact",
@@ -4198,6 +4251,43 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.first",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "first",
+            "description": [],
+            "signature": [
+              "CSSObject",
+              " | ",
+              "InterpolationFunction",
+              "<",
+              "ThemedStyledProps",
+              "<P, T>> | TemplateStringsArray"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.interpolations",
+            "type": "Array",
+            "tags": [],
+            "label": "interpolations",
+            "description": [],
+            "signature": [
+              "Interpolation",
+              "<",
+              "ThemedStyledProps",
+              "<P, T>>[]"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -4374,6 +4464,37 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.strings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strings",
+            "description": [],
+            "signature": [
+              "TemplateStringsArray | ",
+              "CSSKeyframes"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.interpolations",
+            "type": "Array",
+            "tags": [],
+            "label": "interpolations",
+            "description": [],
+            "signature": [
+              "SimpleInterpolation",
+              "[]"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -4404,6 +4525,22 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.component",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "React.ComponentProps<C> extends { theme?: T | undefined; } ? C : never"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

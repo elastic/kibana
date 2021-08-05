@@ -42,8 +42,8 @@ export class EventLoggerTemplate<TEvent> implements IEventLoggerTemplate<TEvent>
     const nextFields = mergeFields(baseFields, extFields, {
       // TODO: Define a schema for own fields used/set by event log. Add it to the base schema.
       // Then maybe introduce a base type for TEvent.
-      'kibana.rac.event_log.log_name': indexNames.logName,
-      'kibana.rac.event_log.logger_name': nextName,
+      'kibana.event_log.log_name': indexNames.logName,
+      'kibana.event_log.logger_name': nextName,
     } as any);
 
     return {

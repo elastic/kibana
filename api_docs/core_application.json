@@ -871,7 +871,9 @@
               "(() => void) | undefined"
             ],
             "path": "src/core/public/application/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1495,31 +1497,29 @@
                 "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
               }
             ],
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.handler",
+                "id": "def-public.AppMountParameters.onAppLeave.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  "(factory: ",
-                  "AppLeaveActionFactory",
-                  ", nextAppId?: string | undefined) => ",
                   {
                     "pluginId": "core",
                     "scope": "public",
                     "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.AppLeaveAction",
-                    "text": "AppLeaveAction"
+                    "section": "def-public.AppLeaveHandler",
+                    "text": "AppLeaveHandler"
                   }
                 ],
                 "path": "src/core/public/application/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -1543,11 +1543,10 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.menuMount",
+                "id": "def-public.AppMountParameters.setHeaderActionMenu.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "menuMount",
@@ -1563,9 +1562,11 @@
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/public/application/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1951,6 +1952,35 @@
             "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           }
         ],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.factory",
+            "type": "Object",
+            "tags": [],
+            "label": "factory",
+            "description": [],
+            "signature": [
+              "AppLeaveActionFactory"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.nextAppId",
+            "type": "string",
+            "tags": [],
+            "label": "nextAppId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1991,6 +2021,31 @@
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
+        "returnComment": [
+          "An unmounting function that will be called to unmount the application. See {@link AppUnmount}."
+        ],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppMountParameters",
+                "text": "AppMountParameters"
+              },
+              "<HistoryLocationState>"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2007,6 +2062,8 @@
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -2079,6 +2136,29 @@
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.app",
+            "type": "Object",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.App",
+                "text": "App"
+              },
+              "<unknown>"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
