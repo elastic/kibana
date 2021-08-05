@@ -10,9 +10,9 @@ import './solution_nav_avatar.scss';
 import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
 
-import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
+import { DistributiveOmit, EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 
-export type KibanaPageTemplateSolutionNavAvatarProps = Omit<EuiAvatarProps, 'size'> & {
+export type KibanaPageTemplateSolutionNavAvatarProps = DistributiveOmit<EuiAvatarProps, 'size'> & {
   /**
    * Any EuiAvatar size available, of `xxl` for custom large, brand-focused version
    */
@@ -28,7 +28,7 @@ export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<KibanaPageTe
   ...rest
 }) => {
   return (
-    // @ts-ignore
+    // @ts-ignore Complains about ExclusiveUnion between `iconSize` and `iconType`, but works fine
     <EuiAvatar
       className={classNames(
         'kbnPageTemplateSolutionNavAvatar',
@@ -39,6 +39,7 @@ export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<KibanaPageTe
       )}
       color="plain"
       size={size === 'xxl' ? 'xl' : size}
+      iconSize={size}
       {...rest}
     />
   );

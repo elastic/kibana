@@ -21,7 +21,6 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
     typeof button !== 'string' ? (
       button
     ) : (
-      // @ts-ignore
       <EuiButton
         href={cardRest?.href}
         onClick={cardRest?.onClick}
@@ -33,12 +32,11 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
     );
 
   return (
-    // @ts-ignore
     <EuiCard
       paddingSize="l"
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
-      {...cardRest}
+      {...(cardRest as any)}
     />
   );
 };
