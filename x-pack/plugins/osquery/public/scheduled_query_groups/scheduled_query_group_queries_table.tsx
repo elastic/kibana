@@ -22,7 +22,7 @@ import {
   PersistedIndexPatternLayer,
   PieVisualizationState,
 } from '../../../lens/public';
-import { layerTypes } from '../../../lens/common/tyconstantspes';
+import { layerTypes } from '../../../lens/common';
 import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { PlatformIcons } from './queries/platforms';

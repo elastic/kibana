@@ -28,7 +28,6 @@ import {
   TermsIndexPatternColumn,
   CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
-import { layerTypes } from '../../../../../../lens/common/constants';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
@@ -41,6 +40,7 @@ import {
   ReportTypes,
 } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
+import { layerTypes } from '../../../../../../lens/common/constants';
 import { PersistableFilter } from '../../../../../../lens/common';
 import { parseAbsoluteDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';

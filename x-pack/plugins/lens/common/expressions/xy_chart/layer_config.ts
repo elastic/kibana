@@ -8,7 +8,7 @@
 import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
 import type { LayerType } from '../../types';
-import { layerTypes } from '../../types';
+import { layerTypes } from '../../constants';
 import { axisConfig, YConfig } from './axis_config';
 import type { SeriesType } from './series_type';
 

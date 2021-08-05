@@ -13,7 +13,7 @@ import type {
   TypedLensByValueInput,
   XYLayerConfig,
 } from '../../../../../../../lens/public';
-import { layerTypes } from '../../../../../../../lens/common/constants';
+import { layerTypes } from '../../../../../../../lens/common';
 import { FieldVisConfig } from '../../stats_table/types';
 import { JOB_FIELD_TYPES } from '../../../../../../common';
 interface ColumnsAndLayer {
