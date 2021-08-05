@@ -11,8 +11,7 @@ import Path from 'path';
 import execa from 'execa';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 
-export const ROOT_REFS_CONFIG_PATH = Path.resolve(REPO_ROOT, 'tsconfig.refs.json');
-export const REF_CONFIG_PATHS = [ROOT_REFS_CONFIG_PATH];
+import { REF_CONFIG_PATHS } from './root_refs_config';
 
 export async function buildAllTsRefs(log: ToolingLog): Promise<{ failed: boolean }> {
   for (const path of REF_CONFIG_PATHS) {

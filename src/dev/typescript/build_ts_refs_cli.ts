@@ -12,8 +12,8 @@ import { run, REPO_ROOT } from '@kbn/dev-utils';
 import del from 'del';
 
 import { RefOutputCache } from './ref_output_cache';
-import { buildAllTsRefs, REF_CONFIG_PATHS } from './build_ts_refs';
-import { updateRootRefsConfig } from './update_root_refs_config';
+import { buildAllTsRefs } from './build_ts_refs';
+import { updateRootRefsConfig, validateRootRefsConfig, REF_CONFIG_PATHS } from './root_refs_config';
 import { getOutputsDeep } from './ts_configfile';
 import { concurrentMap } from './concurrent_map';
 
@@ -37,7 +37,12 @@ export async function runBuildRefsCli() {
         return;
       }
 
-      await updateRootRefsConfig(log);
+      if (!!flags['validate-root-refs-config']) {
+        await validateRootRefsConfig(log);
+      } else {
+        await updateRootRefsConfig(log);
+      }
+
       const outDirs = getOutputsDeep(REF_CONFIG_PATHS);
 
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
@@ -91,7 +96,7 @@ export async function runBuildRefsCli() {
     {
       description: 'Build TypeScript projects',
       flags: {
-        boolean: ['clean', 'force', 'cache', 'ignore-type-failures'],
+        boolean: ['clean', 'force', 'cache', 'ignore-type-failures', 'validate-root-refs-config'],
         default: {
           cache: true,
         },
@@ -99,7 +104,9 @@ export async function runBuildRefsCli() {
           --force            Run the build even if the BUILD_TS_REFS_DISABLE is set to "true"
           --clean            Delete outDirs for each ts project before building
           --no-cache         Disable fetching/extracting outDir caches based on the mergeBase with upstream
-          --ignore-type-failures  If tsc reports type errors, ignore them and just log a small warning.
+          --ignore-type-failures  If tsc reports type errors, ignore them and just log a small warning
+          --validate-root-refs-config  Ensure that all necessary files are listed in the root tsconfig.refs.json
+                              file, and if not fail with an error message about how to update it
         `,
       },
       log: {

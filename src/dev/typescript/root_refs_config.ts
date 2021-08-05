@@ -9,15 +9,17 @@
 import Path from 'path';
 import Fs from 'fs/promises';
 
-import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT, ToolingLog, createFailError } from '@kbn/dev-utils';
 
-import { ROOT_REFS_CONFIG_PATH } from './build_ts_refs';
 import { PROJECTS } from './projects';
 import { Project } from './project';
 
+export const ROOT_REFS_CONFIG_PATH = Path.resolve(REPO_ROOT, 'tsconfig.refs.json');
+export const REF_CONFIG_PATHS = [ROOT_REFS_CONFIG_PATH];
+
 const sort = (arr: string[]) => arr.slice().sort((a, b) => a.localeCompare(b));
 
-export async function updateRootRefsConfig(log: ToolingLog) {
+async function analyzeRootRefsConfig(log: ToolingLog) {
   const compositeProjects = PROJECTS.filter((p) => p.isCompositeProject() && !p.disableTypeCheck);
   const currentRefs = sort(new Project(ROOT_REFS_CONFIG_PATH).getRefdPaths());
   const newRefs = sort(
@@ -56,6 +58,33 @@ export async function updateRootRefsConfig(log: ToolingLog) {
     continue;
   }
 
+  return {
+    refs: newRefs,
+    addedRefs,
+    removedRefs,
+  };
+}
+
+export async function validateRootRefsConfig(log: ToolingLog) {
+  const { addedRefs, removedRefs } = await analyzeRootRefsConfig(log);
+
+  for (const addedRef of addedRefs) {
+    log.warning('Missing reference to composite project', addedRef, 'in root refs config file');
+  }
+  for (const removedRef of removedRefs) {
+    log.warning('Extra reference to non-composite project', removedRef, 'in root refs config file');
+  }
+
+  if (addedRefs.length || removedRefs.length) {
+    throw createFailError(
+      'tsconfig.refs.json at the root of the repo is not valid and needs to be updated. Please run `node scripts/build_ts_refs` locally and commit the changes'
+    );
+  }
+}
+
+export async function updateRootRefsConfig(log: ToolingLog) {
+  const { refs, addedRefs, removedRefs } = await analyzeRootRefsConfig(log);
+
   if (removedRefs.length === 0 && addedRefs.length === 0) {
     log.verbose('root refs config file is up-to-date');
     return;
@@ -73,7 +102,7 @@ export async function updateRootRefsConfig(log: ToolingLog) {
     JSON.stringify(
       {
         include: [],
-        references: newRefs.map((path) => ({ path })),
+        references: refs.map((path) => ({ path })),
       },
       null,
       2
