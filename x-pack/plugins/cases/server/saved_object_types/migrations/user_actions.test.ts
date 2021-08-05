@@ -12,33 +12,136 @@ import { CaseUserActionAttributes, CASE_USER_ACTION_SAVED_OBJECT } from '../../.
 import { createExternalService, createJiraConnector } from '../../services/test_utils';
 import { extractConnectorIdFromJson, userActionsConnectorIdMigration } from './user_actions';
 
-// TODO: change this so it accepts new_value as type string | null | undefined | CaseConnector | CaseFullExternalService
 const create_7_14_0_userAction = (
   params: {
     action?: string;
     action_field?: string[];
-    new_value?: string | null;
-    old_value?: string | null;
+    new_value?: string | null | object;
+    old_value?: string | null | object;
   } = {}
-) => ({
-  type: CASE_USER_ACTION_SAVED_OBJECT,
-  id: '1',
-  attributes: {
-    ...params,
-  },
-});
+) => {
+  const { new_value, old_value, ...restParams } = params;
+
+  return {
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+    id: '1',
+    attributes: {
+      ...restParams,
+      new_value: typeof new_value === 'object' ? JSON.stringify(new_value) : new_value,
+      old_value: typeof old_value === 'object' ? JSON.stringify(old_value) : old_value,
+    },
+  };
+};
+
+const createConnectorObject = () => ({ connector: createJiraConnector() });
 
 describe('user action migrations', () => {
   describe('7.15.0 connector ID migration', () => {
     describe('userActionsConnectorIdMigration', () => {
-      it('extracts the connector.id to references for a create connector', () => {
-        const userAction = create_7_14_0_userAction();
+      it('extracts the external_service connector_id to references for a new pushed user action', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'push-to-service',
+          action_field: ['pushed'],
+          new_value: createExternalService(),
+          old_value: null,
+        });
 
         const migratedUserAction = userActionsConnectorIdMigration(
           userAction
         ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
-        expect(JSON.parse(migratedUserAction.attributes.new_value!)).toMatchInlineSnapshot();
+        expect(JSON.parse(migratedUserAction.attributes.new_value!)).toMatchInlineSnapshot(`
+          Object {
+            "external_service": Object {
+              "connector_name": ".jira",
+              "external_id": "100",
+              "external_title": "awesome",
+              "external_url": "http://www.google.com",
+              "pushed_at": "2019-11-25T21:54:48.952Z",
+              "pushed_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+            },
+          }
+        `);
+
+        expect(migratedUserAction.references).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "100",
+              "name": "pushConnectorId",
+              "type": "action",
+            },
+          ]
+        `);
+      });
+
+      it('leaves the object unmodified when it is not a valid connector user action', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'push-to-service',
+          action_field: ['invalid field'],
+          new_value: 'hello',
+          old_value: null,
+        });
+
+        const migratedUserAction = userActionsConnectorIdMigration(
+          userAction
+        ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+
+        expect(migratedUserAction).toMatchInlineSnapshot(`
+          Object {
+            "attributes": Object {
+              "action": "push-to-service",
+              "action_field": Array [
+                "invalid field",
+              ],
+              "new_value": "hello",
+              "old_value": "null",
+            },
+            "id": "1",
+            "references": Array [],
+            "type": "cases-user-actions",
+          }
+        `);
+      });
+
+      it('extracts the connector.id to references for a new create connector user action', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'create',
+          action_field: ['connector'],
+          new_value: createConnectorObject(),
+          old_value: null,
+        });
+
+        const migratedUserAction = userActionsConnectorIdMigration(
+          userAction
+        ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+
+        expect(JSON.parse(migratedUserAction.attributes.new_value!)).toMatchInlineSnapshot(`
+          Object {
+            "connector": Object {
+              "fields": Object {
+                "issueType": "bug",
+                "parent": "2",
+                "priority": "high",
+              },
+              "name": ".jira",
+              "type": ".jira",
+            },
+          }
+        `);
+
+        expect(migratedUserAction.references).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "1",
+              "name": "connectorId",
+              "type": "action",
+            },
+          ]
+        `);
       });
     });
 
@@ -79,7 +182,7 @@ describe('user action migrations', () => {
         });
 
         it('returns undefined when the action is create and action fields does not contain connector', () => {
-          const jiraConnector = { connector: createJiraConnector() };
+          const jiraConnector = createConnectorObject();
 
           expect(
             extractConnectorIdFromJson({
@@ -91,7 +194,7 @@ describe('user action migrations', () => {
         });
 
         it('returns the stringified json without the id', () => {
-          const jiraConnector = { connector: createJiraConnector() };
+          const jiraConnector = createConnectorObject();
 
           const { transformedJson } = extractConnectorIdFromJson({
             action: 'create',
@@ -115,7 +218,7 @@ describe('user action migrations', () => {
         });
 
         it('returns a reference to the connector.id', () => {
-          const jiraConnector = { connector: createJiraConnector() };
+          const jiraConnector = createConnectorObject();
 
           const { references } = extractConnectorIdFromJson({
             action: 'create',

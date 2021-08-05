@@ -42,15 +42,37 @@ export function userActionsConnectorIdMigration(
     return { ...doc, references: doc.references ?? [] };
   }
 
-  const { new_value, old_value, ...restAttributes } = doc.attributes;
+  const { new_value, old_value, action, action_field, ...restAttributes } = doc.attributes;
   const { references = [] } = doc;
+
+  const {
+    transformedJson: transformedNewValue,
+    references: newValueRefs,
+  } = extractConnectorIdFromJson({
+    action,
+    actionFields: action_field,
+    stringifiedJson: new_value,
+  }) ?? { transformedJson: new_value, references: [] };
+
+  const {
+    transformedJson: transformedOldValue,
+    references: oldValueRefs,
+  } = extractConnectorIdFromJson({
+    action,
+    actionFields: action_field,
+    stringifiedJson: old_value,
+  }) ?? { transformedJson: old_value, references: [] };
 
   return {
     ...doc,
     attributes: {
       ...restAttributes,
+      action,
+      action_field,
+      new_value: transformedNewValue,
+      old_value: transformedOldValue,
     },
-    references: [...references],
+    references: [...references, ...newValueRefs, ...oldValueRefs],
   };
 }
 
@@ -103,7 +125,7 @@ export function extractConnectorIdFromJson({
       return transformPushConnector(decodedJson);
     }
   } catch (error) {
-    return;
+    // ignore any throws from parsing or transforming the connectors and just return undefined
   }
 }
 
