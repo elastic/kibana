@@ -13,7 +13,7 @@ interface Props {
   onManageIngestPipeline(): void;
 }
 
-export const ResultsPanel: FC<Props> = ({onManageIngestPipeline }) => {
+export const ResultsPanel: FC<Props> = ({ onManageIngestPipeline }) => {
   return (
     <EuiCallOut title="Import complete" color="success" iconType="check">
       <EuiText>
@@ -32,7 +32,7 @@ export const ResultsPanel: FC<Props> = ({onManageIngestPipeline }) => {
                 >
                   here
                 </EuiLink>
-              )
+              ),
             }}
           />
         </p>
