@@ -19,7 +19,7 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
-import { TelemetryTrustedAppsTask } from './security_lists_task';
+import { TelemetryExceptionListsTask } from './security_lists_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
@@ -60,7 +60,7 @@ export class TelemetryEventsSender {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private diagTask?: TelemetryDiagTask;
   private epMetricsTask?: TelemetryEndpointTask;
-  private trustedAppsTask?: TelemetryTrustedAppsTask;
+  private exceptionListTask?: TelemetryExceptionListsTask;
   private agentService?: AgentService;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
@@ -77,7 +77,7 @@ export class TelemetryEventsSender {
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
       this.epMetricsTask = new TelemetryEndpointTask(this.logger, taskManager, this);
-      this.trustedAppsTask = new TelemetryTrustedAppsTask(this.logger, taskManager, this);
+      this.exceptionListTask = new TelemetryExceptionListsTask(this.logger, taskManager, this);
     }
   }
 
@@ -99,7 +99,7 @@ export class TelemetryEventsSender {
       this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
       this.diagTask.start(taskManager);
       this.epMetricsTask.start(taskManager);
-      this.trustedAppsTask?.start(taskManager);
+      this.exceptionListTask?.start(taskManager);
     }
 
     this.logger.debug(`Starting local task`);

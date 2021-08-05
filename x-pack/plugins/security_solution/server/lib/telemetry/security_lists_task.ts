@@ -13,6 +13,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 
+// import { ENDPOINT_LIST_ID, ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { getPreviousEpMetaTaskTimestamp, batchTelemetryRecords } from './helpers';
 import { TelemetryEventsSender } from './sender';
 
@@ -23,9 +24,7 @@ export const TelemetrySecuityListsTaskConstants = {
   VERSION: '1.0.0',
 };
 
-/** Telemetry Security Lists Task
- */
-export class TelemetryTrustedAppsTask {
+export class TelemetryExceptionListsTask {
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
 

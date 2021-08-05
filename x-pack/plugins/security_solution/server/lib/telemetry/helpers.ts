@@ -6,6 +6,13 @@
  */
 
 import moment from 'moment';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListClient } from '../../../../lists/server';
+import {
+  GetEndpointListResponse,
+  GetEndpointListRequest,
+  EndpointExceptionListItem,
+} from './types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
@@ -83,3 +90,50 @@ export function isPackagePolicyList(
 
   return (data as PackagePolicy[])[0].inputs !== undefined;
 }
+
+/**
+ * Gets Endpoint Exception lists based on list id
+ *
+ * @param exceptionsListClient
+ * @param listId
+ * @param param2
+ * @returns the list of endpoint exceptions
+ */
+export const getEndpointList = async (
+  exceptionsListClient: ExceptionListClient,
+  listId: string,
+  { page, per_page: perPage, kuery }: GetEndpointListRequest
+): Promise<GetEndpointListResponse> => {
+  // Ensure list is created if it does not exist
+  await exceptionsListClient.createTrustedAppsList();
+
+  const results = await exceptionsListClient.findExceptionListItem({
+    listId,
+    page,
+    perPage,
+    filter: kuery,
+    namespaceType: 'agnostic',
+    sortField: 'name',
+    sortOrder: 'asc',
+  });
+
+  return {
+    data: results?.data.map(exceptionListItemToEndpointEntry) ?? [],
+    total: results?.total ?? 0,
+    page: results?.page ?? 1,
+    per_page: results?.per_page ?? perPage!,
+  };
+};
+
+const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionListItemSchema) => {
+  return {
+    id: exceptionListItem.id,
+    version: exceptionListItem._version || '',
+    name: exceptionListItem.name,
+    description: exceptionListItem.description,
+    created_at: exceptionListItem.created_at,
+    created_by: exceptionListItem.created_by,
+    updated_at: exceptionListItem.updated_at,
+    updated_by: exceptionListItem.updated_by,
+  } as EndpointExceptionListItem;
+};
