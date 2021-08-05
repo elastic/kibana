@@ -9,7 +9,7 @@ import axios from 'axios';
 
 import { createExternalService } from './service';
 import * as utils from '../lib/axios_utils';
-import { ExternalService } from './types';
+import { ExternalService, ServiceNowITSMIncident } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -31,6 +31,7 @@ const requestMock = utils.request as jest.Mock;
 const patchMock = utils.patch as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
 const table = 'incident';
+const actionTypeId = '.servicenow';
 
 describe('ServiceNow service', () => {
   let service: ExternalService;
@@ -45,7 +46,8 @@ describe('ServiceNow service', () => {
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      actionTypeId
     );
   });
 
@@ -63,7 +65,8 @@ describe('ServiceNow service', () => {
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          actionTypeId
         )
       ).toThrow();
     });
@@ -77,7 +80,8 @@ describe('ServiceNow service', () => {
             secrets: { username: '', password: 'admin' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          actionTypeId
         )
       ).toThrow();
     });
@@ -91,7 +95,8 @@ describe('ServiceNow service', () => {
             secrets: { username: '', password: undefined },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          actionTypeId
         )
       ).toThrow();
     });
@@ -128,7 +133,8 @@ describe('ServiceNow service', () => {
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        actionTypeId
       );
 
       requestMock.mockImplementation(() => ({
@@ -172,7 +178,7 @@ describe('ServiceNow service', () => {
       }));
 
       const res = await service.createIncident({
-        incident: { short_description: 'title', description: 'desc' },
+        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
       });
 
       expect(res).toEqual({
@@ -189,7 +195,7 @@ describe('ServiceNow service', () => {
       }));
 
       await service.createIncident({
-        incident: { short_description: 'title', description: 'desc' },
+        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
       });
 
       expect(requestMock).toHaveBeenCalledWith({
@@ -210,7 +216,8 @@ describe('ServiceNow service', () => {
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        actionTypeId
       );
 
       requestMock.mockImplementation(() => ({
@@ -218,7 +225,7 @@ describe('ServiceNow service', () => {
       }));
 
       const res = await service.createIncident({
-        incident: { short_description: 'title', description: 'desc' },
+        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
       });
 
       expect(requestMock).toHaveBeenCalledWith({
@@ -242,7 +249,7 @@ describe('ServiceNow service', () => {
 
       await expect(
         service.createIncident({
-          incident: { short_description: 'title', description: 'desc' },
+          incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
         })
       ).rejects.toThrow(
         '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred'
@@ -269,7 +276,7 @@ describe('ServiceNow service', () => {
 
       const res = await service.updateIncident({
         incidentId: '1',
-        incident: { short_description: 'title', description: 'desc' },
+        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
       });
 
       expect(res).toEqual({
@@ -287,7 +294,7 @@ describe('ServiceNow service', () => {
 
       await service.updateIncident({
         incidentId: '1',
-        incident: { short_description: 'title', description: 'desc' },
+        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
       });
 
       expect(patchMock).toHaveBeenCalledWith({
@@ -307,7 +314,8 @@ describe('ServiceNow service', () => {
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        actionTypeId
       );
 
       patchMock.mockImplementation(() => ({
@@ -316,7 +324,7 @@ describe('ServiceNow service', () => {
 
       const res = await service.updateIncident({
         incidentId: '1',
-        incident: { short_description: 'title', description: 'desc' },
+        incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
       });
 
       expect(patchMock).toHaveBeenCalledWith({
@@ -340,7 +348,7 @@ describe('ServiceNow service', () => {
       await expect(
         service.updateIncident({
           incidentId: '1',
-          incident: { short_description: 'title', description: 'desc' },
+          incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
         })
       ).rejects.toThrow(
         '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred'
@@ -354,7 +362,7 @@ describe('ServiceNow service', () => {
 
       const res = await service.updateIncident({
         incidentId: '1',
-        comment: 'comment-1',
+        incident: { comment: 'comment-1' },
       });
 
       expect(res).toEqual({
@@ -408,7 +416,8 @@ describe('ServiceNow service', () => {
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        actionTypeId
       );
 
       requestMock.mockImplementation(() => ({
@@ -476,7 +485,8 @@ describe('ServiceNow service', () => {
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        actionTypeId
       );
 
       requestMock.mockImplementation(() => ({

@@ -78,11 +78,17 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
   comments?: ExternalServiceCommentResponse[];
 }
 
+export type Incident = ServiceNowITSMIncident | ServiceNowSIRIncident;
+export type PartialIncident = Partial<Incident>;
+
 export interface ExternalServiceParamsCreate {
   incident: Incident & Record<string, unknown>;
 }
 
-export type ExternalServiceParamsUpdate = ExternalServiceParamsCreate & { incidentId: string };
+export interface ExternalServiceParamsUpdate {
+  incidentId: string;
+  incident: PartialIncident & Record<string, unknown>;
+}
 
 export interface ExternalService {
   getChoices: (fields: string[]) => Promise<GetChoicesResponse>;
@@ -118,8 +124,6 @@ export type ServiceNowSIRIncident = Omit<
   TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>['incident'],
   'externalId'
 >;
-
-export type Incident = ServiceNowITSMIncident | ServiceNowSIRIncident;
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;

@@ -17,6 +17,7 @@ import {
   ServiceNowIncident,
   Incident,
   GetApplicationInfoResponse,
+  PartialIncident,
 } from './types';
 
 import * as i18n from './translations';
@@ -31,11 +32,10 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ServiceNowSIRActionTypeId } from './config';
 
 const SYS_DICTIONARY = `api/now/table/sys_dictionary`;
-// TODO: Change it to production when the app is ready
-const IMPORTATION_SET_TABLE = 'x_463134_elastic_import_set_web_service';
+const IMPORTATION_SET_TABLE = 'x_elas2_inc_int_elastic_incident';
 const FIELD_PREFIX = 'u_';
 
-const prepareIncident = (useOldApi: boolean, incident: Incident): Incident =>
+const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
   useOldApi
     ? incident
     : Object.entries(incident).reduce(
