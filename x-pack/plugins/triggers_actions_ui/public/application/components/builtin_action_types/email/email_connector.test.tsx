@@ -35,6 +35,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
@@ -66,6 +68,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
@@ -223,6 +227,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
@@ -245,6 +251,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
@@ -268,6 +276,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);

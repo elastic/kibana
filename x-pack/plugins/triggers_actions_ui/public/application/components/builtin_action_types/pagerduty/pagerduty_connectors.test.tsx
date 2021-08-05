@@ -33,6 +33,8 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
 
@@ -61,6 +63,8 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
@@ -86,6 +90,8 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
@@ -112,6 +118,8 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
