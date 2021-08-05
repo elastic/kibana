@@ -6,6 +6,7 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPanel, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 
 import './_collapsible.scss';
@@ -14,6 +15,15 @@ interface CollapsibleProps {
   children: React.ReactNode;
   renderFooterLinks: React.ReactNode;
 }
+
+const i18nTexts = {
+  collapseLabel: i18n.translate('xpack.upgradeAssistant.overview.collapseLabel', {
+    defaultMessage: 'Collapse',
+  }),
+  expandLabel: i18n.translate('xpack.upgradeAssistant.overview.expandLabel', {
+    defaultMessage: 'Expand',
+  }),
+};
 
 export const Collapsible: FunctionComponent<CollapsibleProps> = ({
   children,
@@ -30,7 +40,7 @@ export const Collapsible: FunctionComponent<CollapsibleProps> = ({
           <EuiFlexItem>{renderFooterLinks}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="xs" onClick={() => setExpanded(!isExpanded)}>
-              {isExpanded ? 'Collapse' : 'Expand'}
+              {isExpanded ? i18nTexts.collapseLabel : i18nTexts.expandLabel}
               <EuiIcon type={isExpanded ? 'arrowUp' : 'arrowDown'} style={{ marginLeft: 8 }} />
             </EuiButtonEmpty>
           </EuiFlexItem>
