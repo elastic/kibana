@@ -165,8 +165,8 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "telemetry",
@@ -194,8 +194,8 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "telemetry",
@@ -211,8 +211,8 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "telemetry",
@@ -228,8 +228,8 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "telemetry",
@@ -245,21 +245,25 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "telemetry",
-                "id": "def-public.optedIn",
+                "id": "def-public.TelemetryServicePublicApis.setOptIn.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "optedIn",
                 "description": [
                   "Whether the user is opting-in (`true`) or out (`false`)."
                 ],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "src/plugins/telemetry/public/plugin.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -661,8 +665,8 @@
           ],
           "path": "src/plugins/telemetry/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -694,8 +698,8 @@
           ],
           "path": "src/plugins/telemetry/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

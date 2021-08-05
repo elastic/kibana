@@ -20,6 +20,7 @@ import {
 import { savedRuleMock, rulesMock } from '../mock';
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response';
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
   Promise.resolve(getRulesSchemaMock());
@@ -60,7 +61,7 @@ export const getRuleStatusById = async ({
       current_status: {
         alert_id: 'alertId',
         status_date: 'mm/dd/yyyyTHH:MM:sssz',
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         last_failure_at: null,
         last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
         last_failure_message: null,
@@ -86,7 +87,7 @@ export const getRulesStatusByIds = async ({
       current_status: {
         alert_id: 'alertId',
         status_date: 'mm/dd/yyyyTHH:MM:sssz',
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         last_failure_at: null,
         last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
         last_failure_message: null,

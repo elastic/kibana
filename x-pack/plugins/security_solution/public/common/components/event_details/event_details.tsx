@@ -145,6 +145,8 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 {enrichmentCount > 0 && (
                   <ThreatSummaryView
+                    browserFields={browserFields}
+                    data={data}
                     eventId={id}
                     timelineId={timelineId}
                     enrichments={allEnrichments}
@@ -243,7 +245,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       content: (
         <>
           <EuiSpacer size="m" />
-          <TabContentWrapper>
+          <TabContentWrapper data-test-subj="jsonViewWrapper">
             <JsonView data={data} />
           </TabContentWrapper>
         </>

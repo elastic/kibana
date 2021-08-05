@@ -783,8 +783,8 @@
           ],
           "path": "src/plugins/maps_ems/public/index.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
