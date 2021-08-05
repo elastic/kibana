@@ -1,0 +1,91 @@
+{
+  "attributes": {
+    "buildNum": 9007199254740991,
+    "defaultIndex": "logstash-*"
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "6.0.0",
+  "migrationVersion": {
+    "config": "7.13.0"
+  },
+  "references": [],
+  "type": "config",
+  "updated_at": "2019-01-22T19:32:02.235Z",
+  "version": "WzQsMl0="
+}
+
+{
+  "attributes": {
+    "buildNum": 9007199254740991,
+    "defaultIndex": "logstash-*"
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "7.15.0",
+  "migrationVersion": {
+    "config": "7.13.0"
+  },
+  "references": [],
+  "type": "config",
+  "updated_at": "2021-07-29T12:29:34.863Z",
+  "version": "WzcsMl0="
+}
+
+{
+  "attributes": {
+    "description": "Ok responses for jpg files",
+    "filters": [
+      {
+        "$state": {
+          "store": "appState"
+        },
+        "meta": {
+          "alias": null,
+          "disabled": false,
+          "index": "b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b",
+          "key": "extension.raw",
+          "negate": false,
+          "params": {
+            "query": "jpg"
+          },
+          "type": "phrase",
+          "value": "jpg"
+        },
+        "query": {
+          "match": {
+            "extension.raw": {
+              "query": "jpg",
+              "type": "phrase"
+            }
+          }
+        }
+      }
+    ],
+    "query": {
+      "language": "kuery",
+      "query": "response:200"
+    },
+    "title": "OKJpgs"
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "OKJpgs",
+  "references": [],
+  "type": "query",
+  "updated_at": "2019-07-17T17:54:26.378Z",
+  "version": "WzUsMl0="
+}
+
+{
+  "attributes": {
+    "timeFieldName": "@timestamp",
+    "title": "logstash-*"
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "logstash-*",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2018-12-21T00:43:07.096Z",
+  "version": "WzMsMl0="
+}

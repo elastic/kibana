@@ -9,23 +9,22 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
-import { wrapEsError } from '../../helpers';
 
 const bodySchema = schema.object({
   dataStreams: schema.arrayOf(schema.string()),
 });
 
-export function registerDeleteRoute({ router }: RouteDependencies) {
+export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/delete_data_streams'),
       validate: { body: bodySchema },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const { dataStreams } = req.body as TypeOf<typeof bodySchema>;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { dataStreams } = request.body as TypeOf<typeof bodySchema>;
 
-      const response: { dataStreamsDeleted: string[]; errors: any[] } = {
+      const responseBody: { dataStreamsDeleted: string[]; errors: any[] } = {
         dataStreamsDeleted: [],
         errors: [],
       };
@@ -33,21 +32,21 @@ export function registerDeleteRoute({ router }: RouteDependencies) {
       await Promise.all(
         dataStreams.map(async (name: string) => {
           try {
-            await callAsCurrentUser('dataManagement.deleteDataStream', {
+            await client.asCurrentUser.indices.deleteDataStream({
               name,
             });
 
-            return response.dataStreamsDeleted.push(name);
-          } catch (e) {
-            return response.errors.push({
+            return responseBody.dataStreamsDeleted.push(name);
+          } catch (error) {
+            return responseBody.errors.push({
               name,
-              error: wrapEsError(e),
+              error: handleEsError({ error, response }),
             });
           }
         })
       );
 
-      return res.ok({ body: response });
+      return response.ok({ body: responseBody });
     }
   );
 }
