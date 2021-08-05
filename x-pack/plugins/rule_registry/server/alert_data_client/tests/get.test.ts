@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_OWNER, ALERT_STATUS, SPACE_IDS } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -59,9 +60,9 @@ describe('get()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
-                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                  [ALERT_OWNER]: 'apm',
+                  [ALERT_STATUS]: 'open',
+                  [SPACE_IDS]: ['test_default_space_id'],
                 },
               },
             ],
@@ -73,11 +74,11 @@ describe('get()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_version": "WzM2MiwyXQ==",
-        "kibana.rac.alert.owner": "apm",
-        "kibana.rac.alert.space_ids": Array [
+        "${ALERT_OWNER}": "apm",
+        "${ALERT_STATUS}": "open",
+        "${SPACE_IDS}": Array [
           "test_default_space_id",
         ],
-        "kibana.rac.alert.status": "open",
         "message": "hello world 1",
         "rule.id": "apm.error_rate",
       }
@@ -140,9 +141,9 @@ describe('get()', () => {
                 _source: {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
-                  'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                  [ALERT_OWNER]: 'apm',
+                  [ALERT_STATUS]: 'open',
+                  [SPACE_IDS]: ['test_default_space_id'],
                 },
               },
             ],
@@ -202,9 +203,9 @@ describe('get()', () => {
                   _source: {
                     'rule.id': 'apm.error_rate',
                     message: 'hello world 1',
-                    'kibana.rac.alert.owner': 'apm',
-                    'kibana.rac.alert.status': 'open',
-                    'kibana.rac.alert.space_ids': ['test_default_space_id'],
+                    [ALERT_OWNER]: 'apm',
+                    [ALERT_STATUS]: 'open',
+                    [SPACE_IDS]: ['test_default_space_id'],
                   },
                 },
               ],
@@ -227,11 +228,11 @@ describe('get()', () => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "_version": "WzM2MiwyXQ==",
-          "kibana.rac.alert.owner": "apm",
-          "kibana.rac.alert.space_ids": Array [
+          "${ALERT_OWNER}": "apm",
+          "${ALERT_STATUS}": "open",
+          "${SPACE_IDS}": Array [
             "test_default_space_id",
           ],
-          "kibana.rac.alert.status": "open",
           "message": "hello world 1",
           "rule.id": "apm.error_rate",
         }

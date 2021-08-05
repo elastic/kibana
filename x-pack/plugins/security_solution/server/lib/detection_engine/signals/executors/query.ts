@@ -59,6 +59,7 @@ export const queryExecutor = async ({
     version,
     index: ruleParams.index,
   });
+
   const esFilter = await getFilter({
     type: ruleParams.type,
     filters: ruleParams.filters,

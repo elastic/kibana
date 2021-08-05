@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> import from "<!-- -->@<!-- -->kbn/field-types" instead
+> Import from the "<!-- -->@<!-- -->kbn/field-types" package directly instead.  8.1
 > 
 
 <b>Signature:</b>
