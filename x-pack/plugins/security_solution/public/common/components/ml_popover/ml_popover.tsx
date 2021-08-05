@@ -197,7 +197,7 @@ export const MlPopover = React.memo(() => {
                     values={{
                       mlDocs: (
                         <a
-                          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/machine-learning.html`}
+                          href={`${docLinks.links.siem.ml}`}
                           rel="noopener noreferrer"
                           target="_blank"
                         >
