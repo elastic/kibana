@@ -14,18 +14,15 @@ import {
   IKibanaSearchResponse,
 } from '../../../../../../../src/plugins/data/common';
 
-import type {
-  SearchServiceParams,
-  SearchServiceValue,
-} from '../../../../common/search_strategies/correlations/types';
-
+import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
 import { asyncErrorCorrelationSearchServiceProvider } from './async_search_service';
+import { ErrorCorrelationValue } from '../../../../common/search_strategies/error_correlations/types';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
 export type PartialSearchResponse = IKibanaSearchResponse<{
-  values: SearchServiceValue[];
+  values: ErrorCorrelationValue[];
 }>;
 
 // @TODO: Consolidate with latency correlation provider

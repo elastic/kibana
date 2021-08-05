@@ -13,6 +13,7 @@ import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search
 import { fetchTransactionDurationFieldCandidates } from '../correlations/queries';
 import { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 import { fetchErrorCorrelationPValues } from './queries/query_error_correlation';
+import { ERROR_CORRELATION_THRESHOLD } from './constants';
 
 export const asyncErrorCorrelationSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -35,7 +36,6 @@ export const asyncErrorCorrelationSearchServiceProvider = (
         includeFrozen,
       };
 
-      // @TODO: double check criteria for error correlation candidates
       const { fieldCandidates } = await fetchTransactionDurationFieldCandidates(
         esClient,
         params
@@ -53,7 +53,14 @@ export const asyncErrorCorrelationSearchServiceProvider = (
             fieldCandidates[i]
           );
 
-          state.addValues(results.filter((r) => r?.p_value < 0.02));
+          state.addValues(
+            results.filter(
+              (r) =>
+                r &&
+                typeof r.p_value === 'number' &&
+                r.p_value < ERROR_CORRELATION_THRESHOLD
+            )
+          );
         } catch (e) {
           state.setError(e);
         }
