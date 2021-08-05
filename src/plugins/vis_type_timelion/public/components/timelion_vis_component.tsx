@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { compact, last, map } from 'lodash';
 import {
   Chart,
@@ -14,13 +14,13 @@ import {
   Position,
   Axis,
   TooltipType,
-  PointerEvent,
   LegendPositionConfig,
   LayoutDirection,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 
 import { useKibana } from '../../../kibana_react/public';
+import { useActiveCursor } from '../../../charts/public';
 
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
@@ -33,7 +33,7 @@ import {
 } from '../helpers/panel_utils';
 
 import { colors } from '../helpers/chart_constants';
-import { activeCursor$ } from '../helpers/active_cursor';
+import { getCharts } from '../helpers/plugin_services';
 
 import type { Sheet } from '../helpers/timelion_request_handler';
 import type { IInterpreterRenderHandlers } from '../../../expressions';
@@ -42,6 +42,15 @@ import type { RangeFilterParams } from '../../../data/public';
 import type { Series } from '../helpers/timelion_request_handler';
 
 import './timelion_vis.scss';
+
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
 
 interface TimelionVisComponentProps {
   interval: string;
@@ -91,20 +100,14 @@ const TimelionVisComponent = ({
   const kibana = useKibana<TimelionVisDependencies>();
   const chartRef = useRef<Chart>(null);
   const chart = seriesList.list;
+  const chartsService = getCharts();
 
-  useEffect(() => {
-    const subscription = activeCursor$.subscribe((cursor: PointerEvent) => {
-      chartRef.current?.dispatchExternalPointerEvent(cursor);
-    });
+  const chartTheme = chartsService.theme.useChartsTheme();
+  const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const handleCursorUpdate = useCallback((cursor: PointerEvent) => {
-    activeCursor$.next(cursor);
-  }, []);
+  const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
 
   const brushEndListener = useCallback(
     ({ x }) => {
@@ -174,7 +177,7 @@ const TimelionVisComponent = ({
   }, [chart]);
 
   return (
-    <div className="timelionChart">
+    <div className="timelionChart" data-test-subj="visTypeXyChart">
       {title && (
         <EuiTitle className="timelionChart__topTitle" size="xxxs">
           <h4>{title}</h4>
@@ -182,14 +185,15 @@ const TimelionVisComponent = ({
       )}
       <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
         <Settings
+          debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
           showLegendExtra={true}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={handleCursorUpdate}
-          theme={kibana.services.chartTheme.useChartsTheme()}
-          baseTheme={kibana.services.chartTheme.useChartsBaseTheme()}
+          theme={chartTheme}
+          baseTheme={chartBaseTheme}
           tooltip={{
             snap: true,
             headerFormatter: ({ value }) => tickFormat(value),
