@@ -25,11 +25,11 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
 
             if (ruleDataClient.isWriteEnabled() && numAlerts) {
               const response = await ruleDataClient.getWriter().bulk({
-                body: alerts.flatMap((event) => [
+                body: alerts.flatMap((alert) => [
                   { index: {} },
                   {
-                    [ALERT_ID]: event.id,
-                    ...event.fields,
+                    [ALERT_ID]: alert.id,
+                    ...alert.fields,
                   },
                 ]),
                 refresh,

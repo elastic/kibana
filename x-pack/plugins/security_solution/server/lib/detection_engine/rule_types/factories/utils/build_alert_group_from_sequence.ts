@@ -8,10 +8,10 @@
 import { SavedObject } from 'src/core/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
-import { AlertAttributes, SignalSource } from '../../../signals/types';
+import { AlertAttributes, Ancestor, SignalSource } from '../../../signals/types';
 import { generateId } from '../../../signals/utils';
 import { RACAlert, WrappedRACAlert } from '../../types';
-import { buildAlert } from './build_alert';
+import { buildAlert, buildAncestors } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
 import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
@@ -30,8 +30,8 @@ export const buildAlertGroupFromSequence = (
   mergeStrategy: ConfigType['alertMergeStrategy'],
   spaceId: string | null | undefined
 ): WrappedRACAlert[] => {
-  const ancestors = sequence.events.flatMap((event) => event._source.signal?.ancestors ?? []);
-  if (ancestors.some((ancestor) => ancestor.rule === ruleSO.id)) {
+  const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
+  if (ancestors.some((ancestor) => ancestor?.rule === ruleSO.id)) {
     return [];
   }
 

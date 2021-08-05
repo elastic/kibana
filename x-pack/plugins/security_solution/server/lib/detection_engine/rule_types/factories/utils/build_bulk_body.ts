@@ -11,7 +11,7 @@ import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
-import { AlertAttributes, SignalSource, SignalSourceHit } from '../../../signals/types';
+import { AlertAttributes, SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
@@ -34,7 +34,7 @@ const isSourceDoc = (
 export const buildBulkBody = (
   spaceId: string | null | undefined,
   ruleSO: SavedObject<AlertAttributes>,
-  doc: SignalSourceHit,
+  doc: SimpleHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   applyOverrides: boolean
 ): RACAlert => {
