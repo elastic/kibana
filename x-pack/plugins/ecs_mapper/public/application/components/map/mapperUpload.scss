@@ -18,13 +18,6 @@
   }
 }
 
-// adding dev tool top bar to the body offset
-$bodyOffset: $euiHeaderHeightCompensation;
-
-.mapper-main {
-  @include kibanaFullBodyHeight($bodyOffset);
-}
-
 .prfDevTool__page {
   flex: 1 1 auto;
 

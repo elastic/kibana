@@ -129,7 +129,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
   };
 
   return (
-    <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperFileUpload">
+    <EuiPage className="prfDevTool__page" data-test-subj="ecsMapperFileUpload">
       <EuiPageBody className="prfDevTool__page__pageBody">
         <EuiPageContent className="prfDevTool__page__pageBodyContent">
           {!isUploaded && ( !isPipelineCreated || !!error ) && (
