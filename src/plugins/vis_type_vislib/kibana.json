@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "kibanaLegacy"],
-  "requiredBundles": ["kibanaUtils", "visDefaultEditor", "visTypeXy", "visTypePie"],
+  "requiredBundles": ["kibanaUtils", "visDefaultEditor", "visTypeXy", "visTypePie", "fieldFormats"],
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"

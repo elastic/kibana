@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Logger } from 'kibana/server';
+
 import { SearchAfterAndBulkCreateParams, SignalSourceHit, WrapHits } from '../../signals/types';
 import { buildBulkBody } from './utils/build_bulk_body';
 import { generateId } from '../../signals/utils';
@@ -13,24 +15,33 @@ import type { ConfigType } from '../../../../config';
 import { WrappedRACAlert } from '../types';
 
 export const wrapHitsFactory = ({
-  ruleSO,
+  logger,
   mergeStrategy,
+  ruleSO,
+  spaceId,
 }: {
+  logger: Logger;
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  spaceId: string | null | undefined;
 }): WrapHits => (events) => {
-  const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
-    {
-      _index: '',
-      _id: generateId(
-        doc._index,
-        doc._id,
-        String(doc._version),
-        ruleSO.attributes.params.ruleId ?? ''
-      ),
-      _source: buildBulkBody(ruleSO, doc as SignalSourceHit, mergeStrategy),
-    },
-  ]);
+  try {
+    const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
+      {
+        _index: '',
+        _id: generateId(
+          doc._index,
+          doc._id,
+          String(doc._version),
+          ruleSO.attributes.params.ruleId ?? ''
+        ),
+        _source: buildBulkBody(spaceId, ruleSO, doc as SignalSourceHit, mergeStrategy, true),
+      },
+    ]);
 
-  return filterDuplicateSignals(ruleSO.id, wrappedDocs, true);
+    return filterDuplicateSignals(ruleSO.id, wrappedDocs, true);
+  } catch (error) {
+    logger.error(error);
+    return [];
+  }
 };

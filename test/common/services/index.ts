@@ -7,7 +7,6 @@
  */
 
 import { DeploymentService } from './deployment';
-import { LegacyEsProvider } from './legacy_es';
 import { ElasticsearchProvider } from './elasticsearch';
 import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
@@ -19,7 +18,6 @@ import { SavedObjectInfoService } from './saved_object_info';
 
 export const services = {
   deployment: DeploymentService,
-  legacyEs: LegacyEsProvider,
   es: ElasticsearchProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
