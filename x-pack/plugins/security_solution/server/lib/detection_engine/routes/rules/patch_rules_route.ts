@@ -25,7 +25,6 @@ import { buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
@@ -108,6 +107,7 @@ export const patchRulesRoute = (
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
 
         const rulesClient = context.alerting?.getRulesClient();
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
         if (!rulesClient) {
@@ -131,7 +131,6 @@ export const patchRulesRoute = (
           throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rule = await patchRules({
           rulesClient,
           author,
@@ -146,7 +145,8 @@ export const patchRulesRoute = (
           license,
           outputIndex,
           savedId,
-          savedObjectsClient,
+          spaceId: context.securitySolution.getSpaceId(),
+          ruleStatusClient,
           timelineId,
           timelineTitle,
           meta,
@@ -193,18 +193,12 @@ export const patchRulesRoute = (
             name: rule.name,
           });
           const ruleStatuses = await ruleStatusClient.find({
-            perPage: 1,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: rule.id,
-            searchFields: ['alertId'],
+            logsCount: 1,
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
           });
 
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleActions,
-            ruleStatuses.saved_objects[0]
-          );
+          const [validated, errors] = transformValidate(rule, ruleActions, ruleStatuses[0]);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

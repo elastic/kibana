@@ -72,10 +72,10 @@ You must migrate your time_based index patterns to a wildcard pattern. For examp
 [%collapsible]
 ====
 *Details* +
-For the `.tar.gz` and `.zip` archives, `platform` has been removed from the `root` folder name. For more information, refer to {kibana-pull}93835[#93835]
+After you extract an archive, the output directory no longer includes the target platform. For example, `kibana-8.0.0-linux-aarch64.tar.gz` produces a `kibana-8.0.0` folder. For more information, refer to {kibana-pull}93835[#93835].
 
 *Impact* +
-The `root` folder name now appears as `kibana-8.0.0-SNAPSHOT-linux-aarch64.tar.gz -> kibana-8.0.0-SNAPSHOT`.
+To use the new folder, update the configuration management tools and automation.
 ====
       
 [discrete]
@@ -84,10 +84,10 @@ The `root` folder name now appears as `kibana-8.0.0-SNAPSHOT-linux-aarch64.tar.g
 [%collapsible]
 ====
 *Details* +
-The default support for TLS v1.0 and v1.1 has been removed. For more information, refer to {kibana-pull}90511[#90511]
+The default support for TLS v1.0 and v1.1 has been removed. For more information, refer to {kibana-pull}90511[#90511].
 
 *Impact* +
-To enable support, set the environment variable to `NODE_OPTIONS=--tls-min-1.0`.
+To enable support, set `--tls-min-1.0` in the `node.options` configuration file. To locate the configuration file, go to the kibana/config folder or any other configuration with the `KBN_PATH_CONF` environment variable. For example, if you are using a Debian-based system, the configuration file is located in /etc/kibana.
 ====
            
 [discrete]
@@ -96,10 +96,10 @@ To enable support, set the environment variable to `NODE_OPTIONS=--tls-min-1.0`.
 [%collapsible]
 ====
 *Details* +
-Systems that don't have `service` aliased to use kibana.service are unable to use `service start kibana`. For more information, refer to {kibana-pull}74424[#74424]
+All supported operating systems use systemd service files. Any system that doesn’t have `service` aliased to use kibana.service should use `systemctl start kibana.service` instead of `service start kibana`. For more information, refer to {kibana-pull}74424[#74424].
 
 *Impact* +
-If your system doesn't have `service` aliased to use kibana.service, use `systemctl start kibana.service`.
+If your installation uses .deb or .rpm packages with SysV, migrate to systemd.
 ====
        
 [discrete]
@@ -108,10 +108,30 @@ If your system doesn't have `service` aliased to use kibana.service, use `system
 [%collapsible]
 ====
 *Details* +
-By default, responses are not logged. Previously, responses were logged if `logging.json` was set to `true`, `logging.dest` was specified, or a TTY was detected. For more information, refer to {kibana-pull}42353[#42353]
+In previous versions, all events are logged in `json` when `logging.json:true`. With the new logging configuration, you can choose the `json` and pattern output formats with layouts. For more information, refer to {kibana-pull}42353[#42353].
 
 *Impact* +
-To log responses, set `logging.events.response=*` in kibana.yml.
+To restore the previous behavior, configure the logging format for each custom appender with the `appender.layout property` in kibana.yml. There is no default for custom appenders, and each appender must be configured expilictly.
+
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    custom_console:
+      type: console
+      layout:
+        type: pattern
+    custom_json:
+      type: console
+      layout:
+        type: json
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [custom_console]
+  root:
+    appenders: [default, custom_json]
+    level: warn
+-------------------
 ====
 
 [float]
@@ -120,7 +140,7 @@ To log responses, set `logging.events.response=*` in kibana.yml.
       
 [discrete]
 [[breaking-52539]]
-.Removed legacy Reporting job params compatibility shim
+.Legacy job parameters are no longer supported
 [%collapsible]
 ====
 *Details* +
@@ -152,10 +172,10 @@ Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 
 [%collapsible]
 ====
 *Details* +
-To provide the maximum level of protection for most installations, the csp.strict config is now enabled by default. Legacy browsers not supported by Kibana, such as IE11, are unable to access {kib} unless explicitly enabled. All browsers officially supported by Kibana do not have this issue. For more information, refer to {kibana-pull}41700[#41700]
+To provide the maximum level of protection for most installations, the csp.strict config is now enabled by default. Legacy browsers not supported by Kibana, such as Internet Explorer 11, are unable to access {kib} unless explicitly enabled. All browsers officially supported by Kibana do not have this issue. For more information, refer to {kibana-pull}41700[#41700]
 
 *Impact* +
-To enable support for legacy browsers, set `csp.strict: false` in kibana.yml.
+To enable support for legacy browsers, set `csp.strict: false` in kibana.yml. To effectively enforce the security protocol, we strongly discourage disabling `csp.strict` unless it is critical that you support Internet Explorer 11.
 ====
 
 [float]
@@ -191,14 +211,14 @@ You are now unable to use `0` as the `server.host`.
 
 [discrete]
 [[breaking-38657]]
-.Removed `xpack.security.authProviders` and `xpack.security.public`
+.Removed `xpack.security.public` and `xpack.security.authProviders`
 [%collapsible]
 ====
 *Details* +
 The `xpack.security.public` and `xpack.security.authProviders` settings have been removed. For more information, refer to {kibana-pull}38657[#38657]
 
 *Impact* +
-Use the `xpack.security.authc.saml.realm` setting.
+Use the `xpack.security.authc.saml.realm` and `xpack.security.authc.providers` settings.
 ====
 
 [discrete]

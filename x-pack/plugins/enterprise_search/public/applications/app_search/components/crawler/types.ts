@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export enum CrawlerPolicies {
   allow = 'allow',
   deny = 'deny',
@@ -74,3 +76,102 @@ export interface CrawlerDomainValidationResultFromServer {
     comment: string;
   }>;
 }
+
+export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'invalid';
+
+export interface CrawlerDomainValidationStep {
+  state: CrawlerDomainValidationStepState;
+  blockingFailure?: boolean;
+  message?: string;
+}
+
+interface CrawlerDomainValidationState {
+  initialValidation: CrawlerDomainValidationStep;
+  networkConnectivity: CrawlerDomainValidationStep;
+  indexingRestrictions: CrawlerDomainValidationStep;
+  contentVerification: CrawlerDomainValidationStep;
+}
+
+export interface CrawlerDomainValidationResult {
+  steps: CrawlerDomainValidationState;
+}
+
+export type CrawlerDomainValidationResultChange = Partial<CrawlerDomainValidationState>;
+
+export type CrawlerDomainValidationStepName =
+  | 'initialValidation'
+  | 'networkConnectivity'
+  | 'indexingRestrictions'
+  | 'contentVerification';
+// See SharedTogo::Crawler::Status for details on how these are generated
+export enum CrawlerStatus {
+  Pending = 'pending',
+  Suspended = 'suspended',
+  Starting = 'starting',
+  Running = 'running',
+  Suspending = 'suspending',
+  Canceling = 'canceling',
+  Success = 'success',
+  Failed = 'failed',
+  Canceled = 'canceled',
+  Skipped = 'skipped',
+}
+
+export interface CrawlRequestFromServer {
+  id: string;
+  status: CrawlerStatus;
+  created_at: string;
+  began_at: string | null;
+  completed_at: string | null;
+}
+
+export interface CrawlRequest {
+  id: string;
+  status: CrawlerStatus;
+  createdAt: string;
+  beganAt: string | null;
+  completedAt: string | null;
+}
+
+export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
+  [CrawlerStatus.Pending]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.pending',
+    { defaultMessage: 'Pending' }
+  ),
+  [CrawlerStatus.Suspended]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.suspended',
+    { defaultMessage: 'Suspended' }
+  ),
+  [CrawlerStatus.Starting]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.starting',
+    { defaultMessage: 'Starting' }
+  ),
+  [CrawlerStatus.Running]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.running',
+    { defaultMessage: 'Running' }
+  ),
+  [CrawlerStatus.Suspending]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.suspending',
+    { defaultMessage: 'Suspending' }
+  ),
+  [CrawlerStatus.Canceling]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.canceling',
+    { defaultMessage: 'Canceling' }
+  ),
+  [CrawlerStatus.Success]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.success',
+    { defaultMessage: 'Success' }
+  ),
+  [CrawlerStatus.Failed]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.failed',
+    { defaultMessage: 'Failed' }
+  ),
+  [CrawlerStatus.Canceled]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.canceled',
+    { defaultMessage: 'Canceled' }
+  ),
+  [CrawlerStatus.Skipped]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.skipped',
+    { defaultMessage: 'Skipped' }
+  ),
+};

@@ -13,6 +13,7 @@ import { FlexGroupAlignItems } from '@elastic/eui/src/components/flex/flex_group
 interface ViewContentHeaderProps {
   title: React.ReactNode;
   description?: React.ReactNode;
+  headingLevel?: 1 | 2 | 3;
   action?: React.ReactNode;
   alignItems?: FlexGroupAlignItems;
   titleSize?: 's' | 'm' | 'l';
@@ -21,24 +22,24 @@ interface ViewContentHeaderProps {
 export const ViewContentHeader: React.FC<ViewContentHeaderProps> = ({
   title,
   titleSize = 'm',
+  headingLevel = 2,
   description,
   action,
   alignItems = 'center',
 }) => {
   let titleElement;
 
-  switch (titleSize) {
-    case 's':
-      titleElement = <h4>{title}</h4>;
+  switch (headingLevel) {
+    case 1:
+      titleElement = <h1>{title}</h1>;
       break;
-    case 'l':
+    case 2:
       titleElement = <h2>{title}</h2>;
       break;
     default:
       titleElement = <h3>{title}</h3>;
       break;
   }
-
   return (
     <>
       <EuiFlexGroup alignItems={alignItems} justifyContent="spaceBetween">
