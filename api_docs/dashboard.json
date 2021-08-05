@@ -1222,7 +1222,8 @@
               "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
             ],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "src/plugins/dashboard/public/locator.ts",
             "deprecated": false
@@ -1230,14 +1231,15 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardAppLocatorParams.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              "any"
+              "Query",
+              " | undefined"
             ],
             "path": "src/plugins/dashboard/public/locator.ts",
             "deprecated": false
@@ -1532,7 +1534,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[]"
+              "Filter",
+              "[]"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
             "deprecated": false
@@ -1550,12 +1553,12 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainerInput.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "any"
+              "{ query: string | { [key: string]: any; }; language: string; }"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
             "deprecated": false
@@ -1961,7 +1964,8 @@
             "label": "getQuery",
             "description": [],
             "signature": [
-              "() => any"
+              "() => ",
+              "Query"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false,
@@ -1976,7 +1980,9 @@
             "label": "getFilters",
             "description": [],
             "signature": [
-              "() => any[]"
+              "() => ",
+              "Filter",
+              "[]"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false,
@@ -1995,11 +2001,10 @@
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "dashboard",
-                "id": "def-public.editMode",
+                "id": "def-public.DashboardSavedObject.getFullEditPath.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "editMode",
@@ -2008,9 +2013,11 @@
                   "boolean | undefined"
                 ],
                 "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2097,7 +2104,8 @@
               "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
             ],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "src/plugins/dashboard/public/url_generator.ts",
             "deprecated": false
@@ -2105,14 +2113,15 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardUrlGeneratorState.query",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              "any"
+              "Query",
+              " | undefined"
             ],
             "path": "src/plugins/dashboard/public/url_generator.ts",
             "deprecated": false
@@ -2508,8 +2517,8 @@
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "dashboard",
@@ -2523,8 +2532,8 @@
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "dashboard",

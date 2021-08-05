@@ -1884,8 +1884,8 @@
             ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -1934,7 +1934,24 @@
               "((appId: string) => string | undefined) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.OriginSaveModalProps.getAppNameFromId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -1997,8 +2014,8 @@
             ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2041,11 +2058,10 @@
             ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.props",
+                "id": "def-public.OriginSaveModalProps.onSave.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -2061,9 +2077,11 @@
                   " & { returnToOrigin: boolean; }"
                 ],
                 "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2198,8 +2216,8 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2234,22 +2252,23 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.resp",
+                "id": "def-public.SavedObject.applyESResp.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "resp",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/plugins/saved_objects/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2275,11 +2294,10 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.opts",
+                "id": "def-public.SavedObject.creationOpts.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -2288,9 +2306,11 @@
                   "SavedObjectCreationOpts"
                 ],
                 "path": "src/plugins/saved_objects/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2316,7 +2336,9 @@
               "(() => Promise<{}>) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2330,8 +2352,8 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2345,8 +2367,8 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2360,8 +2382,8 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2375,8 +2397,8 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2391,13 +2413,30 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IIndexPattern",
-                "text": "IIndexPattern"
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
               },
               " | null>) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObject.hydrateIndexPattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/saved_objects/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2431,7 +2470,9 @@
               ">) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2455,8 +2496,8 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2501,11 +2542,10 @@
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.saveOptions",
+                "id": "def-public.SavedObject.save.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "saveOptions",
@@ -2520,9 +2560,11 @@
                   }
                 ],
                 "path": "src/plugins/saved_objects/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2639,7 +2681,30 @@
               ">) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectConfig.afterESResp.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjects",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-public.SavedObject",
+                    "text": "SavedObject"
+                  }
+                ],
+                "path": "src/plugins/saved_objects/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2669,7 +2734,24 @@
               ") | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectConfig.extractReferences.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "SavedObjectAttributesAndRefs"
+                ],
+                "path": "src/plugins/saved_objects/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2692,7 +2774,39 @@
               "[]) => void) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectConfig.injectReferences.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "object",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/plugins/saved_objects/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectConfig.injectReferences.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "src/plugins/saved_objects/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2718,7 +2832,9 @@
               "(() => void) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2732,8 +2848,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IIndexPattern",
-                "text": "IIndexPattern"
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
               },
               " | undefined"
             ],
@@ -2875,11 +2991,10 @@
             ],
             "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.config",
+                "id": "def-public.SavedObjectDecorator.decorateConfig.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
@@ -2894,9 +3009,11 @@
                   }
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -2912,11 +3029,10 @@
             ],
             "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.object",
+                "id": "def-public.SavedObjectDecorator.decorateObject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "object",
@@ -2925,9 +3041,11 @@
                   "T"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3363,7 +3481,9 @@
               "(() => void) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjects",
@@ -3507,6 +3627,22 @@
         ],
         "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "SavedObjectKibanaServices"
+            ],
+            "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3644,11 +3780,10 @@
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "savedObjects",
-              "id": "def-public.config",
+              "id": "def-public.SavedObjectSetup.registerDecorator.$1",
               "type": "Object",
               "tags": [],
               "label": "config",
@@ -3664,9 +3799,11 @@
                 "<any>"
               ],
               "path": "src/plugins/saved_objects/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

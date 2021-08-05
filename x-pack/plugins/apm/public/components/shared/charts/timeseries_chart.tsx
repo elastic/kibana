@@ -15,7 +15,6 @@ import {
   LineAnnotation,
   LineSeries,
   niceTimeFormatter,
-  Placement,
   Position,
   RectAnnotation,
   ScaleType,
@@ -36,17 +35,17 @@ import {
   RectCoordinate,
   TimeSeries,
 } from '../../../../typings/timeseries';
+import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
+import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
-import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
+import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
-import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
-import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
-import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
 import { getAlertAnnotations } from './helper/get_alert_annotations';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
 
 interface Props {
   id: string;
@@ -115,6 +114,7 @@ export function TimeseriesChart({
     >
       <Chart ref={chartRef} id={id}>
         <Settings
+          tooltip={{ stickTo: 'top' }}
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           theme={{
             ...chartTheme,
@@ -125,7 +125,7 @@ export function TimeseriesChart({
           }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Right },
+            tooltip: { visible: true },
           }}
           showLegend
           showLegendExtra

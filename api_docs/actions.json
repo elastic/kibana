@@ -214,8 +214,8 @@
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "actions",
@@ -1838,6 +1838,22 @@
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.requested",
+            "type": "Object",
+            "tags": [],
+            "label": "requested",
+            "description": [],
+            "signature": [
+              "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
+            ],
+            "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1868,6 +1884,22 @@
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.responded",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "responded",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
