@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { find } from 'lodash';
+import { find, map, trim } from 'lodash';
 import sqlSummary from 'sql-summary';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -36,7 +36,7 @@ import {
 
 export const CommonUseField = getUseField({ component: Field });
 
-// const TABLE_NAMES_REGEX = /(?<=from|join)\s+(\w+)/g;
+const TABLE_NAMES_REGEX = /(?<=from|join)\s+(\w+)/g;
 
 const StyledFieldIcon = styled(FieldIcon)`
   width: 32px;
@@ -248,9 +248,9 @@ interface Props {
 interface ECSMappingEditorFormProps {
   osquerySchemaOptions: any[];
   defaultValue: Record<string, unknown>;
-  onAdd: () => void;
-  onChange: () => void;
-  onDelete: () => void;
+  onAdd?: () => void;
+  onChange?: () => void;
+  onDelete?: () => void;
 }
 
 export const ECSMappingEditorForm = ({
@@ -291,8 +291,18 @@ export const ECSMappingEditorForm = ({
     }
   }, [submit, onAdd, reset]);
 
+  const handleChange = useCallback(async () => {
+    if (!defaultValue) return;
+
+    const { data, isValid } = await submit();
+
+    if (isValid && onChange) {
+      onChange(data);
+    }
+  }, [defaultValue, onChange, submit]);
+
   const handleDeleteClick = useCallback(() => {
-    if (defaultValue?.key) {
+    if (defaultValue?.key && onDelete) {
       onDelete(defaultValue.key);
     }
   }, [defaultValue, onDelete]);
@@ -301,7 +311,7 @@ export const ECSMappingEditorForm = ({
     <Form form={form}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <CommonUseField path="key" component={ECSComboboxField} />
+          <CommonUseField path="key" component={ECSComboboxField} onChange={handleChange} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center">
@@ -314,6 +324,7 @@ export const ECSMappingEditorForm = ({
                 euiFieldProps={{
                   options: osquerySchemaOptions,
                 }}
+                onChange={handleChange}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -337,22 +348,45 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
 
   useEffect(() => {
     setOsquerySchemaOptions((currentValue) => {
-      const columnName = rest.query ? sqlSummary(rest.query).split('SELECT FROM ')[1] : null;
-      const osqueryTable = find(osquerySchema, ['name', columnName]);
-
-      if (osqueryTable) {
-        return osqueryTable.columns.map((osqueryTableColumn) => ({
-          label: osqueryTableColumn.name,
-          value: osqueryTableColumn,
-        }));
+      if (!rest.query) {
+        return currentValue;
       }
 
-      return currentValue;
+      const columnNames = map(rest.query.toLowerCase().match(TABLE_NAMES_REGEX), trim);
+
+      const suggestions = columnNames
+        .map((columnName) => {
+          const osqueryTable = find(osquerySchema, ['name', columnName]);
+
+          if (osqueryTable) {
+            return osqueryTable.columns.map((osqueryTableColumn) => ({
+              label: osqueryTableColumn.name,
+              value: osqueryTableColumn,
+            }));
+          }
+          return [];
+        })
+        .flat();
+
+      return suggestions;
     });
   }, [rest.query]);
 
   const handleAddRow = useCallback(
     ({ key, value }) => {
+      if (key && value) {
+        setValue((current) => ({
+          ...current,
+          [key]: value,
+        }));
+      }
+    },
+    [setValue]
+  );
+
+  const handleUpdateRow = useCallback(
+    (currentKey) => ({ key, value }) => {
+      console.error('handleUpadteRow', currentKey, key, value);
       if (key && value) {
         setValue((current) => ({
           ...current,
@@ -407,7 +441,7 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
             key: ecsKey,
             value: ecsValue,
           }}
-          onAdd={handleAddRow}
+          onChange={handleUpdateRow(ecsKey)}
           onDelete={handleDeleteRow}
         />
       ))}
