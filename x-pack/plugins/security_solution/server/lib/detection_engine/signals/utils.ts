@@ -8,15 +8,17 @@ import { createHash } from 'crypto';
 import { chunk, get, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
+
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
-
+import { ALERT_ID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ElasticsearchClient } from '@kbn/securitysolution-es-utils';
+
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -938,14 +940,14 @@ export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit =>
 };
 
 export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
-  return (event as WrappedSignalHit)._source.signal != null;
+  return (event as WrappedSignalHit)?._source?.signal != null;
 };
 
 export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)._source['kibana.rac.alert.id'] != null;
+  return (event as WrappedRACAlert)?._source?.[ALERT_ID] != null;
 };
 
-export const getF = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
+export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
   if (isWrappedRACAlert(event)) {
     return event._source, field.replace('signal', 'kibana.alert') as T; // TODO: handle special cases
   } else if (isWrappedSignalHit(event)) {

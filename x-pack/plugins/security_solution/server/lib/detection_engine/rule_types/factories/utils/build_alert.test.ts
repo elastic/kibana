@@ -391,7 +391,7 @@ describe('buildAlert', () => {
         ...sampleDoc,
         _source: {
           ...sampleDoc._source,
-          TIMESTAMP: timestamp,
+          [TIMESTAMP]: timestamp,
         },
       });
     });

@@ -7,21 +7,22 @@
 
 import { WrappedRACAlert } from '../rule_types/types';
 import { Ancestor, SimpleHit, WrappedSignalHit } from './types';
-import { isWrappedRACAlert, isWrappedSignalHit } from './utils';
 
-export const filterDuplicateSignals = (ruleId: string, signals: SimpleHit[]) => {
-  if (isWrappedSignalHit(signals[0])) {
+export const filterDuplicateSignals = (
+  ruleId: string,
+  signals: SimpleHit[],
+  isRuleRegistryEnabled: boolean
+) => {
+  if (!isRuleRegistryEnabled) {
     return (signals as WrappedSignalHit[]).filter(
       (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
     );
-  } else if (isWrappedRACAlert(signals[0])) {
+  } else {
     return (signals as WrappedRACAlert[]).filter(
       (doc) =>
         !(doc._source['kibana.alert.ancestors'] as Ancestor[]).some(
           (ancestor) => ancestor.rule === ruleId
         )
     );
-  } else {
-    return signals;
   }
 };

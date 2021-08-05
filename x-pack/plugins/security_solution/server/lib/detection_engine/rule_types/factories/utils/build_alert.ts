@@ -17,7 +17,7 @@ import { RulesSchema } from '../../../../../../common/detection_engine/schemas/r
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { Ancestor, BaseSignalHit, SimpleHit } from '../../../signals/types';
 import {
-  getF,
+  getField,
   getValidDateFromDoc,
   isWrappedRACAlert,
   isWrappedSignalHit,
@@ -44,10 +44,10 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
     index: doc._index,
-    depth: isSignal ? getF(doc, 'signal.depth') ?? 1 : 0,
+    depth: isSignal ? getField(doc, 'signal.depth') ?? 1 : 0,
   };
   if (isSignal) {
-    parent.rule = getF(doc, 'signal.rule.id');
+    parent.rule = getField(doc, 'signal.rule.id');
   }
   return parent;
 };
@@ -59,7 +59,7 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  */
 export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
   const newAncestor = buildParent(doc);
-  const existingAncestors: Ancestor[] = getF(doc, 'signal.ancestors') ?? [];
+  const existingAncestors: Ancestor[] = getField(doc, 'signal.ancestors') ?? [];
   return [...existingAncestors, newAncestor];
 };
 

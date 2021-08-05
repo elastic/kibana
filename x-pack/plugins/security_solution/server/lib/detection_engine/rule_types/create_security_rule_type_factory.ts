@@ -15,7 +15,6 @@ import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toError } from '@kbn/securitysolution-list-api';
 
 import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
-import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { ruleStatusServiceFactory } from '../signals/rule_status_service';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
@@ -36,6 +35,7 @@ import {
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory } from './factories';
+import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
@@ -44,6 +44,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   logger,
   mergeStrategy,
   ruleDataClient,
+  ruleDataService,
 }) => (type) => {
   const persistenceRuleType = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
   return persistenceRuleType({
@@ -65,8 +66,9 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
       const esClient = scopedClusterClient.asCurrentUser;
 
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+      const ruleStatusClient = new RuleExecutionLogClient({ savedObjectsClient, ruleDataService });
       const ruleStatusService = await ruleStatusServiceFactory({
+        spaceId,
         alertId,
         ruleStatusClient,
       });

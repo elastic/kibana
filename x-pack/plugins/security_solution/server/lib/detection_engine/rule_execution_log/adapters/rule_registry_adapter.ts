@@ -6,17 +6,18 @@
  */
 
 import { merge } from 'lodash';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { IRuleStatusSOAttributes } from '../../rules/types';
 import { RuleRegistryLogClient } from '../rule_registry_log_client/rule_registry_log_client';
 import {
+  CreateExecutionLogArgs,
   ExecutionMetric,
   ExecutionMetricArgs,
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
+  IRuleDataPluginService,
   IRuleExecutionLogClient,
   LogStatusChangeArgs,
+  UpdateExecutionLogArgs,
 } from '../types';
 
 /**
@@ -25,7 +26,7 @@ import {
 export class RuleRegistryAdapter implements IRuleExecutionLogClient {
   private ruleRegistryClient: RuleRegistryLogClient;
 
-  constructor(ruleDataService: RuleDataPluginService) {
+  constructor(ruleDataService: IRuleDataPluginService) {
     this.ruleRegistryClient = new RuleRegistryLogClient(ruleDataService);
   }
 
@@ -58,37 +59,45 @@ export class RuleRegistryAdapter implements IRuleExecutionLogClient {
     return merge(statusesById, lastErrorsById);
   }
 
-  public async create(event: IRuleStatusSOAttributes, spaceId: string) {
-    if (event.status) {
+  public async create({ attributes, spaceId }: CreateExecutionLogArgs) {
+    if (attributes.status) {
       await this.ruleRegistryClient.logStatusChange({
-        ruleId: event.alertId,
-        newStatus: event.status,
+        ruleId: attributes.alertId,
+        newStatus: attributes.status,
         spaceId,
       });
     }
 
-    if (event.bulkCreateTimeDurations) {
+    if (attributes.bulkCreateTimeDurations) {
       await this.ruleRegistryClient.logExecutionMetric({
-        ruleId: event.alertId,
+        ruleId: attributes.alertId,
         metric: ExecutionMetric.indexingDurationMax,
-        value: Math.max(...event.bulkCreateTimeDurations.map(Number)),
+        value: Math.max(...attributes.bulkCreateTimeDurations.map(Number)),
         spaceId,
       });
     }
 
-    if (event.gap) {
+    if (attributes.gap) {
       await this.ruleRegistryClient.logExecutionMetric({
-        ruleId: event.alertId,
+        ruleId: attributes.alertId,
         metric: ExecutionMetric.executionGap,
-        value: Number(event.gap),
+        value: Number(attributes.gap),
         spaceId,
       });
     }
+
+    return {
+      id: '',
+      type: '',
+      score: 0,
+      attributes,
+      references: [],
+    };
   }
 
-  public async update(id: string, event: IRuleStatusSOAttributes, spaceId: string) {
+  public async update({ attributes, spaceId }: UpdateExecutionLogArgs) {
     // execution events are immutable, so we just use 'create' here instead of 'update'
-    await this.create(event, spaceId);
+    await this.create({ attributes, spaceId });
   }
 
   public async delete(id: string) {

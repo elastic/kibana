@@ -30,6 +30,7 @@ import {
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
+import { IRuleDataPluginService } from '../rule_execution_log/types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
@@ -98,6 +99,7 @@ export type CreateSecurityRuleTypeFactory = (options: {
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
+  ruleDataService: IRuleDataPluginService;
 }) => <
   TParams extends RuleParams & { index: string[] | undefined },
   TAlertInstanceContext extends AlertInstanceContext,
