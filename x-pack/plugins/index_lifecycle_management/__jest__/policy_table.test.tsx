@@ -79,11 +79,11 @@ const snapshot = (rendered: string[]) => {
 const mountedSnapshot = (rendered: ReactWrapper) => {
   expect(takeMountedSnapshot(rendered)).toMatchSnapshot();
 };
-const names = (rendered: ReactWrapper) => {
+const getPolicyLinks = (rendered: ReactWrapper) => {
   return findTestSubject(rendered, 'policyTablePolicyNameLink');
 };
-const namesText = (rendered: ReactWrapper): string[] => {
-  return (names(rendered) as ReactWrapper).map((button) => button.text());
+const getPolicyNames = (rendered: ReactWrapper): string[] => {
+  return (getPolicyLinks(rendered) as ReactWrapper).map((button) => button.text());
 };
 
 const testSort = (headerName: string) => {
@@ -91,17 +91,10 @@ const testSort = (headerName: string) => {
   const nameHeader = findTestSubject(rendered, `tableHeaderCell_${headerName}`).find('button');
   nameHeader.simulate('click');
   rendered.update();
-  snapshot(namesText(rendered));
+  snapshot(getPolicyNames(rendered));
   nameHeader.simulate('click');
   rendered.update();
-  snapshot(namesText(rendered));
-};
-const openContextMenu = (buttonIndex: number) => {
-  const rendered = mountWithIntl(component);
-  const actionsButton = findTestSubject(rendered, 'euiCollapsedItemActionsButton');
-  actionsButton.at(buttonIndex).simulate('click');
-  rendered.update();
-  return rendered;
+  snapshot(getPolicyNames(rendered));
 };
 
 const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
@@ -118,20 +111,20 @@ describe('policy table', () => {
     component = <TestComponent testPolicies={policies} />;
   });
 
-  test('should show empty state when there are no policies', () => {
+  test('shows empty state when there are no policies', () => {
     component = <TestComponent testPolicies={[]} />;
     const rendered = mountWithIntl(component);
     mountedSnapshot(rendered);
   });
-  test('should change pages when a pagination link is clicked on', () => {
+  test('changes pages when a pagination link is clicked on', () => {
     const rendered = mountWithIntl(component);
-    snapshot(namesText(rendered));
+    snapshot(getPolicyNames(rendered));
     const pagingButtons = rendered.find('.euiPaginationButton');
     pagingButtons.at(2).simulate('click');
     rendered.update();
-    snapshot(namesText(rendered));
+    snapshot(getPolicyNames(rendered));
   });
-  test('should show more when per page value is increased', () => {
+  test('shows more when per page value is increased', () => {
     const rendered = mountWithIntl(component);
     const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
     perPageButton.simulate('click');
@@ -139,68 +132,67 @@ describe('policy table', () => {
     const numberOfRowsButton = rendered.find('.euiContextMenuItem').at(1);
     numberOfRowsButton.simulate('click');
     rendered.update();
-    expect(namesText(rendered).length).toBe(25);
+    expect(getPolicyNames(rendered).length).toBe(25);
   });
-  test('should filter based on content of search input', () => {
+  test('filters based on content of search input', () => {
     const rendered = mountWithIntl(component);
     const searchInput = rendered.find('.euiFieldSearch').first();
     ((searchInput.instance() as unknown) as HTMLInputElement).value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
-    snapshot(namesText(rendered));
+    snapshot(getPolicyNames(rendered));
   });
-  test('should sort when name header is clicked', () => {
+  test('sorts when name header is clicked', () => {
     testSort('name_0');
   });
-  test('should sort when modified date header is clicked', () => {
+  test('sorts when modified date header is clicked', () => {
     testSort('modifiedDate_3');
   });
-  test('should sort when linked indices header is clicked', () => {
+  test('sorts when linked indices header is clicked', () => {
     testSort('indices_2');
   });
-  test('should sort when linked index templates header is clicked', () => {
+  test('sorts when linked index templates header is clicked', () => {
     testSort('indexTemplates_1');
   });
-  test('view indices button should be enabled when there are linked indices', () => {
-    const rendered = openContextMenu(0);
-    const buttons = rendered.find('button.euiContextMenuItem');
-    expect(buttons.length).toBe(3);
-    expect(buttons.at(0).text()).toBe('View indices linked to policy');
-    expect(buttons.at(1).text()).toBe('Add policy to index template');
-    expect(buttons.at(2).text()).toBe('Delete policy');
-    expect((buttons.at(2).getDOMNode() as HTMLButtonElement).disabled).toBeTruthy();
+  test('delete policy button is disabled when there are linked indices', () => {
+    const rendered = mountWithIntl(component);
+    const policyRow = findTestSubject(rendered, `policyTableRow-${testPolicy.name}`);
+    const deleteButton = findTestSubject(policyRow, 'deletePolicy');
+    expect(deleteButton.props().disabled).toBeTruthy();
   });
-  test('view indices button should be disabled when there are no linked indices', () => {
-    const rendered = openContextMenu(1);
-    const buttons = rendered.find('button.euiContextMenuItem');
-    expect(buttons.length).toBe(3);
-    expect(buttons.at(0).text()).toBe('View indices linked to policy');
-    expect(buttons.at(1).text()).toBe('Add policy to index template');
-    expect(buttons.at(2).text()).toBe('Delete policy');
-    expect((buttons.at(1).getDOMNode() as HTMLButtonElement).disabled).toBeFalsy();
+  test('delete policy button is enabled when there are no linked indices', () => {
+    const rendered = mountWithIntl(component);
+    const policyRow = findTestSubject(rendered, `policyTableRow-testy1`);
+    const deleteButton = findTestSubject(policyRow, 'deletePolicy');
+    expect(deleteButton.props().disabled).toBeFalsy();
   });
-  test('confirmation modal should show when delete button is pressed', () => {
-    const rendered = openContextMenu(1);
-    const deleteButton = rendered.find('button.euiContextMenuItem').at(2);
-    deleteButton.simulate('click');
+  test('confirmation modal shows when delete button is pressed', () => {
+    const rendered = mountWithIntl(component);
+    const policyRow = findTestSubject(rendered, `policyTableRow-testy1`);
+    const addPolicyToTemplateButton = findTestSubject(policyRow, 'deletePolicy');
+    addPolicyToTemplateButton.simulate('click');
     rendered.update();
-    expect(rendered.find('.euiModal--confirmation').exists()).toBeTruthy();
+    expect(findTestSubject(rendered, 'deletePolicyModal').exists()).toBeTruthy();
   });
-  test('confirmation modal should show when add policy to index template button is pressed', () => {
-    const rendered = openContextMenu(1);
-    const deleteButton = rendered.find('button.euiContextMenuItem').at(1);
-    deleteButton.simulate('click');
+  test('add index template modal shows when add policy to index template button is pressed', () => {
+    const rendered = mountWithIntl(component);
+    const policyRow = findTestSubject(rendered, `policyTableRow-${testPolicy.name}`);
+    const addPolicyToTemplateButton = findTestSubject(policyRow, 'addPolicyToTemplate');
+    addPolicyToTemplateButton.simulate('click');
     rendered.update();
-    expect(rendered.find('.euiModal--confirmation').exists()).toBeTruthy();
+    expect(findTestSubject(rendered, 'addPolicyToTemplateModal').exists()).toBeTruthy();
   });
   test('displays policy properties', () => {
     const rendered = mountWithIntl(component);
-    const firstRow = findTestSubject(rendered, 'policyTableRow-testy0').text();
-    const numberOfIndices = testPolicy.indices.length;
-    const numberOfIndexTemplates = testPolicy.indexTemplates.length;
-    expect(firstRow).toBe(
-      `Nametesty0Linked index templates${numberOfIndexTemplates}Linked indices${numberOfIndices}Modified date${testDateFormatted}`
-    );
+    const firstRow = findTestSubject(rendered, 'policyTableRow-testy0');
+    const policyName = findTestSubject(firstRow, 'policy-name').text();
+    expect(policyName).toBe(`Name${testPolicy.name}`);
+    const policyIndexTemplates = findTestSubject(firstRow, 'policy-indexTemplates').text();
+    expect(policyIndexTemplates).toBe(`Linked index templates${testPolicy.indexTemplates.length}`);
+    const policyIndices = findTestSubject(firstRow, 'policy-indices').text();
+    expect(policyIndices).toBe(`Linked indices${testPolicy.indices.length}`);
+    const policyModifiedDate = findTestSubject(firstRow, 'policy-modifiedDate').text();
+    expect(policyModifiedDate).toBe(`Modified date${testDateFormatted}`);
   });
   test('opens a flyout with index templates', () => {
     const rendered = mountWithIntl(component);

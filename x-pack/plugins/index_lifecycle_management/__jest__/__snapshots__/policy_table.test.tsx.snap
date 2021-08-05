@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`policy table should change pages when a pagination link is clicked on 1`] = `
+exports[`policy table changes pages when a pagination link is clicked on 1`] = `
 Array [
   "testy0",
   "testy1",
@@ -15,7 +15,7 @@ Array [
 ]
 `;
 
-exports[`policy table should change pages when a pagination link is clicked on 2`] = `
+exports[`policy table changes pages when a pagination link is clicked on 2`] = `
 Array [
   "testy13",
   "testy14",
@@ -30,13 +30,13 @@ Array [
 ]
 `;
 
-exports[`policy table should filter based on content of search input 1`] = `
+exports[`policy table filters based on content of search input 1`] = `
 Array [
   "testy0",
 ]
 `;
 
-exports[`policy table should show empty state when there are no policies 1`] = `
+exports[`policy table shows empty state when there are no policies 1`] = `
 <div
   class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
   role="main"
@@ -97,7 +97,7 @@ exports[`policy table should show empty state when there are no policies 1`] = `
 </div>
 `;
 
-exports[`policy table should sort when linked index templates header is clicked 1`] = `
+exports[`policy table sorts when linked index templates header is clicked 1`] = `
 Array [
   "testy1",
   "testy3",
@@ -112,7 +112,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when linked index templates header is clicked 2`] = `
+exports[`policy table sorts when linked index templates header is clicked 2`] = `
 Array [
   "testy0",
   "testy2",
@@ -127,7 +127,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when linked indices header is clicked 1`] = `
+exports[`policy table sorts when linked indices header is clicked 1`] = `
 Array [
   "testy1",
   "testy3",
@@ -142,7 +142,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when linked indices header is clicked 2`] = `
+exports[`policy table sorts when linked indices header is clicked 2`] = `
 Array [
   "testy0",
   "testy2",
@@ -157,7 +157,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when modified date header is clicked 1`] = `
+exports[`policy table sorts when modified date header is clicked 1`] = `
 Array [
   "testy0",
   "testy104",
@@ -172,7 +172,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when modified date header is clicked 2`] = `
+exports[`policy table sorts when modified date header is clicked 2`] = `
 Array [
   "testy1",
   "testy2",
@@ -187,7 +187,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when name header is clicked 1`] = `
+exports[`policy table sorts when name header is clicked 1`] = `
 Array [
   "testy99",
   "testy98",
@@ -202,7 +202,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when name header is clicked 2`] = `
+exports[`policy table sorts when name header is clicked 2`] = `
 Array [
   "testy0",
   "testy1",

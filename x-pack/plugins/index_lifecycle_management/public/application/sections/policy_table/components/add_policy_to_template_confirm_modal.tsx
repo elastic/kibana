@@ -259,6 +259,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
 
   return (
     <EuiConfirmModal
+      data-test-subj="addPolicyToTemplateModal"
       title={title}
       onCancel={onCancel}
       onConfirm={addPolicyToTemplate}
