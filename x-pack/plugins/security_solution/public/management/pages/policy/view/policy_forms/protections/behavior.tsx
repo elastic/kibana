@@ -23,7 +23,7 @@ import { SecurityPageName } from '../../../../../../app/types';
  *  which will configure for all relevant OSes.
  */
 export const BehaviorProtection = React.memo(() => {
-  const OSes: Immutable<BehaviorProtectionOSes[]> = [OS.windows];
+  const OSes: Immutable<BehaviorProtectionOSes[]> = [OS.windows, OS.mac, OS.linux];
   const protection = 'behavior_protection';
   return (
     <ConfigForm
