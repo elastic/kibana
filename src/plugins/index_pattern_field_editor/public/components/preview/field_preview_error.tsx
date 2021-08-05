@@ -25,6 +25,7 @@ export const FieldPreviewError = () => {
       })}
       color="danger"
       iconType="cross"
+      role="alert"
       data-test-subj="previewError"
     >
       <p data-test-subj="title">{error.error.message}</p>

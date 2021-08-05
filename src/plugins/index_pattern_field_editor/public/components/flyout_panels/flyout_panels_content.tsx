@@ -16,5 +16,5 @@ export const PanelContent: React.FC = (props) => {
     registerContent();
   }, [registerContent]);
 
-  return <div className="fieldEditor__flyoutPanel__content" {...props} />;
+  return <div className="fieldEditor__flyoutPanel__content" tabIndex={0} {...props} />;
 };

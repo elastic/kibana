@@ -75,6 +75,9 @@ export const PreviewListItem: React.FC<Props> = ({
           <div
             className="indexPatternFieldEditor__previewFieldList__item__key__wrapper"
             data-test-subj="key"
+            aria-label={i18n.translate('indexPatternFieldEditor.fieldPreview.fieldName', {
+              defaultMessage: 'Field name',
+            })}
           >
             {key}
           </div>
@@ -82,6 +85,9 @@ export const PreviewListItem: React.FC<Props> = ({
         <EuiFlexItem
           className="indexPatternFieldEditor__previewFieldList__item__value"
           data-test-subj="value"
+          aria-label={i18n.translate('indexPatternFieldEditor.fieldPreview.fieldValue', {
+            defaultMessage: 'Field value',
+          })}
         >
           <EuiToolTip
             position="top"

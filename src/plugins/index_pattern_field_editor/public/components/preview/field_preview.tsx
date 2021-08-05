@@ -19,6 +19,18 @@ import { PreviewFieldList } from './field_list/field_list';
 
 import './field_preview.scss';
 
+const i18nTexts = {
+  a11y: {
+    label: i18n.translate('indexPatternFieldEditor.fieldPreview.panelLabel', {
+      defaultMessage: 'Field preview',
+    }),
+    description: i18n.translate('indexPatternFieldEditor.fieldPreview.panelDescription', {
+      defaultMessage:
+        'Preview how the field will be rendered. Its format if one has been provided or the value returned by the painless script for runtime fields.',
+    }),
+  },
+};
+
 export const FieldPreview = () => {
   const [fieldListHeight, setFieldListHeight] = useState(-1);
   const [searchValue, setSearchValue] = useState('');
@@ -56,7 +68,7 @@ export const FieldPreview = () => {
     const [field] = fields;
 
     return (
-      <ul>
+      <ul tabIndex={0}>
         <li data-test-subj="fieldPreviewItem">
           <PreviewListItem field={field} highlighted />
         </li>
@@ -71,7 +83,15 @@ export const FieldPreview = () => {
   }, [reset]);
 
   return (
-    <div className="indexPatternFieldEditor__previewPannel">
+    <div
+      className="indexPatternFieldEditor__previewPannel"
+      tabIndex={0}
+      aria-label={i18nTexts.a11y.label}
+      // We disable the eslint rule as aria-description is valid WAI-ARIA
+      // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Annotations
+      // eslint-disable-next-line jsx-a11y/aria-props
+      aria-description={i18nTexts.a11y.description}
+    >
       {isEmptyPromptVisible ? (
         <FieldPreviewEmptyPrompt />
       ) : (
