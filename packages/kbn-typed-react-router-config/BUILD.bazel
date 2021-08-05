@@ -1,5 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-typed-react-router-config"
 PKG_REQUIRE_NAME = "@kbn/typed-react-router-config"
@@ -25,24 +26,38 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
-SRC_DEPS = [
+RUNTIME_DEPS = [
+  "//packages/kbn-io-ts-utils",
   "@npm//tslib",
   "@npm//utility-types",
   "@npm//io-ts",
   "@npm//query-string",
   "@npm//react-router-config",
   "@npm//react-router-dom",
-  "//packages/kbn-io-ts-utils",
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-io-ts-utils",
+  "@npm//query-string",
+  "@npm//utility-types",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react-router-config",
   "@npm//@types/react-router-dom",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  config_file = ".babelrc.browser"
+)
 
 ts_config(
   name = "tsconfig",
@@ -52,47 +67,25 @@ ts_config(
   ],
 )
 
-ts_config(
-  name = "tsconfig_browser",
-  src = "tsconfig.browser.json",
-  deps = [
-    "//:tsconfig.base.json",
-    "//:tsconfig.browser.json",
-  ],
-)
-
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   declaration = True,
-  declaration_dir = "target_types",
   declaration_map = True,
-  incremental = True,
-  out_dir = "target_node",
+  emit_declaration_only = True,
+  incremental = False,
+  out_dir = "target_types",
   source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
-ts_project(
-  name = "tsc_browser",
-  args = ['--pretty'],
-  srcs = SRCS,
-  deps = DEPS,
-  declaration = False,
-  incremental = True,
-  out_dir = "target_web",
-  source_map = True,
-  root_dir = "src",
-  tsconfig = ":tsconfig_browser",
-)
-
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":tsc", ":tsc_browser"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
