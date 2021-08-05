@@ -209,7 +209,9 @@ export class SettingsPageObject extends FtrService {
 
   async getFieldsTabCount() {
     return this.retry.try(async () => {
+      // We extract the text from the tab (something like "Fields (86)")
       const text = await this.testSubjects.getVisibleText('tab-indexedFields');
+      // And we return the number inside the parenthesis "86"
       return text.split(' ')[1].replace(/\((.*)\)/, '$1');
     });
   }
@@ -522,7 +524,6 @@ export class SettingsPageObject extends FtrService {
       await this.setFieldScript(script);
     }
     await this.clickSaveField();
-    await this.closeIndexPatternFieldEditor();
   }
 
   public async confirmSave() {
