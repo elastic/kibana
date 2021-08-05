@@ -39,7 +39,7 @@ export const wrapHitsFactory = ({
       },
     ]);
 
-    return filterDuplicateSignals(ruleSO.id, wrappedDocs);
+    return filterDuplicateSignals(ruleSO.id, wrappedDocs, true);
   } catch (error) {
     logger.error(error);
     return [];
