@@ -13,6 +13,7 @@ import del from 'del';
 
 import { RefOutputCache } from './ref_output_cache';
 import { buildAllTsRefs, REF_CONFIG_PATHS } from './build_ts_refs';
+import { updateRootRefsConfig } from './update_root_refs_config';
 import { getOutputsDeep } from './ts_configfile';
 import { concurrentMap } from './concurrent_map';
 
@@ -36,6 +37,7 @@ export async function runBuildRefsCli() {
         return;
       }
 
+      await updateRootRefsConfig(log);
       const outDirs = getOutputsDeep(REF_CONFIG_PATHS);
 
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;

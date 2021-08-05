@@ -63,4 +63,12 @@ export class Project {
   public isAbsolutePathSelected(path: string) {
     return testMatchers(this.exclude, path) ? false : testMatchers(this.include, path);
   }
+
+  public isCompositeProject() {
+    return !!this.config.compilerOptions?.composite;
+  }
+
+  public getRefdPaths() {
+    return this.config.references?.map((r: { path: string }) => r.path) ?? [];
+  }
 }
