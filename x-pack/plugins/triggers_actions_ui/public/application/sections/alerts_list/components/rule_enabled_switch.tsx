@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { asyncScheduler } from 'rxjs';
-import React, { useEffect, useState } from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
 import { Alert, AlertTableItem } from '../../../../types';
 
@@ -28,8 +27,11 @@ export const RuleEnabledSwitch: React.FunctionComponent<ComponentOpts> = ({
   useEffect(() => {
     setIsEnabled(item.enabled);
   }, [item.enabled]);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-  return (
+  return isUpdating ? (
+    <EuiLoadingSpinner data-test-subj="enableSpinner" size="m" />
+  ) : (
     <EuiSwitch
       name="enable"
       disabled={!item.isEditable || !item.enabledInLicense}
@@ -37,16 +39,16 @@ export const RuleEnabledSwitch: React.FunctionComponent<ComponentOpts> = ({
       checked={isEnabled}
       data-test-subj="enableSwitch"
       onChange={async () => {
-        const enabled = isEnabled;
-        asyncScheduler.schedule(async () => {
-          if (enabled) {
-            await disableAlert({ ...item, enabled });
-          } else {
-            await enableAlert({ ...item, enabled });
-          }
-          onAlertChanged();
-        }, 10);
+        setIsUpdating(true);
+        const enabled = item.enabled;
+        if (enabled) {
+          await disableAlert({ ...item, enabled });
+        } else {
+          await enableAlert({ ...item, enabled });
+        }
         setIsEnabled(!isEnabled);
+        setIsUpdating(false);
+        onAlertChanged();
       }}
       label=""
     />
