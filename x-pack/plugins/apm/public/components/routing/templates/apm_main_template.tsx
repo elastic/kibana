@@ -7,9 +7,13 @@
 
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  NoDataPage,
+  useKibana,
+} from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+// import { useSourcererScope } from '../../../../../security_solution/public/common/containers/sourcerer';
 
 /*
  * This template contains:
@@ -35,7 +39,7 @@ export function ApmMainTemplate({
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
 
-  return (
+  return false ? (
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle,
@@ -45,6 +49,31 @@ export function ApmMainTemplate({
       {...pageTemplateProps}
     >
       {children}
+    </ObservabilityPageTemplate>
+  ) : (
+    <ObservabilityPageTemplate
+      {...pageTemplateProps}
+      template="centeredBody"
+      pageContentProps={{
+        hasShadow: false,
+        color: 'transparent',
+      }}
+      paddingSize="none"
+    >
+      <NoDataPage
+        solution="Observability"
+        actions={{
+          elasticAgent: {
+            href: 'app/integrations/browse',
+            recommended: false,
+          },
+          beats: {
+            href: `app/home#/tutorial_directory/logging`,
+            recommended: true,
+          },
+        }}
+        docsLink={'#'}
+      />
     </ObservabilityPageTemplate>
   );
 }
