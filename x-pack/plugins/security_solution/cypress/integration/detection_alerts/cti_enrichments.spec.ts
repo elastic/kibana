@@ -89,7 +89,8 @@ describe('CTI Enrichment', () => {
       expectedEnrichment.forEach((enrichment) => {
         cy.wrap(elements)
           .eq(length - enrichment.line)
-          .should('have.text', enrichment.text);
+          .invoke('text')
+          .should('include', enrichment.text);
       });
     });
   });

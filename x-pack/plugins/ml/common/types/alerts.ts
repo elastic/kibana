@@ -109,7 +109,7 @@ export interface JobAlertingRuleStats {
   alerting_rules?: MlAnomalyDetectionAlertRule[];
 }
 
-interface CommonHealthCheckConfig {
+export interface CommonHealthCheckConfig {
   enabled: boolean;
 }
 

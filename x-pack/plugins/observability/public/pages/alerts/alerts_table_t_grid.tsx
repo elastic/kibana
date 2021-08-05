@@ -21,11 +21,17 @@ import {
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../timelines/common';
+import type {
+  ActionProps,
+  AlertStatus,
+  ColumnHeaderOptions,
+  RowRenderer,
+} from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { decorateResponse } from './decorate_response';
+import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 
 interface AlertsTableTGridProps {
@@ -187,6 +193,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         type: 'standalone',
         columns,
         deletedEventIds: [],
+        defaultCellActions: getDefaultCellActions({ enableFilterActions: false }),
         end: rangeTo,
         filters: [],
         indexNames: [indexName],
@@ -213,6 +220,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             sortDirection: 'desc',
           },
         ],
+        filterStatus: status as AlertStatus,
         leadingControlColumns,
         trailingControlColumns,
         unit: (totalAlerts: number) =>
