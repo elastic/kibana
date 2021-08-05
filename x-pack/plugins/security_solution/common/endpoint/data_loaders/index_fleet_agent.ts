@@ -18,6 +18,7 @@ import {
   GetOneAgentResponse,
 } from '../../../../fleet/common';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
+import { wrapErrorAndRejectPromise } from './utils';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
@@ -28,7 +29,7 @@ export interface IndexedFleetAgentResponse {
 
 /**
  * Indexes a Fleet Agent
- *
+ * (NOTE: ensure that fleet is setup first before calling this loading function)
  *
  * @param esClient
  * @param kbnClient
@@ -64,24 +65,30 @@ export const indexFleetAgentForHost = async (
     },
   });
 
-  const createdFleetAgent = await esClient.index<FleetServerAgent>({
-    index: agentDoc._index,
-    id: agentDoc._id,
-    body: agentDoc._source!,
-    op_type: 'create',
-  });
+  const createdFleetAgent = await esClient
+    .index<FleetServerAgent>({
+      index: agentDoc._index,
+      id: agentDoc._id,
+      body: agentDoc._source!,
+      op_type: 'create',
+    })
+    .catch(wrapErrorAndRejectPromise);
 
   return {
-    agents: [await fetchFleetAgent(kbnClient, createdFleetAgent.body._id)],
     fleetAgentsIndex: agentDoc._index,
+    agents: [
+      await fetchFleetAgent(kbnClient, createdFleetAgent.body._id).catch(wrapErrorAndRejectPromise),
+    ],
   };
 };
 
 const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<Agent> => {
-  return ((await kbnClient.request({
-    path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
-    method: 'GET',
-  })) as AxiosResponse<GetOneAgentResponse>).data.item;
+  return ((await kbnClient
+    .request({
+      path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
+      method: 'GET',
+    })
+    .catch(wrapErrorAndRejectPromise)) as AxiosResponse<GetOneAgentResponse>).data.item;
 };
 
 export interface DeleteIndexedFleetAgentsResponse {
@@ -90,24 +97,35 @@ export interface DeleteIndexedFleetAgentsResponse {
 
 export const deleteIndexedFleetAgents = async (
   esClient: Client,
-  indexedFleetAgents: IndexedFleetAgentResponse
+  indexedData: IndexedFleetAgentResponse
 ): Promise<DeleteIndexedFleetAgentsResponse> => {
   const response: DeleteIndexedFleetAgentsResponse = {
     agents: undefined,
   };
 
-  if (indexedFleetAgents.agents.length) {
+  if (indexedData.agents.length) {
     response.agents = (
-      await esClient.deleteByQuery({
-        index: indexedFleetAgents.fleetAgentsIndex,
-        body: {
-          query: {
-            ids: {
-              values: indexedFleetAgents.agents.map((agent) => agent.id),
+      await esClient
+        .deleteByQuery({
+          index: `${indexedData.fleetAgentsIndex}-*`,
+          wait_for_completion: true,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    terms: {
+                      'local_metadata.elastic.agent.id': indexedData.agents.map(
+                        (agent) => agent.local_metadata.elastic.agent.id
+                      ),
+                    },
+                  },
+                ],
+              },
             },
           },
-        },
-      })
+        })
+        .catch(wrapErrorAndRejectPromise)
     ).body;
   }
 

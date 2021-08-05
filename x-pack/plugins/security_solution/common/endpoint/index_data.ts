@@ -19,14 +19,32 @@ import {
 } from '../../../fleet/common';
 import {
   deleteIndexedEndpointHosts,
+  DeleteIndexedEndpointHostsResponse,
   IndexedHostsResponse,
   indexEndpointHostDocs,
 } from './data_loaders/index_endpoint_hosts';
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
+import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 
+/**
+ * Indexes Endpoint Hosts (with optional Fleet counterparts) along with alerts
+ *
+ * @param client
+ * @param kbnClient
+ * @param seed
+ * @param numHosts
+ * @param numDocs
+ * @param metadataIndex
+ * @param policyResponseIndex
+ * @param eventIndex
+ * @param alertIndex
+ * @param alertsPerHost
+ * @param fleet
+ * @param options
+ */
 export async function indexHostsAndAlerts(
   client: Client,
   kbnClient: KbnClient,
@@ -45,7 +63,7 @@ export async function indexHostsAndAlerts(
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
   const response: IndexedHostsAndAlertsResponse = {
     hosts: [],
-    policies: [],
+    policyResponses: [],
     agents: [],
     fleetAgentsIndex: '',
     metadataIndex,
@@ -54,7 +72,12 @@ export async function indexHostsAndAlerts(
     responsesIndex: '',
     actions: [],
     actionsIndex: '',
+    integrationPolicies: [],
+    agentPolicies: [],
   };
+
+  // Ensure fleet is setup and endpint package installed
+  await setupFleetForEndpoint(kbnClient);
 
   // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
   if (fleet) {
@@ -110,10 +133,14 @@ const getEndpointPackageInfo = async (
   return endpointPackage;
 };
 
+export type DeleteIndexedHostsAndAlertsResponse = DeleteIndexedEndpointHostsResponse;
+
 export const deleteIndexedHostsAndAlerts = async (
   esClient: Client,
   kbnClient: KbnClient,
   indexedData: IndexedHostsAndAlertsResponse
-) => {
-  await deleteIndexedEndpointHosts(esClient, kbnClient, indexedData);
+): Promise<DeleteIndexedHostsAndAlertsResponse> => {
+  return {
+    ...(await deleteIndexedEndpointHosts(esClient, kbnClient, indexedData)),
+  };
 };

@@ -33,6 +33,7 @@ import {
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
 import { metadataCurrentIndexPattern } from '../constants';
+import { wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedHostsResponse
   extends IndexedFleetAgentResponse,
@@ -58,6 +59,8 @@ export interface IndexedHostsResponse
  * Indexes the requested number of documents for the endpoint host metadata currently being output by the generator.
  * Endpoint Host metadata documents are addeded to an index that is set as "append only", thus one Endpoint host could
  * have multiple documents in that index.
+ *
+ *
  *
  * @param numDocs
  * @param client
@@ -141,7 +144,7 @@ export async function indexEndpointHostDocs({
       if (!wasAgentEnrolled) {
         wasAgentEnrolled = true;
 
-        const enrollAgentResponse = await indexFleetAgentForHost(
+        const indexedAgentResponse = await indexFleetAgentForHost(
           client,
           kbnClient,
           hostMetadata!,
@@ -149,11 +152,8 @@ export async function indexEndpointHostDocs({
           kibanaVersion
         );
 
-        enrolledAgent = enrollAgentResponse.agents[0];
-        // ok to ignore within this function since we only get the index name after creating the first agent
-        // @ts-ignore
-        response.fleetAgentsIndex = enrollAgentResponse.index;
-        response.agents.push(enrolledAgent);
+        enrolledAgent = indexedAgentResponse.agents[0];
+        merge(response, indexedAgentResponse);
       }
       // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
       hostMetadata = {
@@ -181,22 +181,26 @@ export async function indexEndpointHostDocs({
       await indexFleetActionsForHost(client, hostMetadata);
     }
 
-    await client.index({
-      index: metadataIndex,
-      body: hostMetadata,
-      op_type: 'create',
-    });
+    await client
+      .index({
+        index: metadataIndex,
+        body: hostMetadata,
+        op_type: 'create',
+      })
+      .catch(wrapErrorAndRejectPromise);
 
     const hostPolicyResponse = generator.generatePolicyResponse({
       ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
       policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
     });
 
-    await client.index({
-      index: policyResponseIndex,
-      body: hostPolicyResponse,
-      op_type: 'create',
-    });
+    await client
+      .index({
+        index: policyResponseIndex,
+        body: hostPolicyResponse,
+        op_type: 'create',
+      })
+      .catch(wrapErrorAndRejectPromise);
 
     // Clone the hostMetadata and policyResponse document to ensure that no shared state
     // (as a result of using the generator) is returned across docs.
@@ -255,51 +259,54 @@ export const deleteIndexedEndpointHosts = async (
     };
 
     response.hosts = (
-      await esClient.deleteByQuery({
-        index: indexedData.metadataIndex,
-        wait_for_completion: true,
-        body,
-      })
+      await esClient
+        .deleteByQuery({
+          index: indexedData.metadataIndex,
+          wait_for_completion: true,
+          body,
+        })
+        .catch(wrapErrorAndRejectPromise)
     ).body;
 
     // Delete from the transform destination index
-    await esClient.deleteByQuery({
-      index: metadataCurrentIndexPattern,
-      wait_for_completion: true,
-      body,
-    });
+    await esClient
+      .deleteByQuery({
+        index: metadataCurrentIndexPattern,
+        wait_for_completion: true,
+        body,
+      })
+      .catch(wrapErrorAndRejectPromise);
   }
 
   if (indexedData.policyResponses.length) {
     response.policyResponses = (
-      await esClient.deleteByQuery({
-        index: indexedData.policyResponseIndex,
-        wait_for_completion: true,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    'agent.id': indexedData.policyResponses.map(
-                      (policyResponse) => policyResponse.agent.id
-                    ),
+      await esClient
+        .deleteByQuery({
+          index: indexedData.policyResponseIndex,
+          wait_for_completion: true,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    terms: {
+                      'agent.id': indexedData.policyResponses.map(
+                        (policyResponse) => policyResponse.agent.id
+                      ),
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
-        },
-      })
+        })
+        .catch(wrapErrorAndRejectPromise)
     ).body;
   }
 
-  merge(
-    response,
-    await deleteIndexedFleetAgents(esClient, indexedData),
-    await deleteIndexedFleetActions(esClient, indexedData),
-    await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData)
-  );
+  merge(response, await deleteIndexedFleetAgents(esClient, indexedData));
+  merge(response, await deleteIndexedFleetActions(esClient, indexedData));
+  merge(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
 
   return response;
 };

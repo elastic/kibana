@@ -21,6 +21,7 @@ import {
 } from '../../../../fleet/common';
 import { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
+import { wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedFleetEndpointPolicyResponse {
   integrationPolicies: PolicyData[];
@@ -51,11 +52,13 @@ export const indexFleetEndpointPolicy = async (
   let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
 
   try {
-    agentPolicy = (await kbnClient.request({
-      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
-      method: 'POST',
-      body: newAgentPolicyData,
-    })) as AxiosResponse<CreateAgentPolicyResponse>;
+    agentPolicy = (await kbnClient
+      .request({
+        path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+        method: 'POST',
+        body: newAgentPolicyData,
+      })
+      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
   } catch (error) {
     throw new Error(`create fleet agent policy failed ${error}`);
   }
@@ -88,11 +91,13 @@ export const indexFleetEndpointPolicy = async (
       version: endpointPackageVersion,
     },
   };
-  const packagePolicy = (await kbnClient.request({
-    path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-    method: 'POST',
-    body: newPackagePolicyData,
-  })) as AxiosResponse<CreatePackagePolicyResponse>;
+  const packagePolicy = (await kbnClient
+    .request({
+      path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+      method: 'POST',
+      body: newPackagePolicyData,
+    })
+    .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreatePackagePolicyResponse>;
 
   response.integrationPolicies.push(packagePolicy.data.item as PolicyData);
 
@@ -121,13 +126,15 @@ export const deleteIndexedFleetEndpointPolicies = async (
   };
 
   if (indexData.integrationPolicies.length) {
-    response.integrationPolicies = ((await kbnClient.request({
-      path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
-      method: 'POST',
-      body: {
-        packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
-      },
-    })) as AxiosResponse<DeletePackagePoliciesResponse>).data;
+    response.integrationPolicies = ((await kbnClient
+      .request({
+        path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
+        method: 'POST',
+        body: {
+          packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
+        },
+      })
+      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeletePackagePoliciesResponse>).data;
   }
 
   if (indexData.agentPolicies.length) {
@@ -135,13 +142,15 @@ export const deleteIndexedFleetEndpointPolicies = async (
 
     for (const agentPolicy of indexData.agentPolicies) {
       response.agentPolicies.push(
-        ((await kbnClient.request({
-          path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
-          method: 'POST',
-          body: {
-            agentPolicyId: agentPolicy.id,
-          },
-        })) as AxiosResponse<DeleteAgentPolicyResponse>).data
+        ((await kbnClient
+          .request({
+            path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
+            method: 'POST',
+            body: {
+              agentPolicyId: agentPolicy.id,
+            },
+          })
+          .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeleteAgentPolicyResponse>).data
       );
     }
   }

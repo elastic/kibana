@@ -10,6 +10,7 @@ import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
 import { EndpointAction, EndpointActionResponse, HostMetadata } from '../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import { FleetActionGenerator } from '../data_generators/fleet_action_generator';
+import { wrapErrorAndRejectPromise } from './utils';
 
 const defaultFleetActionGenerator = new FleetActionGenerator();
 
@@ -51,13 +52,15 @@ export const indexFleetActionsForHost = async (
 
     action.agents = [agentId];
 
-    esClient.index(
-      {
-        index: AGENT_ACTIONS_INDEX,
-        body: action,
-      },
-      ES_INDEX_OPTIONS
-    );
+    esClient
+      .index(
+        {
+          index: AGENT_ACTIONS_INDEX,
+          body: action,
+        },
+        ES_INDEX_OPTIONS
+      )
+      .catch(wrapErrorAndRejectPromise);
 
     // Create an action response for the above
     const actionResponse = fleetActionGenerator.generateResponse({
@@ -66,13 +69,15 @@ export const indexFleetActionsForHost = async (
       action_data: action.data,
     });
 
-    esClient.index(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        body: actionResponse,
-      },
-      ES_INDEX_OPTIONS
-    );
+    esClient
+      .index(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          body: actionResponse,
+        },
+        ES_INDEX_OPTIONS
+      )
+      .catch(wrapErrorAndRejectPromise);
 
     response.actions.push(action);
     response.responses.push(actionResponse);
@@ -100,13 +105,15 @@ export const indexFleetActionsForHost = async (
 
       action.agents = [agentId];
 
-      await esClient.index(
-        {
-          index: AGENT_ACTIONS_INDEX,
-          body: action,
-        },
-        ES_INDEX_OPTIONS
-      );
+      await esClient
+        .index(
+          {
+            index: AGENT_ACTIONS_INDEX,
+            body: action,
+          },
+          ES_INDEX_OPTIONS
+        )
+        .catch(wrapErrorAndRejectPromise);
 
       response.actions.push(action);
     } else {
@@ -122,20 +129,24 @@ export const indexFleetActionsForHost = async (
       action2.agents = [agentId];
 
       await Promise.all([
-        esClient.index(
-          {
-            index: AGENT_ACTIONS_INDEX,
-            body: action1,
-          },
-          ES_INDEX_OPTIONS
-        ),
-        esClient.index(
-          {
-            index: AGENT_ACTIONS_INDEX,
-            body: action2,
-          },
-          ES_INDEX_OPTIONS
-        ),
+        esClient
+          .index(
+            {
+              index: AGENT_ACTIONS_INDEX,
+              body: action1,
+            },
+            ES_INDEX_OPTIONS
+          )
+          .catch(wrapErrorAndRejectPromise),
+        esClient
+          .index(
+            {
+              index: AGENT_ACTIONS_INDEX,
+              body: action2,
+            },
+            ES_INDEX_OPTIONS
+          )
+          .catch(wrapErrorAndRejectPromise),
       ]);
 
       response.actions.push(action1, action2);
@@ -161,37 +172,41 @@ export const deleteIndexedFleetActions = async (
 
   if (indexedData.actions.length) {
     response.actions = (
-      await esClient.deleteByQuery({
-        index: indexedData.actionsIndex,
-        wait_for_completion: true,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
-              ],
+      await esClient
+        .deleteByQuery({
+          index: `${indexedData.actionsIndex}-*`,
+          wait_for_completion: true,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
+                ],
+              },
             },
           },
-        },
-      })
+        })
+        .catch(wrapErrorAndRejectPromise)
     ).body;
   }
 
   if (indexedData.responses) {
     response.responses = (
-      await esClient.deleteByQuery({
-        index: indexedData.responsesIndex,
-        wait_for_completion: true,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { terms: { action_id: indexedData.responses.map((action) => action.action_id) } },
-              ],
+      await esClient
+        .deleteByQuery({
+          index: `${indexedData.responsesIndex}-*`,
+          wait_for_completion: true,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  { terms: { action_id: indexedData.responses.map((action) => action.action_id) } },
+                ],
+              },
             },
           },
-        },
-      })
+        })
+        .catch(wrapErrorAndRejectPromise)
     ).body;
   }
 
