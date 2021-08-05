@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
     after(async () => {
-      await kibanaServer.importExport.load(
+      await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/default'
       );
     });
