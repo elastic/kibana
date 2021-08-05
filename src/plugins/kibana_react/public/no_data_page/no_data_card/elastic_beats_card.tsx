@@ -11,22 +11,14 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
+import { EuiButton, EuiCard } from '@elastic/eui';
 import { useKibana } from '../../context';
+import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 
-export type ElasticBeatsCardProps = Partial<EuiCardProps> & {
-  href: string;
-  recommended?: boolean;
-  buttonLabel?: string;
-};
-
-/**
- * Applies extra styling to a typical EuiAvatar
- */
-export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
+export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
   recommended,
   href = 'app/home#/tutorial',
-  buttonLabel,
+  button,
   ...cardRest
 }) => {
   const {
@@ -35,6 +27,24 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   const addBasePath = http.basePath.prepend;
   const basePathUrl = '/plugins/kibanaReact/assets/';
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+
+  const footer =
+    typeof button !== 'string' && typeof button !== 'undefined' ? (
+      button
+    ) : (
+      // @ts-ignore
+      <EuiButton
+        href={href}
+        onClick={cardRest?.onClick}
+        target={cardRest?.target}
+        fill={recommended}
+      >
+        {button ||
+          i18n.translate('elasticBeatsCard.buttonLabel', {
+            defaultMessage: 'Setup Beats',
+          })}
+      </EuiButton>
+    );
 
   return (
     // @ts-ignore
@@ -52,22 +62,8 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
       image={addBasePath(
         `${basePathUrl}elastic_beats_card_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
       )}
-      betaBadgeLabel={recommended ? 'Recommended' : undefined}
-      footer={
-        // @ts-ignore
-        <EuiButton
-          href={href}
-          onClick={cardRest?.onClick}
-          target={cardRest?.target}
-          fill={recommended}
-          data-test-subj={`empty-page-agent-action`}
-        >
-          {buttonLabel ||
-            i18n.translate('elasticBeatsCard.buttonLabel', {
-              defaultMessage: 'Setup Beats',
-            })}
-        </EuiButton>
-      }
+      betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
+      footer={footer}
       {...cardRest}
     />
   );

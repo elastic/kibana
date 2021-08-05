@@ -11,14 +11,12 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
+import { EuiButton, EuiCard } from '@elastic/eui';
 import { useKibana } from '../../context';
+import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 
-export type ElasticAgentCardProps = Partial<EuiCardProps> & {
+export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;
-  href: string;
-  recommended?: boolean;
-  buttonLabel?: string;
 };
 
 /**
@@ -28,7 +26,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   solution,
   recommended = true,
   href = 'app/integrations/browse',
-  buttonLabel,
+  button,
   ...cardRest
 }) => {
   const {
@@ -36,6 +34,25 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   } = useKibana<CoreStart>();
   const addBasePath = http.basePath.prepend;
   const basePathUrl = '/plugins/kibanaReact/assets/';
+
+  const footer =
+    typeof button !== 'string' && typeof button !== 'undefined' ? (
+      button
+    ) : (
+      // @ts-ignore
+      <EuiButton
+        href={href}
+        onClick={cardRest?.onClick}
+        target={cardRest?.target}
+        fill={recommended}
+      >
+        {button ||
+          i18n.translate('elasticAgentCard.buttonLabel', {
+            defaultMessage: 'Find a {solution} integration',
+            values: { solution },
+          })}
+      </EuiButton>
+    );
 
   return (
     // @ts-ignore
@@ -51,23 +68,8 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
         data from your hosts.`,
       })}
       image={addBasePath(`${basePathUrl}elastic_agent_card.svg`)}
-      betaBadgeLabel={recommended ? 'Recommended' : undefined}
-      footer={
-        // @ts-ignore
-        <EuiButton
-          href={href}
-          onClick={cardRest?.onClick}
-          target={cardRest?.target}
-          fill={recommended}
-          data-test-subj={`empty-page-agent-action`}
-        >
-          {buttonLabel ||
-            i18n.translate('elasticAgentCard.buttonLabel', {
-              defaultMessage: 'Find a {solution} integration',
-              values: { solution },
-            })}
-        </EuiButton>
-      }
+      betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
+      footer={footer}
       {...cardRest}
     />
   );

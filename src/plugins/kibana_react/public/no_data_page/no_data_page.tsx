@@ -8,10 +8,9 @@
 
 import './no_data_page.scss';
 
-import React, { useMemo } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import {
   EuiFlexItem,
-  EuiCard,
   EuiIcon,
   EuiCardProps,
   EuiFlexGrid,
@@ -20,15 +19,23 @@ import {
   EuiTextColor,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '../page_template';
 
-import { ElasticAgentCard, ElasticBeatsCard } from './no_data_card';
+import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
 
-type NoDataPageActions = Partial<EuiCardProps> & {
+export const NO_DATA_RECOMMENDED = i18n.translate('kbn.noDataPage.recommended', {
+  defaultMessage: 'Recommended',
+});
+
+export type NoDataPageActions = Partial<EuiCardProps> & {
   href: string;
   recommended?: boolean;
-  buttonLabel?: string;
+  /**
+   * Provide just a string for the button's label, or a whole component
+   */
+  button?: string | ReactNode;
 };
 
 export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
@@ -42,10 +49,22 @@ export type NoDataPageProps = KibanaPageTemplateProps & {
 
 const NoDataPageComponent = React.memo<NoDataPageProps>(
   ({ solution, logo, actions, title, docsLink, ...rest }) => {
-    // actions = sort('recommended', sort);
-    const actionsKeys = Object.keys(actions);
+    // Convert obj data into an iterable array
+    const entries = Object.entries(actions);
+
+    // This sort fn may look nonsensical, but it's some Good Ol' Javascript (TM)
+    // Sort functions want either a 1, 0, or -1 returned to determine order,
+    // and it turns out in JS you CAN minus booleans from each other to get a 1, 0, or -1 - e.g., (true - false == 1) :whoa:
+    const sortedEntries = entries.sort(([, firstObj], [, secondObj]) => {
+      // The `??` fallbacks are because the recommended key can be missing or undefined
+      return (secondObj.recommended ?? false) - (firstObj.recommended ?? false);
+    });
+
+    // Convert the iterated [[key, value]] array format back into an object
+    const sortedData = Object.fromEntries(sortedEntries);
+    const actionsKeys = Object.keys(sortedData);
     const renderActions = useMemo(() => {
-      return Object.values(actions).map((action, i) => {
+      return Object.values(sortedData).map((action, i) => {
         if (actionsKeys[i] === 'elasticAgent') {
           return (
             <EuiFlexItem key={`empty-page-agent-action`}>
@@ -63,8 +82,7 @@ const NoDataPageComponent = React.memo<NoDataPageProps>(
         } else {
           return (
             <EuiFlexItem key={`empty-page-${actionsKeys[i]}-action`}>
-              {/* @ts-ignore */}
-              <EuiCard {...action} />
+              <NoDataCard {...action} />
             </EuiFlexItem>
           );
         }
