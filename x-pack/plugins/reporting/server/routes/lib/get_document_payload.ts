@@ -12,6 +12,7 @@ import { ReportApiJSON } from '../../../common/types';
 import { ReportingCore } from '../../';
 import { getContentStream, statuses } from '../../lib';
 import { ExportTypeDefinition } from '../../types';
+import { jobsQueryFactory } from './jobs_query';
 
 export interface ErrorFromPayload {
   message: string;
@@ -115,15 +116,18 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     payload: { title },
   }: ReportApiJSON): Promise<Payload> {
     if (output) {
-      const stream = await getContentStream(reporting, { id, index });
-      const content = await stream.toString();
-
       if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
+        const stream = await getContentStream(reporting, { id, index });
+        const content = await stream.toString();
+
         return getCompleted(output, jobType, title, content);
       }
 
       if (status === statuses.JOB_STATUS_FAILED) {
-        return getFailure(content);
+        const jobsQuery = jobsQueryFactory(reporting);
+        const error = await jobsQuery.getError(id);
+
+        return getFailure(error);
       }
     }
 

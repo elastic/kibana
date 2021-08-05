@@ -192,14 +192,14 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('when a job fails', async () => {
-    mockEsClient.search.mockResolvedValueOnce({
+    mockEsClient.search.mockResolvedValue({
       body: getHits({
         jobtype: 'unencodedJobType',
         status: 'failed',
+        output: { content: 'job failure message' },
         payload: { title: 'failing job!' },
       }),
     } as any);
-    stream.toString.mockResolvedValueOnce('job failure message');
     registerJobInfoRoutes(core);
 
     await server.start();
