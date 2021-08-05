@@ -17,15 +17,8 @@ import {
   DataPublicPluginStart,
 } from './shared_imports';
 
-import { CloseEditor, IndexPatternEditorContext } from './types';
+import { CloseEditor, IndexPatternEditorContext, IndexPatternEditorProps } from './types';
 import { IndexPatternFlyoutContentContainer } from './components/index_pattern_flyout_content_container';
-
-export interface OpenEditorOptions {
-  onSave: (indexPattern: IndexPattern) => void;
-  onCancel?: () => void;
-  defaultTypeIsRollup?: boolean;
-  requireTimestampField?: boolean;
-}
 
 interface Dependencies {
   core: CoreStart;
@@ -33,7 +26,7 @@ interface Dependencies {
 }
 
 export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => (
-  options: OpenEditorOptions
+  options: IndexPatternEditorProps
 ): CloseEditor => {
   const { uiSettings, overlays, docLinks, notifications, http, application } = core;
   const {
@@ -54,7 +47,7 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
     onCancel = () => {},
     defaultTypeIsRollup = false,
     requireTimestampField = false,
-  }: OpenEditorOptions): CloseEditor => {
+  }: IndexPatternEditorProps): CloseEditor => {
     const closeEditor = () => {
       if (overlayRef) {
         overlayRef.close();

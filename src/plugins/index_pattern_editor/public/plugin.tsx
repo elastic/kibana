@@ -30,10 +30,20 @@ export class IndexPatternEditorPlugin
     const { data } = plugins;
 
     return {
+      /**
+       * Index pattern editor flyout via function interface
+       * @param IndexPatternEditorProps - index pattern editor config
+       * @returns method to close editor
+       */
       openEditor: getEditorOpener({
         core,
         indexPatternService: data.indexPatterns,
       }),
+      /**
+       * Index pattern editor flyout via react component
+       * @param IndexPatternEditorProps - index pattern editor config
+       * @returns JSX.Element
+       */
       IndexPatternEditorComponent: (props: IndexPatternEditorProps) => (
         <IndexPatternEditor
           services={{
@@ -47,6 +57,11 @@ export class IndexPatternEditorPlugin
           {...props}
         />
       ),
+      /**
+       * Convenience method to determine whether the user can create or edit edit the index patterns.
+       *
+       * @returns boolean
+       */
       userPermissions: {
         editIndexPattern: () => {
           return application.capabilities.management.kibana.indexPatterns;

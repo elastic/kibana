@@ -19,7 +19,6 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type { IndexPattern } from 'src/plugins/data/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
-import { OpenEditorOptions } from './open_editor';
 
 export interface IndexPatternEditorContext {
   uiSettings: IUiSettingsClient;
@@ -30,16 +29,24 @@ export interface IndexPatternEditorContext {
   indexPatternService: DataPublicPluginStart['indexPatterns'];
 }
 
+/** @public */
 export interface IndexPatternEditorProps {
   /**
    * Handler for the "save" footer button
+   * @param indexPattern - newly created index pattern
    */
   onSave: (indexPattern: IndexPattern) => void;
   /**
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
+  /**
+   * Sets the default index pattern type to rollup. Defaults to false.
+   */
   defaultTypeIsRollup?: boolean;
+  /**
+   * Sets whether a timestamp field is required to create an index pattern. Defaults to false.
+   */
   requireTimestampField?: boolean;
 }
 
@@ -47,7 +54,7 @@ export interface IndexPatternEditorProps {
 export interface PluginSetup {}
 
 export interface PluginStart {
-  openEditor(options: OpenEditorOptions): () => void;
+  openEditor(options: IndexPatternEditorProps): () => void;
   IndexPatternEditorComponent: FC<IndexPatternEditorProps>;
   userPermissions: {
     editIndexPattern: () => boolean;

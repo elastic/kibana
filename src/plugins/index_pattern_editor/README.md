@@ -10,7 +10,7 @@ You will then receive in the start contract of the indexPatternEditor plugin the
 
 ### `userPermissions.editIndexPattern(): boolean`
 
-Convenience method that uses the `core.application.capabilities` api to determine whether the user can edit the index pattern. 
+Convenience method that uses the `core.application.capabilities` api to determine whether the user can create or edit the index pattern. 
 
 ### `openEditor(options: IndexPatternEditorProps): CloseEditor`
 
