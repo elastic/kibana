@@ -532,6 +532,7 @@ export function LayerPanel(
                   isFullscreen,
                   setState: updateDataLayerState,
                   supportStaticValue: Boolean(supportStaticValue),
+                  layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 }}
               />
             )}

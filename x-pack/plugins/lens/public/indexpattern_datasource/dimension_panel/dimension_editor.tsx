@@ -48,6 +48,7 @@ import { defaultFilter, Filtering, setFilter } from './filtering';
 import { AdvancedOptions } from './advanced_options';
 import { setTimeShift, TimeShift } from './time_shift';
 import { useDebouncedValue } from '../../shared_components';
+import { LayerType, layerTypes } from '../../../common';
 
 const operationPanels = getOperationDisplay();
 
@@ -55,6 +56,7 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: IndexPatternColumn;
   operationSupportMatrix: OperationSupportMatrix;
   currentIndexPattern: IndexPattern;
+  layerType: LayerType;
 }
 
 const formulaOperationName = 'formula';
@@ -105,6 +107,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
+    layerType = layerTypes.DATA,
   } = props;
   const services = {
     data: props.data,
@@ -206,7 +209,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
           state.indexPatterns[state.currentIndexPatternId],
-          state.layers[layerId]
+          state.layers[layerId],
+          layerType
         ),
     };
   });
@@ -672,7 +676,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
           {supportStaticValue && (
             <EuiTab
               isSelected={
-                !selectedColumn || selectedColumn?.operationType === staticValueOperationName
+                !temporaryQuickFunction &&
+                (!selectedColumn || selectedColumn?.operationType === staticValueOperationName)
               }
               data-test-subj="lens-dimensionTabs-static_value"
               onClick={() => {
