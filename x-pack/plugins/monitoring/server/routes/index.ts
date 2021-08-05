@@ -7,7 +7,7 @@
 /* eslint import/namespace: ['error', { allowComputed: true }]*/
 
 import { MonitoringConfig } from '../config';
-import { decorateDebugServer } from '../debugLogger';
+import { decorateDebugServer } from '../debug_logger';
 import { RouteDependencies } from '../types';
 // @ts-ignore
 import * as uiRoutes from './api/v1/ui'; // namespace import
