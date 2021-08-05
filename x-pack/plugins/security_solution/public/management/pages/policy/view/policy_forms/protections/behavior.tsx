@@ -30,7 +30,7 @@ export const BehaviorProtection = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.behavior_protection', {
         defaultMessage: 'Behavior Protection',
       })}
-      supportedOss={[OperatingSystem.WINDOWS]}
+      supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
       dataTestSubj="behaviorProtectionsForm"
       rightCorner={<ProtectionSwitch protection={protection} osList={OSes} />}
     >
