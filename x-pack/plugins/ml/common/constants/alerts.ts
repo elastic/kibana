@@ -29,7 +29,7 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     description: i18n.translate(
       'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedCheckDescription',
       {
-        defaultMessage: 'Datafeed is not started',
+        defaultMessage: 'Get alerted if the corresponding datafeed of the job is not started',
       }
     ),
   },
