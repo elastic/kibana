@@ -53,6 +53,7 @@ import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
 import { SchemaTypeError } from '@kbn/config-schema';
+import { SerializableRecord } from '@kbn/common-utils';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
 import { Start as Start_2 } from 'src/plugins/inspector/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
@@ -318,7 +319,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
 // Warning: (ae-missing-release-tag) "EmbeddableChildPanel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State_2> {
+export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State> {
     constructor(props: EmbeddableChildPanelProps);
     // (undocumented)
     [panel: string]: any;
@@ -416,7 +417,7 @@ export type EmbeddableInput = {
     id: string;
     lastReloadRequestTime?: number;
     hidePanelTitles?: boolean;
-    enhancements?: Serializable;
+    enhancements?: SerializableRecord;
     disabledActions?: string[];
     disableTriggers?: boolean;
     searchSessionId?: string;
@@ -475,7 +476,7 @@ export interface EmbeddablePackageState {
 // Warning: (ae-missing-release-tag) "EmbeddablePanel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class EmbeddablePanel extends React.Component<Props, State_3> {
+export class EmbeddablePanel extends React.Component<Props, State_2> {
     constructor(props: Props);
     // (undocumented)
     closeMyContextMenuPanel: () => void;
@@ -618,7 +619,7 @@ export class EmbeddableStateTransfer {
 // Warning: (ae-missing-release-tag) "EnhancementRegistryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EnhancementRegistryDefinition<P extends Serializable = Serializable> extends PersistableStateDefinition<P> {
+export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord> extends PersistableStateDefinition<P> {
     // (undocumented)
     id: string;
 }
@@ -895,7 +896,6 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/embeddable/common/types.ts:31:3 - (ae-forgotten-export) The symbol "Serializable" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx:25:3 - (ae-forgotten-export) The symbol "UsageCollectionStart" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/public/lib/triggers/triggers.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 

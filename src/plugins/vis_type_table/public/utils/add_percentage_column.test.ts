@@ -12,7 +12,7 @@ jest.mock('../services', () => ({
   })),
 }));
 
-import { FieldFormat } from 'src/plugins/data/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 import { TableContext } from '../types';
 import { addPercentageColumn } from './add_percentage_column';
 
