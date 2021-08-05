@@ -10,11 +10,10 @@ import React, { FC } from 'react';
 import { EuiCallOut, EuiText, EuiLink } from '@elastic/eui';
 
 interface Props {
-  pipelineName: string;
   onManageIngestPipeline(): void;
 }
 
-export const ResultsPanel: FC<Props> = ({ pipelineName, onManageIngestPipeline }) => {
+export const ResultsPanel: FC<Props> = ({onManageIngestPipeline }) => {
   return (
     <EuiCallOut title="Import complete" color="success" iconType="check">
       <EuiText>
@@ -33,8 +32,7 @@ export const ResultsPanel: FC<Props> = ({ pipelineName, onManageIngestPipeline }
                 >
                   here
                 </EuiLink>
-              ),
-              pipelineName,
+              )
             }}
           />
         </p>
