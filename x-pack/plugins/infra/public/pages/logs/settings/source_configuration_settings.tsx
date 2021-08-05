@@ -100,7 +100,7 @@ export const LogsSettingsPage = () => {
         <Prompt
           prompt={sourceConfigurationFormElement.isDirty ? unsavedFormPromptMessage : undefined}
         />
-        <EuiPanel paddingSize="l">
+        <EuiPanel hasBorder paddingSize="l">
           <NameConfigurationPanel
             isLoading={isLoading}
             isReadOnly={!isWriteable}
@@ -108,7 +108,7 @@ export const LogsSettingsPage = () => {
           />
         </EuiPanel>
         <EuiSpacer />
-        <EuiPanel paddingSize="l">
+        <EuiPanel hasBorder paddingSize="l">
           <IndicesConfigurationPanel
             isLoading={isLoading}
             isReadOnly={!isWriteable}
@@ -118,7 +118,7 @@ export const LogsSettingsPage = () => {
           />
         </EuiPanel>
         <EuiSpacer />
-        <EuiPanel paddingSize="l">
+        <EuiPanel hasBorder paddingSize="l">
           <LogColumnsConfigurationPanel
             availableFields={availableFields}
             isLoading={isLoading}

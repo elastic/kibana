@@ -34,10 +34,6 @@ export const NO_DATA_RECOMMENDED = i18n.translate('kbn.noDataPage.recommended', 
 
 export type NoDataPageActions = Partial<EuiCardProps> & {
   /**
-   * The cards must lead somewhere
-   */
-  href: string;
-  /**
    * Applies the `Recommended` beta badge and makes the button `fill`
    */
   recommended?: boolean;

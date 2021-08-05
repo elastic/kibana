@@ -15,6 +15,7 @@ import { LogsPageNoIndicesContent } from './page_no_indices_content';
 import { LogsPageTemplate } from '../page_template';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
+import { NoDataPage } from '../../../../../../../src/plugins/kibana_react/public';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
@@ -47,7 +48,18 @@ export const StreamPageContent: React.FunctionComponent = () => {
       </LogStreamPageWrapper>
     );
   } else {
-    return <LogsPageNoIndicesContent />;
+    return (
+      <LogsPageTemplate
+        template="centeredBody"
+        pageContentProps={{
+          hasShadow: false,
+          color: 'transparent',
+        }}
+        paddingSize="none"
+      >
+        <LogsPageNoIndicesContent />
+      </LogsPageTemplate>
+    );
   }
 };
 
