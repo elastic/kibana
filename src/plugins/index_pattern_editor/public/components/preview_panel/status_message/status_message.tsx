@@ -26,18 +26,15 @@ const NoMatchStatusMessage = (allIndicesLength: number) => (
     <FormattedMessage
       id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
       defaultMessage="The index pattern you've entered doesn't match any indices.
-  You can match {indicesLength, plural,
-    one {your}
-    other {any of your}
-  } {strongIndices}, below."
+  You can match {strongIndices}, below."
       values={{
         strongIndices: (
           <strong>
             <FormattedMessage
               id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
               defaultMessage="{indicesLength, plural,
-            one {# index}
-            other {# indices}
+            one {# source}
+            other {# sources}
           }"
               values={{ indicesLength: allIndicesLength }}
             />
@@ -80,8 +77,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
           <FormattedMessage
             id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
             defaultMessage="Your index pattern can match {sourceCount, plural,
-              one {your # source}
-              other {any of your # sources}
+              one {# source}
+              other {# sources}
             }."
             values={{ sourceCount: allIndicesLength }}
           />
@@ -131,10 +128,10 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       <span>
         <FormattedMessage
           id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
-          defaultMessage="Your index pattern doesn't match any indices, but you have {strongIndices} which
+          defaultMessage="Your index pattern doesn't match any sources, but you have {strongIndices} which
           {matchedIndicesLength, plural,
-            one {looks}
-            other {look}
+            one {source looks}
+            other {sources look}
           } similar."
           values={{
             matchedIndicesLength: partialMatchedIndices.length,
@@ -143,8 +140,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
                 <FormattedMessage
                   id="indexPatternEditor.status.partialMatchLabel.strongIndicesLabel"
                   defaultMessage="{matchedIndicesLength, plural,
-                    one {index}
-                    other {# indices}
+                    one {source}
+                    other {# sources}
                   }"
                   values={{ matchedIndicesLength: partialMatchedIndices.length }}
                 />

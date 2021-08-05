@@ -63,11 +63,11 @@ const getTimestampConfig = (
 };
 
 const noTimestampOptionText = i18n.translate('indexPatternEditor.editor.form.noTimeFieldsLabel', {
-  defaultMessage: "The matching data sources don't have time fields.",
+  defaultMessage: "The matching sources don't have a time field.",
 });
 
 const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFieldHelp', {
-  defaultMessage: 'Select a primary time field for use with the global time filter.',
+  defaultMessage: 'Select a primary timestamp field for use with the global time filter.',
 });
 
 export const TimestampField = ({

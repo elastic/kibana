@@ -13,11 +13,11 @@ export const geti18nTexts = () => {
     noTimestampOptionText: i18n.translate(
       'indexPatternEditor.createIndexPattern.stepTime.noTimeFieldsLabel',
       {
-        defaultMessage: "The matching data sources don't have time fields.",
+        defaultMessage: "The matching sources don't have time fields.",
       }
     ),
     timestampFieldHelp: i18n.translate('indexPatternEditor.editor.form.timeFieldHelp', {
-      defaultMessage: 'Select a primary time field for use with the global time filter.',
+      defaultMessage: 'Select a primary timestamp field for use with the global time filter.',
     }),
     rollupLabel: i18n.translate('indexPatternEditor.rollupIndexPattern.createIndex.indexLabel', {
       defaultMessage: 'Rollup',
