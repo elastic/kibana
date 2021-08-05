@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiForm,
+  EuiPanel,
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
@@ -69,7 +70,7 @@ export const SourceSettings: React.FC = () => {
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
-    contentSource: { name, id, serviceType, indexing },
+    contentSource: { name, id, serviceType, indexing: {enabled} },
     buttonLoading,
   } = useValues(SourceLogic);
 
@@ -95,7 +96,7 @@ export const SourceSettings: React.FC = () => {
 
   const showConfig = isOrganization && !isEmpty(configuredFields);
 
-  const [synchronizeChecked, setSynchronize] = useState(indexing.enabled);
+  const [synchronizeChecked, setSynchronize] = useState(enabled);
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
@@ -106,11 +107,6 @@ export const SourceSettings: React.FC = () => {
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
   const submitNameChange = (e: FormEvent) => {
-    e.preventDefault();
-    updateContentSource(id, { name: inputValue });
-  };
-
-  const syncManagementChanged = (e: EuiSwitchEvent) => {
     e.preventDefault();
     updateContentSource(id, { name: inputValue });
   };
@@ -194,15 +190,20 @@ export const SourceSettings: React.FC = () => {
         </ContentSection>
       )}
       <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
-        <EuiForm>
-          <EuiFormRow>
-            <EuiSwitch
-              label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
-              checked={synchronizeChecked}
-              onChange={syncManagementChanged}
-            />
-          </EuiFormRow>
-        </EuiForm>
+        <EuiPanel>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={synchronizeChecked}
+                onChange={(e) => setSynchronize(e.target.checked)}
+                // disabled={!hasPlatinumLicense}
+                // showLabel={false}
+                label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
+                data-test-subj="SynchronizeToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </ContentSection>
       <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
         <EuiButton
