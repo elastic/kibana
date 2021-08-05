@@ -24,7 +24,16 @@ import { DslQuery } from '../../kuery';
 export type SerializableState = {
   [key: string]: Serializable;
 };
-export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
+// eslint-disable-next-line
+export interface SerializableArray extends Array<SerializableValue> {}
+export type SerializableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SerializableState
+  | SerializableArray;
 export type Serializable = SerializableValue | SerializableValue[];
 
 /**
@@ -40,12 +49,6 @@ export type FieldFilter =
   | RangeFilter
   | MatchAllFilter
   | MissingFilter;
-
-/**
- * A common type for filters supported by this package
- * @public
- **/
-export type FilterParams = Serializable;
 
 /**
  * An enum of all types of filters supported by this package
@@ -102,7 +105,7 @@ export type Filter = {
 
 // eslint-disable-next-line
 export type Query = {
-  query: string | SerializableState;
+  query: Serializable;
   language: string;
 };
 

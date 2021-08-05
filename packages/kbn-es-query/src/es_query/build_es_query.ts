@@ -72,6 +72,7 @@ export function buildEsQuery(
     config.ignoreFilterIfFieldNotInIndex
   );
 
+  // this should actually return estypes.QueryDslQueryContainer
   return {
     bool: {
       must: removeMatchAll([...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must]),

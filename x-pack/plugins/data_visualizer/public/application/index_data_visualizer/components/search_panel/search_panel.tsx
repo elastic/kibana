@@ -24,7 +24,6 @@ import {
   SEARCH_QUERY_LANGUAGE,
   SearchQueryLanguage,
 } from '../../types/combined_query';
-import { SerializableState } from '../../../../../../../../src/plugins/kibana_utils/common/persistable_state';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -94,7 +93,7 @@ export const SearchPanel: FC<Props> = ({
         filterQuery = {};
       }
       setSearchParams({
-        searchQuery: filterQuery as SerializableState,
+        searchQuery: filterQuery,
         searchString: query.query,
         queryLanguage: query.language as SearchQueryLanguage,
       });
