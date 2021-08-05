@@ -32,6 +32,9 @@ export const useInitSourcerer = (
     []
   );
   const defaultIndexPattern = useDeepEqualSelector(getDefaultIndexPatternSelector);
+  // const kibanaIndexPatterns = useDeepEqualSelector(
+  //   sourcererSelectors.sourcererKibanaIndexPatternsSelector()
+  // );
   const { addError } = useAppToasts();
 
   useEffect(() => {

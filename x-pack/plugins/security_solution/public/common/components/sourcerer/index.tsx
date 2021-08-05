@@ -54,11 +54,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   //     value: indexSelected,
   //   }))
   // );
-  const selectedPatterns = useMemo(() => {
-    const theKip = kibanaIndexPatterns.find((kip) => kip.id === selectedKipId);
-    console.log('ayo', { theKip, kibanaIndexPatterns, selectedKipId });
-    return theKip != null ? theKip.title : '';
-  }, [kibanaIndexPatterns, selectedKipId]);
+  const getSelectedPatterns = useCallback(
+    (kipId) => {
+      const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
+      return theKip != null ? [theKip.title] : [];
+    },
+    [kibanaIndexPatterns]
+  );
   const [selectedOption, setSelectedOption] = useState<string>(selectedKipId ?? '');
   // const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
 
@@ -69,10 +71,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         sourcererActions.setSelectedKip({
           id: scopeId,
           selectedKipId: newSelectedKip,
+          selectedPatterns: getSelectedPatterns(newSelectedKip),
         })
       );
     },
-    [dispatch, scopeId]
+    [dispatch, getSelectedPatterns, scopeId]
   );
   // const onChangeIndexPattern = useCallback(
   //   (newSelectedPatterns: string[]) => {
@@ -194,10 +197,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     );
   }, [selectedKipId]);
 
-  const tooltipContent = useMemo(() => (isPopoverOpen ? null : selectedPatterns), [
-    isPopoverOpen,
-    selectedPatterns,
-  ]);
+  const tooltipContent = useMemo(
+    () => (isPopoverOpen ? null : getSelectedPatterns(selectedKipId)),
+    [getSelectedPatterns, isPopoverOpen, selectedKipId]
+  );
 
   return (
     <EuiToolTip position="top" content={tooltipContent}>

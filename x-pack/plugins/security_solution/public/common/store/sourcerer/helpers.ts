@@ -18,6 +18,14 @@ export interface Args {
 
 export const getPatternList = (kip: KibanaIndexPattern): string[] => [kip.title]; // kip.title.split(','); // TODO: Steph/sourcerer implement splitting KIPs
 
+export const getPatternListByKipId = (
+  kibanaIndexPatterns: KibanaIndexPattern[],
+  kipId: string
+): string[] => {
+  const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
+  return theKip != null ? [theKip.title] : [];
+};
+
 export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, state }: Args) => {
   const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
   const securitySolutionIndexPattern = getPatternList(state.defaultIndexPattern);

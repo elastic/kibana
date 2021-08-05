@@ -20,7 +20,7 @@ import { initialSourcererState, SourcererModel } from './model';
 import {
   createDefaultIndexPatterns,
   defaultIndexPatternByEventType,
-  getPatternList,
+  getPatternListByKipId,
 } from './helpers';
 
 export type SourcererState = SourcererModel;
@@ -40,14 +40,19 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     },
   }))
-  .case(setSelectedKip, (state, { id, selectedKipId, eventType }) => {
+  .case(setSelectedKip, (state, { id, selectedKipId, selectedPatterns, eventType }) => {
+    const sPatterns =
+      selectedPatterns != null
+        ? selectedPatterns
+        : getPatternListByKipId(state.kibanaIndexPatterns, selectedKipId);
     return {
       ...state,
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          selectedKipId, // TODO: Steph/sourcerer createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
+          selectedKipId,
+          selectedPatterns: sPatterns, // TODO: Steph/sourcerer createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
         },
       },
     };
@@ -86,21 +91,31 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
   })
 
   .case(setSource, (state, { id, payload }) => {
-    const { ...sourcererScopes } = payload;
+    // const patterns =
+    //   state.sourcererScopes[id].selectedKipId === null
+    //     ? []
+    //     : [
+    //         state.kibanaIndexPatterns.find(
+    //           (kip) => kip.id === state.sourcererScopes[id].selectedKipId
+    //         )!.title,
+    //       ] ?? [];
+
     return {
       ...state,
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          ...sourcererScopes,
-          ...(state.sourcererScopes[id].selectedPatterns.length === 0 ||
-          state.sourcererScopes[id].selectedKipId === null
-            ? {
-                selectedKipId: state.defaultIndexPattern.id,
-                selectedPatterns: getPatternList(state.defaultIndexPattern),
-              }
-            : {}),
+          ...payload,
+          // ...(patterns.length === 0
+          //   ? {
+          //       selectedKipId: state.defaultIndexPattern.id,
+          //       selectedPatterns: getPatternList(state.defaultIndexPattern),
+          //     }
+          //   : {
+          //       selectedKipId: state.sourcererScopes[id].selectedKipId,
+          //       selectedPatterns: patterns,
+          //     }),
         },
       },
     };

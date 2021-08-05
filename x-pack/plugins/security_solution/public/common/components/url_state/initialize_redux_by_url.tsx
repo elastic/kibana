@@ -48,19 +48,12 @@ export const dispatchSetInitialStateFromUrl = (
           (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
         ) as SourcererScopeName[];
         activeScopes.forEach((scope) => {
-          console.log(`selectedKipId: ${scope}: ${sourcererState[scope]}`);
           dispatch(
             sourcererActions.setSelectedKip({
               id: scope,
               selectedKipId: sourcererState[scope] ?? DEFAULT_INDEX_PATTERN_ID,
             })
           );
-          // dispatch(
-          //   sourcererActions.setSelectedIndexPatterns({
-          //     id: scope,
-          //     selectedPatterns: sourcererState[scope] ?? [],
-          //   })
-          // );
         });
       }
     }

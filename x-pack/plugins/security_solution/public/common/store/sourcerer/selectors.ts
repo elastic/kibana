@@ -69,7 +69,6 @@ export const getIndexNamesSelectedSelector = () => {
 interface SelectedKip {
   kipId: string;
   indexNames: string[];
-  previousIndexNames: string;
 }
 export const getSelectedKipSelector = () => {
   const getScopeSelector = scopeIdSelector();
@@ -79,12 +78,11 @@ export const getSelectedKipSelector = () => {
     const scope = getScopeSelector(state, scopeId);
     const defaultIndexPattern = getDefaultIndexPatternSelector(state);
     return {
-      kipId: defaultIndexPattern.id,
+      kipId: scope.selectedKipId === null ? defaultIndexPattern.id : scope.selectedKipId,
       indexNames:
         scope.selectedPatterns.length === 0
           ? getPatternList(defaultIndexPattern)
           : scope.selectedPatterns,
-      previousIndexNames: scope.indexPattern.title,
     };
   };
 };

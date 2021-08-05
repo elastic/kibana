@@ -156,7 +156,6 @@ export const useFetchIndex = (
           )
           .subscribe({
             next: (response) => {
-              console.log('response', response);
               if (isCompleteResponse(response)) {
                 const stringifyIndices = response.indicesExist.sort().join();
 
@@ -212,13 +211,10 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
-  const kipsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
-  const dKipSelector = sourcererSelectors.defaultIndexPatternSelector();
   const indexNamesSelectedSelector = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { kipId, indexNames, previousIndexNames } = useDeepEqualSelector<{
+  const { kipId, indexNames } = useDeepEqualSelector<{
     kipId: string;
     indexNames: string[];
-    previousIndexNames: string;
   }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
   const { addError, addWarning } = useAppToasts();
 
@@ -230,14 +226,13 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   const indexFieldsSearch = useCallback(
-    (selectedId: string) => {
-      const indicesName = indexNames;
+    (selectedKipId: string, selectedPatterns: string[]) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { kipId: selectedId, indices: indicesName, onlyCheckIfIndicesExist: false },
+            { kipId: selectedKipId, indices: selectedPatterns, onlyCheckIfIndicesExist: false },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'indexFields',
@@ -258,6 +253,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       indexPattern: getIndexFields(stringifyIndices, response.indexFields),
                       indicesExist: response.indicesExist.length > 0,
                       loading: false,
+                      selectedPatterns,
+                      selectedKipId,
                     },
                   })
                 );
@@ -285,12 +282,12 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && previousIndexNames !== indexNames.sort().join()) {
-      indexFieldsSearch(kipId);
+    if (kipId != null) {
+      indexFieldsSearch(kipId, indexNames);
     }
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [kipId, indexFieldsSearch, previousIndexNames]);
+  }, [kipId, indexNames, indexFieldsSearch]);
 };
