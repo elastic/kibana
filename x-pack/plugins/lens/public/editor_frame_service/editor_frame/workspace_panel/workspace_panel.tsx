@@ -64,24 +64,13 @@ import {
 } from '../../../state_management';
 
 export interface WorkspacePanelProps {
-  activeVisualizationId: string | null;
   visualizationMap: VisualizationMap;
-  visualizationState: unknown;
-  activeDatasourceId: string | null;
   datasourceMap: DatasourceMap;
-  datasourceStates: Record<
-    string,
-    {
-      state: unknown;
-      isLoading: boolean;
-    }
-  >;
   framePublicAPI: FramePublicAPI;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
-  isFullscreen: boolean;
 }
 
 interface WorkspaceState {
@@ -123,30 +112,30 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
 
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
-  activeDatasourceId,
-  activeVisualizationId,
-  visualizationMap,
-  visualizationState,
-  datasourceMap,
-  datasourceStates,
   framePublicAPI,
+  visualizationMap,
+  datasourceMap,
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
   suggestionForDraggedField,
-  isFullscreen,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
   const dispatchLens = useLensDispatch();
+  const isFullscreen = Boolean(useLensSelector((state) => state.lens.isFullscreenDatasource));
+  const visualization = useLensSelector((state) => state.lens.visualization);
+  const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
+  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+
   const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
   });
 
-  const activeVisualization = activeVisualizationId
-    ? visualizationMap[activeVisualizationId]
+  const activeVisualization = visualization.activeId
+    ? visualizationMap[visualization.activeId]
     : null;
 
   const missingIndexPatterns = getMissingIndexPattern(
@@ -179,11 +168,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
         activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
         activeVisualization,
-        visualizationState,
+        visualization.state,
         framePublicAPI
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeVisualization, visualizationState, activeDatasourceId, datasourceMap, datasourceStates]
+    [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
   const expression = useMemo(() => {
@@ -191,7 +180,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
-          visualizationState,
+          visualizationState: visualization.state,
           datasourceMap,
           datasourceStates,
           datasourceLayers,
@@ -206,7 +195,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           return null;
         }
       } catch (e) {
-        const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
+        const buildMessages = activeVisualization?.getErrorMessages(visualization.state);
         const defaultMessage = {
           shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
             defaultMessage: 'An unexpected error occurred while preparing the chart',
@@ -222,7 +211,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [
     activeVisualization,
-    visualizationState,
+    visualization.state,
     datasourceMap,
     datasourceStates,
     datasourceLayers,
@@ -232,7 +221,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const expressionExists = Boolean(expression);
   const hasLoaded = Boolean(
-    activeVisualization && visualizationState && datasourceMap && datasourceStates
+    activeVisualization && visualization.state && datasourceMap && datasourceStates
   );
   useEffect(() => {
     if (hasLoaded) {
@@ -392,8 +381,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   return (
     <WorkspacePanelWrapper
       framePublicAPI={framePublicAPI}
-      visualizationState={visualizationState}
-      visualizationId={activeVisualizationId}
+      visualizationState={visualization.state}
+      visualizationId={visualization.activeId}
       datasourceStates={datasourceStates}
       datasourceMap={datasourceMap}
       visualizationMap={visualizationMap}

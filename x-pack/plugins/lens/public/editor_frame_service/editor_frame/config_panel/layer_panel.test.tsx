@@ -65,15 +65,8 @@ describe('LayerPanel', () => {
     return {
       layerId: 'first',
       activeVisualization: mockVisualization,
-      activeDatasourceId: 'ds1',
       datasourceMap: {
-        ds1: mockDatasource,
-      },
-      datasourceStates: {
-        ds1: {
-          isLoading: false,
-          state: 'state',
-        },
+        testDatasource: mockDatasource,
       },
       visualizationState: 'state',
       updateVisualization: jest.fn(),
@@ -120,7 +113,7 @@ describe('LayerPanel', () => {
     };
 
     mockVisualization.getLayerIds.mockReturnValue(['first']);
-    mockDatasource = createMockDatasource('ds1');
+    mockDatasource = createMockDatasource('testDatasource');
   });
 
   describe('layer reset and remove', () => {
@@ -343,29 +336,33 @@ describe('LayerPanel', () => {
       const { instance } = await mountWithProvider(
         <LayerPanel
           {...getDefaultProps()}
-          datasourceStates={{
-            ds1: {
-              isLoading: false,
-              state: {
-                layers: [
-                  {
-                    indexPatternId: '1',
-                    columns: {
-                      y: {
-                        operationType: 'moving_average',
-                        references: ['ref'],
-                      },
-                    },
-                    columnOrder: ['y'],
-                    incompleteColumns: {},
-                  },
-                ],
-              },
-            },
-          }}
           updateDatasource={updateDatasource}
           updateAll={updateAll}
-        />
+        />,
+        {
+          preloadedState: {
+            datasourceStates: {
+              testDatasource: {
+                isLoading: false,
+                state: {
+                  layers: [
+                    {
+                      indexPatternId: '1',
+                      columns: {
+                        y: {
+                          operationType: 'moving_average',
+                          references: ['ref'],
+                        },
+                      },
+                      columnOrder: ['y'],
+                      incompleteColumns: {},
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        }
       );
 
       act(() => {
@@ -551,7 +548,7 @@ describe('LayerPanel', () => {
       });
       instance.update();
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
-      expect(updateDatasource).toHaveBeenCalledWith('ds1', { newState: true });
+      expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: true });
     });
   });
 

@@ -250,6 +250,7 @@ export function SuggestionPanel({
       currentStateExpression: newStateExpression,
       currentStateError: validationErrors,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     currentDatasourceStates,
     currentVisualization.state,

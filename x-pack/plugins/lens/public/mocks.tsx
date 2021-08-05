@@ -165,7 +165,7 @@ export function createMockFrameDatasourceAPI(): FrameDatasourceMock {
     datasourceLayers: {},
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
-    filters: []
+    filters: [],
   };
 }
 
@@ -408,7 +408,7 @@ export const defaultState = {
   datasourceStates: {
     testDatasource: {
       isLoading: false,
-      state: '',
+      state: {},
     },
   },
 };

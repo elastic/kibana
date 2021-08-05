@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DatasourceStates } from '../../../state_management';
 import {
   Visualization,
   FramePublicAPI,
@@ -15,22 +14,14 @@ import {
   VisualizationMap,
 } from '../../../types';
 export interface ConfigPanelWrapperProps {
-  activeDatasourceId: string;
-  visualizationState: unknown;
-  activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  datasourceStates: DatasourceStates;
   core: DatasourceDimensionEditorProps['core'];
-  isFullscreen: boolean;
 }
 
 export interface LayerPanelProps {
-  activeDatasourceId: string;
   visualizationState: unknown;
-  datasourceStates: DatasourceStates;
-  isFullscreen: boolean;
   datasourceMap: DatasourceMap;
   activeVisualization: Visualization;
   framePublicAPI: FramePublicAPI;

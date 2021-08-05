@@ -52,7 +52,6 @@ export function LayerPanel(
     onRemoveLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
-    isFullscreen: boolean;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -60,7 +59,6 @@ export function LayerPanel(
   );
 
   const {
-    isFullscreen,
     framePublicAPI,
     layerId,
     isOnlyLayer,
@@ -77,6 +75,8 @@ export function LayerPanel(
   } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
   const dateRange = useLensSelector((state) => state.lens.resolvedDateRange);
+  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+  const isFullscreen = Boolean(useLensSelector((state) => state.lens.isFullscreenDatasource));
 
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
@@ -97,7 +97,7 @@ export function LayerPanel(
   };
 
   const datasourceId = datasourcePublicAPI.datasourceId;
-  const layerDatasourceState = props.datasourceStates[datasourceId].state;
+  const layerDatasourceState = datasourceStates[datasourceId].state;
 
   const layerDatasourceDropProps = useMemo(
     () => ({

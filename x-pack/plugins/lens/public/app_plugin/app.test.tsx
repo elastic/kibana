@@ -1182,7 +1182,7 @@ describe('Lens App', () => {
             ...defaultDoc,
             state: {
               ...defaultDoc.state,
-              datasourceStates: { testDatasource: '' },
+              datasourceStates: { testDatasource: {} },
               visualization: {},
             },
           },

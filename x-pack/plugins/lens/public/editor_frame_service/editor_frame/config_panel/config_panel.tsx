@@ -40,7 +40,6 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
 
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
-    activeDatasourceId: string;
     activeVisualization: Visualization;
   }
 ) {
