@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
+import { NoDataPage } from '../../../../../../src/plugins/kibana_react/public';
+import { Source } from '../../containers/metrics_source';
+import { useLinkProps } from '../../hooks/use_link_props';
 
 export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
   pageTemplateProps
@@ -20,5 +23,38 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
     },
   } = useKibanaContextForPlugin();
 
-  return <PageTemplate {...pageTemplateProps} />;
+  const { metricIndicesExist } = useContext(Source.Context);
+
+  const tutorialLinkProps = useLinkProps({
+    app: 'home',
+    hash: '/tutorial_directory/metrics',
+  });
+
+  return metricIndicesExist ? (
+    <PageTemplate {...pageTemplateProps} />
+  ) : (
+    <PageTemplate
+      template="centeredBody"
+      pageContentProps={{
+        hasShadow: false,
+        color: 'transparent',
+      }}
+      paddingSize="none"
+    >
+      <NoDataPage
+        solution="Observability"
+        actions={{
+          elasticAgent: {
+            href: 'app/integrations/browse',
+            recommended: false,
+          },
+          beats: {
+            ...tutorialLinkProps,
+            recommended: true,
+          },
+        }}
+        docsLink={'#'}
+      />
+    </PageTemplate>
+  );
 };
