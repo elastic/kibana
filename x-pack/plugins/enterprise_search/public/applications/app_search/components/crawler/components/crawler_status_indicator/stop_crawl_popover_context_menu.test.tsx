@@ -8,9 +8,15 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiResizeObserver,
+} from '@elastic/eui';
 
-import { rerender } from '../../../../../test_helpers';
+import { mountWithIntl, rerender } from '../../../../../test_helpers';
 
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 
@@ -25,30 +31,21 @@ describe('StopCrawlsPopoverContextMenu', () => {
   });
 
   it('can be opened to stop crawls', () => {
-    const wrapper = shallow(<StopCrawlPopoverContextMenu stopCrawl={stopCrawl} />);
+    const wrapper = mountWithIntl(<StopCrawlPopoverContextMenu stopCrawl={stopCrawl} />);
 
-    wrapper.dive().find(EuiButton).simulate('click');
-    rerender(wrapper);
+    wrapper.find(EuiButton).simulate('click');
 
-    expect(wrapper.prop('isOpen')).toEqual(true);
+    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
 
-    // TODO I can't figure out how to find the EuiContextMenuItem inside this component's
-    // EuiContextMenuPanel.  It renders inside of an EuiResizeObserver and I figure out how
-    // to get in it
+    const menuItem = wrapper
+      .find(EuiContextMenuPanel)
+      .find(EuiResizeObserver)
+      .find(EuiContextMenuItem);
 
-    // const menuItem = wrapper
-    //   .find(EuiContextMenuPanel)
-    //   .find(EuiResizeObserver)
-    //   .find(EuiContextMenuItem);
+    expect(menuItem).toHaveLength(1);
 
-    // expect(menuItem).toHaveLength(1);
+    menuItem.simulate('click');
 
-    // menuItem.simulate('click');
-
-    // expect(stopCrawl).toHaveBeenCalled();
-
-    // rerender(wrapper);
-
-    // expect(wrapper.dive().find(EuiContextMenuPanel)).toHaveLength(0);
+    expect(stopCrawl).toHaveBeenCalled();
   });
 });
