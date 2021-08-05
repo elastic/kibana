@@ -27,6 +27,11 @@ describe('createRouter', () => {
               rangeTo: t.string,
             }),
           }),
+          defaults: {
+            query: {
+              rangeFrom: 'now-30m',
+            },
+          },
           children: [
             {
               path: '/services',
@@ -164,6 +169,20 @@ describe('createRouter', () => {
         router.getParams('/service-map', history.location, true);
       }).not.toThrowError();
     });
+
+    it('applies defaults', () => {
+      history.push('/services?rangeTo=now&transactionType=request');
+
+      const topLevelParams = router.getParams('/', history.location);
+
+      expect(topLevelParams).toEqual({
+        path: {},
+        query: {
+          rangeFrom: 'now-30m',
+          rangeTo: 'now',
+        },
+      });
+    });
   });
 
   describe('matchRoutes', () => {
@@ -180,6 +199,23 @@ describe('createRouter', () => {
       expect(() => {
         router.matchRoutes('/traces', history.location);
       }).toThrowError('No matching route found for /traces');
+    });
+
+    it('applies defaults', () => {
+      history.push('/services?rangeTo=now&transactionType=request');
+
+      expect(() => {
+        router.matchRoutes('/', history.location);
+      }).not.toThrow();
+
+      const matches = router.matchRoutes('/', history.location);
+
+      expect(matches[1]?.match.params).toEqual({
+        query: {
+          rangeFrom: 'now-30m',
+          rangeTo: 'now',
+        },
+      });
     });
   });
 
@@ -240,6 +276,17 @@ describe('createRouter', () => {
           },
         } as any);
       }).toThrowError();
+    });
+
+    it('applies defaults', () => {
+      expect(() => {
+        router.link('/traces', {
+          query: {
+            rangeTo: 'now',
+            aggregationType: 'avg',
+          },
+        } as any);
+      }).not.toThrowError();
     });
   });
 });
