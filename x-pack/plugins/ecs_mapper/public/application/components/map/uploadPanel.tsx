@@ -72,7 +72,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             <p>
               <FormattedMessage
                 id="xpack.ecsMapper.file.upload.copyAction.description"
-                defaultMessage="TBD description"
+                defaultMessage="This is the default action for field renames."
               />
             </p>
           }
@@ -100,7 +100,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             <p>
               <FormattedMessage
                 id="xpack.ecsMapper.file.upload.pipelineName.description"
-                defaultMessage="TBD description"
+                defaultMessage="This is the name for the Ingest Node Pipeline that will be created from the CSV mapping."
               />
             </p>
           }
