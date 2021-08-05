@@ -17,6 +17,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -49,6 +50,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 `;
 
 interface EventDetailsPanelProps {
+  alertConsumers?: ALERTS_CONSUMERS[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   expandedEvent: {
@@ -65,6 +67,7 @@ interface EventDetailsPanelProps {
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
+  alertConsumers,
   browserFields,
   docValueFields,
   expandedEvent,
@@ -74,6 +77,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
 }) => {
   const [loading, detailsData] = useTimelineEventsDetails({
+    alertConsumers,
     docValueFields,
     indexName: expandedEvent.indexName ?? '',
     eventId: expandedEvent.eventId ?? '',

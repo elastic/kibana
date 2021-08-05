@@ -58,6 +58,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
       const queryFactory: TimelineFactory<T> = timelineFactory[factoryQueryType];
 
       if (alertConsumers != null && entityType != null && entityType === EntityType.ALERTS) {
+        console.log('------------------');
         const allFeatureIdsValid = alertConsumers.every((id) => isValidFeatureId(id));
 
         if (!allFeatureIdsValid) {

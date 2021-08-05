@@ -9,6 +9,7 @@ import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
+import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -22,19 +23,24 @@ import {
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
+import { EntityType } from '../../../../../timelines/common/search_strategy';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
 
 export interface UseTimelineEventsDetailsProps {
+  alertConsumers?: ALERTS_CONSUMERS[];
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
   skip: boolean;
 }
 
+const EMPTY_ARRAY: ALERTS_CONSUMERS[] = [];
+
 export const useTimelineEventsDetails = ({
+  alertConsumers = EMPTY_ARRAY,
   docValueFields,
   indexName,
   eventId,
@@ -67,7 +73,7 @@ export const useTimelineEventsDetails = ({
 
         searchSubscription$.current = data.search
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
-            request,
+            { ...request, entityType: 'alerts' },
             {
               strategy: 'timelineSearchStrategy',
               abortSignal: abortCtrl.current.signal,
@@ -104,6 +110,7 @@ export const useTimelineEventsDetails = ({
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
+        alertConsumers,
         docValueFields,
         indexName,
         eventId,
@@ -114,7 +121,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName]);
+  }, [alertConsumers, docValueFields, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);

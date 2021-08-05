@@ -8,6 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
+import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
@@ -18,6 +20,7 @@ import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 
 interface DetailsPanelProps {
+  alertConsumers?: ALERTS_CONSUMERS[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   handleOnPanelClosed?: () => void;
@@ -33,6 +36,7 @@ interface DetailsPanelProps {
  */
 export const DetailsPanel = React.memo(
   ({
+    alertConsumers,
     browserFields,
     docValueFields,
     handleOnPanelClosed,
@@ -70,6 +74,7 @@ export const DetailsPanel = React.memo(
       panelSize = 'm';
       visiblePanel = (
         <EventDetailsPanel
+          alertConsumers={alertConsumers}
           browserFields={browserFields}
           docValueFields={docValueFields}
           expandedEvent={currentTabDetail?.params}
