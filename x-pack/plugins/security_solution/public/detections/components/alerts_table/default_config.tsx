@@ -25,6 +25,9 @@ import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
 import {
+  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_TIME,
   ALERT_RULE_BUILDING_BLOCK_TYPE,
   ALERT_RULE_FILTERS,
