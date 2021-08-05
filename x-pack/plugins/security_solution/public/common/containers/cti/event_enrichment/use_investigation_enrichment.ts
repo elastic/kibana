@@ -23,7 +23,7 @@ const noop = () => {};
 
 export type SetDate = (date: moment.Moment) => Dispatch<SetStateAction<moment.Moment>>;
 
-export interface RangeFilterProps {
+export interface RangePickerProps {
   setStartDate: SetDate;
   setEndDate: SetDate;
   startDate: moment.Moment;
@@ -83,9 +83,8 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   }, [startDate, start, kibana.services.data, endDate, eventFields]);
 
   return {
-    loading,
     result,
-    rangeFilterProps: {
+    rangePickerProps: {
       setStartDate,
       setEndDate,
       startDate,

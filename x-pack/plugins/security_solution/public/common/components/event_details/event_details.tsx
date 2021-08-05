@@ -111,18 +111,16 @@ const EventDetailsComponent: React.FC<Props> = ({
         : [],
     [data, isAlert]
   );
-  const {
-    loading: enrichmentsLoading,
-    result: enrichmentsResponse,
-    rangeFilterProps,
-  } = useInvestigationTimeEnrichment(eventFields);
+  const { result: enrichmentsResponse, rangePickerProps } = useInvestigationTimeEnrichment(
+    eventFields
+  );
 
   const allEnrichments = useMemo(() => {
-    if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
+    if (rangePickerProps.loading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
     }
     return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
-  }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
+  }, [rangePickerProps.loading, enrichmentsResponse, existingEnrichments]);
 
   const enrichmentCount = allEnrichments.length;
 
@@ -152,7 +150,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     enrichments={allEnrichments}
                   />
                 )}
-                {enrichmentsLoading && (
+                {rangePickerProps.loading && (
                   <>
                     <EuiLoadingContent lines={2} />
                   </>
@@ -167,7 +165,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       id,
       browserFields,
       timelineId,
-      enrichmentsLoading,
+      rangePickerProps.loading,
       enrichmentCount,
       allEnrichments,
     ]
@@ -190,7 +188,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   <span>{i18n.THREAT_INTEL}</span>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {enrichmentsLoading ? (
+                  {rangePickerProps.loading ? (
                     <EuiLoadingSpinner />
                   ) : (
                     <EuiNotificationBadge data-test-subj="enrichment-count-notification">
@@ -201,11 +199,11 @@ const EventDetailsComponent: React.FC<Props> = ({
               </EuiFlexGroup>
             ),
             content: (
-              <ThreatDetailsView enrichments={allEnrichments} rangeFilterProps={rangeFilterProps} />
+              <ThreatDetailsView enrichments={allEnrichments} rangePickerProps={rangePickerProps} />
             ),
           }
         : undefined,
-    [allEnrichments, rangeFilterProps, enrichmentCount, enrichmentsLoading, isAlert]
+    [allEnrichments, rangePickerProps, enrichmentCount, isAlert]
   );
 
   const tableTab = useMemo(

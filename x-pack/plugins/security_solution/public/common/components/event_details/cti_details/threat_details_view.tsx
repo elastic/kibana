@@ -40,7 +40,7 @@ import {
 import * as i18n from './translations';
 import {
   QUERY_ID,
-  RangeFilterProps,
+  RangePickerProps,
 } from '../../../containers/cti/event_enrichment/use_investigation_enrichment';
 import { InspectButton } from '../../inspect';
 import { EnrichmentButtonContent } from './enrichment_button_content';
@@ -184,8 +184,8 @@ const getMessagesFromType = (type?: ENRICHMENT_TYPE) => {
 const EnrichmentSection: React.FC<{
   enrichments: CtiEnrichment[];
   type?: ENRICHMENT_TYPE;
-  rangeFilterProps?: RangeFilterProps;
-}> = ({ enrichments, type, rangeFilterProps }) => {
+  rangePickerProps?: RangePickerProps;
+}> = ({ enrichments, type, rangePickerProps }) => {
   const { dataTestSubj, title, noData } = getMessagesFromType(type);
   return (
     <div data-test-subj={dataTestSubj}>
@@ -204,9 +204,9 @@ const EnrichmentSection: React.FC<{
           <EuiSpacer size="s" />
         </>
       )}
-      {rangeFilterProps && (
+      {rangePickerProps && (
         <>
-          <EnrichmentRangePicker {...rangeFilterProps} />
+          <EnrichmentRangePicker {...rangePickerProps} />
           <EuiSpacer size="m" />
         </>
       )}
@@ -225,7 +225,7 @@ const EnrichmentSection: React.FC<{
       ) : (
         <>
           {noData && <InlineBlock data-test-subj={'no-intelligence-cta'}>{noData}</InlineBlock>}
-          {rangeFilterProps?.loading && <EuiLoadingContent lines={4} />}
+          {rangePickerProps?.loading && <EuiLoadingContent lines={4} />}
         </>
       )}
     </div>
@@ -234,8 +234,8 @@ const EnrichmentSection: React.FC<{
 
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
-  rangeFilterProps: RangeFilterProps;
-}> = ({ enrichments, rangeFilterProps }) => {
+  rangePickerProps: RangePickerProps;
+}> = ({ enrichments, rangePickerProps }) => {
   const {
     [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
     [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
@@ -251,7 +251,7 @@ const ThreatDetailsViewComponent: React.FC<{
       />
       <EuiHorizontalRule />
       <EnrichmentSection
-        rangeFilterProps={rangeFilterProps}
+        rangePickerProps={rangePickerProps}
         enrichments={threatIntelEnrichments}
         type={ENRICHMENT_TYPES.InvestigationTime}
       />
