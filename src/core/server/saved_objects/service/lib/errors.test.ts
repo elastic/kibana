@@ -442,17 +442,17 @@ describe('savedObjectsClient/errorTypes', () => {
 
   describe('NotFoundEsUnavailableError', () => {
     it('makes an error identifiable as an EsUnavailable error', () => {
-      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('foo', 'bar');
       expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
     });
 
     it('makes an error identifiable as an NotFoundEsUnavailableError error', () => {
-      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('foo', 'bar');
       expect(SavedObjectsErrorHelpers.isNotFoundEsUnavailableError(error)).toBe(true);
     });
 
     it('returns a boom error', () => {
-      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('foo', 'bar');
       expect(error).toHaveProperty('isBoom', true);
     });
 
@@ -466,7 +466,10 @@ describe('savedObjectsClient/errorTypes', () => {
 
     describe('error.output', () => {
       it('prefixes Not Found message with passed reason', () => {
-        const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+        const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
+          'foo',
+          'bar'
+        );
         expect(error.output.payload).toHaveProperty(
           'message',
           'x-elastic-product not present or not recognized: Not Found'
