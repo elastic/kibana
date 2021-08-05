@@ -21,14 +21,15 @@ import { StartPlugins } from '../../../plugin';
 
 const getKibanaIndexPattern = async (
   indexPatternsService: IndexPatternsService,
-  patternList: string[]
+  patternList: string[],
+  patternId: string
 ): Promise<IndexPattern> => {
   let indexPattern: IndexPattern;
   try {
-    indexPattern = await indexPatternsService.get(DEFAULT_INDEX_PATTERN_ID);
+    indexPattern = await indexPatternsService.get(patternId);
   } catch (e) {
     indexPattern = await indexPatternsService.createAndSave({
-      id: DEFAULT_INDEX_PATTERN_ID,
+      id: patternId,
       title: patternList.join(','),
       timeFieldName: DEFAULT_TIME_FIELD,
     });
@@ -63,7 +64,11 @@ export const createSourcererIndexPatternRoute = (
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asInternalUser
         );
-        const pattern = await getKibanaIndexPattern(indexPatternService, request.body.patternList);
+        const pattern = await getKibanaIndexPattern(
+          indexPatternService,
+          request.body.patternList,
+          DEFAULT_INDEX_PATTERN_ID
+        );
         return response.ok({ body: pattern });
       } catch (err) {
         const error = transformError(err);

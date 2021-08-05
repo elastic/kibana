@@ -156,6 +156,7 @@ export const useFetchIndex = (
           )
           .subscribe({
             next: (response) => {
+              console.log('response', response);
               if (isCompleteResponse(response)) {
                 const stringifyIndices = response.indicesExist.sort().join();
 
@@ -211,11 +212,11 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
-  const indexNamesSelectedSelector = useMemo(
-    () => sourcererSelectors.getIndexNamesSelectedSelector(),
-    []
-  );
-  const { indexNames, previousIndexNames } = useDeepEqualSelector<{
+  const kipsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
+  const dKipSelector = sourcererSelectors.defaultIndexPatternSelector();
+  const indexNamesSelectedSelector = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
+  const { kipId, indexNames, previousIndexNames } = useDeepEqualSelector<{
+    kipId: string;
     indexNames: string[];
     previousIndexNames: string;
   }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
@@ -229,13 +230,14 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   const indexFieldsSearch = useCallback(
-    (indicesName) => {
+    (selectedId: string) => {
+      const indicesName = indexNames;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: indicesName, onlyCheckIfIndicesExist: false },
+            { kipId: selectedId, indices: indicesName, onlyCheckIfIndicesExist: false },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'indexFields',
@@ -284,11 +286,11 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
 
   useEffect(() => {
     if (!isEmpty(indexNames) && previousIndexNames !== indexNames.sort().join()) {
-      indexFieldsSearch(indexNames);
+      indexFieldsSearch(kipId);
     }
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [indexNames, indexFieldsSearch, previousIndexNames]);
+  }, [kipId, indexFieldsSearch, previousIndexNames]);
 };

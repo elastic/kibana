@@ -34,6 +34,7 @@ export class TimelinesPlugin
     // Register server side APIs
     defineRoutes(router);
 
+    const IndexFields = indexFieldsProvider(core.getStartServices);
     // Register search strategy
     core.getStartServices().then(([_, depsStart]) => {
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
@@ -41,7 +42,6 @@ export class TimelinesPlugin
         depsStart.alerting
       );
       const TimelineEqlSearchStrategy = timelineEqlSearchStrategyProvider(depsStart.data);
-      const IndexFields = indexFieldsProvider();
 
       plugins.data.search.registerSearchStrategy('indexFields', IndexFields);
       plugins.data.search.registerSearchStrategy('timelineSearchStrategy', TimelineSearchStrategy);

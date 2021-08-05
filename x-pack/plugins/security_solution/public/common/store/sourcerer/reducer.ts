@@ -10,6 +10,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   setSourcererScopeLoading,
+  setSelectedKip,
   setSelectedIndexPatterns,
   setSignalIndexName,
   setSource,
@@ -39,6 +40,18 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     },
   }))
+  .case(setSelectedKip, (state, { id, selectedKipId, eventType }) => {
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        [id]: {
+          ...state.sourcererScopes[id],
+          selectedKipId, // TODO: Steph/sourcerer createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
+        },
+      },
+    };
+  })
   .case(setSelectedIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
     return {
       ...state,
@@ -61,6 +74,12 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
           selectedPatterns: isEmpty(selectedPatterns)
             ? defaultIndexPatternByEventType({ state, eventType })
             : selectedPatterns,
+          // ...(isEmpty(selectedPatterns) || selectedKipId === null
+          //   ? {
+          //     selectedKipId: state.defaultIndexPattern.id,
+          //     selectedPatterns: getPatternList(state.defaultIndexPattern),
+          //   }
+          //   : {}),
         },
       },
     };
@@ -75,8 +94,12 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         [id]: {
           ...state.sourcererScopes[id],
           ...sourcererScopes,
-          ...(state.sourcererScopes[id].selectedPatterns.length === 0
-            ? { selectedPatterns: getPatternList(state.defaultIndexPattern) }
+          ...(state.sourcererScopes[id].selectedPatterns.length === 0 ||
+          state.sourcererScopes[id].selectedKipId === null
+            ? {
+                selectedKipId: state.defaultIndexPattern.id,
+                selectedPatterns: getPatternList(state.defaultIndexPattern),
+              }
             : {}),
         },
       },

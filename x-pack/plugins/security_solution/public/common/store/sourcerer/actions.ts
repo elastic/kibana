@@ -25,6 +25,12 @@ export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; 
   'SET_SOURCERER_SCOPE_LOADING'
 );
 
+export const setSelectedKip = actionCreator<{
+  id: SourcererScopeName;
+  selectedKipId: string;
+  eventType?: TimelineEventsType;
+}>('SET_SELECTED_KIP');
+
 export const setSelectedIndexPatterns = actionCreator<{
   id: SourcererScopeName;
   selectedPatterns: string[];

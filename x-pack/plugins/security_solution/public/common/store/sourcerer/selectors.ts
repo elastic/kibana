@@ -66,6 +66,28 @@ export const getIndexNamesSelectedSelector = () => {
     };
   };
 };
+interface SelectedKip {
+  kipId: string;
+  indexNames: string[];
+  previousIndexNames: string;
+}
+export const getSelectedKipSelector = () => {
+  const getScopeSelector = scopeIdSelector();
+  const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
+
+  return (state: State, scopeId: SourcererScopeName): SelectedKip => {
+    const scope = getScopeSelector(state, scopeId);
+    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
+    return {
+      kipId: defaultIndexPattern.id,
+      indexNames:
+        scope.selectedPatterns.length === 0
+          ? getPatternList(defaultIndexPattern)
+          : scope.selectedPatterns,
+      previousIndexNames: scope.indexPattern.title,
+    };
+  };
+};
 
 export const getAllExistingIndexNamesSelector = () => {
   const getSignalIndexNameSelector = signalIndexNameSelector();

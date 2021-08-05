@@ -24,6 +24,7 @@ import { normalizeTimeRange } from './normalize_time_range';
 import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
+import { DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
 
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch
@@ -36,23 +37,33 @@ export const dispatchSetInitialStateFromUrl = (
   updateTimelineIsLoading,
   urlStateToUpdate,
 }: SetInitialStateFromUrl<unknown>): (() => void) => () => {
+  console.log('init dispatchSetInitialStateFromUrl');
   urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
     if (urlKey === CONSTANTS.timerange) {
       updateTimerange(newUrlStateString, dispatch);
     }
     if (urlKey === CONSTANTS.sourcerer) {
+      console.log('urlKey sourcerer', newUrlStateString);
       const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+      console.log('urlKey sourcererState', sourcererState);
       if (sourcererState != null) {
         const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
           (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
         ) as SourcererScopeName[];
         activeScopes.forEach((scope) => {
+          console.log(`selectedKipId: ${scope}: ${sourcererState[scope]}`);
           dispatch(
-            sourcererActions.setSelectedIndexPatterns({
+            sourcererActions.setSelectedKip({
               id: scope,
-              selectedPatterns: sourcererState[scope] ?? [],
+              selectedKipId: sourcererState[scope] ?? DEFAULT_INDEX_PATTERN_ID,
             })
           );
+          // dispatch(
+          //   sourcererActions.setSelectedIndexPatterns({
+          //     id: scope,
+          //     selectedPatterns: sourcererState[scope] ?? [],
+          //   })
+          // );
         });
       }
     }

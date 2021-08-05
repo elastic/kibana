@@ -8,6 +8,7 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,
@@ -23,67 +24,101 @@ import {
   IndexFieldsStrategyRequest,
   BeatFields,
 } from '../../../common/search_strategy/index_fields';
+import { StartPlugins } from '../../types';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
 
-export const indexFieldsProvider = (): ISearchStrategy<
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse
-> => {
+export const indexFieldsProvider = (
+  getStartServices: StartServicesAccessor<StartPlugins>
+): ISearchStrategy<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse> => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
 
   return {
-    search: (request, options, deps) => from(requestIndexFieldSearch(request, deps, beatFields)),
+    search: (request, options, deps) =>
+      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices)),
   };
 };
 
-export const requestIndexFieldSearch = async (
-  request: IndexFieldsStrategyRequest,
-  { esClient }: SearchStrategyDependencies,
-  beatFields: BeatFields
-): Promise<IndexFieldsStrategyResponse> => {
-  const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
-  const dedupeIndices = dedupeIndexName(request.indices);
-
-  const responsesIndexFields = await Promise.all(
-    dedupeIndices
+export const findExistingIndices = async (
+  indices: string[],
+  esClient: ElasticsearchClient
+): Promise<boolean[]> =>
+  Promise.all(
+    indices
       .map(async (index) => {
-        if (
-          request.onlyCheckIfIndicesExist &&
-          (index.includes(apmIndexPattern) || index.includes(apmDataStreamsPattern))
-        ) {
-          // for apm index pattern check also if there's data https://github.com/elastic/kibana/issues/90661
-          const searchResponse = await esClient.asCurrentUser.search({
-            index,
-            body: { query: { match_all: {} }, size: 0 },
-          });
-          return get(searchResponse, 'body.hits.total.value', 0) > 0;
-        } else {
-          return indexPatternsFetcher.getFieldsForWildcard({
-            pattern: index,
-          });
-        }
+        const searchResponse = await esClient.search({
+          index,
+          body: { query: { match_all: {} }, size: 0 },
+        });
+        return get(searchResponse, 'body.hits.total.value', 0) > 0;
       })
       .map((p) => p.catch((e) => false))
   );
 
+export const requestIndexFieldSearch = async (
+  request: IndexFieldsStrategyRequest,
+  { savedObjectsClient, esClient }: SearchStrategyDependencies,
+  beatFields: BeatFields,
+  getStartServices: StartServicesAccessor<StartPlugins>
+): Promise<IndexFieldsStrategyResponse> => {
+  const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const dedupeIndices = dedupeIndexName(request.indices);
+  const [
+    ,
+    {
+      data: { indexPatterns },
+    },
+  ] = await getStartServices();
+  const indexPatternService = await indexPatterns.indexPatternsServiceFactory(
+    savedObjectsClient,
+    esClient.asCurrentUser
+  );
+
+  const indicesExist: boolean[] = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
+
+  console.log('request', {
+    ...request,
+    indicesExist,
+    dedupeIndices,
+    indicesExistV: dedupeIndices.filter((index, i) => indicesExist[i] !== false),
+  });
+  let fieldDescriptor: FieldDescriptor[][];
+  if (request.kipId) {
+    const kip = await indexPatternService.get(request.kipId);
+    fieldDescriptor = [kip.fields as FieldDescriptor[]];
+  } else {
+    const responsesIndexFields = await Promise.all(
+      dedupeIndices
+        .map(async (index, i) => {
+          if (
+            request.onlyCheckIfIndicesExist &&
+            (index.includes(apmIndexPattern) || index.includes(apmDataStreamsPattern))
+          ) {
+            return indicesExist[i];
+          } else {
+            return indexPatternsFetcher.getFieldsForWildcard({
+              pattern: index,
+            });
+          }
+        })
+        .map((p) => p.catch((e) => false))
+    );
+    fieldDescriptor = responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][];
+  }
+
   let indexFields: IndexField[] = [];
 
   if (!request.onlyCheckIfIndicesExist) {
-    indexFields = await formatIndexFields(
-      beatFields,
-      responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-      dedupeIndices
-    );
+    indexFields = await formatIndexFields(beatFields, fieldDescriptor, dedupeIndices);
   }
 
   return {
     indexFields,
-    indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
+    indicesExist: dedupeIndices.filter((index, i) => indicesExist[i] !== false),
     rawResponse: {
       timed_out: false,
       took: -1,

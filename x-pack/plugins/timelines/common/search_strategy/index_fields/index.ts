@@ -47,6 +47,7 @@ export interface IndexField {
 export type BeatFields = Record<string, FieldInfo>;
 
 export interface IndexFieldsStrategyRequest extends IEsSearchRequest {
+  kipId: string;
   indices: string[];
   onlyCheckIfIndicesExist: boolean;
 }

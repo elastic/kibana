@@ -152,6 +152,11 @@ export const useUrlStateHooks = ({
         });
       }
     });
+    console.log('handleInitialize', {
+      ALL_URL_STATE_KEYS,
+      URL_STATE_KEYS: URL_STATE_KEYS[type],
+      urlStateToUpdate,
+    });
     difference(ALL_URL_STATE_KEYS, URL_STATE_KEYS[type]).forEach((urlKey: KeyUrlState) => {
       mySearch = replaceStateInLocation({
         history,
