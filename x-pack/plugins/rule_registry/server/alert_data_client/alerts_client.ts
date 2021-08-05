@@ -167,7 +167,7 @@ export class AlertsClient {
    * @param param0
    * @returns
    */
-  private async fetchAlertAndAudit({
+  private async singleSearchAfterAndAduti({
     id,
     query,
     index,
@@ -243,7 +243,7 @@ export class AlertsClient {
    * @param param0
    * @returns
    */
-  private async fetchAlertAuditOperate({
+  private async mgetAlertsAuditOperate({
     ids,
     status,
     indexName,
@@ -291,7 +291,7 @@ export class AlertsClient {
       });
       return bulkUpdateResponse;
     } catch (exc) {
-      this.logger.error(`error in fetchAlertAuditOperate ${exc}`);
+      this.logger.error(`error in mgetAlertsAuditOperate ${exc}`);
       throw exc;
     }
   }
@@ -363,7 +363,7 @@ export class AlertsClient {
 
     while (hasSortIds) {
       try {
-        const result = await this.fetchAlertAndAudit({
+        const result = await this.singleSearchAfterAndAduti({
           id: null,
           query,
           index,
@@ -401,7 +401,7 @@ export class AlertsClient {
   public async get({ id, index }: GetAlertParams) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const alert = await this.fetchAlertAndAudit({
+      const alert = await this.singleSearchAfterAndAduti({
         id,
         query: null,
         index,
@@ -430,7 +430,7 @@ export class AlertsClient {
     index,
   }: UpdateOptions<Params>) {
     try {
-      const alert = await this.fetchAlertAndAudit({
+      const alert = await this.singleSearchAfterAndAduti({
         id,
         query: null,
         index,
@@ -474,7 +474,7 @@ export class AlertsClient {
   }: BulkUpdateOptions<Params>) {
     // rejects at the route level if more than 1000 id's are passed in
     if (ids != null) {
-      return this.fetchAlertAuditOperate({
+      return this.mgetAlertsAuditOperate({
         ids,
         status,
         indexName: index,

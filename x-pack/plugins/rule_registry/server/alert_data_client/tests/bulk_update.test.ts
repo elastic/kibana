@@ -346,8 +346,8 @@ describe('bulkUpdate()', () => {
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
-                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update
-                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update
+                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update 
+                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update 
                 Error: Error: Unauthorized for fake.rule and apm"
               `);
 
@@ -417,8 +417,8 @@ describe('bulkUpdate()', () => {
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
-                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update
-                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update
+                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update 
+                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update 
                 Error: Error: Unauthorized for fake.rule and apm"
               `);
 
