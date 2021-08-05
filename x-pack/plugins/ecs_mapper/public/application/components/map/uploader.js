@@ -8,7 +8,9 @@
 import React, { Component } from 'react';
 
 import { UploadPanel } from './upload_panel';
+import { ConfirmationPanel } from './confirmation_panel';
 import { ResultsPanel } from './results_panel';
+import { ErrorPanel } from './error_panel';
 import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
@@ -24,8 +26,9 @@ export class EcsMapperUploadView extends Component {
       fileName: '',
       fileSize: 0,
       fileTooLarge: false,
-      fileCouldNotBeRead: false,
+      pipeline: '',
       pipelineName: '',
+      error: ''
     };
 
     this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
@@ -58,38 +61,39 @@ export class EcsMapperUploadView extends Component {
         fileTooLarge: false,
         fileCouldNotBeRead: false,
         fileCouldNotBeReadPermissionError: false,
-        pipelineName: pipelineName,
+        error: ''
       },
       () => {
         if (files.length) {
-          this.loadFile(files[0], action);
+          this.processFile(files[0], action, pipelineName);
         }
       }
     );
   };
 
-  async loadFile(file, action) {
+  async processFile(file, action, pipelineName) {
     if (file.size <= this.maxFileUploadBytes) {
       try {
         const { fileContents } = await readFile(file, this.maxFileUploadBytes);
+        
+        const processors = await this.props.mapper.fetchPipelineFromMapping(fileContents, action);
+
+        //this.createPipeline(pipelineName, processors);
+        this.props.mapper.createIngestNodePipeline(pipelineName, processors);
+
         this.setState({
+          ...this.state,
+          loading: false,
+          loaded: true,
           fileContents,
           fileName: file.name,
           fileSize: file.size,
-          loading: true,
-        });
-        const processors = await this.props.mapper.fetchPipelineFromMapping(fileContents, action);
-        await this.props.mapper.createIngestNodePipeline(this.state.pipelineName, processors);
-
-        this.setState({
-          loading: false,
-          loaded: true,
+          pipeline: processors
         });
       } catch (error) {
         this.setState({
           loaded: false,
           loading: false,
-          fileCouldNotBeRead: true,
         });
       }
     } else {
@@ -103,33 +107,51 @@ export class EcsMapperUploadView extends Component {
     }
   }
 
-  onCancel = () => {
-    this.onFilePickerChange([]);
-  };
+  async createPipeline(pipelineName, processors) {
+    const resp = this.props.mapper.createIngestNodePipeline(pipelineName, processors);
+    resp.catch(error => {
+      this.setState({
+        ...this.state,
+        error: error,
+        loaded: false
+      });
+    })
+  }
 
   render() {
-    const { loading, loaded, fileCouldNotBeReadPermissionError } = this.state;
+    const { loading, loaded, pipeline, pipelineName, error } = this.state;
 
     return (
       <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperFileUpload">
         <EuiPageBody className="prfDevTool__page__pageBody">
           <EuiPageContent className="prfDevTool__page__pageBodyContent">
+            
             <UploadPanel
               onFileUpload={this.onFileUpload}
               actionOptions={Object.values(FieldCopyAction)}
-              disabled={!fileCouldNotBeReadPermissionError}
               isLoading={loading}
               isLoaded={loaded}
             />
 
             <EuiSpacer size="m" />
 
+            <ConfirmationPanel
+              processors={pipeline}
+            />
+
             {loaded && (
               <ResultsPanel
-                pipelineName={this.state.pipelineName}
+                pipelineName={pipelineName}
                 onManageIngestPipeline={this.onManageIngestPipeline}
               />
             )}
+
+            {error && (
+              <ErrorPanel
+                error={error}
+              />
+            )}
+
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
