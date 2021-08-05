@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IFieldFormat } from 'src/plugins/data/common';
+import type { IFieldFormat } from 'src/plugins/field_formats/common';
 import { Datatable } from 'src/plugins/expressions';
 import { computeSummaryRowForColumn, getFinalSummaryConfiguration } from './summary';
 
