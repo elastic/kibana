@@ -6,12 +6,8 @@
  */
 
 import React, { ReactNode } from 'react';
-import { IHTTPSimpleFields, IHTTPAdvancedFields, ITLSFields, ConfigKeys } from '../types';
-import {
-  HTTPSimpleFieldsContextProvider,
-  HTTPAdvancedFieldsContextProvider,
-  TLSFieldsContextProvider,
-} from '.';
+import { IHTTPSimpleFields, IHTTPAdvancedFields, ConfigKeys } from '../types';
+import { HTTPSimpleFieldsContextProvider, HTTPAdvancedFieldsContextProvider } from '.';
 
 interface HTTPContextProviderProps {
   defaultValues?: any;
@@ -48,21 +44,10 @@ export const HTTPContextProvider = ({ defaultValues, children }: HTTPContextProv
         [ConfigKeys.URLS]: defaultValues[ConfigKeys.URLS],
       }
     : undefined;
-  const tlsFields: ITLSFields | undefined = defaultValues
-    ? {
-        [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
-          defaultValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-        [ConfigKeys.TLS_CERTIFICATE]: defaultValues[ConfigKeys.TLS_CERTIFICATE],
-        [ConfigKeys.TLS_KEY]: defaultValues[ConfigKeys.TLS_KEY],
-        [ConfigKeys.TLS_KEY_PASSPHRASE]: defaultValues[ConfigKeys.TLS_KEY_PASSPHRASE],
-        [ConfigKeys.TLS_VERIFICATION_MODE]: defaultValues[ConfigKeys.TLS_VERIFICATION_MODE],
-        [ConfigKeys.TLS_VERSION]: defaultValues[ConfigKeys.TLS_VERSION],
-      }
-    : undefined;
   return (
     <HTTPAdvancedFieldsContextProvider defaultValues={httpAdvancedFields}>
       <HTTPSimpleFieldsContextProvider defaultValues={httpSimpleFields}>
-        <TLSFieldsContextProvider defaultValues={tlsFields}>{children}</TLSFieldsContextProvider>
+        {children}
       </HTTPSimpleFieldsContextProvider>
     </HTTPAdvancedFieldsContextProvider>
   );

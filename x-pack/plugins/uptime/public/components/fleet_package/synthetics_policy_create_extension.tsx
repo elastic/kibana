@@ -64,7 +64,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
     const { setConfig } = useUpdatePolicy({
       monitorType,
-      defaultConfig,
+      defaultConfig: defaultConfig[monitorType],
       newPolicy,
       onChange,
       validate,

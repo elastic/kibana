@@ -6,12 +6,8 @@
  */
 
 import React, { ReactNode } from 'react';
-import { ConfigKeys, ITCPSimpleFields, ITCPAdvancedFields, ITLSFields } from '../types';
-import {
-  TCPSimpleFieldsContextProvider,
-  TCPAdvancedFieldsContextProvider,
-  TLSFieldsContextProvider,
-} from '.';
+import { ConfigKeys, ITCPSimpleFields, ITCPAdvancedFields } from '../types';
+import { TCPSimpleFieldsContextProvider, TCPAdvancedFieldsContextProvider } from '.';
 
 interface TCPContextProviderProps {
   defaultValues?: any;
@@ -41,21 +37,10 @@ export const TCPContextProvider = ({ defaultValues, children }: TCPContextProvid
         [ConfigKeys.REQUEST_SEND_CHECK]: defaultValues[ConfigKeys.REQUEST_SEND_CHECK],
       }
     : undefined;
-  const tlsFields: ITLSFields | undefined = defaultValues
-    ? {
-        [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
-          defaultValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-        [ConfigKeys.TLS_CERTIFICATE]: defaultValues[ConfigKeys.TLS_CERTIFICATE],
-        [ConfigKeys.TLS_KEY]: defaultValues[ConfigKeys.TLS_KEY],
-        [ConfigKeys.TLS_KEY_PASSPHRASE]: defaultValues[ConfigKeys.TLS_KEY_PASSPHRASE],
-        [ConfigKeys.TLS_VERIFICATION_MODE]: defaultValues[ConfigKeys.TLS_VERIFICATION_MODE],
-        [ConfigKeys.TLS_VERSION]: defaultValues[ConfigKeys.TLS_VERSION],
-      }
-    : undefined;
   return (
     <TCPAdvancedFieldsContextProvider defaultValues={tcpAdvancedFields}>
       <TCPSimpleFieldsContextProvider defaultValues={tcpSimpleFields}>
-        <TLSFieldsContextProvider defaultValues={tlsFields}>{children}</TLSFieldsContextProvider>
+        {children}
       </TCPSimpleFieldsContextProvider>
     </TCPAdvancedFieldsContextProvider>
   );

@@ -19,7 +19,7 @@ import {
   useTLSFieldsContext,
   useBrowserSimpleFieldsContext,
 } from './contexts';
-import { PolicyConfig, DataStream } from './types';
+import { ICustomFields, DataStream } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 import { validate } from './validation';
@@ -27,7 +27,7 @@ import { validate } from './validation';
 interface SyntheticsPolicyEditExtensionProps {
   newPolicy: PackagePolicyEditExtensionComponentProps['newPolicy'];
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
-  defaultConfig: PolicyConfig;
+  defaultConfig: Partial<ICustomFields>;
   isTLSEnabled: boolean;
 }
 /**

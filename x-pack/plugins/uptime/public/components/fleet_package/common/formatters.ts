@@ -9,9 +9,10 @@ import { ICommonFields, ICustomFields, ConfigKeys } from '../types';
 
 export type Formatter = null | ((fields: Partial<ICustomFields>) => string | null);
 
-type CommonFormatMap = Record<keyof ICommonFields, Formatter>;
+export type CommonFormatMap = Record<keyof ICommonFields | ConfigKeys.NAME, Formatter>;
 
 export const commonFormatters: CommonFormatMap = {
+  [ConfigKeys.NAME]: null,
   [ConfigKeys.MONITOR_TYPE]: null,
   [ConfigKeys.SCHEDULE]: (fields) =>
     JSON.stringify(
@@ -29,51 +30,3 @@ export const secondsToCronFormatter = (value: string = '') => (value ? `${value}
 
 export const objectToYamlFormtatter = (value: Record<string, string> = {}) =>
   Object.keys(value).length ? JSON.stringify(value) : null;
-
-// switch (key) {
-//   case ConfigKeys.SCHEDULE:
-//     configItem.value = JSON.stringify(
-//       `@every ${config[key]?.number}${config[key]?.unit}`
-//     ); // convert to cron
-//     break;
-//   case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
-//   case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
-//   case ConfigKeys.RESPONSE_STATUS_CHECK:
-//   case ConfigKeys.TAGS:
-//     configItem.value = config[key]?.length ? JSON.stringify(config[key]) : null;
-//     break;
-//   case ConfigKeys.RESPONSE_HEADERS_CHECK:
-//   case ConfigKeys.REQUEST_HEADERS_CHECK:
-//     configItem.value = Object.keys(config?.[key] || []).length
-//       ? JSON.stringify(config[key])
-//       : null;
-//     break;
-//   case ConfigKeys.TIMEOUT:
-//   case ConfigKeys.WAIT:
-//     configItem.value = config[key] ? `${config[key]}s` : null; // convert to cron
-//     break;
-//   case ConfigKeys.REQUEST_BODY_CHECK:
-//     configItem.value = config[key]?.value ? JSON.stringify(config[key]?.value) : null; // only need value of REQUEST_BODY_CHECK for outputted policy
-//     break;
-//   case ConfigKeys.TLS_CERTIFICATE:
-//   case ConfigKeys.TLS_CERTIFICATE_AUTHORITIES:
-//   case ConfigKeys.TLS_KEY:
-//     configItem.value =
-//       config[key]?.isEnabled && config[key]?.value
-//         ? JSON.stringify(config[key]?.value)
-//         : null; // only add tls settings if they are enabled by the user
-//     break;
-//   case ConfigKeys.TLS_VERSION:
-//     configItem.value =
-//       config[key]?.isEnabled && config[key]?.value.length
-//         ? JSON.stringify(config[key]?.value)
-//         : null; // only add tls settings if they are enabled by the user
-//     break;
-//   case ConfigKeys.TLS_KEY_PASSPHRASE:
-//   case ConfigKeys.TLS_VERIFICATION_MODE:
-//     configItem.value =
-//       config[key]?.isEnabled && config[key]?.value ? config[key]?.value : null; // only add tls settings if they are enabled by the user
-//     break;
-//   default:
-//     configItem.value =
-//       config[key] === undefined || config[key] === null ? null : config[key];

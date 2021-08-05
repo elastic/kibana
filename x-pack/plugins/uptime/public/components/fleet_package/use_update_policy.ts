@@ -6,12 +6,12 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { NewPackagePolicy } from '../../../../fleet/public';
-import { ConfigKeys, PolicyConfig, DataStream, Validation, ICustomFields } from './types';
+import { ConfigKeys, DataStream, Validation, ICustomFields } from './types';
 import { formatters } from './helpers/formatters';
 
 interface Props {
   monitorType: DataStream;
-  defaultConfig: PolicyConfig;
+  defaultConfig: Partial<ICustomFields>;
   newPolicy: NewPackagePolicy;
   onChange: (opts: {
     /** is current form state is valid */
@@ -31,8 +31,8 @@ export const useUpdatePolicy = ({
 }: Props) => {
   const [updatedPolicy, setUpdatedPolicy] = useState<NewPackagePolicy>(newPolicy);
   // Update the integration policy with our custom fields
-  const [config, setConfig] = useState<Partial<ICustomFields>>(defaultConfig[monitorType]);
-  const currentConfig = useRef<Partial<ICustomFields>>(defaultConfig[monitorType]);
+  const [config, setConfig] = useState<Partial<ICustomFields>>(defaultConfig);
+  const currentConfig = useRef<Partial<ICustomFields>>(defaultConfig);
 
   useEffect(() => {
     const configKeys = Object.keys(config) as ConfigKeys[];
@@ -55,8 +55,8 @@ export const useUpdatePolicy = ({
       dataStream.enabled = true;
       configKeys.forEach((key) => {
         const configItem = dataStream.vars?.[key];
-        if (configItem && formatters[monitorType][key]) {
-          configItem.value = formatters[monitorType][key](config);
+        if (configItem && formatters[key]) {
+          configItem.value = formatters[key]?.(config);
         } else if (configItem) {
           configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
         }
