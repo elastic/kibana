@@ -17,7 +17,7 @@ export const createScheduledQueryRoute = (router: IRouter, osqueryContext: Osque
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
       },
-      options: { tags: [`access:${PLUGIN_ID}-allPacks`] },
+      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;

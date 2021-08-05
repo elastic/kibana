@@ -23,9 +23,7 @@ export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryApp
       const esClient = context.core.elasticsearch.client.asCurrentUser;
 
       const privileges = (
-        await esClient.transport.request({
-          path: '/_security/user/_has_privileges',
-          method: 'POST',
+        await esClient.security.hasPrivileges({
           body: {
             index: [
               {

@@ -68,7 +68,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({
 const PlayButton = React.memo(PlayButtonComponent);
 
 interface EditButtonProps {
-  disabled: boolean;
+  disabled?: boolean;
   savedQueryId: string;
   savedQueryName: string;
 }
@@ -99,11 +99,7 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({
 const EditButton = React.memo(EditButtonComponent);
 
 const SavedQueriesPageComponent = () => {
-  const {
-    allSavedQueries,
-    runSavedQueries,
-    allLiveQueries,
-  } = useKibana().services.application.capabilities.osquery;
+  const permissions = useKibana().services.application.capabilities.osquery;
 
   useBreadcrumbs('saved_queries');
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
@@ -116,13 +112,9 @@ const SavedQueriesPageComponent = () => {
 
   const renderEditAction = useCallback(
     (item: SavedObject<{ name: string }>) => (
-      <EditButton
-        savedQueryId={item.id}
-        savedQueryName={item.attributes.name}
-        disabled={!allSavedQueries}
-      />
+      <EditButton savedQueryId={item.id} savedQueryName={item.attributes.name} />
     ),
-    [allSavedQueries]
+    []
   );
 
   const renderPlayAction = useCallback(
@@ -130,10 +122,10 @@ const SavedQueriesPageComponent = () => {
       <PlayButton
         savedQueryId={item.id}
         savedQueryName={item.attributes.name}
-        disabled={!(runSavedQueries || allLiveQueries)}
+        disabled={!(permissions.runSavedQueries || permissions.writeLiveQueries)}
       />
     ),
-    [runSavedQueries, allLiveQueries]
+    [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
   const renderUpdatedAt = useCallback((updatedAt, item) => {
@@ -240,14 +232,19 @@ const SavedQueriesPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle" isDisabled={!allSavedQueries}>
+      <EuiButton
+        fill
+        {...newQueryLinkProps}
+        iconType="plusInCircle"
+        isDisabled={!permissions.writeSavedQueries}
+      >
         <FormattedMessage
           id="xpack.osquery.savedQueryList.addSavedQueryButtonLabel"
           defaultMessage="Add saved query"
         />
       </EuiButton>
     ),
-    [allSavedQueries, newQueryLinkProps]
+    [permissions.writeSavedQueries, newQueryLinkProps]
   );
 
   return (

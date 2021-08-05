@@ -36,7 +36,7 @@ const Divider = styled.div`
 `;
 
 const ScheduledQueryGroupDetailsPageComponent = () => {
-  const { allPacks } = useKibana().services.application.capabilities.osquery;
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { scheduledQueryGroupId } = useParams<{ scheduledQueryGroupId: string }>();
   const scheduledQueryGroupsListProps = useRouterNavigate('scheduled_query_groups');
   const editQueryLinkProps = useRouterNavigate(
@@ -112,7 +112,12 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
           <Divider />
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="edit_button">
-          <EuiButton fill {...editQueryLinkProps} iconType="pencil" isDisabled={!allPacks}>
+          <EuiButton
+            fill
+            {...editQueryLinkProps}
+            iconType="pencil"
+            isDisabled={!permissions.writePacks}
+          >
             <FormattedMessage
               id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
               defaultMessage="Edit"
@@ -121,7 +126,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [data?.policy_id, editQueryLinkProps, allPacks]
+    [data?.policy_id, editQueryLinkProps, permissions]
   );
 
   return (

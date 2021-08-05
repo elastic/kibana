@@ -28,7 +28,7 @@ interface LiveQueryQueryFieldProps {
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
-  const { runSavedQueries, allLiveQueries } = useKibana().services.application.capabilities.osquery;
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { value, setValue, errors } = field;
   const error = errors[0]?.message;
   const savedQueriesDropdownRef = useRef<SavedQueriesDropdownRef>(null);
@@ -53,12 +53,12 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
       <>
         <SavedQueriesDropdown
           ref={savedQueriesDropdownRef}
-          disabled={disabled || !runSavedQueries}
+          disabled={disabled || !permissions.runSavedQueries}
           onChange={handleSavedQueryChange}
         />
         <EuiSpacer />
         <EuiFormRow fullWidth labelAppend={<OsquerySchemaLink />}>
-          {!allLiveQueries ? (
+          {!permissions.writeLiveQueries ? (
             <StyledEuiCodeBlock
               language="sql"
               fontSize="m"

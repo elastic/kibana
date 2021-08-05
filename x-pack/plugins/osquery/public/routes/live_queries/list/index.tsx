@@ -16,7 +16,7 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const LiveQueriesPageComponent = () => {
-  const { allLiveQueries, runSavedQueries } = useKibana().services.application.capabilities.osquery;
+  const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('live_queries');
   const newQueryLinkProps = useRouterNavigate('live_queries/new');
 
@@ -45,7 +45,7 @@ const LiveQueriesPageComponent = () => {
         fill
         {...newQueryLinkProps}
         iconType="plusInCircle"
-        isDisabled={!(allLiveQueries || runSavedQueries)}
+        isDisabled={!(permissions.writeLiveQueries || permissions.runSavedQueries)}
       >
         <FormattedMessage
           id="xpack.osquery.liveQueriesHistory.newLiveQueryButtonLabel"
@@ -53,7 +53,7 @@ const LiveQueriesPageComponent = () => {
         />
       </EuiButton>
     ),
-    [allLiveQueries, runSavedQueries, newQueryLinkProps]
+    [permissions.writeLiveQueries, permissions.runSavedQueries, newQueryLinkProps]
   );
 
   return (

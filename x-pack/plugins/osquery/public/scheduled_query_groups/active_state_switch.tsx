@@ -36,9 +36,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const queryClient = useQueryClient();
   const {
     application: {
-      capabilities: {
-        osquery: { allPacks },
-      },
+      capabilities: { osquery: permissions },
     },
     http,
     notifications: { toasts },
@@ -132,7 +130,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       {isLoading && <StyledEuiLoadingSpinner />}
       <EuiSwitch
         checked={item.enabled}
-        disabled={!allPacks || isLoading}
+        disabled={!permissions.writePacks || isLoading}
         showLabel={false}
         label=""
         onChange={handleToggleActiveClick}

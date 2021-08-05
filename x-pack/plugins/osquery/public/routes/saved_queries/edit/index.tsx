@@ -17,18 +17,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 
-interface EditSavedQueryPageProps {
-  viewMode?: boolean;
-}
+const EditSavedQueryPageComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
 
-const EditSavedQueryPageComponent: React.FC<EditSavedQueryPageProps> = ({ viewMode }) => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
   const savedQueryListProps = useRouterNavigate('saved_queries');
@@ -38,6 +36,8 @@ const EditSavedQueryPageComponent: React.FC<EditSavedQueryPageProps> = ({ viewMo
   const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
 
   useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.id ?? '' });
+
+  const viewMode = useMemo(() => !permissions.writeSavedQueries, [permissions.writeSavedQueries]);
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
     setIsDeleteModalVisible(false);

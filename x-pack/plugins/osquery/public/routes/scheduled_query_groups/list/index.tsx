@@ -15,7 +15,7 @@ import { ScheduledQueryGroupsTable } from '../../../scheduled_query_groups/sched
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const ScheduledQueryGroupsPageComponent = () => {
-  const { allPacks } = useKibana().services.application.capabilities.osquery;
+  const permissions = useKibana().services.application.capabilities.osquery;
   const newQueryLinkProps = useRouterNavigate('scheduled_query_groups/add');
 
   const LeftColumn = useMemo(
@@ -39,14 +39,19 @@ const ScheduledQueryGroupsPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle" isDisabled={!allPacks}>
+      <EuiButton
+        fill
+        {...newQueryLinkProps}
+        iconType="plusInCircle"
+        isDisabled={!permissions.writePacks}
+      >
         <FormattedMessage
           id="xpack.osquery.scheduledQueryList.addScheduledQueryButtonLabel"
           defaultMessage="Add scheduled query group"
         />
       </EuiButton>
     ),
-    [newQueryLinkProps, allPacks]
+    [newQueryLinkProps, permissions.writePacks]
   );
 
   return (

@@ -45,14 +45,14 @@ const registerFeatures = (features: SetupPlugins['features']) => {
     catalogue: [PLUGIN_ID],
     privileges: {
       all: {
-        api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+        api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-write`],
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         savedObject: {
           all: [PACKAGE_POLICY_SAVED_OBJECT_TYPE, usageMetricSavedObjectType],
           read: [PACKAGES_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE],
         },
-        ui: ['all'],
+        ui: ['write'],
       },
       read: {
         api: [`${PLUGIN_ID}-read`],
@@ -79,7 +79,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
-                api: [`${PLUGIN_ID}-allLiveQueries`, `${PLUGIN_ID}-readLiveQueries`],
+                api: [`${PLUGIN_ID}-writeLiveQueries`, `${PLUGIN_ID}-readLiveQueries`],
                 id: 'live_queries_all',
                 includeIn: 'all',
                 name: 'All',
@@ -87,7 +87,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [usageMetricSavedObjectType],
                   read: [],
                 },
-                ui: ['allLiveQueries', 'readLiveQueries'],
+                ui: ['writeLiveQueries', 'readLiveQueries'],
               },
               {
                 api: [`${PLUGIN_ID}-readLiveQueries`],
@@ -138,7 +138,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [savedQuerySavedObjectType],
                   read: [],
                 },
-                ui: ['allSavedQueries', 'readSavedQueries'],
+                ui: ['writeSavedQueries', 'readSavedQueries'],
               },
               {
                 id: 'saved_queries_read',
@@ -155,6 +155,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         ],
       },
       {
+        // TODO: Rename it to "Packs" as part of https://github.com/elastic/kibana/pull/107345
         name: i18n.translate('xpack.osquery.features.scheduledQueryGroupsSubFeatureName', {
           defaultMessage: 'Scheduled query groups',
         }),
@@ -163,7 +164,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
-                api: [`${PLUGIN_ID}-allPacks`],
+                api: [`${PLUGIN_ID}-writePacks`],
                 id: 'packs_all',
                 includeIn: 'all',
                 name: 'All',
@@ -171,7 +172,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [packSavedObjectType],
                   read: [],
                 },
-                ui: ['allPacks', 'readPacks'],
+                ui: ['writePacks', 'readPacks'],
               },
               {
                 api: [`${PLUGIN_ID}-readPacks`],

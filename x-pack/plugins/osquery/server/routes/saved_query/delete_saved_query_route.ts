@@ -17,7 +17,7 @@ export const deleteSavedQueryRoute = (router: IRouter) => {
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
       },
-      options: { tags: [`access:${PLUGIN_ID}-allSavedQueries`] },
+      options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
