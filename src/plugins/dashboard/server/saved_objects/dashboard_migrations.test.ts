@@ -16,7 +16,7 @@ import {
   createInject,
 } from '../../common/embeddable/dashboard_container_persistable_state';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
-import { Serializable } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/common-utils';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
 const extract = createExtract(embeddableSetupMock);
@@ -589,7 +589,7 @@ describe('dashboard', () => {
     it('runs migrations on by value panels only', () => {
       const newEmbeddableSetupMock = createEmbeddableSetupMock();
       newEmbeddableSetupMock.getAllMigrations.mockImplementation(() => ({
-        '7.13.0': (state: Serializable) => {
+        '7.13.0': (state: SerializableRecord) => {
           state.superCoolKey = 'ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH';
           return state;
         },
