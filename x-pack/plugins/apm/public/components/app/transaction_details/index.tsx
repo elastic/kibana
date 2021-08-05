@@ -7,7 +7,7 @@
 
 import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { flatten } from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { XYBrushArea } from '@elastic/charts';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
@@ -62,28 +62,20 @@ export function TransactionDetails() {
 
   const { sampleRangeFrom, sampleRangeTo } = urlParams;
 
-  const traceSamples: Sample[] =
-    sampleRangeFrom !== undefined && sampleRangeTo !== undefined
+  const traceSamples: Sample[] = useMemo(() => {
+    return sampleRangeFrom !== undefined && sampleRangeTo !== undefined
       ? flatten(
           distributionData.buckets
             .filter((b) => b.key >= sampleRangeFrom && b.key <= sampleRangeTo)
             .map((bucket) => bucket.samples)
         )
       : flatten(distributionData.buckets.map((bucket) => bucket.samples));
+  }, [distributionData.buckets, sampleRangeFrom, sampleRangeTo]);
 
   const selectSampleFromChartSelection = (selection: XYBrushArea) => {
     if (selection !== undefined) {
       const { x } = selection;
       if (Array.isArray(x)) {
-        history.push({
-          ...history.location,
-          search: fromQuery({
-            ...toQuery(history.location.search),
-            sampleRangeFrom: Math.round(x[0]),
-            sampleRangeTo: Math.round(x[1]),
-          }),
-        });
-
         const filteredSamples: Sample[] = flatten(
           distributionData.buckets
             .filter((b) => b.key > x[0] && b.key < x[1])
@@ -91,20 +83,28 @@ export function TransactionDetails() {
         );
 
         if (filteredSamples.length > 0) {
-          selectSampleFromBucketClick(filteredSamples[0]);
+          history.push({
+            ...history.location,
+            search: fromQuery({
+              ...toQuery(history.location.search),
+              sampleRangeFrom: Math.round(x[0]),
+              sampleRangeTo: Math.round(x[1]),
+              transactionId: filteredSamples[0].transactionId,
+              traceId: filteredSamples[0].traceId,
+            }),
+          });
         }
       }
     }
   };
 
-  const selectSampleFromBucketClick = (sample: Sample) => {
+  const clearChartSelecton = () => {
+    const currentQuery = toQuery(history.location.search);
+    delete currentQuery.sampleRangeFrom;
+    delete currentQuery.sampleRangeTo;
     history.push({
       ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        transactionId: sample.transactionId,
-        traceId: sample.traceId,
-      }),
+      search: fromQuery(currentQuery),
     });
   };
 
@@ -128,6 +128,7 @@ export function TransactionDetails() {
         <>
           <MlLatencyCorrelations
             onChartSelection={selectSampleFromChartSelection}
+            onClearSelection={clearChartSelecton}
             selection={
               sampleRangeFrom !== undefined && sampleRangeTo !== undefined
                 ? [sampleRangeFrom, sampleRangeTo]

@@ -62,10 +62,15 @@ interface MlCorrelationsTerms {
 
 interface Props {
   onChartSelection: BrushEndListener;
+  onClearSelection: () => void;
   selection?: [number, number];
 }
 
-export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
+export function MlLatencyCorrelations({
+  onChartSelection,
+  onClearSelection,
+  selection,
+}: Props) {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -76,6 +81,13 @@ export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
   const { environment, kuery, transactionName, start, end } = urlParams;
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
+
+  const clearSelectionButtonLabel = i18n.translate(
+    'xpack.apm.transactionDetails.clearSelectionButtonLabel',
+    {
+      defaultMessage: 'Clear selection',
+    }
+  );
 
   const showCorrelationsButtonLabel = i18n.translate(
     'xpack.apm.transactionDetails.showCorrelationsButtonLabel',
@@ -311,8 +323,15 @@ export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              {!showCorrelations && (
-                <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexGroup justifyContent="flexEnd">
+                {selection && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton onClick={onClearSelection}>
+                      {clearSelectionButtonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+                {!showCorrelations && (
                   <EuiFlexItem grow={false}>
                     <EuiButton fill onClick={toggleShowCorrelations}>
                       {showCorrelations
@@ -320,8 +339,8 @@ export function MlLatencyCorrelations({ onChartSelection, selection }: Props) {
                         : showCorrelationsButtonLabel}
                     </EuiButton>
                   </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
 
