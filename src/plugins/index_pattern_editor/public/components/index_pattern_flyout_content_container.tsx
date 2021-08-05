@@ -9,36 +9,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern, IndexPatternSpec, useKibana } from '../shared_imports';
+import { IndexPatternSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './index_pattern_editor_flyout_content';
-import { IndexPatternEditorContext } from '../types';
-
-export interface IndexPatternFlyoutContentContainerProps {
-  /**
-   * Handler for the "save" footer button
-   */
-  onSave: (indexPattern: IndexPattern) => void;
-  /**
-   * Handler for the "cancel" footer button
-   */
-  onCancel: () => void;
-  defaultTypeIsRollup?: boolean;
-  requireTimestampField?: boolean;
-}
-
-/**
- * The container component will be in charge of the communication with the index pattern service
- * to retrieve/save the field in the saved object.
- * The <FieldEditorFlyoutContent /> component is the presentational component that won't know
- * anything about where a field comes from and where it should be persisted.
- */
+import { IndexPatternEditorContext, IndexPatternEditorProps } from '../types';
 
 export const IndexPatternFlyoutContentContainer = ({
   onSave,
-  onCancel,
+  onCancel = () => {},
   defaultTypeIsRollup,
   requireTimestampField = false,
-}: IndexPatternFlyoutContentContainerProps) => {
+}: IndexPatternEditorProps) => {
   const {
     services: { indexPatternService, notifications },
   } = useKibana<IndexPatternEditorContext>();
