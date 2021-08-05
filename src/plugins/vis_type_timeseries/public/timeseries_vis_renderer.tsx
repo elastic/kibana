@@ -18,7 +18,7 @@ import { VisualizationContainer, PersistedState } from '../../visualizations/pub
 
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
-import { getChartsSetup, getDataStart } from './services';
+import { getCharts, getDataStart } from './services';
 
 import type { TimeseriesVisParams } from './types';
 import type { ExpressionRenderDefinition } from '../../expressions/common';
@@ -52,7 +52,7 @@ export const getTimeseriesVisRenderer: (deps: {
     });
     const { visParams: model, visData, syncColors } = config;
 
-    const { palettes } = getChartsSetup();
+    const { palettes } = getCharts();
     const showNoResult = !checkIfDataExists(visData, model);
     const palettesService = await palettes.getPalettes();
 

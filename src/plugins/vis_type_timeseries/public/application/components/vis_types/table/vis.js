@@ -18,7 +18,7 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
-import { fieldFormats } from '../../../../../../../plugins/data/public';
+import { FIELD_FORMAT_IDS } from '../../../../../../../plugins/field_formats/common';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
@@ -50,7 +50,7 @@ class TableVis extends Component {
     super(props);
 
     const fieldFormatsService = getFieldFormats();
-    const DateFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
+    const DateFormat = fieldFormatsService.getType(FIELD_FORMAT_IDS.DATE);
 
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }
@@ -67,10 +67,7 @@ class TableVis extends Component {
     );
 
     // we should skip url field formatting for key if tsvb have drilldown_url
-    if (
-      fieldFormatMap[model.pivot_id]?.id !== fieldFormats.FIELD_FORMAT_IDS.URL ||
-      !model.drilldown_url
-    ) {
+    if (fieldFormatMap[model.pivot_id]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
       const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap);
       rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay, 'html') }} />;
     }
@@ -93,7 +90,7 @@ class TableVis extends Component {
         // we should skip color field formatting for value if tsvb column have color_rules
         if (
           column.ignore_field_formatting ||
-          fieldFormatMap[field]?.id !== fieldFormats.FIELD_FORMAT_IDS.COLOR ||
+          fieldFormatMap[field]?.id !== FIELD_FORMAT_IDS.COLOR ||
           !column.color_rules.length
         ) {
           value = formatter(item.last, 'html');

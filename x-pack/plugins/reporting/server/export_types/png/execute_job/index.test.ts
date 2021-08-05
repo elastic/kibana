@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
@@ -20,7 +21,9 @@ import { runTaskFnFactory } from './';
 
 jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 
+let content: string;
 let mockReporting: ReportingCore;
+let stream: jest.Mocked<Writable>;
 
 const cancellationToken = ({
   on: jest.fn(),
@@ -44,6 +47,9 @@ const encryptHeaders = async (headers: Record<string, string>) => {
 const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPNG;
 
 beforeEach(async () => {
+  content = '';
+  stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+
   const mockReportingConfig = createMockConfigSchema({
     index: '.reporting-2018.10.10',
     encryptionKey: mockEncryptionKey,
@@ -75,7 +81,8 @@ test(`passes browserTimezone to generatePng`, async () => {
       browserTimezone,
       headers: encryptedHeaders,
     }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
 
   expect(generatePngObservable.mock.calls).toMatchInlineSnapshot(`
@@ -119,7 +126,8 @@ test(`returns content_type of application/png`, async () => {
   const { content_type: contentType } = await runTask(
     'pngJobId',
     getBasePayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
   expect(contentType).toBe('image/png');
 });
@@ -131,10 +139,11 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
 
   const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
-  const { content } = await runTask(
+  await runTask(
     'pngJobId',
     getBasePayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
 
   expect(content).toEqual(testContent);
