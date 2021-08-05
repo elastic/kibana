@@ -526,9 +526,18 @@ export class IndexPatternsService {
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
-    const createdIndexPattern = await this.createSavedObject(indexPattern, override);
-    await this.setDefault(createdIndexPattern.id!);
-    return createdIndexPattern;
+    let createdIndexPattern: IndexPattern;
+    try {
+      createdIndexPattern = await this.createSavedObject(indexPattern, override);
+      await this.setDefault(createdIndexPattern.id!);
+    } catch (e) {
+      const title = i18n.translate('data.indexPatterns.unableSaveLabel', {
+        defaultMessage: 'Failed to save index pattern.',
+      });
+
+      this.onNotification({ title, color: 'danger' });
+    }
+    return createdIndexPattern!;
   }
 
   /**

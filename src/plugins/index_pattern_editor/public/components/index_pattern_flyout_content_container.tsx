@@ -25,12 +25,15 @@ export const IndexPatternFlyoutContentContainer = ({
 
   const onSaveClick = async (indexPatternSpec: IndexPatternSpec) => {
     const indexPattern = await indexPatternService.createAndSave(indexPatternSpec);
-    const message = i18n.translate('indexPatternEditor.saved', {
-      defaultMessage: "Saved '{indexPatternTitle}'",
-      values: { indexPatternTitle: indexPattern.title },
-    });
-    notifications.toasts.addSuccess(message);
-    await onSave(indexPattern);
+    // if there's a failure to save, indexPattern will be undefined
+    if (indexPattern) {
+      const message = i18n.translate('indexPatternEditor.saved', {
+        defaultMessage: "Saved '{indexPatternTitle}'",
+        values: { indexPatternTitle: indexPattern.title },
+      });
+      notifications.toasts.addSuccess(message);
+      await onSave(indexPattern);
+    }
   };
 
   return (

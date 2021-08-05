@@ -8,15 +8,12 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import {
-  IndexPatternFlyoutContentContainer,
-  IndexPatternFlyoutContentContainerProps,
-} from './index_pattern_flyout_content_container';
-import { IndexPatternEditorContext } from '../types';
+import { IndexPatternFlyoutContentContainer } from './index_pattern_flyout_content_container';
+import { IndexPatternEditorContext, IndexPatternEditorProps } from '../types';
 import { createKibanaReactContext } from '../shared_imports';
 import './index_pattern_editor.scss';
 
-export interface IndexPatternEditorProps extends IndexPatternFlyoutContentContainerProps {
+export interface IndexPatternEditorPropsWithServices extends IndexPatternEditorProps {
   services: IndexPatternEditorContext;
 }
 
@@ -26,7 +23,7 @@ export const IndexPatternEditor = ({
   services,
   defaultTypeIsRollup = false,
   requireTimestampField = false,
-}: IndexPatternEditorProps) => {
+}: IndexPatternEditorPropsWithServices) => {
   const {
     Provider: KibanaReactContextProvider,
   } = createKibanaReactContext<IndexPatternEditorContext>(services);
