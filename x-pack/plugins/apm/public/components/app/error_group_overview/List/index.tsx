@@ -53,7 +53,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
   const { urlParams } = useUrlParams();
 
   const columns = useMemo(() => {
-    const a: Array<ITableColumn<ErrorGroupItem>> = [
+    return [
       {
         name: (
           <>
@@ -189,9 +189,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
             NOT_AVAILABLE_LABEL
           ),
       },
-    ];
-
-    return a;
+    ] as Array<ITableColumn<ErrorGroupItem>>;
   }, [serviceName, urlParams]);
 
   return (
