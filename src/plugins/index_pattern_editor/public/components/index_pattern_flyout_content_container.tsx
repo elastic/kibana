@@ -34,7 +34,7 @@ export const IndexPatternFlyoutContentContainer = ({
       notifications.toasts.addSuccess(message);
       await onSave(indexPattern);
     } catch (e) {
-      const title = i18n.translate('data.indexPatterns.unableSaveLabel', {
+      const title = i18n.translate('indexPatternEditor.indexPatterns.unableSaveLabel', {
         defaultMessage: 'Failed to save index pattern.',
       });
 
