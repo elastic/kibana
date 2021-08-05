@@ -40,7 +40,6 @@ const NoMatchStatusMessage = (allIndicesLength: number) => (
             />
           </strong>
         ),
-        indicesLength: allIndicesLength,
       }}
     />
   </span>
