@@ -206,7 +206,7 @@ export class AggConfig {
     //
     // @deprecated (undocumented)
     toJSON(): AggConfigSerialized;
-    // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "Serializable" needs to be exported by the entry point index.d.ts
     toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_2<SerializableState_2>, SerializableState_2>;
     // (undocumented)
     get type(): IAggType;
@@ -234,7 +234,7 @@ export class AggConfigs {
         type: string;
         enabled?: boolean | undefined;
         id?: string | undefined;
-        params?: {} | import("./agg_config").SerializableState | undefined;
+        params?: {} | import("./agg_config").Serializable | undefined;
         schema?: string | undefined;
     }, "schema" | "enabled" | "id" | "params"> & Pick<{
         type: string | IAggType;
@@ -1078,7 +1078,7 @@ export class FilterManager implements PersistableStateService {
     static setFiltersStore(filters: Filter_2[], store: FilterStateStore, shouldOverrideStore?: boolean): void;
     setGlobalFilters(newGlobalFilters: Filter_2[]): void;
     // (undocumented)
-    telemetry: (filters: import("../../../../kibana_utils/common/persistable_state").SerializableState, collector: unknown) => {};
+    telemetry: (filters: import("../../../../kibana_utils/common/persistable_state").Serializable, collector: unknown) => {};
     }
 
 // Warning: (ae-missing-release-tag) "generateFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

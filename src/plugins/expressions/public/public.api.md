@@ -133,7 +133,7 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
 // @public (undocumented)
 export type ExecutionContainer<Output = ExpressionValue> = StateContainer<ExecutionState<Output>, ExecutionPureTransitions<Output>>;
 
-// Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "Serializable" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ExecutionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -356,7 +356,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     inputTypes: string[] | undefined;
     // (undocumented)
     migrations: {
-        [key: string]: (state: SerializableState) => SerializableState;
+        [key: string]: (state: Serializable) => Serializable;
     };
     name: string;
     // (undocumented)
@@ -764,7 +764,7 @@ export type ExpressionValueConverter<I extends ExpressionValue, O extends Expres
 // @public (undocumented)
 export type ExpressionValueError = ExpressionValueBoxed<'error', {
     error: ErrorLike;
-    info?: SerializableState;
+    info?: Serializable;
 }>;
 
 // Warning: (ae-missing-release-tag) "ExpressionValueFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1193,7 +1193,7 @@ export type UnmappedTypeStrings = 'date' | 'filter';
 // Warnings were encountered during analysis:
 //
 // src/plugins/expressions/common/ast/types.ts:29:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
-// src/plugins/expressions/common/expression_functions/expression_function.ts:68:5 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/expression_functions/expression_function.ts:68:5 - (ae-forgotten-export) The symbol "Serializable" needs to be exported by the entry point index.d.ts
 // src/plugins/expressions/common/expression_types/specs/error.ts:20:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

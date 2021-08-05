@@ -416,7 +416,7 @@ export type EmbeddableInput = {
     id: string;
     lastReloadRequestTime?: number;
     hidePanelTitles?: boolean;
-    enhancements?: SerializableState;
+    enhancements?: Serializable;
     disabledActions?: string[];
     disableTriggers?: boolean;
     searchSessionId?: string;
@@ -618,7 +618,7 @@ export class EmbeddableStateTransfer {
 // Warning: (ae-missing-release-tag) "EnhancementRegistryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState> extends PersistableStateDefinition<P> {
+export interface EnhancementRegistryDefinition<P extends Serializable = Serializable> extends PersistableStateDefinition<P> {
     // (undocumented)
     id: string;
 }
@@ -895,7 +895,7 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/embeddable/common/types.ts:31:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/common/types.ts:31:3 - (ae-forgotten-export) The symbol "Serializable" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx:25:3 - (ae-forgotten-export) The symbol "UsageCollectionStart" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/public/lib/triggers/triggers.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 

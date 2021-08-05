@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializableState } from '@kbn/common-utils';
+import { Serializable } from '@kbn/common-utils';
 import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
@@ -40,7 +40,7 @@ one,1
 two,2
 fourty two,42`,
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, Serializable>
       )
     ).toEqual(expected);
   });
@@ -56,7 +56,7 @@ two\t2
 fourty two\t42`,
           delimiter: '\t',
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, Serializable>
       )
     ).toEqual(expected);
 
@@ -70,7 +70,7 @@ two%SPLIT%2
 fourty two%SPLIT%42`,
           delimiter: '%SPLIT%',
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, Serializable>
       )
     ).toEqual(expected);
   });
@@ -83,7 +83,7 @@ fourty two%SPLIT%42`,
           data: `name,number\rone,1\rtwo,2\rfourty two,42`,
           newline: '\r',
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, Serializable>
       )
     ).toEqual(expected);
   });
@@ -107,7 +107,7 @@ fourty two%SPLIT%42`,
           data: `foo," bar  ", baz, " buz "
 1,2,3,4`,
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, Serializable>
       )
     ).toEqual(expectedResult);
   });
@@ -135,7 +135,7 @@ fourty two%SPLIT%42`,
 1,"  best  ",3, "  ok"
 "  good", bad, better   , " worst    " `,
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, Serializable>
       )
     ).toEqual(expectedResult);
   });
@@ -150,7 +150,7 @@ one|1
 two.2
 fourty two,42`,
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, Serializable>
       );
     }).toThrow(new RegExp(errors.invalidInputCSV().message));
   });

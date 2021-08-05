@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { Serializable } from '@kbn/common-utils';
 import { LocatorDefinition } from '../locators';
 import { UrlService, UrlServiceDependencies } from '../url_service';
 
-export interface TestLocatorState extends SerializableState {
+export interface TestLocatorState extends Serializable {
   savedObjectId: string;
   showFlyout: boolean;
   pageNumber: number;

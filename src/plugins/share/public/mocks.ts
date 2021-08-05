@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializableState } from '@kbn/common-utils';
+import { Serializable } from '@kbn/common-utils';
 import { SharePluginSetup, SharePluginStart } from '.';
 import { LocatorPublic, UrlService } from '../common/url_service';
 
@@ -42,9 +42,7 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
-const createLocator = <T extends SerializableState = SerializableState>(): jest.Mocked<
-  LocatorPublic<T>
-> => ({
+const createLocator = <T extends Serializable = Serializable>(): jest.Mocked<LocatorPublic<T>> => ({
   getLocation: jest.fn(),
   getUrl: jest.fn(),
   useUrl: jest.fn(),
