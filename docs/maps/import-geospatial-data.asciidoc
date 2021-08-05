@@ -27,6 +27,7 @@ To upload CSV files in {kib} with the *{file-data-viz}*, you must have
 privileges to upload GeoJSON files and:
 
 * The `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
+* The `manage` index privilege for destination indices
 * The `read` {kib} privilege for *{ml-app}* or the `all` {kib}
 privilege for *Discover*
 

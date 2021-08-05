@@ -57,15 +57,13 @@ The {stack-security-features} provide roles and privileges that control which
 users can upload files. To upload files in {kib}, you must have the following
 privileges:
 
-* `all` {kib} privileges for *Discover* or *{ml-app}* in the appropriate spaces.
-Alternatively, `read` {kib} privileges for *{ml-app}* and `all` {kib}
-privileges for *{ipm-app}*
+* `all` {kib} privileges for *Discover* or *{ml-app}* in the appropriate spaces
 * `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
-* `create`, `create_index`, and `read` index privileges for the destination
-indices
+* `create`, `create_index`, `manage`, and `read` index privileges for the
+destination indices
 
-You can manage your roles, privileges, and
-spaces in **{stack-manage-app}** in {kib}. For more information, refer to
+You can manage your roles, privileges, and spaces in **{stack-manage-app}** in
+{kib}. For more information, refer to
 <<xpack-kibana-role-management, {kib} role management>>.
 
 NOTE: This feature is not intended for use as part of a
