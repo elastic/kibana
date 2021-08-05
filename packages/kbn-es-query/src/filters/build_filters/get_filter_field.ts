@@ -15,6 +15,7 @@ import { getPhraseFilterField, isPhraseFilter } from './phrase_filter';
 import { getRangeFilterField, isRangeFilter } from './range_filter';
 import type { Filter } from './types';
 
+/** @internal */
 export const getFilterField = (filter: Filter) => {
   if (isExistsFilter(filter)) {
     return getExistsFilterField(filter);

@@ -48,21 +48,10 @@ export class Plugin implements PluginType {
             settings: {
               number_of_shards: 1,
             },
-            mappings: mappingFromFieldMap(uptimeRuleFieldMap),
+            mappings: mappingFromFieldMap(uptimeRuleFieldMap, 'strict'),
           },
         },
       });
-
-      /*await ruleDataService.createOrUpdateIndexTemplate({
-        name: ruleDataService.getFullAssetName('synthetics-index-template'),
-        body: {
-          index_patterns: [alertsIndexPattern],
-          composed_of: [
-            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-            componentTemplateName,
-          ],
-        },
-      });*/
 
       await ruleDataService.updateIndexMappingsForAsset(assetName);
     });
@@ -76,10 +65,7 @@ export class Plugin implements PluginType {
       'synthetics',
       assetName,
       () => initializeRuleDataTemplatesPromise,
-      [
-        ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-        componentTemplateName,
-      ]
+      [ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME), componentTemplateName]
     );
 
     initServerWithKibana(
