@@ -127,7 +127,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           className={FIELDS_BUTTON_CLASS_NAME}
           color="text"
           data-test-subj="show-field-browser"
-          iconType="listAdd"
+          iconType="tableOfContents"
           onClick={onShow}
           size="xs"
         >
