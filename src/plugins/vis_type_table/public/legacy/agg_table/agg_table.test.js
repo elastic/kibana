@@ -17,7 +17,7 @@ import { getFieldFormatsRegistry } from '../../../../data/public/test_utils';
 import { coreMock } from '../../../../../core/public/mocks';
 import { initAngularBootstrap } from '../../../../kibana_legacy/public/angular_bootstrap';
 import { setUiSettings } from '../../../../data/public/services';
-import { UI_SETTINGS } from '../../../../data/public/';
+import { FORMATS_UI_SETTINGS } from '../../../../field_formats/common/';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../../share/public';
 
 import { setFormatService } from '../../services';
@@ -38,12 +38,12 @@ describe('Table Vis - AggTable Directive', function () {
     const defaultValues = {
       dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       'dateFormat:tz': 'UTC',
-      [UI_SETTINGS.SHORT_DOTS_ENABLE]: true,
-      [UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN]: '($0,0.[00])',
-      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
-      [UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0,0.[000]%',
-      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: 'en',
-      [UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {},
+      [FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE]: true,
+      [FORMATS_UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN]: '($0,0.[00])',
+      [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
+      [FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0,0.[000]%',
+      [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: 'en',
+      [FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {},
       [CSV_SEPARATOR_SETTING]: ',',
       [CSV_QUOTE_VALUES_SETTING]: true,
     };
