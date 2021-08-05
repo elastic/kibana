@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from 'kibana/server';
+import type { TelemetryConfigType } from './config';
 import { TelemetryPlugin } from './plugin';
-import { TelemetryConfigType } from './config';
 
 export { config } from './config';
 export type { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';

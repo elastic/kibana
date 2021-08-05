@@ -17,7 +17,7 @@ const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
   schema.literal('staging'),
 ];
 
-export const configSchema = schema.object({
+const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
   optIn: schema.conditional(
@@ -36,6 +36,10 @@ export const configSchema = schema.object({
     schema.oneOf(clusterEnvSchema, { defaultValue: 'staging' }),
     schema.oneOf(clusterEnvSchema, { defaultValue: 'prod' })
   ),
+  /**
+   * REMOVE IN 8.0 - INTERNAL CONFIG DEPRECATED IN 7.15
+   * REPLACED WITH `telemetry.sendUsageTo: staging | prod`
+   */
   url: schema.conditional(
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
@@ -46,6 +50,10 @@ export const configSchema = schema.object({
       defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD,
     })
   ),
+  /**
+   * REMOVE IN 8.0 - INTERNAL CONFIG DEPRECATED IN 7.15
+   * REPLACED WITH `telemetry.sendUsageTo: staging | prod`
+   */
   optInStatusUrl: schema.conditional(
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
@@ -93,19 +101,18 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
           addDeprecation({
             message: i18n.translate('telemetry.config.url.deprecationMessage', {
               defaultMessage:
-                '"{{configPath}}" has been deprecated. Set "telemetry.sendUsageTo: staging" to the Kibana configurations to send usage to the staging telemetry cluster.',
+                '"{configPath}" has been deprecated. Set "telemetry.sendUsageTo: staging" to the Kibana configurations to send usage to the staging endpoint.',
               values: { configPath: fullConfigPath },
             }),
             correctiveActions: {
               manualSteps: [
                 i18n.translate('telemetry.config.url.deprecationManualStep1', {
-                  defaultMessage: 'Remove "{{configPath}}" from the Kibana configuration',
+                  defaultMessage: 'Remove "{configPath}" from the Kibana configuration.',
                   values: { configPath: fullConfigPath },
                 }),
                 i18n.translate('telemetry.config.url.deprecationManualStep2', {
                   defaultMessage:
-                    'To send usage to staging, add "telemetry.sendUsageTo: staging" to the Kibana configuration.',
-                  values: { configPath: fullConfigPath },
+                    'To send usage to the staging endpoint add "telemetry.sendUsageTo: staging" to the Kibana configuration.',
                 }),
               ],
             },

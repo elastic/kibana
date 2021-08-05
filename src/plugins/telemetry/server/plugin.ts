@@ -30,7 +30,7 @@ import {
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
 } from './collectors';
-import { TelemetryConfigType } from './config';
+import type { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { handleOldSettings } from './handle_old_settings';
 import { getTelemetrySavedObject } from './telemetry_repository';
