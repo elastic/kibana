@@ -54,6 +54,8 @@ export async function getBuckets({
   transactionType,
   transactionId,
   traceId,
+  sampleRangeFrom,
+  sampleRangeTo,
   distributionMax,
   bucketSize,
   setup,
@@ -66,6 +68,8 @@ export async function getBuckets({
   transactionType: string;
   transactionId: string;
   traceId: string;
+  sampleRangeFrom?: number;
+  sampleRangeTo?: number;
   distributionMax: number;
   bucketSize: number;
   setup: Setup & SetupTimeRange;
@@ -84,6 +88,17 @@ export async function getBuckets({
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
       ] as QueryDslQueryContainer[];
+
+      if (sampleRangeFrom !== undefined && sampleRangeTo !== undefined) {
+        commonFilters.push({
+          range: {
+            'transaction.duration.us': {
+              gte: sampleRangeFrom,
+              lte: sampleRangeTo,
+            },
+          },
+        });
+      }
 
       async function getSamplesForDistributionBuckets() {
         const response = await apmEventClient.search(
@@ -125,22 +140,25 @@ export async function getBuckets({
                   },
                 },
               },
+              size: 10,
             },
           }
         );
 
-        return (
-          response.aggregations?.distribution.buckets.map((bucket) => {
-            const samples = bucket.samples.hits.hits;
-            return {
-              key: bucket.key,
-              samples: samples.map(({ _source: sample }) => ({
-                traceId: sample.trace.id,
-                transactionId: sample.transaction.id,
-              })),
-            };
-          }) ?? []
-        );
+        return {
+          samplesForDistributionBuckets:
+            response.aggregations?.distribution.buckets.map((bucket) => {
+              const samples = bucket.samples.hits.hits;
+              return {
+                key: bucket.key,
+                samples: samples.map(({ _source: sample }) => ({
+                  traceId: sample.trace.id,
+                  transactionId: sample.transaction.id,
+                })),
+              };
+            }) ?? [],
+          samplesForDistributionHits: response.hits.hits,
+        };
       }
 
       async function getDistributionBuckets() {
@@ -190,13 +208,14 @@ export async function getBuckets({
         );
       }
 
-      const [
-        samplesForDistributionBuckets,
-        distributionBuckets,
-      ] = await Promise.all([
+      const [samplesForDistribution, distributionBuckets] = await Promise.all([
         getSamplesForDistributionBuckets(),
         getDistributionBuckets(),
       ]);
+      const {
+        samplesForDistributionBuckets,
+        samplesForDistributionHits,
+      } = samplesForDistribution;
 
       const buckets = joinByKey(
         [...samplesForDistributionBuckets, ...distributionBuckets],
@@ -211,6 +230,7 @@ export async function getBuckets({
         noHits: buckets.length === 0,
         bucketSize,
         buckets,
+        hits: samplesForDistributionHits,
       };
     }
   );

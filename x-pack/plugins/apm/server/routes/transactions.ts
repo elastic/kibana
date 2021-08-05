@@ -219,6 +219,8 @@ const transactionChartsDistributionRoute = createApmServerRoute({
       t.partial({
         transactionId: t.string,
         traceId: t.string,
+        sampleRangeFrom: t.string,
+        sampleRangeTo: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -237,6 +239,8 @@ const transactionChartsDistributionRoute = createApmServerRoute({
       transactionName,
       transactionId = '',
       traceId = '',
+      sampleRangeFrom,
+      sampleRangeTo,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -252,6 +256,12 @@ const transactionChartsDistributionRoute = createApmServerRoute({
       transactionName,
       transactionId,
       traceId,
+      sampleRangeFrom:
+        sampleRangeFrom !== undefined
+          ? parseInt(sampleRangeFrom, 10)
+          : undefined,
+      sampleRangeTo:
+        sampleRangeTo !== undefined ? parseInt(sampleRangeTo, 10) : undefined,
       setup,
       searchAggregatedTransactions,
     });

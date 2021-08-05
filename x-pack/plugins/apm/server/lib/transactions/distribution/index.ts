@@ -27,6 +27,8 @@ export async function getTransactionDistribution({
   transactionType,
   transactionId,
   traceId,
+  sampleRangeFrom,
+  sampleRangeTo,
   setup,
   searchAggregatedTransactions,
 }: {
@@ -37,6 +39,8 @@ export async function getTransactionDistribution({
   transactionType: string;
   transactionId: string;
   traceId: string;
+  sampleRangeFrom?: number;
+  sampleRangeTo?: number;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
@@ -52,12 +56,12 @@ export async function getTransactionDistribution({
     });
 
     if (distributionMax == null) {
-      return { noHits: true, buckets: [], bucketSize: 0 };
+      return { noHits: true, buckets: [], bucketSize: 0, hits: [] };
     }
 
     const bucketSize = getBucketSize(distributionMax);
 
-    const { buckets, noHits } = await getBuckets({
+    const { buckets, noHits, hits } = await getBuckets({
       environment,
       kuery,
       serviceName,
@@ -65,6 +69,8 @@ export async function getTransactionDistribution({
       transactionType,
       transactionId,
       traceId,
+      sampleRangeFrom,
+      sampleRangeTo,
       distributionMax,
       bucketSize,
       setup,
@@ -75,6 +81,7 @@ export async function getTransactionDistribution({
       noHits,
       buckets,
       bucketSize,
+      hits,
     };
   });
 }

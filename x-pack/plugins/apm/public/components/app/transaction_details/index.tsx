@@ -6,7 +6,6 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { flatten } from 'lodash';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { XYBrushArea } from '@elastic/charts';
@@ -47,10 +46,9 @@ export function TransactionDetails() {
 
   const { transactionName } = query;
 
-  const {
-    distributionData,
-    distributionStatus,
-  } = useTransactionDistributionFetcher({ transactionName });
+  const { distributionData } = useTransactionDistributionFetcher({
+    transactionName,
+  });
 
   useBreadcrumb({
     title: transactionName,
@@ -63,39 +61,24 @@ export function TransactionDetails() {
   const { sampleRangeFrom, sampleRangeTo } = urlParams;
 
   const traceSamples: Sample[] = useMemo(() => {
-    return sampleRangeFrom !== undefined && sampleRangeTo !== undefined
-      ? flatten(
-          distributionData.buckets
-            .filter((b) => b.key >= sampleRangeFrom && b.key <= sampleRangeTo)
-            .map((bucket) => bucket.samples)
-        )
-      : flatten(distributionData.buckets.map((bucket) => bucket.samples));
-  }, [distributionData.buckets, sampleRangeFrom, sampleRangeTo]);
+    return distributionData.hits.map((hit) => ({
+      transactionId: hit._source.transaction.id,
+      traceId: hit._source.trace.id,
+    }));
+  }, [distributionData.hits]);
 
   const selectSampleFromChartSelection = (selection: XYBrushArea) => {
     if (selection !== undefined) {
       const { x } = selection;
       if (Array.isArray(x)) {
-        const filteredSamples: Sample[] = flatten(
-          distributionData.buckets
-            .filter((b) => b.key > x[0] && b.key < x[1])
-            .map((bucket) => bucket.samples)
-        );
-
-        if (filteredSamples.length > 0) {
-          history.push({
-            ...history.location,
-            search: fromQuery({
-              ...toQuery(history.location.search),
-              sampleRangeFrom: Math.round(x[0]),
-              sampleRangeTo: Math.round(x[1]),
-              transactionId: filteredSamples[0].transactionId,
-              traceId: filteredSamples[0].traceId,
-            }),
-          });
-        } else {
-          clearChartSelecton();
-        }
+        history.push({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(history.location.search),
+            sampleRangeFrom: Math.round(x[0]),
+            sampleRangeTo: Math.round(x[1]),
+          }),
+        });
       }
     }
   };
@@ -106,8 +89,8 @@ export function TransactionDetails() {
     delete currentQuery.sampleRangeTo;
 
     const firstSample = distributionData.buckets[0].samples[0];
-    currentQuery.transactionId = firstSample.transactionId;
-    currentQuery.traceId = firstSample.traceId;
+    currentQuery.transactionId = firstSample?.transactionId;
+    currentQuery.traceId = firstSample?.traceId;
 
     history.push({
       ...history.location,
@@ -131,20 +114,16 @@ export function TransactionDetails() {
 
       <EuiHorizontalRule size="full" margin="l" />
 
-      {distributionStatus === 'success' && (
-        <>
-          <MlLatencyCorrelations
-            onChartSelection={selectSampleFromChartSelection}
-            onClearSelection={clearChartSelecton}
-            selection={
-              sampleRangeFrom !== undefined && sampleRangeTo !== undefined
-                ? [sampleRangeFrom, sampleRangeTo]
-                : undefined
-            }
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
+      <MlLatencyCorrelations
+        onChartSelection={selectSampleFromChartSelection}
+        onClearSelection={clearChartSelecton}
+        selection={
+          sampleRangeFrom !== undefined && sampleRangeTo !== undefined
+            ? [sampleRangeFrom, sampleRangeTo]
+            : undefined
+        }
+      />
+      <EuiSpacer size="s" />
 
       <HeightRetainer>
         <WaterfallWithSummary
