@@ -122,7 +122,7 @@ by using {kib} or APIs.
 * All data operations (read and write) continue to work.
 
 Once the license expires, calls to the cluster health, cluster stats, and index
-stats APIs fail with a `security_exception` and return a 403 HTTP status code.
+stats APIs (including cat APIs such as `GET _cat/indices` ) fail with a `security_exception` and return a 403 HTTP status code.
 
 [source,sh]
 -----------------------------------------------------
