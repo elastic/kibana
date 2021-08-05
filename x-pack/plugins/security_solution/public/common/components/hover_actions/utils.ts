@@ -175,6 +175,7 @@ export const allowTopN = ({
     ALERT_RULE_UPDATED_BY,
     ALERT_RULE_VERSION,
     ALERT_STATUS,
+    // @ts-expect-error fieldName does not need to match the string literals above
   ].includes(fieldName);
 
   return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);

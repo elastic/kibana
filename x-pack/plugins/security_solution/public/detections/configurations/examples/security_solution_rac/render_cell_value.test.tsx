@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { ALERT_RULE_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_SEVERITY } from '@kbn/rule-data-utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
