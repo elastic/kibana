@@ -34,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      // unload data from the system
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     // Run the same set of tests against all of the Security Solution roles

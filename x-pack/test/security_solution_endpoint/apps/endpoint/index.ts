@@ -18,6 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('endpoint', function () {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
+    const endpointTestResources = getService('endpointTestResources');
 
     if (!isRegistryEnabled()) {
       log.warning('These tests are being run with an external package registry');
@@ -29,6 +30,9 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       log.info('calling Fleet setup');
       await ingestManager.setup();
+
+      log.info('installing/upgrading Endpoint fleet package');
+      await endpointTestResources.installOrUpgradeEndpointFleetPackage();
     });
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_details'));

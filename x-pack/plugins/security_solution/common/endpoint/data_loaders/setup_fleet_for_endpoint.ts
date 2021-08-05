@@ -66,34 +66,47 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient) => {
 
   // Install/upgrade the endpoint package
   try {
-    const installEndpointPackageResp = (await kbnClient
-      .request({
-        path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
-        method: 'POST',
-        body: {
-          packages: ['endpoint'],
-        },
-      })
-      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
-
-    const bulkResp = installEndpointPackageResp.data.response;
-
-    if (bulkResp.length <= 0) {
-      throw new Error('Installing the Endpoint package failed, response was empty, existing');
-    }
-
-    if (isFleetBulkInstallError(bulkResp[0])) {
-      if (bulkResp[0].error instanceof Error) {
-        throw new Error(
-          `Installing the Endpoint package failed: ${bulkResp[0].error.message}, exiting`
-        );
-      }
-
-      throw new EndpointDataLoadingError(bulkResp[0].error);
-    }
+    await installOrUpgradeEndpointFleetPackage(kbnClient);
   } catch (error) {
     log.error(error);
     throw error;
+  }
+};
+
+/**
+ * Installs the Endpoint package (or upgrades it) in Fleet to the latest available in the registry
+ *
+ * @param kbnClient
+ */
+export const installOrUpgradeEndpointFleetPackage = async (kbnClient: KbnClient): Promise<void> => {
+  const installEndpointPackageResp = (await kbnClient
+    .request({
+      path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
+      method: 'POST',
+      body: {
+        packages: ['endpoint'],
+      },
+    })
+    .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
+
+  const bulkResp = installEndpointPackageResp.data.response;
+
+  if (bulkResp.length <= 0) {
+    throw new EndpointDataLoadingError(
+      'Installing the Endpoint package failed, response was empty, existing',
+      bulkResp
+    );
+  }
+
+  if (isFleetBulkInstallError(bulkResp[0])) {
+    if (bulkResp[0].error instanceof Error) {
+      throw new EndpointDataLoadingError(
+        `Installing the Endpoint package failed: ${bulkResp[0].error.message}, exiting`,
+        bulkResp
+      );
+    }
+
+    throw new EndpointDataLoadingError(bulkResp[0].error, bulkResp);
   }
 };
 

@@ -21,6 +21,7 @@ import {
 import { TransformPivotConfig } from '../../../plugins/transform/common/types/transform';
 import { GetTransformsResponseSchema } from '../../../plugins/transform/common/api_schemas/transforms';
 import { catchAndWrapError } from '../../../plugins/security_solution/server/endpoint/utils';
+import { installOrUpgradeEndpointFleetPackage } from '../../../plugins/security_solution/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
@@ -182,5 +183,13 @@ export class EndpointTestResources extends FtrService {
         throw new EndpointError(error.message, error);
       }
     });
+  }
+
+  /**
+   * installs (or upgrades) the Endpoint Fleet package
+   * (NOTE: ensure that fleet is setup first before calling this function)
+   */
+  async installOrUpgradeEndpointFleetPackage(): Promise<void> {
+    return installOrUpgradeEndpointFleetPackage(this.kbnClient);
   }
 }
