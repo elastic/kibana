@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-const mockUuidv5 = jest.fn().mockReturnValue('uuidv5');
-Object.defineProperty(mockUuidv5, 'DNS', { value: 'DNSUUID', writable: false });
-jest.mock('uuid/v5', () => mockUuidv5);
-
-export { mockUuidv5 };
+export const LANG = 'yaml';

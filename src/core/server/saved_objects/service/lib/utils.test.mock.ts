@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { registerLanguage } from '@kbn/monaco';
-import { CssLang, HandlebarsLang, MarkdownLang, YamlLang } from './languages';
 
-registerLanguage(CssLang);
-registerLanguage(HandlebarsLang);
-registerLanguage(MarkdownLang);
-registerLanguage(YamlLang);
+const mockUuidv1 = jest.fn().mockReturnValue('uuidv1');
+jest.mock('uuid/v1', () => mockUuidv1);
+
+const mockUuidv5 = jest.fn().mockReturnValue('uuidv5');
+Object.defineProperty(mockUuidv5, 'DNS', { value: 'DNSUUID', writable: false });
+jest.mock('uuid/v5', () => mockUuidv5);
+
+export { mockUuidv1, mockUuidv5 };
