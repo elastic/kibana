@@ -23,6 +23,7 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
@@ -47,6 +48,7 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 `;
 
 export interface OwnProps {
+  defaultCellActions?: TGridCellAction[];
   defaultModel: SubsetTimelineModel;
   end: string;
   id: TimelineId;
@@ -73,6 +75,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
   dataProviders,
+  defaultCellActions,
   deletedEventIds,
   deleteEventQuery,
   end,
@@ -140,6 +143,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               browserFields,
               columns,
               dataProviders: dataProviders!,
+              defaultCellActions,
               deletedEventIds,
               docValueFields,
               end,
@@ -269,6 +273,7 @@ export const StatefulEventsViewer = connector(
       prevProps.scopeId === nextProps.scopeId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      prevProps.defaultCellActions === nextProps.defaultCellActions &&
       deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
