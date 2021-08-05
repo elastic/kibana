@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { registerLanguage } from '@kbn/monaco';
-import { CssLang, HandlebarsLang, MarkdownLang, YamlLang } from './languages';
 
-registerLanguage(CssLang);
-registerLanguage(HandlebarsLang);
-registerLanguage(MarkdownLang);
-registerLanguage(YamlLang);
+/* eslint-disable @kbn/eslint/module_migration */
+import { conf, language } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+
+export { conf as languageConfiguration, language as lexerRules };
