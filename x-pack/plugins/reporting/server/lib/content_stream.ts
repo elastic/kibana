@@ -9,6 +9,7 @@ import { Duplex } from 'stream';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '..';
 import { ReportDocument } from '../../common/types';
+import { ExportTypesRegistry } from './export_types_registry';
 
 type Callback = (error?: Error) => void;
 type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
@@ -25,14 +26,32 @@ export class ContentStream extends Duplex {
   private primaryTerm?: number;
   private seqNo?: number;
 
-  constructor(private client: ElasticsearchClient, private document: ContentStreamDocument) {
+  constructor(
+    private client: ElasticsearchClient,
+    private exportTypesRegistry: ExportTypesRegistry,
+    private document: ContentStreamDocument
+  ) {
     super();
+  }
+
+  private getContentEncoding(jobType: string) {
+    const { jobContentEncoding } = this.exportTypesRegistry.get(
+      ({ jobType: item }) => item === jobType
+    );
+
+    return jobContentEncoding;
+  }
+
+  private decodeContent(content: string, jobType: string) {
+    const contentEncoding = this.getContentEncoding(jobType);
+
+    return contentEncoding === 'base64' ? Buffer.from(content, 'base64') : content;
   }
 
   async _read() {
     const { id, index } = this.document;
     const body: SearchRequest['body'] = {
-      _source: { includes: ['output.content'] },
+      _source: { includes: ['output.content', 'jobtype'] },
       query: {
         constant_score: {
           filter: {
@@ -51,7 +70,7 @@ export class ContentStream extends Duplex {
       const output = hits?._source.output?.content;
 
       if (output != null) {
-        this.push(output);
+        this.push(this.decodeContent(output, hits!._source.jobtype));
       }
 
       this.push(null);
@@ -86,16 +105,6 @@ export class ContentStream extends Duplex {
     }
   }
 
-  async toString(): Promise<string> {
-    let result = '';
-
-    for await (const chunk of this) {
-      result += chunk;
-    }
-
-    return result;
-  }
-
   getSeqNo(): number | undefined {
     return this.seqNo;
   }
@@ -107,6 +116,7 @@ export class ContentStream extends Duplex {
 
 export async function getContentStream(reporting: ReportingCore, document: ContentStreamDocument) {
   const { asInternalUser: client } = await reporting.getEsClient();
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
 
-  return new ContentStream(client, document);
+  return new ContentStream(client, exportTypesRegistry, document);
 }

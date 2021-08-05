@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Stream } from 'stream';
 // @ts-ignore
 import contentDisposition from 'content-disposition';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
@@ -21,7 +22,7 @@ export interface ErrorFromPayload {
 // interface of the API result
 interface Payload {
   statusCode: number;
-  content: string | Buffer | ErrorFromPayload;
+  content: string | Stream | ErrorFromPayload;
   contentType: string | null;
   headers: Record<string, any>;
 }
@@ -50,23 +51,11 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefini
 export function getDocumentPayloadFactory(reporting: ReportingCore) {
   const exportTypesRegistry = reporting.getExportTypesRegistry();
 
-  function encodeContent(
-    content: string | null,
-    exportType: ExportTypeDefinition
-  ): Buffer | string {
-    switch (exportType.jobContentEncoding) {
-      case 'base64':
-        return content ? Buffer.from(content, 'base64') : ''; // convert null to empty string
-      default:
-        return content ? content : ''; // convert null to empty string
-    }
-  }
-
   async function getCompleted(
     output: TaskRunResult,
     jobType: string,
     title: string,
-    content: string
+    content: Stream
   ): Promise<Payload> {
     const exportType = exportTypesRegistry.get(
       (item: ExportTypeDefinition) => item.jobType === jobType
@@ -75,12 +64,13 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     const headers = getReportingHeaders(output, exportType);
 
     return {
+      content,
       statusCode: 200,
-      content: encodeContent(content, exportType),
       contentType: output.content_type,
       headers: {
         ...headers,
         'Content-Disposition': contentDisposition(filename, { type: 'inline' }),
+        'Content-Length': output.size,
       },
     };
   }
@@ -118,9 +108,8 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     if (output) {
       if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
         const stream = await getContentStream(reporting, { id, index });
-        const content = await stream.toString();
 
-        return getCompleted(output, jobType, title, content);
+        return getCompleted(output, jobType, title, stream);
       }
 
       if (status === statuses.JOB_STATUS_FAILED) {

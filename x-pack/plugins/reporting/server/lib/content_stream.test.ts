@@ -9,14 +9,22 @@ import { set } from 'lodash';
 import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { ContentStream } from './content_stream';
+import { ExportTypesRegistry } from './export_types_registry';
 
 describe('ContentStream', () => {
   let client: jest.Mocked<ElasticsearchClient>;
+  let exportTypesRegistry: jest.Mocked<ExportTypesRegistry>;
   let stream: ContentStream;
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    stream = new ContentStream(client, { id: 'something', index: 'somewhere' });
+    exportTypesRegistry = ({
+      get: jest.fn(() => ({})),
+    } as unknown) as typeof exportTypesRegistry;
+    stream = new ContentStream(client, exportTypesRegistry, {
+      id: 'something',
+      index: 'somewhere',
+    });
 
     client.search.mockResolvedValue(
       set<any>({}, 'body.hits.hits.0._source.output.content', 'some content')
@@ -61,17 +69,21 @@ describe('ContentStream', () => {
 
       expect(error).toBe('some error');
     });
-  });
 
-  describe('toString', () => {
-    it('should return the document contents', async () => {
-      await expect(stream.toString()).resolves.toBe('some content');
-    });
+    it('should decode base64 encoded content', async () => {
+      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
+        typeof exportTypesRegistry.get
+      >);
+      client.search.mockResolvedValueOnce(
+        set<any>(
+          {},
+          'body.hits.hits.0._source.output.content',
+          Buffer.from('encoded content').toString('base64')
+        )
+      );
+      const data = await new Promise((resolve) => stream.once('data', resolve));
 
-    it('should return an empty string for the empty document', async () => {
-      client.search.mockResolvedValueOnce({ body: {} } as any);
-
-      await expect(stream.toString()).resolves.toBe('');
+      expect(data).toEqual(Buffer.from('encoded content'));
     });
   });
 
