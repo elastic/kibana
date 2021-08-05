@@ -10,6 +10,7 @@ import { asyncScheduler } from 'rxjs';
 import React, { useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 
+import { useKibana } from '../../../../common/lib/kibana';
 import { AlertTableItem } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
@@ -34,6 +35,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   setAlertsToDelete,
   onEditAlert,
 }: ComponentOpts) => {
+  const { ruleTypeRegistry } = useKibana().services;
+
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(item.muteAll);
@@ -41,6 +44,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     setIsDisabled(!item.enabled);
     setIsMuted(item.muteAll);
   }, [item.enabled, item.muteAll]);
+
+  const isRuleTypeEditableInContext = ruleTypeRegistry.has(item.alertTypeId)
+    ? !ruleTypeRegistry.get(item.alertTypeId).requiresAppContext
+    : false;
 
   const button = (
     <EuiButtonIcon
@@ -112,7 +119,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               ),
         },
         {
-          disabled: !item.isEditable,
+          disabled: !item.isEditable || !isRuleTypeEditableInContext,
           'data-test-subj': 'editAlert',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
