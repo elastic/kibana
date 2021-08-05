@@ -33,6 +33,7 @@ import type {
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
 import type { FormatFactory } from '../../common';
+import { layerTypes } from '../../common';
 import {
   SeriesType,
   YAxisMode,
@@ -41,7 +42,6 @@ import {
   YConfig,
   LineStyle,
   FillStyle,
-  layerTypes,
 } from '../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';

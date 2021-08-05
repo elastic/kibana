@@ -17,7 +17,7 @@ import {
   VisualizationDimensionGroupConfig,
 } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 function mockFrame(): FramePublicAPI {
   return {

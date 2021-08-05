@@ -21,7 +21,8 @@ import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { getStopsForFixedMode } from '../shared_components';
-import { getDefaultSummaryLabel, LayerType, layerTypes } from '../../common/expressions';
+import { LayerType, layerTypes } from '../../common';
+import { getDefaultSummaryLabel } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
 
 export interface DatatableVisualizationState {

@@ -22,7 +22,7 @@ import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
 import type { DatasourcePublicAPI, Operation } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 function exampleState(): HeatmapVisualizationState {
   return {

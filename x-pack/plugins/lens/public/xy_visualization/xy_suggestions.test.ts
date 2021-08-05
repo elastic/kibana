@@ -13,7 +13,7 @@ import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 jest.mock('../id_generator');
 

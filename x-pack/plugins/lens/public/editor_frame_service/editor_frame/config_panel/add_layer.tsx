@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { layerTypes } from '../../../../common/expressions';
+import { layerTypes } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
 
 interface AddLayerButtonProps {

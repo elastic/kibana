@@ -56,3 +56,6 @@ export interface CustomPaletteParams {
 }
 
 export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
+
+export type LayerType = 'data' | 'threshold';
+export const layerTypes: Record<string, LayerType> = { DATA: 'data', THRESHOLD: 'threshold' };

@@ -31,7 +31,7 @@ import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',

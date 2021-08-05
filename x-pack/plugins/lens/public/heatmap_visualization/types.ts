@@ -7,12 +7,8 @@
 
 import type { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type { LensBrushEvent, LensFilterEvent } from '../types';
-import type { LensMultiTable, FormatFactory, CustomPaletteParams } from '../../common';
-import type {
-  HeatmapGridConfigResult,
-  HeatmapLegendConfigResult,
-  LayerType,
-} from '../../common/expressions';
+import type { LensMultiTable, FormatFactory, CustomPaletteParams, LayerType } from '../../common';
+import type { HeatmapGridConfigResult, HeatmapLegendConfigResult } from '../../common/expressions';
 import { CHART_SHAPES, LENS_HEATMAP_RENDERER } from './constants';
 import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 

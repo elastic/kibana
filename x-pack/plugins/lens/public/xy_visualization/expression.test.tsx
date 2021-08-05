@@ -24,6 +24,7 @@ import {
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { calculateMinInterval, XYChart, XYChartRenderProps, xyChart } from './expression';
 import type { LensMultiTable } from '../../common';
+import { layerTypes } from '../../common';
 import {
   layerConfig,
   legendConfig,
@@ -36,7 +37,6 @@ import {
   XYChartProps,
   labelsOrientationConfig,
   LabelsOrientationConfig,
-  layerTypes,
 } from '../../common/expressions';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';

@@ -8,7 +8,8 @@
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { DataType, SuggestionRequest } from '../types';
 import { suggestions } from './suggestions';
-import { layerTypes, PieVisualizationState } from '../../common/expressions';
+import { PieVisualizationState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 describe('suggestions', () => {
   describe('pie', () => {

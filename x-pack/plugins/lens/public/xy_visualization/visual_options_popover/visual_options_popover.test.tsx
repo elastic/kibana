@@ -15,7 +15,7 @@ import { VisualOptionsPopover } from './visual_options_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { FillOpacityOption } from './fill_opacity_option';
-import { layerTypes } from '../../../common/expressions';
+import { layerTypes } from '../../../common';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;

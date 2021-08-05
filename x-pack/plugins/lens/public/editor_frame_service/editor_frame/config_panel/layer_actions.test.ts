@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { layerTypes } from '../../../../common/expressions';
+import { layerTypes } from '../../../../common';
 import { initialState } from '../../../state_management/lens_slice';
 import { removeLayer, appendLayer } from './layer_actions';
 

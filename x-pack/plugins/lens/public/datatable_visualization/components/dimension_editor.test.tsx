@@ -16,7 +16,7 @@ import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { act } from 'react-dom/test-utils';
 import { PalettePanelContainer } from '../../shared_components';
-import { layerTypes } from '../../../common/expressions';
+import { layerTypes } from '../../../common';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;

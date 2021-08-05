@@ -6,7 +6,8 @@
  */
 
 import { getPieVisualization } from './visualization';
-import { layerTypes, PieVisualizationState } from '../../common/expressions';
+import type { PieVisualizationState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { FramePublicAPI } from '../types';

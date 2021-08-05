@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LayerType } from '../types';
+import { LayerType } from '../../types';
 
 export interface MetricState {
   layerId: string;

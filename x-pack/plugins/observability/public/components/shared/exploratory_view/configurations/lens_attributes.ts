@@ -28,7 +28,7 @@ import {
   TermsIndexPatternColumn,
   CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
-import { layerTypes } from '../../../../../../lens/common/expressions';
+import { layerTypes } from '../../../../../../lens/common';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {

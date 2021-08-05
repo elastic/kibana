@@ -12,7 +12,7 @@ import { getXyVisualization } from './xy_visualization';
 import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({

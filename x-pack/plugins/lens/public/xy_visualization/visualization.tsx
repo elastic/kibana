@@ -24,7 +24,8 @@ import type {
   FramePublicAPI,
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
-import { SeriesType, XYLayerConfig, LayerType, layerTypes } from '../../common/expressions';
+import { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { LayerType, layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';

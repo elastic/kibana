@@ -21,7 +21,7 @@ import {
   VisualizationMap,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
-import { LayerType } from '../../../common/expressions';
+import type { LayerType } from '../../../common';
 import { LensDispatch, selectSuggestion, switchVisualization } from '../../state_management';
 import { getLayerType } from './config_panel/add_layer';
 

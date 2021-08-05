@@ -17,7 +17,8 @@ import {
   TableChangeType,
 } from '../types';
 import { State, XYState, visualizationTypes } from './types';
-import { layerTypes, SeriesType, XYLayerConfig } from '../../common/expressions';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {

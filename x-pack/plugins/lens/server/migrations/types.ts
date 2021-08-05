@@ -6,7 +6,7 @@
  */
 
 import { Query, Filter } from 'src/plugins/data/public';
-import { LayerType } from '../../common/expressions';
+import type { LayerType } from '../../common';
 
 export type OperationTypePre712 =
   | 'avg'

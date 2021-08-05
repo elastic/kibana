@@ -16,7 +16,7 @@ import {
   VisStatePost715,
   VisStatePre715,
 } from './types';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 export const commonRenameOperationsForFormula = (
   attributes: LensDocShapePre712

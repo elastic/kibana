@@ -9,7 +9,7 @@ import { Position } from '@elastic/charts';
 import { getSuggestions } from './suggestions';
 import type { HeatmapVisualizationState } from './types';
 import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 describe('heatmap suggestions', () => {
   describe('rejects suggestions', () => {

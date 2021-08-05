@@ -18,7 +18,7 @@ import {
   Datatable,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import { DateRange } from '../common';
+import type { DateRange, LayerType } from '../common';
 import { Query, Filter } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
@@ -33,7 +33,6 @@ import type {
   LensToggleActionData,
 } from './datatable_visualization/components/types';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { LayerType } from '../common/expressions';
 
 export type ErrorCallback = (e: { message: string }) => void;
 

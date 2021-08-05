@@ -10,7 +10,8 @@ import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import { layerTypes, MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 const toExpression = (
   state: MetricState,

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
 import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,

@@ -13,7 +13,7 @@ import {
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
 import { LensDocShape715, VisStatePost715, VisStatePre715 } from './types';
-import { layerTypes } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {
