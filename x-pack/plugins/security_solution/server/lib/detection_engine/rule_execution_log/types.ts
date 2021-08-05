@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { SavedObject, SavedObjectsFindResult } from '../../../../../../../src/core/server';
+import { RuleDataPluginService } from '../../../../../rule_registry/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { IRuleStatusSOAttributes } from '../rules/types';
 
@@ -15,6 +17,8 @@ export enum ExecutionMetric {
   'indexingDurationMax' = 'indexingDurationMax',
   'indexingLookback' = 'indexingLookback',
 }
+
+export type IRuleDataPluginService = PublicMethodsOf<RuleDataPluginService>;
 
 export type ExecutionMetricValue<T extends ExecutionMetric> = {
   [ExecutionMetric.executionGap]: number;
@@ -43,6 +47,17 @@ export interface LogStatusChangeArgs {
   message?: string;
 }
 
+export interface UpdateExecutionLogArgs {
+  id: string;
+  attributes: IRuleStatusSOAttributes;
+  spaceId: string;
+}
+
+export interface CreateExecutionLogArgs {
+  attributes: IRuleStatusSOAttributes;
+  spaceId: string;
+}
+
 export interface ExecutionMetricArgs<T extends ExecutionMetric> {
   ruleId: string;
   spaceId: string;
@@ -60,8 +75,8 @@ export interface IRuleExecutionLogClient {
     args: FindExecutionLogArgs
   ) => Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>>;
   findBulk: (args: FindBulkExecutionLogArgs) => Promise<FindBulkExecutionLogResponse>;
-  create: (event: IRuleStatusSOAttributes, spaceId: string) => Promise<void>;
-  update: (id: string, event: IRuleStatusSOAttributes, spaceId: string) => Promise<void>;
+  create: (args: CreateExecutionLogArgs) => Promise<SavedObject<IRuleStatusSOAttributes>>;
+  update: (args: UpdateExecutionLogArgs) => Promise<void>;
   delete: (id: string) => Promise<void>;
   // TODO These methods are intended to supersede ones provided by RuleStatusService
   logStatusChange: (args: LogStatusChangeArgs) => Promise<void>;

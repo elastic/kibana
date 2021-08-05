@@ -13,6 +13,7 @@ import {
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -96,12 +97,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const [{ migration_index: newIndex }] = createResponses;
       await waitForIndexToPopulate(es, newIndex);
-      const { body: migrationResults } = await es.search({ index: newIndex });
+      const { body: migrationResults } = await es.search<{ signal: Signal }>({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);
-      // @ts-expect-error _source has unknown type
-      const migratedSignal = migrationResults.hits.hits[0]._source.signal;
-      expect(migratedSignal._meta.version).to.equal(SIGNALS_TEMPLATE_VERSION);
+      const migratedSignal = migrationResults.hits.hits[0]._source?.signal;
+      expect(migratedSignal?._meta?.version).to.equal(SIGNALS_TEMPLATE_VERSION);
     });
 
     it('specifying the signals alias itself is a bad request', async () => {

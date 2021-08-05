@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -98,6 +98,7 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
 
 export interface TGridStandaloneProps {
   columns: ColumnHeaderOptions[];
+  defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   end: string;
   loadingText: React.ReactNode;
@@ -127,6 +128,7 @@ const basicUnit = (n: number) => i18n.UNIT(n);
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   columns,
+  defaultCellActions,
   deletedEventIds,
   end,
   loadingText,
@@ -322,6 +324,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
                     id={STANDALONE_ID}
                     isEventViewer={true}
                     loadPage={loadPage}
