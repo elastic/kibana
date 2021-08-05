@@ -7,3 +7,4 @@
  */
 
 export { KibanaPageTemplate, KibanaPageTemplateProps } from './page_template';
+export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav';

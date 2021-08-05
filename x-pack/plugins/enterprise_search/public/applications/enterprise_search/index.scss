@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-.enterpriseSearchOverview {
-  padding-top: 78px;
-  background-image: url('./assets/bg_enterprise_search.png');
-  background-repeat: no-repeat;
-  background-size: 670px;
-  background-position: center -27px;
+// .enterpriseSearchOverview {
+// padding-top: 78px;
+// background-image: url('./assets/bg_enterprise_search.png');
+// background-repeat: no-repeat;
+// background-size: 670px;
+// background-position: center -27px;
 
-  @include euiBreakpoint('m', 'l', 'xl') {
-    padding-top: 158px;
-    background-size: 1160px;
-    background-position: center -48px;
-  }
+// @include euiBreakpoint('m', 'l', 'xl') {
+//   padding-top: 158px;
+//   background-size: 1160px;
+//   background-position: center -48px;
+// }
 
-  &__header {
-    text-align: center;
-    margin: auto;
-    @include euiBreakpoint('m', 'l', 'xl') {
-      margin-bottom: $euiSizeL;
-    }
-  }
+// &__header {
+//   text-align: center;
+//   margin: auto;
+//   @include euiBreakpoint('m', 'l', 'xl') {
+//     margin-bottom: $euiSizeL;
+//   }
+// }
 
-  // EUI override
-  .euiTitle + .euiTitle {
-    margin-top: 0;
+// // EUI override
+// .euiTitle + .euiTitle {
+//   margin-top: 0;
 
-    @include euiBreakpoint('m', 'l', 'xl') {
-      margin-top: $euiSizeS;
-    }
-  }
+//   @include euiBreakpoint('m', 'l', 'xl') {
+//     margin-top: $euiSizeS;
+//   }
+// }
 
-  .enterpriseSearchOverview__card {
-    flex-basis: 50%;
-  }
-}
+// .enterpriseSearchOverview__card {
+//   flex-basis: 50%;
+// }
+// }

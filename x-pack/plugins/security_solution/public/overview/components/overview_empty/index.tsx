@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { omit } from 'lodash/fp';
 import { createStructuredSelector } from 'reselect';
 
-import { EuiButton } from '@elastic/eui';
 import * as i18nCommon from '../../../common/translations';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';

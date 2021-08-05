@@ -11,7 +11,6 @@ import './no_data_page.scss';
 import React, { ReactNode, useMemo } from 'react';
 import {
   EuiFlexItem,
-  EuiIcon,
   EuiCardProps,
   EuiFlexGrid,
   EuiSpacer,
@@ -21,7 +20,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '../page_template';
+import {
+  KibanaPageTemplate,
+  KibanaPageTemplateProps,
+  KibanaPageTemplateSolutionNavAvatar,
+} from '../page_template';
 
 import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
 
@@ -30,7 +33,13 @@ export const NO_DATA_RECOMMENDED = i18n.translate('kbn.noDataPage.recommended', 
 });
 
 export type NoDataPageActions = Partial<EuiCardProps> & {
+  /**
+   * The cards must lead somewhere
+   */
   href: string;
+  /**
+   * Applies the `Recommended` beta badge and makes the button `fill`
+   */
   recommended?: boolean;
   /**
    * Provide just a string for the button's label, or a whole component
@@ -57,7 +66,7 @@ const NoDataPageComponent = React.memo<NoDataPageProps>(
     // and it turns out in JS you CAN minus booleans from each other to get a 1, 0, or -1 - e.g., (true - false == 1) :whoa:
     const sortedEntries = entries.sort(([, firstObj], [, secondObj]) => {
       // The `??` fallbacks are because the recommended key can be missing or undefined
-      return (secondObj.recommended ?? false) - (firstObj.recommended ?? false);
+      return Number(secondObj.recommended ?? false) - Number(firstObj.recommended ?? false);
     });
 
     // Convert the iterated [[key, value]] array format back into an object
@@ -68,14 +77,12 @@ const NoDataPageComponent = React.memo<NoDataPageProps>(
         if (actionsKeys[i] === 'elasticAgent') {
           return (
             <EuiFlexItem key={`empty-page-agent-action`}>
-              {/* @ts-ignore */}
               <ElasticAgentCard solution={solution} {...action} />
             </EuiFlexItem>
           );
         } else if (actionsKeys[i] === 'beats') {
           return (
             <EuiFlexItem key={`empty-page-beats-action`}>
-              {/* @ts-ignore */}
               <ElasticBeatsCard {...action} />
             </EuiFlexItem>
           );
@@ -87,7 +94,7 @@ const NoDataPageComponent = React.memo<NoDataPageProps>(
           );
         }
       });
-    }, [actions, actionsKeys]);
+    }, [actions, sortedData, actionsKeys]);
 
     return (
       <KibanaPageTemplate
@@ -97,9 +104,12 @@ const NoDataPageComponent = React.memo<NoDataPageProps>(
         {...rest}
       >
         <EuiText textAlign="center">
-          <div className="noDataPageLogo">
-            <EuiIcon type={logo || `logo${solution}`} size="xxl" />
-          </div>
+          <KibanaPageTemplateSolutionNavAvatar
+            name={solution}
+            iconType={logo || `logo${solution}`}
+            size="xxl"
+          />
+
           <EuiSpacer />
           <h1>
             <FormattedMessage

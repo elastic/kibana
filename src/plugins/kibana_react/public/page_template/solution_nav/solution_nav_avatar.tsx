@@ -12,19 +12,33 @@ import classNames from 'classnames';
 
 import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 
-export type KibanaPageTemplateSolutionNavAvatarProps = EuiAvatarProps;
+export type KibanaPageTemplateSolutionNavAvatarProps = Omit<EuiAvatarProps, 'size'> & {
+  /**
+   * Any EuiAvatar size available, of `xxl` for custom large, brand-focused version
+   */
+  size?: EuiAvatarProps['size'] | 'xxl';
+};
 
 /**
  * Applies extra styling to a typical EuiAvatar
  */
 export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<KibanaPageTemplateSolutionNavAvatarProps> = ({
   className,
+  size,
   ...rest
 }) => {
   return (
+    // @ts-ignore
     <EuiAvatar
-      className={classNames('kbnPageTemplateSolutionNavAvatar', className)}
+      className={classNames(
+        'kbnPageTemplateSolutionNavAvatar',
+        {
+          [`kbnPageTemplateSolutionNavAvatar--${size}`]: size,
+        },
+        className
+      )}
       color="plain"
+      size={size === 'xxl' ? 'xl' : size}
       {...rest}
     />
   );

@@ -22,13 +22,15 @@ export const SetupGuideCta: React.FC = () => (
     paddingSize="l"
     className="enterpriseSearchSetupCta"
     data-test-subj="setupGuideLink"
+    hasBorder
+    color="transparent"
   >
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem className="enterpriseSearchSetupCta__text">
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <h2>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h2>
         </EuiTitle>
-        <EuiText size="s" color="subdued">
+        <EuiText grow={false} size="s" color="subdued">
           {i18n.translate('xpack.enterpriseSearch.overview.setupCta.description', {
             defaultMessage:
               'Add search to your app or internal organization with Elastic App Search and Workplace Search. Watch the video to see what you can do when search is made easy.',
