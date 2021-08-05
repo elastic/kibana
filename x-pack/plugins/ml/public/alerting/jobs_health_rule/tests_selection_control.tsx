@@ -11,8 +11,10 @@ import {
   EuiFieldNumber,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobsHealthRuleTestsConfig, JobsHealthTests } from '../../../common/types/alerts';
@@ -74,10 +76,23 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                 <>
                   <EuiFormRow
                     label={
-                      <FormattedMessage
-                        id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountLabel"
-                        defaultMessage="Number of documents"
-                      />
+                      <>
+                        <FormattedMessage
+                          id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountLabel"
+                          defaultMessage="Number of documents"
+                        />
+                        <EuiToolTip
+                          position="bottom"
+                          content={
+                            <FormattedMessage
+                              id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountHint"
+                              defaultMessage="The threshold for the amount of missing documents to alert upon."
+                            />
+                          }
+                        >
+                          <EuiIcon type="questionInCircle" />
+                        </EuiToolTip>
+                      </>
                     }
                   >
                     <EuiFieldNumber
@@ -98,10 +113,23 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
 
                   <TimeIntervalControl
                     label={
-                      <FormattedMessage
-                        id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.timeIntervalLabel"
-                        defaultMessage="Time interval"
-                      />
+                      <>
+                        <FormattedMessage
+                          id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.timeIntervalLabel"
+                          defaultMessage="Time interval"
+                        />
+                        <EuiToolTip
+                          position="bottom"
+                          content={
+                            <FormattedMessage
+                              id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.timeIntervalHint"
+                              defaultMessage="The lookback interval to check during rule execution for delayed data. By default derived from the longest bucket span and query delay."
+                            />
+                          }
+                        >
+                          <EuiIcon type="questionInCircle" />
+                        </EuiToolTip>
+                      </>
                     }
                     value={uiConfig.delayedData.timeInterval}
                     onChange={(e) => {
