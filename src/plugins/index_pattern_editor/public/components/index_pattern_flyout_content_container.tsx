@@ -24,15 +24,21 @@ export const IndexPatternFlyoutContentContainer = ({
   } = useKibana<IndexPatternEditorContext>();
 
   const onSaveClick = async (indexPatternSpec: IndexPatternSpec) => {
-    const indexPattern = await indexPatternService.createAndSave(indexPatternSpec);
-    // if there's a failure to save, indexPattern will be undefined
-    if (indexPattern) {
+    try {
+      const indexPattern = await indexPatternService.createAndSave(indexPatternSpec);
+
       const message = i18n.translate('indexPatternEditor.saved', {
         defaultMessage: "Saved '{indexPatternTitle}'",
         values: { indexPatternTitle: indexPattern.title },
       });
       notifications.toasts.addSuccess(message);
       await onSave(indexPattern);
+    } catch (e) {
+      const title = i18n.translate('data.indexPatterns.unableSaveLabel', {
+        defaultMessage: 'Failed to save index pattern.',
+      });
+
+      notifications.toasts.addDanger({ title });
     }
   };
 
