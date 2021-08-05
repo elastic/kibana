@@ -7,6 +7,12 @@
  */
 
 import { Subject } from 'rxjs';
-import { PointerEvent } from '@elastic/charts';
+import type { ActiveCursorPayload } from './types';
 
-export const activeCursor$ = new Subject<PointerEvent>();
+export class ActiveCursor {
+  public activeCursor$?: Subject<ActiveCursorPayload>;
+
+  setup() {
+    this.activeCursor$ = new Subject();
+  }
+}
