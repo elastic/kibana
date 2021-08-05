@@ -143,8 +143,8 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "licensing",
@@ -175,8 +175,8 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "licensing",
@@ -764,11 +764,7 @@
             },
             {
               "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/public/share_context_menu/register_csv_reporting.tsx"
-            },
-            {
-              "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/public/share_context_menu/register_pdf_png_reporting.tsx"
+              "path": "x-pack/plugins/reporting/public/share_context_menu/index.ts"
             },
             {
               "plugin": "reporting",
@@ -1849,8 +1845,8 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "licensing",
@@ -1881,8 +1877,8 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "licensing",
@@ -2409,6 +2405,22 @@
         ],
         "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "licensing",
+            "id": "def-server.license",
+            "type": "Object",
+            "tags": [],
+            "label": "license",
+            "description": [],
+            "signature": [
+              "ILicense"
+            ],
+            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2739,11 +2751,10 @@
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "licensing",
-              "id": "def-server.clusterClient",
+              "id": "def-server.LicensingPluginStart.createLicensePoller.$1",
               "type": "Object",
               "tags": [],
               "label": "clusterClient",
@@ -2758,19 +2769,25 @@
                 }
               ],
               "path": "x-pack/plugins/licensing/server/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "licensing",
-              "id": "def-server.pollingFrequency",
+              "id": "def-server.LicensingPluginStart.createLicensePoller.$2",
               "type": "number",
               "tags": [],
               "label": "pollingFrequency",
               "description": [],
+              "signature": [
+                "number"
+              ],
               "path": "x-pack/plugins/licensing/server/types.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "licensing",

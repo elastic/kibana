@@ -109,6 +109,9 @@ export const registry = {
     running = true;
     const esArchiver = context.getService('esArchiver');
     const logger = context.getService('log');
+
+    const supertest = context.getService('supertestAsApmWriteUser');
+
     const logWithTimer = () => {
       const start = process.hrtime();
 
@@ -148,6 +151,9 @@ export const registry = {
                   archiveName
                 )
               );
+
+              // sync jobs from .ml-config to .kibana SOs
+              await supertest.get('/api/ml/saved_objects/sync').set('kbn-xsrf', 'foo');
             }
             if (condition.archives.length) {
               log('Loaded all archives');

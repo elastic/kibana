@@ -191,7 +191,52 @@
               "((objects: { type: string; id: string; }[], spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"
             ],
             "path": "src/plugins/spaces_oss/public/api.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "{ type: string; id: string; }[]"
+                ],
+                "path": "src/plugins/spaces_oss/public/api.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToAdd",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/spaces_oss/public/api.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToRemove",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/spaces_oss/public/api.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "spacesOss",
@@ -206,7 +251,24 @@
               "((updatedObjects: { type: string; id: string; }[]) => void) | undefined"
             ],
             "path": "src/plugins/spaces_oss/public/api.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.ShareToSpaceFlyoutProps.onUpdate.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "updatedObjects",
+                "description": [],
+                "signature": [
+                  "{ type: string; id: string; }[]"
+                ],
+                "path": "src/plugins/spaces_oss/public/api.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "spacesOss",
@@ -221,7 +283,9 @@
               "(() => void) | undefined"
             ],
             "path": "src/plugins/spaces_oss/public/api.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -610,23 +674,26 @@
             ],
             "path": "src/plugins/spaces_oss/public/api.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "spacesOss",
-                "id": "def-public.path",
+                "id": "def-public.SpacesApiUi.redirectLegacyUrl.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
                 "description": [
                   "The path to use for the new URL, optionally including `search` and/or `hash` URL components."
                 ],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/spaces_oss/public/api.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "spacesOss",
-                "id": "def-public.objectNoun",
+                "id": "def-public.SpacesApiUi.redirectLegacyUrl.$2",
                 "type": "string",
                 "tags": [],
                 "label": "objectNoun",
@@ -637,9 +704,11 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/spaces_oss/public/api.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -982,6 +1051,22 @@
         ],
         "path": "src/plugins/spaces_oss/public/api.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/spaces_oss/public/api.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
