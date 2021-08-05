@@ -7,6 +7,8 @@
 
 import type { ApplicationStart } from 'kibana/public';
 
+import type { EditPackagePolicyFrom } from '../applications/fleet/sections/agent_policy/create_package_policy_page/types';
+
 import type { PackagePolicy } from './';
 
 /**
@@ -42,6 +44,13 @@ export interface AgentDetailsReassignPolicyAction {
 export interface IntegrationsAppBrowseRouteState {
   /** The agent policy that we are browsing integrations for */
   forAgentPolicyId: string;
+}
+
+/**
+ * Supported routing state for the edit package policy page
+ */
+export interface EditPackagePolicyRouteState {
+  from: EditPackagePolicyFrom;
 }
 
 /**

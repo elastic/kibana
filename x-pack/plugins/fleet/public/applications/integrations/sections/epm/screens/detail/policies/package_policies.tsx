@@ -240,10 +240,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                   <EuiButton
                     size="s"
                     minWidth="0"
-                    href={`${getHref('edit_integration', {
+                    href={`${getHref('upgrade_package_policy', {
                       policyId: agentPolicy.id,
                       packagePolicyId: packagePolicy.id,
-                    })}?upgrade=true`}
+                    })}?from=integrations-policy-list`}
                   >
                     <FormattedMessage
                       id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
@@ -349,6 +349,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               packagePolicy={packagePolicy}
               viewDataStep={viewDataStep}
               showAddAgent={true}
+              upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
+                policyId: agentPolicy.id,
+                packagePolicyId: packagePolicy.id,
+              })}?from=integrations-policy-list`}
             />
           );
         },

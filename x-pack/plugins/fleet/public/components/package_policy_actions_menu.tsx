@@ -24,7 +24,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   packagePolicy: InMemoryPackagePolicy;
   viewDataStep?: EuiStepProps;
   showAddAgent?: boolean;
-}> = ({ agentPolicy, packagePolicy, viewDataStep, showAddAgent }) => {
+  upgradePackagePolicyHref: string;
+}> = ({ agentPolicy, packagePolicy, viewDataStep, showAddAgent, upgradePackagePolicyHref }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
@@ -82,10 +83,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     <EuiContextMenuItem
       disabled={!packagePolicy.hasUpgrade}
       icon="refresh"
-      href={`${getHref('edit_integration', {
-        policyId: agentPolicy.id,
-        packagePolicyId: packagePolicy.id,
-      })}?upgrade=true`}
+      href={upgradePackagePolicyHref}
     >
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"

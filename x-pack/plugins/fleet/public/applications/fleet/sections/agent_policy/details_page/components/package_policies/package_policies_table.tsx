@@ -169,10 +169,10 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     <EuiButton
                       size="s"
                       minWidth="0"
-                      href={`${getHref('edit_integration', {
+                      href={`${getHref('upgrade_package_policy', {
                         policyId: agentPolicy.id,
                         packagePolicyId: packagePolicy.id,
-                      })}?upgrade=true`}
+                      })}?from=fleet-policy-list`}
                     >
                       <FormattedMessage
                         id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
@@ -206,7 +206,14 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
               return (
-                <PackagePolicyActionsMenu agentPolicy={agentPolicy} packagePolicy={packagePolicy} />
+                <PackagePolicyActionsMenu
+                  agentPolicy={agentPolicy}
+                  packagePolicy={packagePolicy}
+                  upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
+                    policyId: agentPolicy.id,
+                    packagePolicyId: packagePolicy.id,
+                  })}`}
+                />
               );
             },
           },

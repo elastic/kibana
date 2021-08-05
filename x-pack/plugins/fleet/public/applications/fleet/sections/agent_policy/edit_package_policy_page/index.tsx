@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
+import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -33,6 +33,7 @@ import type {
   UpdatePackagePolicy,
   PackagePolicy,
   DryRunPackagePolicy,
+  EditPackagePolicyRouteState,
 } from '../../../types';
 import {
   useLink,
@@ -45,12 +46,11 @@ import {
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
-} from '../../../hooks';
-import {
   sendUpgradePackagePolicy,
   sendUpgradePackagePolicyDryRun,
-  useBreadcrumbs as useIntegrationsBreadcrumbs,
-} from '../../../../integrations/hooks';
+  useIntraAppState,
+} from '../../../hooks';
+import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
@@ -58,7 +58,7 @@ import type { PackagePolicyValidationResults } from '../create_package_policy_pa
 import { validatePackagePolicy, validationHasErrors } from '../create_package_policy_page/services';
 import type {
   PackagePolicyFormState,
-  CreatePackagePolicyFrom,
+  EditPackagePolicyFrom,
 } from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
@@ -79,22 +79,13 @@ export const EditPackagePolicyPage = memo(() => {
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
-  from?: CreatePackagePolicyFrom;
+  from?: EditPackagePolicyFrom;
 }>(({ packagePolicyId, from = 'edit' }) => {
-  const { notifications } = useStartServices();
+  const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const history = useHistory();
-
-  const { search } = useLocation();
-  const isUpgrade = useMemo(() => new URLSearchParams(search).has('upgrade'), [search]);
-
-  if (isUpgrade) {
-    from = 'upgrade';
-  }
-
-  const { getHref, getPath } = useLink();
+  const { getHref } = useLink();
 
   // Agent policy, package info, and package policy states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -115,6 +106,14 @@ export const EditPackagePolicyForm = memo<{
     GetOnePackagePolicyResponse['item']
   >();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
+  const routeState = useIntraAppState<EditPackagePolicyRouteState>();
+
+  // Allow overriding the `from` prop via intra-app state
+  if (routeState && routeState.from) {
+    from = routeState.from;
+  }
+  const isUpgrade =
+    from === 'upgrade-from-fleet-policy-list' || from === 'upgrade-from-integrations-policy-list';
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -314,14 +313,14 @@ export const EditPackagePolicyForm = memo<{
 
   const successRedirectPath = useMemo(() => {
     if (packageInfo && policyId) {
-      return from === 'package-edit'
-        ? getPath('integration_details_policies', {
+      return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
+        ? getHref('integration_details_policies', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
           })
-        : getPath('policy_details', { policyId });
+        : getHref('policy_details', { policyId });
     }
     return '/';
-  }, [from, getPath, packageInfo, policyId]);
+  }, [from, getHref, packageInfo, policyId]);
 
   // Save package policy
   const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
@@ -367,7 +366,7 @@ export const EditPackagePolicyForm = memo<{
         }
       }
 
-      history.push(successRedirectPath);
+      application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
           defaultMessage: `Successfully updated '{packagePolicyName}'`,
@@ -553,7 +552,7 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
 
-          {from === 'upgrade' && dryRunData && (
+          {isUpgrade && dryRunData && (
             <>
               <UpgradeStatusCallout dryRunData={dryRunData} />
               <EuiSpacer size="xxl" />

@@ -21,10 +21,10 @@ import {
 import { WithHeaderLayout } from '../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
 import { PackageIcon } from '../../../../components';
-import type { CreatePackagePolicyFrom } from '../types';
+import type { EditPackagePolicyFrom } from '../types';
 
 export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
-  from: CreatePackagePolicyFrom;
+  from: EditPackagePolicyFrom;
   cancelUrl: string;
   onCancel?: React.ReactEventHandler;
   agentPolicy?: AgentPolicy;
@@ -54,7 +54,8 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
           from === 'package-edit' ||
           from === 'edit' ||
           from === 'policy' ||
-          from === 'upgrade') &&
+          from === 'upgrade-from-fleet-policy-list' ||
+          from === 'upgrade-from-integrations-policy-list') &&
         packageInfo
       ) {
         return (
@@ -71,7 +72,10 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             <EuiFlexItem>
               <EuiText>
                 <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
-                  {from === 'edit' || from === 'package-edit' || from === 'upgrade' ? (
+                  {from === 'edit' ||
+                  from === 'package-edit' ||
+                  from === 'upgrade-from-fleet-policy-list' ||
+                  from === 'upgrade-from-integrations-policy-list' ? (
                     <FormattedMessage
                       id="xpack.fleet.editPackagePolicy.pageTitleWithPackageName"
                       defaultMessage="{action} {packageName} integration"
@@ -139,7 +143,10 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             defaultMessage="Configure an integration for the selected agent policy."
           />
         );
-      } else if (from === 'upgrade') {
+      } else if (
+        from === 'upgrade-from-fleet-policy-list' ||
+        from === 'upgrade-from-integrations-policy-list'
+      ) {
         return (
           <FormattedMessage
             id="xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade"
