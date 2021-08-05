@@ -1,14 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "outDir": "./target",
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "outDir": "./target_types",
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-telemetry-tools/src",
-    "isolatedModules": true,
     "types": [
       "jest",
       "node"
