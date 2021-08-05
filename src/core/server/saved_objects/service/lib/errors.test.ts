@@ -465,17 +465,6 @@ describe('savedObjectsClient/errorTypes', () => {
     });
 
     describe('error.output', () => {
-      it('prefixes Not Found message with passed reason', () => {
-        const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
-          'foo',
-          'bar'
-        );
-        expect(error.output.payload).toHaveProperty(
-          'message',
-          'x-elastic-product not present or not recognized: Not Found'
-        );
-      });
-
       it('specifies the saved object that was not found', () => {
         const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
           'foo',
@@ -488,7 +477,10 @@ describe('savedObjectsClient/errorTypes', () => {
       });
 
       it('sets statusCode to 503', () => {
-        const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+        const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
+          'foo',
+          'bar'
+        );
         expect(error.output).toHaveProperty('statusCode', 503);
       });
     });
