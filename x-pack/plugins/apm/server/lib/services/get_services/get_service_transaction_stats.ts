@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -15,7 +16,6 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -24,7 +24,6 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
-import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
@@ -111,20 +110,6 @@ export async function getServiceTransactionStats({
                       },
                     },
                   },
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: getBucketSizeForAggregatedTransactions({
-                        start,
-                        end,
-                        numBuckets: 20,
-                        searchAggregatedTransactions,
-                      }).intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: { min: start, max: end },
-                    },
-                    aggs: metrics,
-                  },
                 },
               },
             },
@@ -151,43 +136,15 @@ export async function getServiceTransactionStats({
         agentName: topTransactionTypeBucket.sample.top[0].metrics[
           AGENT_NAME
         ] as AgentName,
-        avgResponseTime: {
-          value: topTransactionTypeBucket.avg_duration.value,
-          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-            (dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.avg_duration.value,
-            })
-          ),
-        },
-        transactionErrorRate: {
-          value: calculateTransactionErrorPercentage(
-            topTransactionTypeBucket.outcomes
-          ),
-          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-            (dateBucket) => ({
-              x: dateBucket.key,
-              y: calculateTransactionErrorPercentage(dateBucket.outcomes),
-            })
-          ),
-        },
-        transactionsPerMinute: {
-          value: calculateThroughput({
-            start,
-            end,
-            value: topTransactionTypeBucket.doc_count,
-          }),
-          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-            (dateBucket) => ({
-              x: dateBucket.key,
-              y: calculateThroughput({
-                start,
-                end,
-                value: dateBucket.doc_count,
-              }),
-            })
-          ),
-        },
+        latency: topTransactionTypeBucket.avg_duration.value,
+        transactionErrorRate: calculateTransactionErrorPercentage(
+          topTransactionTypeBucket.outcomes
+        ),
+        throughput: calculateThroughput({
+          start,
+          end,
+          value: topTransactionTypeBucket.doc_count,
+        }),
       };
     }) ?? []
   );

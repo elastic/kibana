@@ -349,8 +349,8 @@
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -707,8 +707,8 @@
             ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1079,8 +1079,8 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -1195,7 +1195,9 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -1208,7 +1210,9 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -1264,7 +1268,9 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2627,21 +2633,24 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.columnName",
+                "id": "def-common.ColumnRenderer.isInstance.$1",
                 "type": "string",
                 "tags": [],
                 "label": "columnName",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.data",
+                "id": "def-common.ColumnRenderer.isInstance.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "data",
@@ -2657,9 +2666,11 @@
                   "[]"
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -2681,30 +2692,115 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.__0",
+                "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n    columnName,\n    eventId,\n    field,\n    timelineId,\n    truncate,\n    values,\n    linkValues,\n  }",
                 "description": [],
-                "signature": [
-                  "{ columnName: string; eventId: string; field: ",
-                  {
-                    "pluginId": "timelines",
-                    "scope": "common",
-                    "docId": "kibTimelinesPluginApi",
-                    "section": "def-common.ColumnHeaderOptions",
-                    "text": "ColumnHeaderOptions"
-                  },
-                  "; timelineId: string; truncate?: boolean | undefined; values: string[] | null | undefined; linkValues?: string[] | null | undefined; }"
-                ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.columnName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "columnName",
+                    "description": [],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.eventId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "eventId",
+                    "description": [],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.field",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "field",
+                    "description": [],
+                    "signature": [
+                      "Pick<",
+                      "EuiDataGridColumn",
+                      ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & { aggregatable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+                      {
+                        "pluginId": "timelines",
+                        "scope": "common",
+                        "docId": "kibTimelinesPluginApi",
+                        "section": "def-common.ColumnHeaderType",
+                        "text": "ColumnHeaderType"
+                      },
+                      "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+                      "IFieldSubType",
+                      " | undefined; type?: string | undefined; }"
+                    ],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.timelineId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "timelineId",
+                    "description": [],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.truncate",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "truncate",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.values",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "values",
+                    "description": [],
+                    "signature": [
+                      "string[] | null | undefined"
+                    ],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.linkValues",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "linkValues",
+                    "description": [],
+                    "signature": [
+                      "string[] | null | undefined"
+                    ],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "deprecated": false
+                  }
+                ]
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4973,22 +5069,31 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.__0",
+                "id": "def-common.HeaderActionProps.onSelectAll.$1.isSelected",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ isSelected }",
                 "description": [],
-                "signature": [
-                  "{ isSelected: boolean; }"
-                ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.HeaderActionProps.onSelectAll.$1.isSelected.isSelected",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isSelected",
+                    "description": [],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                    "deprecated": false
+                  }
+                ]
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -9265,11 +9370,10 @@
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.options",
+                "id": "def-common.MatrixHistogramSchema.buildDsl.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -9284,9 +9388,11 @@
                   }
                 ],
                 "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -9335,7 +9441,45 @@
               "[]) | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-common.MatrixHistogramSchema.parser.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "common",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-common.MatrixHistogramParseData",
+                    "text": "MatrixHistogramParseData"
+                  },
+                  "<U>"
+                ],
+                "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-common.MatrixHistogramSchema.parser.$2",
+                "type": "string",
+                "tags": [],
+                "label": "keyBucket",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14320,11 +14464,10 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.data",
+                "id": "def-common.RowRenderer.isInstance.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "data",
@@ -14333,9 +14476,11 @@
                   "Ecs"
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",
@@ -14359,32 +14504,75 @@
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-common.__0",
+                "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n    browserFields,\n    data,\n    isDraggable,\n    timelineId,\n  }",
                 "description": [],
-                "signature": [
-                  "{ browserFields: Readonly<Record<string, Partial<",
-                  {
-                    "pluginId": "timelines",
-                    "scope": "common",
-                    "docId": "kibTimelinesPluginApi",
-                    "section": "def-common.BrowserField",
-                    "text": "BrowserField"
-                  },
-                  ">>>; data: ",
-                  "Ecs",
-                  "; isDraggable: boolean; timelineId: string; }"
-                ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.browserFields",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "browserFields",
+                    "description": [],
+                    "signature": [
+                      "{ readonly [x: string]: Partial<",
+                      {
+                        "pluginId": "timelines",
+                        "scope": "common",
+                        "docId": "kibTimelinesPluginApi",
+                        "section": "def-common.BrowserField",
+                        "text": "BrowserField"
+                      },
+                      ">; }"
+                    ],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.data",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "data",
+                    "description": [],
+                    "signature": [
+                      "Ecs"
+                    ],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.isDraggable",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isDraggable",
+                    "description": [],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "securitySolution",
+                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.timelineId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "timelineId",
+                    "description": [],
+                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "deprecated": false
+                  }
+                ]
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -16330,7 +16518,8 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "Filter",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
             "deprecated": false
@@ -19902,6 +20091,19 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.nextPage",
+            "type": "number",
+            "tags": [],
+            "label": "nextPage",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19916,6 +20118,19 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.columnId",
+            "type": "string",
+            "tags": [],
+            "label": "columnId",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19930,6 +20145,22 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ columnId: string; delta: number; }"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19954,6 +20185,30 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.sorted",
+            "type": "Object",
+            "tags": [],
+            "label": "sorted",
+            "description": [],
+            "signature": [
+              "{ columnId: string; sortDirection: ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.SortDirection",
+                "text": "SortDirection"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19976,6 +20231,30 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.sorted",
+            "type": "Array",
+            "tags": [],
+            "label": "sorted",
+            "description": [],
+            "signature": [
+              "{ columnId: string; sortDirection: ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.SortDirection",
+                "text": "SortDirection"
+              },
+              "; }[]"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19992,6 +20271,19 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.eventId",
+            "type": "string",
+            "tags": [],
+            "label": "eventId",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -20008,6 +20300,22 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ eventIds: string[]; isSelected: boolean; }"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -20024,6 +20332,22 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ isSelected: boolean; }"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -20040,6 +20364,19 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.eventId",
+            "type": "string",
+            "tags": [],
+            "label": "eventId",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -20064,6 +20401,29 @@
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.ColumnHeaderOptions",
+                "text": "ColumnHeaderOptions"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

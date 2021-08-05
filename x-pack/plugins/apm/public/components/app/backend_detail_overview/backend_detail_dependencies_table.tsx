@@ -15,6 +15,8 @@ import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_ra
 import { DependenciesTable } from '../../shared/dependencies_table';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
 import { ServiceLink } from '../../shared/service_link';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { DependenciesTableServiceMapLink } from '../../shared/dependencies_table/dependencies_table_service_map_link';
 
 export function BackendDetailDependenciesTable() {
   const {
@@ -24,6 +26,16 @@ export function BackendDetailDependenciesTable() {
   const {
     query: { rangeFrom, rangeTo, kuery },
   } = useApmParams('/backends/:backendName/overview');
+
+  const router = useApmRouter();
+
+  const serviceMapLink = router.link('/service-map', {
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+    },
+  });
 
   const { offset } = getTimeRangeComparison({
     start,
@@ -46,11 +58,11 @@ export function BackendDetailDependenciesTable() {
           path: {
             backendName,
           },
-          query: { start, end, environment, numBuckets: 20, offset },
+          query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
       });
     },
-    [start, end, environment, offset, backendName]
+    [start, end, environment, offset, backendName, kuery]
   );
 
   const dependencies =
@@ -99,6 +111,7 @@ export function BackendDetailDependenciesTable() {
       )}
       status={status}
       compact={false}
+      link={<DependenciesTableServiceMapLink href={serviceMapLink} />}
     />
   );
 }
