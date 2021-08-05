@@ -36,6 +36,7 @@ function createEditorInstance() {
     onKeyDown: jest.fn((listener) => {
       keyDownListeners.push(listener);
     }),
+    getDomNode: jest.fn(),
     // Helpers for our tests
     __helpers__: {
       areSuggestionsVisible: () => areSuggestionsVisible,
@@ -97,7 +98,7 @@ jest.mock('@elastic/eui', () => {
   return {
     ...original,
     htmlIdGenerator: () => {
-      return () => 42;
+      return () => '1234';
     },
   };
 });

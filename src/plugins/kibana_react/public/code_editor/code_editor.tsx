@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
 import { htmlIdGenerator, EuiText, EuiToolTip } from '@elastic/eui';
@@ -137,6 +137,7 @@ export const CodeEditor: React.FC<Props> = ({
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
+  const textboxMutationObserver = useRef<MutationObserver | null>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
 
@@ -186,7 +187,7 @@ export const CodeEditor: React.FC<Props> = ({
   );
 
   const renderPrompt = useCallback(() => {
-    const tooltipId = htmlIdGenerator()();
+    const tooltipId = htmlIdGenerator('codeEditorTooltip')();
 
     return (
       <EuiToolTip
@@ -291,6 +292,15 @@ export const CodeEditor: React.FC<Props> = ({
       if (textbox) {
         // Make sure the textarea is not directly accesible with TAB
         textbox.tabIndex = -1;
+
+        // The Monaco editor seems to override the tabindex and set it back to "0"
+        // so we make sure that whenever the attributes change the tabindex stays at -1
+        textboxMutationObserver.current = new MutationObserver(function onTextboxAttributeChange() {
+          if (textbox.tabIndex >= 0) {
+            textbox.tabIndex = -1;
+          }
+        });
+        textboxMutationObserver.current.observe(textbox, { attributes: true });
       }
 
       editor.onKeyDown(onKeydownMonaco);
@@ -315,6 +325,12 @@ export const CodeEditor: React.FC<Props> = ({
     },
     [editorDidMount]
   );
+
+  useEffect(() => {
+    return () => {
+      textboxMutationObserver.current?.disconnect();
+    };
+  }, []);
 
   return (
     <div className="kibanaCodeEditor">

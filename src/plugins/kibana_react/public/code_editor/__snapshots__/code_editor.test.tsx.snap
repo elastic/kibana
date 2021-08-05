@@ -2,27 +2,13 @@
 
 exports[`<CodeEditor /> hint element should be tabable 1`] = `
 <div
+  aria-describedby="1234"
   class="kibanaCodeEditor__keyboardHint"
   data-test-subj="codeEditorHint"
-  id="42"
+  id="1234"
   role="button"
   tabindex="0"
->
-  <div
-    class="euiText euiText--medium"
-  >
-    <p>
-      Press Enter to start editing.
-    </p>
-  </div>
-  <div
-    class="euiText euiText--medium"
-  >
-    <p>
-      When you're done, press Escape to stop editing.
-    </p>
-  </div>
-</div>
+/>
 `;
 
 exports[`<CodeEditor /> is rendered 1`] = `
@@ -141,46 +127,54 @@ exports[`<CodeEditor /> is rendered 1`] = `
   <div
     className="kibanaCodeEditor"
   >
-    <div
-      className="kibanaCodeEditor__keyboardHint"
-      data-test-subj="codeEditorHint"
-      id={42}
-      onClick={[Function]}
-      onKeyDown={[Function]}
-      role="button"
-      tabIndex={0}
+    <EuiToolTip
+      content={
+        <div>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                defaultMessage="Press Enter to start editing."
+                id="kibana-react.kibanaCodeEditor.startEditing"
+                values={Object {}}
+              />
+            </p>
+          </EuiText>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                defaultMessage="Press Escape to stop editing."
+                id="kibana-react.kibanaCodeEditor.stopEditing"
+                values={Object {}}
+              />
+            </p>
+          </EuiText>
+        </div>
+      }
+      delay="regular"
+      display="block"
+      id="1234"
+      position="top"
     >
-      <EuiText>
+      <span
+        className="euiToolTipAnchor euiToolTipAnchor--displayBlock"
+        onKeyUp={[Function]}
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
         <div
-          className="euiText euiText--medium"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Press Enter to start editing."
-              id="kibana-react.kibanaCodeEditor.startEditing"
-              values={Object {}}
-            >
-              Press Enter to start editing.
-            </FormattedMessage>
-          </p>
-        </div>
-      </EuiText>
-      <EuiText>
-        <div
-          className="euiText euiText--medium"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="When you're done, press Escape to stop editing."
-              id="kibana-react.kibanaCodeEditor.stopEditing"
-              values={Object {}}
-            >
-              When you're done, press Escape to stop editing.
-            </FormattedMessage>
-          </p>
-        </div>
-      </EuiText>
-    </div>
+          aria-describedby="1234"
+          className="kibanaCodeEditor__keyboardHint"
+          data-test-subj="codeEditorHint"
+          id="1234"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          role="button"
+          tabIndex={0}
+        />
+      </span>
+    </EuiToolTip>
     <mockMonacoEditor
       editorDidMount={[Function]}
       editorWillMount={[Function]}
