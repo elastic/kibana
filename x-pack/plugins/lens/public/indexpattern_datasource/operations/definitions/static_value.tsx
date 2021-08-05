@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { OperationDefinition } from './index';
@@ -142,7 +142,7 @@ export const staticValueOperation: OperationDefinition<
     currentColumn,
     columnId,
   }) {
-    const { inputValue, handleInputChange } = useDebouncedValue(
+    const { inputValue, handleInputChange } = useDebouncedValue<string | undefined>(
       {
         value: currentColumn?.params?.value || String(defaultValue),
         onChange: (newValue) => {
@@ -165,6 +165,14 @@ export const staticValueOperation: OperationDefinition<
       { allowFalsyValue: true }
     );
 
+    const onChangeHandler = useCallback(
+      (value: string) => {
+        const newValue = value === '' ? undefined : value;
+        handleInputChange(newValue);
+      },
+      [handleInputChange]
+    );
+
     return (
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
@@ -176,10 +184,10 @@ export const staticValueOperation: OperationDefinition<
         <EuiFieldNumber
           data-test-subj="lns-indexPattern-percentile-input"
           compressed
-          value={inputValue}
+          value={inputValue ?? ''}
           onChange={(e) => {
             const newValue = e.currentTarget.value;
-            handleInputChange(newValue);
+            onChangeHandler(newValue);
           }}
         />
       </div>
