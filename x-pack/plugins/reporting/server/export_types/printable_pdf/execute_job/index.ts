@@ -61,15 +61,13 @@ export const runTaskFnFactory: RunTaskFnFactory<
       }),
       map(({ buffer, warnings }) => {
         apmGeneratePdf?.end();
-        const apmEncode = apmTrans?.startSpan('encode_pdf', 'output');
-        const content = buffer?.toString('base64') || null;
-        apmEncode?.end();
-
-        stream.write(content);
+        if (buffer) {
+          stream.write(buffer);
+        }
 
         return {
           content_type: 'application/pdf',
-          size: buffer?.byteLength || 0,
+          size: buffer?.byteLength ?? 0,
           warnings,
         };
       }),

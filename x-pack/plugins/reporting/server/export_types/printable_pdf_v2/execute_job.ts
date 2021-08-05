@@ -44,7 +44,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
       ),
       mergeMap(({ logo, conditionalHeaders }) => {
         const { browserTimezone, layout, title, locatorParams } = job;
-        if (apmGetAssets) apmGetAssets.end();
+        apmGetAssets?.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
@@ -59,18 +59,15 @@ export const runTaskFnFactory: RunTaskFnFactory<
         );
       }),
       map(({ buffer, warnings }) => {
-        if (apmGeneratePdf) apmGeneratePdf.end();
+        apmGeneratePdf?.end();
 
-        const apmEncode = apmTrans?.startSpan('encode_pdf', 'output');
-        const content = buffer?.toString('base64') || null;
-        apmEncode?.end();
-
-        stream.write(content);
+        if (buffer) {
+          stream.write(buffer);
+        }
 
         return {
           content_type: 'application/pdf',
-          content,
-          size: buffer?.byteLength || 0,
+          size: buffer?.byteLength ?? 0,
           warnings,
         };
       }),
@@ -82,7 +79,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    if (apmTrans) apmTrans.end();
+    apmTrans?.end();
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 };

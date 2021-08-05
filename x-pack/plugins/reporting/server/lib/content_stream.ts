@@ -8,7 +8,7 @@
 import { Duplex } from 'stream';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '..';
-import { ReportDocument } from '../../common/types';
+import { ReportDocument, ReportSource } from '../../common/types';
 import { ExportTypesRegistry } from './export_types_registry';
 
 type Callback = (error?: Error) => void;
@@ -22,7 +22,9 @@ interface ContentStreamDocument {
 }
 
 export class ContentStream extends Duplex {
-  private buffer = '';
+  private buffer = Buffer.from('');
+  private jobContentEncoding?: string;
+  private jobType?: string;
   private primaryTerm?: number;
   private seqNo?: number;
 
@@ -34,18 +36,53 @@ export class ContentStream extends Duplex {
     super();
   }
 
-  private getContentEncoding(jobType: string) {
-    const { jobContentEncoding } = this.exportTypesRegistry.get(
-      ({ jobType: item }) => item === jobType
-    );
+  private async getJobType() {
+    if (!this.jobType) {
+      const { id, index } = this.document;
+      const body: SearchRequest['body'] = {
+        _source: { includes: ['jobtype'] },
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [{ term: { _id: id } }],
+              },
+            },
+          },
+        },
+        size: 1,
+      };
 
-    return jobContentEncoding;
+      const response = await this.client.search<ReportSource>({ body, index });
+      const hits = response?.body.hits?.hits?.[0];
+      this.jobType = hits?._source?.jobtype;
+    }
+
+    return this.jobType;
   }
 
-  private decodeContent(content: string, jobType: string) {
-    const contentEncoding = this.getContentEncoding(jobType);
+  private async getJobContentEncoding() {
+    if (!this.jobContentEncoding) {
+      const jobType = await this.getJobType();
 
-    return contentEncoding === 'base64' ? Buffer.from(content, 'base64') : content;
+      ({ jobContentEncoding: this.jobContentEncoding } = this.exportTypesRegistry.get(
+        ({ jobType: item }) => item === jobType
+      ));
+    }
+
+    return this.jobContentEncoding;
+  }
+
+  private async decode(content: string) {
+    const contentEncoding = await this.getJobContentEncoding();
+
+    return Buffer.from(content, contentEncoding === 'base64' ? 'base64' : undefined);
+  }
+
+  private async encode(buffer: Buffer) {
+    const contentEncoding = await this.getJobContentEncoding();
+
+    return buffer.toString(contentEncoding === 'base64' ? 'base64' : undefined);
   }
 
   async _read() {
@@ -68,9 +105,10 @@ export class ContentStream extends Duplex {
       const response = await this.client.search({ body, index });
       const hits = response?.body.hits?.hits?.[0] as ReportDocument | undefined;
       const output = hits?._source.output?.content;
+      this.jobType = hits?._source.jobtype;
 
       if (output != null) {
-        this.push(this.decodeContent(output, hits!._source.jobtype));
+        this.push(await this.decode(output));
       }
 
       this.push(null);
@@ -79,26 +117,28 @@ export class ContentStream extends Duplex {
     }
   }
 
-  _write(chunk: Buffer | string, _encoding: string, callback: Callback) {
-    this.buffer += typeof chunk === 'string' ? chunk : chunk.toString();
+  _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
+    this.buffer = Buffer.concat([
+      this.buffer,
+      Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
+    ]);
     callback();
   }
 
   async _final(callback: Callback) {
     try {
+      const content = await this.encode(this.buffer);
       const { body } = await this.client.update<ReportDocument>({
         ...this.document,
         body: {
           doc: {
-            output: {
-              content: this.buffer,
-            },
+            output: { content },
           },
         },
       });
 
       ({ _primary_term: this.primaryTerm, _seq_no: this.seqNo } = body);
-      this.buffer = '';
+      this.buffer = Buffer.from('');
       callback();
     } catch (error) {
       callback(error);

@@ -27,7 +27,12 @@ describe('ContentStream', () => {
     });
 
     client.search.mockResolvedValue(
-      set<any>({}, 'body.hits.hits.0._source.output.content', 'some content')
+      set<any>({}, 'body.hits.hits.0._source', {
+        jobtype: 'pdf',
+        output: {
+          content: 'some content',
+        },
+      })
     );
   });
 
@@ -131,6 +136,24 @@ describe('ContentStream', () => {
 
       expect(stream.getPrimaryTerm()).toBe(1);
       expect(stream.getSeqNo()).toBe(10);
+    });
+
+    it('should encode using base64', async () => {
+      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
+        typeof exportTypesRegistry.get
+      >);
+
+      stream.end('12345');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.update).toHaveBeenCalledTimes(1);
+
+      const [[request]] = client.update.mock.calls;
+
+      expect(request).toHaveProperty(
+        'body.doc.output.content',
+        Buffer.from('12345').toString('base64')
+      );
     });
   });
 });

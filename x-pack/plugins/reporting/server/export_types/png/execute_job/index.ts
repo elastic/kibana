@@ -51,10 +51,10 @@ export const runTaskFnFactory: RunTaskFnFactory<
           job.layout
         );
       }),
-      tap(({ base64 }) => stream.write(base64)),
-      map(({ base64, warnings }) => ({
+      tap(({ buffer }) => stream.write(buffer)),
+      map(({ buffer, warnings }) => ({
         content_type: 'image/png',
-        size: (base64 && base64.length) || 0,
+        size: buffer.byteLength,
         warnings,
       })),
       catchError((err) => {
