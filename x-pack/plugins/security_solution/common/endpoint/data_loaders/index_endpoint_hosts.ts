@@ -13,7 +13,7 @@ import { KbnClient } from '@kbn/test';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
 import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '../../../../fleet/common';
 import { EndpointDocGenerator } from '../generate_data';
-import { HostMetadata } from '../types';
+import { HostMetadata, HostPolicyResponse } from '../types';
 import {
   deleteIndexedFleetAgents,
   DeleteIndexedFleetAgentsResponse,
@@ -32,6 +32,7 @@ import {
   IndexedFleetEndpointPolicyResponse,
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
+import { metadataCurrentIndexPattern } from '../constants';
 
 export interface IndexedHostsResponse
   extends IndexedFleetAgentResponse,
@@ -45,9 +46,10 @@ export interface IndexedHostsResponse
   hosts: HostMetadata[];
 
   /**
-   * Any policy created during processing of creating metadata documents for the endpoint host
+   * The list of Endpoint Policy Response documents (1 or more) that was created.
    */
-  policies: Array<CreatePackagePolicyResponse['item']>;
+  policyResponses: HostPolicyResponse[];
+
   metadataIndex: string;
   policyResponseIndex: string;
 }
@@ -93,8 +95,8 @@ export async function indexEndpointHostDocs({
   const kibanaVersion = await fetchKibanaVersion(kbnClient);
   const response: IndexedHostsResponse = {
     hosts: [],
-    policies: [],
     agents: [],
+    policyResponses: [],
     metadataIndex,
     policyResponseIndex,
     fleetAgentsIndex: '',
@@ -133,8 +135,6 @@ export async function indexEndpointHostDocs({
 
         // eslint-disable-next-line require-atomic-updates
         realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
-
-        response.policies.push(realPolicies[appliedPolicyId]);
       }
 
       // If we did not yet enroll an agent for this Host, do it now that we have good policy id
@@ -187,18 +187,21 @@ export async function indexEndpointHostDocs({
       op_type: 'create',
     });
 
+    const hostPolicyResponse = generator.generatePolicyResponse({
+      ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
+      policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
+    });
+
     await client.index({
       index: policyResponseIndex,
-      body: generator.generatePolicyResponse({
-        ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
-        policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
-      }),
+      body: hostPolicyResponse,
       op_type: 'create',
     });
 
-    // Clone the hostMetadata document to ensure that no shared state (as a result of using the
-    // generator) is returned across docs.
+    // Clone the hostMetadata and policyResponse document to ensure that no shared state
+    // (as a result of using the generator) is returned across docs.
     response.hosts.push(cloneDeep(hostMetadata));
+    response.policyResponses.push(cloneDeep(hostPolicyResponse));
   }
 
   return response;
@@ -219,21 +222,22 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   return version;
 };
 
-export interface DeleteIndexedEndpointHosts
+export interface DeleteIndexedEndpointHostsResponse
   extends DeleteIndexedFleetAgentsResponse,
     DeleteIndexedFleetActionsResponse,
     DeleteIndexedFleetEndpointPoliciesResponse {
   hosts: DeleteByQueryResponse | undefined;
-  agents: DeleteByQueryResponse | undefined;
+  policyResponses: DeleteByQueryResponse | undefined;
 }
 
 export const deleteIndexedEndpointHosts = async (
   esClient: Client,
   kbnClient: KbnClient,
   indexedData: IndexedHostsResponse
-): Promise<DeleteIndexedEndpointHosts> => {
-  const response: DeleteIndexedEndpointHosts = {
+): Promise<DeleteIndexedEndpointHostsResponse> => {
+  const response: DeleteIndexedEndpointHostsResponse = {
     hosts: undefined,
+    policyResponses: undefined,
     agents: undefined,
     responses: undefined,
     actions: undefined,
@@ -242,21 +246,52 @@ export const deleteIndexedEndpointHosts = async (
   };
 
   if (indexedData.hosts.length) {
+    const body = {
+      query: {
+        bool: {
+          filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
+        },
+      },
+    };
+
     response.hosts = (
       await esClient.deleteByQuery({
         index: indexedData.metadataIndex,
         wait_for_completion: true,
+        body,
+      })
+    ).body;
+
+    // Delete from the transform destination index
+    await esClient.deleteByQuery({
+      index: metadataCurrentIndexPattern,
+      wait_for_completion: true,
+      body,
+    });
+  }
+
+  if (indexedData.policyResponses.length) {
+    response.policyResponses = (
+      await esClient.deleteByQuery({
+        index: indexedData.policyResponseIndex,
+        wait_for_completion: true,
         body: {
           query: {
             bool: {
-              filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
+              filter: [
+                {
+                  terms: {
+                    'agent.id': indexedData.policyResponses.map(
+                      (policyResponse) => policyResponse.agent.id
+                    ),
+                  },
+                },
+              ],
             },
           },
         },
       })
     ).body;
-
-    // FIXME:PT Delete data from the `_current` (transform destination) index as well?
   }
 
   merge(
@@ -265,8 +300,6 @@ export const deleteIndexedEndpointHosts = async (
     await deleteIndexedFleetActions(esClient, indexedData),
     await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData)
   );
-
-  // FIXME:PT Delete policy responses
 
   return response;
 };
