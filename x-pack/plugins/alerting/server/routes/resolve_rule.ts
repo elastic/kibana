@@ -22,6 +22,7 @@ const paramSchema = schema.object({
 });
 
 const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
+  legacyId,
   alertTypeId,
   createdBy,
   updatedBy,
@@ -37,6 +38,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   ...rest
 }) => ({
   ...rest,
+  legacy_id: legacyId,
   rule_type_id: alertTypeId,
   created_by: createdBy,
   updated_by: updatedBy,

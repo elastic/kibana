@@ -52,7 +52,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   const [refreshToken, requestRefresh] = React.useState<number>();
 
   useEffect(() => {
-    async function resolveAlertId() {
+    async function potentiallyRedirectBasedOnSavedObjectResolve() {
       const resolvedResult = await resolveAlert(ruleId);
       setResolvedAlertResult(resolvedResult);
       if (resolvedResult.outcome === 'aliasMatch' && spaces) {
@@ -60,21 +60,24 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
         const path = `insightsAndAlerting/triggersActions/rule/${resolvedResult.savedObject.id}`;
         const objectNoun = 'rule'; // TODO: i18n
         spaces.ui.redirectLegacyUrl(path, objectNoun);
-        return;
+        return false;
       }
+      return true;
     }
-    resolveAlertId().then(() =>
-      getAlertData(
-        ruleId,
-        loadAlert,
-        resolveAlert,
-        loadAlertTypes,
-        loadActionTypes,
-        setAlert,
-        setAlertType,
-        setActionTypes,
-        toasts
-      )
+    potentiallyRedirectBasedOnSavedObjectResolve().then((result: boolean) =>
+      result
+        ? getAlertData(
+            ruleId,
+            loadAlert,
+            resolveAlert,
+            loadAlertTypes,
+            loadActionTypes,
+            setAlert,
+            setAlertType,
+            setActionTypes,
+            toasts
+          )
+        : undefined
     );
   }, [
     ruleId,
