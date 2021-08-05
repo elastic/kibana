@@ -16,7 +16,7 @@ import {
   EuiResizeObserver,
 } from '@elastic/eui';
 
-import { mountWithIntl, rerender } from '../../../../../test_helpers';
+import { mountWithIntl } from '../../../../../test_helpers';
 
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 
