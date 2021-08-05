@@ -63,11 +63,7 @@
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) | Data plugin public Start contract |
 |  [DataPublicPluginStartActions](./kibana-plugin-plugins-data-public.datapublicpluginstartactions.md) | utilities to generate filters from action context |
 |  [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) | Data plugin prewired UI components |
-<<<<<<< HEAD
-|  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
 |  [GetFieldsOptions](./kibana-plugin-plugins-data-public.getfieldsoptions.md) |  |
-=======
->>>>>>> ca6182cd20d88f7717f6495d52190a204c537152
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
