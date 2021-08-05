@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable react/no-danger */
+
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
@@ -63,20 +65,39 @@ class TableVis extends Component {
     let rowDisplay = getValueOrEmpty(
       model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key
     );
+
+    // we should skip url field formatting for key if tsvb have drilldown_url
+    if (
+      fieldFormatMap[model.pivot_id]?.id !== fieldFormats.FIELD_FORMAT_IDS.URL ||
+      !model.drilldown_url
+    ) {
+      const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap);
+      rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay, 'html') }} />;
+    }
+
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
       rowDisplay = <a href={sanitizeUrl(url)}>{rowDisplay}</a>;
     }
+
     const columns = row.series
       .filter((item) => item)
       .map((item) => {
         const column = this.visibleSeries.find((c) => c.id === item.id);
         if (!column) return null;
-        const formatter =
-          model.use_kibana_indexes && !column.ignore_field_formatting
-            ? createFieldFormatter(last(column.metrics)?.field, fieldFormatMap)
-            : createTickFormatter(column.formatter, column.value_template, this.props.getConfig);
-        const value = formatter(item.last);
+        const field = last(column.metrics)?.field;
+        const formatter = column.ignore_field_formatting
+          ? createTickFormatter(column.formatter, column.value_template, this.props.getConfig)
+          : createFieldFormatter(field, fieldFormatMap);
+        let value = item.last;
+        // we should skip color field formatting for value if tsvb column have color_rules
+        if (
+          column.ignore_field_formatting ||
+          fieldFormatMap[field]?.id !== fieldFormats.FIELD_FORMAT_IDS.COLOR ||
+          !column.color_rules.length
+        ) {
+          value = formatter(item.last, 'html');
+        }
         let trend;
         if (column.trend_arrows) {
           const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';
@@ -94,7 +115,7 @@ class TableVis extends Component {
             className="eui-textRight"
             style={style}
           >
-            <span>{value}</span>
+            <span dangerouslySetInnerHTML={{ __html: value }} />
             {trend}
           </td>
         );

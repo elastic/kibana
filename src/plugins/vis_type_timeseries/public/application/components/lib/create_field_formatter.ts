@@ -7,10 +7,11 @@
  */
 
 import { getFieldFormats } from '../../../services';
-import type { FieldFormatMap } from '../../../../../data/common';
+import type { FieldFormatMap, FieldFormatsContentType } from '../../../../../data/common';
 
 export const createFieldFormatter = (fieldName: string = '', fieldFormatMap?: FieldFormatMap) => {
   const fieldFormat = getFieldFormats().deserialize(fieldFormatMap?.[fieldName]);
 
-  return (value: unknown) => fieldFormat.convert(value);
+  return (value: unknown, contextType?: FieldFormatsContentType) =>
+    fieldFormat.convert(value, contextType);
 };
