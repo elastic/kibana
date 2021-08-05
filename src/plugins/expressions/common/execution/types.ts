@@ -9,7 +9,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
 import type { IExecutionContextContainer } from 'src/core/public';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 
 import { ExpressionType } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
@@ -21,7 +21,7 @@ import { TablesAdapter } from '../util/tables_adapter';
  */
 export interface ExecutionContext<
   InspectorAdapters extends Adapters = Adapters,
-  ExecutionContextSearch extends SerializableState = SerializableState
+  ExecutionContextSearch extends SerializableRecord = SerializableRecord
 > {
   /**
    * Get search context of the expression.

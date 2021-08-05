@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { map, pick, zipObject } from 'lodash';
 
 import { ExpressionTypeDefinition } from '../types';
@@ -78,7 +78,7 @@ export interface DatatableColumnMeta {
   /**
    * any extra parameters for the source that produced this column
    */
-  sourceParams?: SerializableState;
+  sourceParams?: SerializableRecord;
 }
 
 /**

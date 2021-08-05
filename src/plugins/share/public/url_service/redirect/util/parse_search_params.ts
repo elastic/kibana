@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { i18n } from '@kbn/i18n';
 import type { RedirectOptions } from '../redirect_manager';
 
@@ -63,7 +63,7 @@ export function parseSearchParams(urlSearch: string): RedirectOptions {
     throw new Error(message);
   }
 
-  let params: unknown & SerializableState;
+  let params: unknown & SerializableRecord;
   try {
     params = JSON.parse(paramsJson);
   } catch {

@@ -6,7 +6,7 @@
  */
 
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { DOC_TYPE } from '../../common';
 import {
   commonRemoveTimezoneDateHistogramParam,
@@ -25,7 +25,7 @@ export const lensEmbeddableFactory = (): EmbeddableRegistryDefinition => {
         return ({
           ...lensState,
           attributes: migratedLensState,
-        } as unknown) as SerializableState;
+        } as unknown) as SerializableRecord;
       },
       '7.14.0': (state) => {
         const lensState = (state as unknown) as { attributes: LensDocShape713 };
@@ -33,7 +33,7 @@ export const lensEmbeddableFactory = (): EmbeddableRegistryDefinition => {
         return ({
           ...lensState,
           attributes: migratedLensState,
-        } as unknown) as SerializableState;
+        } as unknown) as SerializableRecord;
       },
     },
   };

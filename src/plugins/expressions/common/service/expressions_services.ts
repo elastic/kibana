@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
 import type { IExecutionContextContainer } from 'src/core/public';
@@ -57,7 +57,7 @@ export type ExpressionsServiceSetup = Pick<
 >;
 
 export interface ExpressionExecutionParams {
-  searchContext?: SerializableState;
+  searchContext?: SerializableRecord;
 
   variables?: Record<string, any>;
 

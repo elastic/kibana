@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { ExpressionValueRender } from './render';
 import { getType } from '../get_type';
@@ -18,7 +18,7 @@ export type ExpressionValueError = ExpressionValueBoxed<
   'error',
   {
     error: ErrorLike;
-    info?: SerializableState;
+    info?: SerializableRecord;
   }
 >;
 

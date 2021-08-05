@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import {
   DynamicActionsState,
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
@@ -20,7 +20,7 @@ import {
 export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
   enhancements?: {
     dynamicActions: DynamicActionsState;
-    [key: string]: SerializableState;
+    [key: string]: SerializableRecord;
   };
 }
 

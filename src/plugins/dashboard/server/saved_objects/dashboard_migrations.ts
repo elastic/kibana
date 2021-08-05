@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializableValue } from '@kbn/common-utils';
+import { Serializable } from '@kbn/common-utils';
 import { get, flow, mapValues } from 'lodash';
 import {
   SavedObjectAttributes,
@@ -154,8 +154,8 @@ function createExtractPanelReferencesMigration(
 }
 
 type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
-  attributes?: SerializableValue;
-  savedVis?: SerializableValue;
+  attributes?: Serializable;
+  savedVis?: Serializable;
 };
 
 // Runs the embeddable migrations on each panel

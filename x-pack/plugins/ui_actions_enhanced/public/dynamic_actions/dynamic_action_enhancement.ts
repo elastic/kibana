@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { EnhancementRegistryDefinition } from '../../../../../src/plugins/embeddable/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { DynamicActionsState } from '../../../ui_actions_enhanced/public';
@@ -16,14 +16,14 @@ export const dynamicActionEnhancement = (
 ): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
-    telemetry: (state: SerializableState, telemetryData: Record<string, any>) => {
+    telemetry: (state: SerializableRecord, telemetryData: Record<string, any>) => {
       return uiActionsEnhanced.telemetry(state as DynamicActionsState, telemetryData);
     },
-    extract: (state: SerializableState) => {
+    extract: (state: SerializableRecord) => {
       return uiActionsEnhanced.extract(state as DynamicActionsState);
     },
-    inject: (state: SerializableState, references: SavedObjectReference[]) => {
+    inject: (state: SerializableRecord, references: SavedObjectReference[]) => {
       return uiActionsEnhanced.inject(state as DynamicActionsState, references);
     },
-  } as EnhancementRegistryDefinition<SerializableState>;
+  } as EnhancementRegistryDefinition<SerializableRecord>;
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
 
@@ -30,7 +30,7 @@ export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) =
       if (!enhancements[key]) return;
       const enhancementResult = embeddables
         .getEnhancement(key)
-        .extract(enhancements[key] as SerializableState);
+        .extract(enhancements[key] as SerializableRecord);
       refs.push(...enhancementResult.references);
       updatedInput.enhancements![key] = enhancementResult.state;
     });

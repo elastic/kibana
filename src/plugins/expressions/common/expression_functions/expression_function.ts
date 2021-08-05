@@ -7,7 +7,7 @@
  */
 
 import { identity } from 'lodash';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
 import { ExpressionValue } from '../expression_types/types';
@@ -66,7 +66,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     references: SavedObjectReference[]
   ) => ExpressionAstFunction['arguments'];
   migrations: {
-    [key: string]: (state: SerializableState) => SerializableState;
+    [key: string]: (state: SerializableRecord) => SerializableRecord;
   };
 
   constructor(functionDefinition: AnyExpressionFunctionDefinition) {

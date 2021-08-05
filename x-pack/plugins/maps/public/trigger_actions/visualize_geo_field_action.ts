@@ -7,7 +7,7 @@
 
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
@@ -78,7 +78,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
   const location = await locator.getLocation({
     filters: getData().query.filterManager.getFilters(),
     query: getData().query.queryString.getQuery(),
-    initialLayers: (initialLayers as unknown) as LayerDescriptor[] & SerializableState,
+    initialLayers: (initialLayers as unknown) as LayerDescriptor[] & SerializableRecord,
     timeRange: getData().query.timefilter.timefilter.getTime(),
   });
 

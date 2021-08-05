@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { ManagementAppLocator } from 'src/plugins/management/common';
 import {
   LocatorPublic,
@@ -27,7 +27,7 @@ export enum INGEST_PIPELINES_PAGES {
   CLONE = 'pipeline_clone',
 }
 
-interface IngestPipelinesBaseParams extends SerializableState {
+interface IngestPipelinesBaseParams extends SerializableRecord {
   pipelineId: string;
 }
 export interface IngestPipelinesListParams extends Partial<IngestPipelinesBaseParams> {

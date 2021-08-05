@@ -10,6 +10,6 @@ export {
   JsonArray,
   JsonValue,
   JsonObject,
-  SerializableState,
-  SerializableValue,
+  SerializableRecord,
+  Serializable,
 } from './typed_json';

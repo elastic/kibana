@@ -7,7 +7,7 @@
  */
 
 import { mergeWith } from 'lodash';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { MigrateFunctionsObject, MigrateFunction } from './types';
 
 export const mergeMigrationFunctionMaps = (
@@ -18,7 +18,7 @@ export const mergeMigrationFunctionMaps = (
     if (!srcValue || !objValue) {
       return srcValue || objValue;
     }
-    return (state: SerializableState) => objValue(srcValue(state));
+    return (state: SerializableRecord) => objValue(srcValue(state));
   };
 
   return mergeWith({ ...obj1 }, obj2, customizer);

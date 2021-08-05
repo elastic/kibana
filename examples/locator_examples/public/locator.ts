@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { MigrateFunction } from 'src/plugins/kibana_utils/common';
 import { LocatorDefinition, LocatorPublic } from '../../../src/plugins/share/public';
 
 export const HELLO_LOCATOR = 'HELLO_LOCATOR';
 
-export interface HelloLocatorV1Params extends SerializableState {
+export interface HelloLocatorV1Params extends SerializableRecord {
   name: string;
 }
 
-export interface HelloLocatorV2Params extends SerializableState {
+export interface HelloLocatorV2Params extends SerializableRecord {
   firstName: string;
   lastName: string;
 }

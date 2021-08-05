@@ -8,7 +8,7 @@
 
 import uuid from 'uuid';
 import { Filter } from '@kbn/es-query';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { SavedObjectReference } from '../../../../core/types';
 
 export const extract = (filters: Filter[]) => {
@@ -51,7 +51,7 @@ export const inject = (filters: Filter[], references: SavedObjectReference[]) =>
   });
 };
 
-export const telemetry = (filters: SerializableState, collector: unknown) => {
+export const telemetry = (filters: SerializableRecord, collector: unknown) => {
   return {};
 };
 

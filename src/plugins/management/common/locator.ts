@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
 import { MANAGEMENT_APP_ID } from './contants';
 
 export const MANAGEMENT_APP_LOCATOR = 'MANAGEMENT_APP_LOCATOR';
 
-export interface ManagementAppLocatorParams extends SerializableState {
+export interface ManagementAppLocatorParams extends SerializableRecord {
   sectionId: string;
   appId?: string;
 }

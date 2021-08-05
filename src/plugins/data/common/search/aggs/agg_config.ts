@@ -9,7 +9,7 @@
 import moment from 'moment';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { Assign, Ensure } from '@kbn/utility-types';
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
@@ -30,10 +30,10 @@ export type AggConfigSerialized = Ensure<
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: {} | SerializableState;
+    params?: {} | SerializableRecord;
     schema?: string;
   },
-  SerializableState
+  SerializableRecord
 >;
 
 export type AggConfigOptions = Assign<AggConfigSerialized, { type: IAggType }>;
@@ -305,7 +305,7 @@ export class AggConfig {
       id: this.id,
       enabled: this.enabled,
       type: this.type && this.type.name,
-      params: outParams as SerializableState,
+      params: outParams as SerializableRecord,
       ...(this.schema && { schema: this.schema }),
     };
   }
@@ -327,7 +327,7 @@ export class AggConfig {
    */
   toSerializedFieldFormat():
     | {}
-    | Ensure<SerializedFieldFormat<SerializableState>, SerializableState> {
+    | Ensure<SerializedFieldFormat<SerializableRecord>, SerializableRecord> {
     return this.type ? this.type.getSerializedFormat(this) : {};
   }
 

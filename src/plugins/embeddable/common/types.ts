@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { PersistableStateService } from '../../kibana_utils/common';
 
 export enum ViewMode {
@@ -29,7 +29,7 @@ export type EmbeddableInput = {
   /**
    * Reserved key for enhancements added by other plugins.
    */
-  enhancements?: SerializableState;
+  enhancements?: SerializableRecord;
 
   /**
    * List of action IDs that this embeddable should not render.

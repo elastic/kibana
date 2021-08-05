@@ -10,7 +10,7 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -272,7 +272,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return migrateToLatest(this.getAllMigrations(), state) as ExpressionAstExpression;
   }
 
-  private migrate(ast: SerializableState, version: string) {
+  private migrate(ast: SerializableRecord, version: string) {
     return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
       if (!fn.migrations[version]) return link;
       const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SerializableState } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/common-utils';
 
-export type BaseActionConfig = SerializableState;
+export type BaseActionConfig = SerializableRecord;
 
 export type SerializedAction<Config extends BaseActionConfig = BaseActionConfig> = {
   readonly factoryId: string;
