@@ -90,11 +90,11 @@ describe('CrawlerOverviewLogic', () => {
       });
     });
 
-    describe('onCreatedNewTimeout', () => {
+    describe('onCreateNewTimeout', () => {
       it('sets the timeout in the logic', () => {
         const timeout = setTimeout(() => {}, 1);
 
-        CrawlerOverviewLogic.actions.onCreatedNewTimeout(timeout);
+        CrawlerOverviewLogic.actions.onCreateNewTimeout(timeout);
 
         expect(CrawlerOverviewLogic.values.timeoutId).toEqual(timeout);
       });
@@ -264,13 +264,13 @@ describe('CrawlerOverviewLogic', () => {
 
     describe('createNewTimeoutForCrawlRequests', () => {
       it('saves the timeout ID in the logic', () => {
-        jest.spyOn(CrawlerOverviewLogic.actions, 'onCreatedNewTimeout');
+        jest.spyOn(CrawlerOverviewLogic.actions, 'onCreateNewTimeout');
         jest.spyOn(CrawlerOverviewLogic.actions, 'getLatestCrawlRequests');
 
         CrawlerOverviewLogic.actions.createNewTimeoutForCrawlRequests(2000);
 
         expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 2000);
-        expect(CrawlerOverviewLogic.actions.onCreatedNewTimeout).toHaveBeenCalled();
+        expect(CrawlerOverviewLogic.actions.onCreateNewTimeout).toHaveBeenCalled();
 
         jest.runAllTimers();
 

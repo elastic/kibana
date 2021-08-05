@@ -51,7 +51,7 @@ interface CrawlerOverviewActions {
   deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   fetchCrawlerData(): void;
   getLatestCrawlRequests(refreshData?: boolean): { refreshData?: boolean };
-  onCreatedNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
+  onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
   onReceiveCrawlRequests(crawlRequests: CrawlRequest[]): { crawlRequests: CrawlRequest[] };
   startCrawl(): void;
@@ -68,7 +68,7 @@ export const CrawlerOverviewLogic = kea<
     deleteDomain: (domain) => ({ domain }),
     fetchCrawlerData: true,
     getLatestCrawlRequests: (refreshData) => ({ refreshData }),
-    onCreatedNewTimeout: (timeoutId) => ({ timeoutId }),
+    onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     onReceiveCrawlerData: (data) => ({ data }),
     onReceiveCrawlRequests: (crawlRequests) => ({ crawlRequests }),
     startCrawl: () => null,
@@ -97,7 +97,7 @@ export const CrawlerOverviewLogic = kea<
       null,
       {
         clearTimeoutId: () => null,
-        onCreatedNewTimeout: (_, { timeoutId }) => timeoutId,
+        onCreateNewTimeout: (_, { timeoutId }) => timeoutId,
       },
     ],
   },
@@ -181,7 +181,7 @@ export const CrawlerOverviewLogic = kea<
         actions.getLatestCrawlRequests();
       }, duration);
 
-      actions.onCreatedNewTimeout(timeoutIdId);
+      actions.onCreateNewTimeout(timeoutIdId);
     },
     getLatestCrawlRequests: async ({ refreshData = true }) => {
       const { http } = HttpLogic.values;
