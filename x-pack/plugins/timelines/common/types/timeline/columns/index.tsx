@@ -5,14 +5,51 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import { ReactNode } from 'react';
+
+import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { IFieldSubType } from '../../../../../../../src/plugins/data/common';
+import { BrowserFields } from '../../../search_strategy/index_fields';
 import { TimelineNonEcsData } from '../../../search_strategy/timeline';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 /** Uniquely identifies a column */
 export type ColumnId = string;
+
+/**
+ * A `TGridCellAction` function accepts `data`, where each row of data is
+ * represented as a `TimelineNonEcsData[]`. For example, `data[0]` would
+ * contain a `TimelineNonEcsData[]` with the first row of data.
+ *
+ * A `TGridCellAction` returns a function that has access to all the
+ * `EuiDataGridColumnCellActionProps`, _plus_ access to `data`,
+ *  which enables code like the following example to be written:
+ *
+ * Example:
+ * ```
+ * ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+ *   const value = getMappedNonEcsValue({
+ *     data: data[rowIndex], // access a specific row's values
+ *     fieldName: columnId,
+ *   });
+ *
+ *   return (
+ *     <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType="heart">
+ *       {'Love it'}
+ *      </Component>
+ *   );
+ * };
+ * ```
+ */
+export type TGridCellAction = ({
+  browserFields,
+  data,
+}: {
+  browserFields: BrowserFields;
+  /** each row of data is represented as one TimelineNonEcsData[] */
+  data: TimelineNonEcsData[][];
+}) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
 
 /** The specification of a column header */
 export type ColumnHeaderOptions = Pick<
@@ -26,6 +63,7 @@ export type ColumnHeaderOptions = Pick<
   | 'isSortable'
 > & {
   aggregatable?: boolean;
+  tGridCellActions?: TGridCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string;
