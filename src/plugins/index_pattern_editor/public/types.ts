@@ -39,7 +39,7 @@ export interface IndexPatternEditorProps {
   /**
    * Handler for the "cancel" footer button
    */
-  onCancel: () => void;
+  onCancel?: () => void;
   /**
    * Sets the default index pattern type to rollup. Defaults to false.
    */
