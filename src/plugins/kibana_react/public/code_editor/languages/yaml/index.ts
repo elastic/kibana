@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { registerLanguage } from '@kbn/monaco';
-import { CssLang, HandlebarsLang, MarkdownLang, YamlLang } from './languages';
+import { LangModuleType } from '@kbn/monaco';
+import { languageConfiguration, lexerRules } from './language';
+import { LANG } from './constants';
 
-registerLanguage(CssLang);
-registerLanguage(HandlebarsLang);
-registerLanguage(MarkdownLang);
-registerLanguage(YamlLang);
+export const Lang: LangModuleType = { ID: LANG, languageConfiguration, lexerRules };
