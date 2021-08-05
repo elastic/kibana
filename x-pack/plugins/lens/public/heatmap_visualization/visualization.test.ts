@@ -249,6 +249,32 @@ describe('heatmap', () => {
     });
   });
 
+  describe('#getLayerTypes', () => {
+    it('should return a single layer type', () => {
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getLayerTypes()
+      ).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
+      };
+      const instance = getHeatmapVisualization({
+        paletteService,
+      });
+      expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
+      expect(instance.getLayerType('foo', state)).toBeUndefined();
+    });
+  });
+
   describe('#toExpression', () => {
     let datasourceLayers: Record<string, DatasourcePublicAPI>;
 

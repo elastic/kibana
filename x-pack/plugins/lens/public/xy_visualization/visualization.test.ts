@@ -215,6 +215,23 @@ describe('xy_visualization', () => {
     });
   });
 
+  describe('#getLayerTypes', () => {
+    it('should return a single layer type', () => {
+      expect(xyVisualization.getLayerTypes()).toHaveLength(1);
+    });
+
+    it('should return the icon for the visualization type', () => {
+      expect(xyVisualization.getLayerTypes()[0].icon).not.toBeUndefined();
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      expect(xyVisualization.getLayerType('first', exampleState())).toEqual(layerTypes.DATA);
+      expect(xyVisualization.getLayerType('foo', exampleState())).toBeUndefined();
+    });
+  });
+
   describe('#setDimension', () => {
     let mockDatasource: ReturnType<typeof createMockDatasource>;
     let frame: ReturnType<typeof createMockFramePublicAPI>;

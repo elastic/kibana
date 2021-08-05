@@ -155,6 +155,19 @@ describe('metric_visualization', () => {
     });
   });
 
+  describe('#getLayerTypes', () => {
+    it('should return a single layer type', () => {
+      expect(metricVisualization.getLayerTypes()).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      expect(metricVisualization.getLayerType('l1', exampleState())).toEqual(layerTypes.DATA);
+      expect(metricVisualization.getLayerType('foo', exampleState())).toBeUndefined();
+    });
+  });
+
   describe('#toExpression', () => {
     it('should map to a valid AST', () => {
       const datasource: DatasourcePublicAPI = {

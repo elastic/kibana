@@ -82,6 +82,24 @@ describe('Datatable Visualization', () => {
     });
   });
 
+  describe('#getLayerTypes', () => {
+    it('should return a single layer type', () => {
+      expect(datatableVisualization.getLayerTypes()).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      const state: DatatableVisualizationState = {
+        layerId: 'baz',
+        layerType: layerTypes.DATA,
+        columns: [{ columnId: 'a' }, { columnId: 'b' }, { columnId: 'c' }],
+      };
+      expect(datatableVisualization.getLayerType('baz', state)).toEqual(layerTypes.DATA);
+      expect(datatableVisualization.getLayerType('foo', state)).toBeUndefined();
+    });
+  });
+
   describe('#getSuggestions', () => {
     function numCol(columnId: string): TableSuggestionColumn {
       return {

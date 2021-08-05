@@ -57,6 +57,20 @@ describe('pie_visualization', () => {
       expect(error).not.toBeDefined();
     });
   });
+
+  describe('#getLayerTypes', () => {
+    it('should return a single layer type', () => {
+      expect(pieVisualization.getLayerTypes()).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      expect(pieVisualization.getLayerType(LAYER_ID, getExampleState())).toEqual(layerTypes.DATA);
+      expect(pieVisualization.getLayerType('foo', getExampleState())).toBeUndefined();
+    });
+  });
+
   describe('#setDimension', () => {
     it('returns expected state', () => {
       const prevState: PieVisualizationState = {
