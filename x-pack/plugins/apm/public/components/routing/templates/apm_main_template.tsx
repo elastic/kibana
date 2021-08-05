@@ -13,7 +13,6 @@ import {
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
-// import { useSourcererScope } from '../../../../../security_solution/public/common/containers/sourcerer';
 
 /*
  * This template contains:
@@ -39,6 +38,7 @@ export function ApmMainTemplate({
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
 
+  // TODO: GET A CHECK
   return false ? (
     <ObservabilityPageTemplate
       pageHeader={{

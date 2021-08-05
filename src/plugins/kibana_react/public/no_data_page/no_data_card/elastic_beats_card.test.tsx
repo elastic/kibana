@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ElasticBeatsCard } from './elastic_agent_card';
+import { ElasticBeatsCard } from './elastic_beats_card';
 
 jest.mock('../../context', () => ({
   useKibana: jest.fn().mockReturnValue({
