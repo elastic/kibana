@@ -51,7 +51,7 @@ const rollupIndexPatternTooManyMatchesError = {
 
 const mustMatchError = {
   message: i18n.translate('indexPatternEditor.createIndex.noMatch', {
-    defaultMessage: 'Name must match one or more indices, data streams, or index aliases.',
+    defaultMessage: 'Name must match one or more data streams, indices, or aliases.',
   }),
 };
 
