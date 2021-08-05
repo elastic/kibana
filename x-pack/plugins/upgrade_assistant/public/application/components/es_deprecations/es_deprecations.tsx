@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -23,6 +24,7 @@ import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { EsDeprecationsTable } from './es_deprecations_table';
 import { EsDeprecationErrors } from './es_deprecation_errors';
+import { NoDeprecationsPrompt } from '../shared';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageTitle', {
@@ -53,7 +55,7 @@ const i18nTexts = {
   },
 };
 
-export const EsDeprecationsContent = () => {
+export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
   const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
 
   const { data: esDeprecations, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
@@ -82,6 +84,17 @@ export const EsDeprecationsContent = () => {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
+      </EuiPageContent>
+    );
+  }
+
+  if (esDeprecations?.deprecations?.length === 0) {
+    return (
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <NoDeprecationsPrompt
+          deprecationType="Elasticsearch"
+          navigateToOverviewPage={() => history.push('/overview')}
+        />
       </EuiPageContent>
     );
   }
@@ -136,4 +149,4 @@ export const EsDeprecationsContent = () => {
       <EsDeprecationsTable deprecations={esDeprecations?.deprecations} reload={resendRequest} />
     </div>
   );
-};
+});

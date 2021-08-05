@@ -20,3 +20,5 @@ export enum GroupByOption {
 }
 
 export type DeprecationTableColumns = 'type' | 'index' | 'message' | 'correctiveAction';
+
+export type Status = 'in_progress' | 'complete' | 'idle' | 'error';

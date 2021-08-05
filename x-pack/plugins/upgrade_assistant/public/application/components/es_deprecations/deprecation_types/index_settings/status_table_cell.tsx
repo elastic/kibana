@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiFlexItem, EuiText, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Status } from './table_row';
+import { Status } from '../../../types';
 
 const i18nTexts = {
   deleteInProgressText: i18n.translate(
@@ -21,7 +21,7 @@ const i18nTexts = {
   deleteCompleteText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indexSettings.deleteCompleteText',
     {
-      defaultMessage: 'Settings removal complete',
+      defaultMessage: 'Deprecated settings removed',
     }
   ),
   deleteFailedText: i18n.translate(
@@ -33,11 +33,14 @@ const i18nTexts = {
 };
 
 interface Props {
-  status: Status;
+  status: {
+    statusType: Status;
+  };
 }
 
 export const IndexSettingsStatusCell: React.FunctionComponent<Props> = ({ status }) => {
-  if (status === 'in_progress') {
+  const { statusType } = status;
+  if (statusType === 'in_progress') {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -50,7 +53,7 @@ export const IndexSettingsStatusCell: React.FunctionComponent<Props> = ({ status
     );
   }
 
-  if (status === 'complete') {
+  if (statusType === 'complete') {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -63,7 +66,7 @@ export const IndexSettingsStatusCell: React.FunctionComponent<Props> = ({ status
     );
   }
 
-  if (status === 'error') {
+  if (statusType === 'error') {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>

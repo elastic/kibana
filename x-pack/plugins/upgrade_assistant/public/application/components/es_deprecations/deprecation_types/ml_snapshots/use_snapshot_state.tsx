@@ -8,13 +8,14 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 
 import { ApiService, ResponseError } from '../../../../lib/api';
+import { Status } from '../../../types';
 
 const POLL_INTERVAL_MS = 1000;
 
 interface SnapshotStatus {
   snapshotId: string;
   jobId: string;
-  status: 'complete' | 'in_progress' | 'error' | 'idle';
+  status: Status;
   action?: 'upgrade' | 'delete';
 }
 

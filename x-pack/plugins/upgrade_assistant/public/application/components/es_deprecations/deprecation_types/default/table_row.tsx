@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
@@ -21,12 +21,17 @@ interface Props {
 }
 
 export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames, deprecation }) => {
-  const [showFlyout, setShowFlyout] = useState<boolean | undefined>(false);
+  const [showFlyout, setShowFlyout] = useState(false);
 
   const {
     addContent: addContentToGlobalFlyout,
     removeContent: removeContentFromGlobalFlyout,
   } = useGlobalFlyout();
+
+  const closeFlyout = useCallback(() => {
+    setShowFlyout(false);
+    removeContentFromGlobalFlyout('deprecationDetails');
+  }, [removeContentFromGlobalFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -35,22 +40,16 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames,
         Component: DefaultDeprecationFlyout,
         props: {
           deprecation,
-          closeFlyout: () => setShowFlyout(false),
+          closeFlyout,
         },
         flyoutProps: {
-          onClose: () => setShowFlyout(false),
+          onClose: closeFlyout,
           'data-test-subj': 'defaultDeprecationDetails',
           'aria-labelledby': 'defaultDeprecationDetailsFlyoutTitle',
         },
       });
     }
-  }, [addContentToGlobalFlyout, deprecation, showFlyout]);
-
-  useEffect(() => {
-    if (showFlyout === false) {
-      removeContentFromGlobalFlyout('deprecationDetails');
-    }
-  }, [showFlyout, removeContentFromGlobalFlyout]);
+  }, [addContentToGlobalFlyout, closeFlyout, deprecation, showFlyout]);
 
   return (
     <>

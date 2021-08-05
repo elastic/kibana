@@ -31,6 +31,70 @@ export async function getUpgradeAssistantStatus(
         details:
           "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
       },
+      {
+        level: 'warning',
+        message: "A Cluster name cannot contain ':'",
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+        details:
+          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+      },
+      {
+        level: 'warning',
+        message: "A Cluster name cannot contain ':'",
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+        details:
+          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+      },
+      {
+        level: 'warning',
+        message: "A Cluster name cannot contain ':'",
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+        details:
+          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+      },
+      {
+        level: 'warning',
+        message: "D Cluster name cannot contain ':'",
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+        details:
+          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+      },
+      {
+        level: 'warning',
+        message: "E Cluster name cannot contain ':'",
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+        details:
+          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+      },
+      {
+        level: 'warning',
+        message: "F Cluster name cannot contain ':'",
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+        details:
+          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+      },
+      {
+        level: 'warning',
+        message: "G Cluster name cannot contain ':'",
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+        details:
+          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+      },
+      {
+        level: 'warning',
+        message: "A Cluster name cannot contain ':'",
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+        details:
+          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+      },
     ],
     node_settings: [
       {

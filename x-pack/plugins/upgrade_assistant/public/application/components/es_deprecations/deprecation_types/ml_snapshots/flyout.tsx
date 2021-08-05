@@ -131,34 +131,37 @@ export const FixSnapshotsFlyout = ({
               {i18nTexts.closeButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  data-test-subj="deleteSnapshotButton"
-                  color="danger"
-                  onClick={onDeleteSnapshot}
-                  isLoading={false}
-                >
-                  {snapshotState.action === 'delete' && snapshotState.error
-                    ? i18nTexts.retryDeleteButtonLabel
-                    : i18nTexts.deleteButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton
-                  fill
-                  onClick={onUpgradeSnapshot}
-                  isLoading={false}
-                  data-test-subj="upgradeSnapshotButton"
-                >
-                  {snapshotState.action === 'upgrade' && snapshotState.error
-                    ? i18nTexts.retryUpgradeButtonLabel
-                    : i18nTexts.upgradeButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {/* Hide the upgrade/delete actions if the deprecation has been resolved */}
+          {snapshotState.status !== 'complete' && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    data-test-subj="deleteSnapshotButton"
+                    color="danger"
+                    onClick={onDeleteSnapshot}
+                    isLoading={false}
+                  >
+                    {snapshotState.action === 'delete' && snapshotState.error
+                      ? i18nTexts.retryDeleteButtonLabel
+                      : i18nTexts.deleteButtonLabel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton
+                    fill
+                    onClick={onUpgradeSnapshot}
+                    isLoading={false}
+                    data-test-subj="upgradeSnapshotButton"
+                  >
+                    {snapshotState.action === 'upgrade' && snapshotState.error
+                      ? i18nTexts.retryUpgradeButtonLabel
+                      : i18nTexts.upgradeButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

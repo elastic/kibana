@@ -27,7 +27,7 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
   rowFieldNames,
   deprecation,
 }) => {
-  const [showFlyout, setShowFlyout] = useState<boolean | undefined>(false);
+  const [showFlyout, setShowFlyout] = useState(false);
   const snapshotState = useMlSnapshotContext();
 
   const {
@@ -35,7 +35,10 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
     removeContent: removeContentFromGlobalFlyout,
   } = useGlobalFlyout();
 
-  const closeFlyout = useCallback(() => setShowFlyout(false), []);
+  const closeFlyout = useCallback(() => {
+    setShowFlyout(false);
+    removeContentFromGlobalFlyout('mlFlyout');
+  }, [removeContentFromGlobalFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -55,12 +58,6 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
       });
     }
   }, [snapshotState, addContentToGlobalFlyout, showFlyout, deprecation, closeFlyout]);
-
-  useEffect(() => {
-    if (showFlyout === false) {
-      removeContentFromGlobalFlyout('mlFlyout');
-    }
-  }, [showFlyout, removeContentFromGlobalFlyout]);
 
   return (
     <>

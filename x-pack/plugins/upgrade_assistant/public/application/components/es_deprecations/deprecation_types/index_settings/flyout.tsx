@@ -21,13 +21,20 @@ import {
   EuiTextColor,
   EuiLink,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { EnrichedDeprecationInfo, IndexSettingAction } from '../../../../../../common/types';
+import type { ResponseError } from '../../../../lib/api';
+import type { Status } from '../../../types';
 
 export interface RemoveIndexSettingsFlyoutProps {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
   removeIndexSettings: (index: string, settings: string[]) => Promise<void>;
+  status: {
+    statusType: Status;
+    details?: ResponseError;
+  };
 }
 
 const i18nTexts = {
@@ -53,6 +60,18 @@ const i18nTexts = {
       defaultMessage: 'Remove deprecated settings',
     }
   ),
+  retryRemoveButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.retryRemoveButtonLabel',
+    {
+      defaultMessage: 'Retry removing deprecated settings',
+    }
+  ),
+  resolvedButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.resolvedButtonLabel',
+    {
+      defaultMessage: 'Resolved',
+    }
+  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.cancelButtonLabel',
     {
@@ -65,16 +84,23 @@ const i18nTexts = {
       defaultMessage: 'Remove the following deprecated index settings?',
     }
   ),
+  errorTitle: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.deleteErrorTitle',
+    {
+      defaultMessage: 'Error deleting index settings',
+    }
+  ),
 };
 
 export const RemoveIndexSettingsFlyout = ({
   deprecation,
   closeFlyout,
   removeIndexSettings,
+  status,
 }: RemoveIndexSettingsFlyoutProps) => {
   const { index, message, details, url, correctiveAction } = deprecation;
+  const { statusType, details: statusDetails } = status;
 
-  // TODO handle error banner/retry if error
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -88,6 +114,19 @@ export const RemoveIndexSettingsFlyout = ({
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {statusType === 'error' && (
+          <>
+            <EuiCallOut
+              title={i18nTexts.errorTitle}
+              color="danger"
+              iconType="alert"
+              data-test-subj="deleteSettingsError"
+            >
+              {statusDetails!.message}
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
         <EuiText>
           <p>{details}</p>
           <p>
@@ -97,25 +136,30 @@ export const RemoveIndexSettingsFlyout = ({
           </p>
         </EuiText>
 
-        <EuiSpacer />
+        {/* Hide the prompt to remove settings if the deprecation has been resolved */}
+        {statusType !== 'complete' && (
+          <>
+            <EuiSpacer />
 
-        <EuiTitle size="xs">
-          <h3>{i18nTexts.confirmationText}</h3>
-        </EuiTitle>
+            <EuiTitle size="xs">
+              <h3>{i18nTexts.confirmationText}</h3>
+            </EuiTitle>
 
-        <EuiSpacer />
+            <EuiSpacer />
 
-        <EuiText>
-          <ul>
-            {(correctiveAction as IndexSettingAction).deprecatedSettings.map(
-              (setting, settingIndex) => (
-                <li key={`${setting}-${settingIndex}`}>
-                  <EuiCode>{setting}</EuiCode>
-                </li>
-              )
-            )}
-          </ul>
-        </EuiText>
+            <EuiText>
+              <ul>
+                {(correctiveAction as IndexSettingAction).deprecatedSettings.map(
+                  (setting, settingIndex) => (
+                    <li key={`${setting}-${settingIndex}`}>
+                      <EuiCode>{setting}</EuiCode>
+                    </li>
+                  )
+                )}
+              </ul>
+            </EuiText>
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -124,21 +168,26 @@ export const RemoveIndexSettingsFlyout = ({
               {i18nTexts.closeButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              data-test-subj="deleteSettingsButton"
-              color="danger"
-              onClick={() =>
-                removeIndexSettings(
-                  index!,
-                  (correctiveAction as IndexSettingAction).deprecatedSettings
-                )
-              }
-            >
-              {i18nTexts.removeButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
+          {/* Hide the "Remove settings" button if the deprecation has been resolved */}
+          {statusType !== 'complete' && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                data-test-subj="deleteSettingsButton"
+                color="danger"
+                onClick={() =>
+                  removeIndexSettings(
+                    index!,
+                    (correctiveAction as IndexSettingAction).deprecatedSettings
+                  )
+                }
+              >
+                {statusType === 'error'
+                  ? i18nTexts.retryRemoveButtonLabel
+                  : i18nTexts.removeButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

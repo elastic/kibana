@@ -27,15 +27,20 @@ export const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
 }) => {
-  const [showFlyout, setShowFlyout] = useState<boolean | undefined>(false);
+  const [showFlyout, setShowFlyout] = useState(false);
   const reindexState = useReindexContext();
+  const { api } = useAppContext();
 
   const {
     addContent: addContentToGlobalFlyout,
     removeContent: removeContentFromGlobalFlyout,
   } = useGlobalFlyout();
 
-  const closeFlyout = useCallback(() => setShowFlyout(false), []);
+  const closeFlyout = useCallback(async () => {
+    await api.sendReindexTelemetryData({ close: true });
+    setShowFlyout(false);
+    removeContentFromGlobalFlyout('reindexFlyout');
+  }, [api, removeContentFromGlobalFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -57,10 +62,14 @@ export const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   }, [addContentToGlobalFlyout, deprecation, showFlyout, reindexState, closeFlyout]);
 
   useEffect(() => {
-    if (showFlyout === false) {
-      removeContentFromGlobalFlyout('reindexFlyout');
+    if (showFlyout) {
+      async function sendTelemetry() {
+        await api.sendReindexTelemetryData({ open: true });
+      }
+
+      sendTelemetry();
     }
-  }, [showFlyout, removeContentFromGlobalFlyout]);
+  }, [showFlyout, api]);
 
   return (
     <>
