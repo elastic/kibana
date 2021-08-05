@@ -46,7 +46,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   // a background task solution can be built on the server side. Once a background task solution is available we
   // can remove this.
   useUpgradeSecurityPackages();
-  console.log('home', indexPattern);
+
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
       <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />

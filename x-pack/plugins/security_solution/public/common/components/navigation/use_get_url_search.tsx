@@ -16,7 +16,6 @@ export const useGetUrlSearch = (tab?: SearchNavTab) => {
   const mapState = makeMapStateToProps();
   const { urlState } = useDeepEqualSelector(mapState);
   const urlSearch = useMemo(() => {
-    console.log('getSearch yall', { tab, urlState, getSearch: getSearch(tab, urlState) });
     return tab ? getSearch(tab, urlState) : '';
   }, [tab, urlState]);
   return urlSearch;

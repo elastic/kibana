@@ -79,27 +79,12 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
           selectedPatterns: isEmpty(selectedPatterns)
             ? defaultIndexPatternByEventType({ state, eventType })
             : selectedPatterns,
-          // ...(isEmpty(selectedPatterns) || selectedKipId === null
-          //   ? {
-          //     selectedKipId: state.defaultIndexPattern.id,
-          //     selectedPatterns: getPatternList(state.defaultIndexPattern),
-          //   }
-          //   : {}),
         },
       },
     };
   })
 
   .case(setSource, (state, { id, payload }) => {
-    // const patterns =
-    //   state.sourcererScopes[id].selectedKipId === null
-    //     ? []
-    //     : [
-    //         state.kibanaIndexPatterns.find(
-    //           (kip) => kip.id === state.sourcererScopes[id].selectedKipId
-    //         )!.title,
-    //       ] ?? [];
-
     return {
       ...state,
       sourcererScopes: {
@@ -107,15 +92,6 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         [id]: {
           ...state.sourcererScopes[id],
           ...payload,
-          // ...(patterns.length === 0
-          //   ? {
-          //       selectedKipId: state.defaultIndexPattern.id,
-          //       selectedPatterns: getPatternList(state.defaultIndexPattern),
-          //     }
-          //   : {
-          //       selectedKipId: state.sourcererScopes[id].selectedKipId,
-          //       selectedPatterns: patterns,
-          //     }),
         },
       },
     };
