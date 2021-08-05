@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { ContentsProps } from '.';
 import { NodeStats } from '../../../../../common/service_map';
@@ -14,6 +15,7 @@ import { useUrlParams } from '../../../../context/url_params_context/use_url_par
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 
 export function BackendContents({ nodeData }: ContentsProps) {
@@ -50,7 +52,10 @@ export function BackendContents({ nodeData }: ContentsProps) {
   const isLoading = status === FETCH_STATUS.LOADING;
   const detailsUrl = apmRouter.link('/backends/:backendName/overview', {
     path: { backendName },
-    query: query as any,
+    query: query as TypeOf<
+      ApmRoutes,
+      '/backends/:backendName/overview'
+    >['query'],
   });
 
   return (
