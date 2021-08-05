@@ -171,7 +171,7 @@ export const CodeEditor: React.FC<Props> = ({
   );
 
   const onKeydownMonaco = useCallback(
-    (ev) => {
+    (ev: monaco.IKeyboardEvent) => {
       if (ev.keyCode === monaco.KeyCode.Escape) {
         // If the autocompletion context menu is open then we want to let ESCAPE close it but
         // **not** exit out of editing mode.
