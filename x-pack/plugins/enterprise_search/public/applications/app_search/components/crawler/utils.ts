@@ -104,6 +104,19 @@ export function crawlDomainValidationToResult(
   };
 }
 
+export const getDeleteDomainConfirmationMessage = (domainUrl: string) => {
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.action.deleteDomain.confirmationPopupMessage',
+    {
+      defaultMessage:
+        'Are you sure you want to remove the domain "{domainUrl}" and all of its settings?',
+      values: {
+        domainUrl,
+      },
+    }
+  );
+};
+
 export const getDeleteDomainSuccessMessage = (domainUrl: string) => {
   return i18n.translate(
     'xpack.enterpriseSearch.appSearch.crawler.action.deleteDomain.successMessage',
