@@ -67,7 +67,7 @@ plugins/
 
 `ui` - [Optional] If your plugin contains client-side code, this must be true.
 
-`configPath` - Every plugin might allow Kibana users to adjust configuration via kibana.yml file. If your plugin needs to read config from `kibana.yml , you should declare what property name it should have access to.
+`configPath` - [Optional] Every plugin might allow Kibana users to adjust configuration via kibana.yml file. If your plugin needs to read config from `kibana.yml , you should declare what property name it should have access to.
 
 `type` - [Optional] Should be either `preboot` or `standard` which specifies the type of plugin. Default value, if unspecified, is `standard`. There are two types of plugins:
 
@@ -82,7 +82,7 @@ plugins/
 
 `optionalPlugins` - [Optional] If your plugin has an optional dependency on other plugins, you must list them here by id. If any of the optional plugins are disabled or not installed, your plugin will still load, however that plugin's API contract will be undefined in the second parameter of the setup and start functions.
 
-`requiredBundles` - Don't worry about getting this right. The build optimizer will complain if any of these values are incorrect.
+`requiredBundles` - [Required in certain situations] Don't worry about getting this right. The build optimizer will complain if any of these values are incorrect.
 
 <DocCallOut>
   You don't need to declare a dependency on a plugin if you only wish to access its types.
