@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatten, omit, isEmpty } from 'lodash';
+import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
@@ -20,6 +20,7 @@ const INITIAL_DATA = {
   buckets: [] as APIResponse['buckets'],
   noHits: true,
   bucketSize: 0,
+  hits: [] as APIResponse['hits'],
 };
 
 export function useTransactionDistributionFetcher({
@@ -30,7 +31,16 @@ export function useTransactionDistributionFetcher({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    urlParams: { environment, kuery, start, end, transactionId, traceId },
+    urlParams: {
+      environment,
+      kuery,
+      start,
+      end,
+      transactionId,
+      traceId,
+      sampleRangeFrom,
+      sampleRangeTo,
+    },
   } = useUrlParams();
 
   const history = useHistory();
@@ -53,13 +63,20 @@ export function useTransactionDistributionFetcher({
               transactionName,
               transactionId,
               traceId,
+              sampleRangeFrom: sampleRangeFrom + '',
+              sampleRangeTo: sampleRangeTo + '',
             },
           },
         });
 
+        const buckets = response.hits.map((hit) => ({
+          transactionId: hit._source.transaction.id,
+          traceId: hit._source.trace.id,
+        }));
+
         const selectedSample =
           transactionId && traceId
-            ? flatten(response.buckets.map((bucket) => bucket.samples)).find(
+            ? buckets.find(
                 (sample) =>
                   sample.transactionId === transactionId &&
                   sample.traceId === traceId
@@ -68,13 +85,7 @@ export function useTransactionDistributionFetcher({
 
         if (!selectedSample) {
           // selected sample was not found. select a new one:
-          // sorted by total number of requests, but only pick
-          // from buckets that have samples
-          const bucketsSortedByCount = response.buckets
-            .filter((bucket) => !isEmpty(bucket.samples))
-            .sort((bucket) => bucket.count);
-
-          const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
+          const preferredSample = maybe(buckets[0]);
 
           history.replace({
             ...history.location,
@@ -101,6 +112,8 @@ export function useTransactionDistributionFetcher({
       end,
       transactionType,
       transactionName,
+      sampleRangeFrom,
+      sampleRangeTo,
     ]
   );
 

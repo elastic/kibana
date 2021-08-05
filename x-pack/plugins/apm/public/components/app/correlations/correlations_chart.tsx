@@ -8,23 +8,23 @@
 import React from 'react';
 import {
   AnnotationDomainType,
+  AreaSeries,
+  Axis,
+  AxisStyle,
+  BrushEndListener,
   Chart,
   CurveType,
-  Settings,
-  Axis,
-  ScaleType,
-  Position,
-  AreaSeries,
-  RecursivePartial,
-  AxisStyle,
-  PartialTheme,
   LineAnnotation,
   LineAnnotationDatum,
+  PartialTheme,
+  Position,
+  RectAnnotation,
+  RecursivePartial,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
 
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
-
-import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -82,6 +82,8 @@ interface CorrelationsChartProps {
   markerValue: number;
   markerPercentile: number;
   overallHistogram: HistogramItem[];
+  onChartSelection?: BrushEndListener;
+  selection?: [number, number];
 }
 
 const annotationsStyle = {
@@ -130,10 +132,13 @@ export function CorrelationsChart({
   markerValue,
   markerPercentile,
   overallHistogram,
+  onChartSelection,
+  selection,
 }: CorrelationsChartProps) {
   const euiTheme = useTheme();
 
   if (!Array.isArray(overallHistogram)) return <div />;
+
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
       dataValue: markerValue,
@@ -155,6 +160,27 @@ export function CorrelationsChart({
 
   const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
+  const onBrushEnd: BrushEndListener = (d) => {
+    if (onChartSelection !== undefined) {
+      onChartSelection(d);
+    }
+  };
+
+  const selectionAnnotation =
+    selection !== undefined
+      ? [
+          {
+            coordinates: {
+              x0: selection[0],
+              x1: selection[1],
+              y0: 0,
+              y1: 100000,
+            },
+            details: 'selection',
+          },
+        ]
+      : undefined;
+
   return (
     <div
       data-test-subj="apmCorrelationsChart"
@@ -170,7 +196,21 @@ export function CorrelationsChart({
           theme={chartTheme}
           showLegend
           legendPosition={Position.Bottom}
+          onBrushEnd={onBrushEnd}
         />
+        {selectionAnnotation !== undefined && (
+          <RectAnnotation
+            dataValues={selectionAnnotation}
+            id="rect_annotation_1"
+            style={{
+              strokeWidth: 1,
+              stroke: '#e5e5e5',
+              fill: '#e5e5e5',
+              opacity: 0.9,
+            }}
+            hideTooltips={true}
+          />
+        )}
         <LineAnnotation
           id="annotation_1"
           domainType={AnnotationDomainType.XDomain}
@@ -235,7 +275,6 @@ export function CorrelationsChart({
             />
           )}
       </Chart>
-      <EuiSpacer size="s" />
     </div>
   );
 }

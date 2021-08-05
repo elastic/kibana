@@ -15,6 +15,7 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
+
 import { useRedirect } from './useRedirect';
 
 function getRedirectLocation({

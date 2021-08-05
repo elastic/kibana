@@ -24,6 +24,8 @@ export type IUrlParams = {
   sortDirection?: string;
   sortField?: string;
   start?: string;
+  sampleRangeFrom?: number;
+  sampleRangeTo?: number;
   traceId?: string;
   transactionId?: string;
   transactionName?: string;

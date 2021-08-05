@@ -107,6 +107,22 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
+      // finish early if correlation analysis is not required.
+      if (params.analyzeCorrelations === false) {
+        addLogMessage(
+          `Finish service since correlation analysis wasn't requested.`
+        );
+        state.setProgress({
+          loadedHistogramStepsize: 1,
+          loadedOverallHistogram: 1,
+          loadedFieldCanditates: 1,
+          loadedFieldValuePairs: 1,
+          loadedHistograms: 1,
+        });
+        state.setIsRunning(false);
+        return;
+      }
+
       // Create an array of ranges [2, 4, 6, ..., 98]
       const percents = Array.from(range(2, 100, 2));
       const {

@@ -15,19 +15,14 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import type {
   HistogramItem,
+  SearchServiceParams,
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 
 interface CorrelationsOptions {
-  environment?: string;
-  kuery?: string;
-  serviceName?: string;
-  transactionName?: string;
-  transactionType?: string;
-  start?: string;
-  end?: string;
+  params: SearchServiceParams;
 }
 
 interface RawResponse {
@@ -39,7 +34,7 @@ interface RawResponse {
   ccsWarning: boolean;
 }
 
-export const useCorrelations = (params: CorrelationsOptions) => {
+export const useCorrelations = ({ params }: CorrelationsOptions) => {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -48,16 +43,42 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   const [isComplete, setIsComplete] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [loaded, setLoaded] = useState<number>(0);
-  const [rawResponse, setRawResponse] = useState<RawResponse>();
+
+  const [ccsWarning, setCcsWarning] = useState<RawResponse['ccsWarning']>(
+    false
+  );
+  const [histograms, setHistograms] = useState<RawResponse['values']>([]);
+  const [log, setLog] = useState<RawResponse['log']>([]);
+  const [overallHistogram, setOverallHistogram] = useState<
+    RawResponse['overallHistogram']
+  >();
+  const [percentileThresholdValue, setPercentileThresholdValue] = useState<
+    RawResponse['percentileThresholdValue']
+  >();
+
   const [timeTook, setTimeTook] = useState<number | undefined>();
   const [total, setTotal] = useState<number>(100);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
   function setResponse(response: IKibanaSearchResponse<RawResponse>) {
-    // @TODO: optimize rawResponse.overallHistogram if histogram is the same
     setIsRunning(response.isRunning || false);
-    setRawResponse(response.rawResponse);
+    setCcsWarning(response.rawResponse?.ccsWarning ?? false);
+    setHistograms(response.rawResponse?.values ?? []);
+    setLog(response.rawResponse?.log ?? []);
+
+    // only set percentileThresholdValue and overallHistogram once it's repopulated on a refresh,
+    // otherwise the consuming chart would flicker with an empty state on reload.
+    if (
+      response.rawResponse?.percentileThresholdValue !== undefined &&
+      response.rawResponse?.overallHistogram !== undefined
+    ) {
+      setOverallHistogram(response.rawResponse?.overallHistogram);
+      setPercentileThresholdValue(
+        response.rawResponse?.percentileThresholdValue
+      );
+    }
+
     setLoaded(response.loaded!);
     setTotal(response.total!);
     setTimeTook(response.rawResponse.took);
@@ -106,13 +127,12 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   };
 
   return {
-    ccsWarning: rawResponse?.ccsWarning ?? false,
-    log: rawResponse?.log ?? [],
+    ccsWarning,
+    log,
     error,
-    histograms: rawResponse?.values ?? [],
-    percentileThresholdValue:
-      rawResponse?.percentileThresholdValue ?? undefined,
-    overallHistogram: rawResponse?.overallHistogram,
+    histograms,
+    percentileThresholdValue,
+    overallHistogram,
     isComplete,
     isRunning,
     progress: loaded / total,

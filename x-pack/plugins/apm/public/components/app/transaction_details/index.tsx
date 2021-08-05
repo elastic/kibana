@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { flatten, isEmpty } from 'lodash';
-import React from 'react';
+import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { XYBrushArea } from '@elastic/charts';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -19,7 +19,7 @@ import { useTransactionDistributionFetcher } from '../../../hooks/use_transactio
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { TransactionDistribution } from './Distribution';
+import { MlLatencyCorrelations } from '../correlations/ml_latency_correlations_page';
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { WaterfallWithSummary } from './waterfall_with_summary';
 
@@ -46,10 +46,9 @@ export function TransactionDetails() {
 
   const { transactionName } = query;
 
-  const {
-    distributionData,
-    distributionStatus,
-  } = useTransactionDistributionFetcher({ transactionName });
+  const { distributionData } = useTransactionDistributionFetcher({
+    transactionName,
+  });
 
   useBreadcrumb({
     title: transactionName,
@@ -59,33 +58,43 @@ export function TransactionDetails() {
     }),
   });
 
-  const selectedSample = flatten(
-    distributionData.buckets.map((bucket) => bucket.samples)
-  ).find(
-    (sample) =>
-      sample.transactionId === urlParams.transactionId &&
-      sample.traceId === urlParams.traceId
-  );
+  const { sampleRangeFrom, sampleRangeTo } = urlParams;
 
-  const bucketWithSample =
-    selectedSample &&
-    distributionData.buckets.find((bucket) =>
-      bucket.samples.includes(selectedSample)
-    );
+  const traceSamples: Sample[] = useMemo(() => {
+    return distributionData.hits.map((hit) => ({
+      transactionId: hit._source.transaction.id,
+      traceId: hit._source.trace.id,
+    }));
+  }, [distributionData.hits]);
 
-  const traceSamples = bucketWithSample?.samples ?? [];
-  const bucketIndex = bucketWithSample
-    ? distributionData.buckets.indexOf(bucketWithSample)
-    : -1;
+  const selectSampleFromChartSelection = (selection: XYBrushArea) => {
+    if (selection !== undefined) {
+      const { x } = selection;
+      if (Array.isArray(x)) {
+        history.push({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(history.location.search),
+            sampleRangeFrom: Math.round(x[0]),
+            sampleRangeTo: Math.round(x[1]),
+          }),
+        });
+      }
+    }
+  };
 
-  const selectSampleFromBucketClick = (sample: Sample) => {
+  const clearChartSelecton = () => {
+    const currentQuery = toQuery(history.location.search);
+    delete currentQuery.sampleRangeFrom;
+    delete currentQuery.sampleRangeTo;
+
+    const firstSample = distributionData.buckets[0].samples[0];
+    currentQuery.transactionId = firstSample?.transactionId;
+    currentQuery.traceId = firstSample?.traceId;
+
     history.push({
       ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        transactionId: sample.transactionId,
-        traceId: sample.traceId,
-      }),
+      search: fromQuery(currentQuery),
     });
   };
 
@@ -105,19 +114,15 @@ export function TransactionDetails() {
 
       <EuiHorizontalRule size="full" margin="l" />
 
-      <EuiPanel hasBorder={true}>
-        <TransactionDistribution
-          distribution={distributionData}
-          fetchStatus={distributionStatus}
-          bucketIndex={bucketIndex}
-          onBucketClick={(bucket) => {
-            if (!isEmpty(bucket.samples)) {
-              selectSampleFromBucketClick(bucket.samples[0]);
-            }
-          }}
-        />
-      </EuiPanel>
-
+      <MlLatencyCorrelations
+        onChartSelection={selectSampleFromChartSelection}
+        onClearSelection={clearChartSelecton}
+        selection={
+          sampleRangeFrom !== undefined && sampleRangeTo !== undefined
+            ? [sampleRangeFrom, sampleRangeTo]
+            : undefined
+        }
+      />
       <EuiSpacer size="s" />
 
       <HeightRetainer>
