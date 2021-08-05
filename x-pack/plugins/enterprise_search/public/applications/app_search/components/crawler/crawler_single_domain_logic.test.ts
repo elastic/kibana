@@ -46,7 +46,7 @@ describe('CrawlerSingleDomainLogic', () => {
         CrawlerSingleDomainLogic.actions.onReceiveDomainData(domain as CrawlerDomain);
       });
 
-      it('should set the crawl requests', () => {
+      it('should set the domain', () => {
         expect(CrawlerSingleDomainLogic.values.domain).toEqual(domain);
       });
     });

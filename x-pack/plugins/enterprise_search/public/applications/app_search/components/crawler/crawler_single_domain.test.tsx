@@ -43,7 +43,7 @@ describe('CrawlerSingleDomain', () => {
     expect(wrapper.prop('pageHeader')).toEqual({ pageTitle: 'https://elastic.co' });
   });
 
-  it('Uses a placeholder for the page title and page chrome if a domain has not been', () => {
+  it('uses a placeholder for the page title and page chrome if a domain has not been', () => {
     setMockValues({
       ...MOCK_VALUES,
       domain: null,
