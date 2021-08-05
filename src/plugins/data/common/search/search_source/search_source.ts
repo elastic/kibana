@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
+import { uniqueId, keyBy, pick, difference, isEqual, uniqWith, isObject } from 'lodash';
 import {
   catchError,
   finalize,
@@ -72,7 +72,7 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
@@ -588,14 +588,14 @@ export class SearchSource {
         return addToBody('_source', val);
       case 'sort':
         const sort = normalizeSortRequest(
-          val,
+          (val as SearchSourceFields['sort'])!,
           this.getField('index'),
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
       case 'aggs':
         if ((val as any) instanceof AggConfigs) {
-          return addToBody('aggs', val.toDsl());
+          return addToBody('aggs', (val as AggConfigs).toDsl());
         } else {
           return addToBody('aggs', val);
         }
@@ -854,10 +854,9 @@ export class SearchSource {
       index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
     if (originalFilters) {
-      const filters = this.getFilters(originalFilters);
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
-        filter: filters,
+        filter: originalFilters,
       };
     }
     if (recurse && this.getParent()) {
@@ -879,21 +878,5 @@ export class SearchSource {
   public serialize() {
     const [searchSourceFields, references] = extractReferences(this.getSerializedFields());
     return { searchSourceJSON: JSON.stringify(searchSourceFields), references };
-  }
-
-  private getFilters(filterField: SearchSourceFields['filter']): Filter[] {
-    if (!filterField) {
-      return [];
-    }
-
-    if (Array.isArray(filterField)) {
-      return filterField;
-    }
-
-    if (isFunction(filterField)) {
-      return this.getFilters(filterField());
-    }
-
-    return [filterField];
   }
 }

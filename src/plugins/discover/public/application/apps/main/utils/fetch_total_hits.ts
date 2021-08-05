@@ -38,7 +38,7 @@ export function fetchTotalHits(
   const { totalHits$ } = data$;
   const indexPattern = searchSource.getField('index');
   searchSource.setField('trackTotalHits', true);
-  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
+  searchSource.setField('filter', [data.query.timefilter.timefilter.createFilter(indexPattern!)!]);
   searchSource.setField('size', 0);
   searchSource.removeField('sort');
   searchSource.removeField('fields');

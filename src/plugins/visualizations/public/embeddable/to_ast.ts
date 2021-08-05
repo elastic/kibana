@@ -22,10 +22,7 @@ import { queryToAst, filtersToAst } from '../../../data/common';
 export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
   const { savedSearchId, searchSource } = vis.data;
   const query = searchSource?.getField('query');
-  let filters = searchSource?.getField('filter');
-  if (typeof filters === 'function') {
-    filters = filters();
-  }
+  const filters = searchSource?.getField('filter');
 
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {

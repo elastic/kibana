@@ -99,9 +99,7 @@ export const handleRequest = ({
     // If a timeRange has been specified and we had at least one timeField available, create range
     // filters for that those time fields
     if (timeRange && allTimeFields.length > 0) {
-      timeFilterSearchSource.setField('filter', () => {
-        return aggs.getSearchSourceTimeFilter(forceNow);
-      });
+      timeFilterSearchSource.setField('filter', aggs.getSearchSourceTimeFilter(forceNow));
     }
 
     requestSearchSource.setField('filter', filters);

@@ -752,7 +752,7 @@ describe('SearchSource', () => {
     test('should omit size but not sort', () => {
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
-      searchSource.setField('sort', { field: SortDirection.asc });
+      searchSource.setField('sort', [{ field: SortDirection.asc }]);
       searchSource.setField('size', 200);
       const { searchSourceJSON } = searchSource.serialize();
       expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from', 'sort']);
@@ -835,9 +835,7 @@ describe('SearchSource', () => {
     test('should return serialized fields', () => {
       const indexPattern123 = { id: '123' } as IndexPattern;
       searchSource.setField('index', indexPattern123);
-      searchSource.setField('filter', () => {
-        return filter;
-      });
+      searchSource.setField('filter', filter);
       const serializedFields = searchSource.getSerializedFields();
       expect(serializedFields).toMatchInlineSnapshot(
         { index: '123', filter },

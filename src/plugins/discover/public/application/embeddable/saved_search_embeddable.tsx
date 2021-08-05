@@ -49,7 +49,6 @@ export interface SearchProps extends Partial<DiscoverGridProps> {
   description?: string;
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
-
   filter?: (field: IndexPatternField, value: string[], operator: string) => void;
   hits?: ElasticSearchHit[];
   totalHitCount?: number;
@@ -286,10 +285,11 @@ export class SavedSearchEmbeddable
     };
 
     const timeRangeSearchSource = searchSource.create();
-    timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchProps || !this.input.timeRange) return;
-      return this.services.timefilter.createFilter(indexPattern, this.input.timeRange);
-    });
+    if (this.searchProps && this.input.timeRange) {
+      timeRangeSearchSource.setField('filter', [
+        this.services.timefilter.createFilter(indexPattern, this.input.timeRange)!,
+      ]);
+    }
 
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);

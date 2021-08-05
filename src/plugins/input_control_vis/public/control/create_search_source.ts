@@ -25,18 +25,17 @@ export async function createSearchSource(
 ) {
   const searchSource = await create(initialState || {});
 
+  const activeFilters = [...filters];
+  if (useTimeFilter) {
+    const filter = timefilter.createFilter(indexPattern);
+    if (filter) {
+      activeFilters.push(filter);
+    }
+  }
+
   // Do not not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.setParent(undefined);
-  searchSource.setField('filter', () => {
-    const activeFilters = [...filters];
-    if (useTimeFilter) {
-      const filter = timefilter.createFilter(indexPattern);
-      if (filter) {
-        activeFilters.push(filter);
-      }
-    }
-    return activeFilters;
-  });
+  searchSource.setField('filter', activeFilters);
   searchSource.setField('size', 0);
   searchSource.setField('index', indexPattern);
   searchSource.setField('aggs', aggs);

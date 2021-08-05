@@ -75,18 +75,18 @@ export interface SearchSourceFields {
   /**
    * {@link Filter}
    */
-  filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
+  filter?: Filter[];
   /**
    * {@link EsQuerySortValue}
    */
-  sort?: EsQuerySortValue | EsQuerySortValue[];
-  highlight?: any;
+  sort?: EsQuerySortValue[];
+  highlight?: boolean;
   highlightAll?: boolean;
   trackTotalHits?: boolean | number;
   /**
    * {@link AggConfigs}
    */
-  aggs?: object | IAggConfigs | (() => object);
+  aggs?: object | IAggConfigs;
   from?: number;
   size?: number;
   source?: boolean | estypes.Fields;
