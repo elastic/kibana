@@ -191,6 +191,7 @@ kibana_vars=(
     telemetry.enabled
     telemetry.optIn
     telemetry.optInStatusUrl
+    telemetry.sendUsageTo
     telemetry.sendUsageFrom
     tilemap.options.attribution
     tilemap.options.maxZoom
