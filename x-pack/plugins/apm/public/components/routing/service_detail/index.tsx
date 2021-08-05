@@ -21,6 +21,7 @@ import { ServiceNodeMetrics } from '../../app/service_node_metrics';
 import { ServiceMap } from '../../app/service_map';
 import { TransactionDetails } from '../../app/transaction_details';
 import { ServiceProfiling } from '../../app/service_profiling';
+import { ServiceDependencies } from '../../app/service_dependencies';
 
 function page<TPath extends string>({
   path,
@@ -101,6 +102,7 @@ export const serviceDetail = {
         element: <Outlet />,
         searchBarOptions: {
           showTransactionTypeSelector: true,
+          showTimeComparison: true,
         },
       }),
       children: [
@@ -125,6 +127,17 @@ export const serviceDetail = {
         },
       ],
     },
+    page({
+      path: '/dependencies',
+      element: <ServiceDependencies />,
+      tab: 'dependencies',
+      title: i18n.translate('xpack.apm.views.dependencies.title', {
+        defaultMessage: 'Dependencies',
+      }),
+      searchBarOptions: {
+        showTimeComparison: true,
+      },
+    }),
     {
       ...page({
         path: '/errors',

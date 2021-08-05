@@ -11,6 +11,7 @@ import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@ela
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
+import { ACTIONS_HEADER } from '../constants';
 import { docLinks } from '../doc_links';
 import { RoleRules } from '../types';
 
@@ -136,7 +137,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
 
   const actionsCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'id',
-    name: '',
+    name: ACTIONS_HEADER,
     align: 'right',
     render: (_, { id, toolTip }: SharedRoleMapping) => (
       <>

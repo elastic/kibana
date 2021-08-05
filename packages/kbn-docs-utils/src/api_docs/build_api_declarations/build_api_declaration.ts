@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Node } from 'ts-morph';
+import { FunctionTypeNode, Node } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
@@ -17,6 +17,8 @@ import { buildTypeLiteralDec } from './build_type_literal_dec';
 import { ApiScope } from '../types';
 import { buildInterfaceDec } from './build_interface_dec';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { buildFunctionTypeDec } from './build_function_type_dec';
+import { buildCallSignatureDec } from './build_call_signature_dec';
 
 /**
  * A potentially recursive function, depending on the node type, that builds a JSON like structure
@@ -66,12 +68,27 @@ export function buildApiDeclaration({
   } else if (Node.isInterfaceDeclaration(node)) {
     return buildInterfaceDec(node, plugins, anchorLink, currentPluginId, log, captureReferences);
   } else if (
+    Node.isPropertySignature(node) &&
+    node.getTypeNode() &&
+    Node.isFunctionTypeNode(node.getTypeNode()!)
+  ) {
+    // This code path covers optional properties on interfaces, otherwise they lost their children. Yes, a bit strange.
+    return buildFunctionTypeDec({
+      node,
+      typeNode: node.getTypeNode()! as FunctionTypeNode,
+      plugins,
+      anchorLink,
+      currentPluginId,
+      log,
+      captureReferences,
+    });
+  } else if (
     Node.isMethodSignature(node) ||
     Node.isFunctionDeclaration(node) ||
     Node.isMethodDeclaration(node) ||
     Node.isConstructorDeclaration(node)
   ) {
-    return buildFunctionDec(node, plugins, anchorLink, currentPluginId, log, captureReferences);
+    return buildFunctionDec({ node, plugins, anchorLink, currentPluginId, log, captureReferences });
   } else if (
     Node.isPropertySignature(node) ||
     Node.isPropertyDeclaration(node) ||
@@ -90,6 +107,29 @@ export function buildApiDeclaration({
       apiName,
       captureReferences
     );
+  }
+
+  // Without this types that are functions won't include comments on parameters. e.g.
+  // /**
+  //  * @param t A parameter
+  //  */
+  // export type AFn = (t: string) => void;
+  //
+  if (node.getType().getCallSignatures().length > 0) {
+    if (node.getType().getCallSignatures().length > 1) {
+      log.warning(`Not handling more than one call signature for node ${apiName}`);
+    } else {
+      return buildCallSignatureDec({
+        signature: node.getType().getCallSignatures()[0],
+        log,
+        captureReferences,
+        plugins,
+        anchorLink,
+        currentPluginId,
+        name: apiName,
+        node,
+      });
+    }
   }
 
   return buildBasicApiDeclaration({
