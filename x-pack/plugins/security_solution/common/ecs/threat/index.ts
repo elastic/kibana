@@ -15,13 +15,25 @@ interface ThreatMatchEcs {
   type?: string[];
 }
 
-export interface ThreatIndicatorEcs {
+export interface LegacyThreatIndicatorEcs {
   matched?: ThreatMatchEcs;
   event?: EventEcs & { reference?: string[] };
   provider?: string[];
   type?: string[];
 }
 
+export interface ThreatIndicatorEcs {
+  provider?: string[];
+  reference?: string[];
+  type?: string[];
+}
+
+export interface ThreatEnrichmentEcs {
+  indicator?: ThreatIndicatorEcs;
+  matched?: ThreatMatchEcs;
+}
+
 export interface ThreatEcs {
-  indicator: ThreatIndicatorEcs[];
+  indicator?: LegacyThreatIndicatorEcs[];
+  enrichments?: ThreatEnrichmentEcs[];
 }
