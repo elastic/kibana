@@ -107,7 +107,7 @@ export class TimePickerPageObject extends FtrService {
         timeout: 50,
       });
       if (isShowDatesButton) {
-        await this.testSubjects.click('superDatePickerShowDatesButton', 50);
+        await this.testSubjects.clickWithRetries('superDatePickerShowDatesButton', 0, 50);
       }
       await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
     });
