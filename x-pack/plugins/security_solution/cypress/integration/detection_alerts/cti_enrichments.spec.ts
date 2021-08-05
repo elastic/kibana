@@ -18,10 +18,20 @@ import {
   ENRICHMENT_COUNT_NOTIFICATION,
   THREAT_SUMMARY_VIEW,
   TITLE,
+  INDICATOR_MATCH_ENRICHMENT_SECTION,
+  FIRST_ENRICHMENT_TABLE,
+  INVESTIGATION_TIME_ENRICHMENT_SECTION,
+  THREAT_INTEL_TAB,
+  THREAT_DETAILS_ACCORDION,
 } from '../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../screens/rule_details';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { expandFirstAlert, goToManageAlertsDetectionRules } from '../../tasks/alerts';
+import {
+  expandFirstAlert,
+  goToManageAlertsDetectionRules,
+  setEnrichmentDates,
+  viewThreatIntelTab,
+} from '../../tasks/alerts';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import {
   openJsonView,
@@ -156,8 +166,7 @@ describe('CTI Enrichment', () => {
     });
   });
 
-  // https://github.com/elastic/kibana/pull/106889
-  describe.skip('with additional indicators', () => {
+  describe('with additional indicators', () => {
     before(() => {
       esArchiverLoad('threat_indicator2');
     });
@@ -166,7 +175,7 @@ describe('CTI Enrichment', () => {
       esArchiverUnload('threat_indicator2');
     });
 
-    it('Displays matched fields from both indicator match rules and investigation time enrichments on Alerts Summary tab', () => {
+    it('Displays matched fields from both indicator match rules and investigation time enrichments on Threat Intel tab', () => {
       const indicatorMatchRuleEnrichment = {
         field: 'myhash.mysha256',
         value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
@@ -174,22 +183,26 @@ describe('CTI Enrichment', () => {
       const investigationTimeEnrichment = {
         field: 'source.ip',
         value: '192.168.1.1',
+        provider: 'another_provider',
       };
-      const expectedMatches = [indicatorMatchRuleEnrichment, investigationTimeEnrichment];
 
       expandFirstAlert();
+      viewThreatIntelTab();
+      setEnrichmentDates('08/05/2018 10:00 AM');
 
-      cy.get(THREAT_SUMMARY_VIEW).within(() => {
-        cy.get(TABLE_ROWS).should('have.length', expectedMatches.length);
-        expectedMatches.forEach((row, index) => {
-          cy.get(TABLE_ROWS)
-            .eq(index)
-            .within(() => {
-              cy.get(TITLE).should('have.text', row.field);
-              cy.get(THREAT_CONTENT).should('have.text', row.value);
-            });
-        });
-      });
+      cy.get(`${INDICATOR_MATCH_ENRICHMENT_SECTION} ${THREAT_DETAILS_ACCORDION}`)
+        .should('exist')
+        .should(
+          'have.text',
+          `${indicatorMatchRuleEnrichment.field} ${indicatorMatchRuleEnrichment.value}`
+        );
+
+      cy.get(`${INVESTIGATION_TIME_ENRICHMENT_SECTION} ${THREAT_DETAILS_ACCORDION}`)
+        .should('exist')
+        .should(
+          'have.text',
+          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.provider}`
+        );
     });
   });
 });

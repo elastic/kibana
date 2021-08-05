@@ -260,10 +260,13 @@ const ThreatDetailsViewComponent: React.FC<{
       />
 
       {matchesWithNoType && (
-        <div data-test-subj={'matches-with-no-type'}>
-          {indicatorMatches && <EuiSpacer size="l" />}
-          <EnrichmentSection enrichments={matchesWithNoType} />
-        </div>
+        <>
+          <EuiHorizontalRule />
+          <div data-test-subj={'matches-with-no-type'}>
+            {indicatorMatches && <EuiSpacer size="l" />}
+            <EnrichmentSection enrichments={matchesWithNoType} />
+          </div>
+        </>
       )}
     </>
   );
