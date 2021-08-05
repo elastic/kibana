@@ -232,8 +232,8 @@
           ],
           "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

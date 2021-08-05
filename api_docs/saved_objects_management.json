@@ -710,11 +710,10 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
-                "id": "def-public.action",
+                "id": "def-public.SavedObjectsManagementActionServiceSetup.register.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -729,9 +728,11 @@
                   }
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -760,19 +761,23 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
-                "id": "def-public.actionId",
+                "id": "def-public.SavedObjectsManagementActionServiceStart.has.$1",
                 "type": "string",
                 "tags": [],
                 "label": "actionId",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -796,8 +801,8 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -906,11 +911,10 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
-                "id": "def-public.column",
+                "id": "def-public.SavedObjectsManagementColumnServiceSetup.register.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "column",
@@ -926,9 +930,11 @@
                   "<unknown>"
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -965,8 +971,8 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
