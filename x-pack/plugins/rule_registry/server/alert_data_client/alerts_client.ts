@@ -72,7 +72,7 @@ interface GetAlertParams {
   index?: string;
 }
 
-interface FetchAndAuditAlertParams {
+interface SingleSearchAfterAndAudit {
   id: string | null | undefined;
   query: string | null | undefined;
   index?: string;
@@ -102,6 +102,12 @@ export class AlertsClient {
     this.spaceId = this.authorization.getSpaceId();
   }
 
+  /**
+   * Accepts an array of ES documents and executes ensureAuthorized for the given operation
+   * @param items
+   * @param operation
+   * @returns
+   */
   private async ensureAllAuthorized(
     items: Array<{
       _id: string;
@@ -167,13 +173,13 @@ export class AlertsClient {
    * @param param0
    * @returns
    */
-  private async singleSearchAfterAndAduti({
+  private async singleSearchAfterAndAudit({
     id,
     query,
     index,
     operation,
     lastSortIds = [],
-  }: FetchAndAuditAlertParams) {
+  }: SingleSearchAfterAndAudit) {
     try {
       const alertSpaceId = this.spaceId;
       if (alertSpaceId == null) {
@@ -363,7 +369,7 @@ export class AlertsClient {
 
     while (hasSortIds) {
       try {
-        const result = await this.singleSearchAfterAndAduti({
+        const result = await this.singleSearchAfterAndAudit({
           id: null,
           query,
           index,
@@ -401,7 +407,7 @@ export class AlertsClient {
   public async get({ id, index }: GetAlertParams) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const alert = await this.singleSearchAfterAndAduti({
+      const alert = await this.singleSearchAfterAndAudit({
         id,
         query: null,
         index,
@@ -430,7 +436,7 @@ export class AlertsClient {
     index,
   }: UpdateOptions<Params>) {
     try {
-      const alert = await this.singleSearchAfterAndAduti({
+      const alert = await this.singleSearchAfterAndAudit({
         id,
         query: null,
         index,
