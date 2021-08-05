@@ -19,15 +19,16 @@ spaces in **{stack-manage-app}** in {kib}. For more information, see
 To upload GeoJSON files in {kib} with *Maps*, you must have:
 
 * The `all` {kib} privilege for *Maps*.
-* The `all` {kib} privilege for *Index Pattern Management*.
+* The `all` {kib} privilege for *{ipm-app}*.
 * The `create` and `create_index` index privileges for destination indices.
 * To use the index in *Maps*, you must also have the `read` and `view_index_metadata` index privileges for destination indices.
 
-To upload CSV files in {kib} with the *{file-data-viz}*, you must have privileges to upload GeoJSON files and:
+To upload CSV files in {kib} with the *{file-data-viz}*, you must have
+privileges to upload GeoJSON files and:
 
-* The `manage_pipeline` cluster privilege.
-* The `read` {kib} privilege for *Machine Learning*.
-* The `monitor` or `monitor_text_structure` cluster privileges
+* The `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
+* The `read` {kib} privilege for *{ml-app}* or the `all` {kib}
+privilege for *Discover*
 
 
 [discrete]

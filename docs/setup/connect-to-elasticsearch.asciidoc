@@ -54,21 +54,18 @@ refer to <<import-geospatial-data, Import geospatial data>>.
 image::images/add-data-fv.png[{file-data-viz}]
 
 The {stack-security-features} provide roles and privileges that control which
-users can upload files. To upload files in {kib} with the *{file-data-viz}*, you
-must have the following privileges:
+users can upload files. To upload files in {kib}, you must have the following
+privileges:
 
-* `all` {kib} privileges for the {ml-features} in the appropriate spaces.
-Alternatively, `read` {kib} privileges for the {ml-features} and `all` {kib}
-privileges for the index pattern management feature
-* `manage_pipeline` cluster privilege
-* `monitor` or `monitor_text_structure` cluster privileges
-* `create`, `create_index`, and `read` index privileges for destination
+* `all` {kib} privileges for *Discover* or *{ml-app}* in the appropriate spaces.
+Alternatively, `read` {kib} privileges for *{ml-app}* and `all` {kib}
+privileges for *{ipm-app}*
+* `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
+* `create`, `create_index`, and `read` index privileges for the destination
 indices
 
 You can manage your roles, privileges, and
-spaces in **{stack-manage-app}** in {kib}. For more information, see
-{ref}/security-privileges.html[Security privileges],
-<<kibana-privileges, {kib} privileges>>, and
+spaces in **{stack-manage-app}** in {kib}. For more information, refer to
 <<xpack-kibana-role-management, {kib} role management>>.
 
 NOTE: This feature is not intended for use as part of a
