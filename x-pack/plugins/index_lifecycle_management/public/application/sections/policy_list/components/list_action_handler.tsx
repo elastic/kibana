@@ -14,45 +14,46 @@ import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confir
 interface Props {
   updatePolicies: () => void;
 }
-export const PolicyAction: React.FunctionComponent<Props> = ({ updatePolicies }) => {
-  const { policyAction, setPolicyAction } = usePolicyListContext();
-  if (policyAction?.action === 'viewIndexTemplates') {
+export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolicies }) => {
+  const { listAction, setListAction } = usePolicyListContext();
+  if (listAction?.actionType === 'viewIndexTemplates') {
     return (
       <IndexTemplatesFlyout
-        policy={policyAction.policy}
+        policy={listAction.selectedPolicy}
         close={() => {
-          setPolicyAction(null);
+          setListAction(null);
         }}
       />
     );
   }
-  if (policyAction?.action === 'deletePolicy') {
+  if (listAction?.actionType === 'deletePolicy') {
     return (
       <ConfirmDelete
-        policyToDelete={policyAction.policy}
+        policyToDelete={listAction.selectedPolicy}
         callback={() => {
           updatePolicies();
-          setPolicyAction(null);
+          setListAction(null);
         }}
         onCancel={() => {
-          setPolicyAction(null);
+          setListAction(null);
         }}
       />
     );
   }
 
-  if (policyAction?.action === 'addIndexTemplate') {
+  if (listAction?.actionType === 'addIndexTemplate') {
     return (
       <AddPolicyToTemplateConfirmModal
-        policy={policyAction.policy}
+        policy={listAction.selectedPolicy}
         onSuccess={(indexTemplate: string) => {
-          policyAction!.policy.indexTemplates = [
-            ...(policyAction!.policy.indexTemplates || []),
+          // update the linked index templates of the selected policy
+          listAction!.selectedPolicy.indexTemplates = [
+            ...(listAction!.selectedPolicy.indexTemplates || []),
             indexTemplate,
           ];
-          setPolicyAction(null);
+          setListAction(null);
         }}
-        onCancel={() => setPolicyAction(null)}
+        onCancel={() => setListAction(null)}
       />
     );
   }

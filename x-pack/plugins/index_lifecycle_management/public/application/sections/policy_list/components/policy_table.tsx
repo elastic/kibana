@@ -50,13 +50,13 @@ interface Props {
   policies: PolicyFromES[];
 }
 
-export const TableContent: React.FunctionComponent<Props> = ({ policies }) => {
+export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const history = useHistory();
   const {
     services: { navigateToApp },
   } = useKibana();
 
-  const { setPolicyAction } = usePolicyListContext();
+  const { setListAction } = usePolicyListContext();
 
   const columns: Array<EuiBasicTableColumn<PolicyFromES>> = [
     {
@@ -93,7 +93,9 @@ export const TableContent: React.FunctionComponent<Props> = ({ policies }) => {
             <EuiButtonEmpty
               flush="both"
               data-test-subj="viewIndexTemplates"
-              onClick={() => setPolicyAction({ policy, action: 'viewIndexTemplates' })}
+              onClick={() =>
+                setListAction({ selectedPolicy: policy, actionType: 'viewIndexTemplates' })
+              }
             >
               {value.length}
             </EuiButtonEmpty>
@@ -151,7 +153,9 @@ export const TableContent: React.FunctionComponent<Props> = ({ policies }) => {
               <EuiToolTip content={actionTooltips.addIndexTemplate}>
                 <EuiButtonIcon
                   data-test-subj="addPolicyToTemplate"
-                  onClick={() => setPolicyAction({ policy, action: 'addIndexTemplate' })}
+                  onClick={() =>
+                    setListAction({ selectedPolicy: policy, actionType: 'addIndexTemplate' })
+                  }
                   iconType="plusInCircle"
                   aria-label={actionTooltips.addIndexTemplate}
                 />
@@ -167,7 +171,9 @@ export const TableContent: React.FunctionComponent<Props> = ({ policies }) => {
               >
                 <EuiButtonIcon
                   data-test-subj="deletePolicy"
-                  onClick={() => setPolicyAction({ policy, action: 'deletePolicy' })}
+                  onClick={() =>
+                    setListAction({ selectedPolicy: policy, actionType: 'deletePolicy' })
+                  }
                   iconType="trash"
                   aria-label={actionTooltips.deleteEnabled}
                   disabled={!enabled}

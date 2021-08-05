@@ -8,29 +8,29 @@
 import React, { createContext, ReactChild, useContext, useState } from 'react';
 import { PolicyFromES } from '../../../../common/types';
 
-interface PolicyAction {
-  action: 'viewIndexTemplates' | 'addIndexTemplate' | 'deletePolicy';
-  policy: PolicyFromES;
+interface ListAction {
+  actionType: 'viewIndexTemplates' | 'addIndexTemplate' | 'deletePolicy';
+  selectedPolicy: PolicyFromES;
 }
 
 export interface PolicyListContextValue {
-  policyAction: PolicyAction | null;
-  setPolicyAction: (policyAction: PolicyAction | null) => void;
+  listAction: ListAction | null;
+  setListAction: (policyAction: ListAction | null) => void;
 }
 
 const PolicyListContext = createContext<PolicyListContextValue>({
-  policyAction: null,
-  setPolicyAction: () => {},
+  listAction: null,
+  setListAction: () => {},
 });
 
 export const PolicyListContextProvider = ({ children }: { children: ReactChild }) => {
-  const [policyAction, setPolicyAction] = useState<PolicyAction | null>(null);
+  const [listAction, setListAction] = useState<ListAction | null>(null);
 
   return (
     <PolicyListContext.Provider
       value={{
-        setPolicyAction,
-        policyAction,
+        listAction,
+        setListAction,
       }}
     >
       {children}

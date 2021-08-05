@@ -19,11 +19,11 @@ import { HttpService } from '../../../../src/core/public/http';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
 
 import { PolicyFromES } from '../common/types';
-import { PolicyTable } from '../public/application/sections/policy_table/policy_table';
+import { PolicyList } from '../public/application/sections/policy_list/policy_list';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { KibanaContextProvider } from '../public/shared_imports';
-import { PolicyListContextProvider } from '../public/application/sections/policy_table/policy_list_context';
+import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
 
 initHttp(
   new HttpService().setup({
@@ -101,7 +101,7 @@ const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
   return (
     <KibanaContextProvider services={{ getUrlForApp: () => '' }}>
       <PolicyListContextProvider>
-        <PolicyTable updatePolicies={jest.fn()} policies={testPolicies} />
+        <PolicyList updatePolicies={jest.fn()} policies={testPolicies} />
       </PolicyListContextProvider>
     </KibanaContextProvider>
   );

@@ -12,16 +12,16 @@ import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPageHeader, EuiPageContent } f
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { PolicyFromES } from '../../../../common/types';
-import { TableContent } from './components/table_content';
+import { PolicyTable } from './components/policy_table';
 import { getPolicyCreatePath } from '../../services/navigation';
-import { PolicyAction } from './components/policy_action';
+import { ListActionHandler } from './components/list_action_handler';
 
 interface Props {
   policies: PolicyFromES[];
   updatePolicies: () => void;
 }
 
-export const PolicyTable: React.FunctionComponent<Props> = ({ policies, updatePolicies }) => {
+export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePolicies }) => {
   const history = useHistory();
 
   const createPolicyButton = (
@@ -69,7 +69,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, updatePo
 
   return (
     <>
-      <PolicyAction updatePolicies={updatePolicies} />
+      <ListActionHandler updatePolicies={updatePolicies} />
 
       <EuiPageHeader
         pageTitle={
@@ -93,7 +93,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, updatePo
 
       <EuiSpacer size="l" />
 
-      <TableContent policies={policies} />
+      <PolicyTable policies={policies} />
     </>
   );
 };
