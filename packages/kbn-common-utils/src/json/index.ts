@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  JsonArray,
-  JsonValue,
-  JsonObject,
-  SerializableRecord,
-  Serializable,
-} from './typed_json';
+export { JsonArray, JsonValue, JsonObject, SerializableRecord, Serializable } from './typed_json';
