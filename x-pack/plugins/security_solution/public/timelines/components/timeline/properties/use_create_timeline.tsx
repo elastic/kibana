@@ -43,6 +43,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       if (id === TimelineId.active && timelineFullScreen) {
         setTimelineFullScreen(false);
       }
+      console.log('replace me! setSelectedIndexPatterns timeline/properties L47');
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,

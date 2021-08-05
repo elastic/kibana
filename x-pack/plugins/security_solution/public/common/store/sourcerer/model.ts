@@ -31,7 +31,7 @@ export interface ManageScope {
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
-  selectedKipId: string;
+  selectedKipId: string | null;
   selectedPatterns: string[];
 }
 
@@ -65,7 +65,7 @@ export const initSourcererScope = {
   indexPattern: EMPTY_INDEX_PATTERN,
   indicesExist: true,
   loading: false,
-  selectedKipId: DEFAULT_INDEX_PATTERN_ID,
+  selectedKipId: null,
   selectedPatterns: [],
 };
 

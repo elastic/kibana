@@ -400,6 +400,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
     dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
+    console.log('replace me! setSelectedIndexPatterns timeline/eql_tab_content L403');
     dispatch(
       sourcererActions.setSelectedIndexPatterns({
         id: SourcererScopeName.timeline,

@@ -84,6 +84,12 @@ export const useUrlStateHooks = ({
         getQueryStringFromLocation(mySearch),
         urlKey
       );
+      console.log('URL_STATE_KEYS for each', {
+        urlKey,
+        newUrlStateString,
+        mySearch,
+        getQueryStringFromLocation: getQueryStringFromLocation(mySearch),
+      });
       if (newUrlStateString) {
         mySearch = updateUrlStateString({
           history,

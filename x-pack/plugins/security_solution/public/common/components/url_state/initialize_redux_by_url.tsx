@@ -37,15 +37,12 @@ export const dispatchSetInitialStateFromUrl = (
   updateTimelineIsLoading,
   urlStateToUpdate,
 }: SetInitialStateFromUrl<unknown>): (() => void) => () => {
-  console.log('init dispatchSetInitialStateFromUrl');
   urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
     if (urlKey === CONSTANTS.timerange) {
       updateTimerange(newUrlStateString, dispatch);
     }
     if (urlKey === CONSTANTS.sourcerer) {
-      console.log('urlKey sourcerer', newUrlStateString);
       const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
-      console.log('urlKey sourcererState', sourcererState);
       if (sourcererState != null) {
         const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
           (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))

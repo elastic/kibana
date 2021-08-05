@@ -82,6 +82,7 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
+      console.log('replace me! setSelectedIndexPatterns containers/sourcerer L85');
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
@@ -94,6 +95,7 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
+      console.log('replace me! setSelectedIndexPatterns containers/sourcerer L98');
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
@@ -119,6 +121,7 @@ export const useInitSourcerer = (
       initialDetectionSourcerer.current
     ) {
       initialDetectionSourcerer.current = false;
+      console.log('replace me! setSelectedIndexPatterns containers/sourcerer L123');
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.detections,
@@ -131,6 +134,7 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current
     ) {
       initialDetectionSourcerer.current = false;
+      console.log('replace me! setSelectedIndexPatterns containers/sourcerer L137');
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.detections,

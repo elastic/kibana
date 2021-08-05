@@ -33,25 +33,6 @@ export const isDetectionsPages = (pageName: string) =>
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
-    const v0 = [
-      '(default:!(security-solution))',
-      "(default:!('security-solution'))",
-      '(default:!("security-solution"))',
-      '(default:!(%22security-solution%22))',
-      '(default:!(%27security-solution%27))',
-      '(default:!security-solution)',
-      "(default:!'security-solution')",
-      '(default:!"security-solution")',
-      '(default:!%22security-solution%22)',
-      '(default:!%27security-solution%27)',
-    ];
-    v0.forEach((v) =>
-      console.log('decodeRisonUrlState', {
-        v,
-        decoded: (decode(v) as unknown) as T,
-      })
-    );
-
     return value ? ((decode(value) as unknown) as T) : null;
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('rison decoder error')) {
@@ -182,7 +163,7 @@ export const makeMapStateToProps = () => {
     const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
     const selectedPatterns: SourcererScopePatterns = activeScopes
       .filter((scope) => scope === SourcererScopeName.default)
-      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
+      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedKipId }), {});
 
     return {
       urlState: {

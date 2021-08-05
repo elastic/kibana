@@ -50,6 +50,11 @@ export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
           urlStateToReplace = urlState[CONSTANTS.timerange];
         } else if (urlKey === CONSTANTS.sourcerer) {
           urlStateToReplace = urlState[CONSTANTS.sourcerer];
+          console.log('getSearch sourcerer', {
+            urlStateToReplace,
+            myLocation,
+            getQueryStringFromLocation: getQueryStringFromLocation(myLocation.search),
+          });
         } else if (urlKey === CONSTANTS.timeline && urlState[CONSTANTS.timeline] != null) {
           const timeline = urlState[CONSTANTS.timeline];
           if (timeline.id === '') {
