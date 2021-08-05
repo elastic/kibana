@@ -18,7 +18,7 @@ import {
 } from './shared_imports';
 
 import { CloseEditor, IndexPatternEditorContext, IndexPatternEditorProps } from './types';
-import { IndexPatternFlyoutContentContainer } from './components/index_pattern_flyout_content_container';
+import { IndexPatternEditorLazy } from './components/index_pattern_editor_lazy';
 
 interface Dependencies {
   core: CoreStart;
@@ -67,7 +67,7 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
       toMountPoint(
         <KibanaReactContextProvider>
           <I18nProvider>
-            <IndexPatternFlyoutContentContainer
+            <IndexPatternEditorLazy
               onSave={onSaveIndexPattern}
               onCancel={() => {
                 closeEditor();

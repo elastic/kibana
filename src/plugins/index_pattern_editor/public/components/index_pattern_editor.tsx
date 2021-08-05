@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { IndexPatternFlyoutContentContainer } from './index_pattern_flyout_content_container';
+import { IndexPatternEditorLazy } from './index_pattern_editor_lazy';
 import { IndexPatternEditorContext, IndexPatternEditorProps } from '../types';
 import { createKibanaReactContext } from '../shared_imports';
 import './index_pattern_editor.scss';
@@ -31,7 +31,7 @@ export const IndexPatternEditor = ({
   return (
     <KibanaReactContextProvider>
       <EuiFlyout onClose={() => {}} hideCloseButton={true} size="l">
-        <IndexPatternFlyoutContentContainer
+        <IndexPatternEditorLazy
           onSave={onSave}
           onCancel={onCancel}
           defaultTypeIsRollup={defaultTypeIsRollup}

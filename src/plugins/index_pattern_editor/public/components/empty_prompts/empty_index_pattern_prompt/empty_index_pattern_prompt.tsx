@@ -21,13 +21,13 @@ interface Props {
   indexPatternsIntroUrl: string;
 }
 
+const Illustration = lazy(() => import('./assets/index_pattern_illustration'));
+
 export const EmptyIndexPatternPrompt = ({
   goToCreate,
   canSaveIndexPattern,
   indexPatternsIntroUrl,
 }: Props) => {
-  const Illustration = lazy(() => import('./assets/index_pattern_illustration'));
-
   return (
     <EuiPageContent
       data-test-subj="emptyIndexPatternPrompt"

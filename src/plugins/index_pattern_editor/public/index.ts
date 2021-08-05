@@ -20,7 +20,7 @@
 
 import { IndexPatternEditorPlugin } from './plugin';
 
-export { PluginStart as IndexPatternEditorStart, IndexPatternEditorProps } from './types';
+export type { PluginStart as IndexPatternEditorStart, IndexPatternEditorProps } from './types';
 
 export function plugin() {
   return new IndexPatternEditorPlugin();

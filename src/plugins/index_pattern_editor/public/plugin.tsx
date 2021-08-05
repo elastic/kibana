@@ -17,7 +17,7 @@ import {
   IndexPatternEditorProps,
 } from './types';
 import { getEditorOpener } from './open_editor';
-import { IndexPatternEditor } from './components';
+import { IndexPatternEditor } from './components/index_pattern_editor';
 
 export class IndexPatternEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {

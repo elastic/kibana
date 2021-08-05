@@ -13,7 +13,7 @@ import { IndexPatternSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './index_pattern_editor_flyout_content';
 import { IndexPatternEditorContext, IndexPatternEditorProps } from '../types';
 
-export const IndexPatternFlyoutContentContainer = ({
+const IndexPatternFlyoutContentContainer = ({
   onSave,
   onCancel = () => {},
   defaultTypeIsRollup,
@@ -51,3 +51,6 @@ export const IndexPatternFlyoutContentContainer = ({
     />
   );
 };
+
+/* eslint-disable import/no-default-export */
+export default IndexPatternFlyoutContentContainer;
