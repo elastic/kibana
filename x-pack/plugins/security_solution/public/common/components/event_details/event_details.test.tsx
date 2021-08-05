@@ -8,6 +8,7 @@
 import { waitFor } from '@testing-library/dom';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
+import moment from 'moment';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
@@ -48,7 +49,16 @@ describe('EventDetails', () => {
   let wrapper: ReactWrapper;
   let alertsWrapper: ReactWrapper;
   beforeAll(async () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({});
+    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+      result: [],
+      rangePickerProps: {
+        startDate: moment().subtract(30, 'd'),
+        endDate: moment(),
+        loading: false,
+        setStartDate: jest.fn(),
+        setEndDate: jest.fn(),
+      },
+    });
     wrapper = mount(
       <TestProviders>
         <EventDetails {...defaultProps} />
@@ -113,7 +123,7 @@ describe('EventDetails', () => {
   describe('threat intel tab', () => {
     it('renders a "no enrichments" panel view if there are no enrichments', () => {
       alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
-      expect(alertsWrapper.find('[data-test-subj="no-enrichments-panel"]').exists()).toEqual(true);
+      expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
     });
   });
 });

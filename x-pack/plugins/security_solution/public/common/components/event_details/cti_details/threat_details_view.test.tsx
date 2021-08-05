@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../mock';
@@ -14,6 +15,14 @@ import { FIRSTSEEN } from '../../../../../common/cti/constants';
 import { ThreatDetailsView } from './threat_details_view';
 
 describe('ThreatDetailsView', () => {
+  const rangePickerProps = {
+    startDate: moment().subtract(30, 'd'),
+    endDate: moment(),
+    loading: false,
+    setStartDate: jest.fn(),
+    setEndDate: jest.fn(),
+  };
+
   it('renders a detail view for each enrichment', () => {
     const enrichments = [
       buildEventEnrichmentMock(),
@@ -22,7 +31,7 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} />
+        <ThreatDetailsView enrichments={enrichments} rangePickerProps={rangePickerProps} />
       </TestProviders>
     );
 
@@ -36,11 +45,12 @@ describe('ThreatDetailsView', () => {
       buildEventEnrichmentMock({
         'event.url': ['http://foo.bar'],
         'event.reference': ['http://foo.baz'],
+        'matched.type': ['indicator_match_rule'],
       }),
     ];
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} />
+        <ThreatDetailsView enrichments={enrichments} rangePickerProps={rangePickerProps} />
       </TestProviders>
     );
     expect(wrapper.find('a').length).toEqual(2);
@@ -63,7 +73,7 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} />
+        <ThreatDetailsView enrichments={enrichments} rangePickerProps={rangePickerProps} />
       </TestProviders>
     );
 
@@ -88,11 +98,53 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} />
+        <ThreatDetailsView enrichments={enrichments} rangePickerProps={rangePickerProps} />
       </TestProviders>
     );
 
     expect(wrapper.exists('[data-test-subj="threat-match-detected"]')).toEqual(true);
     expect(wrapper.exists('[data-test-subj="enriched-with-threat-intel"]')).toEqual(true);
+  });
+
+  it('renders no data views', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={[]} rangePickerProps={rangePickerProps} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.exists(
+        '[data-test-subj="threat-match-detected"] [data-test-subj="no-enrichments-found"]'
+      )
+    ).toEqual(true);
+    expect(
+      wrapper.exists(
+        '[data-test-subj="enriched-with-threat-intel"] [data-test-subj="no-enrichments-found"]'
+      )
+    ).toEqual(true);
+  });
+
+  it('renders range picker', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={[]} rangePickerProps={rangePickerProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('[data-test-subj="enrichment-query-range-picker"]')).toEqual(true);
+  });
+
+  it('renders loading state picker', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView
+          enrichments={[]}
+          rangePickerProps={{ ...rangePickerProps, loading: true }}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('[data-test-subj="loading-enrichments"]')).toEqual(true);
   });
 });

@@ -23,7 +23,7 @@ import { groupBy } from 'lodash';
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
 import {
-  ENRICHMENT_TYPE,
+  EnrichmentType,
   ENRICHMENT_TYPES,
   EVENT_REFERENCE,
   EVENT_URL,
@@ -163,7 +163,7 @@ const EnrichmentAccordion: React.FC<{
   );
 };
 
-const getMessagesFromType = (type?: ENRICHMENT_TYPE) => {
+const getMessagesFromType = (type?: EnrichmentType) => {
   let title;
   let dataTestSubj;
   let noData;
@@ -183,7 +183,7 @@ const getMessagesFromType = (type?: ENRICHMENT_TYPE) => {
 
 const EnrichmentSection: React.FC<{
   enrichments: CtiEnrichment[];
-  type?: ENRICHMENT_TYPE;
+  type?: EnrichmentType;
   rangePickerProps?: RangePickerProps;
 }> = ({ enrichments, type, rangePickerProps }) => {
   const { dataTestSubj, title, noData } = getMessagesFromType(type);
@@ -216,6 +216,7 @@ const EnrichmentSection: React.FC<{
             .sort((a, b) => getFirstSeen(b) - getFirstSeen(a))
             .map((enrichment, index) => (
               <EnrichmentAccordion
+                key={`${enrichment.id}`}
                 enrichment={enrichment}
                 index={index}
                 enrichmentsLength={enrichments.length}
@@ -224,8 +225,10 @@ const EnrichmentSection: React.FC<{
         </>
       ) : (
         <>
-          {noData && <InlineBlock data-test-subj={'no-intelligence-cta'}>{noData}</InlineBlock>}
-          {rangePickerProps?.loading && <EuiLoadingContent lines={4} />}
+          {noData && <InlineBlock data-test-subj={'no-enrichments-found'}>{noData}</InlineBlock>}
+          {rangePickerProps?.loading && (
+            <EuiLoadingContent data-test-subj={'loading-enrichments'} lines={4} />
+          )}
         </>
       )}
     </div>

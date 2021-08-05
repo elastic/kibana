@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SetStateAction, Dispatch, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
@@ -21,7 +21,7 @@ import { useEventEnrichmentComplete } from '.';
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
 
-export type SetDate = (date: moment.Moment) => Dispatch<SetStateAction<moment.Moment>>;
+export type SetDate = (date: moment.Moment) => void;
 
 export interface RangePickerProps {
   setStartDate: SetDate;
