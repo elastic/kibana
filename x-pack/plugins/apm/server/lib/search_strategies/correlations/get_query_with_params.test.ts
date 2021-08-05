@@ -74,13 +74,6 @@ describe('correlations', () => {
                 'transaction.name': 'actualTransactionName',
               },
             },
-            {
-              range: {
-                'transaction.duration.us': {
-                  gte: 75,
-                },
-              },
-            },
           ],
         },
       });
