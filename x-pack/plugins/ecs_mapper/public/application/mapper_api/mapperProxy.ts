@@ -26,7 +26,7 @@ export class MapperProxy {
   public fetchPipelineFromMapping = async (
     file: string,
     copyAction: FieldCopyAction
-  ): Promise<string> => {
+  ): Promise<object[]> => {
     try {
       return this.http.post('/api/ecs_mapper/map/ingest_pipeline', {
         body: JSON.stringify({
@@ -40,6 +40,7 @@ export class MapperProxy {
           defaultMessage: 'Error',
         }),
       });
+      return [];
     }
   };
 

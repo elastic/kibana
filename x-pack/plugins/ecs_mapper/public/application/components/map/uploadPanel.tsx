@@ -23,7 +23,7 @@ import {
 import { FieldCopyAction } from '../../../../common';
 import { Instructions } from './instructions';
 
-import './mapper_upload.scss';
+import './mapperUpload.scss';
 
 interface Props {
   actionOptions: FieldCopyAction[];

@@ -6,11 +6,10 @@
  */
 
 import React, { FC } from 'react';
-import { getCoreStart, getPluginsStart } from '../../kibana_services';
+import { getCoreStart, getPluginsStart } from '../../kibanaServices';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
-// @ts-ignore
-import { EcsMapperUploadView } from '../components/map/index';
+import { EcsMapperUploadView } from '../components/map/uploader';
 
 export const EcsMapperMainUi: FC = () => {
   const { fileUpload, mapper } = getPluginsStart();

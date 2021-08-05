@@ -7,12 +7,8 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-
-import { getPluginsStart } from '../../../kibana_services';
-
-import './mapper_upload.scss';
+import { getPluginsStart } from '../../../kibanaServices';
 
 export const Instructions: FC = () => {
   const { fileUpload } = getPluginsStart();

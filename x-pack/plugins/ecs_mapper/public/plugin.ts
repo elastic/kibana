@@ -12,7 +12,7 @@ import { Plugin, CoreSetup, CoreStart, ApplicationStart } from '../../../../src/
 
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { registerDevTool, registerHomeFeatureCatalogue } from './registration';
-import { setStartServices } from './kibana_services';
+import { setStartServices } from './kibanaServices';
 import { FieldCopyAction } from '../common';
 import { MapperProxy } from './application/mapper_api';
 

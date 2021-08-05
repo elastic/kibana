@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function readFile(file: File, maxFileSizeBytes: any) {
+export function readFile (file: File, maxFileSizeBytes: any): Promise<string> {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
       const reader = new FileReader();
@@ -23,7 +23,7 @@ export function readFile(file: File, maxFileSizeBytes: any) {
           if (fileContents === '') {
             reject();
           } else {
-            resolve({ fileContents, data });
+            resolve( fileContents );
           }
         };
       })();
