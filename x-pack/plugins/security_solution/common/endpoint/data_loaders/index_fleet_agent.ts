@@ -21,14 +21,14 @@ import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
-export interface IndexedFleetAgent {
+export interface IndexedFleetAgentResponse {
   agents: Agent[];
   fleetAgentsIndex: string;
 }
 
 /**
  * Indexes a Fleet Agent
- * (NOTE: ensure that fleet is setup first before calling this loading function)
+ *
  *
  * @param esClient
  * @param kbnClient
@@ -44,7 +44,7 @@ export const indexFleetAgentForHost = async (
   agentPolicyId: string,
   kibanaVersion: string = '8.0.0',
   fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
-): Promise<IndexedFleetAgent> => {
+): Promise<IndexedFleetAgentResponse> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
     _source: {
       local_metadata: {
@@ -84,13 +84,13 @@ const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<A
   })) as AxiosResponse<GetOneAgentResponse>).data.item;
 };
 
-interface DeleteIndexedFleetAgentsResponse {
+export interface DeleteIndexedFleetAgentsResponse {
   agents: DeleteByQueryResponse | undefined;
 }
 
 export const deleteIndexedFleetAgents = async (
   esClient: Client,
-  indexedFleetAgents: IndexedFleetAgent
+  indexedFleetAgents: IndexedFleetAgentResponse
 ): Promise<DeleteIndexedFleetAgentsResponse> => {
   const response: DeleteIndexedFleetAgentsResponse = {
     agents: undefined,

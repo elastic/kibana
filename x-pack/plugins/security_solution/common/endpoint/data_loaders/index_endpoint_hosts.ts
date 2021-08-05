@@ -6,27 +6,18 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import { AxiosResponse } from 'axios';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
-import {
-  Agent,
-  AGENT_POLICY_API_ROUTES,
-  CreateAgentPolicyRequest,
-  CreateAgentPolicyResponse,
-  CreatePackagePolicyRequest,
-  CreatePackagePolicyResponse,
-  GetPackagesResponse,
-  PACKAGE_POLICY_API_ROUTES,
-} from '../../../../fleet/common';
+import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '../../../../fleet/common';
 import { EndpointDocGenerator } from '../generate_data';
 import { HostMetadata } from '../types';
-import { policyFactory as policyConfigFactory } from '../models/policy_config';
 import {
   deleteIndexedFleetAgents,
-  IndexedFleetAgent,
+  DeleteIndexedFleetAgentsResponse,
+  IndexedFleetAgentResponse,
   indexFleetAgentForHost,
 } from './index_fleet_agent';
 import {
@@ -35,10 +26,17 @@ import {
   IndexedFleetActionsForHostResponse,
   indexFleetActionsForHost,
 } from './index_fleet_actions';
+import {
+  deleteIndexedFleetEndpointPolicies,
+  DeleteIndexedFleetEndpointPoliciesResponse,
+  IndexedFleetEndpointPolicyResponse,
+  indexFleetEndpointPolicy,
+} from './index_fleet_endpoint_policy';
 
 export interface IndexedHostsResponse
-  extends IndexedFleetAgent,
-    IndexedFleetActionsForHostResponse {
+  extends IndexedFleetAgentResponse,
+    IndexedFleetActionsForHostResponse,
+    IndexedFleetEndpointPolicyResponse {
   /**
    * The documents (1 or more) that were generated for the (single) endpoint host.
    * If consuming this data and wanting only the last one created, just access the
@@ -104,6 +102,8 @@ export async function indexEndpointHostDocs({
     responsesIndex: '',
     actions: [],
     actionsIndex: '',
+    integrationPolicies: [],
+    agentPolicies: [],
   };
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
@@ -123,12 +123,16 @@ export async function indexEndpointHostDocs({
 
       // If we don't yet have a "real" policy record, then create it now in ingest (package config)
       if (!realPolicies[appliedPolicyId]) {
-        // eslint-disable-next-line require-atomic-updates
-        realPolicies[appliedPolicyId] = await createPolicy(
+        const createdPolicies = await indexFleetEndpointPolicy(
           kbnClient,
           appliedPolicyName,
           epmEndpointPackage.version
         );
+
+        merge(response, createdPolicies);
+
+        // eslint-disable-next-line require-atomic-updates
+        realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
 
         response.policies.push(realPolicies[appliedPolicyId]);
       }
@@ -200,62 +204,6 @@ export async function indexEndpointHostDocs({
   return response;
 }
 
-const createPolicy = async (
-  kbnClient: KbnClient,
-  policyName: string,
-  endpointPackageVersion: string
-): Promise<CreatePackagePolicyResponse['item']> => {
-  // Create Agent Policy first
-  const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name: `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
-    description: `Policy created with endpoint data generator (${policyName})`,
-    namespace: 'default',
-  };
-  let agentPolicy;
-  try {
-    agentPolicy = (await kbnClient.request({
-      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
-      method: 'POST',
-      body: newAgentPolicyData,
-    })) as AxiosResponse<CreateAgentPolicyResponse>;
-  } catch (error) {
-    throw new Error(`create policy ${error}`);
-  }
-
-  // Create Package Configuration
-  const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-    name: policyName,
-    description: 'Protect the worlds data',
-    policy_id: agentPolicy.data.item.id,
-    enabled: true,
-    output_id: '',
-    inputs: [
-      {
-        type: 'endpoint',
-        enabled: true,
-        streams: [],
-        config: {
-          policy: {
-            value: policyConfigFactory(),
-          },
-        },
-      },
-    ],
-    namespace: 'default',
-    package: {
-      name: 'endpoint',
-      title: 'endpoint',
-      version: endpointPackageVersion,
-    },
-  };
-  const packagePolicy = (await kbnClient.request({
-    path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-    method: 'POST',
-    body: newPackagePolicyData,
-  })) as AxiosResponse<CreatePackagePolicyResponse>;
-  return packagePolicy.data.item;
-};
-
 const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   const version = ((await kbnClient.request({
     path: '/api/status',
@@ -271,7 +219,10 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   return version;
 };
 
-export interface DeleteIndexedEndpointHosts extends DeleteIndexedFleetActionsResponse {
+export interface DeleteIndexedEndpointHosts
+  extends DeleteIndexedFleetAgentsResponse,
+    DeleteIndexedFleetActionsResponse,
+    DeleteIndexedFleetEndpointPoliciesResponse {
   hosts: DeleteByQueryResponse | undefined;
   agents: DeleteByQueryResponse | undefined;
 }
@@ -286,6 +237,8 @@ export const deleteIndexedEndpointHosts = async (
     agents: undefined,
     responses: undefined,
     actions: undefined,
+    integrationPolicies: undefined,
+    agentPolicies: undefined,
   };
 
   if (indexedData.hosts.length) {
@@ -306,13 +259,14 @@ export const deleteIndexedEndpointHosts = async (
     // FIXME:PT Delete data from the `_current` (transform destination) index as well?
   }
 
-  Object.assign(
+  merge(
     response,
     await deleteIndexedFleetAgents(esClient, indexedData),
-    await deleteIndexedFleetActions(esClient, indexedData)
+    await deleteIndexedFleetActions(esClient, indexedData),
+    await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData)
   );
 
-  // FIXME:PT delete policies
+  // FIXME:PT Delete policy responses
 
   return response;
 };
