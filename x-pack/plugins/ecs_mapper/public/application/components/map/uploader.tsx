@@ -58,6 +58,13 @@ export const EcsMapperUploadView: FC<Props> = ({fileUpload, mapper, navigateToAp
     setIsPipelineCreated(true);
   }
 
+  const onCancelCreate = () => {
+    setIsUploaded(false);
+    setPipelineName('');
+    setPipelineProcessors([]);
+    setIsPipelineCreated(false);
+  }
+
   const processFile = async (file: File, action: FieldCopyAction, pipelineName: string) => {
     const maxBytes = fileUpload.getMaxBytes();
     
@@ -101,11 +108,12 @@ export const EcsMapperUploadView: FC<Props> = ({fileUpload, mapper, navigateToAp
 
           <EuiSpacer size="m" />
 
-          {isUploaded && !isPipelineCreated && (
+          {isUploaded && (
             <ConfirmationPanel
               pipelineName={pipelineName}
               processors={pipelineProcessors}
               onCreatePipeline={onCreatePipeline}
+              onCancel={onCancelCreate}
             />
           )}
 
