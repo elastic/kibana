@@ -31,7 +31,7 @@ export const ConfirmationPanel: FC<Props> = ({
   processors,
   onCreatePipeline,
   onCancel,
-  isPipelineCreated
+  isPipelineCreated,
 }) => {
   return (
     <EuiFlexGroup>
@@ -58,11 +58,10 @@ export const ConfirmationPanel: FC<Props> = ({
         </EuiCodeBlock>
 
         <EuiSpacer size="m" />
-        
-        {!isPipelineCreated && (
-          <EuiFlexGroup wrap >
-            <EuiFlexItem grow={false}>
 
+        {!isPipelineCreated && (
+          <EuiFlexGroup wrap>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 target="_self"
                 onClick={() => onCreatePipeline()}
@@ -90,7 +89,6 @@ export const ConfirmationPanel: FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        
       </EuiFlexItem>
     </EuiFlexGroup>
   );

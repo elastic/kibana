@@ -27,12 +27,14 @@ export const ResultsPanel: FC<Props> = ({ pipelineName, onManageIngestPipeline }
               managementLink: (
                 <EuiLink
                   target="_blank"
-                  onClick={() => {onManageIngestPipeline()}}
+                  onClick={() => {
+                    onManageIngestPipeline();
+                  }}
                 >
                   here
                 </EuiLink>
               ),
-              pipelineName
+              pipelineName,
             }}
           />
         </p>
