@@ -7,7 +7,7 @@
 
 import './expression.scss';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
@@ -51,8 +51,10 @@ import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
+  ChartsPluginStart,
   PaletteRegistry,
   SeriesLayer,
+  useActiveCursor,
 } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { getFitOptions } from './fitting_functions';
@@ -89,6 +91,7 @@ export {
 
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
+  chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
@@ -125,7 +128,8 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
 
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
-  chartsThemeService: ChartsPluginSetup['theme'];
+  chartsThemeService: ChartsPluginStart['theme'];
+  chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -154,6 +158,7 @@ export const getXyChartRenderer = (dependencies: {
         <XYChartReportable
           {...config}
           formatFactory={formatFactory}
+          chartsActiveCursorService={dependencies.chartsActiveCursorService}
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
@@ -226,6 +231,7 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartsThemeService,
+  chartsActiveCursorService,
   paletteService,
   minInterval,
   onClickValue,
@@ -244,10 +250,15 @@ export function XYChart({
     yRightExtent,
     valuesInLegend,
   } = args;
+  const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
+
+  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+    datatables: Object.values(data.tables),
+  });
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
@@ -491,8 +502,9 @@ export function XYChart({
   } as LegendPositionConfig;
 
   return (
-    <Chart>
+    <Chart ref={chartRef}>
       <Settings
+        onPointerUpdate={handleCursorUpdate}
         debugState={window._echDebugStateFlag ?? false}
         showLegend={
           legend.isVisible && !legend.showSingleSeries

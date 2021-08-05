@@ -50,7 +50,12 @@ import { XyEndzones } from './x_domain';
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
 
-const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const chartSetupContract = chartPluginMock.createSetupContract();
+const chartStartContract = chartPluginMock.createStartContract();
+
+const chartsThemeService = chartSetupContract.theme;
+const chartsActiveCursorService = chartStartContract.activeCursor;
+
 const paletteService = chartPluginMock.createPaletteRegistry();
 
 const mockPaletteOutput: PaletteOutput = {
@@ -477,6 +482,7 @@ describe('xy_expression', () => {
         timeZone: 'UTC',
         renderMode: 'display',
         chartsThemeService,
+        chartsActiveCursorService,
         paletteService,
         minInterval: 50,
         onClickValue,
