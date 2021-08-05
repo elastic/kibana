@@ -10,10 +10,7 @@ import { filterFieldToList } from '.';
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getListResponseMock } from '../list_schema/index.mock';
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType } from '../../../../../../../src/plugins/data/common';
-type IFieldType = any;
+import { IndexPatternFieldBase } from '@kbn/es-query';
 
 describe('#filterFieldToList', () => {
   test('it returns empty array if given a undefined for field', () => {
@@ -22,13 +19,20 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns empty array if filed does not contain esTypes', () => {
-    const field: IFieldType = { name: 'some-name', type: 'some-type' };
+    const field: IndexPatternFieldBase = {
+      name: 'some-name',
+      type: 'some-type',
+    };
     const filter = filterFieldToList([], field);
     expect(filter).toEqual([]);
   });
 
   test('it returns single filtered list of ip_range -> ip', () => {
-    const field: IFieldType = { esTypes: ['ip'], name: 'some-name', type: 'ip' };
+    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+      esTypes: ['ip'],
+      name: 'some-name',
+      type: 'ip',
+    };
     const listItem: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
     const filter = filterFieldToList([listItem], field);
     const expected: ListSchema[] = [listItem];
@@ -36,7 +40,11 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns single filtered list of ip -> ip', () => {
-    const field: IFieldType = { esTypes: ['ip'], name: 'some-name', type: 'ip' };
+    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+      esTypes: ['ip'],
+      name: 'some-name',
+      type: 'ip',
+    };
     const listItem: ListSchema = { ...getListResponseMock(), type: 'ip' };
     const filter = filterFieldToList([listItem], field);
     const expected: ListSchema[] = [listItem];
@@ -44,7 +52,11 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns single filtered list of keyword -> keyword', () => {
-    const field: IFieldType = { esTypes: ['keyword'], name: 'some-name', type: 'keyword' };
+    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+      esTypes: ['keyword'],
+      name: 'some-name',
+      type: 'keyword',
+    };
     const listItem: ListSchema = { ...getListResponseMock(), type: 'keyword' };
     const filter = filterFieldToList([listItem], field);
     const expected: ListSchema[] = [listItem];
@@ -52,7 +64,11 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns single filtered list of text -> text', () => {
-    const field: IFieldType = { esTypes: ['text'], name: 'some-name', type: 'text' };
+    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+      esTypes: ['text'],
+      name: 'some-name',
+      type: 'text',
+    };
     const listItem: ListSchema = { ...getListResponseMock(), type: 'text' };
     const filter = filterFieldToList([listItem], field);
     const expected: ListSchema[] = [listItem];
@@ -60,7 +76,11 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns 2 filtered lists of ip_range -> ip', () => {
-    const field: IFieldType = { esTypes: ['ip'], name: 'some-name', type: 'ip' };
+    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+      esTypes: ['ip'],
+      name: 'some-name',
+      type: 'ip',
+    };
     const listItem1: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
     const listItem2: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
     const filter = filterFieldToList([listItem1, listItem2], field);
@@ -69,7 +89,11 @@ describe('#filterFieldToList', () => {
   });
 
   test('it returns 1 filtered lists of ip_range -> ip if the 2nd is not compatible type', () => {
-    const field: IFieldType = { esTypes: ['ip'], name: 'some-name', type: 'ip' };
+    const field: IndexPatternFieldBase & { esTypes: string[] } = {
+      esTypes: ['ip'],
+      name: 'some-name',
+      type: 'ip',
+    };
     const listItem1: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
     const listItem2: ListSchema = { ...getListResponseMock(), type: 'text' };
     const filter = filterFieldToList([listItem1, listItem2], field);

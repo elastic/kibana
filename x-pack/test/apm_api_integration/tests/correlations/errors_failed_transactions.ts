@@ -58,7 +58,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns significant terms', () => {
         const { significantTerms } = response.body;
-        expect(significantTerms).to.have.length(2);
+        expect(significantTerms.length).to.be.greaterThan(0);
+
         const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
         expectSnapshot(sortedFieldNames).toMatchInline(`
           Array [

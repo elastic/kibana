@@ -16,7 +16,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
 import { buildSiemResponse } from '../utils';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
 import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
@@ -53,7 +52,7 @@ export const findRulesRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const execLogClient = context.securitySolution.getExecutionLogClient();
         const rules = await findRules({
           rulesClient,
           perPage: query.per_page,
@@ -64,8 +63,13 @@ export const findRulesRoute = (
           fields: query.fields,
         });
         const alertIds = rules.data.map((rule) => rule.id);
+
         const [ruleStatuses, ruleActions] = await Promise.all([
-          ruleStatusClient.findBulk(alertIds, 1),
+          execLogClient.findBulk({
+            ruleIds: alertIds,
+            logsCount: 1,
+            spaceId: context.securitySolution.getSpaceId(),
+          }),
           getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
         const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);

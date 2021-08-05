@@ -364,4 +364,12 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
+  .case(setInsertTimeline, (state, insertTimeline) => ({
+    ...state,
+    insertTimeline,
+  }))
+  .case(showTimeline, (state, { id, show }) => ({
+    ...state,
+    timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
+  }))
   .build();

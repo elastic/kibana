@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { ISearchRequestParams } from 'src/plugins/data/common';
 import {
   TimelineEventsLastEventTimeRequestOptions,
   LastEventIndexKey,
@@ -82,6 +83,7 @@ export const buildLastEventTimeQuery = ({
         throw new Error('buildLastEventTimeQuery - no hostName argument provided');
       case LastEventIndexKey.hosts:
       case LastEventIndexKey.network:
+      case LastEventIndexKey.ueba:
         return {
           allowNoIndices: true,
           index: indicesToQuery[indexKey],
@@ -105,5 +107,7 @@ export const buildLastEventTimeQuery = ({
         return assertUnreachable(eventIndexKey);
     }
   };
-  return getQuery(indexKey);
+  // TODO: Yes, TypeScript defeated me. Need to remove this type
+  // cast, typing issue seemed to have slipped into codebase previously
+  return getQuery(indexKey) as ISearchRequestParams;
 };

@@ -21,7 +21,12 @@ import {
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../timelines/common';
+import type {
+  ActionProps,
+  AlertStatus,
+  ColumnHeaderOptions,
+  RowRenderer,
+} from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -41,11 +46,9 @@ const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thContent ${className}`,
 }))<{ textAlign?: string; width?: number }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  position: relative;
-  top: 3px;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
@@ -79,7 +82,7 @@ export const columns: Array<
       defaultMessage: 'Triggered',
     }),
     id: ALERT_START,
-    initialWidth: 116,
+    initialWidth: 176,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -104,7 +107,6 @@ export const columns: Array<
     }),
     linkField: '*',
     id: RULE_NAME,
-    initialWidth: 400,
   },
 ];
 
@@ -216,6 +218,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             sortDirection: 'desc',
           },
         ],
+        filterStatus: status as AlertStatus,
         leadingControlColumns,
         trailingControlColumns,
         unit: (totalAlerts: number) =>

@@ -95,12 +95,6 @@ describe('migration v2', () => {
             },
           ],
         },
-        // reporting loads headless browser, that prevents nodejs process from exiting.
-        xpack: {
-          reporting: {
-            enabled: false,
-          },
-        },
       },
       {
         oss,
