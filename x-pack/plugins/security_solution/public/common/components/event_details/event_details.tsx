@@ -34,7 +34,6 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from './cti_details/helpers';
-import { NoEnrichmentsPanel } from './cti_details/no_enrichments_panel';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -115,7 +114,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   const {
     loading: enrichmentsLoading,
     result: enrichmentsResponse,
-    setRange,
+    rangeFilterProps,
   } = useInvestigationTimeEnrichment(eventFields);
 
   const allEnrichments = useMemo(() => {
@@ -201,10 +200,12 @@ const EventDetailsComponent: React.FC<Props> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),
-            content: <ThreatDetailsView enrichments={allEnrichments} setRange={setRange} />,
+            content: (
+              <ThreatDetailsView enrichments={allEnrichments} rangeFilterProps={rangeFilterProps} />
+            ),
           }
         : undefined,
-    [allEnrichments, setRange, enrichmentCount, enrichmentsLoading, isAlert]
+    [allEnrichments, rangeFilterProps, enrichmentCount, enrichmentsLoading, isAlert]
   );
 
   const tableTab = useMemo(

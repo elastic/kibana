@@ -6,55 +6,84 @@
  */
 
 import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
-import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+import React, { useMemo, useState, useCallback } from 'react';
+import {
+  EuiDatePicker,
+  EuiDatePickerRange,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+} from '@elastic/eui';
 
 import * as i18n from './translations';
+import { RangeFilterProps } from '../../../containers/cti/event_enrichment';
 
-interface Range {
-  from: string;
-  to: string;
-}
-export type RangeCallback = (range: Range) => void;
+export const EnrichmentRangePicker: React.FC<RangeFilterProps> = ({
+  setStartDate,
+  setEndDate,
+  startDate,
+  endDate,
+  loading,
+}) => {
+  const [localStartDate, setLocalStartDate] = useState<moment.Moment | null>(startDate);
+  const [localEndDate, setLocalEndDate] = useState<moment.Moment | null>(endDate);
 
-export const EnrichmentRangePicker: React.FC<{ onChange: RangeCallback }> = ({ onChange }) => {
-  const [startDate, setStartDate] = useState<moment.Moment | null>(moment().subtract(30, 'd'));
-  const [endDate, setEndDate] = useState<moment.Moment | null>(moment());
-
-  useEffect(() => {
-    if (startDate && endDate) {
-      onChange({ from: startDate.toISOString(), to: endDate.toISOString() });
+  const onButtonClick = useCallback(() => {
+    if (localStartDate && startDate !== localStartDate) {
+      setStartDate(localStartDate);
     }
-  }, [endDate, onChange, startDate]);
-  const isValid = useMemo(() => startDate?.isBefore(endDate), [endDate, startDate]);
+    if (localEndDate && endDate !== localEndDate) {
+      setEndDate(localEndDate);
+    }
+  }, [endDate, setStartDate, localStartDate, localEndDate, setEndDate, startDate]);
+
+  const isValid = useMemo(() => localStartDate?.isBefore(localEndDate), [
+    localStartDate,
+    localEndDate,
+  ]);
 
   return (
-    <EuiDatePickerRange
-      data-test-subj="enrichment-query-range-picker"
-      startDateControl={
-        <EuiDatePicker
-          className="start-picker"
-          selected={startDate}
-          onChange={setStartDate}
-          startDate={startDate}
-          endDate={endDate}
-          isInvalid={!isValid}
-          aria-label={i18n.ENRICHMENT_LOOKBACK_START_DATE}
-          showTimeSelect
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiDatePickerRange
+          fullWidth
+          data-test-subj="enrichment-query-range-picker"
+          startDateControl={
+            <EuiDatePicker
+              className="start-picker"
+              selected={localStartDate}
+              onChange={setLocalStartDate}
+              startDate={localStartDate}
+              endDate={localEndDate}
+              isInvalid={!isValid}
+              aria-label={i18n.ENRICHMENT_LOOKBACK_START_DATE}
+              showTimeSelect
+            />
+          }
+          endDateControl={
+            <EuiDatePicker
+              className="end-picker"
+              selected={localEndDate}
+              onChange={setLocalEndDate}
+              startDate={localStartDate}
+              endDate={localEndDate}
+              isInvalid={!isValid}
+              aria-label={i18n.ENRICHMENT_LOOKBACK_END_DATE}
+              showTimeSelect
+            />
+          }
         />
-      }
-      endDateControl={
-        <EuiDatePicker
-          className="end-picker"
-          selected={endDate}
-          onChange={setEndDate}
-          startDate={startDate}
-          endDate={endDate}
-          isInvalid={!isValid}
-          aria-label={i18n.ENRICHMENT_LOOKBACK_END_DATE}
-          showTimeSelect
-        />
-      }
-    />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          iconType={'refresh'}
+          onClick={onButtonClick}
+          isLoading={loading}
+          data-test-subj={'enrichment-button'}
+        >
+          {i18n.REFRESH}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

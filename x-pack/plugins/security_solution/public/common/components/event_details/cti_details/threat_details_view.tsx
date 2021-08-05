@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
+  EuiLoadingContent,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
@@ -22,26 +23,30 @@ import { groupBy } from 'lodash';
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
 import {
-  FIRSTSEEN,
-  EVENT_URL,
-  EVENT_REFERENCE,
-  ENRICHMENT_TYPES,
   ENRICHMENT_TYPE,
+  ENRICHMENT_TYPES,
+  EVENT_REFERENCE,
+  EVENT_URL,
+  FIRSTSEEN,
 } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import {
+  getEnrichmentIdentifiers,
   getShimmedIndicatorValue,
   isInvestigationTimeEnrichment,
-  getEnrichmentIdentifiers,
 } from './helpers';
 import * as i18n from './translations';
-import { QUERY_ID } from '../../../containers/cti/event_enrichment/use_investigation_enrichment';
+import {
+  QUERY_ID,
+  RangeFilterProps,
+} from '../../../containers/cti/event_enrichment/use_investigation_enrichment';
 import { InspectButton } from '../../inspect';
 import { EnrichmentButtonContent } from './enrichment_button_content';
 import { EnrichmentIcon } from './enrichment_icon';
 import { useKibana } from '../../../lib/kibana';
+import { EnrichmentRangePicker } from './enrichment_range_picker';
 
 const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
@@ -52,10 +57,10 @@ const getFirstSeen = (enrichment: CtiEnrichment): number => {
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {
     background: ${({ theme }) => theme.eui.euiColorLightestShade};
-    height: ${({ theme }) => theme.eui.paddingSizes.xl};
     border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
-    padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
+    height: ${({ theme }) => theme.eui.paddingSizes.xl};
     margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+    padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
   }
 `;
 
@@ -176,10 +181,11 @@ const getMessagesFromType = (type?: ENRICHMENT_TYPE) => {
   return { dataTestSubj, title, noData };
 };
 
-const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[]; type?: ENRICHMENT_TYPE }> = ({
-  enrichments,
-  type,
-}) => {
+const EnrichmentSection: React.FC<{
+  enrichments: CtiEnrichment[];
+  type?: ENRICHMENT_TYPE;
+  rangeFilterProps?: RangeFilterProps;
+}> = ({ enrichments, type, rangeFilterProps }) => {
   const { dataTestSubj, title, noData } = getMessagesFromType(type);
   return (
     <div data-test-subj={dataTestSubj}>
@@ -198,6 +204,12 @@ const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[]; type?: ENRICHM
           <EuiSpacer size="s" />
         </>
       )}
+      {rangeFilterProps && (
+        <>
+          <EnrichmentRangePicker {...rangeFilterProps} />
+          <EuiSpacer size="m" />
+        </>
+      )}
       {Array.isArray(enrichments) ? (
         <>
           {enrichments
@@ -211,7 +223,10 @@ const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[]; type?: ENRICHM
             ))}
         </>
       ) : (
-        noData && <InlineBlock data-test-subj={'no-intelligence-cta'}>{noData}</InlineBlock>
+        <>
+          {noData && <InlineBlock data-test-subj={'no-intelligence-cta'}>{noData}</InlineBlock>}
+          {rangeFilterProps?.loading && <EuiLoadingContent lines={4} />}
+        </>
       )}
     </div>
   );
@@ -219,8 +234,8 @@ const EnrichmentSection: React.FC<{ enrichments: CtiEnrichment[]; type?: ENRICHM
 
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
-  setRange: unknown;
-}> = ({ enrichments }) => {
+  rangeFilterProps: RangeFilterProps;
+}> = ({ enrichments, rangeFilterProps }) => {
   const {
     [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
     [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
@@ -236,6 +251,7 @@ const ThreatDetailsViewComponent: React.FC<{
       />
       <EuiHorizontalRule />
       <EnrichmentSection
+        rangeFilterProps={rangeFilterProps}
         enrichments={threatIntelEnrichments}
         type={ENRICHMENT_TYPES.InvestigationTime}
       />

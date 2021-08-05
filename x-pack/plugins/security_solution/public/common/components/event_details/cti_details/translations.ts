@@ -128,3 +128,7 @@ export const ENRICHMENT_LOOKBACK_END_DATE = i18n.translate(
     defaultMessage: 'End date',
   }
 );
+
+export const REFRESH = i18n.translate('xpack.securitySolution.alertDetails.refresh', {
+  defaultMessage: 'Refresh',
+});

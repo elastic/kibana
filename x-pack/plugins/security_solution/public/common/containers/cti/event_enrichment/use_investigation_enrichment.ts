@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { SetStateAction, Dispatch, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash';
+import moment from 'moment';
 
 import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
-import {
-  DEFAULT_CTI_SOURCE_INDEX,
-  DEFAULT_EVENT_ENRICHMENT_FROM,
-  DEFAULT_EVENT_ENRICHMENT_TO,
-} from '../../../../../common/cti/constants';
+import { DEFAULT_CTI_SOURCE_INDEX } from '../../../../../common/cti/constants';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { inputsActions } from '../../../store/actions';
@@ -24,14 +21,24 @@ import { useEventEnrichmentComplete } from '.';
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
 
+export type SetDate = (date: moment.Moment) => Dispatch<SetStateAction<moment.Moment>>;
+
+export interface RangeFilterProps {
+  setStartDate: SetDate;
+  setEndDate: SetDate;
+  startDate: moment.Moment;
+  endDate: moment.Moment;
+  loading: boolean;
+}
+
 export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
   const kibana = useKibana();
   const dispatch = useDispatch();
-  const [{ from, to }, setRange] = useState({
-    from: DEFAULT_EVENT_ENRICHMENT_FROM,
-    to: DEFAULT_EVENT_ENRICHMENT_TO,
-  });
+
+  const [startDate, setStartDate] = useState<moment.Moment>(moment().subtract(30, 'd'));
+  const [endDate, setEndDate] = useState<moment.Moment>(moment());
+
   const { error, loading, result, start } = useEventEnrichmentComplete();
 
   const deleteQuery = useCallback(() => {
@@ -67,17 +74,23 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
     if (!isEmpty(eventFields)) {
       start({
         data: kibana.services.data,
-        timerange: { from, to, interval: '' },
+        timerange: { from: startDate.toISOString(), to: endDate.toISOString(), interval: '' },
         defaultIndex: DEFAULT_CTI_SOURCE_INDEX,
         eventFields,
         filterQuery: '',
       });
     }
-  }, [from, start, kibana.services.data, to, eventFields]);
+  }, [startDate, start, kibana.services.data, endDate, eventFields]);
 
   return {
     loading,
     result,
-    setRange,
+    rangeFilterProps: {
+      setStartDate,
+      setEndDate,
+      startDate,
+      endDate,
+      loading,
+    },
   };
 };
