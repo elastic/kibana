@@ -42,9 +42,21 @@ This is a good option if you want to understand the bare minimum needed to regis
 
 ```
 > echo '{
-  "extends": "../../tsconfig.base.json"
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./target",
+    "skipLibCheck": true
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": []
 }
-
 ' > tsconfig.json
 ```
 
