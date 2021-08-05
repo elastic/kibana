@@ -125,7 +125,7 @@ export class RuleDataClient implements IRuleDataClient {
     return {
       name: primaryNamespacedAlias,
       body: {
-        index_patterns: [`${primaryNamespacedAlias}*`],
+        index_patterns: [`${primaryNamespacedAlias}-*`],
         composed_of: [...this.options.componentTemplateNames],
         template: {
           aliases:
@@ -148,6 +148,9 @@ export class RuleDataClient implements IRuleDataClient {
         _meta: {
           namespace,
         },
+        // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
+        // then newly created indices will use the matching template with the *longest* namespace
+        priority: namespace?.length,
       },
     };
   }

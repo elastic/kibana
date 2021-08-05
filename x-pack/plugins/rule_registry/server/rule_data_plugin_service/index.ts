@@ -198,8 +198,8 @@ export class RuleDataPluginService {
   async updateIndexMappingsForAsset(assetName: string) {
     await this.wait();
     const clusterClient = await this.getClusterClient();
-    const pattern = this.getFullAssetName(assetName);
-    const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
+    const pattern = `${this.getFullAssetName(assetName)}-*`;
+    const { body: aliasesResponse } = await clusterClient.indices.getAlias({ name: pattern });
     const writeIndicesAndAliases: Array<{ index: string; alias: string }> = [];
     Object.entries(aliasesResponse).forEach(([index, aliases]) => {
       Object.entries(aliases.aliases).forEach(([aliasName, aliasProperties]) => {
