@@ -114,7 +114,7 @@ export class TelemetryTrustedAppsTask {
     this.logger.debug(`Trusted Apps: ${response}`);
 
     batchTelemetryRecords(response.data, 1_000).forEach((telemetryBatch) =>
-      this.sender.sendOnDemand('lists-trustedapps', telemetryBatch)
+      this.sender.sendOnDemand('security-lists', telemetryBatch)
     );
 
     return response.data.length;
