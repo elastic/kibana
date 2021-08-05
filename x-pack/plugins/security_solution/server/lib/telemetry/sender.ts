@@ -19,7 +19,7 @@ import {
 } from '../../../../task_manager/server';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
-import { TelemetryTrustedAppsTask } from './trusted_apps_task';
+import { TelemetryTrustedAppsTask } from './security_lists_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';

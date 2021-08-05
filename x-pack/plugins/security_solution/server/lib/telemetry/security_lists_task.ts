@@ -16,18 +16,14 @@ import {
 import { getPreviousEpMetaTaskTimestamp, batchTelemetryRecords } from './helpers';
 import { TelemetryEventsSender } from './sender';
 
-export const TelemetryTrustedAppsTaskConstants = {
-  TIMEOUT: '1m',
-  TYPE: 'security:trusted-apps-telemetry',
+export const TelemetrySecuityListsTaskConstants = {
+  TIMEOUT: '3m',
+  TYPE: 'security:security-lists-telemetry',
   INTERVAL: '24h',
   VERSION: '1.0.0',
 };
 
-/** Telemetry Trusted Apps Task
- *
- * The Trusted Apps task is a daily batch job that collects and transmits non-sensitive
- * trusted apps hashes + file paths for supported operating systems. This helps test
- * efficacy of our protections.
+/** Telemetry Security Lists Task
  */
 export class TelemetryTrustedAppsTask {
   private readonly logger: Logger;
@@ -42,9 +38,9 @@ export class TelemetryTrustedAppsTask {
     this.sender = sender;
 
     taskManager.registerTaskDefinitions({
-      [TelemetryTrustedAppsTaskConstants.TYPE]: {
+      [TelemetrySecuityListsTaskConstants.TYPE]: {
         title: 'Security Solution Telemetry Endpoint Metrics and Info task',
-        timeout: TelemetryTrustedAppsTaskConstants.TIMEOUT,
+        timeout: TelemetrySecuityListsTaskConstants.TIMEOUT,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           const { state } = taskInstance;
 
@@ -81,13 +77,13 @@ export class TelemetryTrustedAppsTask {
     try {
       await taskManager.ensureScheduled({
         id: this.getTaskId(),
-        taskType: TelemetryTrustedAppsTaskConstants.TYPE,
+        taskType: TelemetrySecuityListsTaskConstants.TYPE,
         scope: ['securitySolution'],
         schedule: {
-          interval: TelemetryTrustedAppsTaskConstants.INTERVAL,
+          interval: TelemetrySecuityListsTaskConstants.INTERVAL,
         },
         state: { runs: 0 },
-        params: { version: TelemetryTrustedAppsTaskConstants.VERSION },
+        params: { version: TelemetrySecuityListsTaskConstants.VERSION },
       });
     } catch (e) {
       this.logger.error(`Error scheduling task, received ${e.message}`);
@@ -95,7 +91,7 @@ export class TelemetryTrustedAppsTask {
   };
 
   private getTaskId = (): string => {
-    return `${TelemetryTrustedAppsTaskConstants.TYPE}:${TelemetryTrustedAppsTaskConstants.VERSION}`;
+    return `${TelemetrySecuityListsTaskConstants.TYPE}:${TelemetrySecuityListsTaskConstants.VERSION}`;
   };
 
   public runTask = async (taskId: string, executeFrom: string, executeTo: string) => {

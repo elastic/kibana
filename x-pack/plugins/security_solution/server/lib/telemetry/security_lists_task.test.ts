@@ -9,7 +9,7 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 import { TaskStatus } from '../../../../task_manager/server';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 
-import { TelemetryTrustedAppsTask, TelemetryTrustedAppsTaskConstants } from './trusted_apps_task';
+import { TelemetryTrustedAppsTask, TelemetryTrustedAppsTaskConstants } from './security_lists_task';
 import { createMockTelemetryEventsSender, MockTelemetryTrustedAppTask } from './mocks';
 
 describe('test trusted apps telemetry task functionality', () => {
