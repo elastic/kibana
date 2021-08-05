@@ -38,7 +38,17 @@ This is a good option if you want to understand the bare minimum needed to regis
 }' > kibana.json
 ```
 
-3. Create a `public/plugin.tsx` file.
+3. Create a `tsconfig.json` file.
+
+```
+> echo '{
+  "extends": "../../tsconfig.base.json"
+}
+
+' > tsconfig.json
+```
+
+4. Create a `public/plugin.tsx` file.
 
 ```
 > mkdir public
@@ -70,7 +80,7 @@ export class HelloWorldPlugin implements Plugin {
 }
 ```
 
-4. Create your `public/index.ts` file.
+5. Create your `public/index.ts` file.
 
 ```
 > echo '
