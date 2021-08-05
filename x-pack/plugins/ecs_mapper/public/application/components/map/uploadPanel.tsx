@@ -138,10 +138,10 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             target="_self"
             onClick={() => onFileUpload(action, file, pipelineName)}
             isLoading={isLoading}
-            data-test-subj="ecsMapperManagePipelineButton"
+            data-test-subj="ecsMapperProcessFileButton"
             fill
           >
-            <FormattedMessage id="xpack.ecsMapper.file.upload.button" defaultMessage="Upload" />
+            <FormattedMessage id="xpack.ecsMapper.file.process.button" defaultMessage="Process" />
           </EuiButton>
         )}
       </EuiFlexItem>

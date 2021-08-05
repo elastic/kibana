@@ -37,7 +37,7 @@ export class MapperProxy {
     } catch (error) {
       this.notifications.toasts.addError(error, {
         title: i18n.translate('xpack.ecsMapper.mapToIngestPipelineError', {
-          defaultMessage: 'Error',
+          defaultMessage: 'Something went wrong',
         }),
       });
       return [];
@@ -55,7 +55,7 @@ export class MapperProxy {
     } catch (error) {
       this.notifications.toasts.addError(error, {
         title: i18n.translate('xpack.ecsMapper.postPipelineError', {
-          defaultMessage: 'Error',
+          defaultMessage: 'Something went wrong',
         }),
       });
     }

@@ -71,7 +71,7 @@ export const ConfirmationPanel: FC<Props> = ({
               >
                 <FormattedMessage
                   id="xpack.ecsMapper.createIngestPipeline"
-                  defaultMessage="Confirm"
+                  defaultMessage="Create pipeline"
                 />
               </EuiButton>
             </EuiFlexItem>

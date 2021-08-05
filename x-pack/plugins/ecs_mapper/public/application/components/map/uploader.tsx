@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { NavigateToAppOptions } from 'kibana/public';
 import { UploadPanel } from './uploadPanel';
@@ -31,13 +32,6 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
   const [pipelineName, setPipelineName] = useState<string>('');
   const [error, setError] = useState<string>('');
 
-  const hasPermissionToImport = async () => {
-    return await fileUpload.hasImportPermission({
-      checkCreateIndexPattern: false,
-      checkHasManagePipeline: true,
-    });
-  };
-
   const onManageIngestPipeline = () => {
     navigateToApp('management', {
       path: `/ingest/ingest_pipelines/edit/${pipelineName}`,
@@ -53,9 +47,51 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
     }
   };
 
+  const fetchPipelineFromMapping = async (fileContents: string, action: FieldCopyAction) => {
+    try {
+      const processors = await mapper.fetchPipelineFromMapping(fileContents, action);
+      setPipelineProcessors(processors);
+      setIsLoading(false);
+      setIsUploaded(true);
+    } catch (e) {
+      if (e.body?.statusCode == 400){
+        setError(e.body.message);
+      } else {
+        setError(
+          i18n.translate(
+            'xpack.ecsMapper.fetchPipeline.unexpectedError',
+            {
+              defaultMessage: "Unexpected error {e}",
+              values: { e }
+            }
+          )
+        );
+      }
+
+      setIsLoading(false);
+      setIsUploaded(false);
+    }
+  }
+
   const onCreatePipeline = async () => {
-    await mapper.createIngestNodePipeline(pipelineName, pipelineProcessors);
-    setIsPipelineCreated(true);
+    try {
+      await mapper.createIngestNodePipeline(pipelineName, pipelineProcessors);
+      setIsPipelineCreated(true);
+    } catch (e) {
+      if (e.body?.statusCode == 409){
+        setError("There is already an existing Ingest Node Pipeline named " + pipelineName);
+      } else {
+        setError(
+          i18n.translate(
+            'xpack.ecsMapper.createIngestNodePipeline.unexpectedError',
+            {
+              defaultMessage: "Unexpected error {e}",
+              values: { e }
+            }
+          )
+        );
+      }
+    } 
   };
 
   const onCancelCreate = () => {
@@ -72,19 +108,20 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
       try {
         const fileContents = await readFile(file, maxBytes);
 
-        const processors = await mapper.fetchPipelineFromMapping(fileContents, action);
+        fetchPipelineFromMapping(fileContents, action)        
 
-        if (processors.length === 0) {
-          setError('error'); // todo
-        }
-
-        setIsLoading(false);
-        setIsUploaded(true);
-        setPipelineProcessors(processors);
       } catch (e) {
         setIsLoading(false);
         setIsUploaded(false);
-        setError('error'); // todo
+        setError(
+          i18n.translate(
+            'xpack.ecsMapper.createIngestNodePipeline.unexpectedError',
+            {
+              defaultMessage: "Unexpected error {e}",
+              values: { e }
+            }
+          )
+        );
       }
     } else {
       setError('File is greater than allowed size of ' + maxBytes + 'bytes.');
@@ -95,7 +132,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
     <EuiPage className="prfDevTool__page mapper-main" data-test-subj="ecsMapperFileUpload">
       <EuiPageBody className="prfDevTool__page__pageBody">
         <EuiPageContent className="prfDevTool__page__pageBodyContent">
-          {!isUploaded && !isPipelineCreated && (
+          {!isUploaded && ( !isPipelineCreated || !!error ) && (
             <UploadPanel
               onFileUpload={onFileUpload}
               actionOptions={Object.values(FieldCopyAction)}
@@ -122,6 +159,8 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
               onManageIngestPipeline={onManageIngestPipeline}
             />
           )}
+
+          <EuiSpacer size="m" />
 
           {error && <ErrorPanel error={error} />}
         </EuiPageContent>

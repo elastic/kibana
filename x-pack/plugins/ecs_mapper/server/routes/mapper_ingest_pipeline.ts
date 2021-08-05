@@ -23,8 +23,12 @@ export function registerMapToIndexPipelineRoute(router: IRouter) {
     },
     async (context, req, res) => {
       const { file, copyAction } = req.body;
-      const result = mapToIngestPipeline(file, copyAction as FieldCopyAction);
-      return res.ok({ body: JSON.stringify(result) });
+      try {
+        const result = mapToIngestPipeline(file, copyAction as FieldCopyAction);
+        return res.ok({ body: JSON.stringify(result) });
+      } catch (error) {
+        return res.badRequest({ body: error.message });
+      }
     }
   );
 }
