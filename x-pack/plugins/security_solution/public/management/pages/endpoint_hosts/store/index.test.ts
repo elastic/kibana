@@ -12,6 +12,7 @@ import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
+import { createUninitialisedResourceState } from '../../../state';
 
 describe('EndpointList store concerns', () => {
   let store: Store<EndpointState>;
@@ -87,6 +88,7 @@ describe('EndpointList store concerns', () => {
           data: new Map(),
           type: 'LoadedResourceState',
         },
+        metadataTransformStats: createUninitialisedResourceState(),
       });
     });
 

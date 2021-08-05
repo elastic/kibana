@@ -8,12 +8,10 @@
 import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, AppUpdater } from '../../../../../../src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../../plugin';
-import { embeddablesServiceFactory } from './embeddables';
 import { searchServiceFactory } from './search';
 import { labsServiceFactory } from './labs';
 
 export { SearchService } from './search';
-export { EmbeddablesService } from './embeddables';
 export { ExpressionsService } from '../../../../../../src/plugins/expressions/common';
 export * from './context';
 
@@ -69,7 +67,6 @@ export class CanvasServiceProvider<Service> {
 export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? T : never;
 
 export const services = {
-  embeddables: new CanvasServiceProvider(embeddablesServiceFactory),
   search: new CanvasServiceProvider(searchServiceFactory),
   labs: new CanvasServiceProvider(labsServiceFactory),
 };
@@ -77,7 +74,6 @@ export const services = {
 export type CanvasServiceProviders = typeof services;
 
 export interface CanvasServices {
-  embeddables: ServiceFromProvider<typeof services.embeddables>;
   search: ServiceFromProvider<typeof services.search>;
   labs: ServiceFromProvider<typeof services.labs>;
 }
@@ -100,4 +96,4 @@ export const stopServices = () => {
   Object.values(services).forEach((provider) => provider.stop());
 };
 
-export const { embeddables: embeddableService, search: searchService } = services;
+export const { search: searchService } = services;

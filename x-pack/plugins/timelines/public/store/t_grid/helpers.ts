@@ -170,7 +170,7 @@ export const setInitializeTgridSettings = ({
       ...(!timeline || (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
         ? { columns: tGridSettingsProps.defaultColumns }
         : {}),
-      sort: tGridDefaults.sort,
+      sort: tGridSettingsProps.sort ?? tGridDefaults.sort,
       loadingEventIds: tGridDefaults.loadingEventIds,
     },
   };

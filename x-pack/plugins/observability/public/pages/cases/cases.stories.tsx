@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import { EuiPageTemplate } from '@elastic/eui';
 import React, { ComponentType } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { CoreStart } from '../../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+import { casesFeatureId } from '../../../common';
+import { PluginContext, PluginContextValue } from '../../context/plugin_context';
 import { AllCasesPage } from './all_cases';
 
 export default {
@@ -13,7 +19,33 @@ export default {
   component: AllCasesPage,
   decorators: [
     (Story: ComponentType) => {
-      return <Story />;
+      const KibanaReactContext = createKibanaReactContext(({
+        application: {
+          capabilities: { [casesFeatureId]: { read_cases: true } },
+          getUrlForApp: () => '',
+        },
+        cases: { getAllCases: () => <></> },
+        chrome: { docTitle: { change: () => {} }, setBadge: () => {} },
+        docLinks: {
+          DOC_LINK_VERSION: '0',
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+        uiSettings: { get: () => true },
+      } as unknown) as Partial<CoreStart>);
+
+      const pluginContextValue = ({
+        ObservabilityPageTemplate: EuiPageTemplate,
+      } as unknown) as PluginContextValue;
+
+      return (
+        <MemoryRouter>
+          <KibanaReactContext.Provider>
+            <PluginContext.Provider value={pluginContextValue}>
+              <Story />
+            </PluginContext.Provider>
+          </KibanaReactContext.Provider>
+        </MemoryRouter>
+      );
     },
   ],
 };

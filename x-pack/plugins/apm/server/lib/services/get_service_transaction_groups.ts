@@ -52,7 +52,8 @@ export async function getServiceTransactionGroups({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end, config } = setup;
+  const bucketSize = config['xpack.apm.ui.transactionGroupBucketSize'];
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
@@ -89,7 +90,7 @@ export async function getServiceTransactionGroups({
           transaction_groups: {
             terms: {
               field: TRANSACTION_NAME,
-              size: 500,
+              size: bucketSize,
               order: { _count: 'desc' },
             },
             aggs: {
@@ -147,5 +148,6 @@ export async function getServiceTransactionGroups({
     isAggregationAccurate:
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
       0,
+    bucketSize,
   };
 }

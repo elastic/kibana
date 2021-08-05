@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient, IUiSettingsClient } from 'src/core/server';
 import { ReportingConfig } from '../../../';
@@ -57,12 +58,17 @@ export function createGenerateCsv(logger: LevelLogger) {
     config: ReportingConfig,
     uiSettingsClient: IUiSettingsClient,
     elasticsearchClient: ElasticsearchClient,
-    cancellationToken: CancellationToken
+    cancellationToken: CancellationToken,
+    stream: Writable
   ): Promise<SavedSearchGeneratorResultDeprecatedCSV> {
     const settings = await getUiSettings(job.browserTimezone, uiSettingsClient, config, logger);
     const escapeValue = createEscapeValue(settings.quoteValues, settings.escapeFormulaValues);
     const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
-    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(settings.maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(
+      stream,
+      byteSizeValueToNumber(settings.maxSizeBytes),
+      bom
+    );
 
     const { fields, metaFields, conflictedTypesFields } = job;
     const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
@@ -71,7 +77,6 @@ export function createGenerateCsv(logger: LevelLogger) {
     if (!builder.tryAppend(header)) {
       return {
         size: 0,
-        content: '',
         maxSizeReached: true,
         warnings: [],
       };
@@ -148,7 +153,6 @@ export function createGenerateCsv(logger: LevelLogger) {
     }
 
     return {
-      content: builder.getString(),
       csvContainsFormulas: csvContainsFormulas && !settings.escapeFormulaValues,
       maxSizeReached,
       size,
