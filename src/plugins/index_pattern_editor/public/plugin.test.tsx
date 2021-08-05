@@ -21,7 +21,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 
-import { IndexPatternFlyoutContentContainer } from './components/index_pattern_flyout_content_container';
+import { IndexPatternEditorLazy } from './components/index_pattern_editor_lazy';
 import { IndexPatternEditorPlugin } from './plugin';
 
 const noop = () => {};
@@ -63,7 +63,7 @@ describe('IndexPatternEditorPlugin', () => {
 
     const [[arg]] = openFlyout.mock.calls;
     const i18nProvider = arg.props.children;
-    expect(i18nProvider.props.children.type).toBe(IndexPatternFlyoutContentContainer);
+    expect(i18nProvider.props.children.type).toBe(IndexPatternEditorLazy);
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
     // and make sure that the the spy is being called.
