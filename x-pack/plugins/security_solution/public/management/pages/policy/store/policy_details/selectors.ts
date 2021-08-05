@@ -194,14 +194,14 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
-        behavior_protection: windows.behavior_protection,
+        behavior_protection: mac.behavior_protection,
         popup: mac.popup,
       },
       linux: {
         advanced: linux.advanced,
         events: linux.events,
         malware: linux.malware,
-        behavior_protection: windows.behavior_protection,
+        behavior_protection: linux.behavior_protection,
         popup: linux.popup,
       },
     };
