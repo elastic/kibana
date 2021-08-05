@@ -222,7 +222,7 @@ describe('CrawlerOverviewLogic', () => {
       });
 
       describe('on failure', () => {
-        it('it flashes an error message', async () => {
+        it('flashes an error message', async () => {
           http.post.mockReturnValueOnce(Promise.reject('error'));
 
           CrawlerOverviewLogic.actions.startCrawl();
@@ -250,7 +250,7 @@ describe('CrawlerOverviewLogic', () => {
       });
 
       describe('on failure', () => {
-        it('it flashes an error message', async () => {
+        it('flashes an error message', async () => {
           jest.spyOn(CrawlerOverviewLogic.actions, 'getLatestCrawlRequests');
           http.post.mockReturnValueOnce(Promise.reject('error'));
 
@@ -297,7 +297,7 @@ describe('CrawlerOverviewLogic', () => {
           CrawlerStatus.Running,
           CrawlerStatus.Canceling,
         ].forEach((status) => {
-          it(`Creates a new timeout for status ${status}`, async () => {
+          it(`creates a new timeout for status ${status}`, async () => {
             jest.spyOn(CrawlerOverviewLogic.actions, 'createNewTimeoutForCrawlRequests');
             http.get.mockReturnValueOnce(Promise.resolve([{ status }]));
 
@@ -323,7 +323,7 @@ describe('CrawlerOverviewLogic', () => {
             expect(CrawlerOverviewLogic.actions.fetchCrawlerData).toHaveBeenCalled();
           });
 
-          it(`can optionally supresses fetching data  ${status}`, async () => {
+          it(`optionally supresses fetching data for status ${status}`, async () => {
             jest.spyOn(CrawlerOverviewLogic.actions, 'clearTimeoutId');
             jest.spyOn(CrawlerOverviewLogic.actions, 'fetchCrawlerData');
             http.get.mockReturnValueOnce(Promise.resolve([{ status }]));

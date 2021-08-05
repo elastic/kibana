@@ -45,7 +45,7 @@ describe('CrawlerStatusBanner', () => {
     CrawlerStatus.Suspending,
   ].forEach((status) => {
     describe(`when the status is ${status}`, () => {
-      it('renders an appropriate CrawlerStatusBanner', () => {
+      it('does not render a banner/callout', () => {
         setMockValues({
           mostRecentCrawlRequestStatus: status,
         });
