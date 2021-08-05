@@ -23,8 +23,11 @@ import {
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { EntityType } from '../../../../../timelines/common/search_strategy';
 
+enum EntityType {
+  ALERTS = 'alerts',
+  EVENTS = 'events',
+}
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
@@ -73,7 +76,7 @@ export const useTimelineEventsDetails = ({
 
         searchSubscription$.current = data.search
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
-            { ...request, entityType: 'alerts' },
+            { ...request, entityType: EntityType.EVENTS },
             {
               strategy: 'timelineSearchStrategy',
               abortSignal: abortCtrl.current.signal,

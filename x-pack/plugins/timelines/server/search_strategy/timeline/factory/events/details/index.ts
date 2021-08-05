@@ -40,7 +40,6 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
 
-    console.log('----', options, JSON.stringify(response));
     if (response.isRunning) {
       return {
         ...response,
