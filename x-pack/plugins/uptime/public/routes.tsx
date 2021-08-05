@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,7 +31,10 @@ import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
+import { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+import { indexStatusSelector } from './state/selectors';
 
+import { NoDataPage } from '../../../../src/plugins/kibana_react/public';
 interface RouteProps {
   path: string;
   component: React.FC;
@@ -151,20 +155,45 @@ export const PageRouter: FC = () => {
     }
   `;
 
+  const { data } = useSelector(indexStatusSelector);
+  const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
+
   return (
     <Switch>
       {Routes.map(
         ({ title, path, component: RouteComponent, dataTestSubj, telemetryId, pageHeader }) => (
           <Route path={path} key={telemetryId} exact={true}>
-            <div data-test-subj={dataTestSubj}>
+            <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              {pageHeader ? (
+              {noDataInfo ? (
+                <StyledPageTemplateComponent
+                  template="centeredBody"
+                  pageContentProps={{
+                    hasShadow: false,
+                    color: 'transparent',
+                  }}
+                  paddingSize="none"
+                >
+                  <NoDataPage
+                    solution="Observability"
+                    actions={{
+                      elasticAgent: {
+                        href: 'app/integrations/browse',
+                        recommended: false,
+                      },
+                      beats: {
+                        href: `app/home#/tutorial_directory/logging`,
+                        recommended: true,
+                      },
+                    }}
+                    docsLink={'#'}
+                  />
+                </StyledPageTemplateComponent>
+              ) : (
                 <StyledPageTemplateComponent pageHeader={pageHeader}>
                   <RouteComponent />
                 </StyledPageTemplateComponent>
-              ) : (
-                <RouteComponent />
               )}
             </div>
           </Route>
