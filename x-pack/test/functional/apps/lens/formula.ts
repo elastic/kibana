@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       input = await find.activeElement();
       await input.type(`Men\'s Clothing`);
 
-      PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
+      await PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
     });
 
     it('should insert single quotes and escape when needed to create valid field name', async () => {
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.sleep(100);
 
-      PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
     });
 
     it('should persist a broken formula on close', async () => {
