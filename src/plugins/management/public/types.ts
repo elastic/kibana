@@ -8,7 +8,6 @@
 
 import { ScopedHistory, Capabilities } from 'kibana/public';
 import type { LocatorPublic } from 'src/plugins/share/common';
-import type { UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
 import type { ManagementAppLocatorParams } from '../common/locator';
@@ -64,7 +63,6 @@ export interface ManagementAppMountParams {
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
-  usageCollection?: UsageCollectionStart;
 }
 
 export interface CreateManagementItemArgs {
