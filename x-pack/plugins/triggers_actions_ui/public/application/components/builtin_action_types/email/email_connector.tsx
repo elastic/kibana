@@ -18,7 +18,9 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiButton,
 } from '@elastic/eui';
+import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
@@ -30,7 +32,7 @@ import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_l
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { docLinks } = useKibana().services;
+  const { docLinks, http } = useKibana().services;
   const { from, host, port, secure, hasAuth } = action.config;
   const { user, password } = action.secrets;
   useEffect(() => {
@@ -429,6 +431,16 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiLink
+                    onClick={() => getOAuth(http)}
+                    data-test-subj="oauth"
+                    iconType="arrowRight"
+                    iconSide="right"
+                  >
+                    Get OAuth
+                  </EuiLink>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </>
           ) : null}
@@ -442,6 +454,18 @@ export const EmailActionConnectorFields: React.FunctionComponent<
 function nullableString(str: string | null | undefined) {
   if (str == null || str.trim() === '') return null;
   return str;
+}
+
+async function getOAuth(http: HttpSetup) {
+  
+  const newWindow = window.open(
+    `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=e9585117-2313-4f62-9a6d-d1aad4260d4f&response_type=code&redirect_uri=https://localhost:5601&response_mode=query&scope=openid%20offline_access%20https%3A%2F%2Foutlook.office.com%2FSMTP.Send&state=12345`,
+    'name',
+    'height=600,width=450'
+  );
+  newWindow?.focus();
+  console.log(res);
+  // https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=e9585117-2313-4f62-9a6d-d1aad4260d4f&response_type=code&redirect_uri=https://localhost:5601&response_mode=query&scope=openid%20offline_access%20https%3A%2F%2Foutlook.office.com%2FSMTP.Send&state=12345
 }
 
 // eslint-disable-next-line import/no-default-export
