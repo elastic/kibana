@@ -4,5 +4,4 @@
     - install_docker
     - install_kibana_docker
     - assert_kibana_listening
-    # flaky https://github.com/elastic/kibana/issues/106749
-    # - assert_kibana_available
+    - assert_kibana_available
