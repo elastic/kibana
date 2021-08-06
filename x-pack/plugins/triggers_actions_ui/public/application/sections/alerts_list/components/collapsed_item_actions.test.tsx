@@ -9,80 +9,11 @@ import * as React from 'react';
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { CollapsedItemActions } from './collapsed_item_actions';
-import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { AlertsList } from './alerts_list';
-import { AlertTableItem, AlertTypeModel, ValidationResult } from '../../../../types';
-import {
-  Alert,
-  AlertExecutionStatusErrorReasons,
-  ALERTS_FEATURE_ID,
-} from '../../../../../../alerting/common';
+import { AlertTableItem, AlertTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
-
-// jest.mock('../../../lib/action_connector_api', () => ({
-//   loadActionTypes: jest.fn(),
-//   loadAllActions: jest.fn(),
-// }));
-// jest.mock('../../../lib/alert_api', () => ({
-//   loadAlerts: jest.fn(),
-//   loadAlertTypes: jest.fn(),
-//   alertingFrameworkHealth: jest.fn(() => ({
-//     isSufficientlySecure: true,
-//     hasPermanentEncryptionKey: true,
-//   })),
-// }));
-// jest.mock('../../../../common/lib/health_api', () => ({
-//   triggersActionsUiHealth: jest.fn(() => ({ isAlertsAvailable: true })),
-// }));
-// jest.mock('react-router-dom', () => ({
-//   useHistory: () => ({
-//     push: jest.fn(),
-//   }),
-//   useLocation: () => ({
-//     pathname: '/triggersActions/alerts/',
-//   }),
-// }));
-// jest.mock('../../../lib/capabilities', () => ({
-//   hasAllPrivilege: jest.fn(() => true),
-//   hasSaveAlertsCapability: jest.fn(() => true),
-//   hasShowActionsCapability: jest.fn(() => true),
-//   hasExecuteActionsCapability: jest.fn(() => true),
-// }));
-// const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-// const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
-// const actionTypeRegistry = actionTypeRegistryMock.create();
-
-// const alertType = {
-//   id: 'test_alert_type',
-//   description: 'test',
-//   iconClass: 'test',
-//   documentationUrl: null,
-//   validate: (): ValidationResult => {
-//     return { errors: {} };
-//   },
-//   alertParamsExpression: () => null,
-//   requiresAppContext: false,
-// };
-// const alertTypeFromApi = {
-//   id: 'test_alert_type',
-//   name: 'some alert type',
-//   actionGroups: [{ id: 'default', name: 'Default' }],
-//   recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-//   actionVariables: { context: [], state: [] },
-//   defaultActionGroupId: 'default',
-//   producer: ALERTS_FEATURE_ID,
-//   minimumLicenseRequired: 'basic',
-//   enabledInLicense: true,
-//   authorizedConsumers: {
-//     [ALERTS_FEATURE_ID]: { read: true, all: true },
-//   },
-// };
-// ruleTypeRegistry.list.mockReturnValue([alertType]);
-// actionTypeRegistry.list.mockReturnValue([]);
 
 const onAlertChanged = jest.fn();
 const onEditAlert = jest.fn();
