@@ -24,6 +24,7 @@ interface SourceConfig {
   username: string;
   password: string;
   inlineScript: string;
+  params: string;
 }
 
 interface Props {
@@ -37,6 +38,7 @@ const defaultValues = {
   username: '',
   password: '',
   inlineScript: '',
+  params: '',
 };
 
 export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) => {
@@ -109,6 +111,34 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, folder: value }))
               }
               value={config.folder}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.label"
+                defaultMessage="Params"
+              />
+            }
+            labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.helpText"
+                defaultMessage="Params help text"
+              />
+            }
+          >
+            <CodeEditor
+              ariaLabel={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
+                {
+                  defaultMessage: 'JSON code editor',
+                }
+              )}
+              id="jsonParamsEditor"
+              languageId={MonacoEditorLangId.JSON}
+              onChange={(code) => setConfig((prevConfig) => ({ ...prevConfig, params: code }))}
+              value={config.params}
             />
           </EuiFormRow>
           <EuiFormRow

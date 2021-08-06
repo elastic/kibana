@@ -64,7 +64,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
       >
         <SourceField
           onChange={useCallback(
-            ({ zipUrl, folder, username, password, inlineScript }) => {
+            ({ zipUrl, folder, username, password, inlineScript, params }) => {
               setFields((prevFields) => ({
                 ...prevFields,
                 [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
@@ -72,6 +72,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
                 [ConfigKeys.SOURCE_ZIP_USERNAME]: username,
                 [ConfigKeys.SOURCE_ZIP_PASSWORD]: password,
                 [ConfigKeys.SOURCE_INLINE]: inlineScript,
+                [ConfigKeys.PARAMS]: params,
               }));
             },
             [setFields]
@@ -83,6 +84,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
               username: defaultValues[ConfigKeys.SOURCE_ZIP_USERNAME],
               password: defaultValues[ConfigKeys.SOURCE_ZIP_PASSWORD],
               inlineScript: defaultValues[ConfigKeys.SOURCE_INLINE],
+              params: defaultValues[ConfigKeys.PARAMS],
             }),
             [defaultValues]
           )}
