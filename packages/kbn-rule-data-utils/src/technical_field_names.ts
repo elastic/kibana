@@ -34,6 +34,7 @@ const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as 
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
 const ALERT_OWNER = `${ALERT_NAMESPACE}.owner` as const;
+const ALERT_CONSUMERS = `${ALERT_NAMESPACE}.consumers` as const;
 const ALERT_PRODUCER = `${ALERT_NAMESPACE}.producer` as const;
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 const ALERT_RISK_SCORE = `${ALERT_NAMESPACE}.risk_score` as const;
@@ -70,9 +71,16 @@ const ALERT_RULE_SEVERITY_MAPPING = `${ALERT_RULE_NAMESPACE}.severity_mapping` a
 const ALERT_RULE_TAGS = `${ALERT_RULE_NAMESPACE}.tags` as const;
 const ALERT_RULE_TO = `${ALERT_RULE_NAMESPACE}.to` as const;
 const ALERT_RULE_TYPE = `${ALERT_RULE_NAMESPACE}.type` as const;
+const ALERT_RULE_TYPE_ID = `${ALERT_RULE_NAMESPACE}.rule_type_id` as const;
 const ALERT_RULE_UPDATED_AT = `${ALERT_RULE_NAMESPACE}.updated_at` as const;
 const ALERT_RULE_UPDATED_BY = `${ALERT_RULE_NAMESPACE}.updated_by` as const;
 const ALERT_RULE_VERSION = `${ALERT_RULE_NAMESPACE}.version` as const;
+
+const namespaces = {
+  KIBANA_NAMESPACE,
+  ALERT_NAMESPACE,
+  ALERT_RULE_NAMESPACE,
+};
 
 const fields = {
   CONSUMERS,
@@ -93,6 +101,7 @@ const fields = {
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
   ALERT_OWNER,
+  ALERT_CONSUMERS,
   ALERT_PRODUCER,
   ALERT_REASON,
   ALERT_RISK_SCORE,
@@ -118,6 +127,7 @@ const fields = {
   ALERT_RULE_TAGS,
   ALERT_RULE_TO,
   ALERT_RULE_TYPE,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UPDATED_AT,
   ALERT_RULE_UPDATED_BY,
   ALERT_RULE_VERSION,
@@ -142,7 +152,10 @@ export {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
+  ALERT_NAMESPACE,
+  ALERT_RULE_NAMESPACE,
   ALERT_OWNER,
+  ALERT_CONSUMERS,
   ALERT_PRODUCER,
   ALERT_REASON,
   ALERT_RISK_SCORE,
@@ -171,6 +184,7 @@ export {
   ALERT_RULE_TAGS,
   ALERT_RULE_TO,
   ALERT_RULE_TYPE,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UPDATED_AT,
   ALERT_RULE_UPDATED_BY,
   ALERT_RULE_VERSION,
@@ -185,6 +199,7 @@ export {
   ECS_VERSION,
   EVENT_ACTION,
   EVENT_KIND,
+  KIBANA_NAMESPACE,
   RULE_CATEGORY,
   RULE_CONSUMERS,
   RULE_ID,
@@ -196,4 +211,4 @@ export {
   VERSION,
 };
 
-export type TechnicalRuleDataFieldName = ValuesType<typeof fields>;
+export type TechnicalRuleDataFieldName = ValuesType<typeof fields & typeof namespaces>;
