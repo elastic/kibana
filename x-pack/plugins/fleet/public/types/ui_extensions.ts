@@ -8,7 +8,7 @@
 import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
+import type { DryRunPackagePolicy, NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -26,7 +26,7 @@ export type PackagePolicyEditExtensionComponent = ComponentType<PackagePolicyEdi
 
 export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
-  policy: PackagePolicy;
+  policy: PackagePolicy | DryRunPackagePolicy;
   /** The new (updated) integration policy that will be saved */
   newPolicy: NewPackagePolicy;
   /**

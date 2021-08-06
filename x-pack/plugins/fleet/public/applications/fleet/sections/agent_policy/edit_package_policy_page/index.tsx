@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -103,7 +103,7 @@ export const EditPackagePolicyForm = memo<{
     version: '',
   });
   const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
-    GetOnePackagePolicyResponse['item']
+    GetOnePackagePolicyResponse['item'] | DryRunPackagePolicy
   >();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
   const routeState = useIntraAppState<EditPackagePolicyRouteState>();
@@ -174,16 +174,16 @@ export const EditPackagePolicyForm = memo<{
             updated_at,
             /* eslint-enable @typescript-eslint/naming-convention */
             ...restOfPackagePolicy
-          } = basePolicy;
+          } = basePolicy as any;
           // Remove `compiled_stream` from all stream info, we assign this after saving
           const newPackagePolicy = {
             ...restOfPackagePolicy,
-            inputs: inputs.map((input) => {
+            inputs: inputs.map((input: any) => {
               // Remove `compiled_input` from all input info, we assign this after saving
               const { streams, compiled_input: compiledInput, ...restOfInput } = input;
               return {
                 ...restOfInput,
-                streams: streams.map((stream) => {
+                streams: streams.map((stream: any) => {
                   // eslint-disable-next-line @typescript-eslint/naming-convention
                   const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
