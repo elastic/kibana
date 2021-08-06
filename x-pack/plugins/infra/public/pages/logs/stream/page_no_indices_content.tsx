@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { NoDataPage } from '../../../../../../../src/plugins/kibana_react/public';
 import { useLinkProps } from '../../../hooks/use_link_props';
+import { LogsPageTemplate } from '../page_template';
 
 export const LogsPageNoIndicesContent = () => {
   const tutorialLinkProps = useLinkProps({
@@ -16,19 +16,21 @@ export const LogsPageNoIndicesContent = () => {
   });
 
   return (
-    <NoDataPage
-      solution="Observability"
-      actions={{
-        elasticAgent: {
-          href: 'app/integrations/browse',
-          recommended: false,
+    <LogsPageTemplate
+      noDataConfig={{
+        solution: 'Observability',
+        actions: {
+          elasticAgent: {
+            href: 'app/integrations/browse',
+            recommended: false,
+          },
+          beats: {
+            ...tutorialLinkProps,
+            recommended: true,
+          },
         },
-        beats: {
-          ...tutorialLinkProps,
-          recommended: true,
-        },
+        docsLink: '#',
       }}
-      docsLink={'#'}
     />
   );
 };

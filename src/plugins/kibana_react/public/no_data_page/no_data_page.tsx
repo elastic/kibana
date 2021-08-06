@@ -20,27 +20,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { KibanaPageTemplateProps, KibanaPageTemplateSolutionNavAvatar } from '../page_template';
 
 import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
 
 export const NO_DATA_PAGE_MAX_WIDTH = 950;
-export function getKibanaNoDataPageTemplateProps(hasSidebar: boolean = true) {
-  return {
-    restrictWidth: 950,
-    template: 'centeredBody',
-    pageContentProps: {
-      hasShadow: false,
-      color: 'transparent',
-    },
-    pageBodyProps: hasSidebar && {
-      style: {
-        borderLeft: euiThemeVars.euiBorderThin,
-      },
-    },
-  } as KibanaPageTemplateProps;
-}
+export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
+  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
+  template: 'centeredBody',
+  pageContentProps: {
+    hasShadow: false,
+    color: 'transparent',
+  },
+};
 
 export const NO_DATA_RECOMMENDED = i18n.translate('kbn.noDataPage.recommended', {
   defaultMessage: 'Recommended',
@@ -63,18 +55,17 @@ export type NoDataPageActions = Partial<EuiCardProps> & {
 
 export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
 
-export type NoDataPageProps = KibanaPageTemplateProps & {
+export interface NoDataPageProps {
   solution: string;
   logo?: string;
   actions: NoDataPageActionsProps;
   docsLink: string;
-};
+}
 
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   solution,
   logo,
   actions,
-  title,
   docsLink,
   ...rest
 }) => {

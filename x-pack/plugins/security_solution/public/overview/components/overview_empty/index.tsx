@@ -22,7 +22,7 @@ import { endpointPackageVersion as useEndpointPackageVersion } from '../../../ma
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 import {
-  NoDataPage,
+  KibanaPageTemplate,
   NoDataPageActionsProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -69,11 +69,13 @@ const OverviewEmptyComponent: React.FC = () => {
   );
 
   return (
-    <NoDataPage
-      solution="Security"
-      actions={canAccessFleet ? emptyPageActions : emptyPageIngestDisabledActions}
+    <KibanaPageTemplate
       data-test-subj="empty-page"
-      docsLink={docLinks.links.siem.gettingStarted}
+      noDataConfig={{
+        solution: 'Security',
+        actions: canAccessFleet ? emptyPageActions : emptyPageIngestDisabledActions,
+        docsLink: docLinks.links.siem.gettingStarted,
+      }}
     />
   );
 };

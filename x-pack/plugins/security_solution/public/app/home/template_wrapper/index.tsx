@@ -10,10 +10,7 @@ import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
-import {
-  KibanaPageTemplate,
-  getKibanaNoDataPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -103,9 +100,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         </EuiPanel>
       </StyledKibanaPageTemplate>
     ) : (
-      <KibanaPageTemplate {...getKibanaNoDataPageTemplateProps(false)}>
-        <OverviewEmpty />
-      </KibanaPageTemplate>
+      <OverviewEmpty />
     );
   }
 );

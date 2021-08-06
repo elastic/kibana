@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
-  getKibanaNoDataPageTemplateProps,
+  NO_DATA_PAGE_TEMPLATE_PROPS,
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -45,7 +45,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
   const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
 
   return (
-    <KibanaPageTemplate {...getKibanaNoDataPageTemplateProps(false)}>
+    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
 

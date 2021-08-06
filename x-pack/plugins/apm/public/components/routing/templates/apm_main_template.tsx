@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
 import {
-  NoDataPage,
-  getKibanaNoDataPageTemplateProps,
   useKibana,
+  KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
@@ -33,15 +32,33 @@ export function ApmMainTemplate({
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
-} & EuiPageTemplateProps) {
+} & KibanaPageTemplateProps) {
   const { services } = useKibana<ApmPluginStartDeps>();
 
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
 
+  // TODO: NEEDS A DATA GET A CHECK
+  const hasData = false;
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
+    solution: 'Observability',
+    actions: {
+      elasticAgent: {
+        href: 'app/integrations/browse',
+        recommended: false,
+      },
+      beats: {
+        href: `app/home#/tutorial_directory/logging`,
+        recommended: true,
+      },
+    },
+    docsLink: '#',
+  };
+
   // TODO: GET A CHECK
-  return false ? (
+  return (
     <ObservabilityPageTemplate
+      noDataConfig={hasData ? undefined : noDataConfig}
       pageHeader={{
         pageTitle,
         rightSideItems: [<EnvironmentFilter />],
@@ -50,26 +67,6 @@ export function ApmMainTemplate({
       {...pageTemplateProps}
     >
       {children}
-    </ObservabilityPageTemplate>
-  ) : (
-    <ObservabilityPageTemplate
-      {...pageTemplateProps}
-      {...getKibanaNoDataPageTemplateProps()}
-    >
-      <NoDataPage
-        solution="Observability"
-        actions={{
-          elasticAgent: {
-            href: 'app/integrations/browse',
-            recommended: false,
-          },
-          beats: {
-            href: `app/home#/tutorial_directory/logging`,
-            recommended: true,
-          },
-        }}
-        docsLink={'#'}
-      />
     </ObservabilityPageTemplate>
   );
 }

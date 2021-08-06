@@ -8,10 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  NoDataPage,
-  getKibanaNoDataPageTemplateProps,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../..';
 import { Alert } from '../../../../alerting/common';
 import { EmptySections } from '../../components/app/empty_sections';
@@ -77,8 +74,26 @@ export function OverviewPage({ routeParams }: Props) {
   });
 
   // TODO: GET THE RIGHT CHECK
-  return hasAnyData ? (
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = hasAnyData
+    ? undefined
+    : {
+        solution: 'Observability',
+        actions: {
+          elasticAgent: {
+            href: 'app/integrations/browse',
+            recommended: false,
+          },
+          beats: {
+            href: `app/home#/tutorial_directory/logging`,
+            recommended: true,
+          },
+        },
+        docsLink: '#',
+      };
+
+  return (
     <ObservabilityPageTemplate
+      noDataConfig={noDataConfig}
       pageHeader={{
         pageTitle: overviewPageTitle,
         rightSideItems: [
@@ -117,25 +132,6 @@ export function OverviewPage({ routeParams }: Props) {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </ObservabilityPageTemplate>
-  ) : (
-    <ObservabilityPageTemplate {...getKibanaNoDataPageTemplateProps()}>
-      <ObservabilityHeaderMenu />
-
-      <NoDataPage
-        solution="Observability"
-        actions={{
-          elasticAgent: {
-            href: 'app/integrations/browse',
-            recommended: false,
-          },
-          beats: {
-            href: `app/home#/tutorial_directory/logging`,
-            recommended: true,
-          },
-        }}
-        docsLink={'#'}
-      />
     </ObservabilityPageTemplate>
   );
 }

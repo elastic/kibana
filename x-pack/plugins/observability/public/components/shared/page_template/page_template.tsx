@@ -30,6 +30,7 @@ export type WrappedPageTemplateProps = Pick<
   | 'restrictWidth'
   | 'template'
   | 'isEmptyState'
+  | 'noDataConfig'
 >;
 
 export interface ObservabilityPageTemplateDependencies {

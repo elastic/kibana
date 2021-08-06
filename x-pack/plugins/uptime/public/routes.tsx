@@ -27,17 +27,13 @@ import { SyntheticsCheckSteps } from './pages/synthetics/synthetics_checks';
 import { ClientPluginsStart } from './apps/plugin';
 import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
-import {
-  getKibanaNoDataPageTemplateProps,
-  useKibana,
-} from '../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplateProps, useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
 import { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 import { indexStatusSelector } from './state/selectors';
 
-import { NoDataPage } from '../../../../src/plugins/kibana_react/public';
 interface RouteProps {
   path: string;
   component: React.FC;
@@ -160,6 +156,20 @@ export const PageRouter: FC = () => {
 
   const { data } = useSelector(indexStatusSelector);
   const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
+    solution: 'Observability',
+    actions: {
+      elasticAgent: {
+        href: 'app/integrations/browse',
+        recommended: false,
+      },
+      beats: {
+        href: `app/home#/tutorial_directory/logging`,
+        recommended: true,
+      },
+    },
+    docsLink: '#',
+  };
 
   return (
     <Switch>
@@ -169,28 +179,12 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              {noDataInfo ? (
-                <PageTemplateComponent {...getKibanaNoDataPageTemplateProps()}>
-                  <NoDataPage
-                    solution="Observability"
-                    actions={{
-                      elasticAgent: {
-                        href: 'app/integrations/browse',
-                        recommended: false,
-                      },
-                      beats: {
-                        href: `app/home#/tutorial_directory/logging`,
-                        recommended: true,
-                      },
-                    }}
-                    docsLink={'#'}
-                  />
-                </PageTemplateComponent>
-              ) : (
-                <StyledPageTemplateComponent pageHeader={pageHeader}>
-                  <RouteComponent />
-                </StyledPageTemplateComponent>
-              )}
+              <StyledPageTemplateComponent
+                noDataConfig={noDataInfo ? noDataConfig : undefined}
+                pageHeader={pageHeader}
+              >
+                <RouteComponent />
+              </StyledPageTemplateComponent>
             </div>
           </Route>
         )

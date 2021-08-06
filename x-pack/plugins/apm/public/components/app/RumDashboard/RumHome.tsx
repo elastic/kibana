@@ -16,10 +16,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakPoints } from '../../../hooks/use_break_points';
-import {
-  NoDataPage,
-  getKibanaNoDataPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'User Experience',
@@ -37,49 +34,45 @@ export function RumHome() {
   const {
     sharedData: { totalPageViews },
   } = useContext(CsmSharedContext);
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
+    solution: 'Observability',
+    actions: {
+      elasticAgent: {
+        href: 'app/integrations/browse',
+        recommended: false,
+      },
+      beats: {
+        href: `app/home#/tutorial_directory/logging`,
+        recommended: true,
+      },
+    },
+    docsLink: '#',
+  };
 
   return (
     <CsmSharedContextProvider>
-      {totalPageViews > 0 ? (
-        <PageTemplateComponent
-          pageHeader={
-            isXXL
-              ? {
-                  pageTitle: i18n.translate('xpack.apm.ux.overview', {
-                    defaultMessage: 'Overview',
-                  }),
-                  rightSideItems: [
-                    <DatePicker />,
-                    <div style={envStyle}>
-                      <EnvironmentFilter />
-                    </div>,
-                    <UserPercentile />,
-                    <WebApplicationSelect />,
-                  ],
-                }
-              : { children: <PageHeader /> }
-          }
-        >
-          <RumOverview />
-        </PageTemplateComponent>
-      ) : (
-        <PageTemplateComponent {...getKibanaNoDataPageTemplateProps()}>
-          <NoDataPage
-            solution="Observability"
-            actions={{
-              elasticAgent: {
-                href: 'app/integrations/browse',
-                recommended: false,
-              },
-              beats: {
-                href: `app/home#/tutorial_directory/logging`,
-                recommended: true,
-              },
-            }}
-            docsLink={'#'}
-          />
-        </PageTemplateComponent>
-      )}
+      <PageTemplateComponent
+        noDataConfig={totalPageViews > 0 ? undefined : noDataConfig}
+        pageHeader={
+          isXXL
+            ? {
+                pageTitle: i18n.translate('xpack.apm.ux.overview', {
+                  defaultMessage: 'Overview',
+                }),
+                rightSideItems: [
+                  <DatePicker />,
+                  <div style={envStyle}>
+                    <EnvironmentFilter />
+                  </div>,
+                  <UserPercentile />,
+                  <WebApplicationSelect />,
+                ],
+              }
+            : { children: <PageHeader /> }
+        }
+      >
+        <RumOverview />
+      </PageTemplateComponent>
     </CsmSharedContextProvider>
   );
 }
