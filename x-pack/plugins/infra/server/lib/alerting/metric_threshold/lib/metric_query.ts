@@ -8,9 +8,11 @@ import moment from 'moment';
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Aggregators } from '../types';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
+import { roundTimestamp } from '../../../../utils/round_timestamp';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
 
+const MINIMUM_BUCKETS = 5;
 const COMPOSITE_RESULTS_PER_PAGE = 100;
 
 const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
