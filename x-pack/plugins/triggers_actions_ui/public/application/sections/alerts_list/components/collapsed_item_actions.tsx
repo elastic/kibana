@@ -23,7 +23,7 @@ export type ComponentOpts = {
   onAlertChanged: () => void;
   setAlertsToDelete: React.Dispatch<React.SetStateAction<string[]>>;
   onEditAlert: (item: AlertTableItem) => void;
-} & BulkOperationsComponentOpts;
+} & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
@@ -52,6 +52,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const button = (
     <EuiButtonIcon
       disabled={!item.isEditable}
+      data-test-subj="selectActionButton"
       iconType="boxesHorizontal"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-label={i18n.translate(
@@ -155,7 +156,12 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       panelPaddingSize="none"
       data-test-subj="collapsedItemActions"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} className="actCollapsedItemActions" />
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={panels}
+        className="actCollapsedItemActions"
+        data-test-subj="collapsedActionPanel"
+      />
     </EuiPopover>
   );
 };
