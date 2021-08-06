@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
+import { AppServicesContext } from './types';
+
 export {
   sendRequest,
   SendRequestConfig,
@@ -17,3 +20,6 @@ export {
 export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
 export { EuiThemeProvider } from '../../../../src/plugins/kibana_react/common';
+export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
+export const useKibana = () => _useKibana<AppServicesContext>();

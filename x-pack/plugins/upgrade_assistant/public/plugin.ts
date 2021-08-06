@@ -9,19 +9,12 @@ import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-
-import { CloudSetup } from '../../cloud/public';
+import { AppServicesContext } from './types';
 import { Config } from '../common/config';
-
-interface Dependencies {
-  management: ManagementSetup;
-  cloud: CloudSetup;
-}
 
 export class UpgradeAssistantUIPlugin implements Plugin {
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup, { management, cloud }: Dependencies) {
+  setup(coreSetup: CoreSetup, { management, cloud }: AppServicesContext) {
     const { enabled, readonly } = this.ctx.config.get<Config>();
 
     if (!enabled) {

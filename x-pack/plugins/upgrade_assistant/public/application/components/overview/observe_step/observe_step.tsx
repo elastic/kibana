@@ -7,13 +7,14 @@
 
 import React from 'react';
 
-import { EuiText, EuiButtonEmpty, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { DocLinksStart } from 'src/core/public';
 
 import { Collapsible } from './collapsible';
+import { ExternalLinks } from './external_links';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { LogStream } from '../../../../../../infra/public';
 
@@ -45,23 +46,6 @@ export const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiSt
   const endTimestamp = Date.now();
   const startTimestamp = endTimestamp - 120 * 60 * 1000; // 2 hours
 
-  const viewLogs = (
-    <div>
-      <EuiButtonEmpty size="xs" href="/observe">
-        <FormattedMessage
-          id="xpack.upgradeAssistant.overview.viewObserveResultsAction"
-          defaultMessage="View deprecation logs in Observability"
-        />
-      </EuiButtonEmpty>
-      <EuiButtonEmpty size="xs" href="/discover">
-        <FormattedMessage
-          id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
-          defaultMessage="Analyse logs in Discover "
-        />
-      </EuiButtonEmpty>
-    </div>
-  );
-
   return {
     title: i18nTexts.observeStepTitle,
     status: 'incomplete',
@@ -77,7 +61,7 @@ export const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiSt
 
         <EuiSpacer size="l" />
 
-        <Collapsible renderFooterLinks={viewLogs}>
+        <Collapsible renderFooter={<ExternalLinks />}>
           <LogStream
             height={200}
             sourceId="deprecation_logs"
