@@ -7,16 +7,14 @@
 
 import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-
 import { PersistenceServices, RuleDataClient } from '../../../../../../rule_registry/server';
 import { QUERY_ALERT_TYPE_ID } from '../../../../../common/constants';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
-
+import { IRuleDataPluginService } from '../../rule_execution_log/types';
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
 
 export const createQueryAlertType = (createOptions: {
@@ -27,6 +25,7 @@ export const createQueryAlertType = (createOptions: {
   mergeStrategy: ConfigType['alertMergeStrategy'];
   ruleDataClient: RuleDataClient;
   version: string;
+  ruleDataService: IRuleDataPluginService;
 }) => {
   const {
     experimentalFeatures,
@@ -36,6 +35,7 @@ export const createQueryAlertType = (createOptions: {
     mergeStrategy,
     ruleDataClient,
     version,
+    ruleDataService,
   } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     indexAlias,
@@ -43,6 +43,7 @@ export const createQueryAlertType = (createOptions: {
     logger,
     mergeStrategy,
     ruleDataClient,
+    ruleDataService,
   });
   return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, {}>({
     id: QUERY_ALERT_TYPE_ID,

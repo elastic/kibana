@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ruleStatusSavedObjectsClientMock } from './__mocks__/rule_status_saved_objects_client.mock';
 import {
   buildRuleStatusAttributes,
   RuleStatusService,
@@ -14,6 +13,8 @@ import {
 } from './rule_status_service';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from './__mocks__/es_results';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { RuleExecutionLogClient } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { UpdateExecutionLogArgs } from '../rule_execution_log/types';
 
 const expectIsoDateString = expect.stringMatching(/2.*Z$/);
 const buildStatuses = (n: number) =>
@@ -87,27 +88,32 @@ describe('buildRuleStatusAttributes', () => {
 
 describe('ruleStatusService', () => {
   let currentStatus: ReturnType<typeof exampleRuleStatus>;
-  let ruleStatusClient: ReturnType<typeof ruleStatusSavedObjectsClientMock.create>;
+  let ruleStatusClient: ReturnType<typeof RuleExecutionLogClient>;
   let service: RuleStatusService;
 
   beforeEach(async () => {
     currentStatus = exampleRuleStatus();
-    ruleStatusClient = ruleStatusSavedObjectsClientMock.create();
+    ruleStatusClient = new RuleExecutionLogClient();
     ruleStatusClient.find.mockResolvedValue(exampleFindRuleStatusResponse([currentStatus]));
-    service = await ruleStatusServiceFactory({ alertId: 'mock-alert-id', ruleStatusClient });
+    service = await ruleStatusServiceFactory({
+      alertId: 'mock-alert-id',
+      ruleStatusClient,
+      spaceId: 'default',
+    });
   });
 
   describe('goingToRun', () => {
     it('updates the current status to "going to run"', async () => {
       await service.goingToRun();
 
-      expect(ruleStatusClient.update).toHaveBeenCalledWith(
-        currentStatus.id,
-        expect.objectContaining({
+      expect(ruleStatusClient.update).toHaveBeenCalledWith<[UpdateExecutionLogArgs]>({
+        id: currentStatus.id,
+        spaceId: 'default',
+        attributes: expect.objectContaining({
           status: 'going to run',
           statusDate: expectIsoDateString,
-        })
-      );
+        }),
+      });
     });
   });
 
@@ -115,15 +121,16 @@ describe('ruleStatusService', () => {
     it('updates the current status to "succeeded"', async () => {
       await service.success('hey, it worked');
 
-      expect(ruleStatusClient.update).toHaveBeenCalledWith(
-        currentStatus.id,
-        expect.objectContaining({
+      expect(ruleStatusClient.update).toHaveBeenCalledWith<[UpdateExecutionLogArgs]>({
+        id: currentStatus.id,
+        spaceId: 'default',
+        attributes: expect.objectContaining({
           status: 'succeeded',
           statusDate: expectIsoDateString,
           lastSuccessAt: expectIsoDateString,
           lastSuccessMessage: 'hey, it worked',
-        })
-      );
+        }),
+      });
     });
   });
 
@@ -136,15 +143,16 @@ describe('ruleStatusService', () => {
     it('updates the current status to "failed"', async () => {
       await service.error('oh no, it broke');
 
-      expect(ruleStatusClient.update).toHaveBeenCalledWith(
-        currentStatus.id,
-        expect.objectContaining({
+      expect(ruleStatusClient.update).toHaveBeenCalledWith<[UpdateExecutionLogArgs]>({
+        id: currentStatus.id,
+        spaceId: 'default',
+        attributes: expect.objectContaining({
           status: 'failed',
           statusDate: expectIsoDateString,
           lastFailureAt: expectIsoDateString,
           lastFailureMessage: 'oh no, it broke',
-        })
-      );
+        }),
+      });
     });
 
     it('does not delete statuses if we have less than the max number of statuses', async () => {
@@ -158,7 +166,11 @@ describe('ruleStatusService', () => {
       ruleStatusClient.find.mockResolvedValue(
         exampleFindRuleStatusResponse(buildStatuses(MAX_RULE_STATUSES - 1))
       );
-      service = await ruleStatusServiceFactory({ alertId: 'mock-alert-id', ruleStatusClient });
+      service = await ruleStatusServiceFactory({
+        alertId: 'mock-alert-id',
+        ruleStatusClient,
+        spaceId: 'default',
+      });
 
       await service.error('oh no, it broke');
 
@@ -170,7 +182,11 @@ describe('ruleStatusService', () => {
       ruleStatusClient.find.mockResolvedValue(
         exampleFindRuleStatusResponse(buildStatuses(MAX_RULE_STATUSES))
       );
-      service = await ruleStatusServiceFactory({ alertId: 'mock-alert-id', ruleStatusClient });
+      service = await ruleStatusServiceFactory({
+        alertId: 'mock-alert-id',
+        ruleStatusClient,
+        spaceId: 'default',
+      });
 
       await service.error('oh no, it broke');
 
@@ -184,7 +200,11 @@ describe('ruleStatusService', () => {
       ruleStatusClient.find.mockResolvedValue(
         exampleFindRuleStatusResponse(buildStatuses(MAX_RULE_STATUSES + 1))
       );
-      service = await ruleStatusServiceFactory({ alertId: 'mock-alert-id', ruleStatusClient });
+      service = await ruleStatusServiceFactory({
+        alertId: 'mock-alert-id',
+        ruleStatusClient,
+        spaceId: 'default',
+      });
 
       await service.error('oh no, it broke');
 
@@ -200,7 +220,11 @@ describe('ruleStatusService', () => {
       ruleStatusClient.find.mockResolvedValue(
         exampleFindRuleStatusResponse(buildStatuses(MAX_RULE_STATUSES))
       );
-      service = await ruleStatusServiceFactory({ alertId: 'mock-alert-id', ruleStatusClient });
+      service = await ruleStatusServiceFactory({
+        alertId: 'mock-alert-id',
+        ruleStatusClient,
+        spaceId: 'default',
+      });
 
       await service.error('oh no, it broke');
       await service.error('oh no, it broke');

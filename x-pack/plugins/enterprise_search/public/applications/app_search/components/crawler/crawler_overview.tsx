@@ -21,6 +21,8 @@ import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
 import { AddDomainForm } from './components/add_domain/add_domain_form';
 import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
+import { CrawlerStatusBanner } from './components/crawler_status_banner';
+import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DomainsTable } from './components/domains_table';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
@@ -28,18 +30,24 @@ import { CrawlerOverviewLogic } from './crawler_overview_logic';
 export const CrawlerOverview: React.FC = () => {
   const { crawlRequests, dataLoading, domains } = useValues(CrawlerOverviewLogic);
 
-  const { fetchCrawlerData } = useActions(CrawlerOverviewLogic);
+  const { fetchCrawlerData, getLatestCrawlRequests } = useActions(CrawlerOverviewLogic);
 
   useEffect(() => {
     fetchCrawlerData();
+    getLatestCrawlRequests(false);
   }, []);
 
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE])}
-      pageHeader={{ pageTitle: CRAWLER_TITLE }}
+      pageHeader={{
+        pageTitle: CRAWLER_TITLE,
+        rightSideItems: [<CrawlerStatusIndicator />],
+      }}
       isLoading={dataLoading}
     >
+      <CrawlerStatusBanner />
+      <EuiSpacer size="l" />
       {domains.length > 0 ? (
         <>
           <EuiFlexGroup direction="row" alignItems="stretch">
