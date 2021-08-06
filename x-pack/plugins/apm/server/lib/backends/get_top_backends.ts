@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { kqlQuery } from '../../../../observability/server';
+import { NodeType } from '../../../common/connections';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
-import { NodeType } from '../../../common/connections';
 import { Setup } from '../helpers/setup_request';
 
 export async function getTopBackends({
@@ -18,6 +19,7 @@ export async function getTopBackends({
   numBuckets,
   environment,
   offset,
+  kuery,
 }: {
   setup: Setup;
   start: number;
@@ -25,13 +27,14 @@ export async function getTopBackends({
   numBuckets: number;
   environment?: string;
   offset?: string;
+  kuery?: string;
 }) {
   const statsItems = await getConnectionStats({
     setup,
     start,
     end,
     numBuckets,
-    filter: [...environmentQuery(environment)],
+    filter: [...environmentQuery(environment), ...kqlQuery(kuery)],
     offset,
     collapseBy: 'downstream',
   });
