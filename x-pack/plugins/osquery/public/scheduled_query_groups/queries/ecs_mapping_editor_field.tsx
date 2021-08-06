@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { find, map, trim } from 'lodash';
-import sqlSummary from 'sql-summary';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { produce } from 'immer';
+import { find, sortBy, isArray } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,10 +18,13 @@ import {
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
+import { Parser } from 'node-sql-parser';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
-import ECSSchema from './ecs_schema.json';
-import osquerySchema from '../../editor/osquery_schema/v4.8.0.json';
+import deepEqual from 'fast-deep-equal';
+
+import ECSSchema from '../../common/schemas/ecs/v1.10.0.json';
+import osquerySchema from '../../common/schemas/osquery/v4.9.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import {
@@ -30,13 +33,13 @@ import {
   FieldHook,
   getFieldValidityAndErrorMessage,
   useForm,
+  useFormData,
   Field,
   getUseField,
 } from '../../shared_imports';
 
 export const CommonUseField = getUseField({ component: Field });
 
-const TABLE_NAMES_REGEX = /(?<=from|join)\s+(\w+)/g;
 
 const StyledFieldIcon = styled(FieldIcon)`
   width: 32px;
@@ -97,10 +100,9 @@ export const ECSComboboxField = ({ field, euiFieldProps = {}, idAria, ...rest }:
     setSelected(() => {
       if (!field.value.length) return [];
 
-      const selectedOption = find(ECSSchemaOptions, ['label', field.value]) ?? {
-        label: field.value,
-      };
-      return [selectedOption];
+      const selectedOption = find(ECSSchemaOptions, ['label', field.value]);
+
+      return selectedOption? [selectedOption] : [];
     });
   }, [field.value]);
 
@@ -159,7 +161,7 @@ export const OsqueryColumnField = ({ field, euiFieldProps = {}, idAria, ...rest 
       >
         <EuiFlexItem grow={false}>
           <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
-            {option.value.name}
+            {option.value.suggestion_label}
           </StyledFieldSpan>
         </EuiFlexItem>
 
@@ -204,10 +206,8 @@ export const OsqueryColumnField = ({ field, euiFieldProps = {}, idAria, ...rest 
     setSelected(() => {
       if (!field.value.length) return [];
 
-      const selectedOption = find(euiFieldProps?.options, ['label', field.value]) ?? {
-        label: field.value,
-      };
-      return [selectedOption];
+      const selectedOption = find(euiFieldProps?.options, ['label', field.value]);
+      return  selectedOption ? [selectedOption] : [];
     });
   }, [euiFieldProps?.options, setSelected, field.value]);
 
@@ -224,6 +224,7 @@ export const OsqueryColumnField = ({ field, euiFieldProps = {}, idAria, ...rest 
       <EuiComboBox
         fullWidth
         placeholder="Select a single option"
+        prepend={selectedOptions.length ? selectedOptions[0].value?.table : null}
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         singleSelection={{ asPlainText: true }}
         selectedOptions={selectedOptions}
@@ -260,6 +261,7 @@ export const ECSMappingEditorForm = ({
   onChange,
   onDelete,
 }: ECSMappingEditorFormProps) => {
+  const currentFormData = useRef(defaultValue);
   const formSchema = {
     key: {
       type: FIELD_TYPES.COMBO_BOX,
@@ -282,6 +284,8 @@ export const ECSMappingEditorForm = ({
 
   const { submit, reset } = form;
 
+  const [formData] = useFormData({ form });
+
   const handleSubmit = useCallback(async () => {
     const { data, isValid } = await submit();
 
@@ -291,16 +295,15 @@ export const ECSMappingEditorForm = ({
     }
   }, [submit, onAdd, reset]);
 
-  const handleChange = useCallback(async () => {
-    console.error('handleChange')
-    // if (!defaultValue) return;
+  useEffect(() => {
+    if (defaultValue && onChange && !deepEqual(formData, currentFormData.current)) {
+      console.error(currentFormData.current, formData);
 
-    // const { data, isValid } = await submit();
+      currentFormData.current = formData;
+      onChange(formData);
+    }
+  },[formData]);
 
-    // if (isValid && onChange) {
-    //   onChange(data);
-    // }
-  }, [defaultValue, onChange, submit]);
 
   const handleDeleteClick = useCallback(() => {
     if (defaultValue?.key && onDelete) {
@@ -348,36 +351,99 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
 
   useEffect(() => {
     setOsquerySchemaOptions((currentValue) => {
-      if (!rest.query) {
+      if (!rest.query?.length) {
         return currentValue;
       }
 
-      const columnNames = map(rest.query.toLowerCase().match(TABLE_NAMES_REGEX), trim);
+      const parser = new Parser();
+      let ast;
 
-      const suggestions = columnNames
-        .map((columnName) => {
-          const osqueryTable = find(osquerySchema, ['name', columnName]);
+      try {
+        ast = parser.astify(rest.query);
+      } catch (e) {
+        return currentValue;
+      }
 
-          if (osqueryTable) {
-            return osqueryTable.columns.map((osqueryTableColumn) => ({
-              label: osqueryTableColumn.name,
-              value: osqueryTableColumn,
-            }));
+      const astOsqueryTables = ast[0]?.from.reduce((acc, table) => {
+        const osqueryTable = find(osquerySchema, ['name', table.table]);
+
+        if (osqueryTable) {
+          acc[table.as ?? table.table] = osqueryTable.columns;
+        }
+
+        return acc;
+      }, {});
+
+      // Table doesn't exist in osquery schema
+      if (!isArray(ast[0]?.columns) && ast[0]?.columns !== '*' && !astOsqueryTables[ast[0].from[0].table]) {
+        return currentValue;
+      }
+      /*
+        Simple query
+        select * from users;
+      */
+      if (ast[0]?.columns === '*' && astOsqueryTables[ast[0].from[0].table]) {
+        const tableName =  ast[0].from[0].as ?? ast[0].from[0].table;
+
+        return astOsqueryTables[ ast[0].from[0].table].map((osqueryColumn) => ({
+          label: osqueryColumn.name,
+          value:  {
+            name: osqueryColumn.name,
+            description: osqueryColumn.description,
+            table: tableName,
+            suggestion_label: `${tableName}.${osqueryColumn.name}`
           }
-          return [];
-        })
-        .flat();
+        }));
+      }
 
-      return suggestions;
+
+      /*
+       Advanced query
+       select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+      */
+      const suggestions = ast[0]?.columns?.map((column) => {
+        if (column.expr.column === '*') {
+          return astOsqueryTables[column.expr.table].map((osqueryColumn) => ({
+            label: osqueryColumn.name,
+            value:  {
+              name: osqueryColumn.name,
+              description: osqueryColumn.description,
+              table: column.expr.table,
+              suggestion_label: `${column.expr.table}.${osqueryColumn.name}`
+            }
+          }));
+        }
+
+        if (astOsqueryTables[column.expr.table]) {
+          const osqueryColumn = find(astOsqueryTables[column.expr.table], ['name', column.expr.column]);
+          const label = column.as ?? column.expr.column;
+
+          return [
+            {
+              label: column.as ?? column.expr.column,
+              value: {
+                name: osqueryColumn.name,
+                description: osqueryColumn.description,
+                table: column.expr.table,
+                suggestion_label: `${column.expr.table}.${label}`
+              }
+            }
+          ]
+        }
+
+        return [];
+      }).flat();
+
+      return sortBy(suggestions, 'value.suggestion_label');
     });
   }, [rest.query]);
 
   const handleAddRow = useCallback(
     ({ key, value }) => {
       if (key && value) {
-        setValue((current) => ({
-          ...current,
-          [key]: value,
+        setValue(produce((draft) => {
+          draft[key] = value;
+          return draft;
         }));
       }
     },
@@ -388,9 +454,14 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
     (currentKey) => ({ key, value }) => {
       console.error('handleUpadteRow', currentKey, key, value);
       if (key && value) {
-        setValue((current) => ({
-          ...current,
-          [key]: value,
+        setValue(produce((draft) => {
+          if(currentKey !== key) {
+            delete draft[currentKey];
+          }
+
+          draft[key] = value;
+
+          return draft;
         }));
       }
     },
@@ -400,16 +471,18 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
   const handleDeleteRow = useCallback(
     (key) => {
       if (key) {
-        setValue((current) => {
-          if (current[key]) {
-            delete current[key];
+        setValue(produce((draft) => {
+          if (draft[key]) {
+            delete draft[key];
           }
-          return current;
-        });
+          return draft;
+        }));
       }
     },
     [setValue]
   );
+
+  console.error('ssssssss', value);
 
   return (
     <>
