@@ -18,6 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
+import { CrawlerStatusBanner } from './components/crawler_status_banner';
+import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DeleteDomainPanel } from './components/delete_domain_panel';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerSingleDomainLogic } from './crawler_single_domain_logic';
@@ -42,9 +44,11 @@ export const CrawlerSingleDomain: React.FC = () => {
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE, displayDomainUrl])}
-      pageHeader={{ pageTitle: displayDomainUrl }}
+      pageHeader={{ pageTitle: displayDomainUrl, rightSideItems: [<CrawlerStatusIndicator />] }}
       isLoading={dataLoading}
     >
+      <CrawlerStatusBanner />
+      <EuiSpacer size="l" />
       <EuiTitle size="s">
         <h2>
           {i18n.translate(
