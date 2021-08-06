@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FunctionComponent } from 'react';
+import React, { useState, FunctionComponent } from 'react';
 
 import {
   EuiSwitch,
@@ -23,8 +23,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useAppContext } from '../../../app_context';
 import { ResponseError } from '../../../lib/api';
+import { DeprecationLoggingPreviewProps } from '../../types';
 
 const i18nTexts = {
   fetchErrorMessage: i18n.translate(
@@ -102,51 +102,16 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
   );
 };
 
-export const DeprecationLoggingToggle: FunctionComponent = () => {
-  const { api, notifications } = useAppContext();
-
-  const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();
-
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [hasLoggerDeprecationWarning, setLoggerDeprecationWarning] = useState(false);
-  const [isEnabled, setIsEnabled] = useState<boolean | undefined>(undefined);
-  const [updateError, setUpdateError] = useState<ResponseError | undefined>(undefined);
-
-  useEffect(() => {
-    if (isLoading === false && data) {
-      setIsEnabled(data.isEnabled);
-
-      if (!data?.isEnabled && data?.isLoggerDeprecationEnabled) {
-        setLoggerDeprecationWarning(true);
-      }
-    }
-  }, [data, isLoading]);
-
-  const toggleLogging = async () => {
-    const newIsEnabledValue = !isEnabled;
-
-    setIsUpdating(true);
-
-    const {
-      data: updatedLoggingState,
-      error: updateDeprecationError,
-    } = await api.updateDeprecationLogging({
-      isEnabled: newIsEnabledValue,
-    });
-
-    setIsUpdating(false);
-    setLoggerDeprecationWarning(false);
-
-    if (updateDeprecationError) {
-      setUpdateError(updateDeprecationError);
-    } else if (updatedLoggingState) {
-      setIsEnabled(updatedLoggingState.isEnabled);
-      notifications.toasts.addSuccess(
-        updatedLoggingState.isEnabled ? i18nTexts.enabledMessage : i18nTexts.disabledMessage
-      );
-    }
-  };
-
+export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPreviewProps> = ({
+  isEnabled,
+  isLoading,
+  isUpdating,
+  fetchError,
+  updateError,
+  resendRequest,
+  toggleLogging,
+  hasLoggerDeprecationWarning,
+}) => {
   if (isLoading) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">

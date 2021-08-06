@@ -14,6 +14,7 @@ import './_collapsible.scss';
 interface CollapsibleProps {
   children: React.ReactNode;
   renderFooter: React.ReactNode;
+  showFooter: boolean;
 }
 
 const i18nTexts = {
@@ -25,24 +26,30 @@ const i18nTexts = {
   }),
 };
 
-export const Collapsible: FunctionComponent<CollapsibleProps> = ({ children, renderFooter }) => {
+export const Collapsible: FunctionComponent<CollapsibleProps> = ({
+  children,
+  renderFooter,
+  showFooter,
+}) => {
   const [isExpanded, setExpanded] = useState<boolean>(false);
 
   return (
     <EuiPanel className={`upgCollapsible ${isExpanded ? '' : 'collapsed'}`}>
       <div className="upgCollapsibleContent">{children}</div>
 
-      <EuiPanel paddingSize="s" hasShadow={false} className="upgCollapsibleFooter">
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>{renderFooter}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="xs" onClick={() => setExpanded(!isExpanded)}>
-              {isExpanded ? i18nTexts.collapseLabel : i18nTexts.expandLabel}
-              <EuiIcon type={isExpanded ? 'arrowUp' : 'arrowDown'} style={{ marginLeft: 8 }} />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      {showFooter && (
+        <EuiPanel paddingSize="s" hasShadow={false} className="upgCollapsibleFooter">
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>{renderFooter}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" onClick={() => setExpanded(!isExpanded)}>
+                {isExpanded ? i18nTexts.collapseLabel : i18nTexts.expandLabel}
+                <EuiIcon type={isExpanded ? 'arrowUp' : 'arrowDown'} style={{ marginLeft: 8 }} />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
     </EuiPanel>
   );
 };
