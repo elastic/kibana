@@ -11,7 +11,7 @@ import type { LazyObservabilityPageTemplateProps } from '../../../../observabili
 import { useLogSourceContext } from '../../containers/logs/log_source';
 import {
   NoDataPage,
-  NO_DATA_PAGE_MAX_WIDTH,
+  getKibanaNoDataPageTemplateProps,
 } from '../../../../../../src/plugins/kibana_react/public';
 
 export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
@@ -30,14 +30,7 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
   return sourceStatus?.logIndexStatus !== 'missing' ? (
     <PageTemplate {...pageTemplateProps} />
   ) : (
-    <PageTemplate
-      restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
-      template="centeredBody"
-      pageContentProps={{
-        hasShadow: false,
-        color: 'transparent',
-      }}
-    >
+    <PageTemplate {...getKibanaNoDataPageTemplateProps()}>
       <NoDataPage
         solution="Observability"
         actions={{

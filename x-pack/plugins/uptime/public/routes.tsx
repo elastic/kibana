@@ -27,7 +27,10 @@ import { SyntheticsCheckSteps } from './pages/synthetics/synthetics_checks';
 import { ClientPluginsStart } from './apps/plugin';
 import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
-import { NO_DATA_PAGE_MAX_WIDTH, useKibana } from '../../../../src/plugins/kibana_react/public';
+import {
+  getKibanaNoDataPageTemplateProps,
+  useKibana,
+} from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
@@ -167,14 +170,7 @@ export const PageRouter: FC = () => {
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
               {noDataInfo ? (
-                <StyledPageTemplateComponent
-                  restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
-                  template="centeredBody"
-                  pageContentProps={{
-                    hasShadow: false,
-                    color: 'transparent',
-                  }}
-                >
+                <PageTemplateComponent {...getKibanaNoDataPageTemplateProps()}>
                   <NoDataPage
                     solution="Observability"
                     actions={{
@@ -189,7 +185,7 @@ export const PageRouter: FC = () => {
                     }}
                     docsLink={'#'}
                   />
-                </StyledPageTemplateComponent>
+                </PageTemplateComponent>
               ) : (
                 <StyledPageTemplateComponent pageHeader={pageHeader}>
                   <RouteComponent />

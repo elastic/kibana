@@ -12,7 +12,7 @@ import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
 import {
   KibanaPageTemplate,
-  NO_DATA_PAGE_MAX_WIDTH,
+  getKibanaNoDataPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -103,11 +103,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         </EuiPanel>
       </StyledKibanaPageTemplate>
     ) : (
-      <KibanaPageTemplate
-        restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
-        template="centeredBody"
-        pageContentProps={{ color: 'transparent' }}
-      >
+      <KibanaPageTemplate {...getKibanaNoDataPageTemplateProps(false)}>
         <OverviewEmpty />
       </KibanaPageTemplate>
     );

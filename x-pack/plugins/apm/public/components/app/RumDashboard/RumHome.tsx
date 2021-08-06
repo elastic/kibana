@@ -18,7 +18,7 @@ import { UserPercentile } from './UserPercentile';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 import {
   NoDataPage,
-  NO_DATA_PAGE_MAX_WIDTH,
+  getKibanaNoDataPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
@@ -63,14 +63,7 @@ export function RumHome() {
           <RumOverview />
         </PageTemplateComponent>
       ) : (
-        <PageTemplateComponent
-          restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
-          template="centeredBody"
-          pageContentProps={{
-            hasShadow: false,
-            color: 'transparent',
-          }}
-        >
+        <PageTemplateComponent {...getKibanaNoDataPageTemplateProps()}>
           <NoDataPage
             solution="Observability"
             actions={{

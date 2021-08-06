@@ -17,6 +17,7 @@ import {
   EuiPageTemplate,
   EuiPageTemplateProps,
   useIsWithinBreakpoints,
+  DistributiveOmit,
 } from '@elastic/eui';
 
 import {
@@ -27,7 +28,7 @@ import {
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
-export type KibanaPageTemplateProps = EuiPageTemplateProps & {
+export type KibanaPageTemplateProps = DistributiveOmit<EuiPageTemplateProps, 'template'> & {
   /**
    * Changes the template type depending on other props provided.
    * With `pageHeader` only: Uses `centeredBody` and fills an EuiEmptyPrompt with `pageHeader` info.
@@ -39,6 +40,11 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
    * Quick creation of EuiSideNav. Hooks up mobile instance too
    */
   solutionNav?: KibanaPageTemplateSolutionNavProps;
+  /**
+   * Accepts all the same `template` options of EuiPageTemplate plus custom ones:
+   * `noData`: Displays Agent, Beats, and custom cards to direct users to the right ingest location
+   */
+  template?: EuiPageTemplateProps['template'] | 'noData';
 };
 
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
