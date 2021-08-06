@@ -12,7 +12,7 @@ jest.mock('../browsers');
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { fieldFormats } from 'src/plugins/data/server';
+import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
@@ -171,7 +171,7 @@ export const createMockReportingCore = async (
 
   setFieldFormats({
     fieldFormatServiceFactory() {
-      const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+      const fieldFormatsRegistry = new FieldFormatsRegistry();
       return Promise.resolve(fieldFormatsRegistry);
     },
   });

@@ -7,7 +7,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
+import { FORMATS_UI_SETTINGS } from '../../../../../src/plugins/field_formats/common';
 
 export default function ({ getPageObjects, getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService, loadTestFile }: FtrProvid
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
+        [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       });
     });
 
