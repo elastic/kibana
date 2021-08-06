@@ -54,7 +54,7 @@ export function getTopNBuckets(job: Job): number {
   return Math.ceil(narrowBucketLength / bucketSpan.asSeconds());
 }
 
-const implementedTests = ['datafeed', 'mml'] as JobsHealthTests[];
+const implementedTests = ['datafeed', 'mml', 'delayedData'] as JobsHealthTests[];
 
 /**
  * Returns tests configuration combined with default values.
@@ -70,6 +70,8 @@ export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig)
     },
     delayedData: {
       enabled: config?.delayedData?.enabled ?? true,
+      docsCount: config?.delayedData?.docsCount ?? 1,
+      timeInterval: config?.delayedData?.timeInterval ?? null,
     },
     behindRealtime: {
       enabled: config?.behindRealtime?.enabled ?? true,

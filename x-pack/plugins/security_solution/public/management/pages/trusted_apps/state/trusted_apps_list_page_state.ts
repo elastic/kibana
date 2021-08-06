@@ -23,6 +23,8 @@ export interface TrustedAppsListData {
   timestamp: number;
   totalItemsCount: number;
   filter: string;
+  includedPolicies: string;
+  excludedPolicies: string;
 }
 
 export type ViewType = 'list' | 'grid';
@@ -35,6 +37,10 @@ export interface TrustedAppsListPageLocation {
   /** Used for editing. The ID of the selected trusted app */
   id?: string;
   filter: string;
+  // A string with comma dlimetered list of included policy IDs
+  included_policies: string;
+  // A string with comma dlimetered list of excluded policy IDs
+  excluded_policies: string;
 }
 
 export interface TrustedAppsListPageState {
