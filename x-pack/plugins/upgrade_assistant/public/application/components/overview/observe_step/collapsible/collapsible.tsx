@@ -13,7 +13,7 @@ import './_collapsible.scss';
 
 interface CollapsibleProps {
   children: React.ReactNode;
-  renderFooterLinks: React.ReactNode;
+  renderFooter: React.ReactNode;
 }
 
 const i18nTexts = {
@@ -25,10 +25,7 @@ const i18nTexts = {
   }),
 };
 
-export const Collapsible: FunctionComponent<CollapsibleProps> = ({
-  children,
-  renderFooterLinks,
-}) => {
+export const Collapsible: FunctionComponent<CollapsibleProps> = ({ children, renderFooter }) => {
   const [isExpanded, setExpanded] = useState<boolean>(false);
 
   return (
@@ -37,7 +34,7 @@ export const Collapsible: FunctionComponent<CollapsibleProps> = ({
 
       <EuiPanel paddingSize="s" hasShadow={false} className="upgCollapsibleFooter">
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>{renderFooterLinks}</EuiFlexItem>
+          <EuiFlexItem>{renderFooter}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="xs" onClick={() => setExpanded(!isExpanded)}>
               {isExpanded ? i18nTexts.collapseLabel : i18nTexts.expandLabel}
