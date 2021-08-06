@@ -13,7 +13,7 @@ export const geti18nTexts = () => {
     noTimestampOptionText: i18n.translate(
       'indexPatternEditor.createIndexPattern.stepTime.noTimeFieldsLabel',
       {
-        defaultMessage: "No matching data stream, index, or alias has a timestamp field.",
+        defaultMessage: 'No matching data stream, index, or alias has a timestamp field.',
       }
     ),
     timestampFieldHelp: i18n.translate('indexPatternEditor.editor.form.timeFieldHelp', {
