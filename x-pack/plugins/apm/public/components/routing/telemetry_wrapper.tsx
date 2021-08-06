@@ -20,8 +20,8 @@ export function TelemetryWrapper({
   const { component, render, path } = route;
   const pathAsString = path as string;
 
-  useTrackPageview({ app: 'apm', path: pathAsString });
-  useTrackPageview({ app: 'apm', path: pathAsString, delay: 15000 });
+  useTrackPageview({ app: 'apm', path: pathAsString }, [pathAsString]);
+  useTrackPageview({ app: 'apm', path: pathAsString, delay: 15000 }, [pathAsString]);
 
   if (component) {
     return React.createElement(component, props);
