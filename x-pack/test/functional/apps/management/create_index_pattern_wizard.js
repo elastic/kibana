@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
           method: 'PUT',
         });
 
-        await PageObjects.settings.createIndexPattern('test_data_stream', false);
+        await PageObjects.settings.createIndexPattern('test_data_stream');
 
         await es.transport.request({
           path: '/_data_stream/test_data_stream',

@@ -83,7 +83,9 @@ export {
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  GetFieldsOptions,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  AggregationRestrictions,
   IndexPatternType,
 } from '../common';
 
