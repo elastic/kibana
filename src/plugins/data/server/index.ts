@@ -27,50 +27,7 @@ export const exporters = {
  * Field Formats:
  */
 
-import {
-  FieldFormatsRegistry,
-  FieldFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-} from '../common/field_formats';
-
-export const fieldFormats = {
-  FieldFormatsRegistry,
-  FieldFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-};
-
-export {
-  IFieldFormatsRegistry,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
-} from '../common';
+export { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../common';
 
 /*
  * Index patterns:
@@ -93,6 +50,7 @@ export {
 } from './index_patterns';
 
 export {
+  IndexPatternField,
   IFieldType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
