@@ -43,11 +43,6 @@ export interface EncryptedSavedObjectsClient {
     id: string,
     options?: SavedObjectsBaseOptions
   ) => Promise<SavedObject<T>>;
-  resolveDecryptedIdAsInternalUser: <T = unknown>(
-    type: string,
-    id: string,
-    options?: SavedObjectsBaseOptions
-  ) => Promise<string>;
 }
 
 export function setupSavedObjects({
@@ -100,15 +95,6 @@ export function setupSavedObjects({
             savedObject.attributes as Record<string, unknown>
           )) as T,
         };
-      },
-      resolveDecryptedIdAsInternalUser: async (
-        type: string,
-        id: string,
-        options?: SavedObjectsBaseOptions
-      ): Promise<string> => {
-        const [internalRepository] = await internalRepositoryAndTypeRegistryPromise;
-        const { saved_object: savedObject } = await internalRepository.resolve(type, id, options);
-        return savedObject.id;
       },
     };
   };
