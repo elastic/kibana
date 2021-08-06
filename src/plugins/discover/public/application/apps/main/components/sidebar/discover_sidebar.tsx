@@ -36,6 +36,7 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../../../../../../../x-pack/plugins/ml/public/embeddables';
 
 /**
@@ -43,7 +44,7 @@ import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../../../../../..
  */
 const FIELDS_PER_PAGE = 50;
 
-export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
+export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProps, 'documents$'> {
   /**
    * Current state of the field filter, filtering fields by name, type, ...
    */
@@ -65,6 +66,15 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   setFieldEditorRef?: (ref: () => void | undefined) => void;
 
   editField: (fieldName?: string) => void;
+
+  /**
+   * a statistics of the distribution of fields in the given hits
+   */
+  fieldCounts: Record<string, number>;
+  /**
+   * hits fetched from ES, displayed in the doc table
+   */
+  documents: ElasticSearchHit[];
 }
 
 export function DiscoverSidebar({
@@ -72,7 +82,7 @@ export function DiscoverSidebar({
   columns,
   fieldCounts,
   fieldFilter,
-  hits,
+  documents,
   indexPatternList,
   onAddField,
   onAddFilter,
@@ -102,7 +112,7 @@ export function DiscoverSidebar({
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
-  }, [selectedIndexPattern, fieldCounts, hits]);
+  }, [selectedIndexPattern, fieldCounts, documents]);
 
   const scrollDimensions = useResizeObserver(scrollContainer);
 
@@ -116,8 +126,8 @@ export function DiscoverSidebar({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: IndexPatternField) => getDetails(ipField, hits, columns, selectedIndexPattern),
-    [hits, columns, selectedIndexPattern]
+    (ipField: IndexPatternField) => getDetails(ipField, documents, columns, selectedIndexPattern),
+    [documents, columns, selectedIndexPattern]
   );
 
   const popularLimit = useMemo(() => services.uiSettings.get(FIELDS_LIMIT_SETTING), [
