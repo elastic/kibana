@@ -3,7 +3,7 @@
   "version": "kibana",
   "ui": true,
   "optionalPlugins": ["visualize"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "data", "fieldFormats"],
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"

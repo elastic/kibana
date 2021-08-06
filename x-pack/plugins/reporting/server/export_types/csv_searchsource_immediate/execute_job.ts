@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { KibanaRequest } from 'src/core/server';
 import { CancellationToken } from '../../../common';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
@@ -22,6 +23,7 @@ export type ImmediateExecuteFn = (
   jobId: null,
   job: JobParamsDownloadCSV,
   context: ReportingRequestHandlerContext,
+  stream: Writable,
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
 
@@ -32,7 +34,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   const config = reporting.getConfig();
   const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE, 'execute-job']);
 
-  return async function runTask(_jobId, immediateJobParams, context, req) {
+  return async function runTask(_jobId, immediateJobParams, context, stream, req) {
     const job = {
       objectType: 'immediate-search',
       ...immediateJobParams,
@@ -58,7 +60,15 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     };
     const cancellationToken = new CancellationToken();
 
-    const csv = new CsvGenerator(job, config, clients, dependencies, cancellationToken, logger);
+    const csv = new CsvGenerator(
+      job,
+      config,
+      clients,
+      dependencies,
+      cancellationToken,
+      logger,
+      stream
+    );
     const result = await csv.generateData();
 
     if (result.csv_contains_formulas) {

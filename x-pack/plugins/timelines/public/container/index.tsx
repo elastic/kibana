@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -80,6 +81,7 @@ export interface UseTimelineEventsProps {
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
   data?: DataPublicPluginStart;
+  alertConsumers?: AlertConsumers[];
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -106,7 +108,9 @@ export const initSortDefault = [
   },
 ];
 
+const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
+  alertConsumers = NO_CONSUMERS,
   docValueFields,
   endDate,
   excludeEcsData = false,
@@ -185,11 +189,16 @@ export const useTimelineEvents = ({
         setLoading(true);
         if (data && data.search) {
           searchSubscription$.current = data.search
-            .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
-              strategy:
-                request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
-              abortSignal: abortCtrl.current.signal,
-            })
+            .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
+              { ...request, entityType: 'alerts' },
+              {
+                strategy:
+                  request.language === 'eql'
+                    ? 'timelineEqlSearchStrategy'
+                    : 'timelineSearchStrategy',
+                abortSignal: abortCtrl.current.signal,
+              }
+            )
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
@@ -262,6 +271,7 @@ export const useTimelineEvents = ({
         : 0;
 
       const currentRequest = {
+        alertConsumers,
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         excludeEcsData,
@@ -291,6 +301,7 @@ export const useTimelineEvents = ({
       return prevRequest;
     });
   }, [
+    alertConsumers,
     dispatch,
     indexNames,
     activePage,

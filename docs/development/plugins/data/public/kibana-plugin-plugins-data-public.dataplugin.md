@@ -20,7 +20,7 @@ export declare class DataPublicPlugin implements Plugin<DataPublicPluginSetup, D
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [setup(core, { bfetch, expressions, uiActions, usageCollection, inspector })](./kibana-plugin-plugins-data-public.dataplugin.setup.md) |  |  |
-|  [start(core, { uiActions })](./kibana-plugin-plugins-data-public.dataplugin.start.md) |  |  |
+|  [setup(core, { bfetch, expressions, uiActions, usageCollection, inspector, fieldFormats, })](./kibana-plugin-plugins-data-public.dataplugin.setup.md) |  |  |
+|  [start(core, { uiActions, fieldFormats })](./kibana-plugin-plugins-data-public.dataplugin.start.md) |  |  |
 |  [stop()](./kibana-plugin-plugins-data-public.dataplugin.stop.md) |  |  |
 

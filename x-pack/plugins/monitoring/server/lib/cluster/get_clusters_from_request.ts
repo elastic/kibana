@@ -35,6 +35,7 @@ import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standa
 import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
+import { RulesByType } from '../../../common/types/alerts';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -142,21 +143,16 @@ export async function getClustersFromRequest(
         } else {
           try {
             cluster.alerts = {
-              list: Object.keys(alertStatus).reduce((accum, alertName) => {
-                const value = alertStatus[alertName];
-                if (value.states && value.states.length) {
-                  Reflect.set(accum, alertName, {
-                    ...value,
-                    states: value.states.filter(
-                      (state) =>
-                        state.state.cluster.clusterUuid ===
-                        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
-                    ),
-                  });
-                } else {
-                  Reflect.set(accum, alertName, value);
-                }
-                return accum;
+              list: Object.keys(alertStatus).reduce<RulesByType>((acc, ruleTypeName) => {
+                acc[ruleTypeName] = alertStatus[ruleTypeName].map((rule) => ({
+                  ...rule,
+                  states: rule.states.filter(
+                    (state) =>
+                      state.state.cluster.clusterUuid ===
+                      get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
+                  ),
+                }));
+                return acc;
               }, {}),
               alertsMeta: {
                 enabled: true,
@@ -177,7 +173,6 @@ export async function getClustersFromRequest(
       }
     }
   }
-
   // add kibana data
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
