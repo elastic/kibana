@@ -82,7 +82,6 @@ export function DiscoverLayout({
     setDiscoverViewMode(option);
   };
 
-  const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const fetchCounter = useRef<number>(0);
   const { main$, charts$, totalHits$ } = savedSearchData$;
@@ -279,19 +278,34 @@ export function DiscoverLayout({
                       />
                     </EuiFlexItem>
                     <EuiHorizontalRule margin="none" />
-                    <DiscoverDocuments
-                      documents$={savedSearchData$.documents$}
-                      expandedDoc={expandedDoc}
-                      indexPattern={indexPattern}
-                      isMobile={isMobile}
-                      navigateTo={navigateTo}
-                      onAddFilter={onAddFilter as DocViewFilterFn}
-                      savedSearch={savedSearch}
-                      services={services}
-                      setExpandedDoc={setExpandedDoc}
-                      state={state}
-                      stateContainer={stateContainer}
-                    />
+                    {discoverViewMode === DISCOVER_VIEW_MODES.DOCUMENT_LEVEL && (
+                      <DiscoverDocuments
+                        documents$={savedSearchData$.documents$}
+                        expandedDoc={expandedDoc}
+                        indexPattern={indexPattern}
+                        isMobile={isMobile}
+                        navigateTo={navigateTo}
+                        onAddFilter={onAddFilter as DocViewFilterFn}
+                        savedSearch={savedSearch}
+                        services={services}
+                        setExpandedDoc={setExpandedDoc}
+                        state={state}
+                        stateContainer={stateContainer}
+                      />
+                    )}
+                    {discoverViewMode === DISCOVER_VIEW_MODES.FIELD_LEVEL && (
+                      <DataVisualizerGridMemoized
+                        savedSearch={savedSearch}
+                        services={services}
+                        indexPattern={indexPattern}
+                        searchDescription={savedSearch.description}
+                        searchTitle={savedSearch.lastSavedTitle}
+                        sampleSize={5000}
+                        query={state.query}
+                        filters={state.filters}
+                        columns={columns}
+                      />
+                    )}
                   </EuiFlexGroup>
                 )}
               </EuiPageContent>
