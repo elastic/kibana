@@ -5813,7 +5813,6 @@
     "xpack.apm.serviceMap.invalidLicenseMessage": "サービスマップを利用するには、Elastic Platinum ライセンスが必要です。これにより、APM データとともにアプリケーションスタックすべてを可視化することができるようになります。",
     "xpack.apm.serviceMap.noServicesPromptDescription": "現在選択されている時間範囲と環境内では、マッピングするサービスが見つかりません。別の範囲を試すか、選択した環境を確認してください。サービスがない場合は、セットアップ手順に従って開始してください。",
     "xpack.apm.serviceMap.noServicesPromptTitle": "サービスが利用できません",
-    "xpack.apm.serviceMap.popoverMetrics.noDataText": "選択した環境のデータがありません。別の環境に切り替えてください。",
     "xpack.apm.serviceMap.resourceCountLabel": "{count}個のリソース",
     "xpack.apm.serviceMap.serviceDetailsButtonText": "サービス詳細",
     "xpack.apm.serviceMap.subtypePopoverStat": "サブタイプ",
