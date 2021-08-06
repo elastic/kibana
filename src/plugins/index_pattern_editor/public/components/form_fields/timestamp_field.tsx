@@ -37,7 +37,7 @@ const requireTimestampOptionValidator = (options: Props['options']): ValidationC
         message: i18n.translate(
           'indexPatternEditor.requireTimestampOption.ValidationErrorMessage',
           {
-            defaultMessage: 'Select a timestamp field option.',
+            defaultMessage: 'Select a timestamp field.',
           }
         ),
       };
@@ -63,7 +63,7 @@ const getTimestampConfig = (
 };
 
 const noTimestampOptionText = i18n.translate('indexPatternEditor.editor.form.noTimeFieldsLabel', {
-  defaultMessage: 'No matching index, data stream, or index alias has a time field.',
+  defaultMessage: 'No matching data stream, index, or alias has a timestamp field.',
 });
 
 const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFieldHelp', {
