@@ -102,8 +102,11 @@ export const TableRow = ({
         })}
         data-test-subj="docTableExpandToggleColumn"
       >
-        {open && <EuiIcon type="arrowDown" color="text" size="s" />}
-        {!open && <EuiIcon type="arrowRight" color="text" size="s" />}
+        {open ? (
+          <EuiIcon type="arrowDown" color="text" size="s" />
+        ) : (
+          <EuiIcon type="arrowRight" color="text" size="s" />
+        )}
       </EuiButtonEmpty>
     </td>,
   ];

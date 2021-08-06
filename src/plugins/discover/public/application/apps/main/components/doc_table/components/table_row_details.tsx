@@ -27,54 +27,54 @@ export const TableRowDetails = ({
   getSingleDocHref,
   children,
 }: TableRowDetailsProps) => {
-  if (open) {
-    return (
-      <td colSpan={(colLength || 1) + 2}>
-        <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="folderOpen" size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
-                  <h4>
-                    <FormattedMessage
-                      id="discover.docTable.tableRow.detailHeading"
-                      defaultMessage="Expanded document"
-                    />
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                {isTimeBased && (
-                  <EuiLink data-test-subj="docTableRowAction" href={getContextAppHref()}>
-                    <FormattedMessage
-                      id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
-                      defaultMessage="View surrounding documents"
-                    />
-                  </EuiLink>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiLink data-test-subj="docTableRowAction" href={getSingleDocHref()}>
-                  <FormattedMessage
-                    id="discover.docTable.tableRow.viewSingleDocumentLinkText"
-                    defaultMessage="View single document"
-                  />
-                </EuiLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <div data-test-subj="docViewer">{children}</div>
-      </td>
-    );
+  if (!open) {
+    return null;
   }
 
-  return null;
+  return (
+    <td colSpan={(colLength || 1) + 2}>
+      <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="folderOpen" size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
+                <h4>
+                  <FormattedMessage
+                    id="discover.docTable.tableRow.detailHeading"
+                    defaultMessage="Expanded document"
+                  />
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {isTimeBased && (
+                <EuiLink data-test-subj="docTableRowAction" href={getContextAppHref()}>
+                  <FormattedMessage
+                    id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
+                    defaultMessage="View surrounding documents"
+                  />
+                </EuiLink>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink data-test-subj="docTableRowAction" href={getSingleDocHref()}>
+                <FormattedMessage
+                  id="discover.docTable.tableRow.viewSingleDocumentLinkText"
+                  defaultMessage="View single document"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <div data-test-subj="docViewer">{children}</div>
+    </td>
+  );
 };

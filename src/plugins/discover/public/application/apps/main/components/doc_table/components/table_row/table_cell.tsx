@@ -20,7 +20,7 @@ export interface CellProps {
 
 export const TableCell = (props: CellProps) => {
   const classes = classNames({
-    ['eui-textNoWrap kbnDocTableCell--extraWidth']: props.timefield,
+    ['eui-textNoWrap']: props.timefield,
     ['eui-textBreakAll eui-textBreakWord']: props.sourcefield,
     ['kbnDocTableCell__dataField eui-textBreakAll eui-textBreakWord']:
       !props.timefield && !props.sourcefield,

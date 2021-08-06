@@ -57,7 +57,7 @@ export const discoverServiceMock = ({
         return 5;
       } else if (key === SORT_DEFAULT_ORDER_SETTING) {
         return 'desc';
-      } else if (UI_SETTINGS.SHORT_DOTS_ENABLE) {
+      } else if (key === UI_SETTINGS.SHORT_DOTS_ENABLE) {
         return false;
       } else if (key === SAMPLE_SIZE_SETTING) {
         return 250;
