@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getFieldFormatsRegistry } from './field_formats/field_formats_registry.stub';
+export { getFieldFormatsRegistry } from '../../field_formats/public/mocks';
 export { getStubIndexPattern, StubIndexPattern } from './index_patterns/index_pattern.stub';

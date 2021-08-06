@@ -12,31 +12,24 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/common';
-import { AlertInstance } from '../../../alerting/server';
 import { AlertTypeWithExecutor } from '../types';
-import { createLifecycleExecutor } from './create_lifecycle_executor';
-
-export type LifecycleAlertService<
-  TAlertInstanceContext extends Record<string, unknown>,
-  TActionGroupIds extends string = string
-> = (alert: {
-  id: string;
-  fields: Record<string, unknown>;
-}) => AlertInstance<AlertInstanceState, TAlertInstanceContext, TActionGroupIds>;
+import { LifecycleAlertService, createLifecycleExecutor } from './create_lifecycle_executor';
 
 export const createLifecycleRuleTypeFactory = ({
   logger,
   ruleDataClient,
 }: {
-  ruleDataClient: RuleDataClient;
   logger: Logger;
+  ruleDataClient: RuleDataClient;
 }) => <
   TParams extends AlertTypeParams,
   TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends { alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext> }
+  TServices extends {
+    alertWithLifecycle: LifecycleAlertService<Record<string, any>, TAlertInstanceContext, string>;
+  }
 >(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
-): AlertTypeWithExecutor<TParams, TAlertInstanceContext, any> => {
+  type: AlertTypeWithExecutor<Record<string, any>, TParams, TAlertInstanceContext, TServices>
+): AlertTypeWithExecutor<Record<string, any>, TParams, TAlertInstanceContext, any> => {
   const createBoundLifecycleExecutor = createLifecycleExecutor(logger, ruleDataClient);
   const executor = createBoundLifecycleExecutor<
     TParams,

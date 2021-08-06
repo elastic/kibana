@@ -12,8 +12,8 @@ import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
+import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
-import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
@@ -29,10 +29,12 @@ export interface DataSetupDependencies {
   uiActions: UiActionsSetup;
   inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
 }
 
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -41,6 +43,9 @@ export interface DataStartDependencies {
 export interface DataPublicPluginSetup {
   autocomplete: AutocompleteSetup;
   search: ISearchSetup;
+  /**
+   * @deprecated Use fieldFormats plugin instead
+   */
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
 }
@@ -86,8 +91,7 @@ export interface DataPublicPluginStart {
    */
   search: ISearchStart;
   /**
-   * field formats service
-   * {@link FieldFormatsStart}
+   * @deprecated Use fieldFormats plugin instead
    */
   fieldFormats: FieldFormatsStart;
   /**

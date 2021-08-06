@@ -11,8 +11,7 @@ specific needs.
 [role="screenshot"]
 image::user/monitoring/images/monitoring-kibana-alerting-notification.png["{kib} alerting notifications in {stack-monitor-app}"]
 
-When you open *{stack-monitor-app}*, you will be ask to create these rules 
-They are initially configured to detect and notify on various 
+When you open *{stack-monitor-app}* for the first time, you will be asked to acknowledge the creation of these default rules. They are initially configured to detect and notify on various 
 conditions across your monitored clusters. You can view notifications for: *Cluster health*, *Resource utilization*, and *Errors and exceptions* for {es}
 in real time.
 
@@ -23,8 +22,8 @@ been recreated as rules in {kib} {alert-features}. For this reason, the existing
 The default action for all {stack-monitor-app} rules is to write to {kib} logs 
 and display a notification in the UI.
 
-To review and modify all available rules, click *Enter setup mode* on the 
-*Cluster overview* page.
+To review and modify existing *{stack-monitor-app}* rules, click *Enter setup mode* on the *Cluster overview* page.
+Alternatively, to manage all rules, including create and delete functionality go to *Stack Management > Rules and Connectors*.
 
 [discrete]
 [[kibana-alerts-cpu-threshold]]
@@ -32,17 +31,15 @@ To review and modify all available rules, click *Enter setup mode* on the
 
 This rule checks for {es} nodes that run a consistently high CPU load. By
 default, the condition is set at 85% or more averaged over the last 5 minutes.
-The rule is grouped across all the nodes of the cluster by running checks on a
-schedule time of 1 minute with a re-notify interval of 1 day.
+The default rule checks on a schedule time of 1 minute with a re-notify interval of 1 day.
 
 [discrete]
 [[kibana-alerts-disk-usage-threshold]]
 == Disk usage threshold
 
 This rule checks for {es} nodes that are nearly at disk capacity. By default,
-the condition is set at 80% or more averaged over the last 5 minutes. The rule
-is grouped across all the nodes of the cluster by running checks on a schedule
-time of 1 minute with a re-notify interval of 1 day.
+the condition is set at 80% or more averaged over the last 5 minutes. The default rule
+checks on a schedule time of 1 minute with a re-notify interval of 1 day.
 
 [discrete]
 [[kibana-alerts-jvm-memory-threshold]]
@@ -50,16 +47,14 @@ time of 1 minute with a re-notify interval of 1 day.
 
 This rule checks for {es} nodes that use a high amount of JVM memory. By
 default, the condition is set at 85% or more averaged over the last 5 minutes.
-The rule is grouped across all the nodes of the cluster by running checks on a
-schedule time of 1 minute with a re-notify interval of 1 day. 
+The default rule checks on a schedule time of 1 minute with a re-notify interval of 1 day. 
 
 [discrete]
 [[kibana-alerts-missing-monitoring-data]]
 == Missing monitoring data
 
 This rule checks for {es} nodes that stop sending monitoring data. By default, 
-the condition is set to missing for 15 minutes looking back 1 day. The rule is
-grouped across all the {es} nodes of the cluster by running checks on a schedule
+the condition is set to missing for 15 minutes looking back 1 day. The default rule checks on a schedule
 time of 1 minute with a re-notify interval of 6 hours. 
 
 [discrete]
@@ -67,9 +62,8 @@ time of 1 minute with a re-notify interval of 6 hours.
 == Thread pool rejections (search/write)
 
 This rule checks for {es} nodes that experience thread pool rejections. By 
-default, the condition is set at 300 or more over the last 5 minutes. The rule
-is grouped across all the nodes of the cluster by running checks on a schedule
-time of 1 minute with a re-notify interval of 1 day. Thresholds can be set
+default, the condition is set at 300 or more over the last 5 minutes. The default rule
+checks on a schedule time of 1 minute with a re-notify interval of 1 day. Thresholds can be set
 independently for `search` and `write` type rejections.
 
 [discrete]
@@ -78,8 +72,7 @@ independently for `search` and `write` type rejections.
 
 This rule checks for read exceptions on any of the replicated {es} clusters. The
 condition is met if 1 or more read exceptions are detected in the last hour. The
-rule is grouped across all replicated clusters by running checks on a schedule 
-time of 1 minute with a re-notify interval of 6 hours. 
+default rule checks on a schedule time of 1 minute with a re-notify interval of 6 hours. 
 
 [discrete]
 [[kibana-alerts-large-shard-size]]
@@ -87,9 +80,8 @@ time of 1 minute with a re-notify interval of 6 hours.
 
 This rule checks for a large average shard size (across associated primaries) on
 any of the specified index patterns in an {es} cluster. The condition is met if
-an index's average shard size is 55gb or higher in the last 5 minutes. The rule
-is grouped across all indices that match the default pattern of `-.*` by running
-checks on a schedule time of 1 minute with a re-notify interval of 12 hours.
+an index's average shard size is 55gb or higher in the last 5 minutes. The default rule
+matches the pattern of `-.*` by running checks on a schedule time of 1 minute with a re-notify interval of 12 hours.
 
 [discrete]
 [[kibana-alerts-cluster-alerts]]

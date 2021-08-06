@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+import {
+  ALERT_OWNER,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_SEVERITY,
+  ALERT_STATUS,
+  CONSUMERS,
+  ECS_VERSION,
+  RULE_ID,
+  SPACE_IDS,
+  TIMESTAMP,
+  VERSION,
+} from '@kbn/rule-data-utils';
+
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { getAlertByIdRoute } from './get_alert_by_id';
@@ -13,10 +26,16 @@ import { getReadRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
 
 const getMockAlert = (): ParsedTechnicalFields => ({
-  '@timestamp': '2021-06-21T21:33:05.713Z',
-  'rule.id': 'apm.error_rate',
-  'kibana.rac.alert.owner': 'apm',
-  'kibana.rac.alert.status': 'open',
+  [TIMESTAMP]: '2021-06-21T21:33:05.713Z',
+  [ECS_VERSION]: '1.0.0',
+  [CONSUMERS]: [],
+  [VERSION]: '7.13.0',
+  [RULE_ID]: 'apm.error_rate',
+  [ALERT_OWNER]: 'apm',
+  [ALERT_STATUS]: 'open',
+  [ALERT_RULE_RISK_SCORE]: 20,
+  [SPACE_IDS]: ['fake-space-id'],
+  [ALERT_RULE_SEVERITY]: 'warning',
 });
 
 describe('getAlertByIdRoute', () => {
