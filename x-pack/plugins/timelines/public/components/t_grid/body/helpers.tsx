@@ -25,7 +25,7 @@ import {
   ALERT_RULE_VERSION,
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
-import { includes, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import {
   ALERT_ANCESTORS_DEPTH,
   ALERT_ANCESTORS_ID,

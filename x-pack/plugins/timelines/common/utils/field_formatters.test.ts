@@ -163,14 +163,14 @@ describe('Events Details Helpers', () => {
       },
       {
         category: 'signal',
-        field: 'signal.status',
+        field: ALERT_STATUS,
         values: ['open'],
         originalValue: ['open'],
         isObjectArray: false,
       },
       {
         category: 'signal',
-        field: 'signal.rule.name',
+        field: ALERT_RULE_NAME,
         values: ['Rawr'],
         originalValue: ['Rawr'],
         isObjectArray: false,
