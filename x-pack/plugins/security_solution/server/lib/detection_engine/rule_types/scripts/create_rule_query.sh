@@ -37,7 +37,7 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
      "version": 1
    },
    "consumer":"alerts",
-   "alertTypeId":"siem.queryRule",
+   "alertTypeId":"siem.query",
    "schedule":{
       "interval":"1m"
    },

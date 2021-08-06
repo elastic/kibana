@@ -162,6 +162,138 @@ export const convertCreateAPIToInternalSchema = (
   };
 };
 
+export const convertCreateAPIToInternalRACSchema = (
+  input: CreateRulesSchema,
+  siemClient: AppClient
+): InternalRuleCreate => {
+  const converted = convertCreateAPIToInternalSchema(input, siemClient);
+  return {
+    ...converted,
+    alertTypeId: 'query',
+    params: {
+      ...converted.params,
+      namespace: input.namespace,
+    }
+  };
+};
+
+// Converts the internal rule data structure to the response API schema
+export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): ResponseTypeSpecific => {
+  switch (params.type) {
+    case 'eql': {
+      return {
+        type: params.type,
+        language: params.language,
+        index: params.index,
+        query: params.query,
+        filters: params.filters,
+        event_category_override: params.eventCategoryOverride,
+      };
+    }
+    case 'threat_match': {
+      return {
+        type: params.type,
+        language: params.language,
+        index: params.index,
+        query: params.query,
+        filters: params.filters,
+        saved_id: params.savedId,
+        threat_filters: params.threatFilters,
+        threat_query: params.threatQuery,
+        threat_mapping: params.threatMapping,
+        threat_language: params.threatLanguage,
+        threat_index: params.threatIndex,
+        threat_indicator_path: params.threatIndicatorPath,
+        concurrent_searches: params.concurrentSearches,
+        items_per_search: params.itemsPerSearch,
+      };
+    }
+    case 'query': {
+      return {
+        type: params.type,
+        language: params.language,
+        index: params.index,
+        query: params.query,
+        filters: params.filters,
+        saved_id: params.savedId,
+      };
+    }
+    case 'saved_query': {
+      return {
+        type: params.type,
+        language: params.language,
+        index: params.index,
+        query: params.query,
+        filters: params.filters,
+        saved_id: params.savedId,
+      };
+    }
+    case 'threshold': {
+      return {
+        type: params.type,
+        language: params.language,
+        index: params.index,
+        query: params.query,
+        filters: params.filters,
+        saved_id: params.savedId,
+        threshold: params.threshold,
+      };
+    }
+    case 'machine_learning': {
+      return {
+        type: params.type,
+        anomaly_threshold: params.anomalyThreshold,
+        machine_learning_job_id: params.machineLearningJobId,
+      };
+    }
+    default: {
+      return assertUnreachable(params);
+    }
+  }
+};
+
+// TODO: separate out security solution defined common params from Alerting framework common params
+// so we can explicitly specify the return type of this function
+export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
+  return {
+    description: params.description,
+    risk_score: params.riskScore,
+    severity: params.severity,
+    building_block_type: params.buildingBlockType,
+    note: params.note,
+    license: params.license,
+    output_index: params.outputIndex,
+    timeline_id: params.timelineId,
+    timeline_title: params.timelineTitle,
+    meta: params.meta,
+    rule_name_override: params.ruleNameOverride,
+    timestamp_override: params.timestampOverride,
+    author: params.author,
+    false_positives: params.falsePositives,
+    from: params.from,
+    rule_id: params.ruleId,
+    max_signals: params.maxSignals,
+    risk_score_mapping: params.riskScoreMapping,
+    severity_mapping: params.severityMapping,
+    threat: params.threat,
+    to: params.to,
+    references: params.references,
+    version: params.version,
+    exceptions_list: params.exceptionsList,
+    immutable: params.immutable,
+  };
+};
+
+export const internalRuleToAPIResponse = (
+  rule: SanitizedAlert<RuleParams>,
+  ruleActions?: RuleActions | null,
+  ruleStatus?: IRuleStatusSOAttributes
+): FullResponseSchema => {
+  const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
+  return {
+    // Alerting framework params
+    id: rule.id,
+    updated_at: rule.updatedAt.toISOString(),
 // Converts the internal rule data structure to the response API schema
 export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): ResponseTypeSpecific => {
   switch (params.type) {

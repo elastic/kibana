@@ -956,3 +956,10 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
     return get(event._source, field) as T;
   }
 };
+
+export const getRACRuleType = (ruleType: 'query'): string => {
+  const ruleTypeMapping = {
+    query: 'siem.query',
+  };
+  return ruleTypeMapping[ruleType];
+};

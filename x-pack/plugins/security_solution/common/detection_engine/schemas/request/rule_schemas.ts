@@ -176,11 +176,26 @@ const baseParams = {
     exceptions_list: listArray,
   },
 };
+
+const racBaseParams = {
+  ...baseParams,
+  defaultable: {
+    ...baseParams.defaultable,
+    namespace: t.string,
+  },
+};
+
 const {
   create: baseCreateParams,
   patch: basePatchParams,
   response: baseResponseParams,
 } = buildAPISchemas(baseParams);
+
+const {
+  create: racBaseCreateParams,
+  patch: racBasePatchParams,
+  response: racBaseResponseParams,
+} = buildAPISchemas(racBaseParams);
 
 // "shared" types are the same across all rule types, and built from "baseParams" above
 // with some variations for each route. These intersect with type specific schemas below
@@ -190,6 +205,12 @@ export const sharedCreateSchema = t.intersection([
   t.exact(t.partial({ rule_id })),
 ]);
 export type SharedCreateSchema = t.TypeOf<typeof sharedCreateSchema>;
+
+export const racSharedCreateSchema = t.intersection([
+  racBaseCreateParams,
+  t.exact(t.partial({ rule_id })),
+]);
+export type RACSharedCreateSchema = t.TypeOf<typeof racSharedCreateSchema>;
 
 export const sharedUpdateSchema = t.intersection([
   baseCreateParams,
@@ -261,6 +282,7 @@ const queryRuleParams = {
     language: t.keyof({ kuery: null, lucene: null }),
   },
 };
+
 const {
   create: queryCreateParams,
   patch: queryPatchParams,
@@ -356,6 +378,9 @@ export type MachineLearningCreateSchema = CreateSchema<
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
+
+export const racCreateRulesSchema = t.intersection([racSharedCreateSchema, createTypeSpecific]);
+export type RACCreateRulesSchema = t.TypeOf<typeof racCreateRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
