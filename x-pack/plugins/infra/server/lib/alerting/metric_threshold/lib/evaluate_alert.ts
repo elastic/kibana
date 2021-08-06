@@ -96,6 +96,8 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   );
 };
 
+const MINIMUM_BUCKETS = 5;
+
 const getMetric: (
   esClient: ElasticsearchClient,
   params: MetricExpressionParams,
