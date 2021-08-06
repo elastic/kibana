@@ -119,6 +119,7 @@ export interface SignalSource {
     original_time?: string;
     threshold_result?: ThresholdResult;
   };
+  kibana?: SearchTypes;
 }
 
 export interface BulkItem {
