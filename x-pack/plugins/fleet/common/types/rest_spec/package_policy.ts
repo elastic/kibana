@@ -10,7 +10,6 @@ import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   DryRunPackagePolicy,
-  DryRunPackagePolicyResponse,
 } from '../models';
 
 export interface GetPackagePoliciesRequest {
