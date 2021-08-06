@@ -13,6 +13,7 @@ import { useKibana, DataPublicPluginStart } from '../../../../shared_imports';
 
 // TODO: refactor into commmon folder
 const INDEX_PATTERN_NAME = '.logs-deprecation.elasticsearch-default';
+const DEPRECATION_SOURCE_ID = 'deprecation_logs';
 
 const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
   const { indexPatterns: indexPatternService } = dataService;
@@ -57,8 +58,13 @@ const DiscoverAppLink = () => {
 };
 
 const ObserveAppLink = () => {
+  const { http } = useKibana().services;
+  const logStreamUrl = http?.basePath?.prepend(
+    `/app/logs/stream?sourceId=${DEPRECATION_SOURCE_ID}`
+  );
+
   return (
-    <EuiButtonEmpty size="xs" href="/observe">
+    <EuiButtonEmpty size="xs" href={logStreamUrl}>
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewObserveResultsAction"
         defaultMessage="View deprecation logs in Observability"
