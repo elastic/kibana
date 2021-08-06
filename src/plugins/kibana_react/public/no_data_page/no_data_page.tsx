@@ -56,10 +56,26 @@ export type NoDataPageActions = Partial<EuiCardProps> & {
 export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
 
 export interface NoDataPageProps {
+  /**
+   * Single name for the current solution
+   */
   solution: string;
+  /**
+   * Optionally replace the auto-generated logo
+   */
   logo?: string;
+  /**
+   * The array of card configurations
+   */
   actions: NoDataPageActionsProps;
+  /**
+   * Link to docs for the whole solution
+   */
   docsLink: string;
+  /**
+   * Replace the auto-generated page title (h1)
+   */
+  pageTitle?: string;
 }
 
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
@@ -67,6 +83,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   logo,
   actions,
   docsLink,
+  pageTitle,
   ...rest
 }) => {
   // Convert obj data into an iterable array
@@ -117,11 +134,13 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         />
         <EuiSpacer />
         <h1>
-          <FormattedMessage
-            id="kbn.noDataPage.welcomeTitle"
-            defaultMessage="Welcome to Elastic {solution}!"
-            values={{ solution }}
-          />
+          {pageTitle || (
+            <FormattedMessage
+              id="kbn.noDataPage.welcomeTitle"
+              defaultMessage="Welcome to Elastic {solution}!"
+              values={{ solution }}
+            />
+          )}
         </h1>
         <EuiTextColor color="subdued">
           <p>

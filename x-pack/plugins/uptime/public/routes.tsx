@@ -158,13 +158,14 @@ export const PageRouter: FC = () => {
   const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
     solution: 'Observability',
+    pageTitle: 'Set up Uptime for Observability!',
     actions: {
       elasticAgent: {
-        href: 'app/integrations/browse',
+        href: 'integrations/detail/synthetics-0.2.1/overview',
         recommended: false,
       },
       beats: {
-        href: `app/home#/tutorial_directory/logging`,
+        href: `home#/tutorial/uptimeMonitors`,
         recommended: true,
       },
     },

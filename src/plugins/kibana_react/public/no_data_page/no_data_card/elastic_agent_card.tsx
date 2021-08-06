@@ -39,7 +39,6 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      // @ts-ignore
       <EuiButton
         href={href}
         onClick={cardRest?.onClick}
@@ -48,14 +47,13 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       >
         {button ||
           i18n.translate('elasticAgentCard.buttonLabel', {
-            defaultMessage: 'Find a {solution} integration',
+            defaultMessage: 'Find an integration for {solution}',
             values: { solution },
           })}
       </EuiButton>
     );
 
   return (
-    // @ts-ignore
     <EuiCard
       paddingSize="l"
       href={href}
@@ -70,7 +68,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       image={addBasePath(`${basePathUrl}elastic_agent_card.svg`)}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
-      {...cardRest}
+      {...(cardRest as any)}
     />
   );
 };

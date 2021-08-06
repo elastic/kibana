@@ -36,13 +36,14 @@ export function RumHome() {
   } = useContext(CsmSharedContext);
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
     solution: 'Observability',
+    pageTitle: 'Set up User Experience Tracking for Observability!',
     actions: {
       elasticAgent: {
-        href: 'app/integrations/browse',
+        href: 'integrations/detail/apm-0.3.0/overview',
         recommended: false,
       },
       beats: {
-        href: `app/home#/tutorial_directory/logging`,
+        href: `home#/tutorial/apm`,
         recommended: true,
       },
     },

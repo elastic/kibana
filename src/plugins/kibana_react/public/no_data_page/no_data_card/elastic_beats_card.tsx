@@ -32,7 +32,6 @@ export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      // @ts-ignore
       <EuiButton
         href={href}
         onClick={cardRest?.onClick}
@@ -47,7 +46,6 @@ export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
     );
 
   return (
-    // @ts-ignore
     <EuiCard
       paddingSize="l"
       href={href}
@@ -64,7 +62,7 @@ export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
       )}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
-      {...cardRest}
+      {...(cardRest as any)}
     />
   );
 };

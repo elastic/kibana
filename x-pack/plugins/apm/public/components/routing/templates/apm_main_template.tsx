@@ -42,13 +42,14 @@ export function ApmMainTemplate({
   const hasData = false;
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
     solution: 'Observability',
+    pageTitle: 'Set up APM for Observability!',
     actions: {
       elasticAgent: {
-        href: 'app/integrations/browse',
+        href: '/integrations/detail/apm-0.3.0/overview',
         recommended: false,
       },
       beats: {
-        href: `app/home#/tutorial_directory/logging`,
+        href: `/app/home#/tutorial/apm`,
         recommended: true,
       },
     },
