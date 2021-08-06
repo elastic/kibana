@@ -15,6 +15,7 @@ export interface OverlayFlyoutOpenOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  ["aria-label"](./kibana-plugin-core-public.overlayflyoutopenoptions._aria-label_.md) | <code>string</code> |  |
 |  ["data-test-subj"](./kibana-plugin-core-public.overlayflyoutopenoptions._data-test-subj_.md) | <code>string</code> |  |
 |  [className](./kibana-plugin-core-public.overlayflyoutopenoptions.classname.md) | <code>string</code> |  |
 |  [closeButtonAriaLabel](./kibana-plugin-core-public.overlayflyoutopenoptions.closebuttonarialabel.md) | <code>string</code> |  |
