@@ -19,6 +19,7 @@ import { getPageHeaderActions } from '../../../test_helpers';
 
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
+import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CrawlerOverview } from './crawler_overview';
 import { CrawlerSingleDomain } from './crawler_single_domain';
 
@@ -75,5 +76,11 @@ describe('CrawlerSingleDomain', () => {
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(getPageHeaderActions(wrapper).find(CrawlerStatusIndicator)).toHaveLength(1);
+  });
+
+  it('contains a popover to manage crawls', () => {
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(getPageHeaderActions(wrapper).find(ManageCrawlsPopover)).toHaveLength(1);
   });
 });

@@ -20,6 +20,7 @@ import { AppSearchPageTemplate } from '../layout';
 
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
+import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerSingleDomainLogic } from './crawler_single_domain_logic';
 
@@ -43,7 +44,10 @@ export const CrawlerSingleDomain: React.FC = () => {
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE, displayDomainUrl])}
-      pageHeader={{ pageTitle: displayDomainUrl, rightSideItems: [<CrawlerStatusIndicator />] }}
+      pageHeader={{
+        pageTitle: displayDomainUrl,
+        rightSideItems: [<ManageCrawlsPopover />, <CrawlerStatusIndicator />],
+      }}
       isLoading={dataLoading}
     >
       <CrawlerStatusBanner />
