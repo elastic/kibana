@@ -15,6 +15,7 @@ import { ComingSoonPrompt } from './components/coming_soon_prompt';
 import { EsDeprecationsContent } from './components/es_deprecations';
 import { KibanaDeprecationsContent } from './components/kibana_deprecations';
 import { DeprecationsOverview } from './components/overview';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 export interface AppDependencies extends ContextValue {
   i18n: I18nStart;
@@ -47,6 +48,7 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
   );
 };
 
+// TODO: for these warnings look at observability app implementation
 export const RootComponent = ({
   i18n,
   history,
@@ -55,14 +57,16 @@ export const RootComponent = ({
   ...contextValue
 }: AppDependencies) => {
   return (
-    <i18n.Context>
-      <EuiThemeProvider>
-        <KibanaContextProvider services={{ ...startServices, ...startPluginDeps }}>
-          <AppContextProvider value={contextValue}>
-            <AppWithRouter history={history} />
-          </AppContextProvider>
-        </KibanaContextProvider>
-      </EuiThemeProvider>
-    </i18n.Context>
+    <RedirectAppLinks application={startServices.application}>
+      <i18n.Context>
+        <EuiThemeProvider>
+          <KibanaContextProvider services={{ ...startServices, ...startPluginDeps }}>
+            <AppContextProvider value={contextValue}>
+              <AppWithRouter history={history} />
+            </AppContextProvider>
+          </KibanaContextProvider>
+        </EuiThemeProvider>
+      </i18n.Context>
+    </RedirectAppLinks>
   );
 };
