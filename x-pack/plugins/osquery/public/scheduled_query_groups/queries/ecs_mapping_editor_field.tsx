@@ -292,13 +292,14 @@ export const ECSMappingEditorForm = ({
   }, [submit, onAdd, reset]);
 
   const handleChange = useCallback(async () => {
-    if (!defaultValue) return;
+    console.error('handleChange')
+    // if (!defaultValue) return;
 
-    const { data, isValid } = await submit();
+    // const { data, isValid } = await submit();
 
-    if (isValid && onChange) {
-      onChange(data);
-    }
+    // if (isValid && onChange) {
+    //   onChange(data);
+    // }
   }, [defaultValue, onChange, submit]);
 
   const handleDeleteClick = useCallback(() => {
@@ -311,7 +312,7 @@ export const ECSMappingEditorForm = ({
     <Form form={form}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <CommonUseField path="key" component={ECSComboboxField} onChange={handleChange} />
+          <CommonUseField path="key" component={ECSComboboxField}  />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center">
@@ -324,7 +325,6 @@ export const ECSMappingEditorForm = ({
                 euiFieldProps={{
                   options: osquerySchemaOptions,
                 }}
-                onChange={handleChange}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
