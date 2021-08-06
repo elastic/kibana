@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiPageContentBody,
@@ -72,11 +71,7 @@ const PageDescription = ({
   </>
 );
 
-interface Props {
-  history: RouteComponentProps['history'];
-}
-
-export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
+export const DeprecationsOverview: FunctionComponent = () => {
   const {
     kibanaVersionInfo,
     breadcrumbs,
@@ -133,7 +128,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
           <EuiSteps
             steps={[
-              getResolveStep({ history }),
+              getResolveStep(),
               getObserveStep({ docLinks }),
               getUpgradeStep({ docLinks, isCloudEnabled, cloudDeploymentUrl }),
             ]}

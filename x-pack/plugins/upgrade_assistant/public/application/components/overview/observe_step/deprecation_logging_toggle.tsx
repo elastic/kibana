@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FunctionComponent } from 'react';
 
 import {
   EuiSwitch,
@@ -102,7 +102,7 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
   );
 };
 
-export const DeprecationLoggingToggle: React.FunctionComponent = () => {
+export const DeprecationLoggingToggle: FunctionComponent = () => {
   const { api, notifications } = useAppContext();
 
   const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();

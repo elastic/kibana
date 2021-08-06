@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -35,7 +35,7 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
   }
 };
 
-const DiscoverAppLink = () => {
+const DiscoverAppLink: FunctionComponent = () => {
   const { data: dataService, discover: discoverService } = useKibana().services;
 
   const onDiscoverLogsClick = async () => {
@@ -61,7 +61,7 @@ const DiscoverAppLink = () => {
   );
 };
 
-const ObserveAppLink = () => {
+const ObserveAppLink: FunctionComponent = () => {
   const { http } = useKibana().services;
   const logStreamUrl = http?.basePath?.prepend(
     `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
@@ -77,7 +77,7 @@ const ObserveAppLink = () => {
   );
 };
 
-export const ExternalLinks = () => {
+export const ExternalLinks: FunctionComponent = () => {
   return (
     <div>
       <ObserveAppLink />

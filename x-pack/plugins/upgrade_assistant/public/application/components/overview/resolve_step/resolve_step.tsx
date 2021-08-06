@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,17 +14,13 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
 
-interface Props {
-  history: RouteComponentProps['history'];
-}
-
 const i18nTexts = {
   resolveStepTitle: i18n.translate('xpack.upgradeAssistant.overview.resolveStepTitle', {
     defaultMessage: 'Resolve deprecation issues in Elasticsearch and Kibana',
   }),
 };
 
-export const getResolveStep = ({ history }: Props): EuiStepProps => {
+export const getResolveStep = (): EuiStepProps => {
   return {
     title: i18nTexts.resolveStepTitle,
     status: 'incomplete',
@@ -45,11 +40,11 @@ export const getResolveStep = ({ history }: Props): EuiStepProps => {
 
         <EuiFlexGroup>
           <EuiFlexItem>
-            <ESDeprecationStats history={history} />
+            <ESDeprecationStats />
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <KibanaDeprecationStats history={history} />
+            <KibanaDeprecationStats />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>

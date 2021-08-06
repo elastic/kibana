@@ -6,6 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiStat,
@@ -17,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { RouteComponentProps } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useAppContext } from '../../../app_context';
 import { EsStatsErrors } from './es_stats_error';
@@ -59,11 +59,8 @@ const i18nTexts = {
     }),
 };
 
-interface Props {
-  history: RouteComponentProps['history'];
-}
-
-export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
+export const ESDeprecationStats: FunctionComponent = () => {
+  const history = useHistory();
   const { api } = useAppContext();
 
   const { data: esDeprecations, isLoading, error } = api.useLoadUpgradeStatus();

@@ -6,6 +6,7 @@
  */
 
 import React, { FunctionComponent, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiCard,
@@ -18,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { RouteComponentProps } from 'react-router-dom';
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useAppContext } from '../../../app_context';
@@ -64,11 +64,8 @@ const i18nTexts = {
     }),
 };
 
-interface Props {
-  history: RouteComponentProps['history'];
-}
-
-export const KibanaDeprecationStats: FunctionComponent<Props> = ({ history }) => {
+export const KibanaDeprecationStats: FunctionComponent = () => {
+  const history = useHistory();
   const { deprecations } = useAppContext();
 
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
