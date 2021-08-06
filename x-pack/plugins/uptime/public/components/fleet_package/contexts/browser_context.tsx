@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { IBrowserSimpleFields, ConfigKeys, ScheduleUnit, DataStream } from '../types';
+import { IBrowserSimpleFields, ConfigKeys, DataStream } from '../types';
+import { defaultValues as commonDefaultValues } from '../common/default_values';
 
 interface IBrowserSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<IBrowserSimpleFields>>;
@@ -20,20 +21,14 @@ interface IBrowserSimpleFieldsContextProvider {
 }
 
 export const initialValues: IBrowserSimpleFields = {
+  ...commonDefaultValues,
+  [ConfigKeys.MONITOR_TYPE]: DataStream.BROWSER,
   [ConfigKeys.SOURCE_ZIP_URL]: '',
   [ConfigKeys.SOURCE_ZIP_USERNAME]: '',
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: '',
   [ConfigKeys.SOURCE_ZIP_FOLDER]: '',
   [ConfigKeys.SOURCE_INLINE]: '',
   [ConfigKeys.PARAMS]: '',
-  [ConfigKeys.MONITOR_TYPE]: DataStream.BROWSER,
-  [ConfigKeys.SCHEDULE]: {
-    number: '3',
-    unit: ScheduleUnit.MINUTES,
-  },
-  [ConfigKeys.APM_SERVICE_NAME]: '',
-  [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: '16',
 };
 
 const defaultContext: IBrowserSimpleFieldsContext = {
