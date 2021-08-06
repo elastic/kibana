@@ -6,6 +6,14 @@
   padding: $euiSizeXS 0 0 0 !important;
 }
 
+/**
+ * Fixes time column width in Firefox after toggle display of the rows details.
+ * Described issue - https://github.com/elastic/kibana/pull/104361#issuecomment-894271241
+ */
+.kbnDocTableCell--extraWidth {
+  width: 1%;
+}
+
 .kbnDocTableCell__filter {
   position: absolute;
   white-space: nowrap;
