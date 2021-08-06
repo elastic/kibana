@@ -34,6 +34,7 @@ import {
 } from './saved_object_types';
 
 import { RouteDependencies } from './types';
+import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX_PATTERN } from '../common/constants';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -90,12 +91,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       ],
     });
 
-    infra.defineInternalSourceConfiguration('deprecation_logs', {
+    infra.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {
         type: 'index_name',
-        indexName: '.logs-deprecation.elasticsearch-default',
+        indexName: DEPRECATION_LOGS_INDEX_PATTERN,
       },
       logColumns: [
         { timestampColumn: { id: 'timestampField' } },

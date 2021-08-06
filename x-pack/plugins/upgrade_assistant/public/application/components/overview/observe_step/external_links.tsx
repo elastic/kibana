@@ -10,23 +10,27 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana, DataPublicPluginStart } from '../../../../shared_imports';
-
-// TODO: refactor into commmon folder
-const INDEX_PATTERN_NAME = '.logs-deprecation.elasticsearch-default';
-const DEPRECATION_SOURCE_ID = 'deprecation_logs';
+import {
+  DEPRECATION_LOGS_INDEX_PATTERN,
+  DEPRECATION_LOGS_SOURCE_ID,
+} from '../../../../../common/constants';
 
 const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
   const { indexPatterns: indexPatternService } = dataService;
 
-  const results = await indexPatternService.find(INDEX_PATTERN_NAME);
+  const results = await indexPatternService.find(DEPRECATION_LOGS_INDEX_PATTERN);
   // Since the find might return also results with wildcard matchers we need to find the
   // index pattern that has an exact match with our title.
-  const deprecationIndexPattern = results.find((result) => result.title === INDEX_PATTERN_NAME);
+  const deprecationIndexPattern = results.find(
+    (result) => result.title === DEPRECATION_LOGS_INDEX_PATTERN
+  );
 
   if (deprecationIndexPattern) {
     return deprecationIndexPattern.id;
   } else {
-    const newIndexPattern = await indexPatternService.createAndSave({ title: INDEX_PATTERN_NAME });
+    const newIndexPattern = await indexPatternService.createAndSave({
+      title: DEPRECATION_LOGS_INDEX_PATTERN,
+    });
     return newIndexPattern.id;
   }
 };
@@ -60,7 +64,7 @@ const DiscoverAppLink = () => {
 const ObserveAppLink = () => {
   const { http } = useKibana().services;
   const logStreamUrl = http?.basePath?.prepend(
-    `/app/logs/stream?sourceId=${DEPRECATION_SOURCE_ID}`
+    `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
   );
 
   return (

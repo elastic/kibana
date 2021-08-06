@@ -17,6 +17,7 @@ import { Collapsible } from './collapsible';
 import { ExternalLinks } from './external_links';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { LogStream } from '../../../../../../infra/public';
+import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../../common/constants';
 
 const i18nTexts = {
   observeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.observeStepTitle', {
@@ -64,7 +65,7 @@ export const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiSt
         <Collapsible renderFooter={<ExternalLinks />}>
           <LogStream
             height={200}
-            sourceId="deprecation_logs"
+            sourceId={DEPRECATION_LOGS_SOURCE_ID}
             startTimestamp={startTimestamp}
             endTimestamp={endTimestamp}
             columns={[
