@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiTitle,
+} from '@elastic/eui';
+import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
   MouseEvent,
@@ -14,13 +22,39 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { EuiPopover } from '@elastic/eui';
-import cytoscape from 'cytoscape';
+import {
+  SERVICE_NAME,
+  SPAN_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
 import { useTheme } from '../../../../hooks/use_theme';
-import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
-import { getAnimationOptions } from '../cytoscape_options';
-import { Contents } from './Contents';
+import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
+import { BackendContents } from './backend_contents';
+import { ExternalsListContents } from './externals_list_contents';
+import { ResourceContents } from './resource_contents';
+import { ServiceContents } from './service_contents';
+
+function getContentsComponent(selectedNodeData: cytoscape.NodeDataDefinition) {
+  if (
+    selectedNodeData.groupedConnections &&
+    Array.isArray(selectedNodeData.groupedConnections)
+  ) {
+    return ExternalsListContents;
+  }
+  if (selectedNodeData[SERVICE_NAME]) {
+    return ServiceContents;
+  }
+  if (selectedNodeData[SPAN_TYPE] === 'resource') {
+    return ResourceContents;
+  }
+
+  return BackendContents;
+}
+
+export interface ContentsProps {
+  nodeData: cytoscape.NodeDataDefinition;
+  onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
+}
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -42,7 +76,6 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: -10000, y: -10000 };
   const isOpen = !!selectedNode;
-  const isService = selectedNode?.data(SERVICE_NAME) !== undefined;
   const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
@@ -58,9 +91,8 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     transform: `translate(${x}px, ${translateY}px)`,
   };
   const selectedNodeData = selectedNode?.data() ?? {};
-  const selectedNodeServiceName = selectedNodeData.id;
-  const label = selectedNodeData.label || selectedNodeServiceName;
   const popoverRef = useRef<EuiPopover>(null);
+  const selectedNodeId = selectedNodeData.id;
 
   // Set up Cytoscape event handlers
   useEffect(() => {
@@ -99,18 +131,20 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       if (cy) {
         cy.animate({
           ...getAnimationOptions(theme),
-          center: { eles: cy.getElementById(selectedNodeServiceName) },
+          center: { eles: cy.getElementById(selectedNodeId) },
         });
       }
     },
-    [cy, selectedNodeServiceName, theme]
+    [cy, selectedNodeId, theme]
   );
 
-  const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
+  const isAlreadyFocused = focusedServiceName === selectedNodeId;
 
   const onFocusClick = isAlreadyFocused
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
+
+  const ContentsComponent = getContentsComponent(selectedNodeData);
 
   return (
     <EuiPopover
@@ -121,13 +155,24 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       ref={popoverRef}
       style={popoverStyle}
     >
-      <Contents
-        isService={isService}
-        label={label}
-        onFocusClick={onFocusClick}
-        selectedNodeData={selectedNodeData}
-        selectedNodeServiceName={selectedNodeServiceName}
-      />
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        style={{ width: popoverWidth }}
+      >
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h3 style={{ wordBreak: 'break-all' }}>
+              {selectedNodeData.label ?? selectedNodeId}
+            </h3>
+          </EuiTitle>
+          <EuiHorizontalRule margin="xs" />
+        </EuiFlexItem>
+        <ContentsComponent
+          onFocusClick={onFocusClick}
+          nodeData={selectedNodeData}
+        />
+      </EuiFlexGroup>
     </EuiPopover>
   );
 }
