@@ -69,7 +69,6 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
 
   const [jobDependencies, setJobDependencies] = useState<JobDependencies>([]);
   const [selectedJobDependencies, setSelectedJobDependencies] = useState<JobDependencies>([]);
-  // const [showJobDependenciesWarning, setShowJobDependenciesWarning] = useState(false);
 
   useEffect(
     function onFlyoutChange() {

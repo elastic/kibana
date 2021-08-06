@@ -17,12 +17,9 @@ interface Props {
 }
 
 export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }) => {
-  const usingCalendars = allJobs.some((j) => j.calendarIds.length > 0);
-  const usingFilters = allJobs.some((j) => j.filterIds.length > 0);
-
-  const jobs = allJobs.filter(
-    ({ calendarIds, filterIds }) => calendarIds.length > 0 || filterIds.length > 0
-  );
+  const [jobs, jobsWithCalendars, jobsWithFilters] = filterJobs(allJobs);
+  const usingCalendars = jobsWithCalendars.length > 0;
+  const usingFilters = jobsWithFilters.length > 0;
 
   if (usingCalendars === false && usingFilters === false) {
     return null;
@@ -30,7 +27,10 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
 
   return (
     <>
-      <EuiCallOut title={getTitle(jobs)} color="warning">
+      <EuiCallOut
+        title={getTitle(jobs, jobsWithCalendars.length, jobsWithFilters.length)}
+        color="warning"
+      >
         <FormattedMessage
           id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarDependencies"
           defaultMessage="When importing jobs into a new environment, calendars and filters which are relied upon by jobs will need to be recreated."
@@ -54,7 +54,7 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
               />
             }
           >
-            <CalendarJobList jobs={jobs} />
+            <CalendarJobList jobs={jobsWithCalendars} />
           </EuiAccordion>
         )}
 
@@ -75,7 +75,7 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
               />
             }
           >
-            <FilterJobList jobs={jobs} />
+            <FilterJobList jobs={jobsWithFilters} />
           </EuiAccordion>
         )}
       </EuiCallOut>
@@ -85,64 +85,55 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
   );
 };
 
-const CalendarJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => {
-  return (
-    <>
-      {jobs.length > 0 && (
-        <>
-          {jobs
-            .filter(({ calendarIds }) => calendarIds.length > 0)
-            .map(({ jobId, calendarIds }) => (
-              <>
-                <EuiText size="s">
-                  <h5>{jobId}</h5>
-                  {calendarIds.length > 0 && (
-                    <FormattedMessage
-                      id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarList"
-                      defaultMessage="{num, plural, one {calendar} other {calendars}}: {calendars}"
-                      values={{ num: calendarIds.length, calendars: calendarIds.join(', ') }}
-                    />
-                  )}
-                </EuiText>
-                <EuiSpacer size="s" />
-              </>
-            ))}
-        </>
-      )}
-    </>
-  );
-};
-
-const FilterJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
+const CalendarJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
   <>
     {jobs.length > 0 && (
       <>
-        {jobs
-          .filter(({ filterIds }) => filterIds.length > 0)
-          .map(({ jobId, filterIds }) => (
-            <>
-              <EuiText size="s">
-                <h5>{jobId}</h5>
-                {filterIds.length > 0 && (
-                  <FormattedMessage
-                    id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterList"
-                    defaultMessage="{num, plural, one {filter} other {filters}}: {filters}"
-                    values={{ num: filterIds.length, filters: filterIds.join(', ') }}
-                  />
-                )}
-              </EuiText>
-              <EuiSpacer size="s" />
-            </>
-          ))}
+        {jobs.map(({ jobId, calendarIds }) => (
+          <>
+            <EuiText size="s">
+              <h5>{jobId}</h5>
+              {calendarIds.length > 0 && (
+                <FormattedMessage
+                  id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarList"
+                  defaultMessage="{num, plural, one {calendar} other {calendars}}: {calendars}"
+                  values={{ num: calendarIds.length, calendars: calendarIds.join(', ') }}
+                />
+              )}
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        ))}
       </>
     )}
   </>
 );
 
-function getTitle(jobs: JobDependencies) {
-  const calendarCount = jobs.reduce((a, { calendarIds }) => a + calendarIds.length, 0);
-  const filterCount = jobs.reduce((a, { filterIds }) => a + filterIds.length, 0);
+const FilterJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
+  <>
+    {jobs.length > 0 && (
+      <>
+        {jobs.map(({ jobId, filterIds }) => (
+          <>
+            <EuiText size="s">
+              <h5>{jobId}</h5>
+              {filterIds.length > 0 && (
+                <FormattedMessage
+                  id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterList"
+                  defaultMessage="{num, plural, one {filter} other {filters}}: {filters}"
+                  values={{ num: filterIds.length, filters: filterIds.join(', ') }}
+                />
+              )}
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        ))}
+      </>
+    )}
+  </>
+);
 
+function getTitle(jobs: JobDependencies, calendarCount: number, filterCount: number) {
   if (calendarCount > 0 && filterCount === 0) {
     return i18n.translate(
       'xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarOnlyTitle',
@@ -172,5 +163,25 @@ function getTitle(jobs: JobDependencies) {
         '{jobCount, plural, one {# selected job has} other {# selected jobs have}} dependencies on filters and calendars',
       values: { jobCount: jobs.length },
     }
+  );
+}
+
+function filterJobs(jobs: JobDependencies) {
+  return jobs.reduce(
+    (acc, job) => {
+      const usingCalendars = job.calendarIds.length > 0;
+      const usingFilters = job.filterIds.length > 0;
+      if (usingCalendars || usingFilters) {
+        acc[0].push(job);
+        if (usingCalendars) {
+          acc[1].push(job);
+        }
+        if (usingFilters) {
+          acc[2].push(job);
+        }
+      }
+      return acc;
+    },
+    [[], [], []] as JobDependencies[]
   );
 }
