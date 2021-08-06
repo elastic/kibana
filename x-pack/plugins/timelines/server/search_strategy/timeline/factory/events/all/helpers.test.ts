@@ -5,7 +5,25 @@
  * 2.0.
  */
 
+import {
+  ALERT_RULE_FROM,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_ID,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_STATUS,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_VERSION,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TO,
+} from '@kbn/rule-data-utils';
 import { eventHit } from '@kbn/securitysolution-t-grid';
+import {
+  ALERT_RULE_OUTPUT_INDEX,
+  ALERT_RULE_LANGUAGE,
+  ALERT_RULE_QUERY,
+  ALERT_RULE_INDEX,
+  ALERT_ORIGINAL_TIME,
+} from '../../../../../../common/alert_constants';
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { buildObjectForFieldPath, formatTimelineData } from './helpers';
@@ -265,20 +283,20 @@ describe('#formatTimelineData', () => {
         },
       },
       fields: {
-        'signal.rule.output_index': ['.siem-signals-patrykkopycinski-default'],
-        'signal.rule.from': ['now-360s'],
-        'signal.rule.language': ['kuery'],
+        [ALERT_RULE_OUTPUT_INDEX]: ['.siem-signals-patrykkopycinski-default'],
+        [ALERT_RULE_FROM]: ['now-360s'],
+        [ALERT_RULE_LANGUAGE]: ['kuery'],
         '@timestamp': ['2021-01-09T13:41:40.517Z'],
-        'signal.rule.query': ['_id :*'],
-        'signal.rule.type': ['threshold'],
-        'signal.rule.id': ['696c24e0-526d-11eb-836c-e1620268b945'],
-        'signal.rule.risk_score': [21],
-        'signal.status': ['open'],
+        [ALERT_RULE_QUERY]: ['_id :*'],
+        [ALERT_RULE_TYPE]: ['threshold'],
+        [ALERT_RULE_ID]: ['696c24e0-526d-11eb-836c-e1620268b945'],
+        [ALERT_RULE_RISK_SCORE]: [21],
+        [ALERT_STATUS]: ['open'],
         'event.kind': ['signal'],
-        'signal.original_time': ['2021-01-09T13:39:32.595Z'],
-        'signal.rule.severity': ['low'],
-        'signal.rule.version': ['1'],
-        'signal.rule.index': [
+        [ALERT_ORIGINAL_TIME]: ['2021-01-09T13:39:32.595Z'],
+        [ALERT_RULE_SEVERITY]: ['low'],
+        [ALERT_RULE_VERSION]: ['1'],
+        [ALERT_RULE_INDEX]: [
           'apm-*-transaction*',
           'traces-apm*',
           'auditbeat-*',
@@ -288,8 +306,8 @@ describe('#formatTimelineData', () => {
           'packetbeat-*',
           'winlogbeat-*',
         ],
-        'signal.rule.name': ['Threshold test'],
-        'signal.rule.to': ['now'],
+        [ALERT_RULE_NAME]: ['Threshold test'],
+        [ALERT_RULE_TO]: ['now'],
       },
       _type: '',
       sort: ['1610199700517'],

@@ -5,6 +5,29 @@
  * 2.0.
  */
 
+import {
+  ALERT_STATUS,
+  ALERT_RULE_FROM,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TO,
+  ALERT_RULE_ID,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_VERSION,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_RISK_SCORE,
+} from '@kbn/rule-data-utils';
+import {
+  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_TIME,
+  ALERT_RULE_FILTERS,
+  ALERT_RULE_LANGUAGE,
+  ALERT_RULE_QUERY,
+  ALERT_RULE_INDEX,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
+  ALERT_THRESHOLD_RESULT,
+} from '../../../../../../common/alert_constants';
+
 // import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
 // TODO: share with security_solution/common/cti/constants.ts
@@ -42,24 +65,24 @@ export const CTI_ROW_RENDERER_FIELDS = [
 
 export const TIMELINE_EVENTS_FIELDS = [
   '@timestamp',
-  'signal.status',
-  'signal.group.id',
-  'signal.original_time',
-  'signal.rule.filters',
-  'signal.rule.from',
-  'signal.rule.language',
-  'signal.rule.query',
-  'signal.rule.name',
-  'signal.rule.to',
-  'signal.rule.id',
-  'signal.rule.index',
-  'signal.rule.type',
-  'signal.original_event.kind',
-  'signal.original_event.module',
-  'signal.rule.version',
-  'signal.rule.severity',
-  'signal.rule.risk_score',
-  'signal.threshold_result',
+  ALERT_STATUS,
+  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_TIME,
+  ALERT_RULE_FILTERS,
+  ALERT_RULE_FROM,
+  ALERT_RULE_LANGUAGE,
+  ALERT_RULE_QUERY,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TO,
+  ALERT_RULE_ID,
+  ALERT_RULE_INDEX,
+  ALERT_RULE_TYPE,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
+  ALERT_RULE_VERSION,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_THRESHOLD_RESULT,
   'event.code',
   'event.module',
   'event.action',

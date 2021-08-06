@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { ALERT_RULE_ID } from '@kbn/rule-data-utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useQueryAlerts } from '../alerts/use_query';
 import { fetchRuleById } from './api';
@@ -41,7 +42,7 @@ const useFetchRule = () => useAsync(fetchWithOptionslSignal);
 const buildLastAlertQuery = (ruleId: string) => ({
   query: {
     bool: {
-      filter: [{ match: { 'signal.rule.id': ruleId } }],
+      filter: [{ match: { [ALERT_RULE_ID]: ruleId } }],
     },
   },
   size: 1,
@@ -77,6 +78,7 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   }, [addError, error]);
 
   const rule = useMemo<Rule | undefined>(() => {
+    // TODO: Is this access still kosher?
     const result = isExistingRule ? ruleData : alertsData?.hits.hits[0]?._source.signal.rule;
     if (result) {
       return transformInput(result);

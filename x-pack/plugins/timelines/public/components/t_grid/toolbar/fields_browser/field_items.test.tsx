@@ -8,6 +8,7 @@
 import { omit } from 'lodash/fp';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { mockBrowserFields, TestProviders } from '../../../../mock';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
@@ -17,6 +18,7 @@ import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { ColumnHeaderOptions } from '../../../../../common';
+import { ALERT_RULE_THREAT_TECHNIQUE_NAME } from '../../../../../common/alert_constants';
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
@@ -199,14 +201,14 @@ describe('field_items', () => {
         ...mockBrowserFields,
         signal: {
           fields: {
-            'signal.rule.name': {
+            [ALERT_RULE_NAME]: {
               aggregatable: true,
               category: 'signal',
               description: 'rule name',
               example: '',
               format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
-              name: 'signal.rule.name',
+              name: ALERT_RULE_THREAT_TECHNIQUE_NAME,
               searchable: true,
               type: 'string',
             },
@@ -235,7 +237,7 @@ describe('field_items', () => {
         </TestProviders>
       );
       wrapper
-        .find(`[data-test-subj="field-signal.rule.name-checkbox"]`)
+        .find(`[data-test-subj="field-${ALERT_RULE_NAME}-checkbox"]`)
         .last()
         .simulate('change', {
           target: { checked: true },
@@ -244,7 +246,7 @@ describe('field_items', () => {
       await waitFor(() => {
         expect(toggleColumn).toBeCalledWith({
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.name',
+          id: ALERT_RULE_THREAT_TECHNIQUE_NAME,
           initialWidth: 180,
         });
       });

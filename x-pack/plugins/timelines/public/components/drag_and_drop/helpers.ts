@@ -10,6 +10,7 @@ import { KEYBOARD_DRAG_OFFSET, getFieldIdFromDraggable } from '@kbn/securitysolu
 import { Dispatch } from 'redux';
 import { isString, keyBy } from 'lodash/fp';
 
+import { ALERT_RULE_ID, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { stopPropagationAndPreventDefault, TimelineId } from '../../../common';
 import type { BrowserField, BrowserFields, ColumnHeaderOptions } from '../../../common';
 import { tGridActions } from '../../store/t_grid';
@@ -144,7 +145,7 @@ const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 const linkFields: Record<string, string> = {
-  'signal.rule.name': 'signal.rule.id',
+  [ALERT_RULE_NAME]: ALERT_RULE_ID,
   'event.module': 'rule.reference',
 };
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
 import { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
 import { AlertSearchResponse, AlertsIndex, Privilege, CasesFromAlertsResponse } from './types';
 
@@ -949,7 +950,7 @@ export const mockAlertsQuery: object = {
   aggs: {
     alertsByGrouping: {
       terms: {
-        field: 'signal.rule.risk_score',
+        field: ALERT_RULE_RISK_SCORE,
         missing: 'All others',
         order: { _count: 'desc' },
         size: 10,
