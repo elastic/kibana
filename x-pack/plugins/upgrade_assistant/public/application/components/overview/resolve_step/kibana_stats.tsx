@@ -28,9 +28,9 @@ const i18nTexts = {
     defaultMessage: 'Kibana',
   }),
   totalDeprecationsTitle: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecationStats.totalDeprecationsTitle',
+    'xpack.upgradeAssistant.kibanaDeprecationStats.warningDeprecationsTitle',
     {
-      defaultMessage: 'Deprecations',
+      defaultMessage: 'Warning',
     }
   ),
   criticalDeprecationsTitle: i18n.translate(

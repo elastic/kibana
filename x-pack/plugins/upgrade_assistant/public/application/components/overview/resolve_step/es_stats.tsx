@@ -27,9 +27,9 @@ const i18nTexts = {
     defaultMessage: 'Elasticsearch',
   }),
   totalDeprecationsTitle: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTitle',
+    'xpack.upgradeAssistant.esDeprecationStats.warningDeprecationsTitle',
     {
-      defaultMessage: 'Deprecations',
+      defaultMessage: 'Warning',
     }
   ),
   criticalDeprecationsTitle: i18n.translate(

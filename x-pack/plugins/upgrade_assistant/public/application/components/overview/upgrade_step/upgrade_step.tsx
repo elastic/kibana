@@ -22,22 +22,24 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { DocLinksStart } from 'src/core/public';
 
 const i18nTexts = {
-  upgradeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-    defaultMessage: 'Upgrade the Stack',
-  }),
+  upgradeStepTitle: (currentMajor: number) =>
+    i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
+      defaultMessage: 'Install {currentMajor}.0',
+      values: { currentMajor },
+    }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      'After you have resolved your deprecations issues and are satisfied with the deprecation logs, it is time to upgrade. Follow the instructions in our documentation to complete your update.',
+      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack.",
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
     {
       defaultMessage:
-        'After you have resolved your deprecations issues and are satisfied with the deprecation logs, it is time to upgrade. Upgrade your deployment on Elasic Cloud.',
+        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack. Upgrade your deployment on Elasic Cloud.",
     }
   ),
   upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
-    defaultMessage: 'Follow the upgrade guide',
+    defaultMessage: 'Learn more',
   }),
 };
 
@@ -45,10 +47,12 @@ export const getUpgradeStep = ({
   docLinks,
   isCloudEnabled,
   cloudDeploymentUrl,
+  currentMajor,
 }: {
   docLinks: DocLinksStart;
   isCloudEnabled: boolean;
   cloudDeploymentUrl: string;
+  currentMajor: number;
 }): EuiStepProps => {
   let callToAction;
 
@@ -65,7 +69,7 @@ export const getUpgradeStep = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiLink href={docLinks.links.elasticsearch.migrating8} target="_blank">
+          <EuiLink href={docLinks.links.elasticsearch.setupUpgrade} target="_blank">
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.pageDescriptionLink"
               defaultMessage="View upgrade guide"
@@ -76,7 +80,7 @@ export const getUpgradeStep = ({
     );
   } else {
     callToAction = (
-      <EuiButton href={docLinks.links.elasticsearch.migrating8} target="_blank">
+      <EuiButton href={docLinks.links.elasticsearch.setupUpgrade} target="_blank">
         {i18nTexts.upgradeStepLink}
         <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
       </EuiButton>
@@ -84,7 +88,7 @@ export const getUpgradeStep = ({
   }
 
   return {
-    title: i18nTexts.upgradeStepTitle,
+    title: i18nTexts.upgradeStepTitle(currentMajor),
     status: 'incomplete',
     children: (
       <>

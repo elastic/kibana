@@ -21,13 +21,14 @@ import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../../common/constants';
 
 const i18nTexts = {
   observeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.observeStepTitle', {
-    defaultMessage: 'Observe deprecation logs',
+    defaultMessage: 'Log deprecated API usage and update your applications.',
   }),
-  observeStepDescription: (href: string) => (
+  observeStepDescription: (href: string, currentMajor: number) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.observeStepDescription"
-      defaultMessage="Collect and review the deprecation logs to see if your applications are using functionality that is not available in the next version. {deprecationLoggingLink} and how to manage them."
+      defaultMessage="See if you are using any features that aren't available in {currentMajor}.0. {deprecationLoggingLink} and how to manage them."
       values={{
+        currentMajor,
         deprecationLoggingLink: (
           <EuiLink href={href} target="_blank">
             {i18n.translate(
@@ -43,7 +44,13 @@ const i18nTexts = {
   ),
 };
 
-export const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiStepProps => {
+export const getObserveStep = ({
+  docLinks,
+  currentMajor,
+}: {
+  docLinks: DocLinksStart;
+  currentMajor: number;
+}): EuiStepProps => {
   const endTimestamp = Date.now();
   const startTimestamp = endTimestamp - 120 * 60 * 1000; // 2 hours
 
@@ -53,7 +60,12 @@ export const getObserveStep = ({ docLinks }: { docLinks: DocLinksStart }): EuiSt
     children: (
       <>
         <EuiText>
-          <p>{i18nTexts.observeStepDescription(docLinks.links.elasticsearch.deprecationLogging)}</p>
+          <p>
+            {i18nTexts.observeStepDescription(
+              docLinks.links.elasticsearch.deprecationLogging,
+              currentMajor
+            )}
+          </p>
         </EuiText>
 
         <EuiSpacer size="m" />

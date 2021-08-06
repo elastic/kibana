@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana, DataPublicPluginStart } from '../../../../shared_imports';
 import {
@@ -57,6 +57,7 @@ const DiscoverAppLink: FunctionComponent = () => {
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
         defaultMessage="Analyse logs in Discover "
       />
+      <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
     </EuiButtonEmpty>
   );
 };
@@ -73,6 +74,7 @@ const ObserveAppLink: FunctionComponent = () => {
         id="xpack.upgradeAssistant.overview.viewObserveResultsAction"
         defaultMessage="View deprecation logs in Observability"
       />
+      <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
     </EuiButtonEmpty>
   );
 };

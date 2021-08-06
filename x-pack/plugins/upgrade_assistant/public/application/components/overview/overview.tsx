@@ -33,28 +33,11 @@ const i18nTexts = {
   }),
 };
 
-const PageDescription = ({
-  version,
-  upgradeGuideLink,
-  whatsNewLink,
-}: {
-  version: number;
-  upgradeGuideLink: string;
-  whatsNewLink: string;
-}) => (
+const PageDescription = ({ version, whatsNewLink }: { version: number; whatsNewLink: string }) => (
   <>
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.pageDescription"
-      defaultMessage="Get ready for the next version of Elastic Stack. Prepare to upgrade by identifying deprecated settings and features below. When you are ready, follow the {upgradeGuideLink} to complete your version upgrade."
-      values={{
-        upgradeGuideLink: (
-          <EuiLink href={upgradeGuideLink} target="_blank" external={false}>
-            {i18n.translate('xpack.upgradeAssistant.overview.pageDescriptionLink', {
-              defaultMessage: 'upgrade guide',
-            })}
-          </EuiLink>
-        ),
-      }}
+      defaultMessage="Get ready for the next version of Elastic Stack!"
     />
 
     <EuiSpacer size="m" />
@@ -63,7 +46,7 @@ const PageDescription = ({
       <EuiLink href={whatsNewLink} target="_blank">
         <FormattedMessage
           id="xpack.upgradeAssistant.overview.pageDescriptionLink"
-          defaultMessage="Learn about what is new in version {version}.0"
+          defaultMessage="What's new in version {version}.0?"
           values={{ version }}
         />
       </EuiLink>
@@ -104,8 +87,7 @@ export const DeprecationsOverview: FunctionComponent = () => {
         description={
           <PageDescription
             version={currentMajor}
-            upgradeGuideLink={docLinks.links.elasticsearch.setupUpgrade}
-            whatsNewLink={docLinks.links.elasticsearch.migrating8}
+            whatsNewLink={docLinks.links.elasticsearch.whatsNew}
           />
         }
         rightSideItems={[
@@ -128,9 +110,9 @@ export const DeprecationsOverview: FunctionComponent = () => {
 
           <EuiSteps
             steps={[
-              getResolveStep(),
-              getObserveStep({ docLinks }),
-              getUpgradeStep({ docLinks, isCloudEnabled, cloudDeploymentUrl }),
+              getResolveStep({ currentMajor }),
+              getObserveStep({ docLinks, currentMajor }),
+              getUpgradeStep({ docLinks, isCloudEnabled, cloudDeploymentUrl, currentMajor }),
             ]}
           />
         </>

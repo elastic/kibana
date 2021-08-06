@@ -16,11 +16,11 @@ import { KibanaDeprecationStats } from './kibana_stats';
 
 const i18nTexts = {
   resolveStepTitle: i18n.translate('xpack.upgradeAssistant.overview.resolveStepTitle', {
-    defaultMessage: 'Resolve deprecation issues in Elasticsearch and Kibana',
+    defaultMessage: 'Review deprecated settings and resolve issues.',
   }),
 };
 
-export const getResolveStep = (): EuiStepProps => {
+export const getResolveStep = ({ currentMajor }: { currentMajor: number }): EuiStepProps => {
   return {
     title: i18nTexts.resolveStepTitle,
     status: 'incomplete',
@@ -30,8 +30,8 @@ export const getResolveStep = (): EuiStepProps => {
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.resolveStepDescription"
-              defaultMessage="Review your deprecation issues. Use the provided {quickResolve} actions to update configuration automatically. Follow instructions for any issues in need of manual configuration."
-              values={{ quickResolve: <b>Quick Resolve</b> }}
+              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with {currentMajor}.0. Critical issues must be resolved before you upgrade."
+              values={{ currentMajor }}
             />
           </p>
         </EuiText>
