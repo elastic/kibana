@@ -96,8 +96,6 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   );
 };
 
-const MINIMUM_BUCKETS = 5;
-
 const getMetric: (
   esClient: ElasticsearchClient,
   params: MetricExpressionParams,
@@ -127,10 +125,10 @@ const getMetric: (
     .startOf(timeUnit)
     .valueOf();
 
-  // We need enough data for 5 buckets worth of data. We also need
-  // to convert the intervalAsSeconds to milliseconds.
-  // TODO: We only need to get 5 buckets for the rate query, so this logic should move there.
-  const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
+  // Rate aggregations need 5 buckets worth of data
+  const minimumBuckets = aggType === Aggregators.RATE ? 5 : 1;
+
+  const minimumFrom = to - intervalAsMS * minimumBuckets;
 
   const from = roundTimestamp(
     timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
