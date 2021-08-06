@@ -25,9 +25,9 @@ const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
   timefield: string,
+  timeframe: { start: number; end: number },
   groupBy?: string | string[],
-  filterQuery?: string,
-  timeframe?: { start: number; end: number }
+  filterQuery?: string
 ) => {
   if (aggType === Aggregators.COUNT && metric) {
     throw new Error('Cannot aggregate document count with a metric');
