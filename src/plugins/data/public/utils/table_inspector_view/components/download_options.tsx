@@ -22,7 +22,7 @@ import {
 import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
 import { Datatable } from '../../../../../expressions';
 import { downloadMultipleAs } from '../../../../../share/public';
-import { FieldFormatsStart } from '../../../field_formats';
+import { FieldFormatsStart } from '../../../../../field_formats/public';
 import { IUiSettingsClient } from '../../../../../../core/public';
 
 interface DataDownloadOptionsState {
