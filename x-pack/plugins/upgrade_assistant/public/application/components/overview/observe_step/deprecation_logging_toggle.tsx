@@ -61,7 +61,7 @@ const i18nTexts = {
     defaultMessage: 'Error',
   }),
   buttonLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.buttonLabel', {
-    defaultMessage: 'Collect deprecation logs',
+    defaultMessage: 'Enable deprecation logs',
   }),
   deprecationWarningTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
