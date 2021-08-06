@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuidv5 from 'uuid/v5';
 import {
   LogMeta,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
+  SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { ActionTaskParams, RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -23,11 +23,6 @@ interface ActionsLogMeta<T = RawAction> extends LogMeta {
 type ActionMigration<T = RawAction> = (
   doc: SavedObjectUnsanitizedDoc<T>
 ) => SavedObjectUnsanitizedDoc<T>;
-
-// TODO: Use https://github.com/elastic/kibana/issues/107744 when it's available
-function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
-  return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
-}
 
 function createEsoMigration<T = RawAction>(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
@@ -204,7 +199,7 @@ const resolveSavedObjectIdsInActionTaskParams = (
   const namespace = doc.namespaces && doc.namespaces.length ? doc.namespaces[0] : undefined;
   const newId =
     namespace && namespace !== 'default'
-      ? deterministicallyRegenerateObjectId(namespace, 'action', doc.attributes.actionId)
+      ? SavedObjectsUtils.getConvertedObjectId(namespace, 'action', doc.attributes.actionId)
       : doc.attributes.actionId;
   return {
     ...doc,
