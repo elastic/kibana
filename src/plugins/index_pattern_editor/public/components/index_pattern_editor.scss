@@ -1,0 +1,13 @@
+.indexPatternEditor__form {
+  flex-grow: 1;
+}
+
+.fieldEditor__mainFlyoutPanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.indexPatternEditor__footer {
+  margin-left: -$euiSizeL;
+  margin-right: -$euiSizeL;
+}
