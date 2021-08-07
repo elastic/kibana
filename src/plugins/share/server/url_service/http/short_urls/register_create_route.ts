@@ -48,11 +48,7 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
           headers: {
             'content-type': 'application/json',
           },
-          body: JSON.stringify({
-            error: {
-              message: 'Locator not found.',
-            },
-          }),
+          body: 'Locator not found.',
         });
       }
 
