@@ -168,6 +168,22 @@ export const sampleDocNoSortId = (
   sort: [],
 });
 
+export const sampleDocNoSortIdWithTimestamp = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): SignalSourceHit & {
+  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+} => {
+  const doc = sampleDocNoSortId(someUuid, ip);
+  return {
+    ...doc,
+    _source: {
+      ...doc._source,
+      '@timestamp': new Date().toISOString(),
+    },
+  };
+};
+
 export const sampleDocSeverity = (severity?: unknown, fieldName?: string): SignalSourceHit => {
   const doc = {
     _index: 'myFakeSignalIndex',

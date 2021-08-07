@@ -19,7 +19,6 @@ import {
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
-import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import {
@@ -62,7 +61,6 @@ export class DataPublicPlugin
     > {
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
-  private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private usageCollection: UsageCollectionSetup | undefined;
@@ -71,7 +69,6 @@ export class DataPublicPlugin
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
-    this.fieldFormatsService = new FieldFormatsService();
 
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
@@ -80,7 +77,14 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { bfetch, expressions, uiActions, usageCollection, inspector }: DataSetupDependencies
+    {
+      bfetch,
+      expressions,
+      uiActions,
+      usageCollection,
+      inspector,
+      fieldFormats,
+    }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -115,10 +119,9 @@ export class DataPublicPlugin
       }))
     );
 
-    const fieldFormats = this.fieldFormatsService.setup(core);
     fieldFormats.register(
       getAggsFormats((serializedFieldFormat) =>
-        startServices().self.fieldFormats.deserialize(serializedFieldFormat)
+        startServices().plugins.fieldFormats.deserialize(serializedFieldFormat)
       )
     );
 
@@ -133,13 +136,14 @@ export class DataPublicPlugin
     };
   }
 
-  public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
+  public start(
+    core: CoreStart,
+    { uiActions, fieldFormats }: DataStartDependencies
+  ): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
-
-    const fieldFormats = this.fieldFormatsService.start();
 
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),

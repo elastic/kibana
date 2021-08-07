@@ -18,7 +18,7 @@ import React, { useState } from 'react';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
-import { ManagedTable } from '../../../../shared/managed_table';
+import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 
 interface Props {
@@ -31,7 +31,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const { core } = useApmPluginContext();
   const canSave = core.application.capabilities.apm.save;
 
-  const columns = [
+  const columns: Array<ITableColumn<CustomLink>> = [
     {
       field: 'label',
       name: i18n.translate(

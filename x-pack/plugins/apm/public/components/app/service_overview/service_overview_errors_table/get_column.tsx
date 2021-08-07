@@ -51,14 +51,14 @@ export function getColumns({
       },
     },
     {
-      field: 'last_seen',
+      field: 'lastSeen',
       name: i18n.translate(
         'xpack.apm.serviceOverview.errorsTableColumnLastSeen',
         {
           defaultMessage: 'Last seen',
         }
       ),
-      render: (_, { last_seen: lastSeen }) => {
+      render: (_, { lastSeen }) => {
         return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
       },
       width: `${unit * 9}px`,

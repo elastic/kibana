@@ -7,7 +7,8 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { search, FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import { search, UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import { FIELD_FORMAT_IDS } from '../../../../../src/plugins/field_formats/common';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
