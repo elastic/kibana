@@ -45,7 +45,8 @@ import * as i18n from './translations';
 import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
 import { InspectButtonContainer } from '../../inspect';
-import { SummaryViewSelector, ViewSelection } from '../summary_view/selector';
+import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
+import { EventRenderedView } from '../event_rendered_view';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -324,43 +325,60 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   <LastUpdatedAt updatedAt={updatedAt} />
                 </UpdatedFlexItem>
               </EuiFlexGroup>
-
-              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
-                <ScrollableFlexItem grow={1}>
-                  <StatefulBody
-                    activePage={pageInfo.activePage}
-                    additionalControls={additionalControls}
-                    browserFields={browserFields}
-                    data={nonDeletedEvents}
-                    id={id}
-                    isEventViewer={true}
-                    onRuleChange={onRuleChange}
-                    renderCellValue={renderCellValue}
-                    rowRenderers={rowRenderers}
-                    sort={sort}
-                    tabType={TimelineTabs.query}
-                    totalPages={calculateTotalPages({
-                      itemsCount: totalCountMinusDeleted,
-                      itemsPerPage,
-                    })}
-                    leadingControlColumns={leadingControlColumns}
-                    trailingControlColumns={trailingControlColumns}
-                  />
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
-                  />
-                </ScrollableFlexItem>
-              </FullWidthFlexGroup>
+              {tableView === 'gridView' && (
+                <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+                  <ScrollableFlexItem grow={1}>
+                    <StatefulBody
+                      activePage={pageInfo.activePage}
+                      additionalControls={additionalControls}
+                      browserFields={browserFields}
+                      data={nonDeletedEvents}
+                      id={id}
+                      isEventViewer={true}
+                      onRuleChange={onRuleChange}
+                      renderCellValue={renderCellValue}
+                      rowRenderers={rowRenderers}
+                      sort={sort}
+                      tabType={TimelineTabs.query}
+                      totalPages={calculateTotalPages({
+                        itemsCount: totalCountMinusDeleted,
+                        itemsPerPage,
+                      })}
+                      leadingControlColumns={leadingControlColumns}
+                      trailingControlColumns={trailingControlColumns}
+                    />
+                    <Footer
+                      activePage={pageInfo.activePage}
+                      data-test-subj="events-viewer-footer"
+                      height={footerHeight}
+                      id={id}
+                      isLive={isLive}
+                      isLoading={loading}
+                      itemsCount={nonDeletedEvents.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangePage={loadPage}
+                      totalCount={totalCountMinusDeleted}
+                    />
+                  </ScrollableFlexItem>
+                </FullWidthFlexGroup>
+              )}
+              {tableView === 'eventRenderedView' && (
+                <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+                  <ScrollableFlexItem grow={1}>
+                    <EventRenderedView
+                      events={events}
+                      leadingControlColumns={leadingControlColumns}
+                      onChangePage={loadPage}
+                      pageIndex={pageInfo.activePage}
+                      pageSize={pageInfo.querySize}
+                      pageSizeOptions={itemsPerPageOptions}
+                      rowRenderers={rowRenderers}
+                      totalItemCount={totalCountMinusDeleted}
+                    />
+                  </ScrollableFlexItem>
+                </FullWidthFlexGroup>
+              )}
             </EventsContainerLoading>
           </>
         ) : null}
