@@ -12,13 +12,13 @@ export function offsetPreviousPeriodCoordinates({
   currentPeriodTimeseries,
   previousPeriodTimeseries,
 }: {
-  currentPeriodTimeseries: Coordinate[];
+  currentPeriodTimeseries?: Coordinate[];
   previousPeriodTimeseries?: Coordinate[];
 }) {
   if (!previousPeriodTimeseries?.length) {
     return [];
   }
-  const currentPeriodStart = currentPeriodTimeseries.length
+  const currentPeriodStart = currentPeriodTimeseries?.length
     ? currentPeriodTimeseries[0].x
     : 0;
 
