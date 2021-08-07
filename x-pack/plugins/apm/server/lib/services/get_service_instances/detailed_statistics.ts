@@ -123,9 +123,7 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
         previousPeriodPromise,
       ]);
 
-      const firstCurrentPeriod = currentPeriod.length
-        ? currentPeriod[0]
-        : undefined;
+      const firstCurrentPeriod = currentPeriod?.[0];
 
       return {
         currentPeriod: keyBy(currentPeriod, 'serviceNodeName'),

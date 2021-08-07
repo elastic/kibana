@@ -239,9 +239,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
     previousPeriodPromise,
   ]);
 
-  const firstCurrentPeriod = currentPeriod.length
-    ? currentPeriod[0]
-    : undefined;
+  const firstCurrentPeriod = currentPeriod?.[0];
 
   return {
     currentPeriod: keyBy(currentPeriod, 'transactionName'),
