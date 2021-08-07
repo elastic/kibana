@@ -46,29 +46,17 @@ export function toggleOsqueryPlugin(
     return;
   }
 
-  http
-    .fetch<Installation | undefined>(`/internal/osquery/status`)
-    .then((response) => {
-      const installed = response?.install_status === 'installed';
+  http.fetch<Installation | undefined>(`/internal/osquery/status`).then((response) => {
+    const installed = response?.install_status === 'installed';
 
-      if (installed && registerExtension) {
-        registerExtension({
-          package: OSQUERY_INTEGRATION_NAME,
-          view: 'package-detail-custom',
-          Component: LazyOsqueryManagedCustomButtonExtension,
-        });
-      }
-
-      updater$.next(() => ({
-        navLinkStatus: installed ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
-      }));
-    })
-    .catch(() => {
-      updater$.next(() => ({
-        status: AppStatus.inaccessible,
-        navLinkStatus: AppNavLinkStatus.hidden,
-      }));
-    });
+    if (installed && registerExtension) {
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-detail-custom',
+        Component: LazyOsqueryManagedCustomButtonExtension,
+      });
+    }
+  });
 }
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
