@@ -170,7 +170,7 @@ export function asExactTransactionRate(
   value: number,
   unit: 'minute' | 'second'
 ) {
-  return i18n.translate('xpack.apm.transactionRateLabel', {
+  return i18n.translate('xpack.apm.exactTransactionRateLabel', {
     defaultMessage: `{value} { unit, select, minute {tpm} other {tps} }`,
     values: { value: asDecimalOrInteger(value), unit },
   });
