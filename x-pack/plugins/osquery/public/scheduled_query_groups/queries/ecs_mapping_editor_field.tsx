@@ -40,7 +40,6 @@ import {
 
 export const CommonUseField = getUseField({ component: Field });
 
-
 const StyledFieldIcon = styled(FieldIcon)`
   width: 32px;
 `;
@@ -56,7 +55,7 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
 }));
 
 export const ECSComboboxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
-  const { setValue, value } = field;
+  const { setValue } = field;
   const [selectedOptions, setSelected] = useState([]);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
@@ -102,7 +101,7 @@ export const ECSComboboxField = ({ field, euiFieldProps = {}, idAria, ...rest }:
 
       const selectedOption = find(ECSSchemaOptions, ['label', field.value]);
 
-      return selectedOption? [selectedOption] : [];
+      return selectedOption ? [selectedOption] : [];
     });
   }, [field.value]);
 
@@ -144,7 +143,13 @@ export const ECSComboboxField = ({ field, euiFieldProps = {}, idAria, ...rest }:
   );
 };
 
-export const OsqueryColumnField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
+export const OsqueryColumnField = ({
+  field,
+  euiFieldProps = {},
+  idAria,
+  query,
+  ...rest
+}: Props) => {
   const { setValue } = field;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
@@ -207,7 +212,7 @@ export const OsqueryColumnField = ({ field, euiFieldProps = {}, idAria, ...rest 
       if (!field.value.length) return [];
 
       const selectedOption = find(euiFieldProps?.options, ['label', field.value]);
-      return  selectedOption ? [selectedOption] : [];
+      return selectedOption ? [selectedOption] : [];
     });
   }, [euiFieldProps?.options, setSelected, field.value]);
 
@@ -241,9 +246,7 @@ export const OsqueryColumnField = ({ field, euiFieldProps = {}, idAria, ...rest 
 
 interface Props {
   field: FieldHook<string>;
-  euiFieldProps?: Record<string, unknown>;
-  idAria?: string;
-  [key: string]: unknown;
+  query: string;
 }
 
 interface ECSMappingEditorFormProps {
@@ -302,8 +305,7 @@ export const ECSMappingEditorForm = ({
       currentFormData.current = formData;
       onChange(formData);
     }
-  },[formData]);
-
+  }, [formData]);
 
   const handleDeleteClick = useCallback(() => {
     if (defaultValue?.key && onDelete) {
@@ -315,7 +317,7 @@ export const ECSMappingEditorForm = ({
     <Form form={form}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <CommonUseField path="key" component={ECSComboboxField}  />
+          <CommonUseField path="key" component={ECSComboboxField} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center">
@@ -345,13 +347,13 @@ export const ECSMappingEditorForm = ({
   );
 };
 
-export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
+export const ECSMappingEditorField = ({ field, query }: Props) => {
   const { setValue, value } = field;
   const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<unknown[]>([]);
 
   useEffect(() => {
     setOsquerySchemaOptions((currentValue) => {
-      if (!rest.query?.length) {
+      if (!query?.length) {
         return currentValue;
       }
 
@@ -359,12 +361,13 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
       let ast;
 
       try {
-        ast = parser.astify(rest.query);
+        const parsedQuery = parser.astify(query);
+        ast = isArray(parsedQuery) ? parsedQuery[0] : parsedQuery;
       } catch (e) {
         return currentValue;
       }
 
-      const astOsqueryTables = ast[0]?.from.reduce((acc, table) => {
+      const astOsqueryTables = ast?.from?.reduce((acc, table) => {
         const osqueryTable = find(osquerySchema, ['name', table.table]);
 
         if (osqueryTable) {
@@ -375,76 +378,82 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
       }, {});
 
       // Table doesn't exist in osquery schema
-      if (!isArray(ast[0]?.columns) && ast[0]?.columns !== '*' && !astOsqueryTables[ast[0].from[0].table]) {
+      if (!isArray(ast?.columns) && ast?.columns !== '*' && !astOsqueryTables[ast.from[0].table]) {
         return currentValue;
       }
       /*
         Simple query
         select * from users;
       */
-      if (ast[0]?.columns === '*' && astOsqueryTables[ast[0].from[0].table]) {
-        const tableName =  ast[0].from[0].as ?? ast[0].from[0].table;
+      if (ast?.columns === '*' && astOsqueryTables[ast.from[0].table]) {
+        const tableName = ast.from[0].as ?? ast.from[0].table;
 
-        return astOsqueryTables[ ast[0].from[0].table].map((osqueryColumn) => ({
+        return astOsqueryTables[ast.from[0].table].map((osqueryColumn) => ({
           label: osqueryColumn.name,
-          value:  {
+          value: {
             name: osqueryColumn.name,
             description: osqueryColumn.description,
             table: tableName,
-            suggestion_label: `${tableName}.${osqueryColumn.name}`
-          }
+            suggestion_label: `${tableName}.${osqueryColumn.name}`,
+          },
         }));
       }
-
 
       /*
        Advanced query
        select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
       */
-      const suggestions = ast[0]?.columns?.map((column) => {
-        if (column.expr.column === '*') {
-          return astOsqueryTables[column.expr.table].map((osqueryColumn) => ({
-            label: osqueryColumn.name,
-            value:  {
-              name: osqueryColumn.name,
-              description: osqueryColumn.description,
-              table: column.expr.table,
-              suggestion_label: `${column.expr.table}.${osqueryColumn.name}`
-            }
-          }));
-        }
-
-        if (astOsqueryTables[column.expr.table]) {
-          const osqueryColumn = find(astOsqueryTables[column.expr.table], ['name', column.expr.column]);
-          const label = column.as ?? column.expr.column;
-
-          return [
-            {
-              label: column.as ?? column.expr.column,
+      const suggestions = ast?.columns
+        ?.map((column) => {
+          if (column.expr.column === '*') {
+            return astOsqueryTables[column.expr.table].map((osqueryColumn) => ({
+              label: osqueryColumn.name,
               value: {
                 name: osqueryColumn.name,
                 description: osqueryColumn.description,
                 table: column.expr.table,
-                suggestion_label: `${column.expr.table}.${label}`
-              }
-            }
-          ]
-        }
+                suggestion_label: `${column.expr.table}.${osqueryColumn.name}`,
+              },
+            }));
+          }
 
-        return [];
-      }).flat();
+          if (astOsqueryTables[column.expr.table]) {
+            const osqueryColumn = find(astOsqueryTables[column.expr.table], [
+              'name',
+              column.expr.column,
+            ]);
+            const label = column.as ?? column.expr.column;
+
+            return [
+              {
+                label: column.as ?? column.expr.column,
+                value: {
+                  name: osqueryColumn.name,
+                  description: osqueryColumn.description,
+                  table: column.expr.table,
+                  suggestion_label: `${column.expr.table}.${label}`,
+                },
+              },
+            ];
+          }
+
+          return [];
+        })
+        .flat();
 
       return sortBy(suggestions, 'value.suggestion_label');
     });
-  }, [rest.query]);
+  }, [query]);
 
   const handleAddRow = useCallback(
     ({ key, value }) => {
       if (key && value) {
-        setValue(produce((draft) => {
-          draft[key] = value;
-          return draft;
-        }));
+        setValue(
+          produce((draft) => {
+            draft[key] = value;
+            return draft;
+          })
+        );
       }
     },
     [setValue]
@@ -454,15 +463,17 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
     (currentKey) => ({ key, value }) => {
       console.error('handleUpadteRow', currentKey, key, value);
       if (key && value) {
-        setValue(produce((draft) => {
-          if(currentKey !== key) {
-            delete draft[currentKey];
-          }
+        setValue(
+          produce((draft) => {
+            if (currentKey !== key) {
+              delete draft[currentKey];
+            }
 
-          draft[key] = value;
+            draft[key] = value;
 
-          return draft;
-        }));
+            return draft;
+          })
+        );
       }
     },
     [setValue]
@@ -471,12 +482,14 @@ export const ECSMappingEditorField = ({ field, euiFieldProps = {}, idAria, ...re
   const handleDeleteRow = useCallback(
     (key) => {
       if (key) {
-        setValue(produce((draft) => {
-          if (draft[key]) {
-            delete draft[key];
-          }
-          return draft;
-        }));
+        setValue(
+          produce((draft) => {
+            if (draft[key]) {
+              delete draft[key];
+            }
+            return draft;
+          })
+        );
       }
     },
     [setValue]

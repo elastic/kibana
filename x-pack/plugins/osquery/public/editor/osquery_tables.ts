@@ -24,5 +24,4 @@ export const getOsqueryTables = () => {
   }
   return osqueryTables;
 };
-export const getOsqueryTableNames = () =>
-  flatMap(getOsqueryTables(), (table) => table.name);
+export const getOsqueryTableNames = () => flatMap(getOsqueryTables(), (table) => table.name);
