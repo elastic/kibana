@@ -22,5 +22,35 @@ export default function ({ getService }: FtrProviderContext) {
         '[request body]: expected a plain object value, but found [null] instead.'
       );
     });
+
+    it('returns error when locator ID is not provided', async () => {
+      const response = await supertest.post('/api/short_url').send({
+        params: {},
+      });
+
+      expect(response.status).to.be(400);
+    });
+
+    it('returns error when locator is not found', async () => {
+      const response = await supertest.post('/api/short_url').send({
+        locatorId: 'LEGACY_SHORT_URL_LOCATOR-NOT_FOUND',
+        params: {},
+      });
+
+      expect(response.status).to.be(409);
+      expect(response.body.statusCode).to.be(409);
+      expect(response.body.error).to.be('Conflict');
+      expect(response.body.message).to.be('Locator not found.');
+    });
+
+    it('returns error when slug is too short', async () => {
+      const response = await supertest.post('/api/short_url').send({
+        locatorId: 'LEGACY_SHORT_URL_LOCATOR',
+        params: {},
+        slug: 'a',
+      });
+
+      expect(response.status).to.be(400);
+    });
   });
 }
