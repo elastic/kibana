@@ -6,11 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-<<<<<<< HEAD
-> import from "<!-- -->@<!-- -->kbn/field-types" instead
-=======
 > Import from the "<!-- -->@<!-- -->kbn/field-types" package directly instead.  8.1
->>>>>>> af3a976e177... [FieldFormats] Break from `data` plugin (#107173)
 > 
 
 <b>Signature:</b>
