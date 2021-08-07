@@ -8,12 +8,12 @@ pageLoadAssetSize:
   charts: 95000
   cloud: 21076
   console: 46235
-  core: 432925
+  core: 434325
   crossClusterReplication: 65408
   dashboard: 374267
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 900000
+  data: 830000
   dataEnhanced: 50420
   devTools: 38781
   discover: 99999
@@ -24,6 +24,7 @@ pageLoadAssetSize:
   esUiShared: 326798
   expressions: 224120
   features: 21723
+  fieldFormats: 92628
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -107,7 +108,7 @@ pageLoadAssetSize:
   dataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
-  timelines: 330000
+  timelines: 327300
   screenshotMode: 17856
   visTypePie: 35583
   expressionRevealImage: 25675
@@ -116,4 +117,5 @@ pageLoadAssetSize:
   expressionRepeatImage: 22341
   expressionImage: 19288
   expressionMetric: 22238
-  expressionShape: 30033
+  expressionShape: 34008
+

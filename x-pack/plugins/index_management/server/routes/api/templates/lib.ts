@@ -54,7 +54,7 @@ export const saveTemplate = async ({
 
     return await client.asCurrentUser.indices.putTemplate({
       name: template.name,
-      // @ts-expect-error @elastic/elasticsearch not assignable to parameter of type 'IndicesPutTemplateRequest'
+      // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/533
       order,
       include_type_name,
       body: {
@@ -69,7 +69,7 @@ export const saveTemplate = async ({
 
   return await client.asCurrentUser.indices.putIndexTemplate({
     name: template.name,
-    // @ts-expect-error @elastic/elasticsearch Type 'LegacyTemplateSerialized | TemplateSerialized' is not assignable
+    // @ts-expect-error LegacyTemplateSerialized | TemplateSerialized conflicts with @elastic/elasticsearch IndicesPutIndexTemplateRequest
     body: serializedTemplate,
   });
 };
