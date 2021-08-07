@@ -161,10 +161,18 @@ export function asTransactionRate(value: Maybe<number>) {
   }
 
   return i18n.translate('xpack.apm.transactionRateLabel', {
-    defaultMessage: `{value} tpm`,
-    values: {
-      value: displayedValue,
-    },
+    defaultMessage: `{displayedValue} tpm`,
+    values: { displayedValue },
+  });
+}
+
+export function asExactTransactionRate(
+  value: number,
+  unit: 'minute' | 'second'
+) {
+  return i18n.translate('xpack.apm.transactionRateLabel', {
+    defaultMessage: `{value} { unit, select, minute {tpm} other {tps} }`,
+    values: { value: asDecimalOrInteger(value), unit },
   });
 }
 
