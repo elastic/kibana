@@ -15,6 +15,7 @@
   "ui": true,
   "requiredBundles": [
     "esUiShared",
-    "kibanaReact"
+    "kibanaReact",
+    "fieldFormats"
   ]
 }
