@@ -52,11 +52,20 @@ export class ServerShortUrlClient implements IShortUrlClient {
     };
   }
 
-  public async delete(slug: string): Promise<boolean> {
+  public async get(id: string): Promise<ShortUrl> {
+    const { storage } = this.dependencies;
+    const data = await storage.getById(id);
+
+    return {
+      data,
+    };
+  }
+
+  public async resolve(slug: string): Promise<ShortUrl> {
     throw new Error('not implemented');
   }
 
-  public async get(slug: string): Promise<ShortUrl> {
+  public async delete(id: string): Promise<boolean> {
     throw new Error('not implemented');
   }
 }

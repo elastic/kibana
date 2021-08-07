@@ -36,17 +36,24 @@ export interface IShortUrlClient {
   /**
    * Delete a short URL.
    *
-   * @param slug The slug (ID) of the short URL.
+   * @param slug The ID of the short URL.
    * @returns Returns true if deletion was successful.
    */
-  delete(slug: string): Promise<boolean>;
+  delete(id: string): Promise<boolean>;
 
   /**
    * Fetch a short URL.
    *
-   * @param slug The slug (ID) of the short URL.
+   * @param id The ID of the short URL.
    */
-  get(slug: string): Promise<ShortUrl>;
+  get(id: string): Promise<ShortUrl>;
+
+  /**
+   * Fetch a short URL by its slug.
+   *
+   * @param slug The slug of the short URL.
+   */
+  resolve(slug: string): Promise<ShortUrl>;
 }
 
 /**
