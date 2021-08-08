@@ -12,6 +12,7 @@ import { formatters } from './helpers/formatters';
 interface Props {
   monitorType: DataStream;
   defaultConfig: Partial<ICustomFields>;
+  config: Partial<ICustomFields>;
   newPolicy: NewPackagePolicy;
   onChange: (opts: {
     /** is current form state is valid */
@@ -25,13 +26,13 @@ interface Props {
 export const useUpdatePolicy = ({
   monitorType,
   defaultConfig,
+  config,
   newPolicy,
   onChange,
   validate,
 }: Props) => {
   const [updatedPolicy, setUpdatedPolicy] = useState<NewPackagePolicy>(newPolicy);
   // Update the integration policy with our custom fields
-  const [config, setConfig] = useState<Partial<ICustomFields>>(defaultConfig);
   const currentConfig = useRef<Partial<ICustomFields>>(defaultConfig);
 
   useEffect(() => {
@@ -39,20 +40,25 @@ export const useUpdatePolicy = ({
     const validationKeys = Object.keys(validate[monitorType]) as ConfigKeys[];
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
     const isValid =
-      !!newPolicy.name && !validationKeys.find((key) => validate[monitorType][key]?.(config));
+      !!newPolicy.name && !validationKeys.find((key) => validate[monitorType]?.[key]?.(config));
     const formattedPolicy = { ...newPolicy };
     const currentInput = formattedPolicy.inputs.find(
       (input) => input.type === `synthetics/${monitorType}`
     );
-    const dataStream = currentInput?.streams[0];
-
-    // prevent an infinite loop of updating the policy
-    if (currentInput && dataStream && configDidUpdate) {
+    const dataStream = currentInput?.streams.find(
+      (stream) => stream.data_stream.dataset === monitorType
+    );
+    formattedPolicy.inputs.forEach((input) => (input.enabled = false));
+    if (currentInput && dataStream) {
       // reset all data streams to enabled false
       formattedPolicy.inputs.forEach((input) => (input.enabled = false));
       // enable only the input type and data stream that matches the monitor type.
       currentInput.enabled = true;
       dataStream.enabled = true;
+    }
+
+    // prevent an infinite loop of updating the policy
+    if (currentInput && dataStream && configDidUpdate) {
       configKeys.forEach((key) => {
         const configItem = dataStream.vars?.[key];
         if (configItem && formatters[key]) {
@@ -70,14 +76,8 @@ export const useUpdatePolicy = ({
     }
   }, [config, currentConfig, newPolicy, onChange, validate, monitorType]);
 
-  // update our local config state ever time name, which is managed by fleet, changes
-  useEffect(() => {
-    setConfig((prevConfig) => ({ ...prevConfig, name: newPolicy.name }));
-  }, [newPolicy.name, setConfig]);
-
   return {
     config,
-    setConfig,
     updatedPolicy,
   };
 };

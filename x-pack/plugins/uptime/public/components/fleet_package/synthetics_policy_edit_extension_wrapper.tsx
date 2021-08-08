@@ -14,7 +14,7 @@ import {
   HTTPContextProvider,
   TCPContextProvider,
   ICMPSimpleFieldsContextProvider,
-  BrowserSimpleFieldsContextProvider,
+  BrowserContextProvider,
   TLSFieldsContextProvider,
 } from './contexts';
 import { normalizers } from './helpers/normalizers';
@@ -36,14 +36,23 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       const getDefaultConfig = () => {
         // find the enabled input to identify the current monitor type
         const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
-        const vars = currentInput?.streams[0]?.vars;
+        /* Inputs can have multiple data streams. This is true of the `synthetics/browser` input, which includes the browser.network and browser.screenshot
+         * data streams. The `browser.network` and `browser.screenshot` data streams are used to store metadata and mappings.
+         * However, the `browser` data stream is where the variables for the policy are stored. For this reason, we only want
+         * to grab the data stream that exists within our explicitly defined list, which is the browser data stream */
+        const vars = currentInput?.streams.find((stream) =>
+          Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
+        )?.vars;
+
         const type: DataStream = vars?.[ConfigKeys.MONITOR_TYPE].value as DataStream;
 
-        const configKeys: ConfigKeys[] = Object.values(ConfigKeys);
-        const formattedDefaultConfigForMonitorType: ICustomFields = configKeys.reduce(
-          (acc, key: ConfigKeys) => {
-            acc[key] = normalizers[key]?.(vars);
-            return acc;
+        const configKeys: ConfigKeys[] = Object.values(ConfigKeys) || ([] as ConfigKeys[]);
+        const formattedDefaultConfigForMonitorType: ICustomFields = configKeys.reduce<ICustomFields>(
+          (acc: ICustomFields, key: ConfigKeys) => {
+            return {
+              ...acc,
+              [key]: normalizers[key]?.(vars),
+            };
           },
           {} as ICustomFields
         );
@@ -85,16 +94,14 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
           <HTTPContextProvider defaultValues={fullDefaultConfig?.[DataStream.HTTP]}>
             <TCPContextProvider defaultValues={fullDefaultConfig?.[DataStream.TCP]}>
               <ICMPSimpleFieldsContextProvider defaultValues={fullDefaultConfig?.[DataStream.ICMP]}>
-                <BrowserSimpleFieldsContextProvider
-                  defaultValues={fullDefaultConfig?.[DataStream.BROWSER]}
-                >
+                <BrowserContextProvider defaultValues={fullDefaultConfig?.[DataStream.BROWSER]}>
                   <SyntheticsPolicyEditExtension
                     newPolicy={newPolicy}
                     onChange={onChange}
                     defaultConfig={defaultConfig}
                     isTLSEnabled={isTLSEnabled}
                   />
-                </BrowserSimpleFieldsContextProvider>
+                </BrowserContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </TCPContextProvider>
           </HTTPContextProvider>

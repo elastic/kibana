@@ -261,7 +261,7 @@ const defaultNewPolicy: NewPackagePolicy = {
           enabled: false,
           data_stream: {
             type: 'synthetics',
-            dataset: 'icmp',
+            dataset: 'browser',
           },
           vars: {
             type: {

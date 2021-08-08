@@ -8,7 +8,15 @@
 import React, { memo, useEffect } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
-import { PolicyConfig, DataStream, ConfigKeys, HTTPFields, TCPFields, ICMPFields, BrowserFields } from './types';
+import {
+  PolicyConfig,
+  DataStream,
+  ConfigKeys,
+  HTTPFields,
+  TCPFields,
+  ICMPFields,
+  BrowserFields,
+} from './types';
 import {
   useMonitorTypeContext,
   useTCPSimpleFieldsContext,
@@ -88,7 +96,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
         ...browserAdvancedFields,
         [ConfigKeys.NAME]: newPolicy.name,
       } as BrowserFields,
-    }
+    };
 
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
