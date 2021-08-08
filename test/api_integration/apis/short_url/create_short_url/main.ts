@@ -20,17 +20,17 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(typeof response.body.url).to.be('object');
-      expect(typeof response.body.url.id).to.be('string');
-      expect(typeof response.body.url.locator).to.be('object');
-      expect(response.body.url.locator.id).to.be('LEGACY_SHORT_URL_LOCATOR');
-      expect(typeof response.body.url.locator.version).to.be('string');
-      expect(response.body.url.locator.state).to.eql({});
-      expect(response.body.url.accessCount).to.be(0);
-      expect(typeof response.body.url.accessDate).to.be('number');
-      expect(typeof response.body.url.createDate).to.be('number');
-      expect(response.body.url.slug).to.be('');
-      expect(response.body.url.url).to.be('');
+      expect(typeof response.body).to.be('object');
+      expect(typeof response.body.id).to.be('string');
+      expect(typeof response.body.locator).to.be('object');
+      expect(response.body.locator.id).to.be('LEGACY_SHORT_URL_LOCATOR');
+      expect(typeof response.body.locator.version).to.be('string');
+      expect(response.body.locator.state).to.eql({});
+      expect(response.body.accessCount).to.be(0);
+      expect(typeof response.body.accessDate).to.be('number');
+      expect(typeof response.body.createDate).to.be('number');
+      expect(response.body.slug).to.be('');
+      expect(response.body.url).to.be('');
     });
 
     it('can create a short URL with locator params', async () => {
@@ -42,19 +42,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(typeof response.body.url).to.be('object');
-      expect(typeof response.body.url.id).to.be('string');
-      expect(typeof response.body.url.locator).to.be('object');
-      expect(response.body.url.locator.id).to.be('LEGACY_SHORT_URL_LOCATOR');
-      expect(typeof response.body.url.locator.version).to.be('string');
-      expect(response.body.url.locator.state).to.eql({
+      expect(typeof response.body).to.be('object');
+      expect(typeof response.body.id).to.be('string');
+      expect(typeof response.body.locator).to.be('object');
+      expect(response.body.locator.id).to.be('LEGACY_SHORT_URL_LOCATOR');
+      expect(typeof response.body.locator.version).to.be('string');
+      expect(response.body.locator.state).to.eql({
         url: '/foo/bar',
       });
-      expect(response.body.url.accessCount).to.be(0);
-      expect(typeof response.body.url.accessDate).to.be('number');
-      expect(typeof response.body.url.createDate).to.be('number');
-      expect(response.body.url.slug).to.be('');
-      expect(response.body.url.url).to.be('');
+      expect(response.body.accessCount).to.be(0);
+      expect(typeof response.body.accessDate).to.be('number');
+      expect(typeof response.body.createDate).to.be('number');
+      expect(response.body.slug).to.be('');
+      expect(response.body.url).to.be('');
     });
 
     it('can create a short URL with custom slug', async () => {
@@ -67,19 +67,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(typeof response.body.url).to.be('object');
-      expect(typeof response.body.url.id).to.be('string');
-      expect(typeof response.body.url.locator).to.be('object');
-      expect(response.body.url.locator.id).to.be('LEGACY_SHORT_URL_LOCATOR');
-      expect(typeof response.body.url.locator.version).to.be('string');
-      expect(response.body.url.locator.state).to.eql({
+      expect(typeof response.body).to.be('object');
+      expect(typeof response.body.id).to.be('string');
+      expect(typeof response.body.locator).to.be('object');
+      expect(response.body.locator.id).to.be('LEGACY_SHORT_URL_LOCATOR');
+      expect(typeof response.body.locator.version).to.be('string');
+      expect(response.body.locator.state).to.eql({
         url: '/foo/bar',
       });
-      expect(response.body.url.accessCount).to.be(0);
-      expect(typeof response.body.url.accessDate).to.be('number');
-      expect(typeof response.body.url.createDate).to.be('number');
-      expect(response.body.url.slug).to.be('click-me');
-      expect(response.body.url.url).to.be('');
+      expect(response.body.accessCount).to.be(0);
+      expect(typeof response.body.accessDate).to.be('number');
+      expect(typeof response.body.createDate).to.be('number');
+      expect(response.body.slug).to.be('click-me');
+      expect(response.body.url).to.be('');
     });
   });
 }
