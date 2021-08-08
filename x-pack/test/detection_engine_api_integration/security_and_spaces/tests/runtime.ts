@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((signal) => (signal._source.host as Runtime).name);
+        const hits = signalsOpen.hits.hits.map((signal) => (signal._source?.host as Runtime).name);
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
 
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map(
-          (signal) => (signal._source.host as Runtime).hostname
+          (signal) => (signal._source?.host as Runtime).hostname
         );
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((signal) => signal._source.host);
+        const hits = signalsOpen.hits.hits.map((signal) => signal._source?.host);
         expect(hits).to.eql([
           [
             {
@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map(
-          (signal) => (signal._source.host as Runtime).hostname
+          (signal) => (signal._source?.host as Runtime).hostname
         );
         expect(hits).to.eql([undefined, undefined, undefined, undefined]);
       });
