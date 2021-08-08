@@ -25,6 +25,7 @@ import { TCPSimpleFields } from './tcp/simple_fields';
 import { TCPAdvancedFields } from './tcp/advanced_fields';
 import { ICMPSimpleFields } from './icmp/simple_fields';
 import { BrowserSimpleFields } from './browser/simple_fields';
+import { BrowserAdvancedFields } from './browser/advanced_fields';
 
 interface Props {
   typeEditable?: boolean;
@@ -39,6 +40,7 @@ export const CustomFields = memo<Props>(
 
     const isHTTP = monitorType === DataStream.HTTP;
     const isTCP = monitorType === DataStream.TCP;
+    const isBrowser = monitorType === DataStream.BROWSER;
 
     const renderSimpleFields = (type: DataStream) => {
       switch (type) {
@@ -143,6 +145,7 @@ export const CustomFields = memo<Props>(
         <EuiSpacer size="m" />
         {isHTTP && <HTTPAdvancedFields validate={validate} />}
         {isTCP && <TCPAdvancedFields />}
+        {isBrowser && <BrowserAdvancedFields />}
       </EuiForm>
     );
   }

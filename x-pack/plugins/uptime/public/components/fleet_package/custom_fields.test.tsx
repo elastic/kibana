@@ -12,8 +12,10 @@ import { render } from '../../lib/helper/rtl_helpers';
 import {
   TCPContextProvider,
   HTTPContextProvider,
+  BrowserContextProvider,
   ICMPSimpleFieldsContextProvider,
   MonitorTypeContextProvider,
+  TLSFieldsContextProvider,
 } from './contexts';
 import { CustomFields } from './custom_fields';
 import { ConfigKeys, DataStream, ScheduleUnit } from './types';
@@ -36,9 +38,13 @@ describe('<CustomFields />', () => {
       <HTTPContextProvider>
         <MonitorTypeContextProvider>
           <TCPContextProvider>
-            <ICMPSimpleFieldsContextProvider>
-              <CustomFields validate={validate} typeEditable={typeEditable} />
-            </ICMPSimpleFieldsContextProvider>
+            <BrowserContextProvider>
+              <ICMPSimpleFieldsContextProvider>
+                <TLSFieldsContextProvider>
+                  <CustomFields validate={validate} typeEditable={typeEditable} />
+                </TLSFieldsContextProvider>
+              </ICMPSimpleFieldsContextProvider>
+            </BrowserContextProvider>
           </TCPContextProvider>
         </MonitorTypeContextProvider>
       </HTTPContextProvider>
@@ -150,7 +156,7 @@ describe('<CustomFields />', () => {
   });
 
   it('handles switching monitor type', () => {
-    const { getByText, getByLabelText, queryByLabelText } = render(
+    const { getByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
       <WrappedComponent typeEditable />
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
@@ -169,7 +175,7 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
-    const advancedOptionsButton = getByText('Advanced TCP options');
+    let advancedOptionsButton = getByText('Advanced TCP options');
     fireEvent.click(advancedOptionsButton);
 
     expect(queryByLabelText('Request method')).not.toBeInTheDocument();
@@ -182,6 +188,21 @@ describe('<CustomFields />', () => {
 
     // expect TCP fields not to be in the DOM
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
+
+    fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
+
+    // expect browser fields to be in the DOM
+    getAllByLabelText('Zip URL').forEach((node) => {
+      expect(node).toBeInTheDocument();
+    });
+
+    // ensure at least one browser advanced option is present
+    advancedOptionsButton = getByText('Advanced Browser options');
+    fireEvent.click(advancedOptionsButton);
+    expect(getByLabelText('Screenshot options')).toBeInTheDocument();
+
+    // expect ICMP fields not to be in the DOM
+    expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
   });
 
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {

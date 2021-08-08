@@ -8,7 +8,13 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiTabbedContent, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTabbedContent,
+  EuiFormRow,
+  EuiFieldText,
+  EuiFieldPassword,
+  EuiSpacer,
+} from '@elastic/eui';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
 import { MonacoEditorLangId } from '../types';
@@ -124,7 +130,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             helpText={
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.helpText"
-                defaultMessage="Params help text"
+                defaultMessage="A JSON object defining variables your tests always need to be defined."
               />
             }
           >
@@ -178,7 +184,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
               />
             }
           >
-            <EuiFieldText
+            <EuiFieldPassword
               onChange={({ target: { value } }) =>
                 setConfig((prevConfig) => ({ ...prevConfig, password: value }))
               }
