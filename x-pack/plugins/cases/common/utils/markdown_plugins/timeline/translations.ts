@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export interface TimelineSerializerProps {
-  match: string;
-}
+import { i18n } from '@kbn/i18n';
 
-export const TimelineSerializer = ({ match }: TimelineSerializerProps) => match;
+export const NO_PARENTHESES = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.timeline.noParenthesesErrorMsg',
+  {
+    defaultMessage: 'Expected left parentheses',
+  }
+);

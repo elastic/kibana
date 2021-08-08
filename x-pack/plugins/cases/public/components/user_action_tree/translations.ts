@@ -57,13 +57,6 @@ export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.lab
   defaultMessage: 'Unknown rule',
 });
 
-export const INSERT_LENS = i18n.translate(
-  'xpack.cases.markdownEditor.plugins.lens.insertLensButtonLabel',
-  {
-    defaultMessage: 'Insert visualization',
-  }
-);
-
 export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
   defaultMessage: 'submitted isolate request on host',
 });

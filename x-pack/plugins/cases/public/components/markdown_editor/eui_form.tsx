@@ -31,6 +31,8 @@ export const MarkdownEditorForm = React.memo(
     ({ id, field, dataTestSubj, idAria, bottomRightContent }, ref) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
+      console.error(field, 'dupa');
+
       return (
         <>
           <EuiFormRow

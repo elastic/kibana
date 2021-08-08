@@ -7,6 +7,7 @@
 
 import { Plugin } from 'unified';
 import { RemarkTokenizer } from '@elastic/eui';
+import * as i18n from './translations';
 
 export const ID = 'timeline';
 const PREFIX = '[';
@@ -65,7 +66,6 @@ export const TimelineParser: Plugin = function () {
 
     const timelineTitle = readArg(PREFIX, ']');
     const timelineUrl = readArg('(', ')');
-    const now = eat.now();
     const match = `[${timelineTitle}](${timelineUrl})`;
 
     return eat(match)({

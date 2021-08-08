@@ -471,7 +471,6 @@ export const stringifyComment = (comment: Parent) =>
               to make sure that markdown parser doesn't modify the url
             */
             timeline: TimelineSerializer,
-            // @ts-expect-error
             lens: LensSerializer,
           },
         },
