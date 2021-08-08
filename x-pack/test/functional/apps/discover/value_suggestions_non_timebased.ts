@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'settings', 'context']);
-
-  async function setAutocompleteUseTimeRange(value: boolean) {
-    await PageObjects.settings.navigateTo();
-    await PageObjects.settings.clickKibanaSettings();
-    await PageObjects.settings.toggleAdvancedSettingCheckbox(
-      UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE,
-      value
-    );
-  }
 
   describe('value suggestions non time based', function describeIndexTests() {
     before(async function () {
