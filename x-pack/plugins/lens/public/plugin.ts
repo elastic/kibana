@@ -128,7 +128,7 @@ export interface LensPublicStart {
    * @experimental
    */
   navigateToPrefilledEditor: (
-    input: LensEmbeddableInput,
+    input: LensEmbeddableInput | undefined,
     options?: {
       openInNewTab?: boolean;
       originatingApp?: string;
@@ -320,7 +320,7 @@ export class LensPlugin {
         { openInNewTab = false, originatingApp = '', originatingPath } = {}
       ) => {
         // for openInNewTab, we set the time range in url via getEditPath below
-        if (input.timeRange && !openInNewTab) {
+        if (input?.timeRange && !openInNewTab) {
           startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
         }
         const transfer = new EmbeddableStateTransfer(
@@ -329,7 +329,7 @@ export class LensPlugin {
         );
         transfer.navigateToEditor(APP_ID, {
           openInNewTab,
-          path: getEditPath(undefined, openInNewTab ? input.timeRange : undefined),
+          path: getEditPath(undefined, (openInNewTab && input?.timeRange) || undefined),
           state: {
             originatingApp,
             originatingPath,

@@ -35,7 +35,6 @@ import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { LensSavedObjectsModal } from './lens_saved_objects_modal';
 import { ModalContainer } from './modal_container';
-import { getLensAttributes } from './helpers';
 import type {
   EmbeddablePackageState,
   EmbeddableInput,
@@ -69,7 +68,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     lens,
     storage,
     data: {
-      indexPatterns,
       query: {
         timefilter: { timefilter },
       },
@@ -186,14 +184,13 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       );
 
       lens?.navigateToPrefilledEditor(
-        {
-          id: '',
-          timeRange,
-          attributes:
-            lensAttributes ??
-            lensEmbeddableAttributes ??
-            getLensAttributes(await indexPatterns.getDefault()),
-        },
+        lensAttributes || lensEmbeddableAttributes
+          ? {
+              id: '',
+              timeRange,
+              attributes: lensAttributes ?? lensEmbeddableAttributes,
+            }
+          : undefined,
         {
           originatingApp: currentAppId!,
           originatingPath,
@@ -208,7 +205,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       lensEmbeddableAttributes,
       lens,
       timeRange,
-      indexPatterns,
       currentAppId,
       originatingPath,
     ]
