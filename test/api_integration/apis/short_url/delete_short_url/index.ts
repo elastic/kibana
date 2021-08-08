@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('short_url', () => {
-    loadTestFile(require.resolve('./create_short_url'));
-    loadTestFile(require.resolve('./get_short_url'));
-    loadTestFile(require.resolve('./delete_short_url'));
+  describe('delete_short_url', () => {
+    loadTestFile(require.resolve('./validation'));
+    loadTestFile(require.resolve('./main'));
   });
 }

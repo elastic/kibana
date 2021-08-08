@@ -10,8 +10,10 @@ import { IRouter } from 'kibana/server';
 import { ServerUrlService } from '../types';
 import { registerCreateRoute } from './short_urls/register_create_route';
 import { registerGetRoute } from './short_urls/register_get_route';
+import { registerDeleteRoute } from './short_urls/register_delete_route';
 
 export const registerUrlServiceRoutes = (router: IRouter, url: ServerUrlService) => {
   registerCreateRoute(router, url);
   registerGetRoute(router, url);
+  registerDeleteRoute(router, url);
 };
