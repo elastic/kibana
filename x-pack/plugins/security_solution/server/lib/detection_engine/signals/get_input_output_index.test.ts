@@ -34,6 +34,7 @@ describe('get_input_output_index', () => {
       index: ['test-input-index-1'],
       experimentalFeatures: {
         trustedAppsByPolicyEnabled: false,
+        excludePoliciesInFilterEnabled: false,
         metricsEntitiesEnabled: false,
         ruleRegistryEnabled: false,
         tGridEnabled: false,
