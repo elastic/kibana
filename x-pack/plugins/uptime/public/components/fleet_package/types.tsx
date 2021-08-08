@@ -66,6 +66,12 @@ export enum TLSVersion {
   ONE_THREE = 'TLSv1.3',
 }
 
+export enum ScreenshotOption {
+  ON = 'on',
+  OFF = 'off',
+  ONLY_ON_FAILURE = 'only-on-failure',
+}
+
 // values must match keys in the integration package
 export enum ConfigKeys {
   APM_SERVICE_NAME = 'service.name',
@@ -88,11 +94,13 @@ export enum ConfigKeys {
   REQUEST_METHOD_CHECK = 'check.request.method',
   REQUEST_SEND_CHECK = 'check.send',
   SCHEDULE = 'schedule',
+  SCREENSHOTS = 'screenshots',
   SOURCE_INLINE = 'source.inline.script',
   SOURCE_ZIP_URL = 'source.zip_url.url',
   SOURCE_ZIP_USERNAME = 'source.zip_url.username',
   SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
   SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
+  SYNTHETICS_ARGS = 'synthetics_args',
   PARAMS = 'params',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
@@ -187,10 +195,15 @@ export type IBrowserSimpleFields = {
   [ConfigKeys.PARAMS]: string;
 } & ICommonFields;
 
+export interface IBrowserAdvancedFields {
+  [ConfigKeys.SYNTHETICS_ARGS]: string[];
+  [ConfigKeys.SCREENSHOTS]: string;
+}
+
 export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;
 export type TCPFields = ITCPSimpleFields & ITCPAdvancedFields & ITLSFields;
 export type ICMPFields = IICMPSimpleFields;
-export type BrowserFields = IBrowserSimpleFields;
+export type BrowserFields = IBrowserSimpleFields & IBrowserAdvancedFields;
 
 export type ICustomFields = HTTPFields &
   TCPFields &

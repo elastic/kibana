@@ -6,9 +6,13 @@
  */
 
 import { BrowserFields, ConfigKeys } from '../types';
-import { Normalizer, commonNormalizers } from '../common/normalizers';
+import {
+  Normalizer,
+  commonNormalizers,
+  yamlToArrayOrObjectNormalizer,
+} from '../common/normalizers';
 
-import { defaultBrowserSimpleFields } from '../contexts';
+import { defaultBrowserSimpleFields, defaultBrowserAdvancedFields } from '../contexts';
 
 export type BrowserNormalizerMap = Record<keyof BrowserFields, Normalizer>;
 
@@ -30,5 +34,10 @@ export const browserNormalizers: BrowserNormalizerMap = {
     defaultBrowserSimpleFields[ConfigKeys.SOURCE_INLINE],
   [ConfigKeys.PARAMS]: (fields) =>
     fields?.[ConfigKeys.PARAMS]?.value ?? defaultBrowserSimpleFields[ConfigKeys.PARAMS],
+  [ConfigKeys.SCREENSHOTS]: (fields) =>
+    fields?.[ConfigKeys.SCREENSHOTS]?.value ?? defaultBrowserAdvancedFields[ConfigKeys.SCREENSHOTS],
+  [ConfigKeys.SYNTHETICS_ARGS]: (fields) =>
+    yamlToArrayOrObjectNormalizer(fields?.[ConfigKeys.SYNTHETICS_ARGS]?.value) ??
+    defaultBrowserAdvancedFields[ConfigKeys.SYNTHETICS_ARGS],
   ...commonNormalizers,
 };

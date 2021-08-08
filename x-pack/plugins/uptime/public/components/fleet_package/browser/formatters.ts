@@ -6,7 +6,7 @@
  */
 
 import { BrowserFields, ConfigKeys } from '../types';
-import { Formatter, commonFormatters } from '../common/formatters';
+import { Formatter, commonFormatters, arrayToYamlFormatter } from '../common/formatters';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
@@ -17,5 +17,8 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKeys.SOURCE_ZIP_FOLDER]: null,
   [ConfigKeys.SOURCE_INLINE]: null,
   [ConfigKeys.PARAMS]: null,
+  [ConfigKeys.SCREENSHOTS]: null,
+  [ConfigKeys.SYNTHETICS_ARGS]: (fields) =>
+    arrayToYamlFormatter(fields[ConfigKeys.SYNTHETICS_ARGS]),
   ...commonFormatters,
 };

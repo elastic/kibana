@@ -10,7 +10,7 @@ import { NewPackagePolicyInput } from '../../../../../fleet/common';
 import { defaultValues } from './default_values';
 
 // TO DO: create a standard input format that all fields resolve to
-export type Normalizer = (fields: NewPackagePolicyInput['vars']) => any;
+export type Normalizer = (fields: NewPackagePolicyInput['vars']) => unknown;
 
 // create a type of all the common policy fields, as well as the fleet managed 'name' field
 export type CommonNormalizerMap = Record<keyof ICommonFields | ConfigKeys.NAME, Normalizer>;
@@ -20,14 +20,19 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKeys.MONITOR_TYPE]: (fields) =>
     fields?.[ConfigKeys.MONITOR_TYPE]?.value ?? defaultValues[ConfigKeys.MONITOR_TYPE],
   [ConfigKeys.SCHEDULE]: (fields) => {
-    const fullString = JSON.parse(fields?.[ConfigKeys.SCHEDULE]?.value);
-    const fullSchedule = fullString.replace('@every ', '');
-    const unit = fullSchedule.slice(-1);
-    const number = fullSchedule.slice(0, fullSchedule.length - 1);
-    return {
-      unit,
-      number,
-    };
+    const value = fields?.[ConfigKeys.SCHEDULE]?.value;
+    if (value) {
+      const fullString = JSON.parse(fields?.[ConfigKeys.SCHEDULE]?.value);
+      const fullSchedule = fullString.replace('@every ', '');
+      const unit = fullSchedule.slice(-1);
+      const number = fullSchedule.slice(0, fullSchedule.length - 1);
+      return {
+        unit,
+        number,
+      };
+    } else {
+      return defaultValues[ConfigKeys.SCHEDULE];
+    }
   },
   [ConfigKeys.APM_SERVICE_NAME]: (fields) =>
     fields?.[ConfigKeys.APM_SERVICE_NAME]?.value ?? defaultValues[ConfigKeys.APM_SERVICE_NAME],
@@ -39,10 +44,10 @@ export const commonNormalizers: CommonNormalizerMap = {
     defaultValues[ConfigKeys.TIMEOUT],
 };
 
-export const cronToSecondsNormalizer = (value: string = '') => value.slice(0, value.length - 1);
+export const cronToSecondsNormalizer = (value: string) =>
+  value ? value.slice(0, value.length - 1) : null;
 
-export const yamlToArrayOrObjectNormalizer = (value: string = '') =>
-  value ? JSON.parse(value) : null;
+export const yamlToArrayOrObjectNormalizer = (value: string) => (value ? JSON.parse(value) : null);
 
 //   switch (key) {
 //     case ConfigKeys.NAME:
