@@ -21,30 +21,12 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
-import { Installation } from '../../fleet/common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
 import { getLazyOsqueryAction } from './shared_components';
-
-export function toggleOsqueryPlugin(
-  http: CoreStart['http'],
-  registerExtension?: StartPlugins['fleet']['registerExtension']
-) {
-  http.fetch<Installation | undefined>(`/internal/osquery/status`).then((response) => {
-    const installed = response?.install_status === 'installed';
-
-    if (installed && registerExtension) {
-      registerExtension({
-        package: OSQUERY_INTEGRATION_NAME,
-        view: 'package-detail-custom',
-        Component: LazyOsqueryManagedCustomButtonExtension,
-      });
-    }
-  });
-}
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -111,8 +93,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
-      toggleOsqueryPlugin(core.http, registerExtension);
-
       registerExtension({
         package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-create',
@@ -123,6 +103,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-edit',
         Component: LazyOsqueryManagedPolicyEditExtension,
+      });
+
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-detail-custom',
+        Component: LazyOsqueryManagedCustomButtonExtension,
       });
     }
 
