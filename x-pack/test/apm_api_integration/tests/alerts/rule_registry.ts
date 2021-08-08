@@ -12,7 +12,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
-  ALERT_OWNER,
+  ALERT_CONSUMER,
   ALERT_PRODUCER,
   ALERT_START,
   ALERT_STATUS,
@@ -374,7 +374,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_OWNER}": Array [
+            "${ALERT_CONSUMER}": Array [
               "apm",
             ],
             "${ALERT_PRODUCER}": Array [
@@ -450,7 +450,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_OWNER}": Array [
+            "${ALERT_CONSUMER}": Array [
               "apm",
             ],
             "${ALERT_PRODUCER}": Array [
@@ -554,7 +554,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_OWNER}": Array [
+            "${ALERT_CONSUMER}": Array [
               "apm",
             ],
             "${ALERT_PRODUCER}": Array [

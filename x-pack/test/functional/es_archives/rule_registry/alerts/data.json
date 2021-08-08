@@ -8,7 +8,7 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
-      "kibana.alert.owner": "apm",
+      "kibana.alert.consumer": "apm",
       "kibana.alert.status": "open",
       "kibana.space_ids": ["space1", "space2"]
     }
@@ -25,7 +25,7 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
-      "kibana.alert.owner": "apm",
+      "kibana.alert.consumer": "apm",
       "kibana.alert.status": "open",
       "kibana.space_ids": ["space1"]
     }
@@ -42,7 +42,7 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
       "message": "hello world 1",
-      "kibana.alert.owner": "apm",
+      "kibana.alert.consumer": "apm",
       "kibana.alert.status": "open",
       "kibana.space_ids": ["space2"]
     }
@@ -59,7 +59,7 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "siem.signals",
       "message": "hello world security",
-      "kibana.alert.owner": "siem",
+      "kibana.alert.consumer": "siem",
       "kibana.alert.status": "open",
       "kibana.space_ids": ["space1", "space2"]
     }
@@ -76,7 +76,7 @@
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "siem.customRule",
       "message": "hello world security",
-      "kibana.alert.owner": "siem",
+      "kibana.alert.consumer": "siem",
       "kibana.alert.status": "open",
       "kibana.space_ids": ["space1", "space2"]
     }

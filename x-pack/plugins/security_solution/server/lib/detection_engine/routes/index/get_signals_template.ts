@@ -7,7 +7,7 @@
 
 import {
   SPACE_IDS,
-  ALERT_CONSUMERS,
+  ALERT_CONSUMER,
   ALERT_PRODUCER,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -116,7 +116,7 @@ export const getRbacRequiredFields = (spaceId: string) => {
       type: 'constant_keyword',
       value: spaceId,
     },
-    [ALERT_CONSUMERS]: {
+    [ALERT_CONSUMER]: {
       type: 'constant_keyword',
       value: 'siem',
     },

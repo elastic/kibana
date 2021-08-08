@@ -1583,7 +1583,7 @@ Object {
           "path": "signal.ancestors.type",
           "type": "alias",
         },
-        "kibana.alert.consumers": Object {
+        "kibana.alert.consumer": Object {
           "type": "constant_keyword",
           "value": "siem",
         },

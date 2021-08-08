@@ -6,7 +6,7 @@
  */
 
 import {
-  ALERT_OWNER,
+  ALERT_CONSUMER,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_SEVERITY,
   ALERT_STATUS,
@@ -31,7 +31,7 @@ const getMockAlert = (): ParsedTechnicalFields => ({
   [CONSUMERS]: [],
   [VERSION]: '7.13.0',
   [RULE_ID]: 'apm.error_rate',
-  [ALERT_OWNER]: 'apm',
+  [ALERT_CONSUMER]: 'apm',
   [ALERT_STATUS]: 'open',
   [ALERT_RULE_RISK_SCORE]: 20,
   [SPACE_IDS]: ['fake-space-id'],

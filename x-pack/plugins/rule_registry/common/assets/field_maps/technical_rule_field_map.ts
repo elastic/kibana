@@ -20,7 +20,7 @@ export const technicalRuleFieldMap = {
     Fields.RULE_CATEGORY,
     Fields.TAGS
   ),
-  [Fields.ALERT_OWNER]: { type: 'keyword', required: true },
+  [Fields.ALERT_CONSUMER]: { type: 'keyword', required: true },
   [Fields.ALERT_PRODUCER]: { type: 'keyword' },
   [Fields.SPACE_IDS]: { type: 'keyword', array: true, required: true },
   [Fields.ALERT_UUID]: { type: 'keyword' },

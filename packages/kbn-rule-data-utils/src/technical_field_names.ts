@@ -33,8 +33,13 @@ const ALERT_END = `${ALERT_NAMESPACE}.end` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
-const ALERT_OWNER = `${ALERT_NAMESPACE}.owner` as const;
-const ALERT_CONSUMERS = `${ALERT_NAMESPACE}.consumers` as const;
+// the feature instantiating a rule type.
+// Rule created in stack --> alerts
+// Rule created in siem --> siem
+const ALERT_CONSUMER = `${ALERT_NAMESPACE}.consumer` as const;
+// the plugin that registered the rule type.
+// Rule type apm.error_rate --> apm
+// Rule type siem.signals --> siem
 const ALERT_PRODUCER = `${ALERT_NAMESPACE}.producer` as const;
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 const ALERT_RISK_SCORE = `${ALERT_NAMESPACE}.risk_score` as const;
@@ -100,8 +105,7 @@ const fields = {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
-  ALERT_OWNER,
-  ALERT_CONSUMERS,
+  ALERT_CONSUMER,
   ALERT_PRODUCER,
   ALERT_REASON,
   ALERT_RISK_SCORE,
@@ -154,8 +158,7 @@ export {
   ALERT_ID,
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
-  ALERT_OWNER,
-  ALERT_CONSUMERS,
+  ALERT_CONSUMER,
   ALERT_PRODUCER,
   ALERT_REASON,
   ALERT_RISK_SCORE,

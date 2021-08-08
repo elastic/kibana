@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_CONSUMER, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 import {
@@ -140,7 +140,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
       type: AlertingAuthorizationFilterType.ESDSL,
       // Not passing in values, these are the paths for these fields
       fieldNames: {
-        consumer: ALERT_OWNER,
+        consumer: ALERT_CONSUMER,
         ruleTypeId: RULE_ID,
         spaceIds: SPACE_IDS,
       },
