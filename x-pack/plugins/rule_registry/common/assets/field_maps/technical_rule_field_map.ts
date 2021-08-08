@@ -93,11 +93,6 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_RULE_CONSUMERS]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
   [Fields.ALERT_RULE_CREATED_AT]: {
     type: 'date',
     array: false,

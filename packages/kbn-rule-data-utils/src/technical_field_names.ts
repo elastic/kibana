@@ -18,7 +18,6 @@ const ECS_VERSION = 'ecs.version' as const;
 const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
 const RULE_CATEGORY = 'rule.category' as const;
-const RULE_CONSUMERS = 'rule.consumers' as const;
 const RULE_ID = 'rule.id' as const;
 const RULE_NAME = 'rule.name' as const;
 const RULE_UUID = 'rule.uuid' as const;
@@ -55,7 +54,6 @@ const ALERT_WORKFLOW_STATUS = `${ALERT_NAMESPACE}.workflow_status` as const;
 const ALERT_WORKFLOW_USER = `${ALERT_NAMESPACE}.workflow_user` as const;
 
 const ALERT_RULE_AUTHOR = `${ALERT_RULE_NAMESPACE}.author` as const;
-const ALERT_RULE_CONSUMERS = `${ALERT_RULE_NAMESPACE}.consumers` as const;
 const ALERT_RULE_CREATED_AT = `${ALERT_RULE_NAMESPACE}.created_at` as const;
 const ALERT_RULE_CREATED_BY = `${ALERT_RULE_NAMESPACE}.created_by` as const;
 const ALERT_RULE_DESCRIPTION = `${ALERT_RULE_NAMESPACE}.description` as const;
@@ -93,7 +91,6 @@ const fields = {
   EVENT_KIND,
   EVENT_ACTION,
   RULE_CATEGORY,
-  RULE_CONSUMERS,
   RULE_ID,
   RULE_NAME,
   RULE_UUID,
@@ -110,7 +107,6 @@ const fields = {
   ALERT_REASON,
   ALERT_RISK_SCORE,
   ALERT_RULE_AUTHOR,
-  ALERT_RULE_CONSUMERS,
   ALERT_RULE_CREATED_AT,
   ALERT_RULE_CREATED_BY,
   ALERT_RULE_DESCRIPTION,
@@ -167,7 +163,6 @@ export {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_USER,
   ALERT_RULE_AUTHOR,
-  ALERT_RULE_CONSUMERS,
   ALERT_RULE_CREATED_AT,
   ALERT_RULE_CREATED_BY,
   ALERT_RULE_DESCRIPTION,
@@ -204,7 +199,6 @@ export {
   EVENT_KIND,
   KIBANA_NAMESPACE,
   RULE_CATEGORY,
-  RULE_CONSUMERS,
   RULE_ID,
   RULE_NAME,
   RULE_UUID,
