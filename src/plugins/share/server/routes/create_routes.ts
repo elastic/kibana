@@ -11,12 +11,10 @@ import { CoreSetup, IRouter, Logger } from 'kibana/server';
 import { shortUrlLookupProvider } from './lib/short_url_lookup';
 import { createGotoRoute } from './goto';
 import { createShortenUrlRoute } from './shorten_url';
-import { createGetterRoute } from './get';
 
 export function createRoutes({ http }: CoreSetup, router: IRouter, logger: Logger) {
   const shortUrlLookup = shortUrlLookupProvider({ logger });
 
   createGotoRoute({ router, shortUrlLookup, http });
-  createGetterRoute({ router, shortUrlLookup, http });
   createShortenUrlRoute({ router, shortUrlLookup });
 }
