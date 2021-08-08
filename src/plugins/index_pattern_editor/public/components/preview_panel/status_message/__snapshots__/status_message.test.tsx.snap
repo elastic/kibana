@@ -94,7 +94,7 @@ exports[`StatusMessage should render without a query 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your index pattern has {sourceCount, plural, one {# match} other {# matches} }."
+        defaultMessage="Your index pattern can match {sourceCount, plural, one {your # source} other {any of your # sources} }."
         id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
         values={
           Object {

@@ -75,9 +75,9 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
-            defaultMessage="Your index pattern has {sourceCount, plural,
-              one {# match}
-              other {# matches}
+            defaultMessage="Your index pattern can match {sourceCount, plural,
+              one {your # source}
+              other {any of your # sources}
             }."
             values={{ sourceCount: allIndicesLength }}
           />
