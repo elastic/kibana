@@ -7,9 +7,7 @@
 
 import { Plugin } from 'unified';
 import { RemarkTokenizer } from '@elastic/eui';
-// import { ID } from './constants';
-
-export const ID = 'lens';
+import { LENS_ID } from './constants';
 
 export const LensParser: Plugin = function () {
   const Parser = this.Parser;
@@ -17,7 +15,7 @@ export const LensParser: Plugin = function () {
   const methods = Parser.prototype.blockMethods;
 
   const tokenizeLens: RemarkTokenizer = function (eat, value, silent) {
-    if (value.startsWith(`!{${ID}`) === false) return true;
+    if (value.startsWith(`!{${LENS_ID}`) === false) return true;
 
     const nextChar = value[6];
 
@@ -30,7 +28,7 @@ export const LensParser: Plugin = function () {
     // is there a configuration?
     const hasConfiguration = nextChar === '{';
 
-    let match = `!{${ID}`;
+    let match = `!{${LENS_ID}`;
     let configuration = {};
 
     if (hasConfiguration) {
@@ -69,11 +67,11 @@ export const LensParser: Plugin = function () {
     match += '}';
 
     return eat(match)({
-      type: ID,
+      type: LENS_ID,
       ...configuration,
     });
   };
 
   tokenizers.lens = tokenizeLens;
-  methods.splice(methods.indexOf('text'), 0, ID);
+  methods.splice(methods.indexOf('text'), 0, LENS_ID);
 };

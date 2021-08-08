@@ -49,7 +49,8 @@ import {
   User,
 } from '../../common';
 import { UpdateAlertRequest } from '../client/alerts/types';
-import { LensParser, ID as LENS_ID } from './lens_parser';
+import { LENS_ID, LensParser, LensSerializer } from '../../common/utils/markdown_plugins/lens';
+import { TimelineSerializer, TimelineParser } from '../../common/utils/markdown_plugins/timeline';
 
 /**
  * Default sort field for querying saved objects.
@@ -453,7 +454,7 @@ interface LensMarkdownNode {
 }
 
 export const parseCommentString = (comment: string) => {
-  const processor = unified().use([[markdown, {}], LensParser]);
+  const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
   return processor.parse(comment) as Parent;
 };
 
@@ -465,13 +466,13 @@ export const stringifyComment = (comment: Parent) =>
         {
           allowDangerousHtml: true,
           handlers: {
+            /*
+              because we're using rison in the timeline url we need
+              to make sure that markdown parser doesn't modify the url
+            */
+            timeline: TimelineSerializer,
             // @ts-expect-error
-            lens: (a) =>
-              `!{lens${JSON.stringify({
-                timeRange: a.timeRange,
-                editMode: a.editMode,
-                attributes: a.attributes,
-              })}}`,
+            lens: LensSerializer,
           },
         },
       ],
