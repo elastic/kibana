@@ -259,7 +259,7 @@ const defaultNewPolicy: NewPackagePolicy = {
           enabled: false,
           data_stream: {
             type: 'synthetics',
-            dataset: 'icmp',
+            dataset: 'browser',
           },
           vars: {
             type: {
@@ -737,7 +737,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
         })
       );
     });
-  });
+  }, 100000);
 
   it('handles changing TLS fields', async () => {
     const { findByLabelText, queryByLabelText } = render(<WrappedComponent />);

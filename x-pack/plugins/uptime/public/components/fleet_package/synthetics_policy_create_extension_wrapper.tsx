@@ -13,7 +13,7 @@ import {
   TCPContextProvider,
   ICMPSimpleFieldsContextProvider,
   HTTPContextProvider,
-  BrowserSimpleFieldsContextProvider,
+  BrowserContextProvider,
   TLSFieldsContextProvider,
 } from './contexts';
 
@@ -29,9 +29,9 @@ export const SyntheticsPolicyCreateExtensionWrapper = memo<PackagePolicyCreateEx
           <TCPContextProvider>
             <TLSFieldsContextProvider>
               <ICMPSimpleFieldsContextProvider>
-                <BrowserSimpleFieldsContextProvider>
+                <BrowserContextProvider>
                   <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
-                </BrowserSimpleFieldsContextProvider>
+                </BrowserContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </TLSFieldsContextProvider>
           </TCPContextProvider>
