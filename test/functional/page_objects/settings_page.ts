@@ -113,7 +113,14 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
-  async toggleAdvancedSettingCheckbox(propertyName: string) {
+  async toggleAdvancedSettingCheckbox(propertyName: string, value?: boolean) {
+    let curValue: string | undefined;
+    if (value !== undefined) {
+      curValue = await this.getAdvancedSettingCheckbox(propertyName);
+
+      if (curValue === (value ? 'true' : 'false')) return;
+    }
+
     await this.testSubjects.click(`advancedSetting-editField-${propertyName}`);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(`advancedSetting-saveButton`);
