@@ -32,17 +32,18 @@ export interface FieldRecord {
   action: {
     isActive: boolean;
     onFilter?: DocViewFilterFn;
-    onToggleColumn: (field: string) => void;
+    onToggleColumn: (field?: string) => void;
     flattenedField: unknown;
   };
   field: {
-    fieldName: string;
+    fieldKey: string;
+    field?: string;
     fieldType: string;
-    fieldMapping: IndexPatternField | undefined;
+    fieldMapping?: IndexPatternField | undefined;
     scripted: boolean;
   };
   value: {
-    formattedField: unknown;
+    formattedField?: unknown;
   };
 }
 
@@ -82,10 +83,11 @@ export const DocViewerTable = ({
     [onRemoveColumn, onAddColumn, columns]
   );
 
-  const onSetRowProps = useCallback(({ field: { fieldName } }: FieldRecord) => {
+  const onSetRowProps = useCallback(({ field: { fieldKey } }: FieldRecord) => {
     return {
+      key: fieldKey,
       className: 'kbnDocViewer__tableRow',
-      'data-test-subj': `tableDocViewRow-${fieldName}`,
+      'data-test-subj': `tableDocViewRow-${fieldKey}`,
     };
   }, []);
 
@@ -117,31 +119,34 @@ export const DocViewerTable = ({
       const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
       return nameA.localeCompare(nameB);
     })
-    .map((fieldName) => {
-      const fieldMapping = mapping(fieldName);
-      const fieldType = isNestedFieldParent(fieldName, indexPattern)
-        ? 'nested'
-        : fieldMapping?.type;
+    .map((field) => {
+      const fieldMapping = mapping(field);
+      const fieldKey = (field ? field : fieldMapping?.displayName) as string;
+      const fieldType = isNestedFieldParent(field, indexPattern) ? 'nested' : fieldMapping?.type;
 
       return {
         action: {
-          onToggleColumn,
+          onToggleColumn: () => onToggleColumn(field),
           onFilter: filter,
-          isActive: !!columns?.includes(fieldName),
-          flattenedField: flattened[fieldName],
+          isActive: !!columns?.includes(field),
+          flattenedField: flattened[field],
         },
         field: {
-          fieldName,
+          field,
+          fieldKey,
+          fieldMapping,
           fieldType: fieldType!,
           scripted: Boolean(fieldMapping?.scripted),
-          fieldMapping,
         },
-        value: { formattedField: formattedHit[fieldName] },
+        value: {
+          formattedField: formattedHit[field],
+        },
       };
     });
 
   return (
     <EuiInMemoryTable
+      tableLayout="auto"
       className="kbnDocViewer__table"
       items={items}
       columns={tableColumns}
