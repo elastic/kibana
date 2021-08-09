@@ -12,7 +12,8 @@ import moment from 'moment';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, defaultState } from '../default';
+import { DefaultFormatEditor, defaultState } from '../default/default';
+import { formatId } from './constants';
 
 import { FormatEditorSamples } from '../../samples';
 
@@ -21,7 +22,7 @@ interface DateFormatEditorFormatParams {
 }
 
 export class DateFormatEditor extends DefaultFormatEditor<DateFormatEditorFormatParams> {
-  static formatId = 'date';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [

@@ -8,11 +8,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/105731
-// import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-type IFieldType = any;
-type IIndexPattern = any;
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 
 import {
   getGenericComboBoxProps,
@@ -24,14 +20,14 @@ const AS_PLAIN_TEXT = { asPlainText: true };
 interface OperatorProps {
   fieldInputWidth?: number;
   fieldTypeFilter?: string[];
-  indexPattern: IIndexPattern | undefined;
+  indexPattern: IndexPatternBase | undefined;
   isClearable: boolean;
   isDisabled: boolean;
   isLoading: boolean;
   isRequired?: boolean;
-  onChange: (a: IFieldType[]) => void;
+  onChange: (a: IndexPatternFieldBase[]) => void;
   placeholder: string;
-  selectedField: IFieldType | undefined;
+  selectedField: IndexPatternFieldBase | undefined;
 }
 
 export const FieldComponent: React.FC<OperatorProps> = ({
@@ -60,7 +56,7 @@ export const FieldComponent: React.FC<OperatorProps> = ({
 
   const handleValuesChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]): void => {
-      const newValues: IFieldType[] = newOptions.map(
+      const newValues: IndexPatternFieldBase[] = newOptions.map(
         ({ label }) => availableFields[labels.indexOf(label)]
       );
       onChange(newValues);
@@ -98,13 +94,13 @@ export const FieldComponent: React.FC<OperatorProps> = ({
 FieldComponent.displayName = 'Field';
 
 interface ComboBoxFields {
-  availableFields: IFieldType[];
-  selectedFields: IFieldType[];
+  availableFields: IndexPatternFieldBase[];
+  selectedFields: IndexPatternFieldBase[];
 }
 
 const getComboBoxFields = (
-  indexPattern: IIndexPattern | undefined,
-  selectedField: IFieldType | undefined,
+  indexPattern: IndexPatternBase | undefined,
+  selectedField: IndexPatternFieldBase | undefined,
   fieldTypeFilter: string[]
 ): ComboBoxFields => {
   const existingFields = getExistingFields(indexPattern);
@@ -117,27 +113,29 @@ const getComboBoxFields = (
 const getComboBoxProps = (fields: ComboBoxFields): GetGenericComboBoxPropsReturn => {
   const { availableFields, selectedFields } = fields;
 
-  return getGenericComboBoxProps<IFieldType>({
+  return getGenericComboBoxProps<IndexPatternFieldBase>({
     getLabel: (field) => field.name,
     options: availableFields,
     selectedOptions: selectedFields,
   });
 };
 
-const getExistingFields = (indexPattern: IIndexPattern | undefined): IFieldType[] => {
+const getExistingFields = (indexPattern: IndexPatternBase | undefined): IndexPatternFieldBase[] => {
   return indexPattern != null ? indexPattern.fields : [];
 };
 
-const getSelectedFields = (selectedField: IFieldType | undefined): IFieldType[] => {
+const getSelectedFields = (
+  selectedField: IndexPatternFieldBase | undefined
+): IndexPatternFieldBase[] => {
   return selectedField ? [selectedField] : [];
 };
 
 const getAvailableFields = (
-  existingFields: IFieldType[],
-  selectedFields: IFieldType[],
+  existingFields: IndexPatternFieldBase[],
+  selectedFields: IndexPatternFieldBase[],
   fieldTypeFilter: string[]
-): IFieldType[] => {
-  const fieldsByName = new Map<string, IFieldType>();
+): IndexPatternFieldBase[] => {
+  const fieldsByName = new Map<string, IndexPatternFieldBase>();
 
   existingFields.forEach((f) => fieldsByName.set(f.name, f));
   selectedFields.forEach((f) => fieldsByName.set(f.name, f));

@@ -29,15 +29,12 @@ import { gt } from './gt';
 import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
-import { image } from './image';
 import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapCenter } from './map_center';
-import { metric } from './metric';
 import { neq } from './neq';
 import { ply } from './ply';
-import { progress } from './progress';
 import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
@@ -79,15 +76,12 @@ export const functions = [
   gte,
   head,
   ifFn,
-  image,
   lt,
   lte,
   joinRows,
   mapCenter,
-  metric,
   neq,
   ply,
-  progress,
   render,
   replace,
   rounddate,

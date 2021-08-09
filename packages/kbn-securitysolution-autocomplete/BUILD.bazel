@@ -36,6 +36,7 @@ SRC_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-securitysolution-io-ts-list-types",
   "//packages/kbn-securitysolution-list-hooks",
+  "//packages/kbn-es-query",
   "@npm//@babel/core",
   "@npm//babel-loader",
   "@npm//@elastic/eui",

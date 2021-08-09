@@ -11,6 +11,8 @@
       "data",
       "embeddable",
       "expressionError",
+      "expressionImage",
+      "expressionMetric",
       "expressionRepeatImage",
       "expressionRevealImage",
       "expressionShape",
@@ -34,6 +36,7 @@
       "lens",
       "maps",
       "savedObjects",
-      "visualizations"
+      "visualizations",
+      "fieldFormats"
     ]
   }

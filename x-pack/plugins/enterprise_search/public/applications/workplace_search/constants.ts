@@ -805,3 +805,24 @@ export const STATUS_POPOVER_TOOLTIP = i18n.translate(
     defaultMessage: 'Click to view info',
   }
 );
+
+export const DOCUMENTS_HEADER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.documentsHeader',
+  {
+    defaultMessage: 'Documents',
+  }
+);
+
+export const SEARCHABLE_HEADER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.searchableHeader',
+  {
+    defaultMessage: 'Searchable',
+  }
+);
+
+export const PLATINUM_FEATURE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.platinumFeature',
+  {
+    defaultMessage: 'Platinum feature',
+  }
+);

@@ -295,7 +295,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
-  useBreadcrumbs('agent_list', {
+  useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
       typeof agent.local_metadata.host.hostname === 'string'

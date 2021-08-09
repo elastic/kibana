@@ -285,6 +285,7 @@ describe('policy details: ', () => {
                     },
                     malware: { mode: 'prevent' },
                     memory_protection: { mode: 'off', supported: false },
+                    behavior_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
@@ -299,6 +300,10 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                      behavior_protection: {
+                        enabled: false,
+                        message: '',
+                      },
                     },
                     logging: { file: 'info' },
                     antivirus_registration: {
@@ -308,9 +313,14 @@ describe('policy details: ', () => {
                   mac: {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
+                    behavior_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      behavior_protection: {
+                        enabled: false,
                         message: '',
                       },
                     },
@@ -320,9 +330,14 @@ describe('policy details: ', () => {
                     events: { process: true, file: true, network: true },
                     logging: { file: 'info' },
                     malware: { mode: 'prevent' },
+                    behavior_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      behavior_protection: {
+                        enabled: false,
                         message: '',
                       },
                     },

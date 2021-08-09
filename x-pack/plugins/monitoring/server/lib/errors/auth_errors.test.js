@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { errors } from 'elasticsearch';
 import { forbidden, unauthorized } from '@hapi/boom';
 import { isAuthError, handleAuthError } from './auth_errors';
 
 describe('Error handling for 401/403 errors', () => {
   it('ignores an unknown type', () => {
-    const err = new errors.Generic();
+    const err = new Error();
     expect(isAuthError(err)).toBe(false);
   });
 
