@@ -6,13 +6,20 @@
  */
 
 import { SavedObject } from 'src/core/types';
+import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
-import { buildRuleWithOverrides } from '../../../signals/build_rule';
+import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
-import { AlertAttributes, SignalSourceHit } from '../../../signals/types';
+import { AlertAttributes, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
+
+const isSourceDoc = (
+  hit: SignalSourceHit
+): hit is BaseHit<{ '@timestamp': string; _source: SignalSource }> => {
+  return hit._source != null;
+};
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
@@ -24,17 +31,25 @@ import { filterSource } from './filter_source';
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
 export const buildBulkBody = (
+  spaceId: string | null | undefined,
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  applyOverrides: boolean
 ): RACAlert => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
-  const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
+  const rule = applyOverrides
+    ? buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {})
+    : buildRuleWithoutOverrides(ruleSO);
   const filteredSource = filterSource(mergedDoc);
-  return {
-    ...filteredSource,
-    ...buildAlert(mergedDoc, rule),
-    ...additionalAlertFields(mergedDoc),
-    '@timestamp': new Date().toISOString(),
-  };
+  if (isSourceDoc(mergedDoc)) {
+    return {
+      ...filteredSource,
+      ...buildAlert([mergedDoc], rule, spaceId),
+      ...additionalAlertFields(mergedDoc),
+      '@timestamp': new Date().toISOString(),
+    };
+  }
+
+  throw Error('Error building alert from source document.');
 };
