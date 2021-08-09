@@ -39,10 +39,7 @@
           "StartPlugins",
           ">"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/public/plugin.ts",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/cases/public/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -55,10 +52,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/plugin.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -78,10 +72,7 @@
                   },
                   "<object>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/public/plugin.ts",
-                  "lineNumber": 29
-                },
+                "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -108,10 +99,7 @@
               "SetupPlugins",
               ") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/plugin.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -131,10 +119,7 @@
                   },
                   "<object, unknown>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/public/plugin.ts",
-                  "lineNumber": 32
-                },
+                "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -148,10 +133,7 @@
                 "signature": [
                   "SetupPlugins"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/public/plugin.ts",
-                  "lineNumber": 32
-                },
+                "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -185,10 +167,7 @@
                 "text": "CasesUiStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/plugin.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -207,10 +186,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/public/plugin.ts",
-                  "lineNumber": 38
-                },
+                "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -224,10 +200,7 @@
                 "signature": [
                   "StartPlugins"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/public/plugin.ts",
-                  "lineNumber": 38
-                },
+                "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -244,10 +217,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/plugin.ts",
-              "lineNumber": 80
-            },
+            "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -276,10 +246,7 @@
           " extends ",
           "Owner"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -295,10 +262,7 @@
               "CaseDetailsHrefSchema",
               ", \"configurable\">"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -312,10 +276,7 @@
               "CasesNavigation",
               "<MouseEvent | React.MouseEvent<Element, MouseEvent> | null, null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -329,10 +290,7 @@
               "CasesNavigation",
               "<MouseEvent | React.MouseEvent<Element, MouseEvent> | null, null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -345,10 +303,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -361,10 +316,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -374,10 +326,7 @@
             "tags": [],
             "label": "userCanCrud",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/index.tsx",
             "deprecated": false
           }
         ],
@@ -401,10 +350,7 @@
           " extends ",
           "Owner"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -433,10 +379,7 @@
               },
               ".generatedAlert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; }, \"index\" | \"rule\" | \"alertId\" | \"owner\"> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
             "deprecated": false
           },
           {
@@ -450,10 +393,7 @@
               "CasesNavigation",
               "<MouseEvent | React.MouseEvent<Element, MouseEvent> | null, null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
             "deprecated": false
           },
           {
@@ -473,10 +413,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
             "deprecated": false
           },
           {
@@ -505,16 +442,12 @@
               },
               " | undefined) => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "cases",
-                "id": "def-public.theCase",
+                "id": "def-public.AllCasesSelectorModalProps.onRowClick.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "theCase",
@@ -537,13 +470,12 @@
                   },
                   " | undefined"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-                  "lineNumber": 27
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -563,11 +495,31 @@
               },
               ") => void) | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-              "lineNumber": 28
-            },
-            "deprecated": false
+            "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.AllCasesSelectorModalProps.updateCase.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newCase",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.Case",
+                    "text": "Case"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -576,10 +528,7 @@
             "tags": [],
             "label": "userCanCrud",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
             "deprecated": false
           }
         ],
@@ -603,10 +552,7 @@
           " extends ",
           "CaseViewComponentProps"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
-          "lineNumber": 64
-        },
+        "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -627,11 +573,31 @@
               },
               ") => void) | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
-              "lineNumber": 65
-            },
-            "deprecated": false
+            "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CaseViewProps.onCaseDataSuccess.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.Case",
+                    "text": "Case"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -644,10 +610,7 @@
               "CasesTimelineIntegration",
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
-              "lineNumber": 66
-            },
+            "path": "x-pack/plugins/cases/public/components/case_view/index.tsx",
             "deprecated": false
           }
         ],
@@ -671,10 +634,7 @@
           " extends ",
           "Owner"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/public/components/configure_cases/index.tsx",
-          "lineNumber": 52
-        },
+        "path": "x-pack/plugins/cases/public/components/configure_cases/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -684,10 +644,7 @@
             "tags": [],
             "label": "userCanCrud",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/configure_cases/index.tsx",
-              "lineNumber": 53
-            },
+            "path": "x-pack/plugins/cases/public/components/configure_cases/index.tsx",
             "deprecated": false
           }
         ],
@@ -711,10 +668,7 @@
           " extends ",
           "Owner"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-          "lineNumber": 34
-        },
+        "path": "x-pack/plugins/cases/public/components/create/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -735,11 +689,45 @@
               },
               ", postComment: (args: PostComment) => Promise<void>) => Promise<void>) | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-              "lineNumber": 35
-            },
-            "deprecated": false
+            "path": "x-pack/plugins/cases/public/components/create/index.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CreateCaseProps.afterCaseCreated.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "theCase",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.Case",
+                    "text": "Case"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/public/components/create/index.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.CreateCaseProps.afterCaseCreated.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "postComment",
+                "description": [],
+                "signature": [
+                  "(args: PostComment) => Promise<void>"
+                ],
+                "path": "x-pack/plugins/cases/public/components/create/index.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -758,10 +746,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false
           },
           {
@@ -774,10 +759,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false
           },
           {
@@ -790,10 +772,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false
           },
           {
@@ -806,13 +785,10 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-              "lineNumber": 39
-            },
+            "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -832,16 +808,12 @@
               },
               ") => Promise<void>"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "cases",
-                "id": "def-public.theCase",
+                "id": "def-public.CreateCaseProps.onSuccess.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "theCase",
@@ -855,13 +827,12 @@
                     "text": "Case"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-                  "lineNumber": 40
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/cases/public/components/create/index.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -874,10 +845,7 @@
               "CasesTimelineIntegration",
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-              "lineNumber": 41
-            },
+            "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false
           },
           {
@@ -890,10 +858,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/create/index.tsx",
-              "lineNumber": 42
-            },
+            "path": "x-pack/plugins/cases/public/components/create/index.tsx",
             "deprecated": false
           }
         ],
@@ -917,10 +882,7 @@
           " extends ",
           "Owner"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -934,10 +896,7 @@
               "CasesNavigation",
               "<MouseEvent | React.MouseEvent<Element, MouseEvent> | null, null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -953,10 +912,7 @@
               "CaseDetailsHrefSchema",
               ", \"configurable\">"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -970,10 +926,7 @@
               "CasesNavigation",
               "<MouseEvent | React.MouseEvent<Element, MouseEvent> | null, null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -983,10 +936,7 @@
             "tags": [],
             "label": "hasWritePermissions",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
             "deprecated": false
           },
           {
@@ -996,10 +946,7 @@
             "tags": [],
             "label": "maxCasesToShow",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/cases/public/components/recent_cases/index.tsx",
             "deprecated": false
           }
         ],
@@ -1016,10 +963,7 @@
       "tags": [],
       "label": "CasesUiStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/cases/public/types.ts",
-        "lineNumber": 46
-      },
+      "path": "x-pack/plugins/cases/public/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -1050,18 +994,12 @@
             },
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/cases/public/types.ts",
-            "lineNumber": 52
-          },
+          "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component that displays all cases"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getAllCases.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1077,12 +1015,13 @@
                   "text": "AllCasesProps"
                 }
               ],
-              "source": {
-                "path": "x-pack/plugins/cases/public/types.ts",
-                "lineNumber": 52
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component that displays all cases"
           ]
         },
         {
@@ -1113,18 +1052,12 @@
             },
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/cases/public/types.ts",
-            "lineNumber": 58
-          },
+          "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component that is a modal for selecting a case"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getAllCasesSelectorModal.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1140,12 +1073,13 @@
                   "text": "AllCasesSelectorModalProps"
                 }
               ],
-              "source": {
-                "path": "x-pack/plugins/cases/public/types.ts",
-                "lineNumber": 59
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component that is a modal for selecting a case"
           ]
         },
         {
@@ -1176,18 +1110,12 @@
             },
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/cases/public/types.ts",
-            "lineNumber": 66
-          },
+          "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component for viewing a specific case"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getCaseView.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1203,12 +1131,13 @@
                   "text": "CaseViewProps"
                 }
               ],
-              "source": {
-                "path": "x-pack/plugins/cases/public/types.ts",
-                "lineNumber": 66
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component for viewing a specific case"
           ]
         },
         {
@@ -1239,18 +1168,12 @@
             },
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/cases/public/types.ts",
-            "lineNumber": 72
-          },
+          "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component for configuring a specific case"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getConfigureCases.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1266,12 +1189,13 @@
                   "text": "ConfigureCasesProps"
                 }
               ],
-              "source": {
-                "path": "x-pack/plugins/cases/public/types.ts",
-                "lineNumber": 72
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component for configuring a specific case"
           ]
         },
         {
@@ -1302,18 +1226,12 @@
             },
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/cases/public/types.ts",
-            "lineNumber": 78
-          },
+          "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component for creating a new case"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getCreateCase.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1329,12 +1247,13 @@
                   "text": "CreateCaseProps"
                 }
               ],
-              "source": {
-                "path": "x-pack/plugins/cases/public/types.ts",
-                "lineNumber": 78
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component for creating a new case"
           ]
         },
         {
@@ -1365,18 +1284,12 @@
             },
             ">"
           ],
-          "source": {
-            "path": "x-pack/plugins/cases/public/types.ts",
-            "lineNumber": 84
-          },
+          "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
-          "returnComment": [
-            "A react component for showing recent cases"
-          ],
           "children": [
             {
               "parentPluginId": "cases",
-              "id": "def-public.props",
+              "id": "def-public.CasesUiStart.getRecentCases.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -1392,12 +1305,13 @@
                   "text": "RecentCasesProps"
                 }
               ],
-              "source": {
-                "path": "x-pack/plugins/cases/public/types.ts",
-                "lineNumber": 84
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
             }
+          ],
+          "returnComment": [
+            "A react component for showing recent cases"
           ]
         }
       ],
@@ -1416,10 +1330,7 @@
         "description": [
           "\nClient wrapper that contains accessor methods for individual entities within the cases system."
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/server/client/client.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/cases/server/client/client.ts",
         "deprecated": false,
         "children": [
           {
@@ -1432,10 +1343,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/server/client/client.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1448,10 +1356,7 @@
                 "signature": [
                   "CasesClientArgs"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/server/client/client.ts",
-                  "lineNumber": 30
-                },
+                "path": "x-pack/plugins/cases/server/client/client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1470,10 +1375,7 @@
             "signature": [
               "CasesSubClient"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/server/client/client.ts",
-              "lineNumber": 43
-            },
+            "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false
           },
           {
@@ -1488,10 +1390,7 @@
             "signature": [
               "AttachmentsSubClient"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/server/client/client.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false
           },
           {
@@ -1506,10 +1405,7 @@
             "signature": [
               "UserActionsSubClient"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/server/client/client.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false
           },
           {
@@ -1524,10 +1420,7 @@
             "signature": [
               "SubCasesClient"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/server/client/client.ts",
-              "lineNumber": 66
-            },
+            "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false
           },
           {
@@ -1542,10 +1435,7 @@
             "signature": [
               "ConfigureSubClient"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/server/client/client.ts",
-              "lineNumber": 76
-            },
+            "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false
           },
           {
@@ -1560,10 +1450,7 @@
             "signature": [
               "StatsSubClient"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/server/client/client.ts",
-              "lineNumber": 83
-            },
+            "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false
           }
         ],
@@ -1581,10 +1468,7 @@
         "description": [
           "\nCases server exposed contract for interacting with cases entities."
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/server/plugin.ts",
-          "lineNumber": 55
-        },
+        "path": "x-pack/plugins/cases/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -1615,10 +1499,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/server/plugin.ts",
-              "lineNumber": 62
-            },
+            "path": "x-pack/plugins/cases/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -1640,10 +1521,7 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/cases/server/plugin.ts",
-                  "lineNumber": 62
-                },
+                "path": "x-pack/plugins/cases/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1673,10 +1551,7 @@
         "signature": [
           "(message: string) => Error"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 49
-        },
+        "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1689,10 +1564,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1712,10 +1584,7 @@
           "Type",
           "<A, O, I>, createError?: ErrorFactory) => (inputValue: I) => A"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 55
-        },
+        "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1729,10 +1598,7 @@
               "Type",
               "<A, O, I>"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1746,10 +1612,7 @@
             "signature": [
               "ErrorFactory"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1767,10 +1630,7 @@
         "signature": [
           "(codec: C) => C"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 71
-        },
+        "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1783,10 +1643,7 @@
             "signature": [
               "C"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 72
-            },
+            "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1808,10 +1665,7 @@
           "Errors",
           ") => string[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
         "deprecated": true,
         "references": [],
         "children": [
@@ -1825,10 +1679,7 @@
             "signature": [
               "Errors"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1848,10 +1699,7 @@
         "signature": [
           "() => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
-          "lineNumber": 38
-        },
+        "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [
@@ -1871,10 +1719,7 @@
         "signature": [
           "() => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [
@@ -1892,10 +1737,7 @@
         "signature": [
           "(caseId: string, commentId: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 37
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -1908,10 +1750,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1925,10 +1764,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1946,10 +1782,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 33
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -1962,10 +1795,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1983,10 +1813,7 @@
         "signature": [
           "(configureID: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 53
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -1999,10 +1826,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 53
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2020,10 +1844,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -2036,10 +1857,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2057,10 +1875,7 @@
         "signature": [
           "(caseId: string, connectorId: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 49
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -2073,10 +1888,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2090,10 +1902,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2111,10 +1920,7 @@
         "signature": [
           "(alertId: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 57
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -2127,10 +1933,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2148,10 +1951,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 41
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -2164,10 +1964,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 41
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2187,10 +1984,7 @@
         "signature": [
           "() => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
-          "lineNumber": 32
-        },
+        "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [
@@ -2210,10 +2004,7 @@
         "signature": [
           "(connectorId: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
         "deprecated": false,
         "children": [
           {
@@ -2226,10 +2017,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2249,10 +2037,7 @@
         "signature": [
           "(caseID: string, subCaseId: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 29
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -2265,10 +2050,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2282,10 +2064,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2303,10 +2082,7 @@
         "signature": [
           "(caseID: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -2319,10 +2095,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2340,10 +2113,7 @@
         "signature": [
           "(caseID: string, subCaseId: string) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 45
-        },
+        "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "children": [
           {
@@ -2356,10 +2126,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2373,10 +2140,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2396,10 +2160,7 @@
           "Errors",
           ") => never"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-          "lineNumber": 51
-        },
+        "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2412,10 +2173,7 @@
             "signature": [
               "ErrorFactory"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
-              "lineNumber": 51
-            },
+            "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2432,10 +2190,7 @@
         "tags": [],
         "label": "ActionLicense",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 162
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2445,10 +2200,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 163
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2458,10 +2210,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 164
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2471,10 +2220,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 165
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2484,10 +2230,7 @@
             "tags": [],
             "label": "enabledInConfig",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 166
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2497,10 +2240,7 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 167
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -2530,10 +2270,7 @@
             "text": "CasesStatus"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 130
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2553,10 +2290,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 131
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2566,10 +2300,7 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 132
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2579,10 +2310,7 @@
             "tags": [],
             "label": "perPage",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 133
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2592,10 +2320,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 134
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -2608,10 +2333,7 @@
         "tags": [],
         "label": "ApiProps",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 153
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2624,10 +2346,7 @@
             "signature": [
               "AbortSignal"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 154
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -2640,10 +2359,7 @@
         "tags": [],
         "label": "BulkUpdateStatus",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 157
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2653,10 +2369,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 158
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2666,10 +2379,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 159
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2679,10 +2389,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 160
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -2705,10 +2412,7 @@
           },
           " extends BasicCase"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 98
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2769,10 +2473,7 @@
               },
               ".swimlane; fields: { caseId: string | null; } | null; })"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 99
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2782,10 +2483,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 100
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2805,10 +2503,7 @@
               },
               " | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 101
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2828,10 +2523,7 @@
               },
               "[] | null | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 102
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2844,10 +2536,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 103
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2860,10 +2549,7 @@
             "signature": [
               "{ syncAlerts: boolean; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 104
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2876,10 +2562,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 105
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2898,10 +2581,7 @@
                 "text": "CaseType"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 106
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -2914,10 +2594,7 @@
         "tags": [],
         "label": "CaseExternalService",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 66
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2927,10 +2604,7 @@
             "tags": [],
             "label": "pushedAt",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 67
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2949,10 +2623,7 @@
                 "text": "ElasticUser"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 68
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2962,10 +2633,7 @@
             "tags": [],
             "label": "connectorId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 69
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2975,10 +2643,7 @@
             "tags": [],
             "label": "connectorName",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 70
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -2988,10 +2653,7 @@
             "tags": [],
             "label": "externalId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 71
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3001,10 +2663,7 @@
             "tags": [],
             "label": "externalTitle",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 72
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3014,10 +2673,7 @@
             "tags": [],
             "label": "externalUrl",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 73
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3030,10 +2686,7 @@
         "tags": [],
         "label": "CasesStatus",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 124
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3046,10 +2699,7 @@
             "signature": [
               "number | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 125
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3062,10 +2712,7 @@
             "signature": [
               "number | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 126
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3078,10 +2725,7 @@
             "signature": [
               "number | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 127
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3094,10 +2738,7 @@
         "tags": [],
         "label": "CaseUserActions",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 54
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3107,10 +2748,7 @@
             "tags": [],
             "label": "actionId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3123,10 +2761,7 @@
             "signature": [
               "(\"status\" | \"description\" | \"title\" | \"comment\" | \"tags\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3139,10 +2774,7 @@
             "signature": [
               "\"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\""
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3152,10 +2784,7 @@
             "tags": [],
             "label": "actionAt",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 58
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3174,10 +2803,7 @@
                 "text": "ElasticUser"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 59
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3187,10 +2813,7 @@
             "tags": [],
             "label": "caseId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 60
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3203,10 +2826,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 61
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3219,10 +2839,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 62
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3235,10 +2852,7 @@
             "signature": [
               "string | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 63
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3251,10 +2865,7 @@
         "tags": [],
         "label": "DeleteCase",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 170
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3264,10 +2875,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 171
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3287,10 +2895,7 @@
               },
               " | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 172
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3300,10 +2905,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 173
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3316,10 +2918,7 @@
         "tags": [],
         "label": "Ecs",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 243
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3329,10 +2928,7 @@
             "tags": [],
             "label": "_id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 244
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3345,10 +2941,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 245
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3368,10 +2961,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 246
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3384,10 +2974,7 @@
         "tags": [],
         "label": "ElasticUser",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 142
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3400,10 +2987,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 143
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3416,10 +3000,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 144
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3432,10 +3013,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 145
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3448,10 +3026,7 @@
         "tags": [],
         "label": "ESCaseConnector",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 112
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -3461,10 +3036,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-              "lineNumber": 113
-            },
+            "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
             "deprecated": false
           },
           {
@@ -3474,10 +3046,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-              "lineNumber": 114
-            },
+            "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
             "deprecated": false
           },
           {
@@ -3496,10 +3065,7 @@
                 "text": "ConnectorTypes"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-              "lineNumber": 115
-            },
+            "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
             "deprecated": false
           },
           {
@@ -3519,10 +3085,7 @@
               },
               " | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-              "lineNumber": 116
-            },
+            "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
             "deprecated": false
           }
         ],
@@ -3552,10 +3115,7 @@
             "text": "ApiProps"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 148
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3575,10 +3135,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 149
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3599,10 +3156,7 @@
               },
               " & { owner: string[]; }) | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 150
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3615,10 +3169,7 @@
         "tags": [],
         "label": "FieldMappings",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 176
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3628,10 +3179,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 177
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3644,10 +3192,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 178
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3660,10 +3205,7 @@
         "tags": [],
         "label": "FilterOptions",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 116
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3673,10 +3215,7 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 117
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3696,10 +3235,7 @@
                 "text": "CaseStatuses"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 118
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3712,10 +3248,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 119
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3728,10 +3261,7 @@
             "signature": [
               "{ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 120
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3744,10 +3274,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 121
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3760,10 +3287,7 @@
         "tags": [],
         "label": "QueryParams",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 109
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3773,10 +3297,7 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 110
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3786,10 +3307,7 @@
             "tags": [],
             "label": "perPage",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 111
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3808,10 +3326,7 @@
                 "text": "SortFieldCase"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 112
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3824,10 +3339,7 @@
             "signature": [
               "\"asc\" | \"desc\""
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 113
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -3840,10 +3352,7 @@
         "tags": [],
         "label": "RuleEcs",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 196
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3856,10 +3365,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 197
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3872,10 +3378,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 198
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3888,10 +3391,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 199
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3904,10 +3404,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 200
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3920,10 +3417,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 201
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3936,10 +3430,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 202
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3952,10 +3443,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 203
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3968,10 +3456,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 204
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -3984,10 +3469,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 205
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4000,10 +3482,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 206
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4016,10 +3495,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 207
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4032,10 +3508,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 208
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4048,10 +3521,7 @@
             "signature": [
               "boolean[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 209
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4064,10 +3534,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 210
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4080,10 +3547,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 211
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4096,10 +3560,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 212
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4112,10 +3573,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 213
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4128,10 +3586,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 214
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4144,10 +3599,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 215
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4160,10 +3612,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 216
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4176,10 +3625,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 217
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4192,10 +3638,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 218
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4208,10 +3651,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 219
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4224,10 +3664,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 220
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4240,10 +3677,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 221
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4256,10 +3690,7 @@
             "signature": [
               "boolean[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 222
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4272,10 +3703,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 223
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4288,10 +3716,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 224
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4304,10 +3729,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 225
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4320,10 +3742,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 226
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4336,10 +3755,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 227
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4352,10 +3768,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 228
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4368,10 +3781,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 229
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4384,10 +3794,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 230
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -4400,10 +3807,7 @@
         "tags": [],
         "label": "SignalEcs",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 233
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4423,10 +3827,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 234
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4439,10 +3840,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 235
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4455,10 +3853,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 236
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4471,10 +3866,7 @@
             "signature": [
               "{ id?: string[] | undefined; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 237
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4487,10 +3879,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 240
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -4513,10 +3902,7 @@
           },
           " extends BasicCase"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 93
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4535,10 +3921,7 @@
                 "text": "AssociationType"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 94
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4548,10 +3931,7 @@
             "tags": [],
             "label": "caseParentId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 95
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
         ],
@@ -4564,10 +3944,7 @@
         "tags": [],
         "label": "UpdateByKey",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 186
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4580,10 +3957,7 @@
             "signature": [
               "\"status\" | \"description\" | \"title\" | \"tags\" | \"settings\" | \"connector\""
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 187
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4644,10 +4018,7 @@
               },
               ".swimlane; fields: { caseId: string | null; } | null; }) | { syncAlerts: boolean; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 188
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4660,11 +4031,53 @@
             "signature": [
               "((caseId: string, caseConnectorId: string, subCaseId?: string | undefined) => void) | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 189
-            },
-            "deprecated": false
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-common.UpdateByKey.fetchCaseUserActions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "caseId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/cases/common/ui/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-common.UpdateByKey.fetchCaseUserActions.$2",
+                "type": "string",
+                "tags": [],
+                "label": "caseConnectorId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/cases/common/ui/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-common.UpdateByKey.fetchCaseUserActions.$3",
+                "type": "string",
+                "tags": [],
+                "label": "subCaseId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/cases/common/ui/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -4684,11 +4097,31 @@
               },
               ") => void) | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 190
-            },
-            "deprecated": false
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-common.UpdateByKey.updateCase.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newCase",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.Case",
+                    "text": "Case"
+                  }
+                ],
+                "path": "x-pack/plugins/cases/common/ui/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -4706,10 +4139,7 @@
                 "text": "Case"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 191
-            },
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           },
           {
@@ -4722,11 +4152,10 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 192
-            },
-            "deprecated": false
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "cases",
@@ -4738,11 +4167,10 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/cases/common/ui/types.ts",
-              "lineNumber": 193
-            },
-            "deprecated": false
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4758,10 +4186,7 @@
         "description": [
           "\nthis is used to differentiate between an alert attached to a top-level case and a group of alerts that should only\nbe attached to a sub case. The reason we need this is because an alert group comment will have references to both a case and\nsub case when it is created. For us to be able to filter out alert groups in a top-level case we need a field to\nuse as a filter."
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4772,10 +4197,7 @@
         "tags": [],
         "label": "CaseStatuses",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/status.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4786,10 +4208,7 @@
         "tags": [],
         "label": "CaseType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 39
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4800,10 +4219,7 @@
         "tags": [],
         "label": "CommentType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 38
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4814,10 +4230,7 @@
         "tags": [],
         "label": "ConnectorTypes",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 35
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4828,10 +4241,7 @@
         "tags": [],
         "label": "SortFieldCase",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 137
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4842,10 +4252,7 @@
         "tags": [],
         "label": "SwimlaneConnectorType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/swimlane.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/swimlane.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4858,10 +4265,7 @@
         "tags": [],
         "label": "ACTION_TYPES_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 63
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4877,10 +4281,7 @@
         "signature": [
           "\"/api/actions\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 62
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4900,10 +4301,7 @@
             "text": "ActionResult"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4917,10 +4315,7 @@
         "signature": [
           "\"append\" | \"overwrite\" | \"nothing\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4940,10 +4335,7 @@
             "text": "ActionType"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4957,10 +4349,7 @@
         "signature": [
           "{ id: string; index: string; attached_at: string; }[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/alerts.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/alerts.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5030,10 +4419,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 172
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5047,10 +4433,7 @@
         "signature": [
           "{ owner?: string | string[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 335
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5064,10 +4447,7 @@
         "signature": [
           "{ owner?: string | string[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 334
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5081,10 +4461,7 @@
         "signature": [
           "\"cases\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5114,10 +4491,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 164
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5155,10 +4529,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 165
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5188,10 +4559,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 166
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5202,10 +4570,7 @@
         "tags": [],
         "label": "CASE_ALERTS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 55
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5216,10 +4581,7 @@
         "tags": [],
         "label": "CASE_COMMENT_DETAILS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 48
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5233,10 +4595,7 @@
         "signature": [
           "\"cases-comments\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5247,10 +4606,7 @@
         "tags": [],
         "label": "CASE_COMMENTS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 47
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5261,10 +4617,7 @@
         "tags": [],
         "label": "CASE_CONFIGURE_CONNECTORS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 40
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5275,10 +4628,7 @@
         "tags": [],
         "label": "CASE_CONFIGURE_DETAILS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 39
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5292,10 +4642,7 @@
         "signature": [
           "\"cases-configure\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5306,10 +4653,7 @@
         "tags": [],
         "label": "CASE_CONFIGURE_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 38
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5323,10 +4667,7 @@
         "signature": [
           "\"cases-connector-mappings\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5337,10 +4678,7 @@
         "tags": [],
         "label": "CASE_DETAILS_ALERTS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 56
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5351,10 +4689,7 @@
         "tags": [],
         "label": "CASE_DETAILS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 37
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5365,10 +4700,7 @@
         "tags": [],
         "label": "CASE_PUSH_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 49
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5379,10 +4711,7 @@
         "tags": [],
         "label": "CASE_REPORTERS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 50
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5396,10 +4725,7 @@
         "signature": [
           "\"cases\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5410,10 +4736,7 @@
         "tags": [],
         "label": "CASE_STATUS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 51
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5424,10 +4747,7 @@
         "tags": [],
         "label": "CASE_TAGS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 52
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5441,10 +4761,7 @@
         "signature": [
           "\"cases-user-actions\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5455,10 +4772,7 @@
         "tags": [],
         "label": "CASE_USER_ACTIONS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 53
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5536,10 +4850,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: ({ connector_id: string; connector_name: string; external_id: string; external_title: string; external_url: string; } & { pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; }) | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 310
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5601,10 +4912,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; })"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 93
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5618,10 +4926,7 @@
         "signature": [
           "\"description\" | \"title\" | \"comments\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5635,10 +4940,7 @@
         "signature": [
           "({ connector_id: string; connector_name: string; external_id: string; external_title: string; external_url: string; } & { pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; }) | null"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 325
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5716,10 +5018,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }) | undefined; settings?: { syncAlerts: boolean; } | undefined; owner?: string | undefined; } & { id: string; version: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 323
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5789,10 +5088,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 317
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5990,10 +5286,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 318
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6009,10 +5302,7 @@
         "signature": [
           "\"/api/cases\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 36
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6026,10 +5316,7 @@
         "signature": [
           "{ id: string; title: string; }[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 338
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6043,10 +5330,7 @@
         "signature": [
           "{ owner?: string | string[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 321
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6118,10 +5402,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 316
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6183,10 +5464,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; })[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 84
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6248,10 +5526,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 79
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6313,10 +5588,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 82
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6378,10 +5650,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }) | undefined; closure_type?: \"close-by-user\" | \"close-by-pushing\" | undefined; } & { version: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 81
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6443,10 +5712,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 80
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6508,10 +5774,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 83
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6525,10 +5788,7 @@
         "signature": [
           "{ syncAlerts: boolean; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 326
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6558,10 +5818,7 @@
           },
           " | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; fields?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; search?: string | undefined; searchFields?: string | string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; owner?: string | string[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 320
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6759,10 +6016,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[] | undefined; })[]; page: number; per_page: number; total: number; } & { count_open_cases: number; count_in_progress_cases: number; count_closed_cases: number; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 322
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6840,10 +6094,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }) | undefined; settings?: { syncAlerts: boolean; } | undefined; owner?: string | undefined; } & { id: string; version: string; })[]; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 324
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7041,10 +6292,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[] | undefined; })[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 319
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7058,10 +6306,7 @@
         "signature": [
           "{ owner?: string | string[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/status.ts",
-          "lineNumber": 39
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7075,10 +6320,7 @@
         "signature": [
           "{ count_open_cases: number; count_in_progress_cases: number; count_closed_cases: number; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/status.ts",
-          "lineNumber": 38
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7099,10 +6341,7 @@
           },
           "[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/status.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7123,10 +6362,7 @@
             "text": "CaseStatuses"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7142,10 +6378,7 @@
         "signature": [
           "\"type\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 47
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7159,10 +6392,7 @@
         "signature": [
           "{ action_field: (\"status\" | \"description\" | \"title\" | \"comment\" | \"tags\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
-          "lineNumber": 62
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7176,10 +6406,7 @@
         "signature": [
           "{ action_field: (\"status\" | \"description\" | \"title\" | \"comment\" | \"tags\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; } & { action_id: string; case_id: string; comment_id: string | null; } & { sub_case_id?: string | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
-          "lineNumber": 64
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7193,10 +6420,7 @@
         "signature": [
           "({ action_field: (\"status\" | \"description\" | \"title\" | \"comment\" | \"tags\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; owner: string; } & { action_id: string; case_id: string; comment_id: string | null; } & { sub_case_id?: string | undefined; })[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
-          "lineNumber": 63
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7212,10 +6436,7 @@
         "signature": [
           "{ refreshUserActionsAndComments: () => Promise<void>; refreshCase: () => Promise<void>; } | null"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 33
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7229,10 +6450,7 @@
         "signature": [
           "\"close-by-user\" | \"close-by-pushing\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 78
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7350,10 +6568,7 @@
           },
           " | null; version: string; })"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 43
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7423,10 +6638,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; })"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 167
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7472,10 +6684,7 @@
           },
           " | undefined; created_at?: string | undefined; created_by?: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | undefined; owner?: string | undefined; pushed_at?: string | null | undefined; pushed_by?: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null | undefined; updated_at?: string | null | undefined; updated_by?: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null | undefined; })"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 175
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7521,10 +6730,7 @@
           },
           ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } & { id: string; version: string; })"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 174
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7570,10 +6776,7 @@
           },
           ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 168
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7595,10 +6798,7 @@
           },
           ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 178
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7628,10 +6828,7 @@
           },
           ".generatedAlert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 177
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7653,10 +6850,7 @@
           },
           ".user; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 176
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7726,10 +6920,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; })"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 169
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7759,10 +6950,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 171
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7800,10 +6988,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 170
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7873,10 +7058,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[]; page: number; per_page: number; total: number; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 173
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7890,10 +7072,7 @@
         "signature": [
           "{ id: string; name: string; required: boolean; type: \"text\" | \"textarea\"; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 49
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7907,10 +7086,7 @@
         "signature": [
           "{ issueType: string | null; priority: string | null; parent: string | null; } | { incidentTypes: string[] | null; severityCode: string | null; } | { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 104
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7932,10 +7108,7 @@
           },
           ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 95
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7949,10 +7122,7 @@
         "signature": [
           "{ mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 38
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7966,10 +7136,7 @@
         "signature": [
           "{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 37
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7991,10 +7158,7 @@
           },
           ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 96
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8005,10 +7169,7 @@
         "tags": [],
         "label": "CONNECTORS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 64
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8030,10 +7191,7 @@
           },
           ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 98
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8055,10 +7213,7 @@
           },
           ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 101
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8080,10 +7235,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 97
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8145,10 +7297,7 @@
           },
           ".swimlane; fields: { caseId: string | null; } | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 94
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8169,10 +7318,7 @@
           },
           "[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 44
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8186,10 +7332,7 @@
         "signature": [
           "\"dateFormat\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8203,10 +7346,7 @@
         "signature": [
           "\"dateFormat:tz\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8222,10 +7362,7 @@
         "signature": [
           "false"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 91
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8311,10 +7448,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 329
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8334,10 +7468,7 @@
             "text": "ConnectorTypes"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 111
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8423,10 +7554,7 @@
           },
           " | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 330
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8496,10 +7624,7 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 86
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8513,10 +7638,7 @@
         "signature": [
           "{ key: string; value: unknown; }[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 106
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8530,10 +7652,7 @@
         "signature": [
           "{ title: string; id: string; pushedDate: string; url: string; } & { comments?: ({ commentId: string; pushedDate: string; } & { externalCommentId?: string | undefined; })[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 327
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8547,10 +7666,7 @@
         "signature": [
           "{ subCaseId?: string | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasReference?: { id: string; type: string; } | { id: string; type: string; }[] | undefined; fields?: string[] | undefined; filter?: string | undefined; page?: number | undefined; perPage?: number | undefined; search?: string | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 163
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8564,10 +7680,7 @@
         "signature": [
           "{ references: { doc_count: number; caseIds: { buckets: { key: string; }[]; }; }; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 337
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8581,10 +7694,7 @@
         "signature": [
           "{ owner?: string | string[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 90
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8598,10 +7708,7 @@
         "signature": [
           "{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 53
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8615,10 +7722,7 @@
         "signature": [
           "{ issueType: string | null; priority: string | null; parent: string | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/jira.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/jira.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8634,10 +7738,7 @@
         "signature": [
           "5000"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 77
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8651,10 +7752,7 @@
         "signature": [
           "10"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 98
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8668,10 +7766,7 @@
         "signature": [
           "10000"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 97
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8685,10 +7780,7 @@
         "signature": [
           "50"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 78
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8704,10 +7796,7 @@
         "signature": [
           "64"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 104
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8723,10 +7812,7 @@
         "signature": [
           "\"owner\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/constants.ts",
-          "lineNumber": 36
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8740,10 +7826,7 @@
         "signature": [
           "{ incidentTypes: string[] | null; severityCode: string | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/resilient.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/resilient.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8759,10 +7842,7 @@
         "signature": [
           "string[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8776,10 +7856,7 @@
         "signature": [
           "{ defaultSearchOperator?: \"AND\" | \"OR\" | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasReference?: { id: string; type: string; } | { id: string; type: string; }[] | undefined; fields?: string[] | undefined; filter?: string | undefined; page?: number | undefined; perPage?: number | undefined; search?: string | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/saved_object.ts",
-          "lineNumber": 72
-        },
+        "path": "x-pack/plugins/cases/common/api/saved_object.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8795,10 +7872,7 @@
         "signature": [
           "\"securitySolution\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 86
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8812,10 +7886,7 @@
         "signature": [
           "{ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/servicenow_itsm.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/servicenow_itsm.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8829,10 +7900,7 @@
         "signature": [
           "{ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/servicenow_sir.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/servicenow_sir.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8846,10 +7914,7 @@
         "signature": [
           "\"all\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8863,10 +7928,7 @@
         "signature": [
           "\"all\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8877,10 +7939,7 @@
         "tags": [],
         "label": "SUB_CASE_DETAILS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 44
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8894,10 +7953,7 @@
         "signature": [
           "\"cases-sub-case\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8908,10 +7964,7 @@
         "tags": [],
         "label": "SUB_CASE_USER_ACTIONS_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 45
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8922,10 +7975,7 @@
         "tags": [],
         "label": "SUB_CASES_PATCH_DEL_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 42
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8936,10 +7986,7 @@
         "tags": [],
         "label": "SUB_CASES_URL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 43
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8961,10 +8008,7 @@
           },
           "; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; owner: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 106
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8986,10 +8030,7 @@
           },
           " | undefined; } & { id: string; version: string; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 110
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9067,10 +8108,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[] | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 107
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9092,10 +8130,7 @@
           },
           " | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; fields?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; search?: string | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; owner?: string | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 112
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9173,10 +8208,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[] | undefined; })[]; page: number; per_page: number; total: number; } & { count_open_cases: number; count_in_progress_cases: number; count_closed_cases: number; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 109
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9198,10 +8230,7 @@
           },
           " | undefined; } & { id: string; version: string; })[]; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 111
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9279,10 +8308,7 @@
           },
           "; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; version: string; }))[] | undefined; })[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 108
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9296,10 +8322,7 @@
         "signature": [
           "string[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/constants.ts",
-          "lineNumber": 66
-        },
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9313,10 +8336,7 @@
         "signature": [
           "{ caseId: string | null; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/swimlane.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/swimlane.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9330,10 +8350,7 @@
         "signature": [
           "string"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9347,10 +8364,7 @@
         "signature": [
           "\"status\" | \"description\" | \"title\" | \"tags\" | \"settings\" | \"connector\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/ui/types.ts",
-          "lineNumber": 181
-        },
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9364,10 +8378,7 @@
         "signature": [
           "{ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/user.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/cases/common/api/user.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9381,10 +8392,7 @@
         "signature": [
           "\"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
-          "lineNumber": 66
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9398,10 +8406,7 @@
         "signature": [
           "(\"status\" | \"description\" | \"title\" | \"comment\" | \"tags\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\")[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
-          "lineNumber": 67
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9415,10 +8420,7 @@
         "signature": [
           "\"status\" | \"description\" | \"title\" | \"comment\" | \"tags\" | \"settings\" | \"owner\" | \"connector\" | \"pushed\" | \"sub_case\""
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
-          "lineNumber": 68
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -9461,10 +8463,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 67
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9535,10 +8534,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 56
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9561,10 +8557,7 @@
           "StringC",
           "; }>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/alerts.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/alerts.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10073,10 +9066,7 @@
           "StringC",
           "; }>]>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 153
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10585,10 +9575,7 @@
           "StringC",
           "; }>]>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 124
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10611,10 +9598,7 @@
           "StringC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 308
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -10637,10 +9621,7 @@
           "StringC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 300
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11099,10 +10080,7 @@
           "NullC",
           "]>; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 109
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11469,10 +10447,7 @@
           "StringC",
           "; }>]>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 76
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11791,10 +10766,7 @@
           "NullC",
           "]>; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 43
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11811,10 +10783,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 72
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12179,10 +11148,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 53
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12419,10 +11385,7 @@
           "NullC",
           "]>; }>]>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 85
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12737,10 +11700,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 264
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -13021,10 +11981,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 164
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -13043,10 +12000,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 275
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -14675,10 +13629,7 @@
           "StringC",
           "; }>]>>; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 239
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -14701,10 +13652,7 @@
           "StringC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 231
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -14725,10 +13673,7 @@
           "StringC",
           "; }>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 32
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -15005,10 +13950,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 153
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -15259,10 +14201,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 38
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -15513,10 +14452,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 37
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -15641,10 +14577,7 @@
           "StringC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 172
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17293,10 +16226,7 @@
           "NumberC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 254
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17615,10 +16545,7 @@
           "StringC",
           "; }>]>>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 272
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19249,10 +18176,7 @@
           "StringC",
           "; }>]>>; }>]>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 273
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19275,10 +18199,7 @@
           "StringC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/status.ts",
-          "lineNumber": 30
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19299,10 +18220,7 @@
           "NumberC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/status.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19347,10 +18265,7 @@
           },
           ".closed>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/status.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19443,10 +18358,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
-          "lineNumber": 58
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19559,10 +18471,7 @@
           "StringC",
           "; }>]>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
-          "lineNumber": 60
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/user_actions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19701,10 +18610,7 @@
           "NullC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -20031,10 +18937,7 @@
           "NullC",
           "]>; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 141
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -20157,10 +19060,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 126
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -20275,10 +19175,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 94
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -20785,10 +19682,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 100
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -20965,10 +19859,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 116
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21173,10 +20064,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 108
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21693,10 +20581,7 @@
           "NumberC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 146
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21825,10 +20710,7 @@
           "NullC",
           "]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 27
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21865,10 +20747,7 @@
           "LiteralC",
           "<\"not_mapped\">]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21911,10 +20790,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
-          "lineNumber": 32
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22143,10 +21019,7 @@
           "NullC",
           "]>; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-          "lineNumber": 76
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22175,10 +21048,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 45
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22219,10 +21089,7 @@
           "StringC",
           "; }>]>>; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 280
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22291,10 +21158,7 @@
           "LiteralC",
           "<\"asc\">]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
-          "lineNumber": 155
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22321,10 +21185,7 @@
           "StringC",
           "; }>>; }>; }>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22347,10 +21208,7 @@
           "StringC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-          "lineNumber": 64
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22383,10 +21241,7 @@
           "NullC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/jira.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/jira.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22401,10 +21256,7 @@
           "Type",
           "<number, string, unknown>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/saved_object.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/cases/common/api/saved_object.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22433,10 +21285,7 @@
           "NullC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/resilient.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/resilient.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22503,10 +21352,7 @@
           "LiteralC",
           "<\"asc\">]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/saved_object.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/cases/common/api/saved_object.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22551,10 +21397,7 @@
           "NullC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/servicenow_itsm.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/servicenow_itsm.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22611,10 +21454,7 @@
           "NullC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/servicenow_sir.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/servicenow_sir.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22771,10 +21611,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -22829,10 +21666,7 @@
           "StringC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 98
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -23499,10 +22333,7 @@
           "StringC",
           "; }>]>>; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 75
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -23579,10 +22410,7 @@
           "StringC",
           "; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 35
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24269,10 +23097,7 @@
           "NumberC",
           "; }>]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 88
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24331,10 +23156,7 @@
           "StringC",
           "; }>]>>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 103
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -25003,10 +23825,7 @@
           "StringC",
           "; }>]>>; }>]>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
-          "lineNumber": 104
-        },
+        "path": "x-pack/plugins/cases/common/api/cases/sub_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -25027,10 +23846,7 @@
           "NullC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/connectors/swimlane.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/cases/common/api/connectors/swimlane.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -25069,10 +23885,7 @@
           "StringC",
           "]>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/user.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/cases/common/api/user.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -25113,10 +23926,7 @@
           "StringC",
           "]>; }>>"
         ],
-        "source": {
-          "path": "x-pack/plugins/cases/common/api/user.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/cases/common/api/user.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

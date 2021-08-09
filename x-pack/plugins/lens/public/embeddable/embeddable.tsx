@@ -11,7 +11,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import {
   ExecutionContextSearch,
   Filter,
-  IIndexPattern,
   Query,
   TimefilterContract,
   TimeRange,
@@ -82,7 +81,7 @@ export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddab
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
 }
 
 export interface LensEmbeddableDeps {

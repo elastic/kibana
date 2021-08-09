@@ -8,6 +8,7 @@
 
 import {
   EuiBadge,
+  EuiButton,
   EuiBadgeGroup,
   EuiButtonEmpty,
   EuiInMemoryTable,
@@ -15,19 +16,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { CreateButton } from '../create_button';
-import { IndexPatternCreationOption, IndexPatternTableItem } from '../types';
+import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
-import { EmptyState } from './empty_state';
-import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
-import { getIndices } from '../create_index_pattern_wizard/lib';
 
 const pagination = {
   initialPageSize: 10,
@@ -56,66 +52,44 @@ const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
+  showCreateDialog?: boolean;
 }
 
-export const IndexPatternTable = ({ canSave, history }: Props) => {
+export const IndexPatternTable = ({
+  history,
+  canSave,
+  showCreateDialog: showCreateDialogProp = false,
+}: Props) => {
   const {
     setBreadcrumbs,
     uiSettings,
     indexPatternManagementStart,
     chrome,
-    docLinks,
-    application,
-    http,
     data,
+    IndexPatternEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
-  const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
-  const [sources, setSources] = useState<MatchedItem[]>([]);
-  const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
-  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
 
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
     (async function () {
-      const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
-        history.push
-      );
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
         uiSettings.get('defaultIndex'),
-        indexPatternManagementStart,
         data.indexPatterns
       );
-      setIsLoadingIndexPatterns(false);
-      setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
+      setIsLoadingIndexPatterns(false);
+      if (gettedIndexPatterns.length === 0) {
+        setShowCreateDialog(true);
+      }
     })();
-  }, [history.push, indexPatterns.length, indexPatternManagementStart, uiSettings, data]);
-
-  const removeAliases = (item: MatchedItem) =>
-    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
-
-  const loadSources = () => {
-    getIndices(http, () => [], '*', false).then((dataSources) =>
-      setSources(dataSources.filter(removeAliases))
-    );
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  };
-
-  useEffect(() => {
-    getIndices(http, () => [], '*', false).then((dataSources) => {
-      setSources(dataSources.filter(removeAliases));
-      setIsLoadingSources(false);
-    });
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  }, [http, creationOptions]);
+  }, [indexPatternManagementStart, uiSettings, data]);
 
   chrome.docTitle.change(title);
+
+  const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
 
   const columns = [
     {
@@ -150,43 +124,36 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   ];
 
   const createButton = canSave ? (
-    <CreateButton options={creationOptions}>
+    <EuiButton
+      fill={true}
+      iconType="plusInCircle"
+      onClick={() => setShowCreateDialog(true)}
+      data-test-subj="createIndexPatternButton"
+    >
       <FormattedMessage
         id="indexPatternManagement.indexPatternTable.createBtn"
         defaultMessage="Create index pattern"
       />
-    </CreateButton>
+    </EuiButton>
   ) : (
     <></>
   );
 
-  if (isLoadingSources || isLoadingIndexPatterns) {
+  if (isLoadingIndexPatterns) {
     return <></>;
   }
 
-  const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
-
-  if (!indexPatterns.length) {
-    if (!hasDataIndices && !remoteClustersExist) {
-      return (
-        <EmptyState
-          onRefresh={loadSources}
-          docLinks={docLinks}
-          navigateToApp={application.navigateToApp}
-          canSave={canSave}
-        />
-      );
-    } else {
-      return (
-        <EmptyIndexPatternPrompt
-          canSave={canSave}
-          creationOptions={creationOptions}
-          docLinksIndexPatternIntro={docLinks.links.indexPatterns.introduction}
-          setBreadcrumbs={setBreadcrumbs}
-        />
-      );
-    }
-  }
+  const displayIndexPatternEditor = showCreateDialog ? (
+    <IndexPatternEditor
+      onSave={(indexPattern) => {
+        history.push(`patterns/${indexPattern.id}`);
+      }}
+      onCancel={() => setShowCreateDialog(false)}
+      defaultTypeIsRollup={isRollup}
+    />
+  ) : (
+    <></>
+  );
 
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
@@ -214,6 +181,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         sorting={sorting}
         search={search}
       />
+      {displayIndexPatternEditor}
     </div>
   );
 };
