@@ -228,6 +228,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
+      hidden: !agentName || isRumAgentName(agentName) || isIosAgentName(agentName)
     },
     {
       key: 'profiling',
