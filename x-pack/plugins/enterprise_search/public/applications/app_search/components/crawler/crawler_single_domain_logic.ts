@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
+import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -59,7 +59,7 @@ export const CrawlerSingleDomainLogic = kea<
       try {
         await http.delete(`/api/app_search/engines/${engineName}/crawler/domains/${domain.id}`);
 
-        flashSuccessToast(getDeleteDomainSuccessMessage(domain.url));
+        setSuccessMessage(getDeleteDomainSuccessMessage(domain.url));
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CRAWLER_PATH));
       } catch (e) {
         flashAPIErrors(e);

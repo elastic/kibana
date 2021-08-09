@@ -26,7 +26,7 @@ const DEFAULT_VALUES: CrawlerSingleDomainValues = {
 describe('CrawlerSingleDomainLogic', () => {
   const { mount } = new LogicMounter(CrawlerSingleDomainLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,7 +67,7 @@ describe('CrawlerSingleDomainLogic', () => {
           '/api/app_search/engines/some-engine/crawler/domains/1234'
         );
 
-        expect(flashSuccessToast).toHaveBeenCalled();
+        expect(setSuccessMessage).toHaveBeenCalled();
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/crawler');
       });
 
