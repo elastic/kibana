@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, ALERT_STATUS, SPACE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_OWNER, ALERT_STATUS, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
 import { AuditLogger } from '../../../../security/server';
+import { AlertingAuthorizationEntity } from '../../../../alerting/server';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
@@ -26,12 +27,34 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
 };
 
+const DEFAULT_SPACE = 'test_default_space_id';
+
 beforeEach(() => {
   jest.resetAllMocks();
-  alertingAuthMock.getSpaceId.mockImplementation(() => 'test_default_space_id');
+  alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
   // @ts-expect-error
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
+  );
+
+  alertingAuthMock.ensureAuthorized.mockImplementation(
+    // @ts-expect-error
+    async ({
+      ruleTypeId,
+      consumer,
+      operation,
+      entity,
+    }: {
+      ruleTypeId: string;
+      consumer: string;
+      operation: string;
+      entity: typeof AlertingAuthorizationEntity.Alert;
+    }) => {
+      if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
+        return Promise.resolve();
+      }
+      return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+    }
   );
 });
 
@@ -177,8 +200,71 @@ describe('get()', () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith({
       error: undefined,
-      event: { action: 'alert_get', category: ['database'], outcome: 'unknown', type: ['access'] },
-      message: 'User is accessing alert [id=NoxgpHkBqbdrfX07MqXV]',
+      event: { action: 'alert_get', category: ['database'], outcome: 'success', type: ['access'] },
+      message: 'User has accessed alert [id=NoxgpHkBqbdrfX07MqXV]',
+    });
+  });
+
+  test('audit error access if user is unauthorized for given alert', async () => {
+    const indexName = '.alerts-observability-apm.alerts';
+    const fakeAlertId = 'myfakeid1';
+    // fakeRuleTypeId will cause authz to fail
+    const fakeRuleTypeId = 'fake.rule';
+    const alertsClient = new AlertsClient(alertsClientParams);
+    esClientMock.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createApiResponse({
+        body: {
+          took: 5,
+          timed_out: false,
+          _shards: {
+            total: 1,
+            successful: 1,
+            failed: 0,
+            skipped: 0,
+          },
+          hits: {
+            total: 1,
+            max_score: 999,
+            hits: [
+              {
+                found: true,
+                _type: 'alert',
+                _version: 1,
+                _seq_no: 362,
+                _primary_term: 2,
+                _id: fakeAlertId,
+                _index: indexName,
+                _source: {
+                  [RULE_ID]: fakeRuleTypeId,
+                  [ALERT_OWNER]: 'apm',
+                  [ALERT_STATUS]: 'open',
+                  [SPACE_IDS]: [DEFAULT_SPACE],
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm' })).rejects
+      .toThrowErrorMatchingInlineSnapshot(`
+            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"null\\" and operation get 
+            Error: Error: Unauthorized for fake.rule and apm"
+          `);
+
+    expect(auditLogger.log).toHaveBeenLastCalledWith({
+      message: `Failed attempt to access alert [id=${fakeAlertId}]`,
+      event: {
+        action: 'alert_get',
+        category: ['database'],
+        outcome: 'failure',
+        type: ['access'],
+      },
+      error: {
+        code: 'Error',
+        message: 'Unauthorized for fake.rule and apm',
+      },
     });
   });
 

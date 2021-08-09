@@ -24,7 +24,7 @@ import {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from '../../../alerting/server';
-import { Logger, ElasticsearchClient } from '../../../../../src/core/server';
+import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src/core/server';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import { AuditLogger } from '../../../security/server';
 import {
@@ -100,6 +100,14 @@ export class AlertsClient {
     // If spaceId is undefined, it means that spaces is disabled
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
+  }
+
+  private getOutcome(
+    operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get
+  ): { outcome: EcsEventOutcome } {
+    return {
+      outcome: operation === WriteOperations.Update ? 'unknown' : 'success',
+    };
   }
 
   /**
@@ -231,7 +239,7 @@ export class AlertsClient {
           alertAuditEvent({
             action: operationAlertAuditActionMap[operation],
             id: item._id,
-            outcome: 'unknown',
+            ...this.getOutcome(operation),
           })
         )
       );
@@ -275,7 +283,7 @@ export class AlertsClient {
           alertAuditEvent({
             action: operationAlertAuditActionMap[operation],
             id,
-            ...(operation === WriteOperations.Update ? { outcome: 'unknown' } : { operation }),
+            ...this.getOutcome(operation),
           })
         );
       }
