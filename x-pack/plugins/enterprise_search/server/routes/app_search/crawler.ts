@@ -43,6 +43,34 @@ export function registerCrawlerRoutes({
 
   router.post(
     {
+      path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_requests/cancel',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests/active/cancel',
+    })
+  );
+
+  router.post(
+    {
       path: '/api/app_search/engines/{name}/crawler/domains',
       validate: {
         params: schema.object({
@@ -111,6 +139,23 @@ export function registerCrawlerRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v0/crawler/validate_url',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/app_search/engines/{name}/crawler/process_crawls',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        body: schema.object({
+          domains: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/process_crawls',
     })
   );
 }

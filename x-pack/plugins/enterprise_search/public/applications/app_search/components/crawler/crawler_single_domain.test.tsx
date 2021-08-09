@@ -15,17 +15,30 @@ import { shallow } from 'enzyme';
 
 import { EuiCode } from '@elastic/eui';
 
+import { getPageHeaderActions } from '../../../test_helpers';
+
+import { CrawlerStatusBanner } from './components/crawler_status_banner';
+import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
+import { DeleteDomainPanel } from './components/delete_domain_panel';
+import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
+import { CrawlerOverview } from './crawler_overview';
 import { CrawlerSingleDomain } from './crawler_single_domain';
 
 const MOCK_VALUES = {
+  // CrawlerSingleDomainLogic
   dataLoading: false,
   domain: {
     url: 'https://elastic.co',
   },
+  // CrawlerOverviewLogic
+  domains: [],
+  crawlRequests: [],
 };
 
 const MOCK_ACTIONS = {
+  fetchCrawlerData: jest.fn(),
   fetchDomainData: jest.fn(),
+  getLatestCrawlRequests: jest.fn(),
 };
 
 describe('CrawlerSingleDomain', () => {
@@ -39,11 +52,12 @@ describe('CrawlerSingleDomain', () => {
   it('renders', () => {
     const wrapper = shallow(<CrawlerSingleDomain />);
 
+    expect(wrapper.find(DeleteDomainPanel)).toHaveLength(1);
     expect(wrapper.find(EuiCode).render().text()).toContain('https://elastic.co');
-    expect(wrapper.prop('pageHeader')).toEqual({ pageTitle: 'https://elastic.co' });
+    expect(wrapper.prop('pageHeader').pageTitle).toEqual('https://elastic.co');
   });
 
-  it('uses a placeholder for the page title and page chrome if a domain has not been', () => {
+  it('uses a placeholder for the page title and page chrome if a domain has not been set', () => {
     setMockValues({
       ...MOCK_VALUES,
       domain: null,
@@ -51,6 +65,24 @@ describe('CrawlerSingleDomain', () => {
 
     const wrapper = shallow(<CrawlerSingleDomain />);
 
-    expect(wrapper.prop('pageHeader')).toEqual({ pageTitle: 'Loading...' });
+    expect(wrapper.prop('pageHeader').pageTitle).toEqual('Loading...');
+  });
+
+  it('contains a crawler status banner', () => {
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(CrawlerStatusBanner)).toHaveLength(1);
+  });
+
+  it('contains a crawler status indicator', () => {
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(getPageHeaderActions(wrapper).find(CrawlerStatusIndicator)).toHaveLength(1);
+  });
+
+  it('contains a popover to manage crawls', () => {
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(getPageHeaderActions(wrapper).find(ManageCrawlsPopover)).toHaveLength(1);
   });
 });
