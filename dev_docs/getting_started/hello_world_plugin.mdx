@@ -22,26 +22,38 @@ This is a good option if you want to understand the bare minimum needed to regis
 1. Create your plugin folder. Start off in the `kibana` folder.
 
 ```
-> cd examples
-> mkdir hello_world
-> cd hello_world
+$ cd examples
+$ mkdir hello_world
+$ cd hello_world
 ```
 
-2. Create the kibana.json manifest file.
+2. Create the <DocLink id="kibDevTutorialBuildAPlugin" section="1-kibanajson" text="kibana.json manifest file"/>.
 
 ```
-> echo '{
+$ touch kibana.json
+```
+
+and add the following:
+
+```
+{
   "id": "helloWorld",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "ui": true
-}' > kibana.json
+}
 ```
 
 3. Create a `tsconfig.json` file.
 
 ```
-> echo '{
+$ touch tsconfig.json
+```
+
+And add the following to it:
+
+```
+{
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./target",
@@ -57,17 +69,16 @@ This is a good option if you want to understand the bare minimum needed to regis
   ],
   "exclude": []
 }
-' > tsconfig.json
 ```
 
-4. Create a `public/plugin.tsx` file.
+4. Create a <DocLink id="kibDevTutorialBuildAPlugin" section="2-publicindexts" text="`public/plugin.tsx` file "/>.
 
 ```
-> mkdir public
-> touch plugin.tsx
+$ mkdir public
+$ touch plugin.tsx
 ```
 
-Add the following to your `plugin.tsx` file:
+And add the following to it:
 
 ```ts
 import React from 'react';
@@ -93,16 +104,18 @@ export class HelloWorldPlugin implements Plugin {
 }
 ```
 
-5. Create your `public/index.ts` file.
+5. Create a <DocLink id="kibDevTutorialBuildAPlugin" section="3-publicplugints" text="`public/index.ts` file "/>.
 
 ```
-> echo '
+$ touch index.ts
+```
+
+```ts
 import { HelloWorldPlugin } from './plugin';
 
 export function plugin() {
   return new HelloWorldPlugin();
 }
-' > index.ts
 ```
 
 ## 2. Option 2 - Use the automatic plugin generator
