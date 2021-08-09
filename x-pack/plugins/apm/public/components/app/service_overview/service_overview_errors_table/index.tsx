@@ -22,7 +22,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_column';
 
 interface Props {
@@ -32,7 +32,7 @@ type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceNam
 type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
-type SortField = 'name' | 'last_seen' | 'occurrences';
+type SortField = 'name' | 'lastSeen' | 'occurrences';
 
 const PAGE_SIZE = 5;
 const DEFAULT_SORT = {
@@ -205,7 +205,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
-          <ServiceOverviewTableContainer
+          <OverviewTableContainer
             isEmptyAndLoading={
               totalItems === 0 && status === FETCH_STATUS.LOADING
             }
@@ -245,7 +245,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 sort,
               }}
             />
-          </ServiceOverviewTableContainer>
+          </OverviewTableContainer>
         </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>

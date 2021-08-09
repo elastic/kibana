@@ -12,6 +12,10 @@ import { ViewContentHeader } from '../../shared/view_content_header';
 
 export const AccountSettingsSidebar = () => {
   return (
-    <ViewContentHeader title={ACCOUNT_SETTINGS_TITLE} description={ACCOUNT_SETTINGS_DESCRIPTION} />
+    <ViewContentHeader
+      headingLevel={1}
+      title={ACCOUNT_SETTINGS_TITLE}
+      description={ACCOUNT_SETTINGS_DESCRIPTION}
+    />
   );
 };

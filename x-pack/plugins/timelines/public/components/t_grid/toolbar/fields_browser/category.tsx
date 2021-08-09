@@ -15,12 +15,10 @@ import {
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
 } from '../../../../../common';
-// eslint-disable-next-line no-duplicate-imports
 import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
 
 import { CategoryTitle } from './category_title';
 import { getFieldColumns } from './field_items';
-// eslint-disable-next-line no-duplicate-imports
 import type { FieldItem } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 
@@ -28,9 +26,8 @@ import * as i18n from './translations';
 
 const TableContainer = styled.div<{ height: number; width: number }>`
   ${({ height }) => `height: ${height}px`};
-  overflow-x: hidden;
-  overflow-y: auto;
   ${({ width }) => `width: ${width}px`};
+  overflow: hidden;
 `;
 
 TableContainer.displayName = 'TableContainer';
@@ -99,7 +96,7 @@ export const Category = React.memo<Props>(
           width={width}
         >
           <EuiInMemoryTable
-            className={CATEGORY_TABLE_CLASS_NAME}
+            className={`${CATEGORY_TABLE_CLASS_NAME} eui-yScroll`}
             items={fieldItemsWithRowindex}
             columns={columns}
             pagination={false}

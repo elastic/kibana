@@ -9,9 +9,12 @@ import { set } from '@elastic/safer-lodash-set';
 import { FieldMap } from '../../../../common/field_map';
 import { IndexMappings } from '../../elasticsearch';
 
-export function mappingFromFieldMap(fieldMap: FieldMap): IndexMappings {
+export function mappingFromFieldMap(
+  fieldMap: FieldMap,
+  dynamic: 'strict' | boolean
+): IndexMappings {
   const mappings = {
-    dynamic: 'strict' as const,
+    dynamic,
     properties: {},
   };
 

@@ -55,11 +55,39 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
         expect(response.status).to.be(200);
 
-        expect(response.body.avgCpuUsage).to.be(null);
-        expect(response.body.avgErrorRate).to.be(null);
-        expect(response.body.avgMemoryUsage).to.be(null);
-        expect(response.body.transactionStats.avgRequestsPerMinute).to.be(null);
-        expect(response.body.transactionStats.avgTransactionDuration).to.be(null);
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "avgCpuUsage": null,
+            "avgErrorRate": null,
+            "avgMemoryUsage": null,
+            "transactionStats": Object {
+              "avgRequestsPerMinute": null,
+              "avgTransactionDuration": null,
+            },
+          }
+        `);
+      });
+    });
+
+    describe('/api/apm/service-map/backend/{backendName}', () => {
+      it('returns an object with nulls', async () => {
+        const q = querystring.stringify({
+          start: metadata.start,
+          end: metadata.end,
+        });
+        const response = await supertest.get(`/api/apm/service-map/backend/postgres?${q}`);
+
+        expect(response.status).to.be(200);
+
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "avgErrorRate": null,
+            "transactionStats": Object {
+              "avgRequestsPerMinute": null,
+              "avgTransactionDuration": null,
+            },
+          }
+        `);
       });
     });
   });
@@ -89,8 +117,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         expectSnapshot(serviceNames).toMatchInline(`
           Array [
             "auditbeat",
-            "kibana",
-            "kibana-frontend",
             "opbeans-dotnet",
             "opbeans-go",
             "opbeans-java",
@@ -109,10 +135,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
         expectSnapshot(externalDestinations).toMatchInline(`
           Array [
-            ">8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243",
             ">elasticsearch",
-            ">epr-snapshot.elastic.co:443",
-            ">feeds.elastic.co:443",
             ">postgresql",
             ">redis",
             ">sqlite",
@@ -150,22 +173,22 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
             expect(dataWithAnomalies).not.to.be.empty();
 
-            expectSnapshot(dataWithAnomalies.length).toMatchInline(`6`);
+            expectSnapshot(dataWithAnomalies.length).toMatchInline(`7`);
             expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
               Array [
                 Object {
                   "data": Object {
-                    "agent.name": "nodejs",
-                    "id": "kibana",
-                    "service.environment": "production",
-                    "service.name": "kibana",
+                    "agent.name": "rum-js",
+                    "id": "opbeans-rum",
+                    "service.environment": "testing",
+                    "service.name": "opbeans-rum",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 635652.26283725,
+                      "actualValue": 1020870.96774194,
                       "anomalyScore": 0,
                       "healthStatus": "healthy",
-                      "jobId": "apm-production-802c-high_mean_transaction_duration",
-                      "serviceName": "kibana",
-                      "transactionType": "request",
+                      "jobId": "apm-testing-41e5-high_mean_transaction_duration",
+                      "serviceName": "opbeans-rum",
+                      "transactionType": "page-load",
                     },
                   },
                 },
@@ -176,10 +199,10 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                     "service.environment": "production",
                     "service.name": "opbeans-ruby",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 24400.8867924528,
+                      "actualValue": 62009.3356643357,
                       "anomalyScore": 0,
                       "healthStatus": "healthy",
-                      "jobId": "apm-production-802c-high_mean_transaction_duration",
+                      "jobId": "apm-production-6117-high_mean_transaction_duration",
                       "serviceName": "opbeans-ruby",
                       "transactionType": "request",
                     },
@@ -187,16 +210,16 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 },
                 Object {
                   "data": Object {
-                    "agent.name": "java",
-                    "id": "opbeans-java",
+                    "agent.name": "python",
+                    "id": "opbeans-python",
                     "service.environment": "production",
-                    "service.name": "opbeans-java",
+                    "service.name": "opbeans-python",
                     "serviceAnomalyStats": Object {
-                      "actualValue": 19105.8492063492,
-                      "anomalyScore": 0,
+                      "actualValue": 38862.7831325301,
+                      "anomalyScore": 0.0725701910161626,
                       "healthStatus": "healthy",
-                      "jobId": "apm-production-802c-high_mean_transaction_duration",
-                      "serviceName": "opbeans-java",
+                      "jobId": "apm-production-6117-high_mean_transaction_duration",
+                      "serviceName": "opbeans-python",
                       "transactionType": "request",
                     },
                   },
@@ -246,6 +269,52 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             expect(response.body.elements.length).to.be.greaterThan(1);
           });
         });
+      });
+    });
+
+    describe('/api/apm/service-map/service/{serviceName}', () => {
+      it('returns an object with data', async () => {
+        const q = querystring.stringify({
+          start: metadata.start,
+          end: metadata.end,
+        });
+        const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
+
+        expect(response.status).to.be(200);
+
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "avgCpuUsage": 0.240216666666667,
+            "avgErrorRate": 0,
+            "avgMemoryUsage": 0.202572668763642,
+            "transactionStats": Object {
+              "avgRequestsPerMinute": 5.2,
+              "avgTransactionDuration": 53906.6603773585,
+            },
+          }
+        `);
+      });
+    });
+
+    describe('/api/apm/service-map/backend/{backendName}', () => {
+      it('returns an object with data', async () => {
+        const q = querystring.stringify({
+          start: metadata.start,
+          end: metadata.end,
+        });
+        const response = await supertest.get(`/api/apm/service-map/backend/postgresql?${q}`);
+
+        expect(response.status).to.be(200);
+
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "avgErrorRate": 0,
+            "transactionStats": Object {
+              "avgRequestsPerMinute": 82.9666666666667,
+              "avgTransactionDuration": 18307.583366814,
+            },
+          }
+        `);
       });
     });
   });

@@ -218,7 +218,7 @@ export class SecurityPageObject extends FtrService {
     }
 
     if (expectedResult === 'chrome') {
-      await this.find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
+      await this.find.byCssSelector('[data-test-subj="userMenuAvatar"]', 20000);
       this.log.debug(`Finished login process currentUrl = ${await this.browser.getCurrentUrl()}`);
     }
 
@@ -485,10 +485,7 @@ export class SecurityPageObject extends FtrService {
 
     if (roleObj.elasticsearch.indices[0].query) {
       await this.testSubjects.click('restrictDocumentsQuery0');
-      await this.monacoEditor.setCodeEditorValue(
-        0,
-        JSON.stringify(roleObj.elasticsearch.indices[0].query)
-      );
+      await this.monacoEditor.setCodeEditorValue(roleObj.elasticsearch.indices[0].query);
     }
 
     const globalPrivileges = (roleObj.kibana as any).global;

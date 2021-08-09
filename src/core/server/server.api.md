@@ -372,7 +372,7 @@ export const config: {
             healthCheck: import("@kbn/config-schema").ObjectType<{
                 delay: Type<import("moment").Duration>;
             }>;
-            ignoreVersionMismatch: import("@kbn/config-schema/target/types").ConditionalType<false, boolean, boolean>;
+            ignoreVersionMismatch: import("@kbn/config-schema/target_types/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
     logging: {
@@ -2268,6 +2268,7 @@ export interface SavedObjectExportBaseOptions {
 // @public
 export interface SavedObjectMigrationContext {
     readonly convertToMultiNamespaceTypeVersion?: string;
+    readonly isSingleNamespaceType: boolean;
     readonly log: SavedObjectsMigrationLogger;
     readonly migrationVersion: string;
 }
@@ -3162,6 +3163,7 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 export class SavedObjectsUtils {
     static createEmptyFindResponse: <T, A>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T, A>;
     static generateId(): string;
+    static getConvertedObjectId(namespace: string | undefined, type: string, id: string): string;
     static isRandomId(id: string | undefined): boolean;
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;

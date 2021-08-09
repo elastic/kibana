@@ -151,7 +151,7 @@ describe('Case Configuration API', () => {
 
     test('check url, method, signal', async () => {
       await fetchActionTypes({ signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/actions/list_action_types', {
+      expect(fetchMock).toHaveBeenCalledWith('/api/actions/connector_types', {
         method: 'GET',
         signal: abortCtrl.signal,
       });
