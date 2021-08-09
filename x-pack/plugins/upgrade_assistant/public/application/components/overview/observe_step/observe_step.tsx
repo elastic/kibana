@@ -57,7 +57,12 @@ const DeprecationLogsPreview = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText>
-                      <p>Loading deprecation logs</p>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.upgradeAssistant.overview.loadingDeprecationLogs"
+                          defaultMessage="Loading deprecation logs"
+                        />
+                      </p>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -77,7 +82,12 @@ const DeprecationLogsPreview = () => {
                 >
                   <EuiFlexItem grow={false}>
                     <EuiText>
-                      <p>Deprecation logs will appear here when collected.</p>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.upgradeAssistant.overview.emptyDeprecationLogs"
+                          defaultMessage="Deprecation logs will appear here when collected."
+                        />
+                      </p>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -103,13 +113,12 @@ const DeprecationLogsPreview = () => {
   );
 };
 
-export const getObserveStep = ({
-  docLinks,
-  currentMajor,
-}: {
+interface Props {
   docLinks: DocLinksStart;
   currentMajor: number;
-}): EuiStepProps => {
+}
+
+export const getObserveStep = ({ docLinks, currentMajor }: Props): EuiStepProps => {
   return {
     title: i18n.translate('xpack.upgradeAssistant.overview.observeStepTitle', {
       defaultMessage: 'Log deprecated API usage and update your applications.',

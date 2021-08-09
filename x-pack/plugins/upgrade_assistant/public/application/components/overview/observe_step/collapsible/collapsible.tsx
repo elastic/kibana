@@ -30,7 +30,7 @@ export const Collapsible: FunctionComponent<CollapsibleProps> = ({
   renderFooter,
   showFooter,
 }) => {
-  const [isExpanded, setExpanded] = useState<boolean>(false);
+  const [isExpanded, setExpanded] = useState(false);
 
   const panelClassName = classNames('upgCollapsible', {
     collapsed: !isExpanded,

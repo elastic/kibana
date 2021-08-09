@@ -45,7 +45,7 @@ const DiscoverAppLink: FunctionComponent = () => {
       indexPatternId,
       timeRange: {
         to: 'now',
-        from: 'now-1d',
+        from: 'now-7d',
         mode: 'relative',
       },
     });

@@ -24,15 +24,6 @@ import { getResolveStep } from './resolve_step';
 import { getObserveStep } from './observe_step';
 import { getUpgradeStep } from './upgrade_step';
 
-const i18nTexts = {
-  pageTitle: i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
-    defaultMessage: 'Upgrade Assistant',
-  }),
-  docLink: i18n.translate('xpack.upgradeAssistant.overview.documentationLinkText', {
-    defaultMessage: 'Documentation',
-  }),
-};
-
 const PageDescription = ({ version, whatsNewLink }: { version: number; whatsNewLink: string }) => (
   <>
     <FormattedMessage
@@ -83,7 +74,9 @@ export const DeprecationsOverview: FunctionComponent = () => {
     <div data-test-subj="overviewPageContent">
       <EuiPageHeader
         bottomBorder
-        pageTitle={i18nTexts.pageTitle}
+        pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
+          defaultMessage: 'Upgrade Assistant',
+        })}
         description={
           <PageDescription
             version={currentMajor}
@@ -97,7 +90,10 @@ export const DeprecationsOverview: FunctionComponent = () => {
             iconType="help"
             data-test-subj="documentationLink"
           >
-            {i18nTexts.docLink}
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.documentationLinkText"
+              defaultMessage="Documentation"
+            />
           </EuiButtonEmpty>,
         ]}
       />
