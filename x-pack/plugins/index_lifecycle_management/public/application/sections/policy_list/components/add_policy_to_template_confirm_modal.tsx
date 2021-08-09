@@ -30,11 +30,13 @@ import { LearnMoreLink } from '../../edit_policy/components';
 
 interface Props {
   policy: PolicyFromES;
+  onSuccess: (indexTemplate: string) => void;
   onCancel: () => void;
 }
 
 export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = ({
   policy,
+  onSuccess,
   onCancel,
 }) => {
   const [isLegacy, setIsLegacy] = useState<boolean>(false);
@@ -234,7 +236,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
         }
       );
       toasts.addSuccess(message);
-      onCancel();
+      onSuccess(templateName);
     } catch (e) {
       const title = i18n.translate(
         'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.errorMessage',
@@ -257,6 +259,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
 
   return (
     <EuiConfirmModal
+      data-test-subj="addPolicyToTemplateModal"
       title={title}
       onCancel={onCancel}
       onConfirm={addPolicyToTemplate}
