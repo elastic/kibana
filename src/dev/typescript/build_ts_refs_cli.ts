@@ -15,6 +15,7 @@ import { RefOutputCache } from './ref_output_cache';
 import { buildAllTsRefs } from './build_ts_refs';
 import { updateRootRefsConfig, ROOT_REFS_CONFIG_PATH } from './root_refs_config';
 import { Project } from './project';
+import { PROJECT_CACHE } from './projects';
 import { concurrentMap } from './concurrent_map';
 
 const CACHE_WORKING_DIR = Path.resolve(REPO_ROOT, 'data/ts_refs_output_cache');
@@ -43,9 +44,13 @@ export async function runBuildRefsCli() {
 
       // find the outDirs of the root refs config file deeply, so we know all
       // the outDirs we are going to be cleaning or populating with caches
-      const outDirs = Project.at(ROOT_REFS_CONFIG_PATH, {
-        skipConfigValidation: true,
-      }).getOutDirsDeep();
+      const outDirs = Project.load(
+        ROOT_REFS_CONFIG_PATH,
+        {},
+        {
+          skipConfigValidation: true,
+        }
+      ).getOutDirsDeep(PROJECT_CACHE);
 
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
       const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';

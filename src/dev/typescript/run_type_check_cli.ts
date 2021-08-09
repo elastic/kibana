@@ -17,10 +17,15 @@ import { lastValueFrom } from '@kbn/std';
 
 import { PROJECTS } from './projects';
 import { buildAllTsRefs } from './build_ts_refs';
+import { updateRootRefsConfig } from './root_refs_config';
 
 export async function runTypeCheckCli() {
   run(
     async ({ log, flags, procRunner }) => {
+      // if the tsconfig.refs.json file is not self-managed then make sure it has
+      // a reference to every composite project in the repo
+      await updateRootRefsConfig(log);
+
       const { failed } = await buildAllTsRefs({ log, procRunner, verbose: !!flags.verbose });
       if (failed) {
         throw createFailError('Unable to build TS project refs');
@@ -44,7 +49,7 @@ export async function runTypeCheckCli() {
       }
 
       const concurrency = Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
-      log.info('running type check in', projects.length, 'projects,', concurrency, 'at a time');
+      log.info('running type check in', projects.length, 'non-composite projects');
 
       const tscArgs = [
         ...['--emitDeclarationOnly', 'false'],
@@ -65,7 +70,7 @@ export async function runTypeCheckCli() {
               [
                 '--max-old-space-size=5120',
                 require.resolve('typescript/bin/tsc'),
-                ...['--project', p.tsConfigPath],
+                ...['--project', p.tsConfigPath, ...(flags.verbose ? ['--verbose'] : [])],
                 ...tscArgs,
               ],
               {

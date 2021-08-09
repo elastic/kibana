@@ -26,17 +26,24 @@ function testMatchers(matchers: IMinimatch[], path: string) {
   return matchers.some((matcher) => matcher.match(path));
 }
 
-interface Options {
+export interface ProjectOptions {
   name?: string;
   disableTypeCheck?: boolean;
-  skipConfigValidation?: boolean;
-
-  _loadingPath?: string[];
-  _cache?: Map<string, Project>;
 }
+
+interface LoadOptions {
+  history?: string[];
+  cache?: Map<string, Project>;
+  skipConfigValidation?: boolean;
+}
+
 export class Project {
-  static at(tsConfigPath: string, options: Options = {}): Project {
-    const cache = options._cache ?? new Map<string, Project>();
+  static load(
+    tsConfigPath: string,
+    projectOptions: ProjectOptions,
+    loadOptions: LoadOptions = {}
+  ): Project {
+    const cache = loadOptions.cache ?? new Map<string, Project>();
     const cached = cache.get(tsConfigPath);
     if (cached) {
       return cached;
@@ -44,7 +51,7 @@ export class Project {
 
     const config = parseTsConfig(tsConfigPath);
 
-    if (!options?.skipConfigValidation) {
+    if (!loadOptions?.skipConfigValidation) {
       if (config.files) {
         throw new Error(`${tsConfigPath} must not use "files" key`);
       }
@@ -55,8 +62,9 @@ export class Project {
     }
 
     const directory = Path.dirname(tsConfigPath);
-    const disableTypeCheck = options?.disableTypeCheck || false;
-    const name = options?.name || Path.relative(REPO_ROOT, directory) || Path.basename(directory);
+    const disableTypeCheck = projectOptions?.disableTypeCheck || false;
+    const name =
+      projectOptions?.name || Path.relative(REPO_ROOT, directory) || Path.basename(directory);
     const include = config.include ? makeMatchers(directory, config.include) : undefined;
     const exclude = config.exclude ? makeMatchers(directory, config.exclude) : undefined;
 
@@ -65,17 +73,21 @@ export class Project {
       const baseConfigPath = Path.resolve(directory, config.extends);
 
       // prevent circular deps
-      if (options._loadingPath?.includes(baseConfigPath)) {
+      if (loadOptions.history?.includes(baseConfigPath)) {
         throw new Error(
-          `circular "extends" are not supported in tsconfig files: ${options._loadingPath} => ${baseConfigPath}`
+          `circular "extends" are not supported in tsconfig files: ${loadOptions.history} => ${baseConfigPath}`
         );
       }
 
-      baseProject = Project.at(baseConfigPath, {
-        skipConfigValidation: true,
-        _loadingPath: [...(options._loadingPath ?? []), tsConfigPath],
-        _cache: cache,
-      });
+      baseProject = Project.load(
+        baseConfigPath,
+        {},
+        {
+          skipConfigValidation: true,
+          history: [...(loadOptions.history ?? []), tsConfigPath],
+          cache,
+        }
+      );
     }
 
     const project = new Project(
@@ -141,17 +153,12 @@ export class Project {
     return this.baseProject ? this.baseProject.getRefdPaths() : [];
   }
 
-  public getOutDirsDeep(): string[] {
-    const cache = new Map<string, Project>();
+  public getOutDirsDeep(cache?: Map<string, Project>): string[] {
     const outDirs = new Set<string>();
     const queue = new Set<string>([this.tsConfigPath]);
 
     for (const path of queue) {
-      const project =
-        path === this.tsConfigPath
-          ? this
-          : Project.at(path, { skipConfigValidation: true, _cache: cache });
-
+      const project = Project.load(path, {}, { skipConfigValidation: true, cache });
       const outDir = project.getOutDir();
       if (outDir) {
         outDirs.add(outDir);
