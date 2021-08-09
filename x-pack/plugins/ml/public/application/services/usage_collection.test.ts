@@ -25,15 +25,40 @@ describe('usage_collection', () => {
   test('mlUsageCollection', () => {
     const mlUsageCollection = mlUsageCollectionProvider(usageCollection);
 
-    mlUsageCollection.click('test');
-    mlUsageCollection.count('test');
+    mlUsageCollection.click('exported_anomaly_detector_jobs');
+    mlUsageCollection.count('exported_data_frame_analytics_jobs');
     expect(usageCollection.reportUiCounter).toHaveBeenCalledTimes(2);
+    expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
+      'ml',
+      'click',
+      'exported_anomaly_detector_jobs',
+      undefined
+    );
+    expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
+      'ml',
+      'count',
+      'exported_data_frame_analytics_jobs',
+      undefined
+    );
   });
 
   test('mlUsageCollection1', () => {
     const mlUsageCollection = mlUsageCollectionProvider(undefined);
-    mlUsageCollection.click('test', 1);
-    mlUsageCollection.count('test', 2);
+    mlUsageCollection.click('imported_anomaly_detector_jobs', 1);
+    mlUsageCollection.count('imported_data_frame_analytics_jobs', 2);
     expect(usageCollection.reportUiCounter).toHaveBeenCalledTimes(0);
+
+    expect(usageCollection.reportUiCounter).not.toHaveBeenCalledWith(
+      'ml',
+      'click',
+      'imported_anomaly_detector_jobs',
+      undefined
+    );
+    expect(usageCollection.reportUiCounter).not.toHaveBeenCalledWith(
+      'ml',
+      'count',
+      'imported_data_frame_analytics_jobs',
+      undefined
+    );
   });
 });
