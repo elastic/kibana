@@ -446,11 +446,6 @@ describe('savedObjectsClient/errorTypes', () => {
       expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
     });
 
-    it('makes an error identifiable as an NotFoundEsUnavailableError error', () => {
-      const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('foo', 'bar');
-      expect(SavedObjectsErrorHelpers.isNotFoundEsUnavailableError(error)).toBe(true);
-    });
-
     it('returns a boom error', () => {
       const error = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('foo', 'bar');
       expect(error).toHaveProperty('isBoom', true);

@@ -1263,7 +1263,7 @@ export class SavedObjectsRepository {
         return res;
       })
       .catch((err) => {
-        if (SavedObjectsErrorHelpers.isNotFoundEsUnavailableError(err)) {
+        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
           throw err;
         }
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {

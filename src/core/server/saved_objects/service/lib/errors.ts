@@ -210,12 +210,4 @@ export class SavedObjectsErrorHelpers {
       `x-elastic-product not present or not recognized`
     );
   }
-
-  public static isNotFoundEsUnavailableError(error: Error | DecoratedError) {
-    return (
-      isSavedObjectsClientError(error) &&
-      error[code] === CODE_ES_UNAVAILABLE &&
-      error.message.startsWith(`x-elastic-product not present or not recognized`)
-    );
-  }
 }
