@@ -24,11 +24,6 @@ export function SeverityBadge({ severityLevel }: SeverityBadgeProps) {
   }
 
   return (
-    <EuiBadge color={severityLevel ? colorMap[severityLevel] : 'default'}>
-      {severityLevel ??
-        i18n.translate('xpack.observability.severityBadge.unknownDescription', {
-          defaultMessage: 'unknown',
-        })}
-    </EuiBadge>
+    <EuiBadge color={severityLevel ? colorMap[severityLevel] : 'default'}>{severityLevel}</EuiBadge>
   );
 }
