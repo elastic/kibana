@@ -82,3 +82,35 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-security.alerts",
+    "id": "space1securityalert",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "rule.id": "siem.signals",
+      "message": "hello world security",
+      "kibana.alert.owner": "siem",
+      "kibana.alert.status": "open",
+      "kibana.space_ids": ["space1"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-security.alerts",
+    "id": "space2securityalert",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "rule.id": "siem.signals",
+      "message": "hello world security",
+      "kibana.alert.owner": "siem",
+      "kibana.alert.status": "open",
+      "kibana.space_ids": ["space2"]
+    }
+  }
+}
