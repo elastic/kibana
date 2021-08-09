@@ -30,7 +30,7 @@ export interface SerializableState {
   [key: string]: State | State[];
 }
 
-/** @internal **/
+/** @public **/
 export type AggConfigSerialized = Ensure<
   {
     type: string;
