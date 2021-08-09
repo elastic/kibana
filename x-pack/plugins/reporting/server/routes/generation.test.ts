@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import rison from 'rison-node';
 import { UnwrapPromise } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { of } from 'rxjs';
@@ -129,7 +130,7 @@ describe('POST /api/reporting/generate', () => {
 
     await supertest(httpSetup.server.listener)
       .post('/api/reporting/generate/TonyHawksProSkater2')
-      .send({ jobParams: `abc` })
+      .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot('"Invalid export-type of TonyHawksProSkater2"')
@@ -145,7 +146,7 @@ describe('POST /api/reporting/generate', () => {
 
     await supertest(httpSetup.server.listener)
       .post('/api/reporting/generate/printablePdf')
-      .send({ jobParams: `abc` })
+      .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
   });
 
@@ -157,7 +158,7 @@ describe('POST /api/reporting/generate', () => {
 
     await supertest(httpSetup.server.listener)
       .post('/api/reporting/generate/printablePdf')
-      .send({ jobParams: `abc` })
+      .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchObject({

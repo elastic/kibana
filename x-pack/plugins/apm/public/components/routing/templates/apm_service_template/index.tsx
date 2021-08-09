@@ -20,7 +20,6 @@ import {
   isJavaAgentName,
   isRumAgentName,
 } from '../../../../../common/agent_name';
-import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -37,6 +36,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
     | 'overview'
     | 'transactions'
+    | 'dependencies'
     | 'errors'
     | 'metrics'
     | 'nodes'
@@ -124,7 +124,7 @@ function TemplateWithContext({
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName } = useApmServiceContext();
-  const { core, config } = useApmPluginContext();
+  const { config } = useApmPluginContext();
 
   const router = useApmRouter();
 
@@ -151,7 +151,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
-      hidden: !core.uiSettings.get(enableServiceOverview),
     },
     {
       key: 'transactions',
@@ -161,6 +160,16 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       label: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
         defaultMessage: 'Transactions',
+      }),
+    },
+    {
+      key: 'dependencies',
+      href: router.link('/services/:serviceName/dependencies', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
+        defaultMessage: 'Dependencies',
       }),
     },
     {

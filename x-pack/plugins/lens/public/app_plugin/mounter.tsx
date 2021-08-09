@@ -6,24 +6,20 @@
  */
 
 import React, { FC, useCallback } from 'react';
-
+import { DeepPartial } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-
-import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { Provider } from 'react-redux';
-import { isEqual } from 'lodash';
-import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
-import { Datasource, EditorFrameStart, Visualization } from '../types';
+import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
@@ -32,32 +28,18 @@ import {
   LensByReferenceInput,
   LensByValueInput,
 } from '../embeddable/embeddable';
-import {
-  ACTION_VISUALIZE_LENS_FIELD,
-  VisualizeFieldContext,
-} from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-
 import {
   makeConfigureStore,
   navigateAway,
-  getPreloadedState,
   LensRootStore,
-  setState,
-  LensAppState,
-  updateLayer,
-  updateVisualizationState,
+  loadInitial,
+  LensState,
 } from '../state_management';
-import { getPersistedDoc } from './save_modal_container';
-import { getResolvedDateRange, getInitialDatasourceId } from '../utils';
-import { initializeDatasources } from '../editor_frame_service/editor_frame';
-import { generateId } from '../id_generator';
-import {
-  getVisualizeFieldSuggestions,
-  switchToSuggestion,
-} from '../editor_frame_service/editor_frame/suggestion_helpers';
+import { getPreloadedState } from '../state_management/lens_slice';
 
 export async function getLensServices(
   coreStart: CoreStart,
@@ -114,7 +96,7 @@ export async function mountApp(
 
   const lensServices = await getLensServices(coreStart, startDependencies, attributeService);
 
-  const { stateTransfer, data, storage, dashboardFeatureFlag } = lensServices;
+  const { stateTransfer, data, storage } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -183,37 +165,19 @@ export async function mountApp(
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
   }
+
   const { datasourceMap, visualizationMap } = instance;
+  const storeDeps = {
+    lensServices,
+    datasourceMap,
+    visualizationMap,
+    embeddableEditorIncomingState,
+    initialContext,
+  };
+  const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
+    lens: getPreloadedState(storeDeps),
+  } as DeepPartial<LensState>);
 
-  const initialDatasourceId = getInitialDatasourceId(datasourceMap);
-  const datasourceStates: LensAppState['datasourceStates'] = {};
-  if (initialDatasourceId) {
-    datasourceStates[initialDatasourceId] = {
-      state: null,
-      isLoading: true,
-    };
-  }
-
-  const preloadedState = getPreloadedState({
-    isLoading: true,
-    query: data.query.queryString.getQuery(),
-    // Do not use app-specific filters from previous app,
-    // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-    filters: !initialContext
-      ? data.query.filterManager.getGlobalFilters()
-      : data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.getSessionId(),
-    resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-    isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
-    activeDatasourceId: initialDatasourceId,
-    datasourceStates,
-    visualization: {
-      state: null,
-      activeId: Object.keys(visualizationMap)[0] || null,
-    },
-  });
-
-  const lensStore: LensRootStore = makeConfigureStore(preloadedState, { data });
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
       const redirectCallback = useCallback(
@@ -224,17 +188,7 @@ export async function mountApp(
       );
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
-      loadInitialStore(
-        redirectCallback,
-        initialInput,
-        lensServices,
-        lensStore,
-        embeddableEditorIncomingState,
-        dashboardFeatureFlag,
-        datasourceMap,
-        visualizationMap,
-        initialContext
-      );
+      lensStore.dispatch(loadInitial({ redirectCallback, initialInput }));
 
       return (
         <Provider store={lensStore}>
@@ -308,182 +262,4 @@ export async function mountApp(
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
   };
-}
-
-export function loadInitialStore(
-  redirectCallback: (savedObjectId?: string) => void,
-  initialInput: LensEmbeddableInput | undefined,
-  lensServices: LensAppServices,
-  lensStore: LensRootStore,
-  embeddableEditorIncomingState: EmbeddableEditorState | undefined,
-  dashboardFeatureFlag: DashboardFeatureFlagConfig,
-  datasourceMap: Record<string, Datasource>,
-  visualizationMap: Record<string, Visualization>,
-  initialContext?: VisualizeFieldContext
-) {
-  const { attributeService, chrome, notifications, data } = lensServices;
-  const { persistedDoc } = lensStore.getState().lens;
-  if (
-    !initialInput ||
-    (attributeService.inputIsRefType(initialInput) &&
-      initialInput.savedObjectId === persistedDoc?.savedObjectId)
-  ) {
-    return initializeDatasources(
-      datasourceMap,
-      lensStore.getState().lens.datasourceStates,
-      undefined,
-      initialContext,
-      {
-        isFullEditor: true,
-      }
-    )
-      .then((result) => {
-        const datasourceStates = Object.entries(result).reduce(
-          (state, [datasourceId, datasourceState]) => ({
-            ...state,
-            [datasourceId]: {
-              ...datasourceState,
-              isLoading: false,
-            },
-          }),
-          {}
-        );
-        lensStore.dispatch(
-          setState({
-            datasourceStates,
-            isLoading: false,
-          })
-        );
-        if (initialContext) {
-          const selectedSuggestion = getVisualizeFieldSuggestions({
-            datasourceMap,
-            datasourceStates,
-            visualizationMap,
-            activeVisualizationId: Object.keys(visualizationMap)[0] || null,
-            visualizationState: null,
-            visualizeTriggerFieldContext: initialContext,
-          });
-          if (selectedSuggestion) {
-            switchToSuggestion(lensStore.dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
-          }
-        }
-        const activeDatasourceId = getInitialDatasourceId(datasourceMap);
-        const visualization = lensStore.getState().lens.visualization;
-        const activeVisualization =
-          visualization.activeId && visualizationMap[visualization.activeId];
-
-        if (visualization.state === null && activeVisualization) {
-          const newLayerId = generateId();
-
-          const initialVisualizationState = activeVisualization.initialize(() => newLayerId);
-          lensStore.dispatch(
-            updateLayer({
-              datasourceId: activeDatasourceId!,
-              layerId: newLayerId,
-              updater: datasourceMap[activeDatasourceId!].insertLayer,
-            })
-          );
-          lensStore.dispatch(
-            updateVisualizationState({
-              visualizationId: activeVisualization.id,
-              updater: initialVisualizationState,
-            })
-          );
-        }
-      })
-      .catch((e: { message: string }) => {
-        notifications.toasts.addDanger({
-          title: e.message,
-        });
-        redirectCallback();
-      });
-  }
-
-  getPersistedDoc({
-    initialInput,
-    attributeService,
-    data,
-    chrome,
-    notifications,
-  })
-    .then(
-      (doc) => {
-        if (doc) {
-          const currentSessionId = data.search.session.getSessionId();
-          const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
-            (stateMap, [datasourceId, datasourceState]) => ({
-              ...stateMap,
-              [datasourceId]: {
-                isLoading: true,
-                state: datasourceState,
-              },
-            }),
-            {}
-          );
-
-          initializeDatasources(
-            datasourceMap,
-            docDatasourceStates,
-            doc.references,
-            initialContext,
-            {
-              isFullEditor: true,
-            }
-          )
-            .then((result) => {
-              const activeDatasourceId = getInitialDatasourceId(datasourceMap, doc);
-
-              lensStore.dispatch(
-                setState({
-                  query: doc.state.query,
-                  searchSessionId:
-                    dashboardFeatureFlag.allowByValueEmbeddables &&
-                    Boolean(embeddableEditorIncomingState?.originatingApp) &&
-                    !(initialInput as LensByReferenceInput)?.savedObjectId &&
-                    currentSessionId
-                      ? currentSessionId
-                      : data.search.session.start(),
-                  ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
-                  activeDatasourceId,
-                  visualization: {
-                    activeId: doc.visualizationType,
-                    state: doc.state.visualization,
-                  },
-                  datasourceStates: Object.entries(result).reduce(
-                    (state, [datasourceId, datasourceState]) => ({
-                      ...state,
-                      [datasourceId]: {
-                        ...datasourceState,
-                        isLoading: false,
-                      },
-                    }),
-                    {}
-                  ),
-                  isLoading: false,
-                })
-              );
-            })
-            .catch((e: { message: string }) =>
-              notifications.toasts.addDanger({
-                title: e.message,
-              })
-            );
-        } else {
-          redirectCallback();
-        }
-      },
-      () => {
-        lensStore.dispatch(
-          setState({
-            isLoading: false,
-          })
-        );
-        redirectCallback();
-      }
-    )
-    .catch((e: { message: string }) =>
-      notifications.toasts.addDanger({
-        title: e.message,
-      })
-    );
 }

@@ -13,13 +13,10 @@ import 'core-js/features/string/repeat';
 import dedent from 'dedent';
 
 import { Command } from './run_with_commands';
+import { getLogLevelFlagsHelp } from '../tooling_log/log_levels';
 
 const DEFAULT_GLOBAL_USAGE = `node ${Path.relative(process.cwd(), process.argv[1])}`;
 export const GLOBAL_FLAGS = dedent`
-  --verbose, -v      Log verbosely
-  --debug            Log debug messages (less than verbose)
-  --quiet            Only log errors
-  --silent           Don't log anything
   --help             Show this message
 `;
 
@@ -39,12 +36,18 @@ export function getHelp({
   description,
   usage,
   flagHelp,
+  defaultLogLevel,
 }: {
   description?: string;
   usage?: string;
   flagHelp?: string;
+  defaultLogLevel?: string;
 }) {
-  const optionHelp = joinAndTrimLines(dedent(flagHelp || ''), GLOBAL_FLAGS);
+  const optionHelp = joinAndTrimLines(
+    dedent(flagHelp || ''),
+    getLogLevelFlagsHelp(defaultLogLevel),
+    GLOBAL_FLAGS
+  );
 
   return `
   ${dedent(usage || '') || DEFAULT_GLOBAL_USAGE}
