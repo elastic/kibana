@@ -42,14 +42,23 @@ export const buildBulkBody = (
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const timestamp = new Date().toISOString();
+  let hostName = '';
+  if (doc._source?.host != null && doc._source?.host?.name) {
+    hostName = doc._source?.host.name;
+  }
+  let userName = '';
+  if (doc._source?.user != null && doc._source?.user?.name) {
+    userName = doc._source?.user.name;
+  }
   const reason = buildReasonMessage({
-    alertName: 'Alert Name',
+    alertName: rule.name,
     alertRiskScore: ruleSO.attributes.params.riskScore,
     alertSeverity: ruleSO.attributes.params.severity,
-    hostName: 'someHost',
+    hostName,
     timestamp,
-    userName: ruleSO.attributes.params.author[0],
+    userName,
   });
+
   const signal: Signal = {
     ...buildSignal([mergedDoc], rule, reason),
     ...additionalSignalFields(mergedDoc),

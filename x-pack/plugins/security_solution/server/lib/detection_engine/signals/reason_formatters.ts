@@ -28,7 +28,7 @@ export const buildReasonMessageForEqlAlert = ({
 }: BuildReasonMessageArgs) =>
   i18n.translate('xpack.securitySolution.detectionEngine.signals.eql.eqlAlertReasonDescription', {
     defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and {alertRiskScore} risk score by {userName} on {hostName}',
+      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
     values: {
       alertName,
       alertSeverity,
@@ -49,7 +49,7 @@ export const buildReasonMessageForMlAlert = ({
 }: BuildReasonMessageArgs) =>
   i18n.translate('xpack.securitySolution.detectionEngine.signals.mlAlertReasonDescription', {
     defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and {alertRiskScore} risk score by {userName} on {hostName}',
+      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
     values: {
       alertName,
       alertSeverity,
@@ -70,7 +70,7 @@ export const buildReasonMessageForQueryAlert = ({
 }: BuildReasonMessageArgs) =>
   i18n.translate('xpack.securitySolution.detectionEngine.signals.queryAlertReasonDescription', {
     defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and {alertRiskScore} risk score by {userName} on {hostName}',
+      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
     values: {
       alertName,
       alertSeverity,
@@ -93,7 +93,7 @@ export const buildReasonMessageForThreatMatchAlert = ({
     'xpack.securitySolution.detectionEngine.signals.threatMatchAlertReasonDescription',
     {
       defaultMessage:
-        'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and {alertRiskScore} risk score by {userName} on {hostName}',
+        'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
       values: {
         alertName,
         alertSeverity,
@@ -115,7 +115,7 @@ export const buildReasonMessageForThresholdAlert = ({
 }: BuildReasonMessageArgs) =>
   i18n.translate('xpack.securitySolution.detectionEngine.signals.thresholdAlertReasonDescription', {
     defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and {alertRiskScore} risk score by {userName} on {hostName}',
+      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
     values: {
       alertName,
       alertSeverity,
