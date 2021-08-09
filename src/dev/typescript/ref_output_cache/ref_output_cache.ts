@@ -9,14 +9,16 @@
 import Path from 'path';
 import Fs from 'fs/promises';
 
-import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
+import { ToolingLog, kibanaPackageJson, extract } from '@kbn/dev-utils';
 import del from 'del';
 import tempy from 'tempy';
 
 import { Archives } from './archives';
-import { unzip, zip } from './zip';
+import { zip } from './zip';
 import { concurrentMap } from '../concurrent_map';
 import { RepoInfo } from './repo_info';
+import { getFilesChangedSinceSha } from './files_changed_since_sha';
+import { PROJECTS } from '../projects';
 
 export const OUTDIR_MERGE_BASE_FILENAME = '.ts-ref-cache-merge-base';
 
@@ -101,6 +103,13 @@ export class RefOutputCache {
       return;
     }
 
+    const changedFiles = await getFilesChangedSinceSha(this.log, archive.sha);
+    const outDirsForcingExtraCacheCheck = PROJECTS.filter((p) =>
+      changedFiles.some((f) => p.isAbsolutePathSelected(f) || p.getConfigPaths().includes(f))
+    )
+      .map((p) => p.getOutDir())
+      .filter((p): p is string => typeof p === 'string');
+
     const tmpDir = tempy.directory();
     this.log.debug(
       'extracting',
@@ -109,9 +118,13 @@ export class RefOutputCache {
       outdatedOutDirs.length,
       'outDirs'
     );
-    await unzip(archive.path, tmpDir);
+    await extract({
+      archivePath: archive.path,
+      targetDir: tmpDir,
+    });
 
     const cacheNames = await Fs.readdir(tmpDir);
+    const beginningOfTime = new Date(0);
 
     await concurrentMap(50, outdatedOutDirs, async (outDir) => {
       const relative = this.repo.getRelative(outDir);
@@ -129,9 +142,22 @@ export class RefOutputCache {
         return;
       }
 
-      this.log.debug(`[${relative}] clearing outDir and replacing with cache`);
+      const setModifiedTimes = outDirsForcingExtraCacheCheck.includes(outDir)
+        ? beginningOfTime
+        : undefined;
+
+      if (setModifiedTimes) {
+        this.log.debug(`[${relative}] replacing outDir with cache (forcing revalidation)`);
+      } else {
+        this.log.debug(`[${relative}] clearing outDir and replacing with cache`);
+      }
+
       await del(outDir);
-      await unzip(Path.resolve(tmpDir, cacheName), outDir);
+      await extract({
+        archivePath: Path.resolve(tmpDir, cacheName),
+        targetDir: outDir,
+        setModifiedTimes,
+      });
       await Fs.writeFile(Path.resolve(outDir, OUTDIR_MERGE_BASE_FILENAME), this.mergeBase);
     });
   }

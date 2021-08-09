@@ -12,24 +12,24 @@ import { REPO_ROOT } from '@kbn/utils';
 import { Project } from './project';
 
 export const PROJECTS = [
-  new Project(resolve(REPO_ROOT, 'tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
-  new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
-  new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/drilldowns/url_drilldown/tsconfig.json'), {
+  Project.at(resolve(REPO_ROOT, 'tsconfig.json')),
+  Project.at(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
+  Project.at(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
+  Project.at(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
+  Project.at(resolve(REPO_ROOT, 'x-pack/plugins/drilldowns/url_drilldown/tsconfig.json'), {
     name: 'security_solution/cypress',
   }),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
+  Project.at(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
     name: 'security_solution/cypress',
   }),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/osquery/cypress/tsconfig.json'), {
+  Project.at(resolve(REPO_ROOT, 'x-pack/plugins/osquery/cypress/tsconfig.json'), {
     name: 'osquery/cypress',
   }),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/e2e/tsconfig.json'), {
+  Project.at(resolve(REPO_ROOT, 'x-pack/plugins/apm/e2e/tsconfig.json'), {
     name: 'apm/cypress',
     disableTypeCheck: true,
   }),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/ftr_e2e/tsconfig.json'), {
+  Project.at(resolve(REPO_ROOT, 'x-pack/plugins/apm/ftr_e2e/tsconfig.json'), {
     name: 'apm/ftr_e2e',
     disableTypeCheck: true,
   }),
@@ -39,35 +39,26 @@ export const PROJECTS = [
   // both took closer to 1000ms.
   ...glob
     .sync('packages/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => Project.at(resolve(REPO_ROOT, path))),
   ...glob
     .sync('src/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => Project.at(resolve(REPO_ROOT, path))),
   ...glob
     .sync('x-pack/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => Project.at(resolve(REPO_ROOT, path))),
   ...glob
     .sync('examples/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => Project.at(resolve(REPO_ROOT, path))),
   ...glob
     .sync('x-pack/examples/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => Project.at(resolve(REPO_ROOT, path))),
   ...glob
     .sync('test/plugin_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => Project.at(resolve(REPO_ROOT, path))),
   ...glob
     .sync('test/interpreter_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => Project.at(resolve(REPO_ROOT, path))),
   ...glob
     .sync('test/server_integration/__fixtures__/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => Project.at(resolve(REPO_ROOT, path))),
 ];
-
-export function filterProjectsByFlag(projectFlag?: string) {
-  if (!projectFlag) {
-    return PROJECTS;
-  }
-
-  const tsConfigPath = resolve(projectFlag);
-  return PROJECTS.filter((project) => project.tsConfigPath === tsConfigPath);
-}
