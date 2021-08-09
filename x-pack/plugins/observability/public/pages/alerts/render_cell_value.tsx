@@ -23,7 +23,7 @@ import { TopAlert } from '.';
 import { decorateResponse } from './decorate_response';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
-const getMappedNonEcsValue = ({
+export const getMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
