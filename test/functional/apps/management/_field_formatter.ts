@@ -71,6 +71,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldValue: 'A regular text',
             applyFormatterType: FIELD_FORMAT_IDS.STRING,
             expectFormattedValue: 'A regular text',
+
+            // check available formats for ES_FIELD_TYPES.TEXT
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.TRUNCATE,
+              FIELD_FORMAT_IDS.URL,
+            ],
           },
           {
             fieldType: ES_FIELD_TYPES.TEXT,
@@ -89,6 +99,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.selectValue('stringEditorTransform', 'upper');
             },
+            // check available formats for ES_FIELD_TYPES.KEYWORD
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.TRUNCATE,
+              FIELD_FORMAT_IDS.URL,
+            ],
           },
           {
             fieldType: ES_FIELD_TYPES.KEYWORD,
@@ -140,6 +159,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldValue: 324,
             applyFormatterType: FIELD_FORMAT_IDS.STRING,
             expectFormattedValue: '324',
+            // check available formats for ES_FIELD_TYPES.INTEGER
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.BYTES,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.DURATION,
+              FIELD_FORMAT_IDS.NUMBER,
+              FIELD_FORMAT_IDS.PERCENT,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
           },
         ]);
       });
@@ -151,6 +182,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldValue: 324,
             applyFormatterType: FIELD_FORMAT_IDS.NUMBER,
             expectFormattedValue: '324',
+            // check available formats for ES_FIELD_TYPES.LONG
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.BYTES,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.DURATION,
+              FIELD_FORMAT_IDS.NUMBER,
+              FIELD_FORMAT_IDS.PERCENT,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
           },
           {
             fieldType: ES_FIELD_TYPES.LONG,
@@ -177,6 +220,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 'https://elastic.co/?value={{value}}'
               );
             },
+            expect: async (renderedValueContainer) => {
+              expect(
+                await (await renderedValueContainer.findByTagName('a')).getAttribute('href')
+              ).to.be('https://elastic.co/?value=100');
+            },
           },
           {
             fieldType: ES_FIELD_TYPES.LONG,
@@ -189,6 +237,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 'https://elastic.co/?value={{value}}'
               );
               await testSubjects.setValue('urlEditorLabelTemplate', 'url label');
+            },
+            expect: async (renderedValueContainer) => {
+              expect(
+                await (await renderedValueContainer.findByTagName('a')).getAttribute('href')
+              ).to.be('https://elastic.co/?value=100');
             },
           },
         ]);
@@ -204,18 +257,92 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.setValue('dateEditorPattern', 'MMM D, YYYY');
             },
+            // check available formats for ES_FIELD_TYPES.DATE
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.DATE,
+              FIELD_FORMAT_IDS.DATE_NANOS,
+              FIELD_FORMAT_IDS.RELATIVE_DATE,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
           },
           {
             fieldType: ES_FIELD_TYPES.DATE_NANOS,
             fieldValue: '2015-01-01T12:10:30.123456789Z',
             applyFormatterType: FIELD_FORMAT_IDS.DATE,
             expectFormattedValue: 'Jan 1, 2015 @ 12:10:30.123',
+            // check available formats for ES_FIELD_TYPES.DATE_NANOS
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.DATE,
+              FIELD_FORMAT_IDS.DATE_NANOS,
+              FIELD_FORMAT_IDS.RELATIVE_DATE,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
           },
           {
             fieldType: ES_FIELD_TYPES.DATE_NANOS,
             fieldValue: '2015-01-01T12:10:30.123456789Z',
             applyFormatterType: FIELD_FORMAT_IDS.DATE_NANOS,
             expectFormattedValue: 'Jan 1, 2015 @ 12:10:30.123456789',
+          },
+        ]);
+      });
+
+      describe('Static lookup format', () => {
+        testFormatEditors([
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: 'look me up',
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: 'looked up!',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', 'look me up');
+              await testSubjects.setValue('~staticLookupEditorValue', 'looked up!');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.BOOLEAN,
+            fieldValue: 'true',
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            // check available formats for ES_FIELD_TYPES.BOOLEAN
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
+            expectFormattedValue: 'yes',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', 'true');
+              await testSubjects.setValue('~staticLookupEditorValue', 'yes');
+              await testSubjects.setValue('staticLookupEditorUnknownValue', 'no');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.BOOLEAN,
+            fieldValue: 'false',
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: 'no',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', 'true');
+              await testSubjects.setValue('~staticLookupEditorValue', 'yes');
+              await testSubjects.setValue('staticLookupEditorUnknownValue', 'no');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.BOOLEAN,
+            fieldValue: 'false',
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: 'false',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', 'true');
+              await testSubjects.setValue('~staticLookupEditorValue', 'yes');
+            },
           },
         ]);
       });
@@ -235,6 +362,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.DOUBLE,
             fieldValue: 0.1,
             applyFormatterType: FIELD_FORMAT_IDS.PERCENT,
+            // check available formats for ES_FIELD_TYPES.DOUBLE
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.BYTES,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.DURATION,
+              FIELD_FORMAT_IDS.NUMBER,
+              FIELD_FORMAT_IDS.PERCENT,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
             expectFormattedValue: '10.0%',
             beforeSave: async () => {
               await testSubjects.setValue('numberEditorFormatPattern', '0.0%');
@@ -249,11 +388,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await testSubjects.setValue('numberEditorFormatPattern', '0b');
             },
           },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: 'red',
+            applyFormatterType: FIELD_FORMAT_IDS.COLOR,
+            expectFormattedValue: 'red',
+            beforeSave: async () => {
+              await testSubjects.click('colorEditorAddColor');
+              await testSubjects.setValue('~colorEditorKeyPattern', 'red');
+              await testSubjects.setValue('~colorEditorColorPicker', '#ffffff');
+              await testSubjects.setValue('~colorEditorBackgroundPicker', '#ff0000');
+            },
+            expect: async (renderedValueContainer) => {
+              const span = await renderedValueContainer.findByTagName('span');
+              expect(await span.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
+              expect(await span.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
+            },
+          },
         ]);
       });
     });
   });
 
+  /**
+   * Runs a field format editors tests covering data setup, editing a field and checking a resulting formatting in Discover app
+   * TODO: might be useful to reuse this util for runtime fields formats tests
+   * @param specs - {@link FieldFormatEditorSpecDescriptor}
+   */
   function testFormatEditors(specs: FieldFormatEditorSpecDescriptor[]) {
     const indexTitle = 'field_formats_management_functional_tests';
     let indexPatternId: string;
@@ -300,19 +461,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickIndexPatternByName(indexTitle);
       });
 
+      afterEach(async () => {
+        try {
+          await PageObjects.settings.controlChangeSave();
+        } catch (e) {
+          // in case previous test failed in a state when save is disabled
+          await PageObjects.settings.controlChangeCancel();
+        }
+
+        await toasts.dismissAllToasts(); // dismiss "saved" toast, otherwise it could overlap save button for a next test
+      });
+
       specs.forEach((spec, index) => {
         const fieldName = `${index}`;
-        it(`edit field format of "${fieldName}" field to "${spec.applyFormatterType}"`, async () => {
-          await PageObjects.settings.filterField(fieldName);
-          await PageObjects.settings.openControlsByName(fieldName);
-          await PageObjects.settings.toggleRow('formatRow');
-          await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
-          if (spec.beforeSave) {
-            await spec.beforeSave(await testSubjects.find('formatRow'));
+        it(
+          `edit field format of "${fieldName}" field to "${spec.applyFormatterType}"` +
+            spec.expectFormatterTypes
+            ? `, and check available formats types`
+            : '',
+          async () => {
+            await PageObjects.settings.filterField(fieldName);
+            await PageObjects.settings.openControlsByName(fieldName);
+            await PageObjects.settings.toggleRow('formatRow');
+
+            if (spec.expectFormatterTypes) {
+              expect(
+                (
+                  await Promise.all(
+                    (
+                      await (await testSubjects.find('editorSelectedFormatId')).findAllByTagName(
+                        'option'
+                      )
+                    ).map((option) => option.getAttribute('value'))
+                  )
+                ).filter(Boolean)
+              ).to.eql(spec.expectFormatterTypes);
+            }
+
+            await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
+            if (spec.beforeSave) {
+              await spec.beforeSave(await testSubjects.find('formatRow'));
+            }
           }
-          await PageObjects.settings.controlChangeSave();
-          await toasts.dismissToast(); // dismiss "saved" toast, otherwise it could overlap save button for a next test
-        });
+        );
       });
     });
 
@@ -329,6 +520,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const renderedValue = await testSubjects.find(`tableDocViewRow-${index}-value`);
           const text = await renderedValue.getVisibleText();
           expect(text).to.be(spec.expectFormattedValue);
+          if (spec.expect) {
+            await spec.expect(renderedValue);
+          }
         });
       });
     });
@@ -351,6 +545,12 @@ interface FieldFormatEditorSpecDescriptor {
    * Type of a field formatter to apply
    */
   applyFormatterType: FIELD_FORMAT_IDS;
+
+  /**
+   * Optionally check available formats for {@link fieldType}
+   */
+  expectFormatterTypes?: FIELD_FORMAT_IDS[];
+
   /**
    * Function to execute before field format is applied.
    * Use it set specific configuration params for applied field formatter
@@ -363,4 +563,9 @@ interface FieldFormatEditorSpecDescriptor {
    * Use this for final assertion
    */
   expectFormattedValue: string;
+
+  /**
+   * Run additional assertions on rendered element
+   */
+  expect?: (renderedValueContainer: WebElementWrapper) => Promise<void>;
 }
