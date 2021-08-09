@@ -5,61 +5,137 @@
  * 2.0.
  */
 
-import { sortBy, take } from 'lodash';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { sortBy } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import {
+  PARENT_ID,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_ROOT,
 } from '../../../common/elasticsearch_fieldnames';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { joinByKey } from '../../../common/utils/join_by_key';
-import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
-import { mergeProjection } from '../../projections/util/merge_projection';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
-  getAverages,
-  getCounts,
-  getPercentiles,
-  getSums,
-} from './get_transaction_group_stats';
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
 
-interface TopTransactionOptions {
+export interface TopTraceOptions {
   environment?: string;
   kuery?: string;
-  type: 'top_transactions';
+  transactionName?: string;
+  searchAggregatedTransactions: boolean;
+}
+
+type Key = Record<'service.name' | 'transaction.name', string>;
+
+export interface TransactionGroup {
+  key: Key;
   serviceName: string;
+  transactionName: string;
   transactionType: string;
-  transactionName?: string;
-  searchAggregatedTransactions: boolean;
+  averageResponseTime: number | null | undefined;
+  transactionsPerMinute: number;
+  impact: number;
 }
 
-interface TopTraceOptions {
-  environment?: string;
-  kuery?: string;
-  type: 'top_traces';
-  transactionName?: string;
-  searchAggregatedTransactions: boolean;
-}
+export type ESResponse = Promise<{ items: TransactionGroup[] }>;
 
-export type Options = TopTransactionOptions | TopTraceOptions;
-
-export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
-
-export type TransactionGroupRequestBase = ReturnType<
-  typeof getTransactionGroupsProjection
-> & {
+export type TransactionGroupRequestBase = ReturnType<typeof getRequest> & {
   body: {
     aggs: {
-      transaction_groups: Unionize<
-        Pick<AggregationOptionsByType, 'composite' | 'terms'>
-      >;
+      transaction_groups: Unionize<Pick<AggregationOptionsByType, 'composite'>>;
     };
   };
 };
+
+function getRequest(
+  topTraceOptions: TopTraceOptions,
+  setup: TransactionGroupSetup
+) {
+  const { start, end } = setup;
+
+  const {
+    searchAggregatedTransactions,
+    environment,
+    kuery,
+    transactionName,
+  } = topTraceOptions;
+
+  const transactionNameFilter = transactionName
+    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
+    : [];
+
+  return {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...transactionNameFilter,
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...(searchAggregatedTransactions
+              ? [
+                  {
+                    term: {
+                      [TRANSACTION_ROOT]: true,
+                    },
+                  },
+                ]
+              : []),
+          ] as QueryDslQueryContainer[],
+          must_not: [
+            ...(!searchAggregatedTransactions
+              ? [
+                  {
+                    exists: {
+                      field: PARENT_ID,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
+      },
+      aggs: {
+        transaction_groups: {
+          composite: {
+            sources: asMutableArray([
+              { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
+              {
+                [TRANSACTION_NAME]: {
+                  terms: { field: TRANSACTION_NAME },
+                },
+              },
+            ] as const),
+            // traces overview is hardcoded to 10000
+            size: 10000,
+          },
+        },
+      },
+    },
+  };
+}
 
 export type TransactionGroupSetup = Setup & SetupTimeRange;
 
@@ -67,11 +143,10 @@ function getItemsWithRelativeImpact(
   setup: TransactionGroupSetup,
   items: Array<{
     sum?: number | null;
-    key: string | Record<'service.name' | 'transaction.name', string>;
+    key: Key;
     avg?: number | null;
     count?: number | null;
     transactionType?: string;
-    p95?: number | null;
   }>
 ) {
   const values = items
@@ -94,137 +169,47 @@ function getItemsWithRelativeImpact(
         item.sum !== null && item.sum !== undefined
           ? ((item.sum - min) / (max - min)) * 100 || 0
           : 0,
-      p95: item.p95,
     };
   });
 
   return itemsWithRelativeImpact;
 }
 
-export function transactionGroupsFetcher(
-  options: Options,
-  setup: TransactionGroupSetup,
-  bucketSize: number
-) {
-  const spanName =
-    options.type === 'top_traces' ? 'get_top_traces' : 'get_top_transactions';
-
-  return withApmSpan(spanName, async () => {
-    const projection = getTransactionGroupsProjection({
-      setup,
-      options,
-    });
-
-    const isTopTraces = options.type === 'top_traces';
-
-    // @ts-expect-error
-    delete projection.body.aggs;
-
-    // traces overview is hardcoded to 10000
-    // transactions overview: 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size.
-    const expectedBucketSize = isTopTraces ? 10000 : bucketSize;
-    const size = isTopTraces ? 10000 : expectedBucketSize + 1;
-
-    const request = mergeProjection(projection, {
-      body: {
-        size: 0,
-        aggs: {
-          transaction_groups: {
-            ...(isTopTraces
-              ? {
-                  composite: {
-                    sources: asMutableArray([
-                      { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
-                      {
-                        [TRANSACTION_NAME]: {
-                          terms: { field: TRANSACTION_NAME },
-                        },
-                      },
-                    ] as const),
-                    size,
-                  },
-                }
-              : {
-                  terms: {
-                    field: TRANSACTION_NAME,
-                    size,
-                  },
-                }),
-          },
-        },
-      },
-    });
+export function topTransactionGroupsFetcher(
+  topTraceOptions: TopTraceOptions,
+  setup: TransactionGroupSetup
+): Promise<{ items: TransactionGroup[] }> {
+  return withApmSpan('get_top_traces', async () => {
+    const request = getRequest(topTraceOptions, setup);
 
     const params = {
       request,
       setup,
-      searchAggregatedTransactions: options.searchAggregatedTransactions,
+      searchAggregatedTransactions:
+        topTraceOptions.searchAggregatedTransactions,
     };
 
-    const [counts, averages, sums, percentiles] = await Promise.all([
+    const [counts, averages, sums] = await Promise.all([
       getCounts(params),
       getAverages(params),
       getSums(params),
-      !isTopTraces ? getPercentiles(params) : Promise.resolve(undefined),
     ]);
 
-    const stats = [
-      ...averages,
-      ...counts,
-      ...sums,
-      ...(percentiles ? percentiles : []),
-    ];
+    const stats = [...averages, ...counts, ...sums];
 
     const items = joinByKey(stats, 'key');
 
     const itemsWithRelativeImpact = getItemsWithRelativeImpact(setup, items);
 
-    const defaultServiceName =
-      options.type === 'top_transactions' ? options.serviceName : undefined;
-
-    const itemsWithKeys: TransactionGroup[] = itemsWithRelativeImpact.map(
-      (item) => {
-        let transactionName: string;
-        let serviceName: string;
-
-        if (typeof item.key === 'string') {
-          transactionName = item.key;
-          serviceName = defaultServiceName!;
-        } else {
-          transactionName = item.key[TRANSACTION_NAME];
-          serviceName = item.key[SERVICE_NAME];
-        }
-
-        return {
-          ...item,
-          transactionName,
-          serviceName,
-        };
-      }
-    );
+    const itemsWithKeys = itemsWithRelativeImpact.map((item) => ({
+      ...item,
+      transactionName: item.key[TRANSACTION_NAME],
+      serviceName: item.key[SERVICE_NAME],
+    }));
 
     return {
-      items: take(
-        // sort by impact by default so most impactful services are not cut off
-        sortBy(itemsWithKeys, 'impact').reverse(),
-        bucketSize
-      ),
-      // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
-      // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit
-      isAggregationAccurate:
-        expectedBucketSize >= itemsWithRelativeImpact.length,
-      bucketSize,
+      // sort by impact by default so most impactful services are not cut off
+      items: sortBy(itemsWithKeys, 'impact').reverse(),
     };
   });
-}
-
-export interface TransactionGroup {
-  key: string | Record<'service.name' | 'transaction.name', string>;
-  serviceName: string;
-  transactionName: string;
-  transactionType: string;
-  averageResponseTime: number | null | undefined;
-  transactionsPerMinute: number;
-  p95: number | null | undefined;
-  impact: number;
 }

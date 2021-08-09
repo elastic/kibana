@@ -1,10 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "outDir": "./target",
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "incremental": false,
+    "outDir": "./target",
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-server-http-tools/src",

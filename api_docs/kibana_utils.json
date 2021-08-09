@@ -1673,7 +1673,24 @@
                   "((error: Error) => void) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onGetError.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error"
+                    ],
+                    "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -1686,7 +1703,24 @@
                   "((error: Error) => void) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onSetError.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error"
+                    ],
+                    "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -2015,7 +2049,9 @@
                   "<any>) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [],
+                "returnComment": []
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -2045,7 +2081,26 @@
                   "((pathname: string) => boolean) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.shouldTrackUrlUpdate.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pathname",
+                    "description": [
+                      "A location's pathname which comes to history listener"
+                    ],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -2060,7 +2115,24 @@
                   "((newNavLink: string) => string) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.onBeforeNavLinkSaved.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "newNavLink",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -3513,7 +3585,30 @@
                   ") => void) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.onBeforeRedirect.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "kibanaUtils",
+                        "scope": "common",
+                        "docId": "kibKibanaUtilsPluginApi",
+                        "section": "def-common.SavedObjectNotFound",
+                        "text": "SavedObjectNotFound"
+                      }
+                    ],
+                    "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -4260,10 +4355,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "current state"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4279,11 +4374,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.BaseStateContainer.set.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -4294,9 +4388,11 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4368,11 +4464,10 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.config",
+                "id": "def-public.CollectConfigProps.onConfig.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -4381,9 +4476,11 @@
                   "Config"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4439,11 +4536,10 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.context",
+                "id": "def-public.Configurable.createConfig.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -4452,9 +4548,11 @@
                   "Context"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4470,11 +4568,10 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.config",
+                "id": "def-public.Configurable.isConfigValid.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -4483,11 +4580,12 @@
                   "Config"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.context",
+                "id": "def-public.Configurable.isConfigValid.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -4496,9 +4594,11 @@
                   "Context"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4561,7 +4661,24 @@
               "(<T>(state: T) => T) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CreateStateContainerOptions.freeze.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4601,21 +4718,24 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IKbnUrlStateStorage.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.IKbnUrlStateStorage.set.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -4624,22 +4744,33 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.opts",
+                "id": "def-public.IKbnUrlStateStorage.set.$3.opts",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": [
-                  "{ replace: boolean; } | undefined"
-                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.IKbnUrlStateStorage.set.$3.opts.replace",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "replace",
+                    "description": [],
+                    "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                    "deprecated": false
+                  }
+                ]
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4653,19 +4784,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IKbnUrlStateStorage.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4681,19 +4816,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IKbnUrlStateStorage.change$.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4709,8 +4848,8 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4772,11 +4911,10 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.INullableBaseStateContainer.set.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "state",
@@ -4785,9 +4923,11 @@
                   "State | null"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4827,21 +4967,24 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.ISessionStorageStateStorage.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.ISessionStorageStateStorage.set.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -4850,9 +4993,11 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4866,19 +5011,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.ISessionStorageStateStorage.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4989,19 +5138,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorage.getItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5015,21 +5168,24 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorage.setItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.value",
+                "id": "def-public.IStorage.setItem.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -5038,9 +5194,11 @@
                   "T"
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5054,19 +5212,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorage.removeItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5080,8 +5242,8 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5118,19 +5280,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorageWrapper.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5144,21 +5310,24 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorageWrapper.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.value",
+                "id": "def-public.IStorageWrapper.set.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -5167,9 +5336,11 @@
                   "T"
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5183,19 +5354,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorageWrapper.remove.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5209,8 +5384,8 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5370,8 +5545,8 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5438,24 +5613,30 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.nextReducer",
+                "id": "def-public.ReduxLikeStateContainer.replaceReducer.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "nextReducer",
                 "description": [],
                 "signature": [
-                  "(state: State, action: ",
-                  "TransitionDescription",
-                  "<string, any[]>) => State"
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.Reducer",
+                    "text": "Reducer"
+                  },
+                  "<State>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5471,11 +5652,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.action",
+                "id": "def-public.ReduxLikeStateContainer.dispatch.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -5485,9 +5665,11 @@
                   "<string, any[]>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5509,42 +5691,30 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.middleware",
+                "id": "def-public.ReduxLikeStateContainer.addMiddleware.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "middleware",
                 "description": [],
                 "signature": [
-                  "(store: Pick<",
                   {
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.ReduxLikeStateContainer",
-                    "text": "ReduxLikeStateContainer"
+                    "section": "def-common.Middleware",
+                    "text": "Middleware"
                   },
-                  "<State, any, {}>, \"getState\" | \"dispatch\">) => (next: (action: ",
-                  "TransitionDescription",
-                  "<string, any[]>) => any) => ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Dispatch",
-                    "text": "Dispatch"
-                  },
-                  "<",
-                  "TransitionDescription",
-                  "<string, any[]>>"
+                  "<State>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5558,11 +5728,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.listener",
+                "id": "def-public.ReduxLikeStateContainer.subscribe.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -5571,9 +5740,11 @@
                   "(state: State) => void"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5844,6 +6015,35 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.previous",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "previous",
+            "description": [],
+            "signature": [
+              "Result"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.current",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "current",
+            "description": [],
+            "signature": [
+              "Result"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5868,6 +6068,38 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.mapStateToProp",
+            "type": "Function",
+            "tags": [],
+            "label": "mapStateToProp",
+            "description": [],
+            "signature": [
+              "(state: State) => Pick<Props, StatePropKeys>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.state",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "State"
+                ],
+                "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5884,6 +6116,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.action",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5906,6 +6154,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5922,6 +6186,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5936,6 +6216,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -5952,6 +6234,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5988,6 +6286,24 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "{ getState: () => State; dispatch: (action: ",
+              "TransitionDescription",
+              "<string, any[]>) => void; }"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6010,6 +6326,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6067,6 +6399,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.args",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6085,6 +6433,36 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.action",
+            "type": "Object",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "TransitionDescription",
+              "<string, any[]>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6099,6 +6477,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.args",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6113,6 +6507,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.value",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6143,6 +6553,8 @@
         ],
         "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6157,6 +6569,8 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6171,6 +6585,8 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6195,6 +6611,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6296,7 +6714,33 @@
                   "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.val",
+                    "type": "string",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.pctEncodeSpaces",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "pctEncodeSpaces",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -7213,6 +7657,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -7227,6 +7673,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.value",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -7284,7 +7746,33 @@
                   "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-server.val",
+                    "type": "string",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-server.pctEncodeSpaces",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "pctEncodeSpaces",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "kibanaUtils",
@@ -8975,10 +9463,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "current state"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -8994,11 +9482,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.BaseStateContainer.set.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9009,9 +9496,11 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9057,7 +9546,24 @@
               "(<T>(state: T) => T) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CreateStateContainerOptions.freeze.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -9156,13 +9662,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
-            "returnComment": [
-              "A new stats object augmented with new telemetry information."
-            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableState.telemetry.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9173,11 +9676,12 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.stats",
+                "id": "def-common.PersistableState.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "stats",
@@ -9185,11 +9689,15 @@
                   "Stats object containing the stats which were already\ncollected. This `stats` object shall not be mutated in-line."
                 ],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "A new stats object augmented with new telemetry information."
             ]
           },
           {
@@ -9208,13 +9716,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
-            "returnComment": [
-              "Persistable state object with references injected."
-            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableState.inject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9225,11 +9730,12 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.references",
+                "id": "def-common.PersistableState.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -9241,8 +9747,12 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "Persistable state object with references injected."
             ]
           },
           {
@@ -9261,13 +9771,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
-            "returnComment": [
-              "Persistable state object with references extracted and a list of\nreferences."
-            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableState.extract.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9278,8 +9785,12 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "Persistable state object with references extracted and a list of\nreferences."
             ]
           },
           {
@@ -9502,7 +10013,43 @@
               ">) => P) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.PersistableStateService.migrateToLatest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [
+                  "The persistable state serializable state object."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.VersionedState",
+                    "text": "VersionedState"
+                  },
+                  "<",
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.SerializableState",
+                    "text": "SerializableState"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A serializable state object migrated to the latest state."
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9525,8 +10072,8 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -9573,8 +10120,8 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9641,24 +10188,30 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.nextReducer",
+                "id": "def-common.ReduxLikeStateContainer.replaceReducer.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "nextReducer",
                 "description": [],
                 "signature": [
-                  "(state: State, action: ",
-                  "TransitionDescription",
-                  "<string, any[]>) => State"
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.Reducer",
+                    "text": "Reducer"
+                  },
+                  "<State>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9674,11 +10227,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.action",
+                "id": "def-common.ReduxLikeStateContainer.dispatch.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -9688,9 +10240,11 @@
                   "<string, any[]>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9712,42 +10266,30 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.middleware",
+                "id": "def-common.ReduxLikeStateContainer.addMiddleware.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "middleware",
                 "description": [],
                 "signature": [
-                  "(store: Pick<",
                   {
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.ReduxLikeStateContainer",
-                    "text": "ReduxLikeStateContainer"
+                    "section": "def-common.Middleware",
+                    "text": "Middleware"
                   },
-                  "<State, any, {}>, \"getState\" | \"dispatch\">) => (next: (action: ",
-                  "TransitionDescription",
-                  "<string, any[]>) => any) => ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Dispatch",
-                    "text": "Dispatch"
-                  },
-                  "<",
-                  "TransitionDescription",
-                  "<string, any[]>>"
+                  "<State>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9761,11 +10303,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.listener",
+                "id": "def-common.ReduxLikeStateContainer.subscribe.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -9774,9 +10315,11 @@
                   "(state: State) => void"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10033,6 +10576,35 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.previous",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "previous",
+            "description": [],
+            "signature": [
+              "Result"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.current",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "current",
+            "description": [],
+            "signature": [
+              "Result"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10057,6 +10629,38 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.mapStateToProp",
+            "type": "Function",
+            "tags": [],
+            "label": "mapStateToProp",
+            "description": [],
+            "signature": [
+              "(state: State) => Pick<Props, StatePropKeys>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.state",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "State"
+                ],
+                "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10073,6 +10677,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.action",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10095,6 +10715,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10111,6 +10747,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10125,6 +10777,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -10141,6 +10795,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10177,6 +10847,24 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "{ getState: () => State; dispatch: (action: ",
+              "TransitionDescription",
+              "<string, any[]>) => void; }"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10191,6 +10879,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "FromVersion"
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10274,6 +10978,40 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "{ [key: string]: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10296,6 +11034,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10353,6 +11107,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.args",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10371,6 +11141,36 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.action",
+            "type": "Object",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "TransitionDescription",
+              "<string, any[]>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10385,6 +11185,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.args",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10475,6 +11291,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.value",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10499,6 +11331,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -10580,7 +11414,33 @@
                   "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.val",
+                    "type": "string",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.pctEncodeSpaces",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "pctEncodeSpaces",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "kibanaUtils",

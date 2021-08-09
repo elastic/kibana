@@ -7,25 +7,25 @@
 
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { ruleStatusSavedObjectsClientMock } from '../signals/__mocks__/rule_status_saved_objects_client.mock';
 import { deleteRules } from './delete_rules';
 import { deleteNotifications } from '../notifications/delete_notifications';
 import { deleteRuleActionsSavedObject } from '../rule_actions/delete_rule_actions_saved_object';
 import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
 import { IRuleStatusSOAttributes } from './types';
+import { RuleExecutionLogClient } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 
 jest.mock('../notifications/delete_notifications');
 jest.mock('../rule_actions/delete_rule_actions_saved_object');
 
 describe('deleteRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let ruleStatusClient: ReturnType<typeof ruleStatusSavedObjectsClientMock.create>;
+  let ruleStatusClient: ReturnType<typeof RuleExecutionLogClient>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
-    ruleStatusClient = ruleStatusSavedObjectsClientMock.create();
+    ruleStatusClient = new RuleExecutionLogClient();
   });
 
   it('should delete the rule along with its notifications, actions, and statuses', async () => {
@@ -54,12 +54,7 @@ describe('deleteRules', () => {
       savedObjectsClient,
       ruleStatusClient,
       id: 'ruleId',
-      ruleStatuses: {
-        total: 0,
-        per_page: 0,
-        page: 0,
-        saved_objects: [ruleStatus],
-      },
+      ruleStatuses: [ruleStatus],
     };
 
     await deleteRules(rule);

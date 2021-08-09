@@ -16,5 +16,6 @@
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../es_ui_shared/tsconfig.json" },
+    { "path": "../field_formats/tsconfig.json" }
   ]
 }
