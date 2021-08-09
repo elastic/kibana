@@ -13,8 +13,9 @@ import { DomainRange } from '@elastic/charts';
 
 import { getAdjustedInterval } from '../../../charts/public';
 import { Datatable } from '../../../expressions/public';
+import { DateHistogramParams, HistogramParams } from '../../../visualizations/public';
 
-import { Aspect, DateHistogramParams, HistogramParams } from '../types';
+import { Aspect } from '../types';
 
 export const getXDomain = (params: Aspect['params']): DomainRange => {
   const minInterval = (params as DateHistogramParams | HistogramParams)?.interval ?? undefined;

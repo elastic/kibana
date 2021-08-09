@@ -7,7 +7,11 @@
 
 import { KibanaRequest } from 'kibana/server';
 
-export function getAuthorizationHeader(request: KibanaRequest) {
+export interface AuthorizationHeader {
+  headers?: { 'es-secondary-authorization': string | string[] };
+}
+
+export function getAuthorizationHeader(request: KibanaRequest): AuthorizationHeader {
   return request.headers.authorization === undefined
     ? {}
     : {

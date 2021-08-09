@@ -1,0 +1,29 @@
+title: Output
+type: object
+properties:
+  id:
+    type: string
+  is_default:
+    type: boolean
+  name:
+    type: string
+  type:
+    type: string
+    enum: ['elasticsearch']
+  hosts:
+    type: array
+    items:
+      type: string
+  ca_sha256:
+    type: string
+  api_key:
+    type: string
+  config:
+    type: object
+  config_yaml:
+    type: string
+required:
+  - id
+  - is_default
+  - name
+  - type

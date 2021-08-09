@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Please import helpers from the package kbn/es-query directly. This import will be deprecated in v8.0.0.
+> Import helpers from the "<!-- -->@<!-- -->kbn/es-query" package directly instead.  8.1
 > 
 
 <b>Signature:</b>

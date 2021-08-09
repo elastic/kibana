@@ -160,7 +160,7 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({}))
       ),
     });
-    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
+    expect(logHealthMetrics.mock.calls[3][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
@@ -233,7 +233,7 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({}))
       ),
     });
-    expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
+    expect(logHealthMetrics.mock.calls[3][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),

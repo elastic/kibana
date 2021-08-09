@@ -91,6 +91,7 @@
     "DeletingJobTasks",
     "DeleteJobs",
     "RevertModelSnapshot",
+    "BulkCreateJobs",
 
     "Calendars",
     "PutCalendars",

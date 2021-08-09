@@ -1,4 +1,4 @@
-title: PackageInfo
+title: Package information
 type: object
 properties:
   name:

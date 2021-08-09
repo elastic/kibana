@@ -12,6 +12,7 @@ import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../../../src/plugins/data/public';
+import { queryToAst } from '../../../../../src/plugins/data/common';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -22,8 +23,9 @@ import {
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
-import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
+
+type OriginalColumn = { id: string } & IndexPatternColumn;
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
@@ -118,7 +120,7 @@ function getExpressionForLayer(
                   id: `${index}-filter`,
                   enabled: true,
                   schema: 'bucket',
-                  filter: JSON.stringify(col.filter),
+                  filter: col.filter && queryToAst(col.filter),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),

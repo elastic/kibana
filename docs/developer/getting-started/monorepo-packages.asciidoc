@@ -28,23 +28,13 @@ yarn kbn run build -i PACKAGE_NAME
 ----
 
 [discrete]
-=== Watching Non Bazel Packages
-
-Non Bazel packages can be watched independently with
-
-[source,bash]
-----
-yarn kbn watch -i PACKAGE_NAME
-----
-
-[discrete]
 === Building Bazel Packages
 
 Bazel packages are built as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn build-bazel
+yarn kbn build
 ----
 
 [discrete]
@@ -54,7 +44,7 @@ Bazel packages are watched as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn watch-bazel
+yarn kbn watch
 ----
 
 
@@ -91,6 +81,7 @@ yarn kbn watch-bazel
 - @kbn/optimizer
 - @kbn/plugin-helpers
 - @kbn/rule-data-utils
+- @kbn/securitysolution-autocomplete
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-hook-utils
 - @kbn/securitysolution-io-ts-alerting-types

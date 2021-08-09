@@ -13,6 +13,7 @@ import {
   APP_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
+  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -88,7 +89,9 @@ export const initUiSettings = (
       }),
       sensitive: true,
 
-      value: DEFAULT_INDEX_PATTERN,
+      value: experimentalFeatures.uebaEnabled
+        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
+        : DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',

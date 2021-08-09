@@ -115,7 +115,6 @@ describe('When on the Event Filters List Page', () => {
 
       expect(eventMeta).toEqual([
         'some name',
-        'Linux',
         'April 20th 2020 @ 11:25:31',
         'some user',
         'April 20th 2020 @ 11:25:31',

@@ -31,6 +31,11 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
   packageInfo?: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
   'data-test-subj'?: string;
+  tabs?: Array<{
+    title: string;
+    isSelected: boolean;
+    onClick: React.ReactEventHandler;
+  }>;
 }> = memo(
   ({
     from,
@@ -41,9 +46,13 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     integrationInfo,
     children,
     'data-test-subj': dataTestSubj,
+    tabs = [],
   }) => {
     const pageTitle = useMemo(() => {
-      if ((from === 'package' || from === 'package-edit' || from === 'edit') && packageInfo) {
+      if (
+        (from === 'package' || from === 'package-edit' || from === 'edit' || from === 'policy') &&
+        packageInfo
+      ) {
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
@@ -181,6 +190,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
         rightColumn={rightColumn}
         rightColumnGrow={false}
         data-test-subj={dataTestSubj}
+        tabs={tabs.map(({ title, ...rest }) => ({ name: title, ...rest }))}
       >
         {children}
       </WithHeaderLayout>

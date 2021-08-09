@@ -50,7 +50,9 @@ export const OverviewPageFooter: FC<Props> = ({
         iconType="home"
         size="xs"
         onClick={(event: MouseEvent) => {
-          application.navigateToUrl(addBasePath('/app/management/kibana/settings#defaultRoute'));
+          application.navigateToUrl(
+            addBasePath('/app/management/kibana/settings?query=default+route')
+          );
           if (onChangeDefaultRoute) {
             onChangeDefaultRoute(event);
           }

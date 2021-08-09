@@ -12,7 +12,6 @@ import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
-  const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings']);
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -90,10 +89,6 @@ export default function ({ getService, getPageObjects }) {
         (i) => i.includes(rollupIndexPatternName) && i.includes('Rollup')
       );
       expect(filteredIndexPatternNames.length).to.be(1);
-
-      // make sure there are no toasts which might be showing unexpected errors
-      const toastShown = await find.existsByCssSelector('.euiToast');
-      expect(toastShown).to.be(false);
 
       // ensure all fields are available
       await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
