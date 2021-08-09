@@ -25,7 +25,7 @@ const topBackendsRoute = createApmServerRoute({
       query: t.intersection([rangeRt, t.type({ numBuckets: toNumberRt })]),
     }),
     t.partial({
-      query: t.intersection([environmentRt, offsetRt]),
+      query: t.intersection([environmentRt, offsetRt, kueryRt]),
     }),
   ]),
   options: {
@@ -35,9 +35,9 @@ const topBackendsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { start, end } = setup;
-    const { environment, offset, numBuckets } = resources.params.query;
+    const { environment, offset, numBuckets, kuery } = resources.params.query;
 
-    const opts = { setup, start, end, numBuckets, environment };
+    const opts = { setup, start, end, numBuckets, environment, kuery };
 
     const [currentBackends, previousBackends] = await Promise.all([
       getTopBackends(opts),
