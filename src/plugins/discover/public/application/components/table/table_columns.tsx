@@ -83,18 +83,8 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
-    render: (
-      { formattedField }: FieldRecord['value'],
-      { field: { fieldKey, field, fieldMapping } }: FieldRecord
-    ) => {
-      return (
-        <TableFieldValue
-          fieldKey={fieldKey}
-          field={field}
-          formattedField={formattedField}
-          fieldMapping={fieldMapping}
-        />
-      );
+    render: ({ formattedField }: FieldRecord['value'], { field: { fieldKey } }: FieldRecord) => {
+      return <TableFieldValue fieldKey={fieldKey} formattedField={formattedField} />;
     },
   },
 ];
