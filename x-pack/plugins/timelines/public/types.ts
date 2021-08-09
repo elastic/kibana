@@ -23,6 +23,7 @@ import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions/index';
 import type { AddToCaseActionProps } from './components/actions/timeline/cases/add_to_case_action';
+import { StatusBulkActionsProps } from './hooks/use_status_bulk_action_items';
 export * from './store/t_grid';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
@@ -34,6 +35,7 @@ export interface TimelinesUIStart {
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
+  // getUseStatusBulkActionItems: (props: StatusBulkActionsProps) => JSX.Element[];
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
   getUseAddToTimelineSensor: () => (api: SensorAPI) => void;
   getUseDraggableKeyboardWrapper: () => (

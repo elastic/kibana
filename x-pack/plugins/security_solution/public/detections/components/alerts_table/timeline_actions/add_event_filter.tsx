@@ -24,9 +24,7 @@ const AddEventFilterComponent: React.FC<AddEventFilterProps> = ({ onClick, disab
       onClick={onClick}
       disabled={disabled}
     >
-      <EuiText data-test-subj="addEventFilterButton" size="m">
-        {i18n.ACTION_ADD_EVENT_FILTER}
-      </EuiText>
+      {i18n.ACTION_ADD_EVENT_FILTER}
     </EuiContextMenuItem>
   );
 };

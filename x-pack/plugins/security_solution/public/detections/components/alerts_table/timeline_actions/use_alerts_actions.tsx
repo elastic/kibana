@@ -23,11 +23,12 @@ import {
   displayErrorToast,
 } from '../../../../common/components/toasters';
 import { useUserData } from '../../user_info';
+import { useStatusBulkActionItems } from '../../../../../../timelines/public';
 
 interface Props {
-  alertStatus?: string;
+  alertStatus?: Status;
   closePopover: () => void;
-  eventId: string | null | undefined;
+  eventId: string;
   timelineId: string;
 }
 
@@ -41,6 +42,7 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, newStatus: Status) => {
+      closePopover();
       if (conflicts > 0) {
         // Partial failure
         addWarning({
@@ -63,12 +65,14 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
         displaySuccessToast(title, dispatchToaster);
       }
     },
-    [addWarning, dispatchToaster]
+    [addWarning, closePopover, dispatchToaster]
   );
 
   const onAlertStatusUpdateFailure = useCallback(
     (newStatus: Status, error: Error) => {
       let title: string;
+      closePopover();
+
       switch (newStatus) {
         case 'closed':
           title = i18n.CLOSED_ALERT_FAILED_TOAST;
@@ -81,7 +85,7 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
       }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
-    [dispatchToaster]
+    [closePopover, dispatchToaster]
   );
 
   const setEventsLoading = useCallback(
@@ -211,7 +215,17 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
     }
   }, [alertStatus, inProgressAlertAction, closeAlertAction, openAlertAction]);
 
+  const actionItems = useStatusBulkActionItems({
+    eventIds: [eventId],
+    currentStatus: alertStatus,
+    setEventsLoading,
+    setEventsDeleted,
+    onUpdateSuccess: onAlertStatusUpdateSuccess,
+    onUpdateFailure: onAlertStatusUpdateFailure,
+  });
+
   return {
     statusActions,
+    actionItems,
   };
 };

@@ -6,12 +6,14 @@
  */
 
 import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+
 import React from 'react';
 import * as i18n from '../translations';
 
 interface AddExceptionProps {
   disabled?: boolean;
-  onClick: () => void;
+  onClick: (type: ExceptionListType) => void;
 }
 
 const AddExceptionComponent: React.FC<AddExceptionProps> = ({ disabled, onClick }) => {
@@ -24,9 +26,7 @@ const AddExceptionComponent: React.FC<AddExceptionProps> = ({ disabled, onClick 
       onClick={onClick}
       disabled={disabled}
     >
-      <EuiText data-test-subj="addExceptionButton" size="m">
-        {i18n.ACTION_ADD_EXCEPTION}
-      </EuiText>
+      {i18n.ACTION_ADD_EXCEPTION}
     </EuiContextMenuItem>
   );
 };
