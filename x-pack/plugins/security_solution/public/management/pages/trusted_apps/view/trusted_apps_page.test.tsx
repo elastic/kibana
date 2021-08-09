@@ -173,9 +173,9 @@ describe('When on the Trusted Apps Page', () => {
       expect(addButton.textContent).toBe('Add Trusted Application');
     });
 
-    it('should display the searchbar', async () => {
+    it('should display the searchExceptions', async () => {
       const renderResult = await renderWithListData();
-      expect(await renderResult.findByTestId('searchBar')).not.toBeNull();
+      expect(await renderResult.findByTestId('searchExceptions')).not.toBeNull();
     });
 
     describe('and the Grid view is being displayed', () => {
@@ -774,6 +774,20 @@ describe('When on the Trusted Apps Page', () => {
             return releaseListResponse();
           }
         }
+
+        if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
+          const policy = generator.generatePolicyPackagePolicy();
+          policy.name = 'test policy A';
+          policy.id = 'abc123';
+
+          const response: GetPackagePoliciesResponse = {
+            items: [policy],
+            page: 1,
+            perPage: 1000,
+            total: 1,
+          };
+          return response;
+        }
         if (priorMockImplementation) {
           return priorMockImplementation(path);
         }
@@ -874,12 +888,12 @@ describe('When on the Trusted Apps Page', () => {
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
     });
 
-    it('should not display the searchbar', async () => {
+    it('should not display the searchExceptions', async () => {
       const renderResult = render();
       await act(async () => {
         await waitForAction('trustedAppsExistStateChanged');
       });
-      expect(renderResult.queryByTestId('searchBar')).toBeNull();
+      expect(renderResult.queryByTestId('searchExceptions')).toBeNull();
     });
   });
 
@@ -921,6 +935,27 @@ describe('When on the Trusted Apps Page', () => {
           backButtonLabel: 'back to fleet',
           backButtonUrl: '/fleet',
         });
+      });
+
+      const priorMockImplementation = coreStart.http.get.getMockImplementation();
+      // @ts-ignore
+      coreStart.http.get.mockImplementation((path, options) => {
+        if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
+          const policy = generator.generatePolicyPackagePolicy();
+          policy.name = 'test policy A';
+          policy.id = 'abc123';
+
+          const response: GetPackagePoliciesResponse = {
+            items: [policy],
+            page: 1,
+            perPage: 1000,
+            total: 1,
+          };
+          return response;
+        }
+        if (priorMockImplementation) {
+          return priorMockImplementation(path);
+        }
       });
     });
 

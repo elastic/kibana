@@ -443,6 +443,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -559,6 +560,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 Waiting for job to be processed.
                               </span>
@@ -1454,6 +1456,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -1570,6 +1573,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 Attempt 1 of 1.
                               </span>
@@ -2465,6 +2469,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -3506,6 +3511,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -3622,6 +3628,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 See report info for warnings.
                               </span>
@@ -4574,6 +4581,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -5615,6 +5623,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -6656,6 +6665,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -7697,6 +7707,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -8738,6 +8749,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 visualization
                               </span>
