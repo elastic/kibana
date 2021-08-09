@@ -51,6 +51,7 @@ export class ConfirmDelete extends Component<Props> {
     });
     return (
       <EuiConfirmModal
+        data-test-subj="deletePolicyModal"
         title={title}
         onCancel={onCancel}
         onConfirm={this.deletePolicy}
