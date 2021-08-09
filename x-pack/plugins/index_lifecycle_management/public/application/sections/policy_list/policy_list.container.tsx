@@ -8,11 +8,12 @@
 import React, { useEffect } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PolicyTable as PresentationComponent } from './policy_table';
+import { PolicyList as PresentationComponent } from './policy_list';
 import { useKibana } from '../../../shared_imports';
 import { useLoadPoliciesList } from '../../services/api';
+import { PolicyListContextProvider } from './policy_list_context';
 
-export const PolicyTable: React.FunctionComponent = () => {
+export const PolicyList: React.FunctionComponent = () => {
   const {
     services: { breadcrumbService },
   } = useKibana();
@@ -68,5 +69,9 @@ export const PolicyTable: React.FunctionComponent = () => {
     );
   }
 
-  return <PresentationComponent policies={policies || []} updatePolicies={resendRequest} />;
+  return (
+    <PolicyListContextProvider>
+      <PresentationComponent policies={policies || []} updatePolicies={resendRequest} />
+    </PolicyListContextProvider>
+  );
 };
