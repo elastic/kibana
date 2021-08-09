@@ -60,7 +60,7 @@ ts_config(
   deps = [
     "//:tsconfig.base.json",
     "//:tsconfig.browser.json",
-    "//:tsconfig.browser-bazel.json",
+    "//:tsconfig.browser_bazel.json",
   ],
 )
 

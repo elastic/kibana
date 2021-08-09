@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.browser-bazel.json",
+  "extends": "../../tsconfig.browser_bazel.json",
   "compilerOptions": {
     "allowJs": true,
     "outDir": "./target_web",

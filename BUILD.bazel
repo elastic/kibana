@@ -5,7 +5,7 @@ exports_files(
     "tsconfig.base.json",
     "tsconfig.bazel.json",
     "tsconfig.browser.json",
-    "tsconfig.browser-bazel.json",
+    "tsconfig.browser_bazel.json",
     "tsconfig.json",
     "package.json"
   ],
