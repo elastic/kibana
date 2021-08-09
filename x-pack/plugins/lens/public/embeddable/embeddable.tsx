@@ -326,8 +326,8 @@ export class Embeddable
     const executionContext = {
       type: 'lens',
       name: this.savedVis.visualizationType ?? '',
-      description: this.savedVis.title ?? this.savedVis.description ?? '',
       id: this.id,
+      description: this.savedVis.title || this.input.title || '',
       url: this.output.editUrl,
       parent: this.input.executionContext,
     };
