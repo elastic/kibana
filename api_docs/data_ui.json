@@ -276,7 +276,9 @@
               "(() => void) | undefined"
             ],
             "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -291,7 +293,24 @@
               ") => void) | undefined"
             ],
             "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "Query"
+                ],
+                "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -304,7 +323,24 @@
               "((isFocused: boolean) => void) | undefined"
             ],
             "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isFocused",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -319,7 +355,24 @@
               ") => void) | undefined"
             ],
             "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.QueryStringInputProps.onSubmit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "Query"
+                ],
+                "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",

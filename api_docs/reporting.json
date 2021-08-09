@@ -2256,8 +2256,8 @@
           ],
           "path": "x-pack/plugins/reporting/server/types.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

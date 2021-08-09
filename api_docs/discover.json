@@ -690,8 +690,8 @@
             ],
             "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "discover",
@@ -713,11 +713,10 @@
             ],
             "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "discover",
-                "id": "def-public.saveOptions",
+                "id": "def-public.SavedSearch.save.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "saveOptions",
@@ -732,9 +731,11 @@
                   }
                 ],
                 "path": "src/plugins/discover/public/saved_searches/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "discover",
@@ -808,19 +809,23 @@
             ],
             "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "discover",
-                "id": "def-public.id",
+                "id": "def-public.SavedSearchLoader.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/discover/public/saved_searches/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "discover",
@@ -834,19 +839,23 @@
             ],
             "path": "src/plugins/discover/public/saved_searches/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "discover",
-                "id": "def-public.id",
+                "id": "def-public.SavedSearchLoader.urlFor.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/discover/public/saved_searches/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

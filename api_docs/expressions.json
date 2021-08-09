@@ -6404,8 +6404,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -6489,8 +6489,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -6513,7 +6513,9 @@
               "<unknown, unknown, unknown, any>) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -6528,7 +6530,9 @@
               "(() => boolean) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -6552,8 +6556,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -6921,13 +6925,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
-            "returnComment": [
-              "`ExpressionAstFunctionBuilder[]`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.fnName",
+                "id": "def-public.ExpressionAstExpressionBuilder.findFunction.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "fnName",
@@ -6945,8 +6946,12 @@
                   "<FnDef>[\"name\"]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_expression.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`ExpressionAstFunctionBuilder[]`"
             ]
           },
           {
@@ -6972,10 +6977,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`ExpressionAstExpression`"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "expressions",
@@ -6993,10 +6998,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`string`"
-            ],
-            "children": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -7097,13 +7102,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.name",
+                "id": "def-public.ExpressionAstFunctionBuilder.addArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -7114,11 +7116,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.value",
+                "id": "def-public.ExpressionAstFunctionBuilder.addArgument.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "value",
@@ -7136,8 +7139,12 @@
                   " | FunctionArgs<FnDef>[A]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -7164,13 +7171,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`ExpressionAstFunctionBuilderArgument[] | undefined`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.name",
+                "id": "def-public.ExpressionAstFunctionBuilder.getArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -7181,8 +7185,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`ExpressionAstFunctionBuilderArgument[] | undefined`"
             ]
           },
           {
@@ -7209,13 +7217,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.name",
+                "id": "def-public.ExpressionAstFunctionBuilder.replaceArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -7226,11 +7231,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.value",
+                "id": "def-public.ExpressionAstFunctionBuilder.replaceArgument.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "value",
@@ -7249,8 +7255,12 @@
                   " | FunctionArgs<FnDef>[A])[]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -7269,13 +7279,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.name",
+                "id": "def-public.ExpressionAstFunctionBuilder.removeArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -7286,8 +7293,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -7313,10 +7324,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`ExpressionAstFunction`"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "expressions",
@@ -7334,10 +7345,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`string`"
-            ],
-            "children": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -8236,7 +8247,9 @@
               "(() => Error | undefined) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -8272,11 +8285,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.domNode",
+                "id": "def-public.ExpressionRenderDefinition.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -8285,11 +8297,12 @@
                   "HTMLElement"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.config",
+                "id": "def-public.ExpressionRenderDefinition.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -8298,11 +8311,12 @@
                   "Config"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.handlers",
+                "id": "def-public.ExpressionRenderDefinition.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -8317,9 +8331,11 @@
                   }
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8443,19 +8459,23 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.name",
+                "id": "def-public.ExpressionsServiceStart.getFunction.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -8479,19 +8499,23 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.name",
+                "id": "def-public.ExpressionsServiceStart.getRenderer.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -8515,19 +8539,23 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.name",
+                "id": "def-public.ExpressionsServiceStart.getType.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -8593,11 +8621,10 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.ast",
+                "id": "def-public.ExpressionsServiceStart.run.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ast",
@@ -8613,11 +8640,12 @@
                   }
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.input",
+                "id": "def-public.ExpressionsServiceStart.run.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
@@ -8626,11 +8654,12 @@
                   "Input"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.params",
+                "id": "def-public.ExpressionsServiceStart.run.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -8646,9 +8675,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -8688,11 +8719,10 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.ast",
+                "id": "def-public.ExpressionsServiceStart.execute.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ast",
@@ -8708,11 +8738,12 @@
                   }
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.input",
+                "id": "def-public.ExpressionsServiceStart.execute.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
@@ -8721,11 +8752,12 @@
                   "Input"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.params",
+                "id": "def-public.ExpressionsServiceStart.execute.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -8741,9 +8773,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -8766,8 +8800,8 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8818,7 +8852,24 @@
               "((type: any) => void | Error) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionTypeDefinition.validate.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -8831,7 +8882,24 @@
               "((type: Value) => SerializedType) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionTypeDefinition.serialize.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "Value"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -8844,7 +8912,24 @@
               "((type: SerializedType) => Value) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionTypeDefinition.deserialize.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "SerializedType"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9288,8 +9373,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9303,11 +9388,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.fn",
+                "id": "def-public.IInterpreterRenderHandlers.onDestroy.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "fn",
@@ -9316,9 +9400,11 @@
                   "() => void"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9332,8 +9418,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9347,11 +9433,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.params",
+                "id": "def-public.IInterpreterRenderHandlers.update.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "params",
@@ -9360,9 +9445,11 @@
                   "any"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9376,11 +9463,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.event",
+                "id": "def-public.IInterpreterRenderHandlers.event.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "event",
@@ -9389,9 +9475,11 @@
                   "any"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9404,7 +9492,24 @@
               "((event: any) => Promise<boolean>) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.IInterpreterRenderHandlers.hasCompatibleActions.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9425,8 +9530,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9440,8 +9545,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9746,7 +9851,45 @@
               " | null | undefined) => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>[]) | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ReactExpressionRendererProps.renderError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ReactExpressionRendererProps.renderError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "public",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-public.ExpressionRenderError",
+                    "text": "ExpressionRenderError"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9780,7 +9923,30 @@
               ") => void) | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ReactExpressionRendererProps.onEvent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "public",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-public.ExpressionRendererEvent",
+                    "text": "ExpressionRendererEvent"
+                  }
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -9793,7 +9959,52 @@
               "(<TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ReactExpressionRendererProps.onData$.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "TData"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ReactExpressionRendererProps.onData$.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "adapters",
+                "description": [],
+                "signature": [
+                  "TInspectorAdapters | undefined"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ReactExpressionRendererProps.onData$.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "partial",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -10304,6 +10515,35 @@
         ],
         "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.props",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.context",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10346,6 +10586,35 @@
         ],
         "path": "src/plugins/expressions/common/expression_types/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.input",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "I"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.availableTypes",
+            "type": "Object",
+            "tags": [],
+            "label": "availableTypes",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -15898,8 +16167,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -15983,8 +16252,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -16007,7 +16276,9 @@
               "<unknown, unknown, unknown, any>) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -16022,7 +16293,9 @@
               "(() => boolean) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -16046,8 +16319,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -16415,13 +16688,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
-            "returnComment": [
-              "`ExpressionAstFunctionBuilder[]`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.fnName",
+                "id": "def-server.ExpressionAstExpressionBuilder.findFunction.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "fnName",
@@ -16439,8 +16709,12 @@
                   "<FnDef>[\"name\"]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_expression.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`ExpressionAstFunctionBuilder[]`"
             ]
           },
           {
@@ -16466,10 +16740,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`ExpressionAstExpression`"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "expressions",
@@ -16487,10 +16761,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`string`"
-            ],
-            "children": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -16591,13 +16865,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.name",
+                "id": "def-server.ExpressionAstFunctionBuilder.addArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -16608,11 +16879,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.value",
+                "id": "def-server.ExpressionAstFunctionBuilder.addArgument.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "value",
@@ -16630,8 +16902,12 @@
                   " | FunctionArgs<FnDef>[A]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -16658,13 +16934,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`ExpressionAstFunctionBuilderArgument[] | undefined`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.name",
+                "id": "def-server.ExpressionAstFunctionBuilder.getArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -16675,8 +16948,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`ExpressionAstFunctionBuilderArgument[] | undefined`"
             ]
           },
           {
@@ -16703,13 +16980,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.name",
+                "id": "def-server.ExpressionAstFunctionBuilder.replaceArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -16720,11 +16994,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.value",
+                "id": "def-server.ExpressionAstFunctionBuilder.replaceArgument.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "value",
@@ -16743,8 +17018,12 @@
                   " | FunctionArgs<FnDef>[A])[]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -16763,13 +17042,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.name",
+                "id": "def-server.ExpressionAstFunctionBuilder.removeArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -16780,8 +17056,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -16807,10 +17087,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`ExpressionAstFunction`"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "expressions",
@@ -16828,10 +17108,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`string`"
-            ],
-            "children": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -17701,7 +17981,9 @@
               "(() => Error | undefined) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -17737,11 +18019,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.domNode",
+                "id": "def-server.ExpressionRenderDefinition.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -17750,11 +18031,12 @@
                   "HTMLElement"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.config",
+                "id": "def-server.ExpressionRenderDefinition.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -17763,11 +18045,12 @@
                   "Config"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.handlers",
+                "id": "def-server.ExpressionRenderDefinition.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -17782,9 +18065,11 @@
                   }
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -17835,7 +18120,24 @@
               "((type: any) => void | Error) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.ExpressionTypeDefinition.validate.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -17848,7 +18150,24 @@
               "((type: Value) => SerializedType) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.ExpressionTypeDefinition.serialize.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "Value"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -17861,7 +18180,24 @@
               "((type: SerializedType) => Value) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.ExpressionTypeDefinition.deserialize.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "SerializedType"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18043,8 +18379,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18058,11 +18394,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.fn",
+                "id": "def-server.IInterpreterRenderHandlers.onDestroy.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "fn",
@@ -18071,9 +18406,11 @@
                   "() => void"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18087,8 +18424,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18102,11 +18439,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.params",
+                "id": "def-server.IInterpreterRenderHandlers.update.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "params",
@@ -18115,9 +18451,11 @@
                   "any"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18131,11 +18469,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.event",
+                "id": "def-server.IInterpreterRenderHandlers.event.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "event",
@@ -18144,9 +18481,11 @@
                   "any"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18159,7 +18498,24 @@
               "((event: any) => Promise<boolean>) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.IInterpreterRenderHandlers.hasCompatibleActions.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18180,8 +18536,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18195,8 +18551,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -18906,6 +19262,35 @@
         ],
         "path": "src/plugins/expressions/common/expression_types/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.input",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "I"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.availableTypes",
+            "type": "Object",
+            "tags": [],
+            "label": "availableTypes",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -26585,8 +26970,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -26670,8 +27055,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -26694,7 +27079,9 @@
               "<unknown, unknown, unknown, any>) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -26709,7 +27096,9 @@
               "(() => boolean) | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -26733,8 +27122,8 @@
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -26872,11 +27261,10 @@
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutionPureTransitions.start.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -26892,9 +27280,11 @@
                   "<Output>"
                 ],
                 "path": "src/plugins/expressions/common/execution/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -26924,11 +27314,10 @@
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutionPureTransitions.setResult.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -26944,9 +27333,11 @@
                   "<Output>"
                 ],
                 "path": "src/plugins/expressions/common/execution/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -26976,11 +27367,10 @@
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutionPureTransitions.setError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -26996,9 +27386,11 @@
                   "<Output>"
                 ],
                 "path": "src/plugins/expressions/common/execution/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -27190,11 +27582,10 @@
             ],
             "path": "src/plugins/expressions/common/executor/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutorPureSelectors.getFunction.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -27210,9 +27601,11 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/plugins/expressions/common/executor/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -27242,11 +27635,10 @@
             ],
             "path": "src/plugins/expressions/common/executor/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutorPureSelectors.getType.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -27262,9 +27654,11 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/plugins/expressions/common/executor/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -27286,11 +27680,10 @@
             ],
             "path": "src/plugins/expressions/common/executor/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutorPureSelectors.getContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -27306,9 +27699,11 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/plugins/expressions/common/executor/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -27359,11 +27754,10 @@
             ],
             "path": "src/plugins/expressions/common/executor/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutorPureTransitions.addFunction.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -27379,9 +27773,11 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/plugins/expressions/common/executor/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -27419,11 +27815,10 @@
             ],
             "path": "src/plugins/expressions/common/executor/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutorPureTransitions.addType.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -27439,9 +27834,11 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/plugins/expressions/common/executor/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -27471,11 +27868,10 @@
             ],
             "path": "src/plugins/expressions/common/executor/container.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExecutorPureTransitions.extendContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -27491,9 +27887,11 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/plugins/expressions/common/executor/container.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -27679,13 +28077,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
-            "returnComment": [
-              "`ExpressionAstFunctionBuilder[]`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.fnName",
+                "id": "def-common.ExpressionAstExpressionBuilder.findFunction.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "fnName",
@@ -27703,8 +28098,12 @@
                   "<FnDef>[\"name\"]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_expression.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`ExpressionAstFunctionBuilder[]`"
             ]
           },
           {
@@ -27730,10 +28129,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`ExpressionAstExpression`"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "expressions",
@@ -27751,10 +28150,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_expression.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`string`"
-            ],
-            "children": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -27855,13 +28254,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.name",
+                "id": "def-common.ExpressionAstFunctionBuilder.addArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -27872,11 +28268,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.value",
+                "id": "def-common.ExpressionAstFunctionBuilder.addArgument.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "value",
@@ -27894,8 +28291,12 @@
                   " | FunctionArgs<FnDef>[A]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -27922,13 +28323,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`ExpressionAstFunctionBuilderArgument[] | undefined`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.name",
+                "id": "def-common.ExpressionAstFunctionBuilder.getArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -27939,8 +28337,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`ExpressionAstFunctionBuilderArgument[] | undefined`"
             ]
           },
           {
@@ -27967,13 +28369,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.name",
+                "id": "def-common.ExpressionAstFunctionBuilder.replaceArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -27984,11 +28383,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.value",
+                "id": "def-common.ExpressionAstFunctionBuilder.replaceArgument.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "value",
@@ -28007,8 +28407,12 @@
                   " | FunctionArgs<FnDef>[A])[]"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -28027,13 +28431,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
-            "returnComment": [
-              "`this`"
-            ],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.name",
+                "id": "def-common.ExpressionAstFunctionBuilder.removeArgument.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "name",
@@ -28044,8 +28445,12 @@
                   "A"
                 ],
                 "path": "src/plugins/expressions/common/ast/build_function.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "`this`"
             ]
           },
           {
@@ -28071,10 +28476,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`ExpressionAstFunction`"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "expressions",
@@ -28092,10 +28497,10 @@
             ],
             "path": "src/plugins/expressions/common/ast/build_function.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "`string`"
-            ],
-            "children": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -29142,7 +29547,9 @@
               "(() => Error | undefined) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29178,11 +29585,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.domNode",
+                "id": "def-common.ExpressionRenderDefinition.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -29191,11 +29597,12 @@
                   "HTMLElement"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.config",
+                "id": "def-common.ExpressionRenderDefinition.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -29204,11 +29611,12 @@
                   "Config"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.handlers",
+                "id": "def-common.ExpressionRenderDefinition.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -29223,9 +29631,11 @@
                   }
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -29317,19 +29727,23 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.name",
+                "id": "def-common.ExpressionsServiceStart.getFunction.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29353,19 +29767,23 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.name",
+                "id": "def-common.ExpressionsServiceStart.getRenderer.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29389,19 +29807,23 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.name",
+                "id": "def-common.ExpressionsServiceStart.getType.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29467,11 +29889,10 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.ast",
+                "id": "def-common.ExpressionsServiceStart.run.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ast",
@@ -29487,11 +29908,12 @@
                   }
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.input",
+                "id": "def-common.ExpressionsServiceStart.run.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
@@ -29500,11 +29922,12 @@
                   "Input"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.params",
+                "id": "def-common.ExpressionsServiceStart.run.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -29520,9 +29943,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29562,11 +29987,10 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.ast",
+                "id": "def-common.ExpressionsServiceStart.execute.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ast",
@@ -29582,11 +30006,12 @@
                   }
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.input",
+                "id": "def-common.ExpressionsServiceStart.execute.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
@@ -29595,11 +30020,12 @@
                   "Input"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.params",
+                "id": "def-common.ExpressionsServiceStart.execute.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -29615,9 +30041,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29640,8 +30068,8 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -29692,7 +30120,24 @@
               "((type: any) => void | Error) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionTypeDefinition.validate.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29705,7 +30150,24 @@
               "((type: Value) => SerializedType) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionTypeDefinition.serialize.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "Value"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29718,7 +30180,24 @@
               "((type: SerializedType) => Value) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionTypeDefinition.deserialize.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "SerializedType"
+                ],
+                "path": "src/plugins/expressions/common/expression_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29900,8 +30379,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29915,11 +30394,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.fn",
+                "id": "def-common.IInterpreterRenderHandlers.onDestroy.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "fn",
@@ -29928,9 +30406,11 @@
                   "() => void"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29944,8 +30424,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29959,11 +30439,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.params",
+                "id": "def-common.IInterpreterRenderHandlers.update.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "params",
@@ -29972,9 +30451,11 @@
                   "any"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -29988,11 +30469,10 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.event",
+                "id": "def-common.IInterpreterRenderHandlers.event.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "event",
@@ -30001,9 +30481,11 @@
                   "any"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -30016,7 +30498,24 @@
               "((event: any) => Promise<boolean>) | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.IInterpreterRenderHandlers.hasCompatibleActions.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -30037,8 +30536,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -30052,8 +30551,8 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "expressions",
@@ -31829,6 +32328,35 @@
         ],
         "path": "src/plugins/expressions/common/expression_types/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.input",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "I"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.availableTypes",
+            "type": "Object",
+            "tags": [],
+            "label": "availableTypes",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

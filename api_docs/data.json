@@ -2469,7 +2469,7 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               },
-              ">, { bfetch, expressions, uiActions, usageCollection, inspector }: ",
+              ">, { bfetch, expressions, uiActions, usageCollection, inspector, fieldFormats, }: ",
               "DataSetupDependencies",
               ") => ",
               {
@@ -2519,7 +2519,7 @@
                 "id": "def-public.DataPublicPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ bfetch, expressions, uiActions, usageCollection, inspector }",
+                "label": "{\n      bfetch,\n      expressions,\n      uiActions,\n      usageCollection,\n      inspector,\n      fieldFormats,\n    }",
                 "description": [],
                 "signature": [
                   "DataSetupDependencies"
@@ -2547,7 +2547,7 @@
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              ", { uiActions }: ",
+              ", { uiActions, fieldFormats }: ",
               "DataStartDependencies",
               ") => ",
               {
@@ -2586,7 +2586,7 @@
                 "id": "def-public.DataPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ uiActions }",
+                "label": "{ uiActions, fieldFormats }",
                 "description": [],
                 "signature": [
                   "DataStartDependencies"
@@ -2660,556 +2660,6 @@
                   "string"
                 ],
                 "path": "src/plugins/data/common/index_patterns/errors/duplicate_index_pattern.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.FieldFormat",
-        "type": "Class",
-        "tags": [],
-        "label": "FieldFormat",
-        "description": [],
-        "path": "src/plugins/data/common/field_formats/field_format.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.id",
-            "type": "string",
-            "tags": [
-              "property",
-              "static"
-            ],
-            "label": "id",
-            "description": [],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.hidden",
-            "type": "boolean",
-            "tags": [
-              "property",
-              "static"
-            ],
-            "label": "hidden",
-            "description": [
-              "\nHidden field formats can only be accessed directly by id,\nThey won't appear in field format editor UI,\nBut they can be accessed and used from code internally.\n"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.title",
-            "type": "string",
-            "tags": [
-              "property",
-              "static"
-            ],
-            "label": "title",
-            "description": [],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.fieldType",
-            "type": "CompoundType",
-            "tags": [
-              "property",
-              "private"
-            ],
-            "label": "fieldType",
-            "description": [],
-            "signature": [
-              "string | string[]"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.convertObject",
-            "type": "Object",
-            "tags": [
-              "property",
-              "private"
-            ],
-            "label": "convertObject",
-            "description": [],
-            "signature": [
-              "FieldFormatConvert",
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.htmlConvert",
-            "type": "Function",
-            "tags": [
-              "property",
-              "protected"
-            ],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "HtmlContextTypeConvert",
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.textConvert",
-            "type": "Function",
-            "tags": [
-              "property",
-              "protected"
-            ],
-            "label": "textConvert",
-            "description": [],
-            "signature": [
-              "TextContextTypeConvert",
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.type",
-            "type": "Any",
-            "tags": [
-              "property",
-              "private"
-            ],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.allowsNumericalAggregations",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allowsNumericalAggregations",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat._params",
-            "type": "Any",
-            "tags": [],
-            "label": "_params",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.getConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "getConfig",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.GetConfigFn",
-                "text": "GetConfigFn"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "_params",
-                "description": [],
-                "signature": [
-                  "IFieldFormatMetaParams"
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.Unnamed.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "getConfig",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.GetConfigFn",
-                    "text": "GetConfigFn"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.convert",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "convert",
-            "description": [
-              "\nConvert a raw value to a formatted string"
-            ],
-            "signature": [
-              "(value: any, contentType?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatsContentType",
-                "text": "FieldFormatsContentType"
-              },
-              ", options?: Record<string, any> | ",
-              "HtmlContextTypeOptions",
-              " | undefined) => string"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.convert.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.convert.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "contentType",
-                "description": [
-                  "- optional content type, the only two contentTypes\ncurrently supported are \"html\" and \"text\", which helps\nformatters adjust to different contexts"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatsContentType",
-                    "text": "FieldFormatsContentType"
-                  }
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.convert.$3",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "Record<string, any> | ",
-                  "HtmlContextTypeOptions",
-                  " | undefined"
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": [
-              "- the formatted string, which is assumed to be html, safe for\n  injecting into the DOM or a DOM attribute"
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.getConverterFor",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "getConverterFor",
-            "description": [
-              "\nGet a convert function that is bound to a specific contentType"
-            ],
-            "signature": [
-              "(contentType?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatsContentType",
-                "text": "FieldFormatsContentType"
-              },
-              ") => ",
-              "FieldFormatConvertFunction"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.getConverterFor.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "contentType",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatsContentType",
-                    "text": "FieldFormatsContentType"
-                  }
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "- a bound converter function"
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.getParamDefaults",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "getParamDefaults",
-            "description": [
-              "\nGet parameter defaults"
-            ],
-            "signature": [
-              "() => Record<string, any>"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": [
-              "- parameter defaults"
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.param",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "param",
-            "description": [
-              "\nGet the value of a param. This value may be a default value.\n"
-            ],
-            "signature": [
-              "(name: string) => any"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.param.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [
-                  "- the param name to fetch"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.params",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "params",
-            "description": [
-              "\nGet all of the params in a single object"
-            ],
-            "signature": [
-              "() => Record<string, any>"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.toJSON",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "toJSON",
-            "description": [
-              "\nSerialize this format to a simple POJO, with only the params\nthat are not default\n"
-            ],
-            "signature": [
-              "() => { id: any; params: any; }"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.from",
-            "type": "Function",
-            "tags": [],
-            "label": "from",
-            "description": [],
-            "signature": [
-              "(convertFn: ",
-              "FieldFormatConvertFunction",
-              ") => ",
-              "FieldFormatInstanceType"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.from.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "convertFn",
-                "description": [],
-                "signature": [
-                  "FieldFormatConvertFunction"
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.setupContentType",
-            "type": "Function",
-            "tags": [],
-            "label": "setupContentType",
-            "description": [],
-            "signature": [
-              "() => ",
-              "FieldFormatConvert"
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormat.isInstanceOfFieldFormat",
-            "type": "Function",
-            "tags": [],
-            "label": "isInstanceOfFieldFormat",
-            "description": [],
-            "signature": [
-              "(fieldFormat: any) => fieldFormat is ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormat",
-                "text": "FieldFormat"
-              }
-            ],
-            "path": "src/plugins/data/common/field_formats/field_format.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.FieldFormat.isInstanceOfFieldFormat.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "fieldFormat",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/plugins/data/common/field_formats/field_format.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -4090,9 +3540,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               }
@@ -4369,9 +3819,9 @@
             "signature": [
               "(fieldname: string) => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -5112,9 +4562,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -5174,9 +4624,9 @@
                       },
                       ") => ",
                       {
-                        "pluginId": "data",
+                        "pluginId": "fieldFormats",
                         "scope": "common",
-                        "docId": "kibDataFieldFormatsPluginApi",
+                        "docId": "kibFieldFormatsPluginApi",
                         "section": "def-common.FieldFormat",
                         "text": "FieldFormat"
                       },
@@ -10623,55 +10073,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.FieldFormatConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldFormatConfig",
-        "description": [],
-        "path": "src/plugins/data/common/field_formats/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormatConfig.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/plugins/data/common/field_formats/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormatConfig.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
-            "path": "src/plugins/data/common/field_formats/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.FieldFormatConfig.es",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "es",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/field_formats/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.IDataPluginServices",
         "type": "Interface",
         "tags": [],
@@ -11881,9 +11282,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -11898,7 +11299,67 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.IFieldType.toSpec.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.IFieldType.toSpec.$1.options.getFormatterForField",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "getFormatterForField",
+                    "description": [],
+                    "signature": [
+                      "((field: ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IFieldType",
+                        "text": "IFieldType"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IndexPatternField",
+                        "text": "IndexPatternField"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.FieldSpec",
+                        "text": "FieldSpec"
+                      },
+                      ") => ",
+                      {
+                        "pluginId": "fieldFormats",
+                        "scope": "common",
+                        "docId": "kibFieldFormatsPluginApi",
+                        "section": "def-common.FieldFormat",
+                        "text": "FieldFormat"
+                      },
+                      ") | undefined"
+                    ],
+                    "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -12345,14 +11806,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/ueba/pages/details/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts"
           },
           {
             "plugin": "timelines",
@@ -12911,16 +12364,55 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.IIndexPattern.getFormatterForField.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IFieldType",
+                    "text": "IFieldType"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPatternField",
+                    "text": "IndexPatternField"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/plugins/data/common/index_patterns/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -13278,9 +12770,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -13341,9 +12833,9 @@
                       },
                       ") => ",
                       {
-                        "pluginId": "data",
+                        "pluginId": "fieldFormats",
                         "scope": "common",
-                        "docId": "kibDataFieldFormatsPluginApi",
+                        "docId": "kibFieldFormatsPluginApi",
                         "section": "def-common.FieldFormat",
                         "text": "FieldFormat"
                       },
@@ -14126,11 +13618,10 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.fields",
+                "id": "def-public.ISearchStartSearchSource.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "fields",
@@ -14146,9 +13637,11 @@
                   " | undefined"
                 ],
                 "path": "src/plugins/data/common/search/search_source/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -14172,8 +13665,8 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14241,11 +13734,10 @@
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.agg",
+                "id": "def-public.OptionedValueProp.isCompatible.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "agg",
@@ -14260,9 +13752,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15339,9 +14833,7 @@
           "Filter",
           " & { meta: ",
           "FilterMeta",
-          "; exists?: ",
-          "FilterExistsProperty",
-          " | undefined; }"
+          "; exists?: { field: string; } | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -15515,50 +15007,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.FieldFormatId",
-        "type": "Type",
-        "tags": [
-          "string"
-        ],
-        "label": "FieldFormatId",
-        "description": [],
-        "signature": [
-          "string"
-        ],
-        "path": "src/plugins/data/common/field_formats/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.FieldFormatsContentType",
-        "type": "Type",
-        "tags": [],
-        "label": "FieldFormatsContentType",
-        "description": [],
-        "signature": [
-          "\"html\" | \"text\""
-        ],
-        "path": "src/plugins/data/common/field_formats/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.FieldFormatsGetConfigFn",
-        "type": "Type",
-        "tags": [],
-        "label": "FieldFormatsGetConfigFn",
-        "description": [],
-        "signature": [
-          "<T = any>(key: string, defaultOverride?: T | undefined) => T"
-        ],
-        "path": "src/plugins/data/common/field_formats/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.Filter",
         "type": "Type",
         "tags": [
@@ -15567,9 +15015,9 @@
         "label": "Filter",
         "description": [],
         "signature": [
-          "{ $state?: ",
-          "FilterState",
-          " | undefined; meta: ",
+          "{ $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; meta: ",
           "FilterMeta",
           "; query?: any; }"
         ],
@@ -17179,18 +16627,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
           },
           {
@@ -17200,6 +16636,18 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
           },
           {
             "plugin": "securitySolution",
@@ -17389,128 +16837,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.IFieldFormat",
-        "type": "Type",
-        "tags": [],
-        "label": "IFieldFormat",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormat",
-            "text": "FieldFormat"
-          }
-        ],
-        "path": "src/plugins/data/common/field_formats/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.IFieldFormatsRegistry",
-        "type": "Type",
-        "tags": [],
-        "label": "IFieldFormatsRegistry",
-        "description": [],
-        "signature": [
-          "{ init: (getConfig: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.GetConfigFn",
-            "text": "GetConfigFn"
-          },
-          ", metaParamsOptions?: Record<string, any>, defaultFieldConverters?: ",
-          "FieldFormatInstanceType",
-          "[]) => void; register: (fieldFormats: ",
-          "FieldFormatInstanceType",
-          "[]) => void; deserialize: ",
-          "FormatFactory",
-          "; getDefaultConfig: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatConfig",
-            "text": "FieldFormatConfig"
-          },
-          "; getType: (formatId: string) => ",
-          "FieldFormatInstanceType",
-          " | undefined; getTypeWithoutMetaParams: (formatId: string) => ",
-          "FieldFormatInstanceType",
-          " | undefined; getDefaultType: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined) => ",
-          "FieldFormatInstanceType",
-          " | undefined; getTypeNameByEsTypes: (esTypes: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined) => ",
-          "ES_FIELD_TYPES",
-          " | undefined; getDefaultTypeName: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined) => ",
-          "KBN_FIELD_TYPES",
-          " | ",
-          "ES_FIELD_TYPES",
-          "; getInstance: ((formatId: string, params?: Record<string, any>) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormat",
-            "text": "FieldFormat"
-          },
-          ") & _.MemoizedFunction; getDefaultInstancePlain: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined, params?: Record<string, any>) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormat",
-            "text": "FieldFormat"
-          },
-          "; getDefaultInstanceCacheResolver: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes: ",
-          "ES_FIELD_TYPES",
-          "[]) => string; getByFieldType: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ") => ",
-          "FieldFormatInstanceType",
-          "[]; getDefaultInstance: ((fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined, params?: Record<string, any>) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormat",
-            "text": "FieldFormat"
-          },
-          ") & _.MemoizedFunction; parseDefaultTypeMap: (value: any) => void; has: (id: string) => boolean; }"
-        ],
-        "path": "src/plugins/data/common/field_formats/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.IFieldParamType",
         "type": "Type",
         "tags": [],
@@ -17547,11 +16873,11 @@
         "references": [
           {
             "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts"
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx"
           },
           {
             "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts"
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx"
           }
         ],
         "initialIsOpen": false
@@ -17890,6 +17216,42 @@
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.request",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "SearchStrategyRequest"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -18487,7 +17849,7 @@
           "Filter",
           " & { meta: ",
           "PhraseFilterMeta",
-          "; script?: { script: { source?: any; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: any; }; } | undefined; }"
+          "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -18547,7 +17909,7 @@
           "RangeFilterMeta",
           "; script?: { script: { params: any; lang: ",
           "ScriptLanguage",
-          "; source: any; }; } | undefined; match_all?: any; }"
+          "; source: string; }; } | undefined; match_all?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -18577,7 +17939,7 @@
           "FilterMeta",
           " & { params: ",
           "RangeFilterParams",
-          "; field?: any; formattedValue?: string | undefined; }"
+          "; field?: string | undefined; formattedValue?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -19269,7 +18631,7 @@
             "signature": [
               "(field: ",
               "IndexPatternFieldBase",
-              ", params: any[], indexPattern: ",
+              ", params: string[], indexPattern: ",
               "IndexPatternBase",
               ") => ",
               "PhrasesFilter"
@@ -19299,7 +18661,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any[]"
+                  "string[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
                 "deprecated": false
@@ -19376,7 +18738,7 @@
             "signature": [
               "(field: ",
               "IndexPatternFieldBase",
-              ", value: any, indexPattern: ",
+              ", value: PhraseFilterValue, indexPattern: ",
               "IndexPatternBase",
               ") => ",
               "PhraseFilter"
@@ -19401,12 +18763,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.value",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | number | boolean"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
                 "deprecated": false
@@ -19559,7 +18921,23 @@
             "label": "isPhraseFilter",
             "description": [],
             "signature": [
-              "(filter: any) => filter is ",
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
               "PhraseFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
@@ -19569,12 +18947,26 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
                 "deprecated": false
@@ -19589,7 +18981,23 @@
             "label": "isExistsFilter",
             "description": [],
             "signature": [
-              "(filter: any) => filter is ",
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
               "ExistsFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
@@ -19599,12 +19007,26 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
                 "deprecated": false
@@ -19619,7 +19041,23 @@
             "label": "isPhrasesFilter",
             "description": [],
             "signature": [
-              "(filter: any) => filter is ",
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
               "PhrasesFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
@@ -19629,12 +19067,26 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
                 "deprecated": false
@@ -19649,7 +19101,23 @@
             "label": "isRangeFilter",
             "description": [],
             "signature": [
-              "(filter: any) => filter is ",
+              "(filter?: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              " | undefined) => filter is ",
               "RangeFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
@@ -19659,12 +19127,27 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter",
+                  " | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
                 "deprecated": false
@@ -19679,7 +19162,23 @@
             "label": "isMatchAllFilter",
             "description": [],
             "signature": [
-              "(filter: any) => filter is ",
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
               "MatchAllFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
@@ -19689,12 +19188,26 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/match_all_filter.d.ts",
                 "deprecated": false
@@ -19709,7 +19222,23 @@
             "label": "isMissingFilter",
             "description": [],
             "signature": [
-              "(filter: any) => filter is ",
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
               "MissingFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
@@ -19719,12 +19248,26 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/missing_filter.d.ts",
                 "deprecated": false
@@ -19739,7 +19282,23 @@
             "label": "isQueryStringFilter",
             "description": [],
             "signature": [
-              "(filter: any) => filter is ",
+              "(filter: ",
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              ") => filter is ",
               "QueryStringFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
@@ -19749,12 +19308,26 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "any"
+                  "RangeFilter",
+                  " | ",
+                  "ExistsFilter",
+                  " | ",
+                  "GeoBoundingBoxFilter",
+                  " | ",
+                  "GeoPolygonFilter",
+                  " | ",
+                  "PhraseFilter",
+                  " | ",
+                  "PhrasesFilter",
+                  " | ",
+                  "MatchAllFilter",
+                  " | ",
+                  "MissingFilter"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
                 "deprecated": false
@@ -19785,9 +19358,9 @@
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "{ $state?: ",
-                  "FilterState",
-                  " | undefined; meta: ",
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
                   "FilterMeta",
                   "; query?: any; }"
                 ],
@@ -19806,9 +19379,9 @@
             "signature": [
               "(filter: ",
               "Filter",
-              ") => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: ",
-              "FilterState",
-              " | undefined; query?: any; }"
+              ") => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; query?: any; }"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19822,9 +19395,9 @@
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "{ $state?: ",
-                  "FilterState",
-                  " | undefined; meta: ",
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
                   "FilterMeta",
                   "; query?: any; }"
                 ],
@@ -19858,9 +19431,9 @@
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "{ $state?: ",
-                  "FilterState",
-                  " | undefined; meta: ",
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
                   "FilterMeta",
                   "; query?: any; }"
                 ],
@@ -19896,7 +19469,7 @@
                   "Filter",
                   " & { meta: ",
                   "PhraseFilterMeta",
-                  "; script?: { script: { source?: any; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: any; }; } | undefined; }"
+                  "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
                 "deprecated": false
@@ -19930,7 +19503,7 @@
                   "Filter",
                   " & { meta: ",
                   "PhraseFilterMeta",
-                  "; script?: { script: { source?: any; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: any; }; } | undefined; }"
+                  "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
                 "deprecated": false
@@ -19969,9 +19542,9 @@
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "{ $state?: ",
-                  "FilterState",
-                  " | undefined; meta: ",
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
                   "FilterMeta",
                   "; query?: any; }"
                 ],
@@ -20409,7 +19982,7 @@
                   "RangeFilterMeta",
                   "; script?: { script: { params: any; lang: ",
                   "ScriptLanguage",
-                  "; source: any; }; } | undefined; match_all?: any; }"
+                  "; source: string; }; } | undefined; match_all?: any; }"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/change_time_filter.ts",
                 "deprecated": false
@@ -20454,7 +20027,7 @@
                   "RangeFilterMeta",
                   "; script?: { script: { params: any; lang: ",
                   "ScriptLanguage",
-                  "; source: any; }; } | undefined; match_all?: any; }"
+                  "; source: string; }; } | undefined; match_all?: any; }"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/change_time_filter.ts",
                 "deprecated": false
@@ -21882,426 +21455,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.fieldFormats",
-        "type": "Object",
-        "tags": [],
-        "label": "fieldFormats",
-        "description": [],
-        "path": "src/plugins/data/public/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.FieldFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "FieldFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormat",
-                "text": "FieldFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.FieldFormatsRegistry",
-            "type": "Object",
-            "tags": [],
-            "label": "FieldFormatsRegistry",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatsRegistry",
-                "text": "FieldFormatsRegistry"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.DEFAULT_CONVERTER_COLOR",
-            "type": "Object",
-            "tags": [],
-            "label": "DEFAULT_CONVERTER_COLOR",
-            "description": [],
-            "signature": [
-              "{ range: string; regex: string; text: string; background: string; }"
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.HTML_CONTEXT_TYPE",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "HTML_CONTEXT_TYPE",
-            "description": [],
-            "signature": [
-              "\"html\" | \"text\""
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.TEXT_CONTEXT_TYPE",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "TEXT_CONTEXT_TYPE",
-            "description": [],
-            "signature": [
-              "\"html\" | \"text\""
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.FIELD_FORMAT_IDS",
-            "type": "Object",
-            "tags": [],
-            "label": "FIELD_FORMAT_IDS",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FIELD_FORMAT_IDS",
-                "text": "FIELD_FORMAT_IDS"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.BoolFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "BoolFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.BoolFormat",
-                "text": "BoolFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.BytesFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "BytesFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.BytesFormat",
-                "text": "BytesFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.ColorFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "ColorFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.ColorFormat",
-                "text": "ColorFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.DateFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "DateFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              "DateFormat"
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.DateNanosFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "DateNanosFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              "DateNanosFormat"
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.DurationFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "DurationFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.DurationFormat",
-                "text": "DurationFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.IpFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "IpFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.IpFormat",
-                "text": "IpFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.NumberFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "NumberFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.NumberFormat",
-                "text": "NumberFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.PercentFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "PercentFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.PercentFormat",
-                "text": "PercentFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.RelativeDateFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "RelativeDateFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.RelativeDateFormat",
-                "text": "RelativeDateFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.SourceFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "SourceFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.SourceFormat",
-                "text": "SourceFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.StaticLookupFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "StaticLookupFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.StaticLookupFormat",
-                "text": "StaticLookupFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.UrlFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "UrlFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.UrlFormat",
-                "text": "UrlFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.StringFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "StringFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.StringFormat",
-                "text": "StringFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.TruncateFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "TruncateFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.TruncateFormat",
-                "text": "TruncateFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.fieldFormats.HistogramFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "HistogramFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.HistogramFormat",
-                "text": "HistogramFormat"
-              }
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.indexPatterns",
         "type": "Object",
         "tags": [],
@@ -23487,7 +22640,7 @@
         "label": "UI_SETTINGS",
         "description": [],
         "signature": [
-          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly SHORT_DOTS_ENABLE: \"shortDots:enable\"; readonly FORMAT_DEFAULT_TYPE_MAP: \"format:defaultTypeMap\"; readonly FORMAT_NUMBER_DEFAULT_PATTERN: \"format:number:defaultPattern\"; readonly FORMAT_PERCENT_DEFAULT_PATTERN: \"format:percent:defaultPattern\"; readonly FORMAT_BYTES_DEFAULT_PATTERN: \"format:bytes:defaultPattern\"; readonly FORMAT_CURRENCY_DEFAULT_PATTERN: \"format:currency:defaultPattern\"; readonly FORMAT_NUMBER_DEFAULT_LOCALE: \"format:number:defaultLocale\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
+          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
         ],
         "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
@@ -23550,7 +22703,9 @@
           "parentPluginId": "data",
           "id": "def-public.DataPublicPluginSetup.fieldFormats",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "fieldFormats",
           "description": [],
           "signature": [
@@ -23559,7 +22714,17 @@
             "[]) => void; has: (id: string) => boolean; }"
           ],
           "path": "src/plugins/data/public/types.ts",
-          "deprecated": false
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/index.ts"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/index.ts"
+            }
+          ]
         },
         {
           "parentPluginId": "data",
@@ -23890,26 +23055,126 @@
           "parentPluginId": "data",
           "id": "def-public.DataPublicPluginStart.fieldFormats",
           "type": "CompoundType",
-          "tags": [],
-          "label": "fieldFormats",
-          "description": [
-            "\nfield formats service\n{@link FieldFormatsStart}"
+          "tags": [
+            "deprecated"
           ],
+          "label": "fieldFormats",
+          "description": [],
           "signature": [
             "Pick<",
             {
-              "pluginId": "data",
+              "pluginId": "fieldFormats",
               "scope": "common",
-              "docId": "kibDataFieldFormatsPluginApi",
+              "docId": "kibFieldFormatsPluginApi",
               "section": "def-common.FieldFormatsRegistry",
               "text": "FieldFormatsRegistry"
             },
             ", \"deserialize\" | \"getDefaultConfig\" | \"getType\" | \"getTypeWithoutMetaParams\" | \"getDefaultType\" | \"getTypeNameByEsTypes\" | \"getDefaultTypeName\" | \"getInstance\" | \"getDefaultInstancePlain\" | \"getDefaultInstanceCacheResolver\" | \"getByFieldType\" | \"getDefaultInstance\" | \"parseDefaultTypeMap\" | \"has\"> & { deserialize: ",
-            "FormatFactory",
+            {
+              "pluginId": "fieldFormats",
+              "scope": "common",
+              "docId": "kibFieldFormatsPluginApi",
+              "section": "def-common.FormatFactory",
+              "text": "FormatFactory"
+            },
             "; }"
           ],
           "path": "src/plugins/data/public/types.ts",
-          "deprecated": false
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content.tsx"
+            },
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor/field_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx"
+            },
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/public/plugin.ts"
+            },
+            {
+              "plugin": "discover",
+              "path": "src/plugins/discover/public/application/apps/main/components/chart/histogram.tsx"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/application/actions/export_csv_action.tsx"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/public/applications/fleet/sections/data_stream/list_page/index.tsx"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/xy_visualization/visualization.tsx"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/xy_visualization/visualization.tsx"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/field_item.tsx"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/index.ts"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/plugin.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/public/application/util/dependency_cache.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/public/application/app.tsx"
+            },
+            {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/alert_types/threshold/expression.tsx"
+            },
+            {
+              "plugin": "lens",
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/dimension_panel/droppable/droppable.test.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/target/types/public/application/util/dependency_cache.d.ts"
+            }
+          ]
         },
         {
           "parentPluginId": "data",
@@ -24260,7 +23525,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { bfetch, expressions, usageCollection }: ",
+              ">, { bfetch, expressions, usageCollection, fieldFormats }: ",
               "DataPluginSetupDependencies",
               ") => { __enhance: (enhancements: ",
               "DataEnhancements",
@@ -24272,9 +23537,15 @@
                 "section": "def-server.ISearchSetup",
                 "text": "ISearchSetup"
               },
-              "; fieldFormats: { register: (customFieldFormat: ",
-              "FieldFormatInstanceType",
-              ") => number; }; }"
+              "; fieldFormats: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "server",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-server.FieldFormatsSetup",
+                "text": "FieldFormatsSetup"
+              },
+              "; }"
             ],
             "path": "src/plugins/data/server/plugin.ts",
             "deprecated": false,
@@ -24315,7 +23586,7 @@
                 "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ bfetch, expressions, usageCollection }",
+                "label": "{ bfetch, expressions, usageCollection, fieldFormats }",
                 "description": [],
                 "signature": [
                   "DataPluginSetupDependencies"
@@ -24343,23 +23614,17 @@
                 "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
-              ") => { fieldFormats: { fieldFormatServiceFactory: (uiSettings: ",
+              ", { fieldFormats }: ",
+              "DataPluginStartDependencies",
+              ") => { fieldFormats: ",
               {
-                "pluginId": "core",
+                "pluginId": "fieldFormats",
                 "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-server.FieldFormatsStart",
+                "text": "FieldFormatsStart"
               },
-              ") => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatsRegistry",
-                "text": "FieldFormatsRegistry"
-              },
-              ">; }; indexPatterns: { indexPatternsServiceFactory: (savedObjectsClient: Pick<",
+              "; indexPatterns: { indexPatternsServiceFactory: (savedObjectsClient: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -24427,6 +23692,20 @@
                     "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }
+                ],
+                "path": "src/plugins/data/server/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataServerPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ fieldFormats }",
+                "description": [],
+                "signature": [
+                  "DataPluginStartDependencies"
                 ],
                 "path": "src/plugins/data/server/plugin.ts",
                 "deprecated": false,
@@ -25324,9 +24603,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               }
@@ -25603,9 +24882,9 @@
             "signature": [
               "(fieldname: string) => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -26346,9 +25625,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -26408,9 +25687,9 @@
                       },
                       ") => ",
                       {
-                        "pluginId": "data",
+                        "pluginId": "fieldFormats",
                         "scope": "common",
-                        "docId": "kibDataFieldFormatsPluginApi",
+                        "docId": "kibFieldFormatsPluginApi",
                         "section": "def-common.FieldFormat",
                         "text": "FieldFormat"
                       },
@@ -31326,55 +30605,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-server.FieldFormatConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldFormatConfig",
-        "description": [],
-        "path": "src/plugins/data/common/field_formats/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldFormatConfig.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/plugins/data/common/field_formats/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldFormatConfig.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
-            "path": "src/plugins/data/common/field_formats/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldFormatConfig.es",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "es",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/field_formats/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-server.IEsSearchRequest",
         "type": "Interface",
         "tags": [],
@@ -32408,9 +31638,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -32425,7 +31655,67 @@
               ") | undefined"
             ],
             "path": "src/plugins/data/common/index_patterns/fields/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.IFieldType.toSpec.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IFieldType.toSpec.$1.options.getFormatterForField",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "getFormatterForField",
+                    "description": [],
+                    "signature": [
+                      "((field: ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IFieldType",
+                        "text": "IFieldType"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.IndexPatternField",
+                        "text": "IndexPatternField"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataIndexPatternsPluginApi",
+                        "section": "def-common.FieldSpec",
+                        "text": "FieldSpec"
+                      },
+                      ") => ",
+                      {
+                        "pluginId": "fieldFormats",
+                        "scope": "common",
+                        "docId": "kibFieldFormatsPluginApi",
+                        "section": "def-common.FieldFormat",
+                        "text": "FieldFormat"
+                      },
+                      ") | undefined"
+                    ],
+                    "path": "src/plugins/data/common/index_patterns/fields/types.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -32802,11 +32092,10 @@
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.agg",
+                "id": "def-server.OptionedValueProp.isCompatible.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "agg",
@@ -32821,9 +32110,11 @@
                   }
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/optioned.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -33243,20 +32534,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-server.FieldFormatsGetConfigFn",
-        "type": "Type",
-        "tags": [],
-        "label": "FieldFormatsGetConfigFn",
-        "description": [],
-        "signature": [
-          "<T = any>(key: string, defaultOverride?: T | undefined) => T"
-        ],
-        "path": "src/plugins/data/common/field_formats/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-server.Filter",
         "type": "Type",
         "tags": [
@@ -33265,9 +32542,9 @@
         "label": "Filter",
         "description": [],
         "signature": [
-          "{ $state?: ",
-          "FilterState",
-          " | undefined; meta: ",
+          "{ $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; meta: ",
           "FilterMeta",
           "; query?: any; }"
         ],
@@ -34877,18 +34154,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
           },
           {
@@ -34898,6 +34163,18 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
           },
           {
             "plugin": "securitySolution",
@@ -35087,108 +34364,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-server.IFieldFormatsRegistry",
-        "type": "Type",
-        "tags": [],
-        "label": "IFieldFormatsRegistry",
-        "description": [],
-        "signature": [
-          "{ init: (getConfig: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.GetConfigFn",
-            "text": "GetConfigFn"
-          },
-          ", metaParamsOptions?: Record<string, any>, defaultFieldConverters?: ",
-          "FieldFormatInstanceType",
-          "[]) => void; register: (fieldFormats: ",
-          "FieldFormatInstanceType",
-          "[]) => void; deserialize: ",
-          "FormatFactory",
-          "; getDefaultConfig: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatConfig",
-            "text": "FieldFormatConfig"
-          },
-          "; getType: (formatId: string) => ",
-          "FieldFormatInstanceType",
-          " | undefined; getTypeWithoutMetaParams: (formatId: string) => ",
-          "FieldFormatInstanceType",
-          " | undefined; getDefaultType: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined) => ",
-          "FieldFormatInstanceType",
-          " | undefined; getTypeNameByEsTypes: (esTypes: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined) => ",
-          "ES_FIELD_TYPES",
-          " | undefined; getDefaultTypeName: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined) => ",
-          "KBN_FIELD_TYPES",
-          " | ",
-          "ES_FIELD_TYPES",
-          "; getInstance: ((formatId: string, params?: Record<string, any>) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormat",
-            "text": "FieldFormat"
-          },
-          ") & _.MemoizedFunction; getDefaultInstancePlain: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined, params?: Record<string, any>) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormat",
-            "text": "FieldFormat"
-          },
-          "; getDefaultInstanceCacheResolver: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes: ",
-          "ES_FIELD_TYPES",
-          "[]) => string; getByFieldType: (fieldType: ",
-          "KBN_FIELD_TYPES",
-          ") => ",
-          "FieldFormatInstanceType",
-          "[]; getDefaultInstance: ((fieldType: ",
-          "KBN_FIELD_TYPES",
-          ", esTypes?: ",
-          "ES_FIELD_TYPES",
-          "[] | undefined, params?: Record<string, any>) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
-            "section": "def-common.FieldFormat",
-            "text": "FieldFormat"
-          },
-          ") & _.MemoizedFunction; parseDefaultTypeMap: (value: any) => void; has: (id: string) => boolean; }"
-        ],
-        "path": "src/plugins/data/common/field_formats/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-server.IFieldParamType",
         "type": "Type",
         "tags": [],
@@ -35225,11 +34400,11 @@
         "references": [
           {
             "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts"
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx"
           },
           {
             "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts"
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx"
           }
         ],
         "initialIsOpen": false
@@ -35847,7 +35022,7 @@
                 "tags": [],
                 "label": "indexPatternString",
                 "description": [],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -35860,7 +35035,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -35870,7 +35045,7 @@
                 "tags": [],
                 "label": "disabled",
                 "description": [],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -35880,7 +35055,7 @@
                 "tags": [],
                 "label": "negate",
                 "description": [],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -35893,7 +35068,7 @@
                 "signature": [
                   "string | null"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               },
               {
@@ -35906,7 +35081,7 @@
                 "signature": [
                   "FilterStateStore"
                 ],
-                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+                "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
               }
             ]
@@ -36132,7 +35307,7 @@
             "signature": [
               "(field: ",
               "IndexPatternFieldBase",
-              ", value: any, indexPattern: ",
+              ", value: PhraseFilterValue, indexPattern: ",
               "IndexPatternBase",
               ") => ",
               "PhraseFilter"
@@ -36157,12 +35332,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.value",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | number | boolean"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
                 "deprecated": false
@@ -36192,7 +35367,7 @@
             "signature": [
               "(field: ",
               "IndexPatternFieldBase",
-              ", params: any[], indexPattern: ",
+              ", params: string[], indexPattern: ",
               "IndexPatternBase",
               ") => ",
               "PhrasesFilter"
@@ -36222,7 +35397,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any[]"
+                  "string[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
                 "deprecated": false
@@ -36341,9 +35516,9 @@
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "{ $state?: ",
-                  "FilterState",
-                  " | undefined; meta: ",
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
                   "FilterMeta",
                   "; query?: any; }"
                 ],
@@ -36777,339 +35952,6 @@
             "tags": [],
             "label": "CSV_MIME_TYPE",
             "description": [],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.fieldFormats",
-        "type": "Object",
-        "tags": [],
-        "label": "fieldFormats",
-        "description": [],
-        "path": "src/plugins/data/server/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.FieldFormatsRegistry",
-            "type": "Object",
-            "tags": [],
-            "label": "FieldFormatsRegistry",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatsRegistry",
-                "text": "FieldFormatsRegistry"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.FieldFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "FieldFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.FieldFormat",
-                "text": "FieldFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.BoolFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "BoolFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.BoolFormat",
-                "text": "BoolFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.BytesFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "BytesFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.BytesFormat",
-                "text": "BytesFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.ColorFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "ColorFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.ColorFormat",
-                "text": "ColorFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.DurationFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "DurationFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.DurationFormat",
-                "text": "DurationFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.IpFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "IpFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.IpFormat",
-                "text": "IpFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.NumberFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "NumberFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.NumberFormat",
-                "text": "NumberFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.PercentFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "PercentFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.PercentFormat",
-                "text": "PercentFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.RelativeDateFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "RelativeDateFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.RelativeDateFormat",
-                "text": "RelativeDateFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.SourceFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "SourceFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.SourceFormat",
-                "text": "SourceFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.StaticLookupFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "StaticLookupFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.StaticLookupFormat",
-                "text": "StaticLookupFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.UrlFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "UrlFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.UrlFormat",
-                "text": "UrlFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.StringFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "StringFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.StringFormat",
-                "text": "StringFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.TruncateFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "TruncateFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.TruncateFormat",
-                "text": "TruncateFormat"
-              }
-            ],
-            "path": "src/plugins/data/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.fieldFormats.HistogramFormat",
-            "type": "Object",
-            "tags": [],
-            "label": "HistogramFormat",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
-                "section": "def-common.HistogramFormat",
-                "text": "HistogramFormat"
-              }
-            ],
             "path": "src/plugins/data/server/index.ts",
             "deprecated": false
           }
@@ -37888,7 +36730,7 @@
         "label": "UI_SETTINGS",
         "description": [],
         "signature": [
-          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly SHORT_DOTS_ENABLE: \"shortDots:enable\"; readonly FORMAT_DEFAULT_TYPE_MAP: \"format:defaultTypeMap\"; readonly FORMAT_NUMBER_DEFAULT_PATTERN: \"format:number:defaultPattern\"; readonly FORMAT_PERCENT_DEFAULT_PATTERN: \"format:percent:defaultPattern\"; readonly FORMAT_BYTES_DEFAULT_PATTERN: \"format:bytes:defaultPattern\"; readonly FORMAT_CURRENCY_DEFAULT_PATTERN: \"format:currency:defaultPattern\"; readonly FORMAT_NUMBER_DEFAULT_LOCALE: \"format:number:defaultLocale\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
+          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
         ],
         "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
@@ -37928,16 +36770,23 @@
           "parentPluginId": "data",
           "id": "def-server.DataPluginSetup.fieldFormats",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "fieldFormats",
           "description": [],
           "signature": [
-            "{ register: (customFieldFormat: ",
-            "FieldFormatInstanceType",
-            ") => number; }"
+            {
+              "pluginId": "fieldFormats",
+              "scope": "server",
+              "docId": "kibFieldFormatsPluginApi",
+              "section": "def-server.FieldFormatsSetup",
+              "text": "FieldFormatsSetup"
+            }
           ],
           "path": "src/plugins/data/server/plugin.ts",
-          "deprecated": false
+          "deprecated": true,
+          "references": []
         }
       ],
       "lifecycle": "setup",
@@ -37993,30 +36842,28 @@
           "parentPluginId": "data",
           "id": "def-server.DataPluginStart.fieldFormats",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "fieldFormats",
           "description": [],
           "signature": [
-            "{ fieldFormatServiceFactory: (uiSettings: ",
             {
-              "pluginId": "core",
+              "pluginId": "fieldFormats",
               "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.IUiSettingsClient",
-              "text": "IUiSettingsClient"
-            },
-            ") => Promise<",
-            {
-              "pluginId": "data",
-              "scope": "common",
-              "docId": "kibDataFieldFormatsPluginApi",
-              "section": "def-common.FieldFormatsRegistry",
-              "text": "FieldFormatsRegistry"
-            },
-            ">; }"
+              "docId": "kibFieldFormatsPluginApi",
+              "section": "def-server.FieldFormatsStart",
+              "text": "FieldFormatsStart"
+            }
           ],
           "path": "src/plugins/data/server/plugin.ts",
-          "deprecated": false
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "reporting",
+              "path": "x-pack/plugins/reporting/server/plugin.ts"
+            }
+          ]
         },
         {
           "parentPluginId": "data",
@@ -38161,7 +37008,7 @@
             "tags": [],
             "label": "indexPatternString",
             "description": [],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -38174,7 +37021,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -38184,7 +37031,7 @@
             "tags": [],
             "label": "disabled",
             "description": [],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -38194,7 +37041,7 @@
             "tags": [],
             "label": "negate",
             "description": [],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -38207,7 +37054,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           },
           {
@@ -38220,7 +37067,7 @@
             "signature": [
               "FilterStateStore"
             ],
-            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
+            "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
           }
         ],
@@ -38563,7 +37410,7 @@
         "signature": [
           "(field: ",
           "IndexPatternFieldBase",
-          ", value: any, indexPattern: ",
+          ", value: PhraseFilterValue, indexPattern: ",
           "IndexPatternBase",
           ") => ",
           "PhraseFilter"
@@ -38590,12 +37437,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.value",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "value",
             "description": [],
             "signature": [
-              "any"
+              "string | number | boolean"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
             "deprecated": false
@@ -38628,7 +37475,7 @@
         "signature": [
           "(field: ",
           "IndexPatternFieldBase",
-          ", params: any[], indexPattern: ",
+          ", params: string[], indexPattern: ",
           "IndexPatternBase",
           ") => ",
           "PhrasesFilter"
@@ -38660,7 +37507,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "any[]"
+              "string[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
             "deprecated": false
@@ -39051,7 +37898,7 @@
         "label": "createEscapeValue",
         "description": [],
         "signature": [
-          "(quoteValues: boolean, escapeFormulas: boolean) => (val: string | object | null | undefined) => string"
+          "(quoteValues: boolean, escapeFormulas: boolean) => (val: RawValue) => string"
         ],
         "path": "src/plugins/data/common/exports/escape_value.ts",
         "deprecated": false,
@@ -39318,9 +38165,9 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "{ $state?: ",
-              "FilterState",
-              " | undefined; meta: ",
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
               "FilterMeta",
               "; query?: any; }"
             ],
@@ -39359,9 +38206,9 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "{ $state?: ",
-              "FilterState",
-              " | undefined; meta: ",
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
               "FilterMeta",
               "; query?: any; }"
             ],
@@ -39558,7 +38405,7 @@
               "Filter",
               " & { meta: ",
               "PhraseFilterMeta",
-              "; script?: { script: { source?: any; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: any; }; } | undefined; }"
+              "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
             "deprecated": false
@@ -39597,7 +38444,7 @@
               "Filter",
               " & { meta: ",
               "PhraseFilterMeta",
-              "; script?: { script: { source?: any; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: any; }; } | undefined; }"
+              "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
             "deprecated": false
@@ -39615,7 +38462,23 @@
         "label": "isExistsFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
           "ExistsFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -39627,12 +38490,26 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
             "deprecated": false
@@ -39703,9 +38580,9 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "{ $state?: ",
-              "FilterState",
-              " | undefined; meta: ",
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
               "FilterMeta",
               "; query?: any; }"
             ],
@@ -39743,9 +38620,9 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "{ $state?: ",
-              "FilterState",
-              " | undefined; meta: ",
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
               "FilterMeta",
               "; query?: any; }"
             ],
@@ -39810,7 +38687,23 @@
         "label": "isGeoBoundingBoxFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
           "GeoBoundingBoxFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -39822,12 +38715,26 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/geo_bounding_box_filter.d.ts",
             "deprecated": false
@@ -39845,7 +38752,23 @@
         "label": "isGeoPolygonFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
           "GeoPolygonFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -39857,12 +38780,26 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/geo_polygon_filter.d.ts",
             "deprecated": false
@@ -39880,7 +38817,23 @@
         "label": "isMatchAllFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
           "MatchAllFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -39892,12 +38845,26 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/match_all_filter.d.ts",
             "deprecated": false
@@ -39915,7 +38882,23 @@
         "label": "isMissingFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
           "MissingFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -39927,12 +38910,26 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/missing_filter.d.ts",
             "deprecated": false
@@ -39950,7 +38947,23 @@
         "label": "isPhraseFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
           "PhraseFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -39962,12 +38975,26 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
             "deprecated": false
@@ -39985,7 +39012,23 @@
         "label": "isPhrasesFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
           "PhrasesFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -39997,12 +39040,26 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
             "deprecated": false
@@ -40020,7 +39077,23 @@
         "label": "isQueryStringFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          ") => filter is ",
           "QueryStringFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -40032,12 +39105,26 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
             "deprecated": false
@@ -40055,7 +39142,23 @@
         "label": "isRangeFilter",
         "description": [],
         "signature": [
-          "(filter: any) => filter is ",
+          "(filter?: ",
+          "RangeFilter",
+          " | ",
+          "ExistsFilter",
+          " | ",
+          "GeoBoundingBoxFilter",
+          " | ",
+          "GeoPolygonFilter",
+          " | ",
+          "PhraseFilter",
+          " | ",
+          "PhrasesFilter",
+          " | ",
+          "MatchAllFilter",
+          " | ",
+          "MissingFilter",
+          " | undefined) => filter is ",
           "RangeFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -40067,12 +39170,27 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "any"
+              "RangeFilter",
+              " | ",
+              "ExistsFilter",
+              " | ",
+              "GeoBoundingBoxFilter",
+              " | ",
+              "GeoPolygonFilter",
+              " | ",
+              "PhraseFilter",
+              " | ",
+              "PhrasesFilter",
+              " | ",
+              "MatchAllFilter",
+              " | ",
+              "MissingFilter",
+              " | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
             "deprecated": false
@@ -40197,9 +39315,9 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "{ $state?: ",
-              "FilterState",
-              " | undefined; meta: ",
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
               "FilterMeta",
               "; query?: any; }"
             ],
@@ -40395,9 +39513,9 @@
         "signature": [
           "(filter: ",
           "Filter",
-          ") => { meta: { disabled: boolean; alias: string | null; negate: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: ",
-          "FilterState",
-          " | undefined; query?: any; }"
+          ") => { meta: { disabled: boolean; alias: string | null; negate: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; query?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40413,9 +39531,9 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "{ $state?: ",
-              "FilterState",
-              " | undefined; meta: ",
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
               "FilterMeta",
               "; query?: any; }"
             ],
@@ -40437,9 +39555,9 @@
         "signature": [
           "(filter: ",
           "Filter",
-          ") => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: ",
-          "FilterState",
-          " | undefined; query?: any; }"
+          ") => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; query?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -40455,9 +39573,9 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "{ $state?: ",
-              "FilterState",
-              " | undefined; meta: ",
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
               "FilterMeta",
               "; query?: any; }"
             ],
@@ -40572,19 +39690,23 @@
             ],
             "path": "src/plugins/data/common/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.type",
+                "id": "def-common.FilterValueFormatter.getConverterFor.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/data/common/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -40848,7 +39970,9 @@
         "type": "Enum",
         "tags": [],
         "label": "FilterStateStore",
-        "description": [],
+        "description": [
+          "\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
+        ],
         "signature": [
           "FilterStateStore"
         ],
@@ -40981,9 +40105,7 @@
           "Filter",
           " & { meta: ",
           "FilterMeta",
-          "; exists?: ",
-          "FilterExistsProperty",
-          " | undefined; }"
+          "; exists?: { field: string; } | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -41022,9 +40144,9 @@
         "label": "Filter",
         "description": [],
         "signature": [
-          "{ $state?: ",
-          "FilterState",
-          " | undefined; meta: ",
+          "{ $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; meta: ",
           "FilterMeta",
           "; query?: any; }"
         ],
@@ -42634,18 +41756,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
           },
           {
@@ -42655,6 +41765,18 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
           },
           {
             "plugin": "securitySolution",
@@ -42834,6 +41956,32 @@
         ],
         "path": "src/plugins/data/common/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.defaultOverride",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/data/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -42854,11 +42002,11 @@
         "references": [
           {
             "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts"
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx"
           },
           {
             "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts"
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx"
           }
         ],
         "initialIsOpen": false
@@ -43257,7 +42405,7 @@
           "Filter",
           " & { meta: ",
           "FilterMeta",
-          "; missing: any; }"
+          "; missing: { field: string; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -43278,7 +42426,7 @@
           "Filter",
           " & { meta: ",
           "PhraseFilterMeta",
-          "; script?: { script: { source?: any; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: any; }; } | undefined; }"
+          "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -43338,7 +42486,7 @@
           "RangeFilterMeta",
           "; script?: { script: { params: any; lang: ",
           "ScriptLanguage",
-          "; source: any; }; } | undefined; match_all?: any; }"
+          "; source: string; }; } | undefined; match_all?: any; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -43368,7 +42516,7 @@
           "FilterMeta",
           " & { params: ",
           "RangeFilterParams",
-          "; field?: any; formattedValue?: string | undefined; }"
+          "; field?: string | undefined; formattedValue?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -43788,7 +42936,7 @@
         "label": "UI_SETTINGS",
         "description": [],
         "signature": [
-          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly SHORT_DOTS_ENABLE: \"shortDots:enable\"; readonly FORMAT_DEFAULT_TYPE_MAP: \"format:defaultTypeMap\"; readonly FORMAT_NUMBER_DEFAULT_PATTERN: \"format:number:defaultPattern\"; readonly FORMAT_PERCENT_DEFAULT_PATTERN: \"format:percent:defaultPattern\"; readonly FORMAT_BYTES_DEFAULT_PATTERN: \"format:bytes:defaultPattern\"; readonly FORMAT_CURRENCY_DEFAULT_PATTERN: \"format:currency:defaultPattern\"; readonly FORMAT_NUMBER_DEFAULT_LOCALE: \"format:number:defaultLocale\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
+          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
         ],
         "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
