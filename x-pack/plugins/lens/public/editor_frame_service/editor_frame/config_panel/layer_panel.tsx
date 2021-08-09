@@ -29,7 +29,12 @@ import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
-import { useLensSelector } from '../../../state_management';
+import {
+  useLensSelector,
+  selectIsFullscreenDatasource,
+  selectResolvedDateRange,
+  selectDatasourceStates,
+} from '../../../state_management';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -74,9 +79,9 @@ export function LayerPanel(
     visualizationState,
   } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
-  const dateRange = useLensSelector((state) => state.lens.resolvedDateRange);
-  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
-  const isFullscreen = Boolean(useLensSelector((state) => state.lens.isFullscreenDatasource));
+  const dateRange = useLensSelector(selectResolvedDateRange);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
+  const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
 
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);

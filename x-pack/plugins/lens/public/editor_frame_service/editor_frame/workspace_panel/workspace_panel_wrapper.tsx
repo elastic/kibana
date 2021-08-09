@@ -18,13 +18,14 @@ import {
   useLensDispatch,
   updateVisualizationState,
   DatasourceStates,
+  VisualizationState,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
-  visualizationState: unknown;
+  visualizationState: VisualizationState['state'];
   visualizationMap: VisualizationMap;
   visualizationId: string | null;
   datasourceMap: DatasourceMap;

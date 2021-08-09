@@ -14,6 +14,7 @@ import { createDatasourceLayers } from '../editor_frame_service/editor_frame';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
 export const selectQuery = (state: LensState) => state.lens.query;
+export const selectSearchSessionId = (state: LensState) => state.lens.searchSessionId;
 export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
 export const selectVisualization = (state: LensState) => state.lens.visualization;
@@ -21,6 +22,8 @@ export const selectStagedPreview = (state: LensState) => state.lens.stagedPrevie
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
+export const selectIsFullscreenDatasource = (state: LensState) =>
+  !!state.lens.isFullscreenDatasource;
 
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
@@ -40,23 +43,6 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
   filters: res.filters,
 }));
 
-// to correct
-export const selectDocState = createSelector(
-  [selectPersistedDoc, selectQuery, selectVisualization, selectDatasourceStates, selectFilters],
-  (persistedDoc, query, visualization, datasourceStates, filters) => ({
-    savedObjectId: persistedDoc?.savedObjectId,
-    title: persistedDoc?.title || '',
-    description: persistedDoc?.description,
-    visualizationType: visualization.activeId,
-    state: {
-      datasourceStates,
-      visualization: visualization.state,
-      query,
-      filters,
-    },
-  })
-);
-
 const selectDatasourceMap = (state: LensState, datasourceMap: DatasourceMap) => datasourceMap;
 
 const selectVisualizationMap = (
@@ -66,17 +52,34 @@ const selectVisualizationMap = (
 ) => visualizationMap;
 
 export const selectSavedObjectFormat = createSelector(
-  [selectDocState, selectActiveDatasourceId, selectDatasourceMap, selectVisualizationMap],
-  (docState, activeDatasourceId, datasourceMap, visualizationMap) => {
-    const { datasourceStates, visualization, filters } = docState.state;
+  [
+    selectPersistedDoc,
+    selectVisualization,
+    selectDatasourceStates,
+    selectQuery,
+    selectFilters,
+    selectActiveDatasourceId,
+    selectDatasourceMap,
+    selectVisualizationMap,
+  ],
+  (
+    persistedDoc,
+    visualization,
+    datasourceStates,
+    query,
+    filters,
+    activeDatasourceId,
+    datasourceMap,
+    visualizationMap
+  ) => {
     const activeVisualization =
-      visualization && docState.visualizationType && visualizationMap[docState.visualizationType];
+      visualization.state && visualization.activeId && visualizationMap[visualization.activeId];
     const activeDatasource =
       datasourceStates && activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
         ? datasourceMap[activeDatasourceId]
         : undefined;
 
-    if (!activeDatasource || !activeVisualization || !visualization) {
+    if (!activeDatasource || !activeVisualization) {
       return;
     }
 
@@ -103,14 +106,18 @@ export const selectSavedObjectFormat = createSelector(
     references.push(...filterReferences);
 
     return {
-      ...docState,
+      savedObjectId: persistedDoc?.savedObjectId,
+      title: persistedDoc?.title || '',
+      description: persistedDoc?.description,
+      visualizationType: visualization.activeId,
       type: 'lens',
+      references,
       state: {
-        ...docState.state,
+        visualization: visualization.state,
+        query,
         filters: persistableFilters,
         datasourceStates: persistibleDatasourceStates,
       },
-      references,
     };
   }
 );

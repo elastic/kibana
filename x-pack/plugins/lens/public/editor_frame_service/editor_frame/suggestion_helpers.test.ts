@@ -9,6 +9,7 @@ import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../../mocks';
 import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { DatasourceStates } from '../../state_management';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -22,13 +23,7 @@ const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSu
 });
 
 let datasourceMap: Record<string, DatasourceMock>;
-let datasourceStates: Record<
-  string,
-  {
-    isLoading: boolean;
-    state: unknown;
-  }
->;
+let datasourceStates: DatasourceStates;
 
 beforeEach(() => {
   datasourceMap = {

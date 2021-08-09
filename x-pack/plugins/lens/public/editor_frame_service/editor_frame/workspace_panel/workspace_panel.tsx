@@ -61,6 +61,11 @@ import {
   setSaveable,
   useLensSelector,
   selectExecutionContext,
+  selectIsFullscreenDatasource,
+  selectVisualization,
+  selectDatasourceStates,
+  selectActiveDatasourceId,
+  selectSearchSessionId,
 } from '../../../state_management';
 
 export interface WorkspacePanelProps {
@@ -123,10 +128,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   suggestionForDraggedField: Suggestion | undefined;
 }) {
   const dispatchLens = useLensDispatch();
-  const isFullscreen = Boolean(useLensSelector((state) => state.lens.isFullscreenDatasource));
-  const visualization = useLensSelector((state) => state.lens.visualization);
-  const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
-  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+  const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
+  const visualization = useLensSelector(selectVisualization);
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
 
   const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
@@ -433,7 +438,7 @@ export const VisualizationWrapper = ({
     }),
     [context]
   );
-  const searchSessionId = useLensSelector((state) => state.lens.searchSessionId);
+  const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const dispatchLens = useLensDispatch();
 

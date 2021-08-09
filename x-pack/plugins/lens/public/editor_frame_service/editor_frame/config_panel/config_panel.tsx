@@ -25,10 +25,11 @@ import {
   updateVisualizationState,
   setToggleFullscreen,
   useLensSelector,
+  selectVisualization,
 } from '../../../state_management';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
-  const visualization = useLensSelector((state) => state.lens.visualization);
+  const visualization = useLensSelector(selectVisualization);
   const activeVisualization = visualization.activeId
     ? props.visualizationMap[visualization.activeId]
     : null;

@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { useLensSelector } from '../../state_management';
+import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
@@ -21,7 +21,7 @@ export interface FrameLayoutProps {
 }
 
 export function FrameLayout(props: FrameLayoutProps) {
-  const isFullscreen = Boolean(useLensSelector((state) => state.lens.isFullscreenDatasource));
+  const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
 
   return (
     <EuiPage

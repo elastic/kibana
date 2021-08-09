@@ -35,8 +35,6 @@ export function containsDynamicMath(dateMathString: string) {
   return dateMathString.includes('now');
 }
 
-export const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
-
 export function getTimeZone(uiSettings: IUiSettingsClient) {
   const configuredTimeZone = uiSettings.get('dateFormat:tz');
   if (configuredTimeZone === 'Browser') {

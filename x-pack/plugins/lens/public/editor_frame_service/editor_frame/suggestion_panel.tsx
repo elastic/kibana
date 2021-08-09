@@ -50,6 +50,11 @@ import {
   selectCurrentVisualization,
   selectCurrentDatasourceStates,
   DatasourceStates,
+  selectIsFullscreenDatasource,
+  selectSearchSessionId,
+  selectActiveDatasourceId,
+  selectActiveData,
+  selectDatasourceStates,
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -167,7 +172,7 @@ const SuggestionPreview = ({
 };
 
 export const SuggestionPanelWrapper = (props: SuggestionPanelProps) => {
-  const isFullscreenDatasource = useLensSelector((state) => state.lens.isFullscreenDatasource);
+  const isFullscreenDatasource = useLensSelector(selectIsFullscreenDatasource);
   return isFullscreenDatasource ? null : <SuggestionPanel {...props} />;
 };
 
@@ -178,9 +183,9 @@ export function SuggestionPanel({
   ExpressionRenderer: ExpressionRendererComponent,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
-  const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
-  const activeData = useLensSelector((state) => state.lens.activeData);
-  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const activeData = useLensSelector(selectActiveData);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
   const existsStagedPreview = useLensSelector((state) => !!state.lens.stagedPreview);
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
@@ -267,7 +272,7 @@ export function SuggestionPanel({
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);
-  const searchSessionId = useLensSelector((state) => state.lens.searchSessionId);
+  const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const contextRef = useRef<ExecutionContextSearch>(context);
   contextRef.current = context;

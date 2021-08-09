@@ -37,6 +37,9 @@ import {
   useLensSelector,
   VisualizationState,
   DatasourceStates,
+  selectActiveDatasourceId,
+  selectVisualization,
+  selectDatasourceStates,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator/id_generator';
 
@@ -113,9 +116,9 @@ function getCurrentVisualizationId(
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
-  const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
-  const visualization = useLensSelector((state) => state.lens.visualization);
-  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const visualization = useLensSelector(selectVisualization);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
 
   function removeLayers(layerIds: string[]) {
     const activeVisualization =
