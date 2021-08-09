@@ -15,8 +15,9 @@ import {
   FieldFormatInstanceType,
   FieldFormatsContentType,
   IFieldFormat,
-} from '../../../../common/field_formats';
-import { convertDateRangeToString, DateRangeKey } from '../buckets/lib/date_range';
+} from '../../../../../field_formats/common';
+import { DateRange } from '../../expressions';
+import { convertDateRangeToString } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
 
 type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;
@@ -86,7 +87,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'date_range';
       static hidden = true;
 
-      textConvert = (range: DateRangeKey) => {
+      textConvert = (range: DateRange) => {
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = getFieldFormat({
           id: nestedFormatter.id,

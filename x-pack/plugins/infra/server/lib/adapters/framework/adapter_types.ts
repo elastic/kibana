@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GenericParams, SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { JsonArray, JsonValue } from '@kbn/common-utils';
@@ -38,7 +38,7 @@ export interface InfraServerPluginStartDeps {
   data: DataPluginStart;
 }
 
-export interface CallWithRequestParams extends GenericParams {
+export interface CallWithRequestParams extends estypes.RequestBase {
   max_concurrent_shard_requests?: number;
   name?: string;
   index?: string | string[];
@@ -50,6 +50,7 @@ export interface CallWithRequestParams extends GenericParams {
   path?: string;
   query?: string | object;
   track_total_hits?: boolean | number;
+  body?: any;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
@@ -117,7 +118,7 @@ export interface InfraDatabaseGetIndicesResponse {
   };
 }
 
-export type SearchHit = SearchResponse<object>['hits']['hits'][0];
+export type SearchHit = estypes.SearchHit;
 
 export interface SortedSearchHit extends SearchHit {
   sort: any[];

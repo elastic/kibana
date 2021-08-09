@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
@@ -55,22 +56,35 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           searchSource: schema.object({}, { unknowns: 'allow' }),
           browserTimezone: schema.string({ defaultValue: 'UTC' }),
           title: schema.string(),
+          version: schema.maybe(schema.string()),
         }),
       },
       options: {
         tags: kibanaAccessControlTags,
       },
     },
-    userHandler(async (user, context, req: CsvFromSavedObjectRequest, res) => {
+    userHandler(async (_user, context, req: CsvFromSavedObjectRequest, res) => {
       const logger = parentLogger.clone(['csv_searchsource_immediate']);
       const runTaskFn = runTaskFnFactory(reporting, logger);
 
       try {
+        let buffer = Buffer.from('');
+        const stream = new Writable({
+          write(chunk, encoding, callback) {
+            buffer = Buffer.concat([
+              buffer,
+              Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
+            ]);
+            callback();
+          },
+        });
+
         const {
           content_type: jobOutputContentType,
-          content: jobOutputContent,
           size: jobOutputSize,
-        }: TaskRunResult = await runTaskFn(null, req.body, context, req);
+        }: TaskRunResult = await runTaskFn(null, req.body, context, stream, req);
+        stream.end();
+        const jobOutputContent = buffer.toString();
 
         logger.info(`Job output size: ${jobOutputSize} bytes`);
 
