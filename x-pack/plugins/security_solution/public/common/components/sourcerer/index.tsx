@@ -30,6 +30,7 @@ import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import { DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -51,13 +52,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
   const { selectedKipId, selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const getSelectedPatterns = useCallback(
-    (kipId) => {
-      const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
-      return theKip != null ? [theKip.title] : [];
-    },
-    [kibanaIndexPatterns]
-  );
+
   const [selectedOption, setSelectedOption] = useState<string>(selectedKipId ?? '');
   const selectablePatternList = useMemo(() => {
     const theKip = kibanaIndexPatterns.find((kip) => kip.id === selectedOption);
@@ -163,21 +158,21 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const indexesPatternSelectOptions = useMemo(
     () =>
       kibanaIndexPatterns.map(({ title, id }) => ({
-        inputDisplay: (
-          <span data-test-subj="kip-option-super">
-            <EuiIcon type="logoKibana" size="s" /> {title}
-          </span>
-        ),
+        inputDisplay:
+          id === DEFAULT_INDEX_PATTERN_ID ? (
+            <span data-test-subj="kip-option-super">
+              <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_KIP_LABEL}
+            </span>
+          ) : (
+            <span data-test-subj="kip-option-super">
+              <EuiIcon type="logoKibana" size="s" /> {title}
+            </span>
+          ),
         value: id,
       })),
     [kibanaIndexPatterns]
   );
-  console.log('selectedOptions', {
-    selectableOptions,
-    selectedOptions,
-    selectedKipId,
-    selectedPatterns,
-  });
+
   const comboBox = useMemo(
     () => (
       <EuiComboBox
@@ -222,10 +217,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     );
   }, [selectedPatterns]);
 
-  const tooltipContent = useMemo(
-    () => (isPopoverOpen ? null : getSelectedPatterns(selectedKipId)),
-    [getSelectedPatterns, isPopoverOpen, selectedKipId]
-  );
+  const tooltipContent = useMemo(() => (isPopoverOpen ? null : selectedPatterns.join(', ')), [
+    selectedPatterns,
+    isPopoverOpen,
+  ]);
 
   return (
     <EuiToolTip position="top" content={tooltipContent}>

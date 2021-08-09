@@ -11,8 +11,8 @@ export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.da
   defaultMessage: 'Data sources',
 });
 
-export const ALL_DEFAULT = i18n.translate('xpack.securitySolution.indexPatterns.allDefault', {
-  defaultMessage: 'All default',
+export const SIEM_KIP_LABEL = i18n.translate('xpack.securitySolution.indexPatterns.kipLabel', {
+  defaultMessage: 'Default Security Kibana Index Pattern',
 });
 
 export const SELECT_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.help', {

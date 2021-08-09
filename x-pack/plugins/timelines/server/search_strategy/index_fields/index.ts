@@ -80,16 +80,10 @@ export const requestIndexFieldSearch = async (
 
   const indicesExist: boolean[] = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
 
-  console.log('request', {
-    ...request,
-    indicesExist,
-    dedupeIndices,
-    indicesExistV: dedupeIndices.filter((index, i) => indicesExist[i] !== false),
-  });
   let fieldDescriptor: FieldDescriptor[][];
   if (request.kipId) {
     const kip = await indexPatternService.get(request.kipId);
-    fieldDescriptor = [kip.fields as FieldDescriptor[]];
+    fieldDescriptor = [Object.values(kip.fields.toSpec()) as FieldDescriptor[]];
   } else {
     const responsesIndexFields = await Promise.all(
       dedupeIndices
