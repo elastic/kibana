@@ -81,6 +81,27 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+    it('should correctly update the final pipeline', async () => {
+      await es.ingest.putPipeline({
+        id: FINAL_PIPELINE_ID,
+        body: {
+          description: 'Test PIPELINE WITHOUT version',
+          processors: [
+            {
+              set: {
+                field: 'my-keyword-field',
+                value: 'foo',
+              },
+            },
+          ],
+        },
+      });
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
+      const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
+      expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
+      expect(pipelineRes.body[FINAL_PIPELINE_ID].version).to.be(1);
+    });
+
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
