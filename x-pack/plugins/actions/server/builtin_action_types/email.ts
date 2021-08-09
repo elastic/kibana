@@ -217,6 +217,9 @@ async function executor(
     if (secrets.oauthScope != null) {
       transport.scope = secrets.oauthScope;
     }
+    if (config.tokenExpirationDate != null) {
+      transport.expires = config.tokenExpirationDate;
+    }
   } else {
     if (secrets.user != null) {
       transport.user = secrets.user;

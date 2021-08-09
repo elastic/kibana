@@ -570,16 +570,20 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButton
-                    onClick={() =>
-                      getOAuth(
-                        http,
-                        oauthScope ?? '',
-                        redirectUrl ?? '',
-                        clientId ?? '',
-                        editActionSecrets,
-                        editActionConfig
-                      )
-                    }
+                    onClick={() => {
+                      if (authCodeUrl && authTokenUrl) {
+                        getOAuth(
+                          http,
+                          oauthScope ?? '',
+                          redirectUrl ?? '',
+                          clientId ?? '',
+                          editActionSecrets,
+                          editActionConfig,
+                          authCodeUrl,
+                          authTokenUrl
+                        );
+                      }
+                    }}
                     data-test-subj="oauth"
                   >
                     Get OAuth
@@ -606,7 +610,9 @@ async function getOAuth(
   redirectUrl: string,
   clientId: string,
   editActionSecrets: (property: string, value: unknown) => void,
-  editActionConfig: (property: string, value: unknown) => void
+  editActionConfig: (property: string, value: unknown) => void,
+  authUrl: string,
+  tokenUrl: string
 ) {
   // const scope = 'https://outlook.office.com/SMTP.Send';
   // const redirectUrl = 'https://localhost:5601/ntm/api/actions/connector/oauth_code';
@@ -619,8 +625,8 @@ async function getOAuth(
     return crypto.createHash('sha256').update(buffer).digest();
   }
   const challenge = base64URLEncode(sha256(verifier));
-
-  const r = `https://login.microsoftonline.com/017707da-2f93-4a0b-83b0-b64da7903fb2/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUrl}&response_mode=query&scope=${scope}&state=12345&code_challenge=${challenge}&code_challenge_method=S256&prompt=consent`;
+  // https://login.microsoftonline.com/017707da-2f93-4a0b-83b0-b64da7903fb2/oauth2/v2.0/authorize
+  const r = `${authUrl}?client_id=${clientId}&response_type=code&redirect_uri=${redirectUrl}&response_mode=query&scope=${scope}&state=12345&code_challenge=${challenge}&code_challenge_method=S256&prompt=consent`;
   openSignInWindow(r, 'test');
   let loopCount = 600;
   const intervalId = window.setInterval(async () => {
@@ -659,7 +665,8 @@ async function getOAuth(
           };
           http
             .post(
-              'https://login.microsoftonline.com/017707da-2f93-4a0b-83b0-b64da7903fb2/oauth2/v2.0/token',
+              // 'https://login.microsoftonline.com/017707da-2f93-4a0b-83b0-b64da7903fb2/oauth2/v2.0/token',
+              tokenUrl,
               {
                 headers: {
                   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',

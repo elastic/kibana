@@ -37,7 +37,7 @@ export interface Transport {
   clientId?: string;
   clientSecret?: string;
   refreshToken?: string;
-  expires?: string;
+  expires?: number;
   type?: string;
   scope?: string;
 }
@@ -73,7 +73,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       user,
       pass: password,
     };
-  } else if (hasAuth && transport.type === 'OAuth2') {
+  } else if (hasAuth && transport.type === 'oauth2') {
     transportConfig.auth = {
       type: 'OAuth2',
       // user: 'user@example.com',
