@@ -641,27 +641,30 @@ class PackagePolicyService {
       const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
       if (externalCallbacks && externalCallbacks.size > 0) {
         for (const callback of externalCallbacks) {
-          await callback(packagePolicy as DeletePackagePoliciesResponse, context, request);
+          if (Array.isArray(packagePolicy)) {
+            await callback(packagePolicy, context, request);
+          }
         }
       }
     } else {
-      // Doing assertion as this type can be NewPackagePolicy | DeletePackagePoliciesResponse and here must be NewPackagePolicy
-      let newData = packagePolicy as NewPackagePolicy;
-      const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
-      if (externalCallbacks && externalCallbacks.size > 0) {
-        let updatedNewData: NewPackagePolicy = newData;
-        for (const callback of externalCallbacks) {
-          const result = await callback(updatedNewData, context, request);
-          if (externalCallbackType === 'packagePolicyCreate') {
-            updatedNewData = NewPackagePolicySchema.validate(result);
-          } else if (externalCallbackType === 'packagePolicyUpdate') {
-            updatedNewData = UpdatePackagePolicySchema.validate(result);
+      if (!Array.isArray(packagePolicy)) {
+        let newData = packagePolicy;
+        const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+        if (externalCallbacks && externalCallbacks.size > 0) {
+          let updatedNewData = newData;
+          for (const callback of externalCallbacks) {
+            const result = await callback(updatedNewData, context, request);
+            if (externalCallbackType === 'packagePolicyCreate') {
+              updatedNewData = NewPackagePolicySchema.validate(result);
+            } else if (externalCallbackType === 'packagePolicyUpdate') {
+              updatedNewData = UpdatePackagePolicySchema.validate(result);
+            }
           }
-        }
 
-        newData = updatedNewData;
+          newData = updatedNewData;
+        }
+        return newData;
       }
-      return newData;
     }
   }
 }
