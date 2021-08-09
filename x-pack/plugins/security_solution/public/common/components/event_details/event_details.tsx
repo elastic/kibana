@@ -245,7 +245,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       content: (
         <>
           <EuiSpacer size="m" />
-          <TabContentWrapper>
+          <TabContentWrapper data-test-subj="jsonViewWrapper">
             <JsonView data={data} />
           </TabContentWrapper>
         </>

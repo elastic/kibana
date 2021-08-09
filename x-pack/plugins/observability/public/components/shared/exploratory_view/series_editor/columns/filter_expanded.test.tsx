@@ -106,9 +106,9 @@ describe('FilterExpanded', function () {
       { initSeries }
     );
 
-    await waitFor(() => {
-      expect(screen.queryByText('Firefox')).toBeTruthy();
+    expect(screen.getByText('Firefox')).toBeTruthy();
 
+    await waitFor(() => {
       fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'ch' } });
 
       expect(screen.queryByText('Firefox')).toBeFalsy();
