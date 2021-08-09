@@ -41,7 +41,7 @@ export async function runBuildRefsCli() {
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
       const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';
       const doClean = !!flags.clean || doCapture;
-      const doInitCache = cacheEnabled && !doClean;
+      const doInitCache = cacheEnabled && !doCapture;
 
       if (doClean) {
         log.info('deleting', outDirs.length, 'ts output directories');
