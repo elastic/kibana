@@ -67,14 +67,14 @@ export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
 export const JIRA_EMAIL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.emailTextFieldLabel',
   {
-    defaultMessage: 'Username or email address',
+    defaultMessage: 'Email address',
   }
 );
 
 export const JIRA_EMAIL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField',
   {
-    defaultMessage: 'Username or email address is required',
+    defaultMessage: 'Email address is required',
   }
 );
 
