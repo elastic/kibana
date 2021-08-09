@@ -48,7 +48,6 @@ export const executeActionRoute = (
           params,
           actionId: id,
           source: asHttpRequestExecutionSource(req),
-          relatedSavedObjects: [],
         });
         return body
           ? res.ok({

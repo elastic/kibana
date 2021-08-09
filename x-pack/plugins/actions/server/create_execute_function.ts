@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../src/core/server';
+import { SavedObjectReference, SavedObjectsClientContract } from '../../../../src/core/server';
 import { RunNowResult, TaskManagerStartContract } from '../../task_manager/server';
 import {
   RawAction,
@@ -15,8 +15,6 @@ import {
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
-import { isSavedObjectExecutionSource } from './lib';
-import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -29,7 +27,7 @@ export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | '
   id: string;
   spaceId: string;
   apiKey: string | null;
-  relatedSavedObjects?: RelatedSavedObjects;
+  references?: SavedObjectReference[];
 }
 
 export type ExecutionEnqueuer<T> = (
@@ -45,7 +43,7 @@ export function createExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey, relatedSavedObjects }: ExecuteOptions
+    { id, params, spaceId, source, apiKey, references }: ExecuteOptions
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -67,9 +65,8 @@ export function createExecutionEnqueuerFunction({
         actionId: id,
         params,
         apiKey,
-        relatedSavedObjects,
       },
-      executionSourceAsSavedObjectReferences(source)
+      references ? { references } : {}
     );
 
     await taskManager.schedule({
@@ -91,7 +88,7 @@ export function createEphemeralExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey }: ExecuteOptions
+    { id, params, spaceId, source, apiKey, references }: ExecuteOptions
   ): Promise<RunNowResult> {
     const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
@@ -110,7 +107,7 @@ export function createEphemeralExecutionEnqueuerFunction({
         params: params as Record<string, any>,
         ...(apiKey ? { apiKey } : {}),
       },
-      ...executionSourceAsSavedObjectReferences(source),
+      ...(references ? { references } : {}),
     };
 
     return taskManager.ephemeralRunNow({
@@ -129,19 +126,6 @@ function validateCanActionBeUsed(action: PreConfiguredAction | RawAction) {
       `Unable to execute action because no secrets are defined for the "${name}" connector.`
     );
   }
-}
-
-function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
-  return isSavedObjectExecutionSource(executionSource)
-    ? {
-        references: [
-          {
-            name: 'source',
-            ...executionSource.source,
-          },
-        ],
-      }
-    : {};
 }
 
 async function getAction(
