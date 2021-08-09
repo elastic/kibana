@@ -114,7 +114,7 @@ export function TransactionErrorRateChart({
       type: 'linemark',
       color: theme.eui.euiColorVis7,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
-        defaultMessage: 'Error rate (avg.)',
+        defaultMessage: 'Failed transaction % (avg.)',
       }),
     },
     ...(comparisonEnabled
@@ -137,7 +137,7 @@ export function TransactionErrorRateChart({
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.errorRate', {
-            defaultMessage: 'Error rate',
+            defaultMessage: 'Failed transaction %',
           })}
         </h2>
       </EuiTitle>

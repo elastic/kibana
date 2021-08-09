@@ -122,7 +122,7 @@ export function getColumns({
       sortable: true,
       name: i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        { defaultMessage: 'Error rate' }
+        { defaultMessage: 'Failed transactions %' }
       ),
       width: `${unit * 8}px`,
       render: (_, { errorRate, name }) => {
