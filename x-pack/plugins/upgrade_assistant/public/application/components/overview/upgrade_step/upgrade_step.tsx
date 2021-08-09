@@ -71,7 +71,7 @@ export const getUpgradeStep = ({
         <EuiFlexItem grow={false}>
           <EuiLink href={docLinks.links.elasticsearch.setupUpgrade} target="_blank">
             <FormattedMessage
-              id="xpack.upgradeAssistant.overview.pageDescriptionLink"
+              id="xpack.upgradeAssistant.overview.upgradeGuideLink"
               defaultMessage="View upgrade guide"
             />
           </EuiLink>
