@@ -2,7 +2,6 @@
 
 exports[`<CodeEditor /> hint element should be tabable 1`] = `
 <div
-  aria-describedby="1234"
   class="kibanaCodeEditor__keyboardHint"
   data-test-subj="codeEditorHint"
   id="1234"
@@ -152,7 +151,6 @@ exports[`<CodeEditor /> is rendered 1`] = `
       }
       delay="regular"
       display="block"
-      id="1234"
       position="top"
     >
       <span
@@ -162,7 +160,6 @@ exports[`<CodeEditor /> is rendered 1`] = `
         onMouseOver={[Function]}
       >
         <div
-          aria-describedby="1234"
           className="kibanaCodeEditor__keyboardHint"
           data-test-subj="codeEditorHint"
           id="1234"
