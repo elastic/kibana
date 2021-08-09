@@ -25,14 +25,25 @@ const getKibanaIndexPattern = async (
   patternId: string
 ): Promise<IndexPattern> => {
   let indexPattern: IndexPattern;
+  const patternListAsTitle = patternList.join(',');
   try {
     indexPattern = await indexPatternsService.get(patternId);
+    if (patternListAsTitle !== indexPattern.title) {
+      indexPattern.title = patternListAsTitle;
+      await indexPatternsService.updateSavedObject(indexPattern);
+    }
   } catch (e) {
-    indexPattern = await indexPatternsService.createAndSave({
-      id: patternId,
-      title: patternList.join(','),
-      timeFieldName: DEFAULT_TIME_FIELD,
-    });
+    const error = transformError(e);
+    console.log('ERRRR', error);
+    if (error.statusCode === 404) {
+      indexPattern = await indexPatternsService.createAndSave({
+        id: patternId,
+        title: patternListAsTitle,
+        timeFieldName: DEFAULT_TIME_FIELD,
+      });
+    } else {
+      throw e;
+    }
   }
   return indexPattern;
 };
