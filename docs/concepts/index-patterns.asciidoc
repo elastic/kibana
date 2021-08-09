@@ -5,7 +5,7 @@
 An index pattern selects the data to use and allows you to define properties of the fields.
 
 An index pattern can point to a specific index, for example, your log data from yesterday,
-or all indices that contain your data.  An index pattern can also point to a
+or all indices that contain your data. An index pattern can also point to a
 {ref}/data-streams.html[data stream] or {ref}/indices-aliases.html[index alias].
 
 [float]
