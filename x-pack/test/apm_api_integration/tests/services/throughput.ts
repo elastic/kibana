@@ -103,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with kql filter to force transaction-based UI', () => {
-        it('has the correct throughput in tps', async () => {
+        before(async () => {
           const response = await apmApiSupertest({
             endpoint: 'GET /api/apm/services/{serviceName}/throughput',
             params: {
@@ -115,14 +115,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 start: metadata.start,
                 end: metadata.end,
                 transactionType: 'request',
-                _inspect: true,
               },
             },
           });
           throughputResponse = response.body;
+        });
 
+        it('has the correct throughput in tps', async () => {
           const avgTps = mean(throughputResponse.currentPeriod.map((d) => d.y));
-
           expectSnapshot(avgTps).toMatchInline(`0.124043715846995`);
           expectSnapshot(throughputResponse.throughputUnit).toMatchInline(`"second"`);
 
