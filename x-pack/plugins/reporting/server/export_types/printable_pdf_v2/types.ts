@@ -11,6 +11,7 @@ import { BaseParams, BasePayload } from '../../types';
 
 interface BaseParamsPDFV2 {
   layout: LayoutParams;
+
   /**
    * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
    */
@@ -21,4 +22,10 @@ interface BaseParamsPDFV2 {
 export type JobParamsPDFV2 = BaseParamsPDFV2 & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
-export type TaskPayloadPDFV2 = BaseParamsPDFV2 & BasePayload;
+export interface TaskPayloadPDFV2 extends BasePayload, BaseParamsPDFV2 {
+  layout: LayoutParams;
+  /**
+   * The value of forceNow is injected server-side every time a given report is generated.
+   */
+  forceNow: string;
+}

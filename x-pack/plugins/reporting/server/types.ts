@@ -63,7 +63,6 @@ export { BaseParams };
 // base params decorated with encrypted headers that come into runJob functions
 export interface BasePayload extends BaseParams {
   headers: string;
-  forceNow: string;
   spaceId?: string;
   isDeprecated?: boolean;
 }
