@@ -11,6 +11,8 @@ import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
+  HttpSetup,
+  IUiSettingsClient,
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
@@ -32,15 +34,14 @@ import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_ha
 import { getGeneralErrorToast } from './notifier';
 import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
 import { getSharedComponents } from './shared';
-import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
-import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
-
 import type {
   SharePluginSetup,
   SharePluginStart,
   UiActionsSetup,
   UiActionsStart,
 } from './shared_imports';
+import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -89,6 +90,8 @@ export class ReportingPublicPlugin
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
     > {
+  private kibanaVersion: string;
+  private apiClient?: ReportingAPIClient;
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -101,6 +104,17 @@ export class ReportingPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
+
+  /*
+   * Use a single instance of ReportingAPIClient for all the reporting code
+   */
+  private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
+    if (!this.apiClient) {
+      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion);
+    }
+    return this.apiClient;
   }
 
   private getContract(core?: CoreSetup) {
@@ -108,7 +122,7 @@ export class ReportingPublicPlugin
       this.contract = {
         getDefaultLayoutSelectors,
         usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: getSharedComponents(core),
+        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
       };
     }
 
@@ -120,11 +134,11 @@ export class ReportingPublicPlugin
   }
 
   public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
-    const { http, getStartServices, uiSettings } = core;
+    const { getStartServices, uiSettings } = core;
     const {
       home,
       management,
-      licensing: { license$ },
+      licensing: { license$ }, // FIXME: 'license$' is deprecated
       share,
       uiActions,
     } = setupDeps;
@@ -132,7 +146,7 @@ export class ReportingPublicPlugin
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
-    const apiClient = new ReportingAPIClient(http);
+    const apiClient = this.getApiClient(core.http, core.uiSettings);
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -181,7 +195,7 @@ export class ReportingPublicPlugin
 
     uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, startServices$, license$, usesUiCapabilities })
+      new ReportingCsvPanelAction({ core, apiClient, startServices$, license$, usesUiCapabilities })
     );
 
     const reportingStart = this.getContract(core);
@@ -213,8 +227,8 @@ export class ReportingPublicPlugin
   }
 
   public start(core: CoreStart) {
-    const { http, notifications } = core;
-    const apiClient = new ReportingAPIClient(http);
+    const { notifications } = core;
+    const apiClient = this.getApiClient(core.http, core.uiSettings);
     const streamHandler = new StreamHandler(notifications, apiClient);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)

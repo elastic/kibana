@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { prepareLogTable, Dimension } from '../../visualizations/public';
 import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
 import { tableVisResponseHandler } from './utils';
@@ -122,7 +123,38 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
     const convertedData = tableVisResponseHandler(input, args);
 
     if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.logDatatable('default', input);
+      const argsTable: Dimension[] = [
+        [
+          args.metrics,
+          i18n.translate('visTypeTable.function.dimension.metrics', {
+            defaultMessage: 'Metrics',
+          }),
+        ],
+        [
+          args.buckets,
+          i18n.translate('visTypeTable.function.adimension.buckets', {
+            defaultMessage: 'Buckets',
+          }),
+        ],
+      ];
+      if (args.splitColumn) {
+        argsTable.push([
+          [args.splitColumn],
+          i18n.translate('visTypeTable.function.dimension.splitColumn', {
+            defaultMessage: 'Split by column',
+          }),
+        ]);
+      }
+      if (args.splitRow) {
+        argsTable.push([
+          [args.splitRow],
+          i18n.translate('visTypeTable.function.dimension.splitRow', {
+            defaultMessage: 'Split by row',
+          }),
+        ]);
+      }
+      const logTable = prepareLogTable(input, argsTable);
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
     return {
       type: 'render',
