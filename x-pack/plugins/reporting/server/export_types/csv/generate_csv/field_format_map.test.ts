@@ -6,8 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { GetConfigFn } from 'src/plugins/data/common';
-import { fieldFormats, UI_SETTINGS } from 'src/plugins/data/server';
+import {
+  FieldFormatsGetConfigFn,
+  FieldFormatsRegistry,
+  BytesFormat,
+  NumberFormat,
+  FORMATS_UI_SETTINGS,
+} from 'src/plugins/field_formats/common';
 import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 import { fieldFormatMapFactory } from './field_format_map';
 
@@ -23,16 +28,14 @@ describe('field format map', function () {
     },
   };
   const configMock: Record<string, ConfigValue> = {};
-  configMock[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
+  configMock[FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
     number: { id: 'number', params: {} },
   };
   configMock[UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
   const getConfig = ((key: string) => configMock[key]) as GetConfigFn;
-  const testValue = '4000';
-  const mockTimezone = 'Browser';
+  configMock[FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
 
-  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
-  fieldFormatsRegistry.init(getConfig, {}, [fieldFormats.BytesFormat, fieldFormats.NumberFormat]);
+  const fieldFormatsRegistry = new FieldFormatsRegistry();
 
   const formatMap = fieldFormatMapFactory(
     indexPatternSavedObject,

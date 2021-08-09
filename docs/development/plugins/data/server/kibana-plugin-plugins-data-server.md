@@ -38,7 +38,6 @@
 |  --- | --- |
 |  [AsyncSearchStatusResponse](./kibana-plugin-plugins-data-server.asyncsearchstatusresponse.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
-|  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Interface for an index pattern saved object |
@@ -61,7 +60,6 @@
 |  [esKuery](./kibana-plugin-plugins-data-server.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [exporters](./kibana-plugin-plugins-data-server.exporters.md) |  |
-|  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-server.index_pattern_saved_object_type.md) | \* |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
 |  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
@@ -73,7 +71,6 @@
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [Filter](./kibana-plugin-plugins-data-server.filter.md) |  |
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-server.iessearchresponse.md) |  |
-|  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |

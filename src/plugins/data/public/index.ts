@@ -19,69 +19,6 @@ export { getEsQueryConfig } from '../common';
 export { FilterLabel, FilterItem } from './ui';
 export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
 
-/*
- * Field Formatters:
- */
-
-import {
-  FieldFormat,
-  DEFAULT_CONVERTER_COLOR,
-  FIELD_FORMAT_IDS,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-} from '../common/field_formats';
-
-import { DateNanosFormat, DateFormat } from './field_formats';
-export { FieldFormatsStart } from './field_formats';
-
-// Field formats helpers namespace:
-export const fieldFormats = {
-  FieldFormat,
-
-  DEFAULT_CONVERTER_COLOR,
-  FIELD_FORMAT_IDS,
-
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-};
-
-export {
-  IFieldFormat,
-  FieldFormatInstanceType,
-  IFieldFormatsRegistry,
-  FieldFormatsContentType,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
-  FieldFormatId,
-  FieldFormat,
-} from '../common';
-
 /**
  * Exporters (CSV)
  */
@@ -137,7 +74,10 @@ export {
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
+  fieldList,
+  GetFieldsOptions,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  AggregationRestrictions,
   IndexPatternType,
 } from '../common';
 
