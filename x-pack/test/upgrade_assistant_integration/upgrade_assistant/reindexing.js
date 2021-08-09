@@ -52,7 +52,7 @@ export default function ({ getService }) {
     });
 
     it('should create a new index with the same documents', async () => {
-      await esArchiver.load('upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
@@ -84,7 +84,7 @@ export default function ({ getService }) {
     });
 
     it('should update any aliases', async () => {
-      await esArchiver.load('upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
 
       // Add aliases and ensure each returns the right number of docs
       await es.indices.updateAliases({

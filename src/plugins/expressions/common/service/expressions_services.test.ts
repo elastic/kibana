@@ -114,7 +114,7 @@ describe('ExpressionsService', () => {
         },
       });
 
-      const result = await fork.run('__test__', null);
+      const { result } = await fork.run('__test__', null).toPromise();
 
       expect(result).toBe('123');
     });

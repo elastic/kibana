@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 
 export interface IlmPolicy {
-  policy: estypes.Policy;
+  policy: estypes.IlmPolicy;
 }
 
 export const defaultIlmPolicy: IlmPolicy = {

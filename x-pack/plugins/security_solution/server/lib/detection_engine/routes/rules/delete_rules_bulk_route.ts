@@ -23,9 +23,7 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
-import { deleteNotifications } from '../../notifications/delete_notifications';
-import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { readRules } from '../../rules/read_rules';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
 type Handler = RequestHandler<
@@ -51,14 +49,14 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
   const handler: Handler = async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
 
-    const alertsClient = context.alerting?.getAlertsClient();
+    const rulesClient = context.alerting?.getRulesClient();
     const savedObjectsClient = context.core.savedObjects.client;
 
-    if (!alertsClient) {
+    if (!rulesClient) {
       return siemResponse.error({ statusCode: 404 });
     }
 
-    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+    const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {
@@ -74,27 +72,24 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
         }
 
         try {
-          const rule = await deleteRules({
-            alertsClient,
-            id,
-            ruleId,
-          });
-          if (rule != null) {
-            await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
-            await deleteRuleActionsSavedObject({
-              ruleAlertId: rule.id,
-              savedObjectsClient,
-            });
-            const ruleStatuses = await ruleStatusClient.find({
-              perPage: 6,
-              search: rule.id,
-              searchFields: ['alertId'],
-            });
-            ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
-            return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
-          } else {
+          const rule = await readRules({ rulesClient, id, ruleId });
+          if (!rule) {
             return getIdBulkError({ id, ruleId });
           }
+
+          const ruleStatuses = await ruleStatusClient.find({
+            logsCount: 6,
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
+          });
+          await deleteRules({
+            rulesClient,
+            savedObjectsClient,
+            ruleStatusClient,
+            ruleStatuses,
+            id: rule.id,
+          });
+          return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }

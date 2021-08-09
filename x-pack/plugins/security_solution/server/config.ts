@@ -21,6 +21,12 @@ export const configSchema = schema.object({
   maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
   maxTimelineImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
+  alertMergeStrategy: schema.oneOf(
+    [schema.literal('allFields'), schema.literal('missingFields'), schema.literal('noFields')],
+    {
+      defaultValue: 'missingFields',
+    }
+  ),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
 
   /**
@@ -55,18 +61,15 @@ export const configSchema = schema.object({
   endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
 
   /**
-   * Alert Endpoint Configuration
-   */
-  alertResultListDefaultDateRange: schema.object({
-    from: schema.string({ defaultValue: 'now-15m' }),
-    to: schema.string({ defaultValue: 'now' }),
-  }),
-
-  /**
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
-  validateArtifactDownloads: schema.boolean({ defaultValue: true }),
+
+  /**
+   * Detection prebuilt rules
+   */
+  prebuiltRulesFromFileSystem: schema.boolean({ defaultValue: true }),
+  prebuiltRulesFromSavedObjects: schema.boolean({ defaultValue: true }),
 });
 
 export const createConfig = (context: PluginInitializerContext) =>

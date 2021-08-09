@@ -6,17 +6,28 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { union } from 'lodash';
-import { EuiComboBox, EuiFormControlLayout, EuiComboBoxOptionOption } from '@elastic/eui';
+import { union, isEmpty } from 'lodash';
+import {
+  EuiComboBox,
+  EuiFormControlLayout,
+  EuiComboBoxOptionOption,
+  EuiFormRow,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { FieldValueSelectionProps } from './types';
+export const ALL_VALUES_SELECTED = 'ALL_VALUES';
+const formatOptions = (values?: string[], allowAllValuesSelection?: boolean) => {
+  const uniqueValues = Array.from(
+    new Set(
+      allowAllValuesSelection && (values ?? []).length > 0
+        ? ['ALL_VALUES', ...(values ?? [])]
+        : values
+    )
+  );
 
-const formatOptions = (values?: string[]) => {
-  const uniqueValues = Array.from(new Set(values));
-
-  return (uniqueValues ?? []).map((val) => ({
-    label: val,
+  return (uniqueValues ?? []).map((label) => ({
+    label,
   }));
 };
 
@@ -28,43 +39,61 @@ export function FieldValueCombobox({
   loading,
   values,
   setQuery,
+  usePrependLabel = true,
+  compressed = true,
+  required = true,
+  allowAllValuesSelection,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
-  const [options, setOptions] = useState<ValueOption[]>(
-    formatOptions(union(values ?? [], selectedValue ?? []))
+  const [options, setOptions] = useState<ValueOption[]>(() =>
+    formatOptions(
+      union(values?.map(({ label: lb }) => lb) ?? [], selectedValue ?? []),
+      allowAllValuesSelection
+    )
   );
 
   useEffect(() => {
-    setOptions(formatOptions(union(values ?? [], selectedValue ?? [])));
-  }, [selectedValue, values]);
+    setOptions(
+      formatOptions(
+        union(values?.map(({ label: lb }) => lb) ?? [], selectedValue ?? []),
+        allowAllValuesSelection
+      )
+    );
+  }, [allowAllValuesSelection, selectedValue, values]);
 
   const onChange = (selectedValuesN: ValueOption[]) => {
     onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
   };
 
-  return (
+  const comboBox = (
+    <EuiComboBox
+      fullWidth
+      compressed={compressed}
+      placeholder={i18n.translate('xpack.observability.fieldValueSelection.placeholder.search', {
+        defaultMessage: 'Search {label}',
+        values: { label },
+      })}
+      isLoading={loading}
+      onSearchChange={(searchVal) => {
+        setQuery(searchVal);
+      }}
+      options={options}
+      selectedOptions={options.filter((opt) => selectedValue?.includes(opt.label))}
+      onChange={onChange}
+      isInvalid={required && isEmpty(selectedValue)}
+    />
+  );
+
+  return usePrependLabel ? (
     <ComboWrapper>
       <EuiFormControlLayout fullWidth prepend={label} compressed>
-        <EuiComboBox
-          fullWidth
-          compressed
-          placeholder={i18n.translate(
-            'xpack.observability.fieldValueSelection.placeholder.search',
-            {
-              defaultMessage: 'Search {label}',
-              values: { label },
-            }
-          )}
-          isLoading={loading}
-          onSearchChange={(searchVal) => {
-            setQuery(searchVal);
-          }}
-          options={options}
-          selectedOptions={options.filter((opt) => selectedValue?.includes(opt.label))}
-          onChange={onChange}
-        />
+        {comboBox}
       </EuiFormControlLayout>
     </ComboWrapper>
+  ) : (
+    <EuiFormRow label={label} display="center" fullWidth>
+      {comboBox}
+    </EuiFormRow>
   );
 }
 

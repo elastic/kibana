@@ -54,13 +54,16 @@ export declare class IndexPattern implements IIndexPattern
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-server.indexpattern.getformatterforfield.md) |  | Provide a field, get its formatter |
 |  [getFormatterForFieldNoDefault(fieldname)](./kibana-plugin-plugins-data-server.indexpattern.getformatterforfieldnodefault.md) |  | Get formatter for a given field name. Return undefined if none exists |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getnonscriptedfields.md) |  |  |
+|  [getRuntimeField(name)](./kibana-plugin-plugins-data-server.indexpattern.getruntimefield.md) |  | Returns runtime field if exists |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-server.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-server.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |
 |  [getTimeField()](./kibana-plugin-plugins-data-server.indexpattern.gettimefield.md) |  |  |
+|  [hasRuntimeField(name)](./kibana-plugin-plugins-data-server.indexpattern.hasruntimefield.md) |  | Checks if runtime field exists |
 |  [isTimeBased()](./kibana-plugin-plugins-data-server.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-server.indexpattern.istimenanosbased.md) |  |  |
-|  [removeRuntimeField(name)](./kibana-plugin-plugins-data-server.indexpattern.removeruntimefield.md) |  | Remove a runtime field - removed from mapped field or removed unmapped field as appropriate |
+|  [removeRuntimeField(name)](./kibana-plugin-plugins-data-server.indexpattern.removeruntimefield.md) |  | Remove a runtime field - removed from mapped field or removed unmapped field as appropriate. Doesn't clear associated field attributes. |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-server.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
+|  [replaceAllRuntimeFields(newFields)](./kibana-plugin-plugins-data-server.indexpattern.replaceallruntimefields.md) |  | Replaces all existing runtime fields with new fields |
 |  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-server.indexpattern.setfieldattrs.md) |  |  |
 |  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcount.md) |  |  |
 |  [setFieldCustomLabel(fieldName, customLabel)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcustomlabel.md) |  |  |

@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const JIRA_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in Jira.',
-  }
-);
-
-export const JIRA_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.actionTypeTitle',
-  {
-    defaultMessage: 'Jira',
-  }
-);
-
 export const API_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiUrlTextFieldLabel',
   {

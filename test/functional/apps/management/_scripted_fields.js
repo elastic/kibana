@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });

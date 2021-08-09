@@ -12,7 +12,8 @@ import { FtrService } from '../ftr_provider_context';
 export class FilterBarService extends FtrService {
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly PageObjects = this.ctx.getPageObjects(['common', 'header']);
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
 
   /**
    * Checks if specified filter exists
@@ -56,7 +57,7 @@ export class FilterBarService extends FtrService {
   public async removeFilter(key: string): Promise<void> {
     await this.testSubjects.click(`~filter & ~filter-key-${key}`);
     await this.testSubjects.click(`deleteFilter`);
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   /**
@@ -65,8 +66,8 @@ export class FilterBarService extends FtrService {
   public async removeAllFilters(): Promise<void> {
     await this.testSubjects.click('showFilterActions');
     await this.testSubjects.click('removeAllFilters');
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
-    await this.PageObjects.common.waitUntilUrlIncludes('filters:!()');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.common.waitUntilUrlIncludes('filters:!()');
   }
 
   /**
@@ -77,13 +78,13 @@ export class FilterBarService extends FtrService {
   public async toggleFilterEnabled(key: string): Promise<void> {
     await this.testSubjects.click(`~filter & ~filter-key-${key}`);
     await this.testSubjects.click(`disableFilter`);
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async toggleFilterPinned(key: string): Promise<void> {
     await this.testSubjects.click(`~filter & ~filter-key-${key}`);
     await this.testSubjects.click(`pinFilter`);
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async isFilterPinned(key: string): Promise<boolean> {
@@ -141,7 +142,7 @@ export class FilterBarService extends FtrService {
       }
     }
     await this.testSubjects.click('saveFilter');
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   /**
@@ -152,7 +153,7 @@ export class FilterBarService extends FtrService {
   public async clickEditFilter(key: string, value: string): Promise<void> {
     await this.testSubjects.click(`~filter & ~filter-key-${key} & ~filter-value-${value}`);
     await this.testSubjects.click(`editFilter`);
-    await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   /**

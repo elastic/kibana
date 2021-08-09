@@ -25,16 +25,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover histogram', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('long_window_logstash');
-      await esArchiver.load('long_window_logstash_index_pattern');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.load(
+        'test/functional/fixtures/es_archiver/long_window_logstash_index_pattern'
+      );
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
-      await esArchiver.unload('long_window_logstash');
-      await esArchiver.unload('long_window_logstash_index_pattern');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/long_window_logstash_index_pattern'
+      );
       await security.testUser.restoreDefaults();
     });
 

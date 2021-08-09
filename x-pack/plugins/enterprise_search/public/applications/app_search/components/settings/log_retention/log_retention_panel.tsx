@@ -9,7 +9,15 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiLink, EuiSpacer, EuiSwitch, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DOCS_PREFIX } from '../../../routes';
@@ -30,7 +38,7 @@ export const LogRetentionPanel: React.FC = () => {
   }, []);
 
   return (
-    <div data-test-subj="LogRetentionPanel">
+    <EuiPanel hasBorder data-test-subj="LogRetentionPanel">
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.title', {
@@ -104,6 +112,6 @@ export const LogRetentionPanel: React.FC = () => {
           data-test-subj="LogRetentionPanelAPISwitch"
         />
       </EuiText>
-    </div>
+    </EuiPanel>
   );
 };

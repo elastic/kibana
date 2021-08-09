@@ -17,8 +17,10 @@ import {
 import { CasesNavigation } from '../../links';
 import * as i18n from '../../../common/translations';
 import { AllCasesGeneric } from '../all_cases_generic';
+import { Owner } from '../../../types';
+import { OwnerProvider } from '../../owner_context';
 
-export interface AllCasesSelectorModalProps {
+export interface AllCasesSelectorModalProps extends Owner {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   createCaseNavigation: CasesNavigation;
   hiddenStatuses?: CaseStatusWithAllStatus[];
@@ -34,7 +36,7 @@ const Modal = styled(EuiModal)`
   `}
 `;
 
-export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
+const AllCasesSelectorModalComponent: React.FC<AllCasesSelectorModalProps> = ({
   alertData,
   createCaseNavigation,
   hiddenStatuses,
@@ -70,5 +72,13 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
     </Modal>
   ) : null;
 };
+
+export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = React.memo((props) => {
+  return (
+    <OwnerProvider owner={props.owner}>
+      <AllCasesSelectorModalComponent {...props} />
+    </OwnerProvider>
+  );
+});
 // eslint-disable-next-line import/no-default-export
 export { AllCasesSelectorModal as default };

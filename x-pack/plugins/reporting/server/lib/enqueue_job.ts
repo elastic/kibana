@@ -7,10 +7,10 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
-import { BaseParams, ReportingUser } from '../types';
-import { LevelLogger } from './';
-import { Report } from './store';
 import type { ReportingRequestHandlerContext } from '../types';
+import { BaseParams, ReportingUser } from '../types';
+import { checkParamsVersion, LevelLogger } from './';
+import { Report } from './store';
 
 export type EnqueueJobFn = (
   exportTypeId: string,
@@ -47,7 +47,7 @@ export function enqueueJobFactory(
       reporting.getStore(),
     ]);
 
-    const config = reporting.getConfig();
+    jobParams.version = checkParamsVersion(jobParams, logger);
     const job = await createJob!(jobParams, context, request);
 
     // 1. Add the report to ReportingStore to show as pending
@@ -55,7 +55,6 @@ export function enqueueJobFactory(
       new Report({
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
-        max_attempts: config.get('capture', 'maxAttempts'), // NOTE: since max attempts is stored in the document, changing the capture.maxAttempts setting does not affect existing pending reports
         payload: job,
         meta: {
           objectType: jobParams.objectType,
@@ -68,7 +67,7 @@ export function enqueueJobFactory(
     // 2. Schedule the report with Task Manager
     const task = await reporting.scheduleTask(report.toReportTaskJSON());
     logger.info(
-      `Scheduled ${exportType.name} reporting task. Task ID: ${task.id}. Report ID: ${report._id}`
+      `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
 
     return report;

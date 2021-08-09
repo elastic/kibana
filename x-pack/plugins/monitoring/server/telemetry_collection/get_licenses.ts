@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import { ESLicense } from '../../../telemetry_collection_xpack/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
@@ -15,7 +15,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  */
 export async function getLicenses(
   clusterUuids: string[],
-  callCluster: LegacyAPICaller, // TODO: To be changed to the new ES client when the plugin migrates
+  callCluster: ElasticsearchClient, // TODO: To be changed to the new ES client when the plugin migrates
   maxBucketSize: number
 ): Promise<{ [clusterUuid: string]: ESLicense | undefined }> {
   const response = await fetchLicenses(callCluster, clusterUuids, maxBucketSize);
@@ -31,16 +31,16 @@ export async function getLicenses(
  *
  * Returns the response for the aggregations to fetch details for the product.
  */
-export function fetchLicenses(
-  callCluster: LegacyAPICaller,
+export async function fetchLicenses(
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   maxBucketSize: number
 ) {
-  const params = {
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: maxBucketSize,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
+    ignore_unavailable: true,
+    filter_path: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
     body: {
       query: {
         bool: {
@@ -59,7 +59,8 @@ export function fetchLicenses(
     },
   };
 
-  return callCluster('search', params);
+  const { body: response } = await callCluster.search<ESClusterStatsWithLicense>(params);
+  return response;
 }
 
 export interface ESClusterStatsWithLicense {
@@ -71,13 +72,13 @@ export interface ESClusterStatsWithLicense {
 /**
  * Extract the cluster stats for each cluster.
  */
-export function handleLicenses(response: SearchResponse<ESClusterStatsWithLicense>) {
+export function handleLicenses(response: estypes.SearchResponse<ESClusterStatsWithLicense>) {
   const clusters = response.hits?.hits || [];
 
   return clusters.reduce(
     (acc, { _source }) => ({
       ...acc,
-      [_source.cluster_uuid]: _source.license,
+      [_source!.cluster_uuid]: _source!.license,
     }),
     {}
   );

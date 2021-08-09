@@ -56,21 +56,4 @@ export function registerSearchSettingsRoutes({
       path: '/as/engines/:engineName/search_settings',
     })
   );
-
-  router.post(
-    skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/search_settings_search',
-      validate: {
-        params: schema.object({
-          engineName: schema.string(),
-        }),
-        query: schema.object({
-          query: schema.string(),
-        }),
-      },
-    }),
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/search_settings_search',
-    })
-  );
 }

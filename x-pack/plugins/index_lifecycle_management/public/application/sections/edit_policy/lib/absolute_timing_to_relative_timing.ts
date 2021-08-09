@@ -22,17 +22,16 @@
 
 import moment from 'moment';
 
-import { splitSizeAndUnits } from '../../../lib/policies';
+import { Phase, PhaseWithTiming } from '../../../../../common/types';
 
-import { FormInternal, MinAgePhase } from '../types';
+import { splitSizeAndUnits } from '../../../lib/policies';
+import { FormInternal } from '../types';
 
 /* -===- Private functions and types -===- */
 
-type Phase = 'hot' | MinAgePhase;
-
 const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'frozen', 'delete'];
 
-const getMinAge = (phase: MinAgePhase, formData: FormInternal) => ({
+const getMinAge = (phase: PhaseWithTiming, formData: FormInternal) => ({
   min_age: formData.phases?.[phase]?.min_age
     ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
     : '0ms',

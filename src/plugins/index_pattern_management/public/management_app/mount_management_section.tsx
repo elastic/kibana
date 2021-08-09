@@ -20,10 +20,9 @@ import {
   IndexPatternTableWithRouter,
   EditIndexPatternContainer,
   CreateEditFieldContainer,
-  CreateIndexPatternWizardWithRouter,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
-import { IndexPatternManagmentContext, MlCardState } from '../types';
+import { IndexPatternManagmentContext } from '../types';
 
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
@@ -37,12 +36,11 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
-  params: ManagementAppMountParams,
-  getMlCardState: () => MlCardState
+  params: ManagementAppMountParams
 ) {
   const [
     { chrome, application, uiSettings, notifications, overlays, http, docLinks },
-    { data, indexPatternFieldEditor },
+    { data, indexPatternFieldEditor, indexPatternEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
@@ -63,8 +61,8 @@ export async function mountManagementSection(
     indexPatternFieldEditor,
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
-    getMlCardState,
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
+    IndexPatternEditor: indexPatternEditor.IndexPatternEditorComponent,
   };
 
   ReactDOM.render(
@@ -73,7 +71,7 @@ export async function mountManagementSection(
         <Router history={params.history}>
           <Switch>
             <Route path={['/create']}>
-              <CreateIndexPatternWizardWithRouter />
+              <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
             </Route>
             <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
               <CreateEditFieldContainer />

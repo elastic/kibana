@@ -6,24 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function EmbeddingProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const browser = getService('browser');
-  const log = getService('log');
-  const PageObjects = getPageObjects(['header']);
+export class EmbeddingService extends FtrService {
+  private readonly browser = this.ctx.getService('browser');
+  private readonly log = this.ctx.getService('log');
+  private readonly header = this.ctx.getPageObject('header');
 
-  class Embedding {
-    /**
-     * Opens current page in embeded mode
-     */
-    public async openInEmbeddedMode(): Promise<void> {
-      const currentUrl = await browser.getCurrentUrl();
-      log.debug(`Opening in embedded mode: ${currentUrl}`);
-      await browser.get(`${currentUrl}&embed=true`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
+  /**
+   * Opens current page in embeded mode
+   */
+  public async openInEmbeddedMode(): Promise<void> {
+    const currentUrl = await this.browser.getCurrentUrl();
+    this.log.debug(`Opening in embedded mode: ${currentUrl}`);
+    await this.browser.get(`${currentUrl}&embed=true`);
+    await this.header.waitUntilLoadingHasFinished();
   }
-
-  return new Embedding();
 }

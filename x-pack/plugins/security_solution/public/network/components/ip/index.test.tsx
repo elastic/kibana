@@ -14,6 +14,8 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { Ip } from '.';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

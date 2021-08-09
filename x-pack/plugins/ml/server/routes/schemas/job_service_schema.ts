@@ -66,7 +66,7 @@ export const jobIdsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
 });
 
-export const optionaljobIdsSchema = schema.object({
+export const optionalJobIdsSchema = schema.object({
   /** Optional list of job IDs. */
   jobIds: schema.maybe(schema.arrayOf(schema.string())),
 });
@@ -109,17 +109,47 @@ export const revertModelSnapshotSchema = schema.object({
   ),
 });
 
-export const datafeedPreviewSchema = schema.oneOf([
-  schema.object({
-    job: schema.object(anomalyDetectionJobSchema),
-    datafeed: datafeedConfigSchema,
-  }),
-  schema.object({
-    datafeedId: schema.string(),
-  }),
-]);
+export const datafeedPreviewSchema = schema.object(
+  {
+    job: schema.maybe(schema.object(anomalyDetectionJobSchema)),
+    datafeed: schema.maybe(datafeedConfigSchema),
+    datafeedId: schema.maybe(schema.string()),
+  },
+  {
+    validate: (v) => {
+      const msg = 'supply either a datafeed_id for an existing job or a job and datafeed config';
+      if (v.datafeedId !== undefined && (v.job !== undefined || v.datafeed !== undefined)) {
+        // datafeed_id is supplied but job and datafeed configs are also supplied
+        return msg;
+      }
+
+      if (v.datafeedId === undefined && (v.job === undefined || v.datafeed === undefined)) {
+        // datafeed_id is not supplied but job or datafeed configs are missing
+        return msg;
+      }
+
+      if (v.datafeedId === undefined && v.job === undefined && v.datafeed === undefined) {
+        // everything is missing
+        return msg;
+      }
+    },
+  }
+);
 
 export const jobsExistSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
   allSpaces: schema.maybe(schema.boolean()),
 });
+
+export const bulkCreateSchema = schema.oneOf([
+  schema.arrayOf(
+    schema.object({
+      job: schema.object(anomalyDetectionJobSchema),
+      datafeed: datafeedConfigSchema,
+    })
+  ),
+  schema.object({
+    job: schema.object(anomalyDetectionJobSchema),
+    datafeed: datafeedConfigSchema,
+  }),
+]);

@@ -61,15 +61,13 @@ export interface SubtitleProps {
   items: string | React.ReactNode | Array<string | React.ReactNode>;
 }
 
-export const Subtitle = React.memo<SubtitleProps>(({ items }) => {
-  return (
-    <Wrapper className="casesSubtitle">
-      {Array.isArray(items) ? (
-        items.map((item, i) => <SubtitleItem key={i}>{item}</SubtitleItem>)
-      ) : (
-        <SubtitleItem>{items}</SubtitleItem>
-      )}
-    </Wrapper>
-  );
-});
+export const Subtitle = React.memo<SubtitleProps>(({ items }) => (
+  <Wrapper className="casesSubtitle">
+    {Array.isArray(items) ? (
+      items.map((item, i) => <SubtitleItem key={i}>{item}</SubtitleItem>)
+    ) : (
+      <SubtitleItem>{items}</SubtitleItem>
+    )}
+  </Wrapper>
+));
 Subtitle.displayName = 'Subtitle';

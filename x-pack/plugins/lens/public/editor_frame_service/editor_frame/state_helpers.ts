@@ -7,18 +7,21 @@
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
+import memoizeOne from 'memoize-one';
 import {
   Datasource,
+  DatasourceMap,
   DatasourcePublicAPI,
   FramePublicAPI,
   InitializationOptions,
   Visualization,
   VisualizationDimensionGroupConfig,
+  VisualizationMap,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
-import { getActiveDatasourceIdFromDoc } from './state_management';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
 import {
   getMissingCurrentDatasource,
@@ -27,7 +30,7 @@ import {
 } from '../error_helper';
 
 export async function initializeDatasources(
-  datasourceMap: Record<string, Datasource>,
+  datasourceMap: DatasourceMap,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext,
@@ -53,8 +56,8 @@ export async function initializeDatasources(
   return states;
 }
 
-export function createDatasourceLayers(
-  datasourceMap: Record<string, Datasource>,
+export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
+  datasourceMap: DatasourceMap,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>
 ) {
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
@@ -73,11 +76,11 @@ export function createDatasourceLayers(
       });
     });
   return datasourceLayers;
-}
+});
 
 export async function persistedStateToExpression(
   datasources: Record<string, Datasource>,
-  visualizations: Record<string, Visualization>,
+  visualizations: VisualizationMap,
   doc: Document
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {

@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "AWS Configuration Recorder Stopped",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:config.amazonaws.com and event.action:StopConfigurationRecorder and event.outcome:success",
+  "query": "event.dataset:aws.cloudtrail and event.provider:config.amazonaws.com and event.action:StopConfigurationRecorder and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/configservice/stop-configuration-recorder.html",
     "https://docs.aws.amazon.com/config/latest/APIReference/API_StopConfigurationRecorder.html"

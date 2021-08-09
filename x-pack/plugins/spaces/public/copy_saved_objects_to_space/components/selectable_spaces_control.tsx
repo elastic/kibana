@@ -14,6 +14,7 @@ import React, { lazy, Suspense } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
@@ -83,7 +84,7 @@ export const SelectableSpacesControl = (props: Props) => {
           className: 'spcCopyToSpace__spacesList',
           'data-test-subj': 'cts-form-space-selector',
         }}
-        searchable={options.length > 6}
+        searchable={options.length > SPACE_SEARCH_COUNT_THRESHOLD}
       >
         {(list, search) => {
           return (

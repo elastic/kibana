@@ -43,6 +43,7 @@ describe('http service', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      await root.preboot();
     }, 30000);
 
     afterEach(async () => {
@@ -189,6 +190,7 @@ describe('http service', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      await root.preboot();
     }, 30000);
 
     afterEach(async () => {
@@ -282,6 +284,7 @@ describe('http service', () => {
 
     beforeEach(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      await root.preboot();
     }, 30000);
 
     afterEach(async () => {
@@ -405,7 +408,7 @@ describe('http service', () => {
 
       const { body } = await kbnTestServer.request.get(root, '/new-platform/').expect(400);
 
-      expect(body.message).toEqual('[error_type]: error_reason');
+      expect(body.message).toMatch('[error_type]: error_reason');
     });
   });
 });

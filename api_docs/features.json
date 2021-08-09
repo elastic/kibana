@@ -9,10 +9,7 @@
         "tags": [],
         "label": "KibanaFeature",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 137
-        },
+        "path": "x-pack/plugins/features/common/kibana_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -32,10 +29,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 138
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -48,10 +42,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 140
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "children": [
               {
@@ -62,7 +53,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{ id: string; name: string; category: Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>; order?: number | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: readonly string[] | undefined; privileges: Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null; subFeatures?: readonly Readonly<{ name: string; privilegeGroups: readonly Readonly<{ groupType: ",
+                  "Readonly<{ id: string; name: string; category: Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>; order?: number | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; privileges: Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null; subFeatures?: readonly Readonly<{ name: string; privilegeGroups: readonly Readonly<{ groupType: ",
                   {
                     "pluginId": "features",
                     "scope": "common",
@@ -70,12 +61,9 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"all\" | \"none\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/common/kibana_feature.ts",
-                  "lineNumber": 140
-                },
+                "path": "x-pack/plugins/features/common/kibana_feature.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -89,10 +77,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 146
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -102,10 +87,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 150
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -118,10 +100,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 154
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -134,10 +113,7 @@
             "signature": [
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 158
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -150,10 +126,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 162
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -166,10 +139,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 166
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -182,10 +152,7 @@
             "signature": [
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 170
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -198,10 +165,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 174
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -212,12 +176,9 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
+              "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 178
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -230,10 +191,20 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 182
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-public.KibanaFeature.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -243,10 +214,7 @@
             "tags": [],
             "label": "excludeFromBasePrivileges",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 186
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -257,12 +225,9 @@
             "label": "reserved",
             "description": [],
             "signature": [
-              "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
+              "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 190
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -282,10 +247,7 @@
                 "text": "KibanaFeatureConfig"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 194
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -305,10 +267,7 @@
         "description": [
           "\nFeature privilege definition"
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "children": [
           {
@@ -323,10 +282,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -341,10 +297,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -359,10 +312,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -377,10 +327,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 64
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -395,10 +342,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 77
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -411,12 +355,24 @@
               "\nIf your feature requires access to specific Alert Types, then specify your access needs here.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
             ],
             "signature": [
+              "{ rule?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; alert?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-public.FeatureKibanaPrivileges.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [
+              "\nIf your feature requires access to specific owners of cases (aka plugins that have created cases), then specify your access needs here. The values here should\nbe unique identifiers for the owners of cases you want access to."
+            ],
+            "signature": [
               "{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 84
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -431,10 +387,7 @@
             "signature": [
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 110
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -451,10 +404,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 153
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           }
         ],
@@ -469,10 +419,7 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/features/common/kibana_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -486,10 +433,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -501,10 +445,7 @@
             "description": [
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -519,10 +460,7 @@
             "signature": [
               "AppCategory"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -537,10 +475,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -555,10 +490,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 54
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -573,10 +505,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 62
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -591,10 +520,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 68
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -609,10 +535,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 84
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -627,10 +550,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 92
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -645,10 +565,22 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 99
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-public.KibanaFeatureConfig.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [
+              "\nIf your feature grants access to specific case types, you can specify them here to control visibility based on the current space."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -681,10 +613,7 @@
               },
               "; } | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 113
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -707,10 +636,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 121
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -725,10 +651,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 126
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -745,10 +668,7 @@
               "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 131
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           }
         ],
@@ -763,10 +683,7 @@
         "description": [
           "\nConfiguration for a sub-feature."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -778,10 +695,7 @@
             "description": [
               "Display name for this sub-feature"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -804,10 +718,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           }
         ],
@@ -838,12 +749,9 @@
             "section": "def-common.FeatureKibanaPrivileges",
             "text": "FeatureKibanaPrivileges"
           },
-          ", \"management\" | \"catalogue\" | \"alerting\" | \"ui\" | \"app\" | \"api\" | \"savedObject\">"
+          ", \"management\" | \"catalogue\" | \"alerting\" | \"ui\" | \"app\" | \"cases\" | \"api\" | \"savedObject\">"
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 56
-        },
+        "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -855,10 +763,7 @@
             "description": [
               "\nIdentifier for this privilege. Must be unique across all other privileges within a feature."
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 61
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -870,10 +775,7 @@
             "description": [
               "\nThe display name for this privilege."
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 66
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -886,12 +788,9 @@
               "\nDenotes which Primary Feature Privilege this sub-feature privilege should be included in.\n`read` is also included in `all` automatically."
             ],
             "signature": [
-              "\"none\" | \"all\" | \"read\""
+              "\"all\" | \"none\" | \"read\""
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 72
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -906,10 +805,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 79
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           }
         ],
@@ -929,10 +825,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "x-pack/plugins/features/public/plugin.ts",
-        "lineNumber": 27
-      },
+      "path": "x-pack/plugins/features/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -955,10 +848,7 @@
         },
         "[]>; }"
       ],
-      "source": {
-        "path": "x-pack/plugins/features/public/plugin.ts",
-        "lineNumber": 28
-      },
+      "path": "x-pack/plugins/features/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -973,10 +863,7 @@
         "tags": [],
         "label": "ElasticsearchFeature",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-          "lineNumber": 64
-        },
+        "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -989,10 +876,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 65
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "children": [
               {
@@ -1019,10 +903,7 @@
                   },
                   ">; }>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-                  "lineNumber": 65
-                },
+                "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1036,10 +917,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 67
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -1053,10 +931,7 @@
               "RecursiveReadonlyArray",
               "<string> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 71
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -1071,10 +946,7 @@
               "RecursiveReadonlyArray",
               "<string>; }> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -1096,10 +968,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 79
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -1119,10 +988,7 @@
                 "text": "ElasticsearchFeatureConfig"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 83
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1137,10 +1003,7 @@
         "tags": [],
         "label": "KibanaFeature",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 137
-        },
+        "path": "x-pack/plugins/features/common/kibana_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -1160,10 +1023,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 138
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1176,10 +1036,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 140
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "children": [
               {
@@ -1190,7 +1047,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{ id: string; name: string; category: Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>; order?: number | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: readonly string[] | undefined; privileges: Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null; subFeatures?: readonly Readonly<{ name: string; privilegeGroups: readonly Readonly<{ groupType: ",
+                  "Readonly<{ id: string; name: string; category: Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>; order?: number | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; privileges: Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null; subFeatures?: readonly Readonly<{ name: string; privilegeGroups: readonly Readonly<{ groupType: ",
                   {
                     "pluginId": "features",
                     "scope": "common",
@@ -1198,12 +1055,9 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"all\" | \"none\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/common/kibana_feature.ts",
-                  "lineNumber": 140
-                },
+                "path": "x-pack/plugins/features/common/kibana_feature.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1217,10 +1071,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 146
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1230,10 +1081,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 150
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1246,10 +1094,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 154
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1262,10 +1107,7 @@
             "signature": [
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 158
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1278,10 +1120,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 162
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1294,10 +1133,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 166
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1310,10 +1146,7 @@
             "signature": [
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 170
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1326,10 +1159,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 174
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1340,12 +1170,9 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
+              "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 178
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1358,10 +1185,20 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 182
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.KibanaFeature.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1371,10 +1208,7 @@
             "tags": [],
             "label": "excludeFromBasePrivileges",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 186
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1385,12 +1219,9 @@
             "label": "reserved",
             "description": [],
             "signature": [
-              "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
+              "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 190
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1410,10 +1241,7 @@
                 "text": "KibanaFeatureConfig"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 194
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1433,10 +1261,7 @@
         "description": [
           "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -1450,10 +1275,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -1468,10 +1290,7 @@
             "signature": [
               "{ [sectionId: string]: string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -1486,10 +1305,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -1513,10 +1329,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 61
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           }
         ],
@@ -1531,10 +1344,7 @@
         "description": [
           "\nElasticsearch Feature privilege definition"
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
         "deprecated": false,
         "children": [
           {
@@ -1549,10 +1359,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false
           },
           {
@@ -1567,10 +1374,7 @@
             "signature": [
               "{ [indexName: string]: string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false
           },
           {
@@ -1587,18 +1391,12 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/server/authorization/disable_ui_capabilities.ts",
-                  "lineNumber": 311
-                }
+                "path": "x-pack/plugins/security/server/authorization/disable_ui_capabilities.ts"
               }
             ]
           },
@@ -1616,10 +1414,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 72
-            },
+            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false
           }
         ],
@@ -1634,10 +1429,7 @@
         "description": [
           "\nFeature privilege definition"
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "children": [
           {
@@ -1652,10 +1444,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -1670,10 +1459,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -1688,10 +1474,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -1706,10 +1489,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 64
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -1724,10 +1504,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 77
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -1740,12 +1517,24 @@
               "\nIf your feature requires access to specific Alert Types, then specify your access needs here.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
             ],
             "signature": [
+              "{ rule?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; alert?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeatureKibanaPrivileges.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [
+              "\nIf your feature requires access to specific owners of cases (aka plugins that have created cases), then specify your access needs here. The values here should\nbe unique identifiers for the owners of cases you want access to."
+            ],
+            "signature": [
               "{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 84
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -1760,10 +1549,7 @@
             "signature": [
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 110
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -1780,10 +1566,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 153
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           }
         ],
@@ -1798,10 +1581,7 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/features/common/kibana_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -1815,10 +1595,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1830,10 +1607,7 @@
             "description": [
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1848,10 +1622,7 @@
             "signature": [
               "AppCategory"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1866,10 +1637,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1884,10 +1652,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 54
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1902,10 +1667,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 62
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1920,10 +1682,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 68
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1938,10 +1697,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 84
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1956,10 +1712,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 92
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -1974,10 +1727,22 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 99
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.KibanaFeatureConfig.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [
+              "\nIf your feature grants access to specific case types, you can specify them here to control visibility based on the current space."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2010,10 +1775,7 @@
               },
               "; } | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 113
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2036,10 +1798,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 121
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2054,10 +1813,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 126
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2074,10 +1830,7 @@
               "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 131
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           }
         ],
@@ -2092,10 +1845,7 @@
         "description": [
           "\nDescribes public Features plugin contract returned at the `setup` stage."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/server/plugin.ts",
-          "lineNumber": 41
-        },
+        "path": "x-pack/plugins/features/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -2116,10 +1866,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 42
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -2138,10 +1885,7 @@
                     "text": "KibanaFeatureConfig"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/server/plugin.ts",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/features/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2166,10 +1910,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 43
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -2188,10 +1929,7 @@
                     "text": "ElasticsearchFeatureConfig"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/server/plugin.ts",
-                  "lineNumber": 43
-                },
+                "path": "x-pack/plugins/features/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2216,10 +1954,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2242,10 +1977,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2261,10 +1993,7 @@
               "() => ",
               "Capabilities"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2279,10 +2008,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 64
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2317,10 +2043,7 @@
               },
               "; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 70
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2340,10 +2063,7 @@
                     "text": "KibanaFeature"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
-                  "lineNumber": 44
-                },
+                "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
                 "deprecated": false
               },
               {
@@ -2356,10 +2076,7 @@
                 "signature": [
                   "FeaturePrivilegeIteratorOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
-                  "lineNumber": 45
-                },
+                "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
                 "deprecated": false
               }
             ]
@@ -2382,7 +2099,7 @@
                 "section": "def-common.KibanaFeature",
                 "text": "KibanaFeature"
               },
-              ", licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => IterableIterator<",
+              ", licenseHasAtLeast: (licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined) => IterableIterator<",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -2392,10 +2109,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 76
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2415,27 +2129,37 @@
                     "text": "KibanaFeature"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
-                  "lineNumber": 18
-                },
+                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
                 "deprecated": false
               },
               {
                 "parentPluginId": "features",
-                "id": "def-server.licenseType",
-                "type": "CompoundType",
+                "id": "def-server.licenseHasAtLeast",
+                "type": "Function",
                 "tags": [],
-                "label": "licenseType",
+                "label": "licenseHasAtLeast",
                 "description": [],
                 "signature": [
-                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                  "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
-                  "lineNumber": 19
-                },
-                "deprecated": false
+                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "features",
+                    "id": "def-server.licenseType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "licenseType",
+                    "description": [],
+                    "signature": [
+                      "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                    ],
+                    "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           }
@@ -2449,10 +2173,7 @@
         "tags": [],
         "label": "PluginStartContract",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/features/server/plugin.ts",
-          "lineNumber": 79
-        },
+        "path": "x-pack/plugins/features/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -2473,10 +2194,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 80
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2499,10 +2217,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 81
-            },
+            "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2524,10 +2239,7 @@
         "signature": [
           "RegExp"
         ],
-        "source": {
-          "path": "x-pack/plugins/features/server/feature_schema.ts",
-          "lineNumber": 27
-        },
+        "path": "x-pack/plugins/features/server/feature_schema.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2542,10 +2254,7 @@
         "tags": [],
         "label": "ElasticsearchFeature",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-          "lineNumber": 64
-        },
+        "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -2558,10 +2267,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 65
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "children": [
               {
@@ -2588,10 +2294,7 @@
                   },
                   ">; }>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-                  "lineNumber": 65
-                },
+                "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2605,10 +2308,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 67
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -2622,10 +2322,7 @@
               "RecursiveReadonlyArray",
               "<string> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 71
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -2640,10 +2337,7 @@
               "RecursiveReadonlyArray",
               "<string>; }> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -2665,10 +2359,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 79
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -2688,10 +2379,7 @@
                 "text": "ElasticsearchFeatureConfig"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 83
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2706,10 +2394,7 @@
         "tags": [],
         "label": "KibanaFeature",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 137
-        },
+        "path": "x-pack/plugins/features/common/kibana_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -2729,10 +2414,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 138
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2745,10 +2427,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 140
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "children": [
               {
@@ -2759,7 +2438,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{ id: string; name: string; category: Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>; order?: number | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: readonly string[] | undefined; privileges: Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null; subFeatures?: readonly Readonly<{ name: string; privilegeGroups: readonly Readonly<{ groupType: ",
+                  "Readonly<{ id: string; name: string; category: Readonly<{ id: string; label: string; ariaLabel?: string | undefined; order?: number | undefined; euiIconType?: string | undefined; }>; order?: number | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; privileges: Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null; subFeatures?: readonly Readonly<{ name: string; privilegeGroups: readonly Readonly<{ groupType: ",
                   {
                     "pluginId": "features",
                     "scope": "common",
@@ -2767,12 +2446,9 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"all\" | \"none\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined; }>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/common/kibana_feature.ts",
-                  "lineNumber": 140
-                },
+                "path": "x-pack/plugins/features/common/kibana_feature.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2786,10 +2462,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 146
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2799,10 +2472,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 150
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2815,10 +2485,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 154
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2831,10 +2498,7 @@
             "signature": [
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 158
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2847,10 +2511,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 162
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2863,10 +2524,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 166
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2879,10 +2537,7 @@
             "signature": [
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 170
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2895,10 +2550,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 174
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2909,12 +2561,9 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
+              "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }> | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 178
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2927,10 +2576,20 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 182
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-common.KibanaFeature.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2940,10 +2599,7 @@
             "tags": [],
             "label": "excludeFromBasePrivileges",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 186
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2954,12 +2610,9 @@
             "label": "reserved",
             "description": [],
             "signature": [
-              "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
+              "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; }>; }>[]; }> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 190
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -2979,10 +2632,7 @@
                 "text": "KibanaFeatureConfig"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 194
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2997,10 +2647,7 @@
         "tags": [],
         "label": "SubFeature",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 82
-        },
+        "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -3013,10 +2660,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 83
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "children": [
               {
@@ -3035,12 +2679,9 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"all\" | \"none\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/features/common/sub_feature.ts",
-                  "lineNumber": 83
-                },
+                "path": "x-pack/plugins/features/common/sub_feature.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -3054,10 +2695,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 85
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -3076,12 +2714,9 @@
                 "section": "def-common.SubFeaturePrivilegeGroupType",
                 "text": "SubFeaturePrivilegeGroupType"
               },
-              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]"
+              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"all\" | \"none\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 89
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -3100,12 +2735,9 @@
                 "section": "def-common.SubFeaturePrivilegeGroupType",
                 "text": "SubFeaturePrivilegeGroupType"
               },
-              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }"
+              "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"all\" | \"none\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; }> | undefined; ui: readonly string[]; app?: readonly string[] | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; }> | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 93
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -3125,10 +2757,7 @@
         "description": [
           "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -3142,10 +2771,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -3160,10 +2786,7 @@
             "signature": [
               "{ [sectionId: string]: string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -3178,10 +2801,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           },
           {
@@ -3205,10 +2825,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
-              "lineNumber": 61
-            },
+            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
             "deprecated": false
           }
         ],
@@ -3223,10 +2840,7 @@
         "description": [
           "\nElasticsearch Feature privilege definition"
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
         "deprecated": false,
         "children": [
           {
@@ -3241,10 +2855,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false
           },
           {
@@ -3259,10 +2870,7 @@
             "signature": [
               "{ [indexName: string]: string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false
           },
           {
@@ -3279,18 +2887,12 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "security",
-                "link": {
-                  "path": "x-pack/plugins/security/server/authorization/disable_ui_capabilities.ts",
-                  "lineNumber": 311
-                }
+                "path": "x-pack/plugins/security/server/authorization/disable_ui_capabilities.ts"
               }
             ]
           },
@@ -3308,10 +2910,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
-              "lineNumber": 72
-            },
+            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false
           }
         ],
@@ -3326,10 +2925,7 @@
         "description": [
           "\nFeature privilege definition"
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "children": [
           {
@@ -3344,10 +2940,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 15
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -3362,10 +2955,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -3380,10 +2970,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -3398,10 +2985,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 64
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -3416,10 +3000,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 77
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -3432,12 +3013,24 @@
               "\nIf your feature requires access to specific Alert Types, then specify your access needs here.\nInclude both Alert Types registered by the feature and external Alert Types such as built-in\nAlert Types and Alert Types provided by other features to which you wish to grant access."
             ],
             "signature": [
+              "{ rule?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; alert?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-common.FeatureKibanaPrivileges.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [
+              "\nIf your feature requires access to specific owners of cases (aka plugins that have created cases), then specify your access needs here. The values here should\nbe unique identifiers for the owners of cases you want access to."
+            ],
+            "signature": [
               "{ all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 84
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -3452,10 +3045,7 @@
             "signature": [
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 110
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           },
           {
@@ -3472,10 +3062,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-              "lineNumber": 153
-            },
+            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": false
           }
         ],
@@ -3490,10 +3077,7 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/kibana_feature.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/features/common/kibana_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -3507,10 +3091,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3522,10 +3103,7 @@
             "description": [
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3540,10 +3118,7 @@
             "signature": [
               "AppCategory"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3558,10 +3133,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3576,10 +3148,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 54
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3594,10 +3163,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 62
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3612,10 +3178,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 68
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3630,10 +3193,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 84
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3648,10 +3208,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 92
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3666,10 +3223,22 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 99
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-common.KibanaFeatureConfig.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [
+              "\nIf your feature grants access to specific case types, you can specify them here to control visibility based on the current space."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3702,10 +3271,7 @@
               },
               "; } | null"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 113
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3728,10 +3294,7 @@
               },
               "[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 121
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3746,10 +3309,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 126
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           },
           {
@@ -3766,10 +3326,7 @@
               "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/kibana_feature.ts",
-              "lineNumber": 131
-            },
+            "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false
           }
         ],
@@ -3784,10 +3341,7 @@
         "description": [
           "\nConfiguration for a sub-feature."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -3799,10 +3353,7 @@
             "description": [
               "Display name for this sub-feature"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -3825,10 +3376,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           }
         ],
@@ -3859,12 +3407,9 @@
             "section": "def-common.FeatureKibanaPrivileges",
             "text": "FeatureKibanaPrivileges"
           },
-          ", \"management\" | \"catalogue\" | \"alerting\" | \"ui\" | \"app\" | \"api\" | \"savedObject\">"
+          ", \"management\" | \"catalogue\" | \"alerting\" | \"ui\" | \"app\" | \"cases\" | \"api\" | \"savedObject\">"
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 56
-        },
+        "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -3876,10 +3421,7 @@
             "description": [
               "\nIdentifier for this privilege. Must be unique across all other privileges within a feature."
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 61
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -3891,10 +3433,7 @@
             "description": [
               "\nThe display name for this privilege."
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 66
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -3907,12 +3446,9 @@
               "\nDenotes which Primary Feature Privilege this sub-feature privilege should be included in.\n`read` is also included in `all` automatically."
             ],
             "signature": [
-              "\"none\" | \"all\" | \"read\""
+              "\"all\" | \"none\" | \"read\""
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 72
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -3927,10 +3463,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 79
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           }
         ],
@@ -3945,10 +3478,7 @@
         "description": [
           "\nConfiguration for a sub-feature privilege group."
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 36
-        },
+        "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "children": [
           {
@@ -3963,10 +3493,7 @@
             "signature": [
               "\"mutually_exclusive\" | \"independent\""
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 45
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           },
           {
@@ -3989,10 +3516,7 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/features/common/sub_feature.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/features/common/sub_feature.ts",
             "deprecated": false
           }
         ],
@@ -4013,10 +3537,7 @@
         "signature": [
           "\"mutually_exclusive\" | \"independent\""
         ],
-        "source": {
-          "path": "x-pack/plugins/features/common/sub_feature.ts",
-          "lineNumber": 31
-        },
+        "path": "x-pack/plugins/features/common/sub_feature.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

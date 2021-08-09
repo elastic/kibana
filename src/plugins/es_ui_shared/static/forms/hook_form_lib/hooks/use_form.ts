@@ -18,7 +18,7 @@ const DEFAULT_OPTIONS = {
   stripEmptyFields: true,
 };
 
-interface UseFormReturn<T extends FormData, I extends FormData> {
+export interface UseFormReturn<T extends FormData, I extends FormData> {
   form: FormHook<T, I>;
 }
 
@@ -151,14 +151,14 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   }, [fieldsToArray]);
 
   const validateFields: FormHook<T, I>['__validateFields'] = useCallback(
-    async (fieldNames) => {
+    async (fieldNames, onlyBlocking = false) => {
       const fieldsToValidate = fieldNames
         .map((name) => fieldsRefs.current[name])
         .filter((field) => field !== undefined);
 
       const formData = getFormData$().value;
       const validationResult = await Promise.all(
-        fieldsToValidate.map((field) => field.validate({ formData }))
+        fieldsToValidate.map((field) => field.validate({ formData, onlyBlocking }))
       );
 
       if (isMounted.current === false) {
@@ -257,11 +257,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     [getFormData$, updateFormData$, fieldsToArray]
   );
 
-  const getFieldDefaultValue: FormHook<T, I>['__getFieldDefaultValue'] = useCallback(
-    (fieldName) => get(defaultValueDeserialized.current, fieldName),
-    []
-  );
-
   const readFieldConfigFromSchema: FormHook<T, I>['__readFieldConfigFromSchema'] = useCallback(
     (fieldName) => {
       const config = (get(schema ?? {}, fieldName) as FieldConfig) || {};
@@ -315,7 +310,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     if (fieldsToValidate.length === 0) {
       isFormValid = fieldsArray.every(isFieldValid);
     } else {
-      ({ isFormValid } = await validateFields(fieldsToValidate.map((field) => field.path)));
+      const fieldPathsToValidate = fieldsToValidate.map((field) => field.path);
+      ({ isFormValid } = await validateFields(fieldPathsToValidate, true));
     }
 
     setIsValid(isFormValid);
@@ -337,6 +333,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   }, []);
 
   const getFields: FormHook<T, I>['getFields'] = useCallback(() => fieldsRefs.current, []);
+
+  const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
+    (fieldName) => get(defaultValueDeserialized.current, fieldName),
+    []
+  );
 
   const submit: FormHook<T, I>['submit'] = useCallback(
     async (e) => {
@@ -430,6 +431,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       setFieldValue,
       setFieldErrors,
       getFields,
+      getFieldDefaultValue,
       getFormData,
       getErrors,
       reset,
@@ -438,7 +440,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       __updateFormDataAt: updateFormDataAt,
       __updateDefaultValueAt: updateDefaultValueAt,
       __readFieldConfigFromSchema: readFieldConfigFromSchema,
-      __getFieldDefaultValue: getFieldDefaultValue,
       __addField: addField,
       __removeField: removeField,
       __validateFields: validateFields,

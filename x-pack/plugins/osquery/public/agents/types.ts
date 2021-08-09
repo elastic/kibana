@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TermsAggregate } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { Agent } from '../../common/shared_imports';
 
@@ -15,7 +15,7 @@ interface BaseDataPoint {
 }
 
 export type AggregationDataPoint = BaseDataPoint & {
-  [key: string]: TermsAggregate<AggregationDataPoint>;
+  [key: string]: estypes.AggregationsTermsAggregate<AggregationDataPoint>;
 };
 
 export interface Group {

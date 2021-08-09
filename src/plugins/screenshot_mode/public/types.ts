@@ -15,3 +15,4 @@ export interface IScreenshotModeService {
 }
 
 export type ScreenshotModePluginSetup = IScreenshotModeService;
+export type ScreenshotModePluginStart = IScreenshotModeService;

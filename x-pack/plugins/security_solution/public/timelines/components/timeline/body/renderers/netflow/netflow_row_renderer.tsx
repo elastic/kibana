@@ -11,7 +11,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { RowRendererId } from '../../../../../../../common/types/timeline';
+import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
 import { asArrayIfExists } from '../../../../../../common/lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
@@ -63,7 +63,7 @@ import {
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../../../../network/components/source_destination/source_destination_arrows';
-import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { RowRendererContainer } from '../row_renderer';
 
 const Details = styled.div`
   margin: 5px 0;
@@ -90,7 +90,7 @@ export const netflowRowRenderer: RowRenderer = {
   isInstance: (ecs) =>
     eventCategoryMatches(get(EVENT_CATEGORY_FIELD, ecs)) ||
     eventActionMatches(get(EVENT_ACTION_FIELD, ecs)),
-  renderRow: ({ data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <Details>
         <Netflow
@@ -116,6 +116,7 @@ export const netflowRowRenderer: RowRenderer = {
           eventId={get(ID_FIELD_NAME, data)}
           eventEnd={asArrayIfExists(get(EVENT_END_FIELD_NAME, data))}
           eventStart={asArrayIfExists(get(EVENT_START_FIELD_NAME, data))}
+          isDraggable={isDraggable}
           networkBytes={asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, data))}
           networkCommunityId={asArrayIfExists(get(NETWORK_COMMUNITY_ID_FIELD_NAME, data))}
           networkDirection={asArrayIfExists(get(NETWORK_DIRECTION_FIELD_NAME, data))}

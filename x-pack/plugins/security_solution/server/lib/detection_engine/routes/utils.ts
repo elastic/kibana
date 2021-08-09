@@ -14,10 +14,11 @@ import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
-  SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
-import { AlertsClient } from '../../../../../alerting/server';
+import { RulesClient } from '../../../../../alerting/server';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
+
+import { RuleParams } from '../schemas/rule_schemas';
 
 export interface OutputError {
   message: string;
@@ -277,7 +278,7 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
  */
 export const mergeStatuses = (
   id: string,
-  currentStatusAndFailures: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
+  currentStatusAndFailures: IRuleStatusSOAttributes[],
   acc: RuleStatusResponse
 ): RuleStatusResponse => {
   if (currentStatusAndFailures.length === 0) {
@@ -286,7 +287,7 @@ export const mergeStatuses = (
     };
   }
   const convertedCurrentStatus = convertToSnakeCase<IRuleStatusSOAttributes>(
-    currentStatusAndFailures[0].attributes
+    currentStatusAndFailures[0]
   );
   return {
     ...acc,
@@ -294,21 +295,21 @@ export const mergeStatuses = (
       current_status: convertedCurrentStatus,
       failures: currentStatusAndFailures
         .slice(1)
-        .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem.attributes)),
+        .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem)),
     },
   } as RuleStatusResponse;
 };
 
-export type GetFailingRulesResult = Record<string, SanitizedAlert>;
+export type GetFailingRulesResult = Record<string, SanitizedAlert<RuleParams>>;
 
 export const getFailingRules = async (
   ids: string[],
-  alertsClient: AlertsClient
+  rulesClient: RulesClient
 ): Promise<GetFailingRulesResult> => {
   try {
     const errorRules = await Promise.all(
       ids.map(async (id) =>
-        alertsClient.get({
+        rulesClient.get({
           id,
         })
       )
@@ -316,19 +317,17 @@ export const getFailingRules = async (
     return errorRules
       .filter((rule) => rule.executionStatus.status === 'error')
       .reduce<GetFailingRulesResult>((acc, failingRule) => {
-        const accum = acc;
-        const theRule = failingRule;
         return {
-          [theRule.id]: {
-            ...theRule,
+          [failingRule.id]: {
+            ...failingRule,
           },
-          ...accum,
+          ...acc,
         };
       }, {});
   } catch (exc) {
     if (Boom.isBoom(exc)) {
       throw exc;
     }
-    throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
+    throw new Error(`Failed to get executionStatus with RulesClient: ${exc.message}`);
   }
 };

@@ -27,9 +27,10 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 SRC_DEPS = [
+  "//packages/elastic-datemath",
   "//packages/kbn-securitysolution-io-ts-types",
   "//packages/kbn-securitysolution-io-ts-utils",
-  "//packages/elastic-datemath",
+  "//packages/kbn-securitysolution-list-constants",
   "@npm//fp-ts",
   "@npm//io-ts",
   "@npm//lodash",

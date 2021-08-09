@@ -25,6 +25,7 @@ import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 
 describe('NetworkTopNFlow Table Component', () => {
@@ -114,12 +115,8 @@ describe('NetworkTopNFlow Table Component', () => {
         direction: 'asc',
         field: 'bytes_out',
       });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-        'Bytes inClick to sort in ascending order'
-      );
-      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-        'Bytes outClick to sort in descending order'
-      );
+      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Bytes in');
+      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Bytes out');
       expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
     });
   });

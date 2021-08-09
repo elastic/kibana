@@ -37,6 +37,7 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 
 export interface NewPackagePolicyInput {
   type: string;
+  policy_template?: string;
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
@@ -77,3 +78,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
 }
 
 export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
+
+export type DryRunPackagePolicy = NewPackagePolicy & {
+  errors?: Array<{ key: string | undefined; message: string }>;
+};

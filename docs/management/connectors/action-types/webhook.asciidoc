@@ -91,4 +91,4 @@ Body::      A JSON payload sent to the request URL. For example:
 
 Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
 their values escaped, so that the final JSON will be valid (escaping double quote characters).
-For more information on Mustache template variables, refer to <<defining-alerts-actions-details>>.
+For more information on Mustache template variables, refer to <<defining-rules-actions-details>>.

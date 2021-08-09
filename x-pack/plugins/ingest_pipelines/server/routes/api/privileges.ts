@@ -17,13 +17,13 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
     return privileges;
   }, []);
 
-export const registerPrivilegesRoute = ({ license, router, config }: RouteDependencies) => {
+export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) => {
   router.get(
     {
       path: `${API_BASE_PATH}/privileges`,
       validate: false,
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const privilegesResult: Privileges = {
         hasAllPrivileges: true,
         missingPrivileges: {
@@ -51,6 +51,6 @@ export const registerPrivilegesRoute = ({ license, router, config }: RouteDepend
       privilegesResult.hasAllPrivileges = hasAllPrivileges;
 
       return res.ok({ body: privilegesResult });
-    })
+    }
   );
 };

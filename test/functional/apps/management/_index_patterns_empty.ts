@@ -20,14 +20,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('index pattern empty view', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('makelogs');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
     });
 
     after(async () => {
-      await esArchiver.loadIfNeeded('makelogs');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
       await es.transport.request({
         path: '/logstash-a',
         method: 'DELETE',

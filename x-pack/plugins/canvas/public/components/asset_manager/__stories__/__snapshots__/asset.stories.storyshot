@@ -43,6 +43,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           <br />
           <span
             className="euiTextColor euiTextColor--subdued"
+            style={Object {}}
           >
             <small>
               (
@@ -79,6 +80,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="vector"
                 size="m"
               />
@@ -110,6 +112,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="sortDown"
                   size="m"
                 />
@@ -142,6 +145,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="copyClipboard"
                   size="m"
                 />
@@ -170,6 +174,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
               />
@@ -225,6 +230,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           <br />
           <span
             className="euiTextColor euiTextColor--subdued"
+            style={Object {}}
           >
             <small>
               (
@@ -261,6 +267,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="vector"
                 size="m"
               />
@@ -292,6 +299,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="sortDown"
                   size="m"
                 />
@@ -324,6 +332,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="copyClipboard"
                   size="m"
                 />
@@ -352,6 +361,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
               />

@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import { AllCasesSelectorModal } from '.';
 import { TestProviders } from '../../../common/mock';
 import { AllCasesGeneric } from '../all_cases_generic';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common';
 
 jest.mock('../../../methods');
 jest.mock('../all_cases_generic');
@@ -20,6 +21,7 @@ const defaultProps = {
   createCaseNavigation,
   onRowClick,
   userCanCrud: true,
+  owner: [SECURITY_SOLUTION_OWNER],
 };
 const updateCase = jest.fn();
 
@@ -59,6 +61,7 @@ describe('AllCasesSelectorModal', () => {
         },
         index: 'index-id',
         alertId: 'alert-id',
+        owner: SECURITY_SOLUTION_OWNER,
       },
       hiddenStatuses: [],
       updateCase,

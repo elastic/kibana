@@ -42,7 +42,8 @@ import {
   migrateSettingsToV7130,
   migrateOutputToV7130,
 } from './migrations/to_v7_13_0';
-import { migratePackagePolicyToV7140 } from './migrations/to_v7_14_0';
+import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
+import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 
 /*
  * Saved object types and mappings
@@ -149,6 +150,7 @@ const getSavedObjectTypes = (
         is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
+        unenroll_timeout: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
@@ -235,6 +237,7 @@ const getSavedObjectTypes = (
           enabled: false,
           properties: {
             type: { type: 'keyword' },
+            policy_template: { type: 'keyword' },
             enabled: { type: 'boolean' },
             vars: { type: 'flattened' },
             config: { type: 'flattened' },
@@ -270,6 +273,7 @@ const getSavedObjectTypes = (
       '7.12.0': migratePackagePolicyToV7120,
       '7.13.0': migratePackagePolicyToV7130,
       '7.14.0': migratePackagePolicyToV7140,
+      '7.15.0': migratePackagePolicyToV7150,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -315,6 +319,9 @@ const getSavedObjectTypes = (
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.14.0': migrateInstallationToV7140,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {

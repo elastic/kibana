@@ -123,7 +123,7 @@ export const anomalyDetectionJobSchema = {
   job_id: schema.string(),
   job_type: schema.maybe(schema.string()),
   job_version: schema.maybe(schema.string()),
-  groups: schema.arrayOf(schema.maybe(schema.string())),
+  groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
   model_plot_config: schema.maybe(schema.any()),
   model_plot: schema.maybe(schema.any()),
   model_size_stats: schema.maybe(schema.any()),
@@ -186,6 +186,7 @@ export const getOverallBucketsSchema = schema.object({
   bucketSpan: schema.string(),
   start: schema.number(),
   end: schema.number(),
+  overall_score: schema.maybe(schema.number()),
 });
 
 export const getCategoriesSchema = schema.object({

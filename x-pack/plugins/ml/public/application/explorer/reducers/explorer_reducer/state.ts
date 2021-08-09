@@ -58,6 +58,7 @@ export interface ExplorerState {
   viewByFromPage: number;
   viewBySwimlaneOptions: string[];
   swimlaneLimit?: number;
+  swimLaneSeverity?: number;
 }
 
 function getDefaultIndexPattern() {

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useGetCasesStatus, UseGetCasesStatus } from './use_get_cases_status';
 import { casesStatus } from './mock';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
+import { SECURITY_SOLUTION_OWNER } from '../../common';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -22,8 +25,11 @@ describe('useGetCasesStatus', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(() =>
-        useGetCasesStatus()
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
+        () => useGetCasesStatus(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -40,19 +46,25 @@ describe('useGetCasesStatus', () => {
   it('calls getCasesStatus api', async () => {
     const spyOnGetCasesStatus = jest.spyOn(api, 'getCasesStatus');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(() =>
-        useGetCasesStatus()
+      const { waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
+        () => useGetCasesStatus(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(spyOnGetCasesStatus).toBeCalledWith(abortCtrl.signal);
+      expect(spyOnGetCasesStatus).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
     });
   });
 
   it('fetch reporters', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(() =>
-        useGetCasesStatus()
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
+        () => useGetCasesStatus(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -74,8 +86,11 @@ describe('useGetCasesStatus', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(() =>
-        useGetCasesStatus()
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
+        () => useGetCasesStatus(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();

@@ -95,7 +95,6 @@ function getInitSearchInputState({
 
 interface ExplorerQueryBarProps {
   filterActive: boolean;
-  filterIconTriggeredQuery: string;
   filterPlaceHolder: string;
   indexPattern: IIndexPattern;
   queryString?: string;
@@ -104,7 +103,6 @@ interface ExplorerQueryBarProps {
 
 export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   filterActive,
-  filterIconTriggeredQuery,
   filterPlaceHolder,
   indexPattern,
   queryString,
@@ -116,14 +114,12 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   );
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
-  useEffect(() => {
-    if (filterIconTriggeredQuery !== undefined) {
-      setSearchInput({
-        language: searchInput.language,
-        query: filterIconTriggeredQuery,
-      });
-    }
-  }, [filterIconTriggeredQuery]);
+  useEffect(
+    function updateSearchInputFromFilter() {
+      setSearchInput(getInitSearchInputState({ filterActive, queryString }));
+    },
+    [filterActive, queryString]
+  );
 
   const searchChangeHandler = (query: Query) => {
     if (searchInput.language !== query.language) {
@@ -131,6 +127,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
     }
     setSearchInput(query);
   };
+
   const applyInfluencersFilterQuery = (query: Query) => {
     try {
       const { clearSettings, settings } = getKqlQueryValues({

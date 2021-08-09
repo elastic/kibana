@@ -19,22 +19,54 @@ jest.mock('../../kibana_services', () => {
 
 import { ToolbarOverlay } from './toolbar_overlay';
 
-test('Must render zoom tools', async () => {
-  const component = shallow(<ToolbarOverlay geoFields={[]} />);
+test('Should only show set view control', async () => {
+  const component = shallow(
+    <ToolbarOverlay
+      showToolsControl={false}
+      shapeDrawModeActive={false}
+      pointDrawModeActive={false}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
+    />
+  );
   expect(component).toMatchSnapshot();
 });
 
-test('Must zoom tools and draw filter tools', async () => {
-  const geoFieldWithIndex = {
-    geoFieldName: 'myGeoFieldName',
-    geoFieldType: 'geo_point',
-    indexPatternTitle: 'myIndex',
-    indexPatternId: '1',
-  };
+test('Should show all controls', async () => {
   const component = shallow(
     <ToolbarOverlay
+      showToolsControl={true}
       addFilters={async (filters: Filter[], actionId: string) => {}}
-      geoFields={[geoFieldWithIndex]}
+      showFitToBoundsButton={true}
+      showTimesliderButton={true}
+      shapeDrawModeActive={false}
+      pointDrawModeActive={false}
+    />
+  );
+  expect(component).toMatchSnapshot();
+});
+
+test('Should show point layer edit tools', async () => {
+  const component = shallow(
+    <ToolbarOverlay
+      showToolsControl={false}
+      shapeDrawModeActive={false}
+      pointDrawModeActive={true}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
+    />
+  );
+  expect(component).toMatchSnapshot();
+});
+
+test('Should show shape layer edit tools', async () => {
+  const component = shallow(
+    <ToolbarOverlay
+      showToolsControl={false}
+      shapeDrawModeActive={true}
+      pointDrawModeActive={false}
+      showFitToBoundsButton={false}
+      showTimesliderButton={false}
     />
   );
   expect(component).toMatchSnapshot();

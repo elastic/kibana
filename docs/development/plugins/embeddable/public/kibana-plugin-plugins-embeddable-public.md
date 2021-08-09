@@ -36,6 +36,7 @@
 |  [isSavedObjectEmbeddableInput(input)](./kibana-plugin-plugins-embeddable-public.issavedobjectembeddableinput.md) |  |
 |  [openAddPanelFlyout(options)](./kibana-plugin-plugins-embeddable-public.openaddpanelflyout.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-embeddable-public.plugin.md) |  |
+|  [useEmbeddableFactory({ input, factory, onInputUpdated, })](./kibana-plugin-plugins-embeddable-public.useembeddablefactory.md) |  |
 
 ## Interfaces
 

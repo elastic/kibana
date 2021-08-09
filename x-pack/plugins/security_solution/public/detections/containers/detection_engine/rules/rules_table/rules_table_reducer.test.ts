@@ -7,7 +7,7 @@
 
 import { mockRule } from '../../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { FilterOptions, PaginationOptions } from '../types';
-import { RulesTableAction, RulesTableState, createRulesTableReducer } from './rules_table_reducer';
+import { RulesTableState, rulesTableReducer } from './rules_table_reducer';
 
 const initialState: RulesTableState = {
   rules: [],
@@ -24,10 +24,10 @@ const initialState: RulesTableState = {
     showCustomRules: false,
     showElasticRules: false,
   },
+  isAllSelected: false,
   loadingRulesAction: null,
   loadingRuleIds: [],
   selectedRuleIds: [],
-  exportRuleIds: [],
   lastUpdated: 0,
   isRefreshOn: false,
   isRefreshing: false,
@@ -35,36 +35,20 @@ const initialState: RulesTableState = {
 };
 
 describe('allRulesReducer', () => {
-  let reducer: (state: RulesTableState, action: RulesTableAction) => RulesTableState;
-
   beforeEach(() => {
     jest.useFakeTimers();
     jest
       .spyOn(global.Date, 'now')
       .mockImplementationOnce(() => new Date('2020-10-31T11:01:58.135Z').valueOf());
-    reducer = createRulesTableReducer({ current: null });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('#exportRuleIds', () => {
-    test('should update state with rules to be exported', () => {
-      const { loadingRuleIds, loadingRulesAction, exportRuleIds } = reducer(initialState, {
-        type: 'exportRuleIds',
-        ids: ['123', '456'],
-      });
-
-      expect(loadingRuleIds).toEqual(['123', '456']);
-      expect(exportRuleIds).toEqual(['123', '456']);
-      expect(loadingRulesAction).toEqual('export');
-    });
-  });
-
   describe('#loadingRuleIds', () => {
-    test('should update state with rule ids with a pending action', () => {
-      const { loadingRuleIds, loadingRulesAction } = reducer(initialState, {
+    it('should update state with rule ids with a pending action', () => {
+      const { loadingRuleIds, loadingRulesAction } = rulesTableReducer(initialState, {
         type: 'loadingRuleIds',
         ids: ['123', '456'],
         actionType: 'enable',
@@ -74,8 +58,8 @@ describe('allRulesReducer', () => {
       expect(loadingRulesAction).toEqual('enable');
     });
 
-    test('should update loadingIds to empty array if action is null', () => {
-      const { loadingRuleIds, loadingRulesAction } = reducer(initialState, {
+    it('should update loadingIds to empty array if action is null', () => {
+      const { loadingRuleIds, loadingRulesAction } = rulesTableReducer(initialState, {
         type: 'loadingRuleIds',
         ids: ['123', '456'],
         actionType: null,
@@ -85,8 +69,8 @@ describe('allRulesReducer', () => {
       expect(loadingRulesAction).toBeNull();
     });
 
-    test('should append rule ids to any existing loading ids', () => {
-      const { loadingRuleIds, loadingRulesAction } = reducer(
+    it('should append rule ids to any existing loading ids', () => {
+      const { loadingRuleIds, loadingRulesAction } = rulesTableReducer(
         { ...initialState, loadingRuleIds: ['abc'] },
         {
           type: 'loadingRuleIds',
@@ -101,8 +85,8 @@ describe('allRulesReducer', () => {
   });
 
   describe('#selectedRuleIds', () => {
-    test('should update state with selected rule ids', () => {
-      const { selectedRuleIds } = reducer(initialState, {
+    it('should update state with selected rule ids', () => {
+      const { selectedRuleIds } = rulesTableReducer(initialState, {
         type: 'selectedRuleIds',
         ids: ['123', '456'],
       });
@@ -112,19 +96,22 @@ describe('allRulesReducer', () => {
   });
 
   describe('#setRules', () => {
-    test('should update rules and reset loading/selected rule ids', () => {
-      const { selectedRuleIds, loadingRuleIds, loadingRulesAction, pagination, rules } = reducer(
-        initialState,
-        {
-          type: 'setRules',
-          rules: [mockRule('someRuleId')],
-          pagination: {
-            page: 1,
-            perPage: 20,
-            total: 0,
-          },
-        }
-      );
+    it('should update rules and reset loading/selected rule ids', () => {
+      const {
+        selectedRuleIds,
+        loadingRuleIds,
+        loadingRulesAction,
+        pagination,
+        rules,
+      } = rulesTableReducer(initialState, {
+        type: 'setRules',
+        rules: [mockRule('someRuleId')],
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
+      });
 
       expect(rules).toEqual([mockRule('someRuleId')]);
       expect(selectedRuleIds).toEqual([]);
@@ -139,9 +126,9 @@ describe('allRulesReducer', () => {
   });
 
   describe('#updateRules', () => {
-    test('should return existing and new rules', () => {
+    it('should return existing and new rules', () => {
       const existingRule = { ...mockRule('123'), rule_id: 'rule-123' };
-      const { rules, loadingRulesAction } = reducer(
+      const { rules, loadingRulesAction } = rulesTableReducer(
         { ...initialState, rules: [existingRule] },
         {
           type: 'updateRules',
@@ -153,9 +140,9 @@ describe('allRulesReducer', () => {
       expect(loadingRulesAction).toBeNull();
     });
 
-    test('should return updated rule', () => {
+    it('should return updated rule', () => {
       const updatedRule = { ...mockRule('someRuleId'), description: 'updated rule' };
-      const { rules, loadingRulesAction } = reducer(
+      const { rules, loadingRulesAction } = rulesTableReducer(
         { ...initialState, rules: [mockRule('someRuleId')] },
         {
           type: 'updateRules',
@@ -167,9 +154,9 @@ describe('allRulesReducer', () => {
       expect(loadingRulesAction).toBeNull();
     });
 
-    test('should return updated existing loading rule ids', () => {
+    it('should return updated existing loading rule ids', () => {
       const existingRule = { ...mockRule('someRuleId'), id: '123', rule_id: 'rule-123' };
-      const { loadingRuleIds, loadingRulesAction } = reducer(
+      const { loadingRuleIds, loadingRulesAction } = rulesTableReducer(
         {
           ...initialState,
           rules: [existingRule],
@@ -188,7 +175,7 @@ describe('allRulesReducer', () => {
   });
 
   describe('#updateFilterOptions', () => {
-    test('should return existing and new rules', () => {
+    it('should return existing and new rules', () => {
       const paginationMock: PaginationOptions = {
         page: 1,
         perPage: 20,
@@ -202,7 +189,7 @@ describe('allRulesReducer', () => {
         showCustomRules: false,
         showElasticRules: false,
       };
-      const { filterOptions, pagination } = reducer(initialState, {
+      const { filterOptions, pagination } = rulesTableReducer(initialState, {
         type: 'updateFilterOptions',
         filterOptions: filterMock,
         pagination: paginationMock,
@@ -214,8 +201,8 @@ describe('allRulesReducer', () => {
   });
 
   describe('#failure', () => {
-    test('should reset rules value to empty array', () => {
-      const { rules } = reducer(initialState, {
+    it('should reset rules value to empty array', () => {
+      const { rules } = rulesTableReducer(initialState, {
         type: 'failure',
       });
 
@@ -224,8 +211,8 @@ describe('allRulesReducer', () => {
   });
 
   describe('#setLastRefreshDate', () => {
-    test('should update last refresh date with current date', () => {
-      const { lastUpdated } = reducer(initialState, {
+    it('should update last refresh date with current date', () => {
+      const { lastUpdated } = rulesTableReducer(initialState, {
         type: 'setLastRefreshDate',
       });
 
@@ -234,8 +221,8 @@ describe('allRulesReducer', () => {
   });
 
   describe('#setShowIdleModal', () => {
-    test('should hide idle modal and restart refresh if "show" is false', () => {
-      const { showIdleModal, isRefreshOn } = reducer(initialState, {
+    it('should hide idle modal and restart refresh if "show" is false', () => {
+      const { showIdleModal, isRefreshOn } = rulesTableReducer(initialState, {
         type: 'setShowIdleModal',
         show: false,
       });
@@ -244,8 +231,8 @@ describe('allRulesReducer', () => {
       expect(isRefreshOn).toBeTruthy();
     });
 
-    test('should show idle modal and pause refresh if "show" is true', () => {
-      const { showIdleModal, isRefreshOn } = reducer(initialState, {
+    it('should show idle modal and pause refresh if "show" is true', () => {
+      const { showIdleModal, isRefreshOn } = rulesTableReducer(initialState, {
         type: 'setShowIdleModal',
         show: true,
       });
@@ -256,8 +243,8 @@ describe('allRulesReducer', () => {
   });
 
   describe('#setAutoRefreshOn', () => {
-    test('should pause auto refresh if "paused" is true', () => {
-      const { isRefreshOn } = reducer(initialState, {
+    it('should pause auto refresh if "paused" is true', () => {
+      const { isRefreshOn } = rulesTableReducer(initialState, {
         type: 'setAutoRefreshOn',
         on: true,
       });
@@ -265,13 +252,67 @@ describe('allRulesReducer', () => {
       expect(isRefreshOn).toBeTruthy();
     });
 
-    test('should resume auto refresh if "paused" is false', () => {
-      const { isRefreshOn } = reducer(initialState, {
+    it('should resume auto refresh if "paused" is false', () => {
+      const { isRefreshOn } = rulesTableReducer(initialState, {
         type: 'setAutoRefreshOn',
         on: false,
       });
 
       expect(isRefreshOn).toBeFalsy();
+    });
+  });
+
+  describe('#selectAllRules', () => {
+    it('should select all rules', () => {
+      const state = rulesTableReducer(
+        {
+          ...initialState,
+          rules: [mockRule('1'), mockRule('2'), mockRule('3')],
+        },
+        {
+          type: 'setIsAllSelected',
+          isAllSelected: true,
+        }
+      );
+
+      expect(state.isAllSelected).toBe(true);
+      expect(state.selectedRuleIds).toEqual(['1', '2', '3']);
+    });
+
+    it('should deselect all rules', () => {
+      const state = rulesTableReducer(
+        {
+          ...initialState,
+          rules: [mockRule('1'), mockRule('2'), mockRule('3')],
+          isAllSelected: true,
+          selectedRuleIds: ['1', '2', '3'],
+        },
+        {
+          type: 'setIsAllSelected',
+          isAllSelected: false,
+        }
+      );
+
+      expect(state.isAllSelected).toBe(false);
+      expect(state.selectedRuleIds).toEqual([]);
+    });
+
+    it('should unset "isAllSelected" on selected rules modification', () => {
+      const state = rulesTableReducer(
+        {
+          ...initialState,
+          rules: [mockRule('1'), mockRule('2'), mockRule('3')],
+          isAllSelected: true,
+          selectedRuleIds: ['1', '2', '3'],
+        },
+        {
+          type: 'selectedRuleIds',
+          ids: ['1', '2'],
+        }
+      );
+
+      expect(state.isAllSelected).toBe(false);
+      expect(state.selectedRuleIds).toEqual(['1', '2']);
     });
   });
 });

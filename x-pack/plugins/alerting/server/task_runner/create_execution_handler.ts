@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import {
-  PluginStartContract as ActionsPluginStartContract,
   asSavedObjectExecutionSource,
+  PluginStartContract as ActionsPluginStartContract,
 } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -22,10 +21,12 @@ import {
   AlertInstanceContext,
   RawAlert,
 } from '../types';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType } from '../rule_type_registry';
+import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 
 export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -42,6 +43,7 @@ export interface CreateExecutionHandlerOptions<
   kibanaBaseUrl: string | undefined;
   alertType: NormalizedAlertType<
     Params,
+    ExtractedParams,
     State,
     InstanceState,
     InstanceContext,
@@ -52,6 +54,8 @@ export interface CreateExecutionHandlerOptions<
   eventLogger: IEventLogger;
   request: KibanaRequest;
   alertParams: AlertTypeParams;
+  supportsEphemeralTasks: boolean;
+  maxEphemeralActionsPerAlert: Promise<number>;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -68,6 +72,7 @@ export type ExecutionHandler<ActionGroupIds extends string> = (
 
 export function createExecutionHandler<
   Params extends AlertTypeParams,
+  ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -87,8 +92,11 @@ export function createExecutionHandler<
   eventLogger,
   request,
   alertParams,
+  supportsEphemeralTasks,
+  maxEphemeralActionsPerAlert,
 }: CreateExecutionHandlerOptions<
   Params,
+  ExtractedParams,
   State,
   InstanceState,
   InstanceContext,
@@ -138,7 +146,8 @@ export function createExecutionHandler<
       .map((action) => ({
         ...action,
         params: injectActionParams({
-          alertId,
+          ruleId: alertId,
+          spaceId,
           actionParams: action.params,
           actionTypeId: action.actionTypeId,
         }),
@@ -146,6 +155,8 @@ export function createExecutionHandler<
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
+    const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+    let ephemeralActionsToSchedule = await maxEphemeralActionsPerAlert;
     for (const action of actions) {
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
@@ -156,10 +167,9 @@ export function createExecutionHandler<
         continue;
       }
 
-      // TODO would be nice  to add the action name here, but it's not available
-      const actionLabel = `${action.actionTypeId}:${action.id}`;
-      const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-      await actionsClient.enqueueExecution({
+      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+
+      const enqueueOptions = {
         id: action.id,
         params: action.params,
         spaceId,
@@ -168,12 +178,35 @@ export function createExecutionHandler<
           id: alertId,
           type: 'alert',
         }),
-      });
+        relatedSavedObjects: [
+          {
+            id: alertId,
+            type: 'alert',
+            namespace: namespace.namespace,
+            typeId: alertType.id,
+          },
+        ],
+      };
 
-      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+      // TODO would be nice  to add the action name here, but it's not available
+      const actionLabel = `${action.actionTypeId}:${action.id}`;
+      if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
+        ephemeralActionsToSchedule--;
+        actionsClient.ephemeralEnqueuedExecution(enqueueOptions).catch(async (err) => {
+          if (isEphemeralTaskRejectedDueToCapacityError(err)) {
+            await actionsClient.enqueueExecution(enqueueOptions);
+          }
+        });
+      } else {
+        await actionsClient.enqueueExecution(enqueueOptions);
+      }
 
       const event: IEvent = {
-        event: { action: EVENT_LOG_ACTIONS.executeAction },
+        event: {
+          action: EVENT_LOG_ACTIONS.executeAction,
+          kind: 'alert',
+          category: [alertType.producer],
+        },
         kibana: {
           alerting: {
             instance_id: alertInstanceId,
@@ -181,9 +214,22 @@ export function createExecutionHandler<
             action_subgroup: actionSubgroup,
           },
           saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-            { type: 'action', id: action.id, ...namespace },
+            {
+              rel: SAVED_OBJECT_REL_PRIMARY,
+              type: 'alert',
+              id: alertId,
+              type_id: alertType.id,
+              ...namespace,
+            },
+            { type: 'action', id: action.id, type_id: action.actionTypeId, ...namespace },
           ],
+        },
+        rule: {
+          id: alertId,
+          license: alertType.minimumLicenseRequired,
+          category: alertType.id,
+          ruleset: alertType.producer,
+          name: alertName,
         },
       };
 

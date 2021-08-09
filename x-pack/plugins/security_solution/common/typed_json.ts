@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DslQuery, Filter } from 'src/plugins/data/common';
+import { DslQuery, Filter } from '@kbn/es-query';
 
-import { JsonObject } from '../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 
 export type ESQuery =
   | ESRangeQuery

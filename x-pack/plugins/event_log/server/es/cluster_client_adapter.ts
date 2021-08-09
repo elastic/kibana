@@ -240,7 +240,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       });
       throw err;
     }
-    const musts: estypes.QueryContainer[] = [
+    const musts: estypes.QueryDslQueryContainer[] = [
       {
         nested: {
           path: 'kibana.saved_objects',

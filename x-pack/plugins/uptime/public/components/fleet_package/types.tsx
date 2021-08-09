@@ -25,10 +25,17 @@ export enum ResponseBodyIndexPolicy {
   ON_ERROR = 'on_error',
 }
 
+export enum MonacoEditorLangId {
+  JSON = 'xjson',
+  PLAINTEXT = 'plaintext',
+  XML = 'xml',
+  JAVASCRIPT = 'javascript',
+}
+
 export enum Mode {
   FORM = 'form',
   JSON = 'json',
-  TEXT = 'text',
+  PLAINTEXT = 'text',
   XML = 'xml',
 }
 
@@ -105,6 +112,28 @@ export interface ISimpleFields {
   [ConfigKeys.WAIT]: string;
 }
 
+export interface ICommonFields {
+  [ConfigKeys.MONITOR_TYPE]: DataStream;
+  [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
+  [ConfigKeys.APM_SERVICE_NAME]: string;
+  [ConfigKeys.TIMEOUT]: string;
+  [ConfigKeys.TAGS]: string[];
+}
+
+export type IHTTPSimpleFields = {
+  [ConfigKeys.MAX_REDIRECTS]: string;
+  [ConfigKeys.URLS]: string;
+} & ICommonFields;
+
+export type ITCPSimpleFields = {
+  [ConfigKeys.HOSTS]: string;
+} & ICommonFields;
+
+export type IICMPSimpleFields = {
+  [ConfigKeys.HOSTS]: string;
+  [ConfigKeys.WAIT]: string;
+} & ICommonFields;
+
 export interface ITLSFields {
   [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
     value: string;
@@ -154,17 +183,27 @@ export interface ITCPAdvancedFields {
   [ConfigKeys.REQUEST_SEND_CHECK]: string;
 }
 
-export type ICustomFields = ISimpleFields & ITLSFields & IHTTPAdvancedFields & ITCPAdvancedFields;
+export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;
+export type TCPFields = ITCPSimpleFields & ITCPAdvancedFields & ITLSFields;
+export type ICMPFields = IICMPSimpleFields;
 
-export type Config = {
-  [ConfigKeys.NAME]: string;
-} & ICustomFields;
+export type ICustomFields = HTTPFields &
+  TCPFields &
+  ICMPFields & {
+    [ConfigKeys.NAME]: string;
+  };
 
-export type Validation = Partial<Record<ConfigKeys, (value: unknown, ...args: any[]) => void>>;
+export interface PolicyConfig {
+  [DataStream.HTTP]: HTTPFields;
+  [DataStream.TCP]: TCPFields;
+  [DataStream.ICMP]: ICMPFields;
+}
+
+export type Validation = Partial<Record<ConfigKeys, (value: unknown, ...args: any[]) => boolean>>;
 
 export const contentTypesToMode = {
   [ContentType.FORM]: Mode.FORM,
   [ContentType.JSON]: Mode.JSON,
-  [ContentType.TEXT]: Mode.TEXT,
+  [ContentType.TEXT]: Mode.PLAINTEXT,
   [ContentType.XML]: Mode.XML,
 };

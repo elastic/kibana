@@ -13,7 +13,7 @@ import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
 import { HttpService } from '../application/services/http_service';
-import { SeverityControl } from './severity_control';
+import { SeverityControl } from '../application/components/severity_control';
 import { ResultTypeSelector } from './result_type_selector';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';

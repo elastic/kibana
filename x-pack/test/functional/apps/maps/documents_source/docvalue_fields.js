@@ -21,12 +21,12 @@ export default function ({ getPageObjects, getService }) {
       await security.testUser.restoreDefaults();
     });
 
-    it('should only fetch geo_point field and nothing else when source does not have data driven styling', async () => {
+    it('should only fetch geo_point field and time field and nothing else when source does not have data driven styling', async () => {
       await PageObjects.maps.loadSavedMap('document example');
       const { rawResponse: response } = await PageObjects.maps.getResponse();
       const firstHit = response.hits.hits[0];
       expect(firstHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
-      expect(firstHit.fields).to.only.have.keys(['geo.coordinates']);
+      expect(firstHit.fields).to.only.have.keys(['@timestamp', 'geo.coordinates']);
     });
 
     it('should only fetch geo_point field and data driven styling fields', async () => {
@@ -34,7 +34,12 @@ export default function ({ getPageObjects, getService }) {
       const { rawResponse: response } = await PageObjects.maps.getResponse();
       const firstHit = response.hits.hits[0];
       expect(firstHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
-      expect(firstHit.fields).to.only.have.keys(['bytes', 'geo.coordinates', 'hour_of_day']);
+      expect(firstHit.fields).to.only.have.keys([
+        '@timestamp',
+        'bytes',
+        'geo.coordinates',
+        'hour_of_day',
+      ]);
     });
 
     it('should format date fields as epoch_millis when data driven styling is applied to a date field', async () => {

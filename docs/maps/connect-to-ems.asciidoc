@@ -14,17 +14,6 @@ EMS requests are made to the following domains:
 Maps makes requests directly from the browser to EMS.
 
 [float]
-=== Connect to Elastic Maps Service from an internal network
-
-To connect to EMS when your Kibana server and browser are in an internal network:
-
-. Set `map.proxyElasticMapsServiceInMaps` to `true` in your <<settings, kibana.yml>> file to proxy EMS requests through the Kibana server.
-. Update your firewall rules to allow connections from your Kibana server to the EMS domains.
-
-NOTE: Coordinate map  and region map visualizations do not support `map.proxyElasticMapsServiceInMaps` and will not proxy EMS requests through the Kibana server.
-
-
-[float]
 === Disable Elastic Maps Service
 
 You might experience EMS connection issues if your Kibana server or browser are on a private network or
@@ -34,7 +23,6 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 
 . Set `map.includeElasticMapsService` to `false` to turn off the EMS connection.
 . Set `map.tilemap.url` to the URL of your tile server. This configures the default tile layer of Maps.
-. (Optional) Set `map.regionmap` to the vector shapes of the administrative boundaries that you want to use.
 
 [float]
 [id=elastic-maps-server]

@@ -6,14 +6,14 @@
  */
 
 import { SecuritySubPlugin } from '../app/types';
-import { OverviewRoutes } from './routes';
+import { routes } from './routes';
 
 export class Overview {
   public setup() {}
 
   public start(): SecuritySubPlugin {
     return {
-      SubPluginRoutes: OverviewRoutes,
+      routes,
     };
   }
 }

@@ -9,6 +9,7 @@
   "extraPublicDirs": ["common/constants"],
   "requiredBundles": [
     "telemetryManagementSection",
+    "esUiShared",
     "kibanaReact"
   ]
 }

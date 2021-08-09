@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
-import { EuiIcon } from '@elastic/eui';
 import {
   AreaSeries,
   Chart,
@@ -16,11 +13,13 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { merge } from 'lodash';
-import { Coordinate } from '../../../../../typings/timeseries';
+import React from 'react';
 import { useChartTheme } from '../../../../../../observability/public';
-import { px, unit } from '../../../../style/variables';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
+import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
 export type Color =
@@ -73,8 +72,8 @@ export function SparkPlot({
   const colorValue = theme.eui[color];
 
   const chartSize = {
-    height: px(24),
-    width: compact ? px(unit * 3) : px(unit * 4),
+    height: theme.eui.euiSizeL,
+    width: compact ? unit * 3 : unit * 4,
   };
 
   const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;

@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
+import { timelineActions } from '../../../timelines/store/timeline';
 import { HostsComponentsQueryProps } from './types';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import {
@@ -20,10 +21,12 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -64,14 +67,25 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   startDate,
 }) => {
   const dispatch = useDispatch();
-  const { initializeTimeline } = useManageTimeline();
   const { globalFullScreen } = useGlobalFullScreen();
+
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+
   useEffect(() => {
-    initializeTimeline({
-      id: TimelineId.hostsPageEvents,
-      defaultModel: eventsDefaultModel,
-    });
-  }, [dispatch, initializeTimeline]);
+    dispatch(
+      timelineActions.initializeTGridSettings({
+        id: TimelineId.hostsPageEvents,
+        defaultColumns: eventsDefaultModel.columns.map((c) =>
+          !tGridEnabled && c.initialWidth == null
+            ? {
+                ...c,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+              }
+            : c
+        ),
+      })
+    );
+  }, [dispatch, tGridEnabled]);
 
   useEffect(() => {
     return () => {
@@ -95,6 +109,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         />
       )}
       <StatefulEventsViewer
+        defaultCellActions={defaultCellActions}
         defaultModel={eventsDefaultModel}
         end={endDate}
         id={TimelineId.hostsPageEvents}

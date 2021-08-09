@@ -40,9 +40,12 @@ export function getActionType(): ActionTypeModel<
         defaultMessage: 'Webhook data',
       }
     ),
-    validateConnector: (
+    validateConnector: async (
       action: WebhookActionConnector
-    ): ConnectorValidationResult<Pick<WebhookConfig, 'url' | 'method'>, WebhookSecrets> => {
+    ): Promise<
+      ConnectorValidationResult<Pick<WebhookConfig, 'url' | 'method'>, WebhookSecrets>
+    > => {
+      const translations = await import('./translations');
       const configErrors = {
         url: new Array<string>(),
         method: new Array<string>(),
@@ -56,95 +59,39 @@ export function getActionType(): ActionTypeModel<
         secrets: { errors: secretsErrors },
       };
       if (!action.config.url) {
-        configErrors.url.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.requiredUrlText',
-            {
-              defaultMessage: 'URL is required.',
-            }
-          )
-        );
+        configErrors.url.push(translations.URL_REQUIRED);
       }
       if (action.config.url && !isValidUrl(action.config.url)) {
-        configErrors.url = [
-          ...configErrors.url,
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.invalidUrlTextField',
-            {
-              defaultMessage: 'URL is invalid.',
-            }
-          ),
-        ];
+        configErrors.url = [...configErrors.url, translations.URL_INVALID];
       }
       if (!action.config.method) {
-        configErrors.method.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredMethodText',
-            {
-              defaultMessage: 'Method is required.',
-            }
-          )
-        );
+        configErrors.method.push(translations.METHOD_REQUIRED);
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.user.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthUserNameText',
-            {
-              defaultMessage: 'Username is required.',
-            }
-          )
-        );
+        secretsErrors.user.push(translations.USERNAME_REQUIRED);
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthPasswordText',
-            {
-              defaultMessage: 'Password is required.',
-            }
-          )
-        );
+        secretsErrors.password.push(translations.PASSWORD_REQUIRED);
       }
       if (action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText',
-            {
-              defaultMessage: 'Password is required when username is used.',
-            }
-          )
-        );
+        secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER);
       }
       if (!action.secrets.user && action.secrets.password) {
-        secretsErrors.user.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredUserText',
-            {
-              defaultMessage: 'Username is required when password is used.',
-            }
-          )
-        );
+        secretsErrors.user.push(translations.USERNAME_REQUIRED_FOR_PASSWORD);
       }
       return validationResult;
     },
-    validateParams: (
+    validateParams: async (
       actionParams: WebhookActionParams
-    ): GenericValidationResult<WebhookActionParams> => {
+    ): Promise<GenericValidationResult<WebhookActionParams>> => {
+      const translations = await import('./translations');
       const errors = {
         body: new Array<string>(),
       };
       const validationResult = { errors };
       validationResult.errors = errors;
       if (!actionParams.body?.length) {
-        errors.body.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookBodyText',
-            {
-              defaultMessage: 'Body is required.',
-            }
-          )
-        );
+        errors.body.push(translations.BODY_REQUIRED);
       }
       return validationResult;
     },

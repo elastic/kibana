@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Must render zoom tools 1`] = `
+exports[`Should only show set view control 1`] = `
 <EuiFlexGroup
   alignItems="flexStart"
   className="mapToolbarOverlay"
@@ -11,13 +11,10 @@ exports[`Must render zoom tools 1`] = `
   <EuiFlexItem>
     <Connect(SetViewControl) />
   </EuiFlexItem>
-  <EuiFlexItem>
-    <Connect(FitToData) />
-  </EuiFlexItem>
 </EuiFlexGroup>
 `;
 
-exports[`Must zoom tools and draw filter tools 1`] = `
+exports[`Should show all controls 1`] = `
 <EuiFlexGroup
   alignItems="flexStart"
   className="mapToolbarOverlay"
@@ -33,16 +30,48 @@ exports[`Must zoom tools and draw filter tools 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <Connect(ToolsControl)
-      geoFields={
-        Array [
-          Object {
-            "geoFieldName": "myGeoFieldName",
-            "geoFieldType": "geo_point",
-            "indexPatternId": "1",
-            "indexPatternTitle": "myIndex",
-          },
-        ]
-      }
+      disableToolsControl={false}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Connect(TimesliderToggleButton) />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Should show point layer edit tools 1`] = `
+<EuiFlexGroup
+  alignItems="flexStart"
+  className="mapToolbarOverlay"
+  direction="column"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem>
+    <Connect(SetViewControl) />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Connect(FeatureEditTools)
+      pointsOnly={true}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Should show shape layer edit tools 1`] = `
+<EuiFlexGroup
+  alignItems="flexStart"
+  className="mapToolbarOverlay"
+  direction="column"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem>
+    <Connect(SetViewControl) />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Connect(FeatureEditTools)
+      pointsOnly={false}
     />
   </EuiFlexItem>
 </EuiFlexGroup>

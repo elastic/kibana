@@ -32,7 +32,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.disableAlert.errorTitle', {
-          defaultMessage: `Unable to disable alert`,
+          defaultMessage: `Unable to disable rule`,
         }),
         text: err.message,
       });
@@ -46,7 +46,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.enableAlert.errorTitle', {
-          defaultMessage: `Unable to enable alert`,
+          defaultMessage: `Unable to enable rule`,
         }),
         text: err.message,
       });
@@ -60,7 +60,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.muteAlert.errorTitle', {
-          defaultMessage: `Unable to mute alert`,
+          defaultMessage: `Unable to mute rule`,
         }),
         text: err.message,
       });
@@ -74,7 +74,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.ummuteAlert.errorTitle', {
-          defaultMessage: `Unable to unmute alert`,
+          defaultMessage: `Unable to unmute rule`,
         }),
         text: err.message,
       });
@@ -112,7 +112,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
             }}
           >
             {i18n.translate('xpack.monitoring.alerts.panel.editAlert', {
-              defaultMessage: `Edit alert`,
+              defaultMessage: `Edit rule`,
             })}
           </EuiButton>
         </EuiFlexItem>

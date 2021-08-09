@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { ALERT_STATUS } from '@kbn/rule-data-utils/target/technical_field_names';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { AlertStatus } from '../../common/typings';
@@ -18,7 +18,11 @@ export function alertStatusQuery(status: AlertStatus) {
   return [{ term: { [ALERT_STATUS]: status } }];
 }
 
-export function rangeQuery(start?: number, end?: number, field = '@timestamp'): QueryContainer[] {
+export function rangeQuery(
+  start?: number,
+  end?: number,
+  field = '@timestamp'
+): estypes.QueryDslQueryContainer[] {
   return [
     {
       range: {
@@ -32,7 +36,7 @@ export function rangeQuery(start?: number, end?: number, field = '@timestamp'): 
   ];
 }
 
-export function kqlQuery(kql?: string): QueryContainer[] {
+export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }

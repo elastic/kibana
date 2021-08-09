@@ -11,7 +11,7 @@ import { CoreSetup, CoreStart, SavedObject } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
 
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { createFieldFormatsStartMock } from '../field_formats/mocks';
+import { createFieldFormatsStartMock } from '../../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from '../index_patterns/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
@@ -25,6 +25,7 @@ import {
   ISearchSessionService,
   ISearchStart,
   ISearchStrategy,
+  NoSearchIdInSessionError,
 } from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '../../../expressions/public/mocks';
@@ -173,6 +174,22 @@ describe('Search service', () => {
         const [request, callOptions] = mockStrategy.search.mock.calls[0];
         expect(callOptions).toBe(options);
         expect(request).toStrictEqual({ ...searchRequest, id: 'my_id' });
+      });
+
+      it('searches even if id is not found in session during restore', async () => {
+        const searchRequest = { params: {} };
+        const options = { sessionId, isStored: true, isRestore: true };
+
+        mockSessionClient.getId = jest.fn().mockImplementation(() => {
+          throw new NoSearchIdInSessionError();
+        });
+
+        const res = await mockScopedClient.search(searchRequest, options).toPromise();
+
+        const [request, callOptions] = mockStrategy.search.mock.calls[0];
+        expect(callOptions).toBe(options);
+        expect(request).toStrictEqual({ ...searchRequest });
+        expect(res.isRestored).toBe(false);
       });
 
       it('does not fail if `trackId` throws', async () => {

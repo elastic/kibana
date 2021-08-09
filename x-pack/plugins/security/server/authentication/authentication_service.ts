@@ -51,7 +51,7 @@ interface AuthenticationServiceStartParams {
   loggers: LoggerFactory;
 }
 
-export interface AuthenticationServiceStart {
+export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
   apiKeys: Pick<
     APIKeys,
     | 'areAPIKeysEnabled'
@@ -63,6 +63,21 @@ export interface AuthenticationServiceStart {
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+}
+
+/**
+ * Authentication services available on the security plugin's start contract.
+ */
+export interface AuthenticationServiceStart {
+  apiKeys: Pick<
+    APIKeys,
+    | 'areAPIKeysEnabled'
+    | 'create'
+    | 'invalidate'
+    | 'grantAsInternalUser'
+    | 'invalidateAsInternalUser'
+  >;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
@@ -212,7 +227,7 @@ export class AuthenticationService {
     legacyAuditLogger,
     loggers,
     session,
-  }: AuthenticationServiceStartParams): AuthenticationServiceStart {
+  }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),

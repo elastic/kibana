@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Home Home Page 1`] = `
+<div
+  className="euiPage euiPage--grow euiPageTemplate"
+  style={
+    Object {
+      "minHeight": 460,
+    }
+  }
+>
+  <div
+    className="euiPageBody euiPageBody--borderRadiusNone"
+  >
+    <header
+      className="euiPageHeader euiPageHeader--paddingLarge euiPageHeader--responsive euiPageHeader--tabsAtBottom euiPage--restrictWidth-default euiPageHeader--center"
+    >
+      <div
+        className="euiPageHeaderContent"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+        >
+          <div
+            className="euiFlexItem"
+          >
+            <h1
+              className="euiTitle euiTitle--large"
+            >
+              Canvas
+            </h1>
+          </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  className="euiButton euiButton--primary euiButton--fill"
+                  data-test-subj="create-workpad-button"
+                  disabled={false}
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
+                >
+                  <span
+                    className="euiButtonContent euiButton__content"
+                  >
+                    <span
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="plusInCircleFilled"
+                      size="m"
+                    />
+                    <span
+                      className="euiButton__text"
+                    >
+                      Create workpad
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiPageHeaderContent__bottom"
+        >
+          <div
+            className="euiSpacer euiSpacer--l"
+          />
+          <div
+            className="euiTabs euiTabs--condensed euiTabs--large"
+            role="tablist"
+          >
+            <button
+              aria-selected={true}
+              className="euiTab euiTab-isSelected"
+              disabled={false}
+              id="myWorkpads"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                My workpads
+              </span>
+            </button>
+            <button
+              aria-selected={false}
+              className="euiTab"
+              data-test-subj="workpadTemplates"
+              disabled={false}
+              id="workpadTemplates"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Templates
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div
+      className="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
+      role="main"
+    >
+      <div
+        className="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+          style={
+            Object {
+              "minHeight": 600,
+            }
+          }
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <span
+              className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -10,3 +10,16 @@ export type Maybe<T> = T | null | undefined;
 
 export const alertStatusRt = t.union([t.literal('all'), t.literal('open'), t.literal('closed')]);
 export type AlertStatus = t.TypeOf<typeof alertStatusRt>;
+
+export interface ApmIndicesConfig {
+  /* eslint-disable @typescript-eslint/naming-convention */
+  'apm_oss.sourcemapIndices': string;
+  'apm_oss.errorIndices': string;
+  'apm_oss.onboardingIndices': string;
+  'apm_oss.spanIndices': string;
+  'apm_oss.transactionIndices': string;
+  'apm_oss.metricsIndices': string;
+  /* eslint-enable @typescript-eslint/naming-convention */
+  apmAgentConfigurationIndex: string;
+  apmCustomLinkIndex: string;
+}

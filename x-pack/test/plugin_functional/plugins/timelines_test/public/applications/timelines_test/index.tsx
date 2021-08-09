@@ -5,21 +5,25 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { Router } from 'react-router-dom';
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { TimelinesPluginSetup } from '../../../../../../../plugins/timelines/public';
+import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
+import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+
+type CoreStartTimelines = CoreStart & { data: DataPublicPluginStart };
 
 /**
  * Render the Timeline Test app. Returns a cleanup function.
  */
 export function renderApp(
-  coreStart: CoreStart,
+  coreStart: CoreStartTimelines,
   parameters: AppMountParameters,
-  timelinesPluginSetup: TimelinesPluginSetup
+  timelinesPluginSetup: TimelinesUIStart | null
 ) {
   ReactDOM.render(
     <AppRoot
@@ -34,6 +38,7 @@ export function renderApp(
     ReactDOM.unmountComponentAtNode(parameters.element);
   };
 }
+const ALERT_CONSUMER = [AlertConsumers.SIEM];
 
 const AppRoot = React.memo(
   ({
@@ -41,16 +46,48 @@ const AppRoot = React.memo(
     parameters,
     timelinesPluginSetup,
   }: {
-    coreStart: CoreStart;
+    coreStart: CoreStartTimelines;
     parameters: AppMountParameters;
-    timelinesPluginSetup: TimelinesPluginSetup;
+    timelinesPluginSetup: TimelinesUIStart | null;
   }) => {
+    const refetch = useRef();
+
+    const setRefetch = useCallback((_refetch) => {
+      refetch.current = _refetch;
+    }, []);
+
     return (
       <I18nProvider>
         <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
-            {(timelinesPluginSetup.getTimeline &&
-              timelinesPluginSetup.getTimeline({ timelineId: 'test' })) ??
+            {(timelinesPluginSetup &&
+              timelinesPluginSetup.getTGrid &&
+              timelinesPluginSetup.getTGrid<'standalone'>({
+                alertConsumers: ALERT_CONSUMER,
+                type: 'standalone',
+                columns: [],
+                indexNames: [],
+                deletedEventIds: [],
+                end: '',
+                footerText: 'Events',
+                filters: [],
+                itemsPerPage: 50,
+                itemsPerPageOptions: [1, 2, 3],
+                loadingText: 'Loading events',
+                renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
+                sort: [],
+                leadingControlColumns: [],
+                trailingControlColumns: [],
+                query: {
+                  query: '',
+                  language: 'kuery',
+                },
+                setRefetch,
+                start: '',
+                rowRenderers: [],
+                filterStatus: 'open',
+                unit: (n: number) => `${n}`,
+              })) ??
               null}
           </KibanaContextProvider>
         </Router>

@@ -15,6 +15,7 @@ import { Root } from '../../../root';
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures_test.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -79,6 +80,7 @@ describe('migration v2', () => {
     root = createRoot();
 
     esServer = await startES();
+    await root.preboot();
     const coreSetup = await root.setup();
 
     coreSetup.savedObjects.registerType({
@@ -92,17 +94,37 @@ describe('migration v2', () => {
         '7.14.0': (doc) => doc,
       },
     });
+
+    // registering the `space` type with a throwing migration fn to avoid the migration failing for unknown types
+    coreSetup.savedObjects.registerType({
+      name: 'space',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'single',
+      migrations: {
+        '7.14.0': (doc) => {
+          doc.attributes.foo.bar = 12;
+          return doc;
+        },
+      },
+    });
+
     try {
       await root.start();
     } catch (err) {
       const errorMessage = err.message;
+
       expect(
         errorMessage.startsWith(
-          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: '
+          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 7 corrupt saved object documents were found: '
         )
       ).toBeTruthy();
       expect(
-        errorMessage.endsWith(' To allow migrations to proceed, please delete these documents.')
+        errorMessage.endsWith(
+          'To allow migrations to proceed, please delete or fix these documents.'
+        )
       ).toBeTruthy();
 
       const expectedCorruptDocIds = [
@@ -117,9 +139,13 @@ describe('migration v2', () => {
       for (const corruptDocId of expectedCorruptDocIds) {
         expect(errorMessage.includes(corruptDocId)).toBeTruthy();
       }
-      const expectedTransformErrorMessage =
-        'Transformation errors: space:default: Document "default" has property "space" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]';
-      expect(errorMessage.includes(expectedTransformErrorMessage)).toBeTruthy();
+
+      expect(errorMessage.includes('7 transformation errors were encountered:')).toBeTruthy();
+      expect(errorMessage).toEqual(
+        expect.stringContaining(
+          'space:sixth: Error: Migration function for version 7.14.0 threw an error'
+        )
+      );
     }
   });
 });

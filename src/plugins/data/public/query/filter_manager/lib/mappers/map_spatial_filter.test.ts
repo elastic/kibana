@@ -54,6 +54,61 @@ describe('mapSpatialFilter()', () => {
     expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
   });
 
+  test('should return the key for matching multi field filter', async () => {
+    const filter = {
+      meta: {
+        alias: 'my spatial filter',
+        isMultiIndex: true,
+        type: FILTERS.SPATIAL_FILTER,
+      } as FilterMeta,
+      query: {
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: 'geo.coordinates',
+                    },
+                  },
+                  {
+                    geo_distance: {
+                      distance: '1000km',
+                      'geo.coordinates': [120, 30],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: 'location',
+                    },
+                  },
+                  {
+                    geo_distance: {
+                      distance: '1000km',
+                      location: [120, 30],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    } as Filter;
+    const result = mapSpatialFilter(filter);
+
+    expect(result).toHaveProperty('key', 'query');
+    expect(result).toHaveProperty('value', '');
+    expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
+  });
+
   test('should return undefined for none matching', async (done) => {
     const filter = {
       meta: {

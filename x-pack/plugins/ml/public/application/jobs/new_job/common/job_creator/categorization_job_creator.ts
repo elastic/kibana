@@ -66,7 +66,7 @@ export class CategorizationJobCreator extends JobCreator {
     eventRate: Field | null
   ) {
     if (count === null || rare === null || eventRate === null) {
-      return;
+      throw Error('event_rate field or count or rare aggregations missing');
     }
 
     this._createCountDetector = () => {

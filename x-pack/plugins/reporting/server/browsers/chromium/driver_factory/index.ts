@@ -17,7 +17,6 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
 import { ReportingCore } from '../../..';
-import { BROWSER_TYPE } from '../../../../common/constants';
 import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
@@ -25,6 +24,18 @@ import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { Metrics, getMetrics } from './metrics';
+
+// Puppeteer type definitions do not match the documentation.
+// See https://pptr.dev/#?product=Puppeteer&version=v8.0.0&show=api-puppeteerlaunchoptions
+interface ReportingLaunchOptions extends puppeteer.LaunchOptions {
+  userDataDir?: string;
+  ignoreHTTPSErrors?: boolean;
+  args?: string[];
+}
+
+declare module 'puppeteer' {
+  function launch(options: ReportingLaunchOptions): Promise<puppeteer.Browser>;
+}
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 type ViewportConfig = CaptureConfig['viewport'];
@@ -58,7 +69,7 @@ export class HeadlessChromiumDriverFactory {
       });
   }
 
-  type = BROWSER_TYPE;
+  type = 'chromium';
 
   /*
    * Return an observable to objects which will drive screenshot capture for a page
@@ -85,11 +96,12 @@ export class HeadlessChromiumDriverFactory {
           userDataDir: this.userDataDir,
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
+          handleSIGHUP: false,
           args: chromiumArgs,
           env: {
             TZ: browserTimezone,
           },
-        } as puppeteer.LaunchOptions);
+        });
 
         page = await browser.newPage();
         devTools = await page.target().createCDPSession();
@@ -195,10 +207,14 @@ export class HeadlessChromiumDriverFactory {
   getBrowserLogger(page: puppeteer.Page, logger: LevelLogger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<puppeteer.ConsoleMessage>(page, 'console').pipe(
       map((line) => {
+        const formatLine = () => `{ text: "${line.text()?.trim()}", url: ${line.location()?.url} }`;
+
         if (line.type() === 'error') {
-          logger.error(line.text(), ['headless-browser-console']);
+          logger.error(`Error in browser console: ${formatLine()}`, ['headless-browser-console']);
         } else {
-          logger.debug(line.text(), [`headless-browser-console:${line.type()}`]);
+          logger.debug(`Message in browser console: ${formatLine()}`, [
+            `headless-browser-console:${line.type()}`,
+          ]);
         }
       })
     );

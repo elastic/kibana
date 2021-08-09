@@ -6,7 +6,7 @@
  */
 
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { rangeQuery } from '../../../../server/utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   TRANSACTION_DURATION,
@@ -14,19 +14,21 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getHasAggregatedTransactions({
   start,
   end,
   apmEventClient,
+  kuery,
 }: {
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
+  kuery?: string;
 }) {
-  return withApmSpan('get_has_aggregated_transactions', async () => {
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    'get_has_aggregated_transactions',
+    {
       apm: {
         events: [ProcessorEvent.metric],
       },
@@ -36,19 +38,20 @@ export async function getHasAggregatedTransactions({
             filter: [
               { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
               ...(start && end ? rangeQuery(start, end) : []),
+              ...kqlQuery(kuery),
             ],
           },
         },
       },
       terminateAfter: 1,
-    });
-
-    if (response.hits.total.value > 0) {
-      return true;
     }
+  );
 
-    return false;
-  });
+  if (response.hits.total.value > 0) {
+    return true;
+  }
+
+  return false;
 }
 
 export async function getSearchAggregatedTransactions({
@@ -56,19 +59,22 @@ export async function getSearchAggregatedTransactions({
   start,
   end,
   apmEventClient,
+  kuery,
 }: {
   config: APMConfig;
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
+  kuery?: string;
 }): Promise<boolean> {
   const searchAggregatedTransactions =
     config['xpack.apm.searchAggregatedTransactions'];
 
   if (
+    kuery ||
     searchAggregatedTransactions === SearchAggregatedTransactionSetting.auto
   ) {
-    return getHasAggregatedTransactions({ start, end, apmEventClient });
+    return getHasAggregatedTransactions({ start, end, apmEventClient, kuery });
   }
 
   return (

@@ -5,68 +5,66 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
-import { ComponentStrings } from '../../../../i18n/components';
+import { i18n } from '@kbn/i18n';
+import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
-import { PDFPanel } from './pdf_panel';
+import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
-import { LayoutType } from './utils';
 
-const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
+const strings = {
+  getShareDownloadJSONTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareDownloadJSONTitle', {
+      defaultMessage: 'Download as {JSON}',
+      values: {
+        JSON,
+      },
+    }),
+  getShareDownloadPDFTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareDownloadPDFTitle', {
+      defaultMessage: '{PDF} reports',
+      values: {
+        PDF,
+      },
+    }),
+  getShareMenuButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareMenuButtonLabel', {
+      defaultMessage: 'Share',
+    }),
+  getShareWebsiteTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteTitle', {
+      defaultMessage: 'Share on a website',
+    }),
+  getShareWorkpadMessage: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWorkpadMessage', {
+      defaultMessage: 'Share this workpad',
+    }),
+};
 
 type CopyTypes = 'pdf' | 'reportingConfig';
 type ExportTypes = 'pdf' | 'json';
-type ExportUrlTypes = 'pdf';
 type CloseTypes = 'share';
 
 export type OnCopyFn = (type: CopyTypes) => void;
-export type OnExportFn = (type: ExportTypes, layout?: LayoutType) => void;
+export type OnExportFn = (type: ExportTypes) => void;
 export type OnCloseFn = (type: CloseTypes) => void;
-export type GetExportUrlFn = (type: ExportUrlTypes, layout: LayoutType) => string;
+export type ReportingComponent = ({ onClose }: { onClose: () => void }) => JSX.Element;
 
 export interface Props {
-  /** Flag to include the Reporting option only if Reporting is enabled */
-  includeReporting: boolean;
-  /** Handler to invoke when an export URL is copied to the clipboard. */
-  onCopy: OnCopyFn;
-  /** Handler to invoke when an end product is exported. */
+  ReportingComponent: ReportingComponent | null;
   onExport: OnExportFn;
-  /** Handler to retrive an export URL based on the type of export requested. */
-  getExportUrl: GetExportUrlFn;
 }
 
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
-export const ShareMenu: FunctionComponent<Props> = ({
-  includeReporting,
-  onCopy,
-  onExport,
-  getExportUrl,
-}) => {
+export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
-  const onClose = () => {
+  const onFlyoutClose = () => {
     setShowFlyout(false);
-  };
-
-  const getPDFPanel = (closePopover: ClosePopoverFn) => {
-    return (
-      <PDFPanel
-        getPdfURL={(layoutType: LayoutType) => getExportUrl('pdf', layoutType)}
-        onExport={(layoutType) => {
-          onExport('pdf', layoutType);
-          closePopover();
-        }}
-        onCopy={() => {
-          onCopy('pdf');
-          closePopover();
-        }}
-      />
-    );
   };
 
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
@@ -80,14 +78,14 @@ export const ShareMenu: FunctionComponent<Props> = ({
           closePopover();
         },
       },
-      includeReporting
+      ReportingComponent !== null
         ? {
             name: strings.getShareDownloadPDFTitle(),
             icon: 'document',
             panel: {
               id: 1,
               title: strings.getShareDownloadPDFTitle(),
-              content: getPDFPanel(closePopover),
+              content: <ReportingComponent onClose={closePopover} />,
             },
             'data-test-subj': 'sharePanel-PDFReports',
           }
@@ -105,7 +103,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
 
   const shareControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       aria-label={strings.getShareWorkpadMessage()}
       onClick={togglePopover}
       data-test-subj="shareTopNavButton"
@@ -114,7 +112,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
     </EuiButtonEmpty>
   );
 
-  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onClose} /> : null;
+  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onFlyoutClose} /> : null;
 
   return (
     <div>
@@ -132,8 +130,5 @@ export const ShareMenu: FunctionComponent<Props> = ({
 };
 
 ShareMenu.propTypes = {
-  includeReporting: PropTypes.bool.isRequired,
-  onCopy: PropTypes.func.isRequired,
   onExport: PropTypes.func.isRequired,
-  getExportUrl: PropTypes.func.isRequired,
 };

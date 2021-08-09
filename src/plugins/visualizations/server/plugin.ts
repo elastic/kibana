@@ -24,6 +24,8 @@ import { visualizationSavedObjectType } from './saved_objects';
 
 import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import { registerVisualizationsCollector } from './usage_collector';
+import { EmbeddableSetup } from '../../embeddable/server';
+import { visualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
@@ -35,7 +37,10 @@ export class VisualizationsPlugin
     this.config = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+  public setup(
+    core: CoreSetup,
+    plugins: { usageCollection?: UsageCollectionSetup; embeddable: EmbeddableSetup }
+  ) {
     this.logger.debug('visualizations: Setup');
 
     core.savedObjects.registerType(visualizationSavedObjectType);
@@ -58,6 +63,8 @@ export class VisualizationsPlugin
     if (plugins.usageCollection) {
       registerVisualizationsCollector(plugins.usageCollection, this.config);
     }
+
+    plugins.embeddable.registerEmbeddableFactory(visualizeEmbeddableFactory());
 
     return {};
   }

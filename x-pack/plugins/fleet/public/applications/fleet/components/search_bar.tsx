@@ -98,6 +98,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       }}
       submitOnBlur
       isClearable
+      autoSubmit
     />
   );
 };

@@ -36,6 +36,13 @@ import {
   DUPLICATE_RULE_MENU_PANEL_BTN,
   DUPLICATE_RULE_BULK_BTN,
   RULES_ROW,
+  SELECT_ALL_RULES_BTN,
+  MODAL_CONFIRMATION_BTN,
+  RULES_DELETE_CONFIRMATION_MODAL,
+  ACTIVATE_RULE_BULK_BTN,
+  DEACTIVATE_RULE_BULK_BTN,
+  EXPORT_RULE_BULK_BTN,
+  RULE_DETAILS_DELETE_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -55,11 +62,6 @@ export const duplicateFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(DUPLICATE_RULE_ACTION_BTN).should('be.visible');
   cy.get(DUPLICATE_RULE_ACTION_BTN).click();
-};
-
-export const duplicateSelectedRules = () => {
-  cy.get(BULK_ACTIONS_BTN).click({ force: true });
-  cy.get(DUPLICATE_RULE_BULK_BTN).click();
 };
 
 /**
@@ -106,6 +108,37 @@ export const deleteSelectedRules = () => {
   cy.get(DELETE_RULE_BULK_BTN).click();
 };
 
+export const deleteRuleFromDetailsPage = () => {
+  cy.get(ALL_ACTIONS).should('be.visible');
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ALL_ACTIONS).trigger('click');
+      return $el.find(RULE_DETAILS_DELETE_BTN);
+    })
+    .should(($el) => expect($el).to.be.visible);
+  cy.get(RULE_DETAILS_DELETE_BTN).pipe(($el) => $el.trigger('click'));
+};
+
+export const duplicateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+};
+
+export const activateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(ACTIVATE_RULE_BULK_BTN).click();
+};
+
+export const deactivateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DEACTIVATE_RULE_BULK_BTN).click();
+};
+
+export const exportSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(EXPORT_RULE_BULK_BTN).click();
+};
+
 export const exportFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(EXPORT_ACTION_BTN).click();
@@ -122,7 +155,7 @@ export const goToCreateNewRule = () => {
 };
 
 export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).click({ force: true });
+  cy.get(RULE_NAME).first().click({ force: true });
 };
 
 export const loadPrebuiltDetectionRules = () => {
@@ -149,6 +182,17 @@ export const selectNumberOfRules = (numberOfRules: number) => {
   }
 };
 
+export const selectAllRules = () => {
+  cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
+  cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
+};
+
+export const confirmRulesDelete = () => {
+  cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('be.visible');
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+  cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
+};
+
 export const sortByActivatedRules = () => {
   cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
   waitForRulesTableToBeRefreshed();
@@ -158,7 +202,8 @@ export const sortByActivatedRules = () => {
 
 export const waitForRulesTableToBeLoaded = () => {
   cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('exist');
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR).should('not.exist');
+  // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
+  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
 export const waitForRulesTableToBeRefreshed = () => {
@@ -174,9 +219,10 @@ export const waitForRulesTableToBeAutoRefreshed = () => {
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
   cy.get(RULES_TABLE).should('exist');
+  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 
-export const waitForRuleToBeActivated = () => {
+export const waitForRuleToChangeStatus = () => {
   cy.get(RULE_SWITCH_LOADER).should('exist');
   cy.get(RULE_SWITCH_LOADER).should('not.exist');
 };
@@ -215,8 +261,8 @@ export const changeRowsPerPageTo = (rowsCount: number) => {
   waitForRulesTableToBeRefreshed();
 };
 
-export const changeRowsPerPageTo300 = () => {
-  changeRowsPerPageTo(300);
+export const changeRowsPerPageTo100 = () => {
+  changeRowsPerPageTo(100);
 };
 
 export const goToPage = (pageNumber: number) => {

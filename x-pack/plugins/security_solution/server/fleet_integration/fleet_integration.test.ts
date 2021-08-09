@@ -42,6 +42,8 @@ describe('ingest_integration tests ', () => {
   let ctx: SecuritySolutionRequestHandlerContext;
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
   const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
+  const prebuiltRulesFromFileSystem = createMockConfig().prebuiltRulesFromFileSystem;
+  const prebuiltRulesFromSavedObjects = createMockConfig().prebuiltRulesFromSavedObjects;
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -80,6 +82,8 @@ describe('ingest_integration tests ', () => {
         manifestManager,
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
+        prebuiltRulesFromFileSystem,
+        prebuiltRulesFromSavedObjects,
         endpointAppContextMock.security,
         endpointAppContextMock.alerting,
         licenseService,
@@ -100,7 +104,7 @@ describe('ingest_integration tests ', () => {
     let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
     beforeAll(async () => {
-      const artifacts = await getMockArtifacts({ compress: true });
+      const artifacts = await getMockArtifacts();
       ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
       ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
       ARTIFACT_TRUSTED_APPS_MACOS = artifacts[3];
@@ -147,7 +151,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).not.toHaveBeenCalled();
     });
 
@@ -170,7 +177,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
     });
 
@@ -197,10 +207,10 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
     });
 

@@ -91,6 +91,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   title,
   titleSize,
   yTickFormatter,
+  skip,
 }) => {
   const dispatch = useDispatch();
   const handleBrushEnd = useCallback(
@@ -146,6 +147,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     isPtrIncluded,
     docValueFields,
+    skip,
   };
 
   const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogramCombined(
@@ -216,6 +218,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             titleSize={titleSize}
             subtitle={subtitleWithCounts}
             inspectMultiple
+            isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>

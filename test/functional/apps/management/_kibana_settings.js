@@ -37,14 +37,9 @@ export default function ({ getService, getPageObjects }) {
     describe('state:storeInSessionStorage', () => {
       async function getStateFromUrl() {
         const currentUrl = await browser.getCurrentUrl();
-        let match = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
-        if (match) return [match[2], match[3]];
-        match = currentUrl.match(/(.*)?_a=(.*)&_g=(.*)/);
-        if (match) return [match[3], match[2]];
-
-        if (!match) {
-          throw new Error('State in url is missing or malformed: ' + currentUrl);
-        }
+        const match = currentUrl.match(/(.*)?_g=(.*)/);
+        if (match) return match[2];
+        throw new Error('State in url is missing or malformed: ' + currentUrl);
       }
 
       it('defaults to null', async () => {
@@ -59,12 +54,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        const [globalState, appState] = await getStateFromUrl();
+        const globalState = await getStateFromUrl();
 
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
         // which is less than 20 characters.
         expect(globalState.length).to.be.greaterThan(20);
-        expect(appState.length).to.be.greaterThan(20);
       });
 
       it('setting to true change is preserved', async function () {
@@ -81,12 +75,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        const [globalState, appState] = await getStateFromUrl();
+        const globalState = await getStateFromUrl();
 
         // We don't have to be exact, just need to ensure it's less than the unhashed version, which will be
         // greater than 20 characters with the default state plus a time.
         expect(globalState.length).to.be.lessThan(20);
-        expect(appState.length).to.be.lessThan(20);
       });
 
       it("changing 'state:storeInSessionStorage' also takes effect without full page reload", async () => {
@@ -95,11 +88,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         await PageObjects.header.clickDashboard();
-        const [globalState, appState] = await getStateFromUrl();
+        const globalState = await getStateFromUrl();
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
         // which is less than 20 characters.
         expect(globalState.length).to.be.greaterThan(20);
-        expect(appState.length).to.be.greaterThan(20);
       });
     });
 

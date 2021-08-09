@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function BannersPageProvider({ getService }: FtrProviderContext) {
-  const find = getService('find');
+export class BannersPageObject extends FtrService {
+  private readonly find = this.ctx.getService('find');
 
-  class BannersPage {
-    isTopBannerVisible() {
-      return find.existsByCssSelector('.header__topBanner .kbnUserBanner__container');
-    }
-
-    async getTopBannerText() {
-      if (!(await this.isTopBannerVisible())) {
-        return '';
-      }
-      const bannerContainer = await find.byCssSelector(
-        '.header__topBanner .kbnUserBanner__container'
-      );
-      return bannerContainer.getVisibleText();
-    }
+  isTopBannerVisible() {
+    return this.find.existsByCssSelector('.header__topBanner .kbnUserBanner__container');
   }
 
-  return new BannersPage();
+  async getTopBannerText() {
+    if (!(await this.isTopBannerVisible())) {
+      return '';
+    }
+    const bannerContainer = await this.find.byCssSelector(
+      '.header__topBanner .kbnUserBanner__container'
+    );
+    return bannerContainer.getVisibleText();
+  }
 }

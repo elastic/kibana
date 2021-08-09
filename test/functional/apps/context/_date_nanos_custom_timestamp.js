@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
   describe('context view for date_nanos with custom timestamp', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
-      await esArchiver.loadIfNeeded('date_nanos_custom');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_custom');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('date_nanos_custom');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_custom');
     });
   });
 }

@@ -20,73 +20,100 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
-import React from 'react';
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_SEVERITY_LEVEL,
+  ALERT_UUID,
   RULE_CATEGORY,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
-import { TopAlert } from '../';
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import moment from 'moment-timezone';
+import React, { useMemo } from 'react';
+import type { TopAlert, TopAlertResponse } from '../';
+import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import { decorateResponse } from '../decorate_response';
 import { SeverityBadge } from '../severity_badge';
 
-type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
+type AlertsFlyoutProps = {
+  alert?: TopAlert;
+  alerts?: TopAlertResponse[];
+  isInApp?: boolean;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  selectedAlertId?: string;
+} & EuiFlyoutProps;
 
-export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
+export function AlertsFlyout({
+  alert,
+  alerts,
+  isInApp = false,
+  observabilityRuleTypeRegistry,
+  onClose,
+  selectedAlertId,
+}: AlertsFlyoutProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
-  const { core } = usePluginContext();
-  const { prepend } = core.http.basePath;
+  const { services } = useKibana();
+  const { http } = services;
+  const prepend = http?.basePath.prepend;
+  const decoratedAlerts = useMemo(() => {
+    return decorateResponse(alerts ?? [], observabilityRuleTypeRegistry);
+  }, [alerts, observabilityRuleTypeRegistry]);
+
+  let alertData = alert;
+  if (!alertData) {
+    alertData = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId);
+  }
+  if (!alertData) {
+    return null;
+  }
 
   const overviewListItems = [
     {
       title: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
         defaultMessage: 'Status',
       }),
-      description: alert.active ? 'Active' : 'Recovered',
+      description: alertData.active ? 'Active' : 'Recovered',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.severityLabel', {
         defaultMessage: 'Severity',
       }),
-      description: <SeverityBadge severityLevel={alert.fields[ALERT_SEVERITY_LEVEL]} />,
+      description: <SeverityBadge severityLevel={alertData.fields[ALERT_SEVERITY_LEVEL]} />,
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.triggeredLabel', {
         defaultMessage: 'Triggered',
       }),
       description: (
-        <span title={alert.start.toString()}>{moment(alert.start).format(dateFormat)}</span>
+        <span title={alertData.start.toString()}>{moment(alertData.start).format(dateFormat)}</span>
       ),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.durationLabel', {
         defaultMessage: 'Duration',
       }),
-      description: asDuration(alert.fields[ALERT_DURATION], { extended: true }),
+      description: asDuration(alertData.fields[ALERT_DURATION], { extended: true }),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.expectedValueLabel', {
         defaultMessage: 'Expected value',
       }),
-      description: alert.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
+      description: alertData.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.actualValueLabel', {
         defaultMessage: 'Actual value',
       }),
-      description: alert.fields[ALERT_EVALUATION_VALUE] ?? '-',
+      description: alertData.fields[ALERT_EVALUATION_VALUE] ?? '-',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.ruleTypeLabel', {
         defaultMessage: 'Rule type',
       }),
-      description: alert.fields[RULE_CATEGORY] ?? '-',
+      description: alertData.fields[RULE_CATEGORY] ?? '-',
     },
   ];
 
@@ -94,10 +121,10 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{alert.fields[RULE_NAME]}</h2>
+          <h2>{alertData.fields[RULE_NAME]}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="s">{alert.reason}</EuiText>
+        <EuiText size="s">{alertData.reason}</EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiSpacer size="s" />
@@ -107,11 +134,11 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
           listItems={overviewListItems}
         />
       </EuiFlyoutBody>
-      {alert.link && (
+      {alertData.link && !isInApp && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton href={prepend(alert.link)} fill>
+              <EuiButton href={prepend && prepend(alertData.link)} fill>
                 View in app
               </EuiButton>
             </EuiFlexItem>
@@ -121,3 +148,6 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     </EuiFlyout>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default AlertsFlyout;

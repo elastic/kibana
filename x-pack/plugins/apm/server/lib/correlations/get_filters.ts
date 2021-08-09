@@ -6,8 +6,9 @@
  */
 
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { environmentQuery, rangeQuery, kqlQuery } from '../../utils/queries';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { rangeQuery, kqlQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,

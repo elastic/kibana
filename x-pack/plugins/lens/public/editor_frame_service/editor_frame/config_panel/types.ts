@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { Action } from '../state_management';
 import {
   Visualization,
   FramePublicAPI,
-  Datasource,
   DatasourceDimensionEditorProps,
   VisualizationDimensionGroupConfig,
+  DatasourceMap,
 } from '../../../types';
 export interface ConfigPanelWrapperProps {
   activeDatasourceId: string;
   visualizationState: unknown;
-  visualizationMap: Record<string, Visualization>;
-  activeVisualizationId: string | null;
-  dispatch: (action: Action) => void;
+  activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
@@ -29,14 +26,14 @@ export interface ConfigPanelWrapperProps {
     }
   >;
   core: DatasourceDimensionEditorProps['core'];
+  isFullscreen: boolean;
 }
 
 export interface LayerPanelProps {
   activeDatasourceId: string;
   visualizationState: unknown;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   activeVisualization: Visualization;
-  dispatch: (action: Action) => void;
   framePublicAPI: FramePublicAPI;
   datasourceStates: Record<
     string,
@@ -46,6 +43,7 @@ export interface LayerPanelProps {
     }
   >;
   core: DatasourceDimensionEditorProps['core'];
+  isFullscreen: boolean;
 }
 
 export interface LayerDatasourceDropProps {

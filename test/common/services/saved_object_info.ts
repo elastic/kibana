@@ -8,12 +8,26 @@
 
 import { inspect } from 'util';
 
-import { TermsAggregate } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { FtrService } from '../ftr_provider_context';
 
 export class SavedObjectInfoService extends FtrService {
   private readonly es = this.ctx.getService('es');
+
+  public async logSoTypes(log: ToolingLog, msg: string | null = null) {
+    const types = await this.getTypes();
+
+    log.debug(
+      `\n### Saved Object Types ${msg || 'Count: ' + types.length}\n${inspect(types, {
+        compact: false,
+        depth: 99,
+        breakLength: 80,
+        sorted: true,
+      })}`
+    );
+  }
 
   public async getTypes(index = '.kibana') {
     try {
@@ -32,7 +46,7 @@ export class SavedObjectInfoService extends FtrService {
       });
 
       const agg = body.aggregations?.savedobjs as
-        | TermsAggregate<{ key: string; doc_count: number }>
+        | estypes.AggregationsTermsAggregate<{ key: string; doc_count: number }>
         | undefined;
 
       if (!agg?.buckets) {

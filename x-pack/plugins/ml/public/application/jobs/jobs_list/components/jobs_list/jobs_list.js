@@ -21,8 +21,8 @@ import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiScreenReaderOnly,
   EuiIcon,
+  EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

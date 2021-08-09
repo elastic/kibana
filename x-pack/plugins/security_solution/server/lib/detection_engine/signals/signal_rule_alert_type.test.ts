@@ -32,6 +32,9 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 import { queryExecutor } from './executors/query';
 import { mlExecutor } from './executors/ml';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -117,6 +120,7 @@ describe('signal_rule_alert_type', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
   let ruleStatusService: Record<string, jest.Mock>;
+  let ruleDataService: ReturnType<typeof ruleRegistryMocks.createRuleDataPluginService>;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
@@ -128,6 +132,7 @@ describe('signal_rule_alert_type', () => {
       error: jest.fn(),
       partialFailure: jest.fn(),
     };
+    ruleDataService = ruleRegistryMocks.createRuleDataPluginService();
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getListsClient as jest.Mock).mockReturnValue({
       listClient: getListClientMock(),
@@ -157,7 +162,7 @@ describe('signal_rule_alert_type', () => {
     (mlExecutor as jest.Mock).mockClear();
     (mlExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
     (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
-    const value: Partial<ApiResponse<estypes.FieldCapabilitiesResponse>> = {
+    const value: Partial<ApiResponse<estypes.FieldCapsResponse>> = {
       statusCode: 200,
       body: {
         indices: ['index1', 'index2', 'index3', 'index4'],
@@ -174,7 +179,7 @@ describe('signal_rule_alert_type', () => {
       },
     };
     alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
-      value as ApiResponse<estypes.FieldCapabilitiesResponse>
+      value as ApiResponse<estypes.FieldCapsResponse>
     );
     const ruleAlert = getAlertMock(getQueryRuleParams());
     alertServices.savedObjectsClient.get.mockResolvedValue({
@@ -187,11 +192,14 @@ describe('signal_rule_alert_type', () => {
     payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
 
     alert = signalRulesAlertType({
+      experimentalFeatures: allowedExperimentalValues,
       logger,
       eventsTelemetry: undefined,
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
+      mergeStrategy: 'missingFields',
+      ruleDataService,
     });
   });
 
@@ -272,35 +280,6 @@ describe('signal_rule_alert_type', () => {
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalledTimes(0);
       expect(ruleStatusService.error).toHaveBeenCalledTimes(0);
-    });
-
-    it("should set refresh to 'wait_for' when actions are present", async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
-      ruleAlert.actions = [
-        {
-          actionTypeId: '.slack',
-          params: {
-            message:
-              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
-          },
-          group: 'default',
-          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-        },
-      ];
-
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      await alert.executor(payload);
-      expect((queryExecutor as jest.Mock).mock.calls[0][0].refresh).toEqual('wait_for');
-    });
-
-    it('should set refresh to false when actions are not present', async () => {
-      await alert.executor(payload);
-      expect((queryExecutor as jest.Mock).mock.calls[0][0].refresh).toEqual(false);
     });
 
     it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
@@ -462,6 +441,7 @@ describe('signal_rule_alert_type', () => {
         lastLookBackDate: null,
         createdSignalsCount: 0,
         createdSignals: [],
+        warningMessages: [],
         errors: ['Error that bubbled up.'],
       };
       (queryExecutor as jest.Mock).mockResolvedValue(result);
@@ -482,8 +462,15 @@ describe('signal_rule_alert_type', () => {
     });
 
     it('and call ruleStatusService with the default message', async () => {
-      (queryExecutor as jest.Mock).mockRejectedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise({})
+      (queryExecutor as jest.Mock).mockReturnValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(
+          new ResponseError(
+            elasticsearchClientMock.createApiResponse({
+              statusCode: 400,
+              body: { error: { type: 'some_error_type' } },
+            })
+          )
+        )
       );
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();

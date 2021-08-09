@@ -13,7 +13,7 @@ import { EndpointAction, EndpointActionResponse, ISOLATION_ACTIONS } from '../ty
 const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class FleetActionGenerator extends BaseDataGenerator {
-  /** Generate an Action */
+  /** Generate a random endpoint Action (isolate or unisolate) */
   generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
     const timeStamp = new Date(this.randomPastDate());
 
@@ -35,7 +35,15 @@ export class FleetActionGenerator extends BaseDataGenerator {
     );
   }
 
-  /** Generates an action response */
+  generateIsolateAction(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
+    return merge(this.generate({ data: { command: 'isolate' } }), overrides);
+  }
+
+  generateUnIsolateAction(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
+    return merge(this.generate({ data: { command: 'unisolate' } }), overrides);
+  }
+
+  /** Generates an endpoint action response */
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
     const timeStamp = new Date();
 
@@ -54,6 +62,14 @@ export class FleetActionGenerator extends BaseDataGenerator {
       },
       overrides
     );
+  }
+
+  randomFloat(): number {
+    return this.random();
+  }
+
+  randomN(max: number): number {
+    return super.randomN(max);
   }
 
   protected randomIsolateCommand() {

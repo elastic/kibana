@@ -9,9 +9,9 @@
 import moment from 'moment';
 import { get, last } from 'lodash';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
-import { EsHitRecordList, fetchContextProvider } from './context';
+import { EsHitRecordList, fetchContextProvider, SurrDocType } from './context';
 import { setServices, SortDirection } from '../../../../kibana_services';
-import { AnchorHitRecord } from './anchor';
+import { EsHitRecord } from './context';
 import { Query } from '../../../../../../data/public';
 import { DiscoverServices } from '../../../../build_services';
 
@@ -73,9 +73,9 @@ describe('context app', function () {
         };
 
         return fetchContextProvider(createIndexPatternsStub()).fetchSurroundingDocs(
-          'predecessors',
+          SurrDocType.PREDECESSORS,
           indexPatternId,
-          anchor as AnchorHitRecord,
+          anchor as EsHitRecord,
           timeField,
           tieBreakerField,
           sortDir,
@@ -265,9 +265,9 @@ describe('context app', function () {
         };
 
         return fetchContextProvider(createIndexPatternsStub(), true).fetchSurroundingDocs(
-          'predecessors',
+          SurrDocType.PREDECESSORS,
           indexPatternId,
-          anchor as AnchorHitRecord,
+          anchor as EsHitRecord,
           timeField,
           tieBreakerField,
           sortDir,

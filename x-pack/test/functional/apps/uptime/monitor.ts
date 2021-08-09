@@ -11,7 +11,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const uptimeService = getService('uptime');
   const { uptime } = getPageObjects(['uptime']);
-  const archive = 'uptime/full_heartbeat';
+  const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
   describe('monitor page', function () {
     this.tags(['skipFirefox']);

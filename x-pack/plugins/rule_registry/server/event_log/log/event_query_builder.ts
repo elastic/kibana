@@ -78,12 +78,12 @@ export class EventQueryBuilder<TEvent> implements IEventQueryBuilder<TEvent> {
     return new EventQuery<TEvent>({ indexReader, request });
   }
 
-  private buildFilter(): estypes.QueryContainer[] {
-    const result: estypes.QueryContainer[] = [];
+  private buildFilter(): estypes.QueryDslQueryContainer[] {
+    const result: estypes.QueryDslQueryContainer[] = [];
 
     if (this.loggerName) {
       result.push({
-        term: { 'kibana.rac.event_log.logger_name': this.loggerName },
+        term: { 'kibana.event_log.logger_name': this.loggerName },
       });
     }
 

@@ -14,12 +14,12 @@ describe('ActionMenuContent', () => {
   it('renders alerts dropdown', async () => {
     const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
-    const alertsDropdown = getByLabelText('Open alert context menu');
+    const alertsDropdown = getByLabelText('Open alerts and rules context menu');
     fireEvent.click(alertsDropdown);
 
     await waitFor(() => {
-      expect(getByText('Create alert'));
-      expect(getByText('Manage alerts'));
+      expect(getByText('Create rule'));
+      expect(getByText('Manage rules'));
     });
   });
 
@@ -49,7 +49,7 @@ describe('ActionMenuContent', () => {
 
     // this href value is mocked, so it doesn't correspond to the real link
     // that Kibana core services will provide
-    expect(addDataAnchor.getAttribute('href')).toBe('/app/uptime');
+    expect(addDataAnchor.getAttribute('href')).toBe('/home#/tutorial/uptimeMonitors');
     expect(getByText('Add data'));
   });
 });

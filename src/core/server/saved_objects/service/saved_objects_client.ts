@@ -63,7 +63,11 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
    * {@link SavedObjectsCreateOptions}.
    *
-   * Note: this can only be used for multi-namespace object types.
+   * * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,
+   *   including the "All spaces" identifier (`'*'`).
+   * * For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only
+   *   be used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+   * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
 }
@@ -96,7 +100,11 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
    * {@link SavedObjectsCreateOptions}.
    *
-   * Note: this can only be used for multi-namespace object types.
+   * * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,
+   *   including the "All spaces" identifier (`'*'`).
+   * * For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only
+   *   be used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+   * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
 }
@@ -303,6 +311,9 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  * @public
  */
 export interface SavedObjectsResolveResponse<T = unknown> {
+  /**
+   * The saved object that was found.
+   */
   saved_object: SavedObject<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:

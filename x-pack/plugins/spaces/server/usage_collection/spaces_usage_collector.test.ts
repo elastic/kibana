@@ -40,6 +40,7 @@ const MOCK_USAGE_STATS: UsageStats = {
   'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no': 0,
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': 6,
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': 7,
+  'apiCalls.disableLegacyUrlAliases.total': 17,
 };
 
 function setup({

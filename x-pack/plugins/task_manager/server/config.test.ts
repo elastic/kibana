@@ -13,11 +13,19 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": false,
+          "request_capacity": 10,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_health_verbose_log": Object {
+          "enabled": false,
+          "warn_delayed_task_start_in_seconds": 60,
+        },
         "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
@@ -61,11 +69,19 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": false,
+          "request_capacity": 10,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_health_verbose_log": Object {
+          "enabled": false,
+          "warn_delayed_task_start_in_seconds": 60,
+        },
         "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
@@ -96,11 +112,19 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": false,
+          "request_capacity": 10,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_health_verbose_log": Object {
+          "enabled": false,
+          "warn_delayed_task_start_in_seconds": 60,
+        },
         "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {

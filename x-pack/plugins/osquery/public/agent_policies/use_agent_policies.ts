@@ -14,12 +14,11 @@ import {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
 } from '../../../fleet/common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useAgentPolicies = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery<GetAgentPoliciesResponse, unknown, GetAgentPoliciesResponseItem[]>(
     ['agentPolicies'],
@@ -31,11 +30,11 @@ export const useAgentPolicies = () => {
       }),
     {
       initialData: { items: [], total: 0, page: 1, perPage: 100 },
-      placeholderData: [],
       keepPreviousData: true,
       select: (response) => response.items,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
-        toasts.addError(error as Error, {
+        setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agent_policies.fetchError', {
             defaultMessage: 'Error while fetching agent policies',
           }),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import {
   ALERTS_COUNT,
   SELECTED_ALERTS,
@@ -29,15 +29,15 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Opening alerts', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(DETECTIONS_URL);
+    loginAndWaitForPage(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);
     selectNumberOfAlerts(5);

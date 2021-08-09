@@ -32,12 +32,15 @@ const ServiceNowConnectorFields: React.FC<
   const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
+  const isApiUrlInvalid: boolean =
+    errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
 
   const { username, password } = action.secrets;
 
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
+  const isUsernameInvalid: boolean =
+    errors.username !== undefined && errors.username.length > 0 && username !== undefined;
+  const isPasswordInvalid: boolean =
+    errors.password !== undefined && errors.password.length > 0 && password !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),

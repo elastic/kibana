@@ -16,7 +16,9 @@ export class MockSyncContext implements DataRequestContext {
   registerCancelCallback: (requestToken: symbol, callback: () => void) => void;
   startLoading: (dataId: string, requestToken: symbol, meta: DataMeta) => void;
   stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataMeta) => void;
+  onJoinError: (errorMessage: string) => void;
   updateSourceData: (newData: unknown) => void;
+  forceRefresh: boolean;
 
   constructor({ dataFilters }: { dataFilters: Partial<MapFilters> }) {
     const mapFilters: MapFilters = {
@@ -27,6 +29,7 @@ export class MockSyncContext implements DataRequestContext {
         mode: 'relative',
       },
       zoom: 0,
+      isReadOnly: false,
       ...dataFilters,
     };
 
@@ -36,6 +39,8 @@ export class MockSyncContext implements DataRequestContext {
     this.registerCancelCallback = sinon.spy();
     this.startLoading = sinon.spy();
     this.stopLoading = sinon.spy();
+    this.onJoinError = sinon.spy();
     this.updateSourceData = sinon.spy();
+    this.forceRefresh = false;
   }
 }

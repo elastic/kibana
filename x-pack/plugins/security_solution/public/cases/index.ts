@@ -6,14 +6,14 @@
  */
 
 import { SecuritySubPlugin } from '../app/types';
-import { CasesRoutes } from './routes';
+import { routes } from './routes';
 
 export class Cases {
   public setup() {}
 
   public start(): SecuritySubPlugin {
     return {
-      SubPluginRoutes: CasesRoutes,
+      routes,
     };
   }
 }

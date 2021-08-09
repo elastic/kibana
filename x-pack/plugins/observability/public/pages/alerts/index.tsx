@@ -7,31 +7,20 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_START,
-  ALERT_STATUS,
-  RULE_ID,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
-import React from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { format, parse } from 'url';
-import {
-  ParsedTechnicalFields,
-  parseTechnicalFields,
-} from '../../../../rule_registry/common/parse_technical_fields';
+import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
-import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
-import { useFetcher } from '../../hooks/use_fetcher';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
-import { callObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
-import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
-import { AlertsTable } from './alerts_table';
+import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
+import { useFetcher } from '../../hooks/use_fetcher';
+import { callObservabilityApi } from '../../services/call_observability_api';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
@@ -48,12 +37,21 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, observabilityRuleTypeRegistry, ObservabilityPageTemplate } = usePluginContext();
+  const { core, ObservabilityPageTemplate } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
+  const refetch = useRef<() => void>();
   const {
     query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
   } = routeParams;
+
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+    },
+  ]);
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
@@ -61,66 +59,52 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     '/app/management/insightsAndAlerting/triggersActions/alerts'
   );
 
-  const { data: topAlerts } = useFetcher(
-    ({ signal }) => {
-      const { start, end } = getAbsoluteDateRange({ rangeFrom, rangeTo });
+  const { data: dynamicIndexPatternResp } = useFetcher(({ signal }) => {
+    return callObservabilityApi({
+      signal,
+      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
+    });
+  }, []);
 
-      if (!start || !end) {
-        return;
-      }
-      return callObservabilityApi({
-        signal,
-        endpoint: 'GET /api/observability/rules/alerts/top',
-        params: {
-          query: {
-            start,
-            end,
-            kuery,
-            status,
-          },
-        },
-      }).then((alerts) => {
-        return alerts.map((alert) => {
-          const parsedFields = parseTechnicalFields(alert);
-          const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
-          const formatted = {
-            link: undefined,
-            reason: parsedFields[RULE_NAME]!,
-            ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
-          };
-
-          const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
-
-          return {
-            ...formatted,
-            fields: parsedFields,
-            link: parsedLink
-              ? format({
-                  ...parsedLink,
-                  query: {
-                    ...parsedLink.query,
-                    rangeFrom,
-                    rangeTo,
-                  },
-                })
-              : undefined,
-            active: parsedFields[ALERT_STATUS] !== 'closed',
-            start: new Date(parsedFields[ALERT_START]!).getTime(),
-          };
-        });
-      });
-    },
-    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo, status]
+  const dynamicIndexPattern = useMemo(
+    () => (dynamicIndexPatternResp ? [dynamicIndexPatternResp] : []),
+    [dynamicIndexPatternResp]
   );
 
-  function setStatusFilter(value: AlertStatus) {
-    const nextSearchParams = new URLSearchParams(history.location.search);
-    nextSearchParams.set('status', value);
-    history.push({
-      ...history.location,
-      search: nextSearchParams.toString(),
-    });
-  }
+  const setStatusFilter = useCallback(
+    (value: AlertStatus) => {
+      const nextSearchParams = new URLSearchParams(history.location.search);
+      nextSearchParams.set('status', value);
+      history.push({
+        ...history.location,
+        search: nextSearchParams.toString(),
+      });
+    },
+    [history]
+  );
+
+  const onQueryChange = useCallback(
+    ({ dateRange, query }) => {
+      if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
+        return refetch.current && refetch.current();
+      }
+      const nextSearchParams = new URLSearchParams(history.location.search);
+
+      nextSearchParams.set('rangeFrom', dateRange.from);
+      nextSearchParams.set('rangeTo', dateRange.to);
+      nextSearchParams.set('kuery', query ?? '');
+
+      history.push({
+        ...history.location,
+        search: nextSearchParams.toString(),
+      });
+    },
+    [history, rangeFrom, rangeTo, kuery]
+  );
+
+  const setRefetch = useCallback((ref) => {
+    refetch.current = ref;
+  }, []);
 
   return (
     <ObservabilityPageTemplate
@@ -166,21 +150,11 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
+            dynamicIndexPattern={dynamicIndexPattern}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             query={kuery}
-            onQueryChange={({ dateRange, query }) => {
-              const nextSearchParams = new URLSearchParams(history.location.search);
-
-              nextSearchParams.set('rangeFrom', dateRange.from);
-              nextSearchParams.set('rangeTo', dateRange.to);
-              nextSearchParams.set('kuery', query ?? '');
-
-              history.push({
-                ...history.location,
-                search: nextSearchParams.toString(),
-              });
-            }}
+            onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
         <EuiSpacer size="s" />
@@ -193,7 +167,14 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertsTable items={topAlerts ?? []} />
+            <AlertsTableTGrid
+              indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              kuery={kuery}
+              status={status}
+              setRefetch={setRefetch}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

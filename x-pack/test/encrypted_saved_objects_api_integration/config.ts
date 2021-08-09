@@ -19,9 +19,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'X-Pack Encrypted Saved Objects API Integration Tests',
     },
-    esArchiver: {
-      directory: path.join(__dirname, 'fixtures', 'es_archiver'),
-    },
     esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),

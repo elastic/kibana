@@ -75,6 +75,14 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.exists(SUBJ_CLUSTER_ALERTS);
     }
 
+    closeAlertsModal() {
+      return testSubjects.click('alerts-modal-remind-later-button');
+    }
+
+    acceptAlertsModal() {
+      return testSubjects.click('alerts-modal-button');
+    }
+
     getEsStatus() {
       return testSubjects.getVisibleText(SUBJ_ES_STATUS);
     }

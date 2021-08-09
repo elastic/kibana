@@ -8,19 +8,53 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { ApiError, Client, RequestEvent, errors } from '@elastic/elasticsearch';
-import type { RequestBody } from '@elastic/elasticsearch/lib/Transport';
+import { ApiError, Client, RequestEvent, errors, Transport } from '@elastic/elasticsearch';
+import type {
+  RequestBody,
+  TransportRequestParams,
+  TransportRequestOptions,
+} from '@elastic/elasticsearch/lib/Transport';
+import type { IExecutionContextContainer } from '../../execution_context';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
+const noop = () => undefined;
+
 export const configureClient = (
   config: ElasticsearchClientConfig,
-  { logger, type, scoped = false }: { logger: Logger; type: string; scoped?: boolean }
+  {
+    logger,
+    type,
+    scoped = false,
+    getExecutionContext = noop,
+  }: {
+    logger: Logger;
+    type: string;
+    scoped?: boolean;
+    getExecutionContext?: () => IExecutionContextContainer | undefined;
+  }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
+  class KibanaTransport extends Transport {
+    request(params: TransportRequestParams, options?: TransportRequestOptions) {
+      const opts = options || {};
+      const opaqueId = getExecutionContext()?.toString();
+      if (opaqueId && !opts.opaqueId) {
+        // rewrites headers['x-opaque-id'] if it presents
+        opts.opaqueId = opaqueId;
+      }
+      return super.request(params, opts);
+    }
+  }
 
-  const client = new Client(clientOptions);
+  const client = new Client({ ...clientOptions, Transport: KibanaTransport });
   addLogging(client, logger.get('query', type));
+
+  // ------------------------------------------------------------------------ //
+  // Hack to disable the "Product check" while the bugs in                    //
+  // https://github.com/elastic/kibana/issues/105557 are handled.             //
+  skipProductCheck(client);
+  // ------------------------------------------------------------------------ //
 
   return client;
 };
@@ -70,11 +104,35 @@ function getResponseMessage(event: RequestEvent): string {
 const addLogging = (client: Client, logger: Logger) => {
   client.on('response', (error, event) => {
     if (event) {
+      const opaqueId = event.meta.request.options.opaqueId;
+      const meta = opaqueId
+        ? {
+            http: { request: { id: event.meta.request.options.opaqueId } },
+          }
+        : undefined; // do not clutter logs if opaqueId is not present
       if (error) {
-        logger.debug(getErrorMessage(error, event));
+        logger.debug(getErrorMessage(error, event), meta);
       } else {
-        logger.debug(getResponseMessage(event));
+        logger.debug(getResponseMessage(event), meta);
       }
     }
   });
 };
+
+/**
+ * Hack to skip the Product Check performed by the Elasticsearch-js client.
+ * We noticed a couple of bugs that may need to be fixed before taking full
+ * advantage of this feature.
+ *
+ * The bugs are detailed in this issue: https://github.com/elastic/kibana/issues/105557
+ *
+ * The hack is copied from the test/utils in the elasticsearch-js repo
+ * (https://github.com/elastic/elasticsearch-js/blob/master/test/utils/index.js#L45-L56)
+ */
+function skipProductCheck(client: Client) {
+  const tSymbol = Object.getOwnPropertySymbols(client.transport || client).filter(
+    (symbol) => symbol.description === 'product check'
+  )[0];
+  // @ts-expect-error `tSymbol` is missing in the index signature of Transport
+  (client.transport || client)[tSymbol] = 2;
+}

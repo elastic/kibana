@@ -24,13 +24,15 @@ import {
   useBreadcrumbs,
   useStartServices,
   useConfig,
+  useUIExtension,
   sendUpdatePackagePolicy,
   sendGetAgentStatus,
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
-import { Loading, Error } from '../../../components';
+import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
+import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
 import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
@@ -41,11 +43,9 @@ import type {
 } from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
-import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import type { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -332,30 +332,58 @@ export const EditPackagePolicyForm = memo<{
     }
   };
 
+  const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const extensionTabsView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-edit-tabs'
+  );
+  const tabsViews = extensionTabsView?.tabs;
+  const [selectedTab, setSelectedTab] = useState(0);
+
   const layoutProps = {
     from,
     cancelUrl,
     agentPolicy,
     packageInfo,
+    tabs: tabsViews?.length
+      ? [
+          {
+            title: i18n.translate('xpack.fleet.editPackagePolicy.settingsTabName', {
+              defaultMessage: 'Settings',
+            }),
+            isSelected: selectedTab === 0,
+            onClick: () => {
+              setSelectedTab(0);
+            },
+          },
+          ...tabsViews.map(({ title }, index) => ({
+            title,
+            isSelected: selectedTab === index + 1,
+            onClick: () => {
+              setSelectedTab(index + 1);
+            },
+          })),
+        ]
+      : [],
   };
-
-  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
 
   const configurePackage = useMemo(
     () =>
       agentPolicy && packageInfo ? (
         <>
-          <StepDefinePackagePolicy
-            agentPolicy={agentPolicy}
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
+          {selectedTab === 0 && (
+            <StepDefinePackagePolicy
+              agentPolicy={agentPolicy}
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!ExtensionView && (
+          {!extensionView && selectedTab === 0 && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
@@ -365,16 +393,24 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
 
-          {ExtensionView &&
+          {extensionView &&
             packagePolicy.policy_id &&
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
-                <ExtensionView
-                  policy={originalPackagePolicy}
-                  newPolicy={packagePolicy}
-                  onChange={handleExtensionViewOnChange}
-                />
+                {selectedTab > 0 && tabsViews ? (
+                  React.createElement(tabsViews[selectedTab - 1].Component, {
+                    policy: originalPackagePolicy,
+                    newPolicy: packagePolicy,
+                    onChange: handleExtensionViewOnChange,
+                  })
+                ) : (
+                  <extensionView.Component
+                    policy={originalPackagePolicy}
+                    newPolicy={packagePolicy}
+                    onChange={handleExtensionViewOnChange}
+                  />
+                )}
               </ExtensionWrapper>
             )}
         </>
@@ -387,8 +423,10 @@ export const EditPackagePolicyForm = memo<{
       validationResults,
       formState,
       originalPackagePolicy,
-      ExtensionView,
+      extensionView,
       handleExtensionViewOnChange,
+      selectedTab,
+      tabsViews,
     ]
   );
 
@@ -431,7 +469,9 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
           {configurePackage}
-          <EuiSpacer size="l" />
+          {/* Extra space to accomodate the EuiBottomBar height */}
+          <EuiSpacer size="xxl" />
+          <EuiSpacer size="xxl" />
           <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -491,6 +531,6 @@ const IntegrationsBreadcrumb = memo<{
   policyName: string;
   pkgkey: string;
 }>(({ pkgTitle, policyName, pkgkey }) => {
-  useBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
+  useIntegrationsBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
   return null;
 });

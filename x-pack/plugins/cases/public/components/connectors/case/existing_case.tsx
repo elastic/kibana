@@ -21,9 +21,12 @@ interface ExistingCaseProps {
 }
 
 const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, selectedCase }) => {
-  const { data: cases, loading: isLoadingCases, refetchCases } = useGetCases(DEFAULT_QUERY_PARAMS, {
-    ...DEFAULT_FILTER_OPTIONS,
-    onlyCollectionType: true,
+  const { data: cases, loading: isLoadingCases, refetchCases } = useGetCases({
+    initialQueryParams: DEFAULT_QUERY_PARAMS,
+    initialFilterOptions: {
+      ...DEFAULT_FILTER_OPTIONS,
+      onlyCollectionType: true,
+    },
   });
 
   const onCaseCreated = useCallback(

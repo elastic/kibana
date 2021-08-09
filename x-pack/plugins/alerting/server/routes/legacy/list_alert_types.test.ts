@@ -10,11 +10,11 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { alertsClientMock } from '../../alerts_client.mock';
+import { rulesClientMock } from '../../rules_client.mock';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryAlertTypeWithAuth } from '../../authorization';
 
-const alertsClient = alertsClientMock.create();
+const rulesClient = rulesClientMock.create();
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -47,6 +47,7 @@ describe('listAlertTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -57,9 +58,9 @@ describe('listAlertTypesRoute', () => {
         enabledInLicense: true,
       } as RegistryAlertTypeWithAuth,
     ];
-    alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -79,6 +80,7 @@ describe('listAlertTypesRoute', () => {
             "defaultActionGroupId": "default",
             "enabledInLicense": true,
             "id": "1",
+            "isExportable": true,
             "minimumLicenseRequired": "basic",
             "name": "name",
             "producer": "test",
@@ -91,7 +93,7 @@ describe('listAlertTypesRoute', () => {
       }
     `);
 
-    expect(alertsClient.listAlertTypes).toHaveBeenCalledTimes(1);
+    expect(rulesClient.listAlertTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,
@@ -120,6 +122,7 @@ describe('listAlertTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -131,10 +134,10 @@ describe('listAlertTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: { id: '1' },
       },
@@ -172,6 +175,7 @@ describe('listAlertTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -183,10 +187,10 @@ describe('listAlertTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: { id: '1' },
       },

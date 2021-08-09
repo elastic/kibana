@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function StatusPagePageProvider({ getService }: FtrProviderContext) {
-  const log = getService('log');
-  const find = getService('find');
-  class StatusPage {
-    async initTests() {
-      log.debug('StatusPage:initTests');
-    }
+export class StatusPageObject extends FtrService {
+  private readonly log = this.ctx.getService('log');
+  private readonly find = this.ctx.getService('find');
 
-    async expectStatusPage(): Promise<void> {
-      await find.byCssSelector('[data-test-subj="statusPageRoot"]', 20000);
-    }
+  async initTests() {
+    this.log.debug('StatusPage:initTests');
   }
 
-  return new StatusPage();
+  async expectStatusPage(): Promise<void> {
+    await this.find.byCssSelector('[data-test-subj="statusPageRoot"]', 20000);
+  }
 }

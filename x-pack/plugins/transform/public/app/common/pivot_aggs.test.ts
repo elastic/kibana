@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAggConfigFromEsAgg } from './pivot_aggs';
+import { getAggConfigFromEsAgg, isSpecialSortField } from './pivot_aggs';
 import {
   FilterAggForm,
   FilterTermForm,
@@ -65,5 +65,14 @@ describe('getAggConfigFromEsAgg', () => {
       field: 'test_field',
       parentAgg: result,
     });
+  });
+});
+
+describe('isSpecialSortField', () => {
+  test('detects special sort field', () => {
+    expect(isSpecialSortField('_score')).toBe(true);
+  });
+  test('rejects special fields that not supported yet', () => {
+    expect(isSpecialSortField('_doc')).toBe(false);
   });
 });

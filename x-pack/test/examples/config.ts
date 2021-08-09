@@ -33,7 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName: 'X-Pack Example plugin functional tests',
     },
 
-    testFiles: [require.resolve('./search_examples')],
+    testFiles: [require.resolve('./search_examples'), require.resolve('./embedded_lens')],
 
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),

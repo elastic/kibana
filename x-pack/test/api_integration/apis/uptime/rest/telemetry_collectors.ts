@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('telemetry collectors heartbeat', () => {
     before('generating data', async () => {
-      await getService('esArchiver').load('uptime/blank');
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank');
 
       const observer = {
         geo: {
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after('unload heartbeat index', () => {
-      getService('esArchiver').unload('uptime/blank');
+      getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank');
     });
 
     beforeEach(async () => {

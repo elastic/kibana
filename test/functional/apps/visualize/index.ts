@@ -18,10 +18,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
 
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('long_window_logstash');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
     });
 
     // TODO: Remove when vislib is removed
@@ -31,6 +31,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
       });
@@ -38,6 +39,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       after(async () => {
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyChartsLibrary': true,
+          'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();
       });
@@ -49,6 +51,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+      loadTestFile(require.resolve('./_pie_chart'));
+      loadTestFile(require.resolve('./_timelion'));
     });
 
     describe('visualize ciGroup9', function () {

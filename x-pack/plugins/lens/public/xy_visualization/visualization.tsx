@@ -6,23 +6,24 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import { uniq } from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import {
+import type {
   Visualization,
   OperationMetadata,
   VisualizationType,
   AccessorConfig,
   DatasourcePublicAPI,
 } from '../types';
-import { State, SeriesType, visualizationTypes, XYLayerConfig, XYState } from './types';
+import { State, visualizationTypes, XYState } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -43,7 +44,7 @@ function getVisualizationType(state: State): VisualizationType | 'mixed' {
     );
   }
   const visualizationType = visualizationTypes.find((t) => t.id === state.layers[0].seriesType);
-  const seriesTypes = _.uniq(state.layers.map((l) => l.seriesType));
+  const seriesTypes = uniq(state.layers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
@@ -111,7 +112,7 @@ export const getXyVisualization = ({
   },
 
   appendLayer(state, layerId) {
-    const usedSeriesTypes = _.uniq(state.layers.map((layer) => layer.seriesType));
+    const usedSeriesTypes = uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
       layers: [
@@ -152,7 +153,7 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(addNewLayer, state) {
     return (
       state || {
         title: 'Empty XY chart',
@@ -161,7 +162,7 @@ export const getXyVisualization = ({
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
-            layerId: frame.addNewLayer(),
+            layerId: addNewLayer(),
             accessors: [],
             position: Position.Top,
             seriesType: defaultSeriesType,
@@ -235,7 +236,7 @@ export const getXyVisualization = ({
                   triggerIcon: 'colorBy',
                   palette: paletteService
                     .get(layer.palette?.name || 'default')
-                    .getColors(10, layer.palette?.params),
+                    .getCategoricalColors(10, layer.palette?.params),
                 },
               ]
             : [],
@@ -255,10 +256,11 @@ export const getXyVisualization = ({
   },
 
   setDimension({ prevState, layerId, columnId, groupId }) {
-    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!newLayer) {
+    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
       return prevState;
     }
+    const newLayer = { ...foundLayer };
 
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
@@ -277,11 +279,11 @@ export const getXyVisualization = ({
   },
 
   removeDimension({ prevState, layerId, columnId }) {
-    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!newLayer) {
+    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
       return prevState;
     }
-
+    const newLayer = { ...foundLayer };
     if (newLayer.xAccessor === columnId) {
       delete newLayer.xAccessor;
     } else if (newLayer.splitAccessor === columnId) {
@@ -438,10 +440,15 @@ export const getXyVisualization = ({
       }
     }
     return accessorsWithArrayValues.map((label) => (
-      <>
-        <strong>{label}</strong> contains array values. Your visualization may not render as
-        expected.
-      </>
+      <FormattedMessage
+        key={label}
+        id="xpack.lens.xyVisualization.arrayValues"
+        defaultMessage="{label} contains array values. Your visualization may not render as
+        expected."
+        values={{
+          label: <strong>{label}</strong>,
+        }}
+      />
     ));
   },
 });
@@ -536,8 +543,15 @@ function checkXAccessorCompatibility(
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
   const errors = [];
-  const hasDateHistogramSet = state.layers.some(checkIntervalOperation('date', datasourceLayers));
-  const hasNumberHistogram = state.layers.some(checkIntervalOperation('number', datasourceLayers));
+  const hasDateHistogramSet = state.layers.some(
+    checkScaleOperation('interval', 'date', datasourceLayers)
+  );
+  const hasNumberHistogram = state.layers.some(
+    checkScaleOperation('interval', 'number', datasourceLayers)
+  );
+  const hasOrdinalAxis = state.layers.some(
+    checkScaleOperation('ordinal', undefined, datasourceLayers)
+  );
   if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
     errors.push({
       shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
@@ -554,11 +568,28 @@ function checkXAccessorCompatibility(
       }),
     });
   }
+  if (state.layers.length > 1 && (hasDateHistogramSet || hasNumberHistogram) && hasOrdinalAxis) {
+    errors.push({
+      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
+        defaultMessage: `Wrong data type for {axis}.`,
+        values: {
+          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        },
+      }),
+      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong', {
+        defaultMessage: `Data type mismatch for the {axis}, use a different function.`,
+        values: {
+          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        },
+      }),
+    });
+  }
   return errors;
 }
 
-function checkIntervalOperation(
-  dataType: 'date' | 'number',
+function checkScaleOperation(
+  scaleType: 'ordinal' | 'interval' | 'ratio',
+  dataType: 'date' | 'number' | 'string' | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
   return (layer: XYLayerConfig) => {
@@ -567,6 +598,8 @@ function checkIntervalOperation(
       return false;
     }
     const operation = datasourceAPI?.getOperationForColumnId(layer.xAccessor);
-    return Boolean(operation?.dataType === dataType && operation.scale === 'interval');
+    return Boolean(
+      operation && (!dataType || operation.dataType === dataType) && operation.scale === scaleType
+    );
   };
 }

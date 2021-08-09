@@ -18,6 +18,7 @@ import {
   contextServiceMock,
   loggingSystemMock,
   metricsServiceMock,
+  executionContextServiceMock,
 } from '../../../../../core/server/mocks';
 import { createHttpServer } from '../../../../../core/server/test_utils';
 import { registerStatsRoute } from '../stats';
@@ -35,8 +36,10 @@ describe('/api/stats', () => {
 
   beforeEach(async () => {
     server = createHttpServer();
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
     overallStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,

@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiPageContent } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import {
   Capabilities,
   SavedObjectsClientContract,
@@ -19,7 +19,7 @@ import {
 } from '../../../../../core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
-import { canViewInApp, findObject } from '../../lib';
+import { canViewInApp, bulkGetObjects } from '../../lib';
 import { SubmittedFormData } from '../types';
 import { SavedObjectWithMetadata } from '../../types';
 
@@ -41,6 +41,11 @@ interface SavedObjectEditionState {
   object?: SavedObjectWithMetadata<any>;
 }
 
+const unableFindSavedObjectNotificationMessage = i18n.translate(
+  'savedObjectsManagement.objectView.unableFindSavedObjectNotificationMessage',
+  { defaultMessage: 'Unable to find saved object' }
+);
+
 export class SavedObjectEdition extends Component<
   SavedObjectEditionProps,
   SavedObjectEditionState
@@ -58,13 +63,26 @@ export class SavedObjectEdition extends Component<
   }
 
   componentDidMount() {
-    const { http, id } = this.props;
+    const { http, id, notifications } = this.props;
     const { type } = this.state;
-    findObject(http, type, id).then((object) => {
-      this.setState({
-        object,
+    bulkGetObjects(http, [{ type, id }])
+      .then(([object]) => {
+        if (object.error) {
+          const { message } = object.error;
+          notifications.toasts.addDanger({
+            title: unableFindSavedObjectNotificationMessage,
+            text: message,
+          });
+        } else {
+          this.setState({ object });
+        }
+      })
+      .catch((err) => {
+        notifications.toasts.addDanger({
+          title: unableFindSavedObjectNotificationMessage,
+          text: err.message ?? 'Unknown error',
+        });
       });
-    });
   }
 
   render() {
@@ -86,7 +104,7 @@ export class SavedObjectEdition extends Component<
     const service = serviceRegistry.get(serviceName)!.service;
 
     return (
-      <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
+      <div data-test-subj="savedObjectsEdit">
         <Header
           canEdit={canEdit}
           canDelete={canDelete && !object?.meta.hiddenType}
@@ -95,6 +113,7 @@ export class SavedObjectEdition extends Component<
           onDeleteClick={() => this.delete()}
           viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
         />
+        <EuiSpacer size="l" />
         {notFoundType && (
           <>
             <EuiSpacer size="s" />
@@ -119,7 +138,7 @@ export class SavedObjectEdition extends Component<
             />
           </>
         )}
-      </EuiPageContent>
+      </div>
     );
   }
 

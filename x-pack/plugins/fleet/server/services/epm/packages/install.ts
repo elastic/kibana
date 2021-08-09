@@ -34,10 +34,18 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 
-import { isRequiredPackage, getInstallation, getInstallationObject } from './index';
+import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
+
+export async function isPackageInstalled(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<boolean> {
+  const installedPackage = await getInstallation(options);
+  return installedPackage !== undefined;
+}
 
 export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -249,8 +257,7 @@ async function installPackageFromRegistry({
     const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
     // try installing the package, if there was an error, call error handler and rethrow
-    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
-    // @ts-ignore
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -326,8 +333,7 @@ async function installPackageByUpload({
       version: packageInfo.version,
       packageInfo,
     });
-    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
-    // @ts-ignore
+    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -426,7 +432,7 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
   const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
-  const removable = !isRequiredPackage(pkgName);
+  const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
   const created = await savedObjectsClient.create<Installation>(
@@ -476,17 +482,17 @@ export const saveInstalledEsRefs = async (
   return installedAssets;
 };
 
-export const removeAssetsFromInstalledEsByType = async (
+export const removeAssetTypesFromInstalledEs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  assetType: AssetType
+  assetTypes: AssetType[]
 ) => {
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installedAssets = installedPkg?.attributes.installed_es;
   if (!installedAssets?.length) return;
-  const installedAssetsToSave = installedAssets?.filter(({ id, type }) => {
-    return type !== assetType;
-  });
+  const installedAssetsToSave = installedAssets?.filter(
+    (asset) => !assetTypes.includes(asset.type)
+  );
 
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: installedAssetsToSave,

@@ -44,7 +44,7 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
 };
 
 export type AlertsComponentQueryProps = HostsComponentsQueryProps & {
-  filterQuery: string;
+  filterQuery?: string;
   pageFilters?: Filter[];
 };
 

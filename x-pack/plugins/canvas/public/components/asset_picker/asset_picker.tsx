@@ -8,12 +8,16 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CanvasAsset } from '../../../types';
 
-import { ComponentStrings } from '../../../i18n';
-
-const { AssetPicker: strings } = ComponentStrings;
+const strings = {
+  getAssetAltText: () =>
+    i18n.translate('xpack.canvas.assetpicker.assetAltText', {
+      defaultMessage: 'Asset thumbnail',
+    }),
+};
 
 interface Props {
   assets: CanvasAsset[];

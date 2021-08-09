@@ -33,7 +33,9 @@ describe('map_actions', () => {
     describe('store mapState is empty', () => {
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {
-          return {};
+          return {
+            zoom: 5,
+          };
         };
 
         require('../selectors/map_selectors').getLayerList = () => {
@@ -61,11 +63,13 @@ describe('map_actions', () => {
             minLat: 5,
             minLon: 95,
           },
+          zoom: 5,
         });
         await action(dispatchMock, getStoreMock);
 
         expect(dispatchMock).toHaveBeenCalledWith({
           mapState: {
+            zoom: 5,
             extent: {
               maxLat: 10,
               maxLon: 100,
@@ -73,10 +77,10 @@ describe('map_actions', () => {
               minLon: 95,
             },
             buffer: {
-              maxLat: 12.5,
-              maxLon: 102.5,
-              minLat: 2.5,
-              minLon: 92.5,
+              maxLat: 11.1784,
+              maxLon: 101.25,
+              minLat: 0,
+              minLon: 90,
             },
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -154,10 +158,10 @@ describe('map_actions', () => {
               minLon: 85,
             },
             buffer: {
-              maxLat: 7.5,
-              maxLon: 92.5,
-              minLat: -2.5,
-              minLon: 82.5,
+              maxLat: 5.26601,
+              maxLon: 90.35156,
+              minLat: -0.35156,
+              minLon: 84.72656,
             },
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -186,10 +190,10 @@ describe('map_actions', () => {
               minLon: 96,
             },
             buffer: {
-              maxLat: 13.5,
-              maxLon: 103.5,
-              minLat: 3.5,
-              minLon: 93.5,
+              maxLat: 11.0059,
+              maxLon: 101.07422,
+              minLat: 5.96575,
+              minLon: 95.97656,
             },
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -270,6 +274,9 @@ describe('map_actions', () => {
       };
       require('../selectors/map_selectors').getTimeFilters = () => {
         return timeFilters;
+      };
+      require('../selectors/map_selectors').getTimeslice = () => {
+        return undefined;
       };
       require('../selectors/map_selectors').getFilters = () => {
         return filters;

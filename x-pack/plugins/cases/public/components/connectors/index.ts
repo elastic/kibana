@@ -8,6 +8,7 @@
 import { CaseConnectorsRegistry } from './types';
 import { createCaseConnectorsRegistry } from './connectors_registry';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
+import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
 import {
@@ -15,11 +16,11 @@ import {
   ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
   ResilientFieldsType,
+  SwimlaneFieldsType,
 } from '../../../common';
 
 export { getActionType as getCaseConnectorUi } from './case';
 
-export * from './config';
 export * from './types';
 
 interface GetCaseConnectorsReturn {
@@ -41,6 +42,7 @@ class CaseConnectors {
       getServiceNowITSMCaseConnector()
     );
     this.caseConnectorsRegistry.register<ServiceNowSIRFieldsType>(getServiceNowSIRCaseConnector());
+    this.caseConnectorsRegistry.register<SwimlaneFieldsType>(getSwimlaneCaseConnector());
   }
 
   registry(): CaseConnectorsRegistry {
@@ -50,8 +52,6 @@ class CaseConnectors {
 
 const caseConnectors = new CaseConnectors();
 
-export const getCaseConnectors = (): GetCaseConnectorsReturn => {
-  return {
-    caseConnectorsRegistry: caseConnectors.registry(),
-  };
-};
+export const getCaseConnectors = (): GetCaseConnectorsReturn => ({
+  caseConnectorsRegistry: caseConnectors.registry(),
+});

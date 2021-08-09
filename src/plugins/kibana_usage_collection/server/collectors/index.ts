@@ -28,3 +28,4 @@ export {
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
 } from './usage_counters';
+export { registerEventLoopDelaysCollector } from './event_loop_delays';

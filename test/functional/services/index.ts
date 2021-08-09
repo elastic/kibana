@@ -26,16 +26,16 @@ import {
   DashboardVisualizationsService,
 } from './dashboard';
 import { DocTableService } from './doc_table';
-import { EmbeddingProvider } from './embedding';
+import { EmbeddingService } from './embedding';
 import { FilterBarService } from './filter_bar';
 import { FlyoutService } from './flyout';
 import { GlobalNavService } from './global_nav';
 import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
-import { QueryBarProvider } from './query_bar';
+import { QueryBarService } from './query_bar';
 import { RemoteProvider } from './remote';
-import { RenderableProvider } from './renderable';
+import { RenderableService } from './renderable';
 import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
@@ -44,17 +44,17 @@ import {
   VegaDebugInspectorViewService,
 } from './visualizations';
 import { ListingTableService } from './listing_table';
-import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
+import { SavedQueryManagementComponentService } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
-import { MenuToggleProvider } from './menu_toggle';
-import { MonacoEditorProvider } from './monaco_editor';
+import { MenuToggleService } from './menu_toggle';
+import { MonacoEditorService } from './monaco_editor';
 
 export const services = {
   ...commonServiceProviders,
 
   __webdriver__: RemoteProvider,
   filterBar: FilterBarService,
-  queryBar: QueryBarProvider,
+  queryBar: QueryBarService,
   find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
@@ -70,8 +70,8 @@ export const services = {
   flyout: FlyoutService,
   comboBox: ComboBoxService,
   dataGrid: DataGridService,
-  embedding: EmbeddingProvider,
-  renderable: RenderableProvider,
+  embedding: EmbeddingService,
+  renderable: RenderableService,
   browser: BrowserProvider,
   pieChart: PieChartService,
   inspector: InspectorService,
@@ -80,10 +80,10 @@ export const services = {
   appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
   toasts: ToastsService,
-  savedQueryManagementComponent: SavedQueryManagementComponentProvider,
+  savedQueryManagementComponent: SavedQueryManagementComponentService,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
   managementMenu: ManagementMenuService,
-  monacoEditor: MonacoEditorProvider,
-  MenuToggle: MenuToggleProvider,
+  monacoEditor: MonacoEditorService,
+  menuToggle: MenuToggleService,
 };

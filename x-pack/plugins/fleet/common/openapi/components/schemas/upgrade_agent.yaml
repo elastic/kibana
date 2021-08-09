@@ -1,4 +1,4 @@
-title: UpgradeAgent
+title: Upgrade agent
 oneOf:
   - type: object
     properties:

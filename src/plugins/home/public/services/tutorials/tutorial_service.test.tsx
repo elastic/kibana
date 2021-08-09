@@ -138,4 +138,44 @@ describe('TutorialService', () => {
       expect(service.getModuleNotices()).toEqual(notices);
     });
   });
+
+  describe('custom status check', () => {
+    test('returns undefined when name is customStatusCheckName is empty', () => {
+      const service = new TutorialService();
+      expect(service.getCustomStatusCheck('')).toBeUndefined();
+    });
+    test('returns undefined when custom status check was not registered', () => {
+      const service = new TutorialService();
+      expect(service.getCustomStatusCheck('foo')).toBeUndefined();
+    });
+    test('returns custom status check', () => {
+      const service = new TutorialService();
+      const callback = jest.fn();
+      service.setup().registerCustomStatusCheck('foo', callback);
+      const customStatusCheckCallback = service.getCustomStatusCheck('foo');
+      expect(customStatusCheckCallback).toBeDefined();
+      customStatusCheckCallback();
+      expect(callback).toHaveBeenCalled();
+    });
+  });
+
+  describe('custom component', () => {
+    test('returns undefined when name is customComponentName is empty', () => {
+      const service = new TutorialService();
+      expect(service.getCustomComponent('')).toBeUndefined();
+    });
+    test('returns undefined when custom component was not registered', () => {
+      const service = new TutorialService();
+      expect(service.getCustomComponent('foo')).toBeUndefined();
+    });
+    test('returns custom component', async () => {
+      const service = new TutorialService();
+      const customComponent = <div>foo</div>;
+      service.setup().registerCustomComponent('foo', async () => customComponent);
+      const customStatusCheckCallback = service.getCustomComponent('foo');
+      expect(customStatusCheckCallback).toBeDefined();
+      const result = await customStatusCheckCallback();
+      expect(result).toEqual(customComponent);
+    });
+  });
 });

@@ -13,7 +13,8 @@ import { Subscription } from 'rxjs';
 
 import { ESQuery } from '../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
-import { inputsModel, KueryFilterQueryKind } from '../../common/store';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../../timelines/store/timeline';
@@ -32,7 +33,7 @@ import {
 } from '../../../common/search_strategy';
 import { InspectResponse } from '../../types';
 import * as i18n from './translations';
-import { TimelineId } from '../../../common/types/timeline';
+import { KueryFilterQueryKind, TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
 import {
@@ -197,6 +198,9 @@ export const useTimelineEvents = ({
   });
   const { addError, addWarning } = useAppToasts();
 
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
       if (request == null || pageName === '' || skip) {
@@ -210,9 +214,7 @@ export const useTimelineEvents = ({
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
             strategy:
-              request.language === 'eql'
-                ? 'securitySolutionTimelineEqlSearchStrategy'
-                : 'securitySolutionTimelineSearchStrategy',
+              request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
@@ -305,7 +307,10 @@ export const useTimelineEvents = ({
   );
 
   useEffect(() => {
-    if (skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
+    if (
+      skipQueryForDetectionsPage(id, indexNames, ruleRegistryEnabled) ||
+      indexNames.length === 0
+    ) {
       return;
     }
 
@@ -364,7 +369,10 @@ export const useTimelineEvents = ({
           activeTimeline.setActivePage(newActivePage);
         }
       }
-      if (!skipQueryForDetectionsPage(id, indexNames) && !deepEqual(prevRequest, currentRequest)) {
+      if (
+        !skipQueryForDetectionsPage(id, indexNames, ruleRegistryEnabled) &&
+        !deepEqual(prevRequest, currentRequest)
+      ) {
         return currentRequest;
       }
       return prevRequest;
@@ -380,6 +388,7 @@ export const useTimelineEvents = ({
     id,
     language,
     limit,
+    ruleRegistryEnabled,
     startDate,
     sort,
     fields,

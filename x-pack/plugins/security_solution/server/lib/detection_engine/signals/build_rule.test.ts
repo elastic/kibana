@@ -134,7 +134,6 @@ describe('buildRuleWithOverrides', () => {
       },
     ];
     const doc = sampleDocNoSortId();
-    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.new_risk_score = newRiskScore;
     const rule = buildRuleWithOverrides(ruleSO, doc._source!);
     const expected = {

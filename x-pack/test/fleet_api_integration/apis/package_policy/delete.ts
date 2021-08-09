@@ -21,8 +21,10 @@ export default function (providerContext: FtrProviderContext) {
     let agentPolicy: any;
     let packagePolicy: any;
     before(async () => {
-      await getService('esArchiver').load('empty_kibana');
-      await getService('esArchiver').load('fleet/empty_fleet_server');
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
     before(async function () {
       let agentPolicyResponse = await supertest
@@ -83,8 +85,10 @@ export default function (providerContext: FtrProviderContext) {
         .send({ force: true, packagePolicyIds: [packagePolicy.id] });
     });
     after(async () => {
-      await getService('esArchiver').unload('empty_kibana');
-      await getService('esArchiver').unload('fleet/empty_fleet_server');
+      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
 
     it('should fail on hosted agent policies', async function () {

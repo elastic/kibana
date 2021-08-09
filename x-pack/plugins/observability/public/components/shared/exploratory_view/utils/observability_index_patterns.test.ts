@@ -17,23 +17,53 @@ const fieldFormats = {
       outputFormat: 'asSeconds',
       outputPrecision: 1,
       showSuffix: true,
+      useShortSuffix: true,
     },
   },
   'transaction.experience.fid': {
     id: 'duration',
-    params: { inputFormat: 'milliseconds', outputFormat: 'asSeconds', showSuffix: true },
+    params: {
+      inputFormat: 'milliseconds',
+      outputFormat: 'humanizePrecise',
+      showSuffix: true,
+      useShortSuffix: true,
+    },
   },
   'transaction.experience.tbt': {
     id: 'duration',
-    params: { inputFormat: 'milliseconds', outputFormat: 'asSeconds', showSuffix: true },
+    params: {
+      inputFormat: 'milliseconds',
+      outputFormat: 'humanizePrecise',
+      showSuffix: true,
+      useShortSuffix: true,
+    },
   },
   'transaction.marks.agent.firstContentfulPaint': {
     id: 'duration',
-    params: { inputFormat: 'milliseconds', outputFormat: 'asSeconds', showSuffix: true },
+    params: {
+      inputFormat: 'milliseconds',
+      outputFormat: 'humanizePrecise',
+      showSuffix: true,
+      useShortSuffix: true,
+    },
   },
   'transaction.marks.agent.largestContentfulPaint': {
     id: 'duration',
-    params: { inputFormat: 'milliseconds', outputFormat: 'asSeconds', showSuffix: true },
+    params: {
+      inputFormat: 'milliseconds',
+      outputFormat: 'humanizePrecise',
+      showSuffix: true,
+      useShortSuffix: true,
+    },
+  },
+  'transaction.marks.agent.timeToFirstByte': {
+    id: 'duration',
+    params: {
+      inputFormat: 'milliseconds',
+      outputFormat: 'humanizePrecise',
+      showSuffix: true,
+      useShortSuffix: true,
+    },
   },
 };
 

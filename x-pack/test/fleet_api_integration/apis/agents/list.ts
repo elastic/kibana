@@ -68,10 +68,10 @@ export default function ({ getService }: FtrProviderContext) {
         }
       }
 
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     it('should return a 403 if a user without the superuser role try to access the APU', async () => {

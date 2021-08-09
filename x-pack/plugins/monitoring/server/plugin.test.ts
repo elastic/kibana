@@ -13,6 +13,9 @@ jest.mock('./es_client/instantiate_client', () => ({
   instantiateClient: jest.fn().mockImplementation(() => ({
     cluster: {},
   })),
+  instantiateLegacyClient: jest.fn().mockImplementation(() => ({
+    cluster: {},
+  })),
 }));
 
 jest.mock('./license_service', () => ({

@@ -6,6 +6,7 @@
  */
 
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import moment from 'moment';
 
 const SIZE = 1000;
@@ -35,11 +36,19 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
+export function isClearable(index) {
+  if (typeof index === 'string') {
+    const match = index.match(/\d{6}$/);
+    return match !== null && match.length && Number(match[match.length - 1]) >= 2;
+  }
+  return false;
+}
+
 export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
-  async function getJobAuditMessages(jobSavedObjectService, jobId, from) {
+  async function getJobAuditMessages(jobSavedObjectService, { jobId, from, start, end }) {
     let gte = null;
     if (jobId !== undefined && from === undefined) {
       const jobs = await mlClient.getJobs({ job_id: jobId });
@@ -57,6 +66,17 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
           timestamp: {
             gte,
             lte: 'now',
+          },
+        },
+      };
+    }
+
+    if (start !== undefined && end !== undefined) {
+      timeFilter = {
+        range: {
+          timestamp: {
+            gte: start,
+            lte: end,
           },
         },
       };
@@ -111,15 +131,25 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
     });
 
     let messages = [];
+    const notificationIndices = [];
+
     if (body.hits.total.value > 0) {
-      messages = body.hits.hits.map((hit) => hit._source);
+      let notificationIndex;
+      body.hits.hits.forEach((hit) => {
+        if (notificationIndex !== hit._index && isClearable(hit._index)) {
+          notificationIndices.push(hit._index);
+          notificationIndex = hit._index;
+        }
+
+        messages.push(hit._source);
+      });
     }
     messages = await jobSavedObjectService.filterJobsForSpace(
       'anomaly-detector',
       messages,
       'job_id'
     );
-    return messages;
+    return { messages, notificationIndices };
   }
 
   // search highest, most recent audit messages for all jobs for the last 24hrs.
@@ -141,6 +171,11 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
           },
           anomalyDetectorTypeFilter,
         ],
+        must_not: {
+          term: {
+            cleared: true,
+          },
+        },
       },
     };
 
@@ -255,6 +290,65 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
     return jobMessages;
   }
 
+  const clearedTime = new Date().getTime();
+
+  // Sets 'cleared' to true for messages in the last 24hrs and index new message for clear action
+  async function clearJobAuditMessages(jobId, notificationIndices) {
+    const newClearedMessage = {
+      job_id: jobId,
+      job_type: 'anomaly_detection',
+      level: MESSAGE_LEVEL.INFO,
+      message: 'Cleared set to true for messages in the last 24hrs.',
+      timestamp: clearedTime,
+    };
+
+    const query = {
+      bool: {
+        filter: [
+          {
+            range: {
+              timestamp: {
+                gte: 'now-24h',
+              },
+            },
+          },
+          {
+            term: {
+              job_id: jobId,
+            },
+          },
+        ],
+      },
+    };
+
+    const promises = [
+      asInternalUser.updateByQuery({
+        index: notificationIndices.join(','),
+        ignore_unavailable: true,
+        refresh: false,
+        conflicts: 'proceed',
+        body: {
+          query,
+          script: {
+            source: 'ctx._source.cleared = true',
+            lang: 'painless',
+          },
+        },
+      }),
+      ...notificationIndices.map((index) =>
+        asInternalUser.index({
+          index,
+          body: newClearedMessage,
+          refresh: 'wait_for',
+        })
+      ),
+    ];
+
+    await Promise.all(promises);
+
+    return { success: true, last_cleared: clearedTime };
+  }
+
   function levelToText(level) {
     return Object.keys(LEVEL)[Object.values(LEVEL).indexOf(level)];
   }
@@ -262,5 +356,6 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
   return {
     getJobAuditMessages,
     getAuditMessagesSummary,
+    clearJobAuditMessages,
   };
 }

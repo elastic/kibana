@@ -31,6 +31,7 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
         />
@@ -57,6 +58,7 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
             >
               <div
                 className="euiTextColor euiTextColor--ghost"
+                style={Object {}}
               >
                 Page 
                 1
@@ -81,6 +83,7 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
         />
@@ -126,6 +129,7 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
         />
@@ -152,6 +156,7 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
             >
               <div
                 className="euiTextColor euiTextColor--ghost"
+                style={Object {}}
               >
                 Page 
                 1
@@ -176,6 +181,7 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
         />
@@ -221,6 +227,7 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
         />
@@ -247,6 +254,7 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
             >
               <div
                 className="euiTextColor euiTextColor--ghost"
+                style={Object {}}
               >
                 Page 
                 1
@@ -271,6 +279,7 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
         />

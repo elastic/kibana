@@ -81,7 +81,6 @@ const getSavedObjectsList = async ({
     ignore_unavailable: true,
     index: kibanaIndex,
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
-    // @ts-expect-error@elastic/elasticsearch _source does not exist in type SearchRequest
     _source: filterPath,
   });
   return esResponse;

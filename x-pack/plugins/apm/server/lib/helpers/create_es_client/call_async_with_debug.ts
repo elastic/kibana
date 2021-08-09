@@ -23,6 +23,7 @@ export async function callAsyncWithDebug<T>({
   request,
   requestType,
   requestParams,
+  operationName,
   isCalledWithInternalUser,
 }: {
   cb: () => Promise<T>;
@@ -31,6 +32,7 @@ export async function callAsyncWithDebug<T>({
   request: KibanaRequest;
   requestType: string;
   requestParams: Record<string, any>;
+  operationName: string;
   isCalledWithInternalUser: boolean; // only allow inspection of queries that were retrieved with credentials of the end user
 }) {
   if (!debug) {
@@ -65,6 +67,7 @@ export async function callAsyncWithDebug<T>({
     const inspectableEsQueries = inspectableEsQueriesMap.get(request);
     if (!isCalledWithInternalUser && inspectableEsQueries) {
       inspectableEsQueries.push({
+        operationName,
         response: res,
         duration,
         requestType,
@@ -81,17 +84,26 @@ export async function callAsyncWithDebug<T>({
   return res;
 }
 
-export const getDebugBody = (
-  params: Record<string, any>,
-  requestType: string
-) => {
+export const getDebugBody = ({
+  params,
+  requestType,
+  operationName,
+}: {
+  params: Record<string, any>;
+  requestType: string;
+  operationName: string;
+}) => {
+  const operationLine = `${operationName}\n`;
+
   if (requestType === 'search') {
-    return `GET ${params.index}/_search\n${formatObj(params.body)}`;
+    return `${operationLine}GET ${params.index}/_search\n${formatObj(
+      params.body
+    )}`;
   }
 
   return `${chalk.bold('ES operation:')} ${requestType}\n${chalk.bold(
     'ES query:'
-  )}\n${formatObj(params)}`;
+  )}\n${operationLine}${formatObj(params)}`;
 };
 
 export const getDebugTitle = (request: KibanaRequest) =>

@@ -21,6 +21,7 @@ import {
   EuiPortal,
   EuiPagination,
   EuiHideFor,
+  keys,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
@@ -87,9 +88,25 @@ export function DiscoverGridFlyout({
     [hits, setExpandedDoc]
   );
 
+  const onKeyDown = useCallback(
+    (ev: React.KeyboardEvent) => {
+      if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        setPage(activePage + (ev.key === keys.ARROW_RIGHT ? 1 : -1));
+      }
+    },
+    [activePage, setPage]
+  );
+
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
+      <EuiFlyout
+        onClose={onClose}
+        size="m"
+        data-test-subj="docTableDetailsFlyout"
+        onKeyDown={onKeyDown}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle
             size="s"

@@ -10,6 +10,7 @@ import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+  ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../state/async_resource_state';
 import { Immutable } from '../../../../common/endpoint/types';
@@ -49,6 +50,7 @@ export interface EventFiltersService {
   getOne(id: string): Promise<ExceptionListItemSchema>;
   updateOne(exception: Immutable<UpdateExceptionListItemSchema>): Promise<ExceptionListItemSchema>;
   deleteOne(id: string): Promise<ExceptionListItemSchema>;
+  getSummary(): Promise<ExceptionListSummarySchema>;
 }
 
 export interface EventFiltersListPageData {

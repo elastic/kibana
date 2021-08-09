@@ -12,6 +12,7 @@ import {
   ListSnapshotReposResponse,
   NodesDetailsResponse,
 } from '../../../common/types';
+import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
 
 export const init = () => {
   const server = fakeServer.create();
@@ -68,11 +69,23 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setDefaultResponses = () => {
+    setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+    setLoadSnapshotPolicies([]);
+    setListSnapshotRepos({ repositories: ['abc'] });
+    setListNodes({
+      nodesByRoles: {},
+      nodesByAttributes: { test: ['123'] },
+      isUsingDeprecatedDataRoleConfig: false,
+    });
+  };
+
   return {
     setLoadPolicies,
     setLoadSnapshotPolicies,
     setListNodes,
     setNodesDetails,
     setListSnapshotRepos,
+    setDefaultResponses,
   };
 };

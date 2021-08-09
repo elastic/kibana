@@ -12,9 +12,11 @@ import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } fro
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, FormatEditorProps } from '../default';
+import { DefaultFormatEditor } from '../default/default';
+import { formatId } from './constants';
 
-import { fieldFormats } from '../../../../../../data/public';
+import { DEFAULT_CONVERTER_COLOR } from '../../../../../../field_formats/common';
+import { FormatEditorProps } from '../types';
 
 interface Color {
   range?: string;
@@ -32,7 +34,7 @@ interface ColorFormatEditorFormatParams {
 }
 
 export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorFormatParams> {
-  static formatId = 'color';
+  static formatId = formatId;
   constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
     super(props);
     this.onChange({
@@ -54,7 +56,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
   addColor = () => {
     const colors = [...(this.props.formatParams.colors || [])];
     this.onChange({
-      colors: [...colors, { ...fieldFormats.DEFAULT_CONVERTER_COLOR }],
+      colors: [...colors, { ...DEFAULT_CONVERTER_COLOR }],
     });
   };
 

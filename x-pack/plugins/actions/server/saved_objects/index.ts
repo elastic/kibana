@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
@@ -21,17 +22,19 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import { getOldestIdleActionTask } from '../../../task_manager/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  actionTypeRegistry: ActionTypeRegistry
+  actionTypeRegistry: ActionTypeRegistry,
+  taskManagerIndex: string
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
-    mappings: mappings.action,
+    mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
     management: {
       defaultSearchField: 'name',
@@ -67,7 +70,21 @@ export function setupSavedObjects(
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
-    mappings: mappings.action_task_params,
+    mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
+    excludeOnUpgrade: async ({ readonlyEsClient }) => {
+      const oldestIdleActionTask = await getOldestIdleActionTask(
+        readonlyEsClient,
+        taskManagerIndex
+      );
+      return {
+        bool: {
+          must: [
+            { term: { type: 'action_task_params' } },
+            { range: { updated_at: { lt: oldestIdleActionTask } } },
+          ],
+        },
+      };
+    },
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,

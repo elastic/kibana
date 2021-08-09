@@ -9,11 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { TelemetryPluginConfig } from '../plugin';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 
 interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
   http: CoreStart['http'];
   notifications: CoreStart['notifications'];
+  isScreenshotMode: boolean;
   currentKibanaVersion: string;
   reportOptInStatusChange?: boolean;
 }
@@ -27,6 +29,7 @@ export class TelemetryService {
   private readonly reportOptInStatusChange: boolean;
   private readonly notifications: CoreStart['notifications'];
   private readonly defaultConfig: TelemetryPluginConfig;
+  private readonly isScreenshotMode: boolean;
   private updatedConfig?: TelemetryPluginConfig;
 
   /** Current version of Kibana */
@@ -35,11 +38,13 @@ export class TelemetryService {
   constructor({
     config,
     http,
+    isScreenshotMode,
     notifications,
     currentKibanaVersion,
     reportOptInStatusChange = true,
   }: TelemetryServiceConstructor) {
     this.defaultConfig = config;
+    this.isScreenshotMode = isScreenshotMode;
     this.reportOptInStatusChange = reportOptInStatusChange;
     this.notifications = notifications;
     this.currentKibanaVersion = currentKibanaVersion;
@@ -63,7 +68,7 @@ export class TelemetryService {
 
   /** Is the cluster opted-in to telemetry **/
   public get isOptedIn() {
-    return this.config.optIn;
+    return Boolean(this.config.optIn);
   }
 
   /** Changes the opt-in status **/
@@ -89,14 +94,14 @@ export class TelemetryService {
 
   /** Retrieve the opt-in/out notification URL **/
   public getOptInStatusUrl = () => {
-    const telemetryOptInStatusUrl = this.config.optInStatusUrl;
-    return telemetryOptInStatusUrl;
+    const { sendUsageTo } = this.config;
+    return getTelemetryChannelEndpoint({ channelName: 'optInStatus', env: sendUsageTo });
   };
 
   /** Retrieve the URL to report telemetry **/
   public getTelemetryUrl = () => {
-    const telemetryUrl = this.config.url;
-    return telemetryUrl;
+    const { sendUsageTo } = this.config;
+    return getTelemetryChannelEndpoint({ channelName: 'main', env: sendUsageTo });
   };
 
   /**
@@ -122,8 +127,13 @@ export class TelemetryService {
   }
 
   /** Is the cluster opted-in to telemetry **/
-  public getIsOptedIn = () => {
+  public getIsOptedIn = (): boolean => {
     return this.isOptedIn;
+  };
+
+  /** Are there any blockers for sending telemetry */
+  public canSendTelemetry = (): boolean => {
+    return !this.isScreenshotMode && this.getIsOptedIn();
   };
 
   /** Fetches an unencrypted telemetry payload so we can show it to the user **/

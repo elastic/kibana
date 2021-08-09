@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 
 interface DisableWatchesResponse {
   exporters: Array<
@@ -22,9 +22,13 @@ interface DisableWatchesResponse {
   >;
 }
 
-async function callMigrationApi(callCluster: LegacyAPICaller, logger: Logger) {
+async function callMigrationApi(callCluster: ElasticsearchClient, logger: Logger) {
   try {
-    return await callCluster('monitoring.disableWatches');
+    const { body: response } = await callCluster.transport.request({
+      method: 'post',
+      path: '/monitoring.disableWatches',
+    });
+    return response as DisableWatchesResponse;
   } catch (err) {
     logger.warn(
       `Unable to call migration api to disable cluster alert watches. Message=${err.message}`
@@ -33,8 +37,11 @@ async function callMigrationApi(callCluster: LegacyAPICaller, logger: Logger) {
   }
 }
 
-export async function disableWatcherClusterAlerts(callCluster: LegacyAPICaller, logger: Logger) {
-  const response: DisableWatchesResponse = await callMigrationApi(callCluster, logger);
+export async function disableWatcherClusterAlerts(
+  callCluster: ElasticsearchClient,
+  logger: Logger
+) {
+  const response: DisableWatchesResponse | undefined = await callMigrationApi(callCluster, logger);
   if (!response || response.exporters.length === 0) {
     return true;
   }

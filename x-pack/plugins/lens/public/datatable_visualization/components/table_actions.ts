@@ -7,17 +7,11 @@
 
 import type { EuiDataGridSorting } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from 'src/plugins/expressions';
-import type { LensFilterEvent, LensMultiTable } from '../../types';
-import type {
-  LensGridDirection,
-  LensResizeAction,
-  LensSortAction,
-  LensToggleAction,
-} from './types';
-import { ColumnConfig } from './table_basic';
-
-import { desanitizeFilterContext } from '../../utils';
-import { getOriginalId } from '../transpose_helpers';
+import type { LensFilterEvent } from '../../types';
+import type { LensMultiTable } from '../../../common';
+import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
+import type { ColumnConfig, LensGridDirection } from '../../../common/expressions';
+import { getOriginalId } from '../../../common/expressions';
 
 export const createGridResizeHandler = (
   columnConfig: ColumnConfig,
@@ -92,7 +86,7 @@ export const createGridFilterHandler = (
     timeFieldName,
   };
 
-  onClickValue(desanitizeFilterContext(data));
+  onClickValue(data);
 };
 
 export const createTransposeColumnFilterHandler = (
@@ -125,7 +119,7 @@ export const createTransposeColumnFilterHandler = (
     timeFieldName,
   };
 
-  onClickValue(desanitizeFilterContext(data));
+  onClickValue(data);
 };
 
 export const createGridSortingConfig = (

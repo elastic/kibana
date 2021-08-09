@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 
 import { noop } from 'lodash/fp';
@@ -15,7 +15,7 @@ import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
 import { TimelineTabsStyle, TimelineTab } from './types';
-
+import { useKibana } from '../../../common/lib/kibana';
 export interface UseTimelineTypesArgs {
   defaultTimelineCount?: number | null;
   templateTimelineCount?: number | null;
@@ -31,8 +31,8 @@ export const useTimelineTypes = ({
   defaultTimelineCount,
   templateTimelineCount,
 }: UseTimelineTypesArgs): UseTimelineTypesResult => {
-  const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.timelines);
+  const { navigateToUrl } = useKibana().services.application;
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const [timelineType, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(
     tabName === TimelineType.default || tabName === TimelineType.template
@@ -40,27 +40,30 @@ export const useTimelineTypes = ({
       : TimelineType.default
   );
 
+  const timelineUrl = formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch));
+  const templateUrl = formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch));
+
   const goToTimeline = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getTimelineTabsUrl(TimelineType.default, urlSearch));
+      navigateToUrl(timelineUrl);
     },
-    [history, urlSearch]
+    [navigateToUrl, timelineUrl]
   );
 
   const goToTemplateTimeline = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.push(getTimelineTabsUrl(TimelineType.template, urlSearch));
+      navigateToUrl(templateUrl);
     },
-    [history, urlSearch]
+    [navigateToUrl, templateUrl]
   );
   const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
     (timelineTabsStyle: TimelineTabsStyle) => [
       {
         id: TimelineType.default,
         name: i18n.TAB_TIMELINES,
-        href: formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch)),
+        href: timelineUrl,
         disabled: false,
 
         onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTimeline : noop,
@@ -68,13 +71,13 @@ export const useTimelineTypes = ({
       {
         id: TimelineType.template,
         name: i18n.TAB_TEMPLATES,
-        href: formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch)),
+        href: templateUrl,
         disabled: false,
 
         onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTemplateTimeline : noop,
       },
     ],
-    [urlSearch, formatUrl, goToTimeline, goToTemplateTimeline]
+    [timelineUrl, templateUrl, goToTimeline, goToTemplateTimeline]
   );
 
   const onFilterClicked = useCallback(

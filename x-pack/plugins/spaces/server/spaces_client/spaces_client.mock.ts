@@ -30,6 +30,7 @@ const createSpacesClientMock = () =>
     create: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     delete: jest.fn(),
+    disableLegacyUrlAliases: jest.fn(),
   } as unknown) as jest.Mocked<SpacesClient>);
 
 export const spacesClientMock = {

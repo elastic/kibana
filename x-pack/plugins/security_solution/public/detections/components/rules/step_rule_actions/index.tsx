@@ -89,6 +89,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
   };
+
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
   const { form } = useForm<ActionsStepRule>({
     defaultValue: initialState,

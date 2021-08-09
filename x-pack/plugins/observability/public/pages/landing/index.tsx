@@ -21,6 +21,7 @@ import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { FleetPanel } from '../../components/app/fleet_panel';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTrackPageview } from '../../hooks/use_track_metric';
 import { appsSection } from '../home/section';
@@ -33,6 +34,13 @@ const EuiCardWithoutPadding = styled(EuiCard)`
 export function LandingPage() {
   useTrackPageview({ app: 'observability-overview', path: 'landing' });
   useTrackPageview({ app: 'observability-overview', path: 'landing', delay: 15000 });
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.landingLinkText', {
+        defaultMessage: 'Getting started',
+      }),
+    },
+  ]);
 
   const { core, ObservabilityPageTemplate } = usePluginContext();
   const theme = useContext(ThemeContext);

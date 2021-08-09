@@ -20,21 +20,6 @@
   text-align: left;
 }
 
-.visListingCallout {
-  @include kbnThemeStyle('v7') {
-    max-width: 1000px;
-  }
-  @include kbnThemeStyle('v8') {
-    max-width: 1200px;
-  }
-  width: 100%;
-
-  margin-left: auto;
-  margin-right: auto;
-
-  padding: $euiSize $euiSize 0 $euiSize;
-}
-
 .visListingCallout__link {
   text-decoration: underline;
 }

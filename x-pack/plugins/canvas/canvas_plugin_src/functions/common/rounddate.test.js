@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { rounddate } from './rounddate';
 
 describe('rounddate', () => {
   const fn = functionWrapper(rounddate);
+
   const date = new Date('2011-10-31T00:00:00.000Z').valueOf();
 
   it('returns date in ms from date in ms or ISO8601 string', () => {

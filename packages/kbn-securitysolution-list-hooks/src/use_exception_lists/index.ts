@@ -28,6 +28,7 @@ export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, 
  * @param namespaceTypes spaces to be searched
  * @param notifications kibana service for displaying toasters
  * @param showTrustedApps boolean - include/exclude trusted app lists
+ * @param showEventFilters boolean - include/exclude event filters lists
  * @param pagination
  *
  */
@@ -43,6 +44,7 @@ export const useExceptionLists = ({
   namespaceTypes,
   notifications,
   showTrustedApps = false,
+  showEventFilters = false,
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
@@ -51,8 +53,9 @@ export const useExceptionLists = ({
 
   const namespaceTypesAsString = useMemo(() => namespaceTypes.join(','), [namespaceTypes]);
   const filters = useMemo(
-    (): string => getFilters(filterOptions, namespaceTypes, showTrustedApps),
-    [namespaceTypes, filterOptions, showTrustedApps]
+    (): string =>
+      getFilters({ filters: filterOptions, namespaceTypes, showTrustedApps, showEventFilters }),
+    [namespaceTypes, filterOptions, showTrustedApps, showEventFilters]
   );
 
   useEffect(() => {

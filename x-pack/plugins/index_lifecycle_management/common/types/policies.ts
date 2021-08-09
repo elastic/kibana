@@ -7,7 +7,13 @@
 
 import { Index as IndexInterface } from '../../../index_management/common/types';
 
+export type Phase = keyof Phases;
+
 export type PhaseWithAllocation = 'warm' | 'cold';
+
+export type PhaseWithTiming = keyof Omit<Phases, 'hot'>;
+
+export type PhaseExceptDelete = keyof Omit<Phases, 'delete'>;
 
 export interface SerializedPolicy {
   name: string;
@@ -22,14 +28,14 @@ export interface Phases {
   delete?: SerializedDeletePhase;
 }
 
-export type PhasesExceptDelete = keyof Omit<Phases, 'delete'>;
-
 export interface PolicyFromES {
-  modified_date: string;
+  modifiedDate: string;
   name: string;
   policy: SerializedPolicy;
   version: number;
-  linkedIndices?: string[];
+  indices?: string[];
+  dataStreams?: string[];
+  indexTemplates?: string[];
 }
 
 export interface SerializedPhase {

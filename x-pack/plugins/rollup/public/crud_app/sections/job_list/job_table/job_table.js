@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -28,10 +28,11 @@ import {
   EuiTableRowCellCheckbox,
   EuiText,
   EuiToolTip,
+  EuiButton,
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common';
-import { METRIC_TYPE } from '../../../services';
+import { METRIC_TYPE, getRouterLinkProps } from '../../../services';
 import { trackUiMetric } from '../../../../kibana_services';
 import { JobActionMenu, JobStatus } from '../../components';
 
@@ -346,9 +347,9 @@ export class JobTable extends Component {
     const atLeastOneItemSelected = Object.keys(idToSelectedJobMap).length > 0;
 
     return (
-      <Fragment>
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          {atLeastOneItemSelected ? (
+      <div>
+        <EuiFlexGroup>
+          {atLeastOneItemSelected && (
             <EuiFlexItem grow={false}>
               <JobActionMenu
                 jobs={this.getSelectedJobs()}
@@ -357,7 +358,7 @@ export class JobTable extends Component {
                 deselectJobs={this.deselectItems}
               />
             </EuiFlexItem>
-          ) : null}
+          )}
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
@@ -371,6 +372,14 @@ export class JobTable extends Component {
               })}
               aria-label="Search jobs"
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill {...getRouterLinkProps('/create')}>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobList.createButtonLabel"
+                defaultMessage="Create rollup job"
+              />
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -409,7 +418,7 @@ export class JobTable extends Component {
         <EuiSpacer size="m" />
 
         {jobs.length > 0 ? this.renderPager() : null}
-      </Fragment>
+      </div>
     );
   }
 }

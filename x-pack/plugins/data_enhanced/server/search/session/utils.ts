@@ -7,6 +7,9 @@
 
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
+import { SavedObjectsFindResult } from 'kibana/server';
+import moment from 'moment';
+import { SearchSessionSavedObjectAttributes } from 'src/plugins/data/common';
 
 /**
  * Generate the hash for this request so that, in the future, this hash can be used to look up
@@ -16,4 +19,10 @@ import stringify from 'json-stable-stringify';
 export function createRequestHash(keys: Record<any, any>) {
   const { preference, ...params } = keys;
   return createHash(`sha256`).update(stringify(params)).digest('hex');
+}
+
+export function isSearchSessionExpired(
+  session: SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
+) {
+  return moment(session.attributes.expires).isBefore(moment());
 }

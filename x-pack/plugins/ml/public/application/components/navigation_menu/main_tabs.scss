@@ -1,0 +1,4 @@
+.mlMainTabs {
+  // Hack to address https://github.com/elastic/kibana/pull/103197#discussion_r659645946
+  padding-bottom: 0 !important;
+}

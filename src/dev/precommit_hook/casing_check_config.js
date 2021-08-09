@@ -40,6 +40,9 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
+  'packages/kbn-test/jest_integration/jest-preset.js',
+  'test/package/Vagrantfile',
+  '**/test/**/fixtures/**/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -60,12 +63,13 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
-  // packages for the ingest manager's api integration tests could be valid semver which has dashes
-  'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
   '**/BUILD.bazel',
+
+  // Buildkite
+  '.buildkite/hooks/*',
 ];
 
 /**
@@ -94,7 +98,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',

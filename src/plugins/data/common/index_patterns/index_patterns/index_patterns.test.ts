@@ -8,7 +8,7 @@
 
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
-import { fieldFormatsMock } from '../../field_formats/mocks';
+import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 
@@ -230,7 +230,12 @@ describe('IndexPatterns', () => {
 
   test('createAndSave', async () => {
     const title = 'kibana-*';
-    indexPatterns.createSavedObject = jest.fn();
+
+    indexPatterns.createSavedObject = jest.fn(() =>
+      Promise.resolve(({
+        id: 'id',
+      } as unknown) as IndexPattern)
+    );
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
     expect(indexPatterns.createSavedObject).toBeCalled();

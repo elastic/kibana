@@ -24,7 +24,12 @@ import {
   SortField,
   Maybe,
 } from '../common';
-import { DataProviderType, TimelineType, TimelineStatus } from '../../types/timeline';
+import {
+  DataProviderType,
+  TimelineType,
+  TimelineStatus,
+  RowRendererId,
+} from '../../types/timeline';
 
 export * from './events';
 
@@ -163,25 +168,6 @@ export interface DateRangePickerInput {
 export interface SortTimelineInput {
   columnId?: Maybe<string>;
   sortDirection?: Maybe<string>;
-}
-
-export enum RowRendererId {
-  alerts = 'alerts',
-  auditd = 'auditd',
-  auditd_file = 'auditd_file',
-  library = 'library',
-  netflow = 'netflow',
-  plain = 'plain',
-  registry = 'registry',
-  suricata = 'suricata',
-  system = 'system',
-  system_dns = 'system_dns',
-  system_endgame_process = 'system_endgame_process',
-  system_file = 'system_file',
-  system_fim = 'system_fim',
-  system_security_event = 'system_security_event',
-  system_socket = 'system_socket',
-  zeek = 'zeek',
 }
 
 export interface TimelineInput {

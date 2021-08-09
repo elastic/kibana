@@ -10,7 +10,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export interface MapsConfigType {
   enabled: boolean;
   showMapVisualizationTypes: boolean;
-  enableDrawingFeature: boolean;
   showMapsInspectorAdapter: boolean;
   preserveDrawingBuffer: boolean;
 }
@@ -18,7 +17,6 @@ export interface MapsConfigType {
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   showMapVisualizationTypes: schema.boolean({ defaultValue: false }),
-  enableDrawingFeature: schema.boolean({ defaultValue: false }),
   // flag used in functional testing
   showMapsInspectorAdapter: schema.boolean({ defaultValue: false }),
   // flag used in functional testing

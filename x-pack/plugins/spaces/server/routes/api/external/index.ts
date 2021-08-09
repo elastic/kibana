@@ -12,6 +12,7 @@ import type { SpacesRouter } from '../../../types';
 import type { UsageStatsServiceSetup } from '../../../usage_stats';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { initDeleteSpacesApi } from './delete';
+import { initDisableLegacyUrlAliasesApi } from './disable_legacy_url_aliases';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
 import { initGetShareableReferencesApi } from './get_shareable_references';
@@ -36,4 +37,5 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initCopyToSpacesApi(deps);
   initUpdateObjectsSpacesApi(deps);
   initGetShareableReferencesApi(deps);
+  initDisableLegacyUrlAliasesApi(deps);
 }

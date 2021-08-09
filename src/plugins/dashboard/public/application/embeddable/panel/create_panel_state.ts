@@ -26,7 +26,10 @@ export function createPanelState<
   currentPanels: { [key: string]: DashboardPanelState },
   placementMethod?: PanelPlacementMethod<TPlacementMethodArgs>,
   placementArgs?: TPlacementMethodArgs
-): DashboardPanelState<TEmbeddableInput> {
+): {
+  newPanel: DashboardPanelState<TEmbeddableInput>;
+  otherPanels: { [key: string]: DashboardPanelState };
+} {
   const defaultPlacementArgs = {
     width: DEFAULT_PANEL_WIDTH,
     height: DEFAULT_PANEL_HEIGHT,
@@ -39,15 +42,18 @@ export function createPanelState<
       }
     : defaultPlacementArgs;
 
-  const gridDataLocation = placementMethod
+  const { newPanelPlacement, otherPanels } = placementMethod
     ? placementMethod(finalPlacementArgs as TPlacementMethodArgs)
     : findTopLeftMostOpenSpace(defaultPlacementArgs);
 
   return {
-    gridData: {
-      ...gridDataLocation,
-      i: panelState.explicitInput.id,
+    newPanel: {
+      gridData: {
+        ...newPanelPlacement,
+        i: panelState.explicitInput.id,
+      },
+      ...panelState,
     },
-    ...panelState,
+    otherPanels,
   };
 }

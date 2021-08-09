@@ -7,7 +7,7 @@
 
 import React, { CSSProperties, PureComponent } from 'react';
 // @ts-expect-error untyped local
-import { WORKPAD_CONTAINER_ID } from '../../../apps/workpad/workpad_app';
+import { WORKPAD_CONTAINER_ID } from '../../workpad_app';
 
 interface State {
   height: string;

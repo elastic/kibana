@@ -11,7 +11,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_PATH } from '../../routes';
@@ -113,7 +113,7 @@ export const MetaEngineCreationLogic = kea<
       const { navigateToUrl } = KibanaLogic.values;
       const enginePath = generatePath(ENGINE_PATH, { engineName: name });
 
-      setQueuedSuccessMessage(META_ENGINE_CREATION_SUCCESS_MESSAGE);
+      flashSuccessToast(META_ENGINE_CREATION_SUCCESS_MESSAGE(name));
       navigateToUrl(enginePath);
     },
     submitEngine: async () => {

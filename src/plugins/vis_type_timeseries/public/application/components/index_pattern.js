@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useContext, useCallback, useEffect } from 'react';
+import React, { useContext, useCallback, useEffect, useState } from 'react';
 import {
   htmlIdGenerator,
   EuiFieldText,
@@ -28,7 +28,6 @@ import { YesNo } from './yes_no';
 import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
-import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,8 +35,9 @@ import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../.
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
-import { getUISettings } from '../../services';
+import { getDataStart, getUISettings } from '../../services';
 import { UI_SETTINGS } from '../../../../data/common';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;
@@ -76,9 +76,11 @@ export const IndexPattern = ({
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
-  const defaultIndex = useContext(DefaultIndexPatternContext);
+
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+
+  const [fetchedIndex, setFetchedIndex] = useState(null);
 
   const handleMaxBarsChange = useCallback(
     ({ target }) => {
@@ -118,6 +120,7 @@ export const IndexPattern = ({
   };
 
   const model = { ...defaults, ..._model };
+  const index = model[indexPatternName];
 
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
@@ -132,6 +135,33 @@ export const IndexPattern = ({
   useEffect(() => {
     updateControlValidity(intervalName, intervalValidation.isValid);
   }, [intervalName, intervalValidation.isValid, updateControlValidity]);
+
+  useEffect(() => {
+    async function fetchIndex() {
+      const { indexPatterns } = getDataStart();
+      let fetchedIndexPattern = {
+        indexPattern: undefined,
+        indexPatternString: undefined,
+      };
+
+      try {
+        fetchedIndexPattern = index
+          ? await fetchIndexPattern(index, indexPatterns, {
+              fetchKibanaIndexForStringIndexes: true,
+            })
+          : {
+              ...fetchedIndexPattern,
+              defaultIndex: await indexPatterns.getDefault(),
+            };
+      } catch {
+        // nothing to be here
+      }
+
+      setFetchedIndex(fetchedIndexPattern);
+    }
+
+    fetchIndex();
+  }, [index]);
 
   const toggleIndicatorDisplay = useCallback(
     () => onChange({ [HIDE_LAST_VALUE_INDICATOR]: !model.hide_last_value_indicator }),
@@ -207,7 +237,7 @@ export const IndexPattern = ({
       <EuiFlexGroup>
         <EuiFlexItem>
           <IndexPatternSelect
-            value={model[indexPatternName]}
+            fetchedIndex={fetchedIndex}
             indexPatternName={indexPatternName}
             onChange={onChange}
             disabled={disabled}
@@ -225,7 +255,9 @@ export const IndexPattern = ({
             onChange={handleSelectChange(timeFieldName)}
             indexPattern={model[indexPatternName]}
             fields={fields}
-            placeholder={!model[indexPatternName] ? defaultIndex?.timeFieldName : undefined}
+            placeholder={
+              fetchedIndex?.indexPattern?.timeFieldName ?? fetchedIndex?.defaultIndex?.timeFieldName
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -285,7 +317,7 @@ export const IndexPattern = ({
                     content={
                       <FormattedMessage
                         id="visTypeTimeseries.indexPattern.detailLevelHelpText"
-                        defaultMessage="Controls the auto interval based on the time range. The default interval is affected by the advanced settings {histogramTargetBars} and {histogramMaxBars}."
+                        defaultMessage="Controls the auto and gte intervals based on the time range. The default interval is affected by the advanced settings {histogramTargetBars} and {histogramMaxBars}."
                         values={{
                           histogramTargetBars: UI_SETTINGS.HISTOGRAM_MAX_BARS,
                           histogramMaxBars: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
@@ -314,7 +346,7 @@ export const IndexPattern = ({
                     disabled={
                       disabled ||
                       isEntireTimeRangeActive(model, isTimeSeries) ||
-                      !(model[intervalName] === AUTO_INTERVAL || !model[intervalName])
+                      !(isAutoInterval(model[intervalName]) || isGteInterval(model[intervalName]))
                     }
                     min={0}
                     max={maxBarsUiSettings}

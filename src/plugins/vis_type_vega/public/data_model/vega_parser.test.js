@@ -14,6 +14,29 @@ import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 jest.mock('../services');
 
 describe(`VegaParser.parseAsync`, () => {
+  function check(spec, useResize, expectedSpec, warnCount) {
+    return async () => {
+      const searchApiStub = {
+        search: jest.fn(() => ({ toPromise: jest.fn(() => Promise.resolve({})) })),
+        resetSearchStats: jest.fn(),
+      };
+      expectedSpec = expectedSpec || cloneDeep(spec);
+      const mockGetServiceSettings = async () => {
+        return {
+          getFileLayers: async () => [],
+          getUrlForRegionLayer: async (layer) => {
+            return layer.url;
+          },
+        };
+      };
+      const vp = new VegaParser(spec, searchApiStub, 0, 0, mockGetServiceSettings);
+      await vp.parseAsync();
+      expect(vp.warnings).toHaveLength(warnCount || 0);
+      expect(vp.useResize).toEqual(useResize);
+      expect(vp.vlspec).toEqual(expectedSpec);
+    };
+  }
+
   test(`should throw an error in case of $spec is not defined`, async () => {
     const vp = new VegaParser('{}');
 
@@ -23,6 +46,41 @@ describe(`VegaParser.parseAsync`, () => {
       vp.error.startsWith('Your specification requires a "$schema" field with a valid URL')
     ).toBeTruthy();
   });
+
+  test(
+    `should apply autosize on layer spec`,
+    check(
+      {
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+        layer: [{ mark: 'bar' }],
+        encoding: { x: { field: 'a' } },
+      },
+      true,
+      expect.objectContaining({
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+        layer: [{ mark: 'bar' }],
+        encoding: { x: { field: 'a' } },
+        autosize: { type: 'fit', contains: 'padding' },
+        width: 'container',
+        height: 'container',
+      })
+    )
+  );
+
+  test(
+    `should not apply autosize on faceted spec`,
+    check(
+      {
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+        mark: 'circle',
+        encoding: { row: { field: 'a' } },
+      },
+      false,
+      expect.not.objectContaining({
+        autosize: { type: 'fit', contains: 'padding' },
+      })
+    )
+  );
 });
 
 describe(`VegaParser._setDefaultValue`, () => {

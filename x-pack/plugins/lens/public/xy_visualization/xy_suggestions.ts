@@ -16,7 +16,8 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState, visualizationTypes, XYLayerConfig } from './types';
+import { State, XYState, visualizationTypes } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -529,6 +530,7 @@ function buildSuggestion({
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
     hideEndzones: currentState?.hideEndzones,
+    valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
@@ -540,6 +542,11 @@ function buildSuggestion({
       x: true,
       yLeft: true,
       yRight: true,
+    },
+    labelsOrientation: currentState?.labelsOrientation || {
+      x: 0,
+      yLeft: 0,
+      yRight: 0,
     },
     gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
       x: true,

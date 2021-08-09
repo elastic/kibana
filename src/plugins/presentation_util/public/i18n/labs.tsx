@@ -19,8 +19,7 @@ export const LabsStrings = {
           defaultMessage: 'Kibana',
         }),
         help: i18n.translate('presentationUtil.labs.components.kibanaSwitchHelp', {
-          defaultMessage:
-            'Sets the corresponding Advanced Setting for this lab project; affects all Kibana users',
+          defaultMessage: 'Enables this lab for all Kibana users.',
         }),
       }),
       getBrowserSwitchText: () => ({
@@ -28,8 +27,7 @@ export const LabsStrings = {
           defaultMessage: 'Browser',
         }),
         help: i18n.translate('presentationUtil.labs.components.browserSwitchHelp', {
-          defaultMessage:
-            'Enables or disables the lab project for the browser; persists between browser instances',
+          defaultMessage: 'Enables the lab for this browser and persists after it closes.',
         }),
       }),
       getSessionSwitchText: () => ({
@@ -37,21 +35,27 @@ export const LabsStrings = {
           defaultMessage: 'Session',
         }),
         help: i18n.translate('presentationUtil.labs.components.sessionSwitchHelp', {
-          defaultMessage:
-            'Enables or disables the lab project for this tab; resets when the browser tab is closed',
+          defaultMessage: 'Enables the lab for this browser session, so it resets when it closes.',
         }),
       }),
     },
     List: {
       getNoProjectsMessage: () =>
         i18n.translate('presentationUtil.labs.components.noProjectsMessage', {
-          defaultMessage: 'No available lab projects',
+          defaultMessage: 'No labs currently available.',
+        }),
+      getNoProjectsInSolutionMessage: (solutionName: string) =>
+        i18n.translate('presentationUtil.labs.components.noProjectsinSolutionMessage', {
+          defaultMessage: 'No labs currently in {solutionName}.',
+          values: {
+            solutionName,
+          },
         }),
     },
     ListItem: {
       getOverrideLegend: () =>
         i18n.translate('presentationUtil.labs.components.overrideFlagsLabel', {
-          defaultMessage: 'Override flags',
+          defaultMessage: 'Overrides',
         }),
       getOverriddenIconTipLabel: () =>
         i18n.translate('presentationUtil.labs.components.overridenIconTipLabel', {
@@ -81,12 +85,11 @@ export const LabsStrings = {
     Flyout: {
       getTitleLabel: () =>
         i18n.translate('presentationUtil.labs.components.titleLabel', {
-          defaultMessage: 'Lab projects',
+          defaultMessage: 'Labs',
         }),
       getDescriptionMessage: () =>
         i18n.translate('presentationUtil.labs.components.descriptionMessage', {
-          defaultMessage:
-            'Lab projects are features and functionality that are in-progress or experimental in nature.  They can be enabled and disabled locally for your browser or tab, or in Kibana.',
+          defaultMessage: 'Try out our features that are in progress or experimental.',
         }),
       getResetToDefaultLabel: () =>
         i18n.translate('presentationUtil.labs.components.resetToDefaultLabel', {

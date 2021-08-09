@@ -7,7 +7,7 @@
  */
 
 import { of } from 'rxjs';
-import { App, AppNavLinkStatus, AppStatus } from '../types';
+import { App, AppDeepLink, AppNavLinkStatus, AppStatus } from '../types';
 import { getAppInfo } from './get_app_info';
 
 describe('getAppInfo', () => {
@@ -18,7 +18,19 @@ describe('getAppInfo', () => {
     title: 'some-title',
     status: AppStatus.accessible,
     navLinkStatus: AppNavLinkStatus.default,
+    searchable: true,
     appRoute: `/app/some-id`,
+    ...props,
+  });
+
+  const createDeepLink = (props: Partial<AppDeepLink> = {}): AppDeepLink => ({
+    id: 'some-deep-link-id',
+    title: 'my deep link',
+    path: '/my-deep-link',
+    navLinkStatus: AppNavLinkStatus.default,
+    searchable: true,
+    deepLinks: [],
+    keywords: [],
     ...props,
   });
 
@@ -31,6 +43,7 @@ describe('getAppInfo', () => {
       title: 'some-title',
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
+      searchable: true,
       appRoute: `/app/some-id`,
       keywords: [],
       deepLinks: [],
@@ -54,12 +67,15 @@ describe('getAppInfo', () => {
       title: 'some-title',
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
+      searchable: true,
       appRoute: `/app/some-id`,
       keywords: [],
       deepLinks: [
         {
           id: 'sub-id',
           title: 'sub-title',
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: true,
           keywords: [],
           deepLinks: [
             {
@@ -67,6 +83,8 @@ describe('getAppInfo', () => {
               title: 'sub-sub-title',
               path: '/sub-sub',
               keywords: [],
+              navLinkStatus: AppNavLinkStatus.hidden,
+              searchable: true,
               deepLinks: [], // default empty array added
             },
           ],
@@ -102,17 +120,83 @@ describe('getAppInfo', () => {
     );
   });
 
-  it('adds default meta fields to sublinks when needed', () => {
+  it('computes the searchable flag depending on the navLinkStatus when needed', () => {
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.default,
+          searchable: undefined,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        searchable: true,
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.visible,
+          searchable: undefined,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        searchable: true,
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.disabled,
+          searchable: undefined,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        searchable: false,
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: undefined,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        searchable: false,
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: true,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        searchable: true,
+      })
+    );
+  });
+
+  it('adds default deepLinks when needed', () => {
     const app = createApp({
+      order: 3,
       deepLinks: [
         {
           id: 'sub-id',
           title: 'sub-title',
+          order: 2,
           deepLinks: [
             {
               id: 'sub-sub-id',
               title: 'sub-sub-title',
               path: '/sub-sub',
+              order: 1,
               keywords: ['sub sub'],
             },
           ],
@@ -126,17 +210,25 @@ describe('getAppInfo', () => {
       title: 'some-title',
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
+      searchable: true,
       appRoute: `/app/some-id`,
       keywords: [],
+      order: 3,
       deepLinks: [
         {
           id: 'sub-id',
           title: 'sub-title',
-          keywords: [], // default empty array
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: true,
+          order: 2,
+          keywords: [],
           deepLinks: [
             {
               id: 'sub-sub-id',
               title: 'sub-sub-title',
+              navLinkStatus: AppNavLinkStatus.hidden,
+              searchable: true,
+              order: 1,
               path: '/sub-sub',
               keywords: ['sub sub'],
               deepLinks: [],
@@ -145,5 +237,128 @@ describe('getAppInfo', () => {
         },
       ],
     });
+  });
+
+  it('computes the deepLinks navLinkStatus when needed', () => {
+    expect(
+      getAppInfo(
+        createApp({
+          deepLinks: [
+            createDeepLink({
+              navLinkStatus: AppNavLinkStatus.visible,
+            }),
+          ],
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        deepLinks: [
+          expect.objectContaining({
+            navLinkStatus: AppNavLinkStatus.visible,
+          }),
+        ],
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          deepLinks: [
+            createDeepLink({
+              navLinkStatus: AppNavLinkStatus.default,
+            }),
+          ],
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        deepLinks: [
+          expect.objectContaining({
+            navLinkStatus: AppNavLinkStatus.hidden,
+          }),
+        ],
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          deepLinks: [
+            createDeepLink({
+              navLinkStatus: undefined,
+            }),
+          ],
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        deepLinks: [
+          expect.objectContaining({
+            navLinkStatus: AppNavLinkStatus.hidden,
+          }),
+        ],
+      })
+    );
+  });
+
+  it('computes the deepLinks searchable depending on the navLinkStatus when needed', () => {
+    expect(
+      getAppInfo(
+        createApp({
+          deepLinks: [
+            createDeepLink({
+              navLinkStatus: AppNavLinkStatus.default,
+              searchable: undefined,
+            }),
+          ],
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        deepLinks: [
+          expect.objectContaining({
+            searchable: true,
+          }),
+        ],
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          deepLinks: [
+            createDeepLink({
+              navLinkStatus: AppNavLinkStatus.hidden,
+              searchable: undefined,
+            }),
+          ],
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        deepLinks: [
+          expect.objectContaining({
+            searchable: false,
+          }),
+        ],
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          deepLinks: [
+            createDeepLink({
+              navLinkStatus: AppNavLinkStatus.hidden,
+              searchable: true,
+            }),
+          ],
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        deepLinks: [
+          expect.objectContaining({
+            searchable: true,
+          }),
+        ],
+      })
+    );
   });
 });

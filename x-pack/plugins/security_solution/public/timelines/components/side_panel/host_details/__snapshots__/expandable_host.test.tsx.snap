@@ -121,14 +121,17 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
           className="c0"
         >
           <OverviewWrapper
+            data-test-subj="host-overview"
             direction="column"
           >
             <EuiFlexGroup
               className="c1"
+              data-test-subj="host-overview"
               direction="column"
             >
               <div
                 className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+                data-test-subj="host-overview"
               >
                 <OverviewDescriptionList
                   descriptionList={

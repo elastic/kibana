@@ -6,11 +6,11 @@
  */
 
 import { getMonitoringUsageCollector } from './get_usage_collector';
-import { fetchClustersLegacy } from '../../lib/alerts/fetch_clusters';
+import { fetchClusters } from '../../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
 jest.mock('../../lib/alerts/fetch_clusters', () => ({
-  fetchClustersLegacy: jest.fn().mockImplementation(() => {
+  fetchClusters: jest.fn().mockImplementation(() => {
     return [
       {
         clusterUuid: '1abc',
@@ -59,7 +59,8 @@ jest.mock('./lib/fetch_license_type', () => ({
 }));
 
 describe('getMonitoringUsageCollector', () => {
-  const esClient = elasticsearchServiceMock.createLegacyClusterClient();
+  const esClient = elasticsearchServiceMock.createClusterClient();
+  const getEsClient = () => esClient;
   const config: any = {
     ui: {
       ccs: {
@@ -72,7 +73,7 @@ describe('getMonitoringUsageCollector', () => {
     const usageCollection: any = {
       makeUsageCollector: jest.fn(),
     };
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
 
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
 
@@ -122,7 +123,7 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
@@ -149,11 +150,11 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
-    (fetchClustersLegacy as jest.Mock).mockImplementation(() => {
+    (fetchClusters as jest.Mock).mockImplementation(() => {
       return [];
     });
 
@@ -169,11 +170,11 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, esClient);
+    getMonitoringUsageCollector(usageCollection, config, getEsClient);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
-    (fetchClustersLegacy as jest.Mock).mockImplementation(() => {
+    (fetchClusters as jest.Mock).mockImplementation(() => {
       return [];
     });
 

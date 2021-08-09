@@ -29,7 +29,7 @@ export interface FeedActivity {
   id: string;
   message: string;
   timestamp: string;
-  sourceId: string;
+  sourceId?: string;
 }
 
 export const RecentActivity: React.FC = () => {
@@ -98,23 +98,29 @@ export const RecentActivityItem: React.FC<FeedActivity> = ({
   return (
     <div className={`activity ${status ? `activity--${status}` : ''}`}>
       <div className="activity__message">
-        <EuiLinkTo
-          onClick={onClick}
-          color={status === 'error' ? 'danger' : 'primary'}
-          to={getContentSourcePath(SOURCE_DETAILS_PATH, sourceId, true)}
-          data-test-subj="viewSourceDetailsLink"
-        >
-          {id} {message}
-          {status === 'error' && (
-            <span className="activity--error__label">
-              {' '}
-              <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.recentActivitySourceLink.linkLabel"
-                defaultMessage="View Source"
-              />
-            </span>
-          )}
-        </EuiLinkTo>
+        {sourceId ? (
+          <EuiLinkTo
+            onClick={onClick}
+            color={status === 'error' ? 'danger' : 'primary'}
+            to={getContentSourcePath(SOURCE_DETAILS_PATH, sourceId, true)}
+            data-test-subj="viewSourceDetailsLink"
+          >
+            {id} {message}
+            {status === 'error' && (
+              <span className="activity--error__label">
+                {' '}
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.recentActivitySourceLink.linkLabel"
+                  defaultMessage="View Source"
+                />
+              </span>
+            )}
+          </EuiLinkTo>
+        ) : (
+          <div data-test-subj="newUserTextWrapper">
+            {id} {message}
+          </div>
+        )}
       </div>
       <div className="activity__date">{moment.utc(timestamp).fromNow()}</div>
     </div>

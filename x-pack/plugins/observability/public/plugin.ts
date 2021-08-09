@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ConfigSchema } from '.';
 import {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
-import {
+  AppDeepLink,
   AppMountParameters,
+  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -24,18 +24,24 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
+import { CasesUiStart } from '../../cases/public';
 import type { LensPublicStart } from '../../lens/public';
-import { registerDataHandler } from './data_handler';
-import { createCallObservabilityApi } from './services/call_observability_api';
-import { createNavigationRegistry } from './services/navigation_registry';
-import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
-import { ConfigSchema } from '.';
-import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
+import { observabilityAppId, observabilityFeatureId } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
+import { registerDataHandler } from './data_handler';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createCallObservabilityApi } from './services/call_observability_api';
+import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
+import { updateGlobalNavigation } from './update_global_navigation';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -46,10 +52,12 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
+  cases: CasesUiStart;
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
+  discover: DiscoverStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -64,6 +72,29 @@ export class Plugin
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly navigationRegistry = createNavigationRegistry();
+
+  // Define deep links as constant and hidden. Whether they are shown or hidden
+  // in the global navigation will happen in `updateGlobalNavigation`.
+  private readonly deepLinks: AppDeepLink[] = [
+    {
+      id: 'alerts',
+      title: i18n.translate('xpack.observability.alertsLinkTitle', {
+        defaultMessage: 'Alerts',
+      }),
+      order: 8001,
+      path: '/alerts',
+      navLinkStatus: AppNavLinkStatus.hidden,
+    },
+    {
+      id: 'cases',
+      title: i18n.translate('xpack.observability.casesLinkTitle', {
+        defaultMessage: 'Cases',
+      }),
+      order: 8002,
+      path: '/cases',
+      navLinkStatus: AppNavLinkStatus.hidden,
+    },
+  ];
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -80,7 +111,7 @@ export class Plugin
     createCallObservabilityApi(coreSetup.http);
 
     const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
-      pluginsSetup.triggersActionsUi.alertTypeRegistry
+      pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
     const mount = async (params: AppMountParameters<unknown>) => {
@@ -99,48 +130,26 @@ export class Plugin
       });
     };
 
-    const updater$ = this.appUpdater$;
-
-    coreSetup.application.register({
-      id: 'observability-overview',
-      title: 'Overview',
+    const appUpdater$ = this.appUpdater$;
+    const app = {
       appRoute: '/app/observability',
-      order: 8000,
       category,
+      deepLinks: this.deepLinks,
       euiIconType,
+      id: observabilityAppId,
       mount,
-      updater$,
-    });
+      order: 8000,
+      title: i18n.translate('xpack.observability.overviewLinkTitle', {
+        defaultMessage: 'Overview',
+      }),
+      updater$: appUpdater$,
+    };
 
-    if (config.unsafe.alertingExperience.enabled) {
-      coreSetup.application.register({
-        id: 'observability-alerts',
-        title: 'Alerts',
-        appRoute: '/app/observability/alerts',
-        order: 8025,
-        category,
-        euiIconType,
-        mount,
-        updater$,
-      });
-    }
-
-    if (config.unsafe.cases.enabled) {
-      coreSetup.application.register({
-        id: 'observability-cases',
-        title: 'Cases',
-        appRoute: '/app/observability/cases',
-        order: 8050,
-        category,
-        euiIconType,
-        mount,
-        updater$,
-      });
-    }
+    coreSetup.application.register(app);
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
-        id: 'observability',
+        id: observabilityFeatureId,
         title: i18n.translate('xpack.observability.featureCatalogueTitle', {
           defaultMessage: 'Observability',
         }),
@@ -169,13 +178,47 @@ export class Plugin
     }
 
     this.navigationRegistry.registerSections(
-      of([
-        {
-          label: '',
-          sortKey: 100,
-          entries: [{ label: 'Overview', app: 'observability-overview', path: '/overview' }],
-        },
-      ])
+      from(appUpdater$).pipe(
+        map((value) => {
+          const deepLinks = value(app)?.deepLinks ?? [];
+
+          const overviewLink = {
+            label: i18n.translate('xpack.observability.overviewLinkTitle', {
+              defaultMessage: 'Overview',
+            }),
+            app: observabilityAppId,
+            path: '/overview',
+          };
+
+          // Reformat the visible links to be NavigationEntry objects instead of
+          // AppDeepLink objects.
+          //
+          // In our case the deep links and sections being registered are the
+          // same, and the logic to hide them based on flags or capabilities is
+          // the same, so we just want to make a new list with the properties
+          // needed by `registerSections`, which are different than the
+          // properties used by the deepLinks.
+          //
+          // See https://github.com/elastic/kibana/issues/103325.
+          const otherLinks: NavigationEntry[] = deepLinks
+            .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
+            .map((link) => ({
+              app: observabilityAppId,
+              label: link.title,
+              path: link.path ?? '',
+            }));
+
+          const sections = [
+            {
+              label: '',
+              sortKey: 100,
+              entries: [overviewLink, ...otherLinks],
+            },
+          ];
+
+          return sections;
+        })
+      )
     );
 
     return {
@@ -187,8 +230,16 @@ export class Plugin
       },
     };
   }
+
   public start({ application }: CoreStart) {
-    toggleOverviewLinkInNav(this.appUpdater$, application);
+    const config = this.initializerContext.config.get();
+
+    updateGlobalNavigation({
+      capabilities: application.capabilities,
+      config,
+      deepLinks: this.deepLinks,
+      updater$: this.appUpdater$,
+    });
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,

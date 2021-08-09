@@ -122,6 +122,7 @@ describe('CoreUsageDataService', () => {
           hidden: true,
           namespaceType: 'agnostic',
           mappings: expect.anything(),
+          migrations: expect.anything(),
         });
       });
     });
@@ -182,6 +183,19 @@ describe('CoreUsageDataService', () => {
               'pri.store.size': '4000',
             },
           ],
+        } as any);
+        elasticsearch.client.asInternalUser.search.mockResolvedValueOnce({
+          body: {
+            hits: { total: { value: 6 } },
+            aggregations: {
+              aliases: {
+                buckets: {
+                  active: { doc_count: 1 },
+                  disabled: { doc_count: 2 },
+                },
+              },
+            },
+          },
         } as any);
         const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
         typeRegistry.getAllTypes.mockReturnValue([
@@ -329,6 +343,12 @@ describe('CoreUsageDataService', () => {
                     "storeSizeBytes": 2000,
                   },
                 ],
+                "legacyUrlAliases": Object {
+                  "activeCount": 1,
+                  "disabledCount": 2,
+                  "inactiveCount": 3,
+                  "totalCount": 6,
+                },
               },
             },
           }

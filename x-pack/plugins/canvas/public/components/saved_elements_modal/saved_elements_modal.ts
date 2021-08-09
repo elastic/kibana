@@ -11,7 +11,7 @@ import { compose, withState } from 'recompose';
 import { camelCase } from 'lodash';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
-import { withServices, WithServicesProps } from '../../services';
+import { withServices, WithServicesProps, pluginServices } from '../../services';
 // @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';
 // @ts-expect-error untyped local
@@ -68,6 +68,7 @@ const mergeProps = (
   dispatchProps: DispatchProps,
   ownProps: OwnPropsWithState & WithServicesProps
 ): ComponentProps => {
+  const notifyService = pluginServices.getServices().notify;
   const { pageId } = stateProps;
   const { onClose, search, setCustomElements } = ownProps;
 
@@ -94,7 +95,7 @@ const mergeProps = (
       try {
         await findCustomElements();
       } catch (err) {
-        ownProps.services.notify.error(err, {
+        notifyService.error(err, {
           title: `Couldn't find custom elements`,
         });
       }
@@ -105,7 +106,7 @@ const mergeProps = (
         await customElementService.remove(id);
         await findCustomElements();
       } catch (err) {
-        ownProps.services.notify.error(err, {
+        notifyService.error(err, {
           title: `Couldn't delete custom elements`,
         });
       }
@@ -121,7 +122,7 @@ const mergeProps = (
         });
         await findCustomElements();
       } catch (err) {
-        ownProps.services.notify.error(err, {
+        notifyService.error(err, {
           title: `Couldn't update custom elements`,
         });
       }

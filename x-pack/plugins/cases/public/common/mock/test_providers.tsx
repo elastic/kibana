@@ -10,6 +10,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { OwnerProvider } from '../../components/owner_context';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
@@ -29,33 +31,33 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 const TestProvidersComponent: React.FC<Props> = ({ children }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>{children}</ThemeProvider>
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>{children}</OwnerProvider>
+      </ThemeProvider>
     </MockKibanaContextProvider>
   </I18nProvider>
 );
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
-export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => {
-  return {
-    path: 'path',
-    type: 'type',
-    value: ('mockedValue' as unknown) as T,
-    isPristine: false,
-    isValidating: false,
-    isValidated: false,
-    isChangingValue: false,
-    errors: [],
-    isValid: true,
-    getErrorsMessages: jest.fn(),
-    onChange: jest.fn(),
-    setValue: jest.fn(),
-    setErrors: jest.fn(),
-    clearErrors: jest.fn(),
-    validate: jest.fn(),
-    reset: jest.fn(),
-    __isIncludedInOutput: true,
-    __serializeValue: jest.fn(),
-    ...options,
-  };
-};
+export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
+  path: 'path',
+  type: 'type',
+  value: ('mockedValue' as unknown) as T,
+  isPristine: false,
+  isValidating: false,
+  isValidated: false,
+  isChangingValue: false,
+  errors: [],
+  isValid: true,
+  getErrorsMessages: jest.fn(),
+  onChange: jest.fn(),
+  setValue: jest.fn(),
+  setErrors: jest.fn(),
+  clearErrors: jest.fn(),
+  validate: jest.fn(),
+  reset: jest.fn(),
+  __isIncludedInOutput: true,
+  __serializeValue: jest.fn(),
+  ...options,
+});

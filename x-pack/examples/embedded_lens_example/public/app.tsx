@@ -17,13 +17,16 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
+import { ViewMode } from '../../../../src/plugins/embeddable/public';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
+  LensEmbeddableInput,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
@@ -112,12 +115,15 @@ export const App = (props: {
 }) => {
   const [color, setColor] = useState('green');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
+  const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
   const [time, setTime] = useState({
     from: 'now-5d',
     to: 'now',
   });
+
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -144,6 +150,7 @@ export const App = (props: {
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="lns-example-change-color"
                       isLoading={isLoading}
                       onClick={() => {
                         // eslint-disable-next-line no-bitwise
@@ -172,12 +179,59 @@ export const App = (props: {
                         setColor(newColor);
                       }}
                     >
-                      Edit
+                      Edit in Lens (new tab)
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      aria-label="Open lens in same tab"
+                      data-test-subj="lns-example-open-editor"
+                      isDisabled={!props.plugins.lens.canUseEditor()}
+                      onClick={() => {
+                        props.plugins.lens.navigateToPrefilledEditor(
+                          {
+                            id: '',
+                            timeRange: time,
+                            attributes: getLensAttributes(props.defaultIndexPattern!, color),
+                          },
+                          false
+                        );
+                      }}
+                    >
+                      Edit in Lens (same tab)
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      aria-label="Save visualization into library or embed directly into any dashboard"
+                      data-test-subj="lns-example-save"
+                      isDisabled={!getLensAttributes(props.defaultIndexPattern, color)}
+                      onClick={() => {
+                        setIsSaveModalVisible(true);
+                      }}
+                    >
+                      Save Visualization
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      aria-label="Change time range"
+                      data-test-subj="lns-example-change-time-range"
+                      isDisabled={!getLensAttributes(props.defaultIndexPattern, color)}
+                      onClick={() => {
+                        setTime({
+                          from: '2015-09-18T06:31:44.000Z',
+                          to: '2015-09-23T18:31:44.000Z',
+                        });
+                      }}
+                    >
+                      Change time range
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <LensComponent
                   id=""
+                  withActions
                   style={{ height: 500 }}
                   timeRange={time}
                   attributes={getLensAttributes(props.defaultIndexPattern, color)}
@@ -196,10 +250,29 @@ export const App = (props: {
                   onTableRowClick={(_data) => {
                     // call back event for on table row click event
                   }}
+                  viewMode={ViewMode.VIEW}
                 />
+                {isSaveModalVisible && (
+                  <LensSaveModalComponent
+                    initialInput={
+                      (getLensAttributes(
+                        props.defaultIndexPattern,
+                        color
+                      ) as unknown) as LensEmbeddableInput
+                    }
+                    onSave={() => {}}
+                    onClose={() => setIsSaveModalVisible(false)}
+                  />
+                )}
               </>
             ) : (
-              <p>This demo only works if your default index pattern is set and time based</p>
+              <EuiCallOut
+                title="Please define a default index pattern to use this demo"
+                color="danger"
+                iconType="alert"
+              >
+                <p>This demo only works if your default index pattern is set and time based</p>
+              </EuiCallOut>
             )}
           </EuiPageContentBody>
         </EuiPageContent>

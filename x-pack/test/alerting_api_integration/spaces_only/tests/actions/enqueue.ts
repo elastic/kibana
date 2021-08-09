@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { estypes } from '@elastic/elasticsearch';
 import { Spaces } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -18,7 +19,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -70,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should cleanup task after a failure', async () => {
-      const testStart = new Date();
+      const testStart = new Date().toISOString();
       const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
@@ -135,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect(searchResult.hits.total.value).to.eql(0);
+        expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(0);
       });
     });
   });

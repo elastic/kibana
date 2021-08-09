@@ -10,16 +10,17 @@ import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
+import { RowRenderer } from '../../../../../../../common';
 import { Fields } from '../../../../../../../common/search_strategy';
 import { ID_FIELD_NAME } from '../../../../../../common/components/event_details/event_id';
-import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { RowRendererContainer } from '../row_renderer';
 import { ThreatMatchRow } from './threat_match_row';
 
 const SpacedContainer = styled.div`
   margin: ${({ theme }) => theme.eui.paddingSizes.s} 0;
 `;
 
-export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) => {
+export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, timelineId }) => {
   const indicators = get(data, 'threat.indicator') as Fields[];
   const eventId = get(data, ID_FIELD_NAME);
 
@@ -30,7 +31,12 @@ export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, timelineId }) 
           const contextId = `threat-match-row-${timelineId}-${eventId}-${index}`;
           return (
             <Fragment key={contextId}>
-              <ThreatMatchRow contextId={contextId} data={indicator} eventId={eventId} />
+              <ThreatMatchRow
+                contextId={contextId}
+                data={indicator}
+                eventId={eventId}
+                isDraggable={isDraggable}
+              />
               {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
             </Fragment>
           );

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { of } from 'rxjs';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -22,6 +24,14 @@ import type { FleetAppContext } from '../plugin';
 export * from '../services/artifacts/mocks';
 
 export const createAppContextStartContractMock = (): FleetAppContext => {
+  const config = {
+    agents: { enabled: true, elasticsearch: {} },
+    enabled: true,
+    agentIdVerificationEnabled: true,
+  };
+
+  const config$ = of(config);
+
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     data: dataPluginMock.createStartContract(),
@@ -33,7 +43,9 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
+      agentIdVerificationEnabled: true,
     },
+    config$,
     kibanaVersion: '8.0.0',
     kibanaBranch: 'master',
   };
@@ -63,6 +75,9 @@ export const createPackagePolicyServiceMock = () => {
     listIds: jest.fn(),
     update: jest.fn(),
     runExternalCallbacks: jest.fn(),
+    upgrade: jest.fn(),
+    getUpgradeDryRunDiff: jest.fn(),
+    getUpgradePackagePolicyInfo: jest.fn(),
   } as jest.Mocked<PackagePolicyServiceInterface>;
 };
 
@@ -76,6 +91,7 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     list: jest.fn(),
     getDefaultAgentPolicyId: jest.fn(),
     getFullAgentPolicy: jest.fn(),
+    getByIds: jest.fn(),
   };
 };
 

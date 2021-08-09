@@ -5,28 +5,13 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { get } from 'lodash';
-import { MonitoringConfig } from '../../../config';
+import { estypes } from '@elastic/elasticsearch';
 import { StackProductUsage } from '../types';
-
-interface ESResponse {
-  hits: {
-    hits: ESResponseHits[];
-  };
-  aggregations: {
-    indices: {
-      buckets: ESIndicesBucket;
-    };
-  };
-}
 
 interface ESIndicesBucket {
   key: string;
-}
-
-interface ESResponseHits {
-  _source: ClusterStats;
 }
 
 interface ClusterStats {
@@ -41,16 +26,15 @@ interface ClusterStats {
 }
 
 export async function fetchESUsage(
-  config: MonitoringConfig,
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuid: string,
   index: string
 ): Promise<StackProductUsage> {
-  const params = {
+  const params: estypes.SearchRequest = {
     index,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_stats.nodes.count.total',
       'aggregations.indices.buckets',
     ],
@@ -101,8 +85,8 @@ export async function fetchESUsage(
     },
   };
 
-  const response = await callCluster('search', params);
-  const esResponse = response as ESResponse;
+  const { body: response } = await callCluster.search(params);
+  const esResponse = response as estypes.SearchResponse<ClusterStats>;
   if (esResponse.hits.hits.length === 0) {
     return {
       count: 0,
@@ -112,7 +96,7 @@ export async function fetchESUsage(
   }
 
   const hit = esResponse.hits.hits[0]._source;
-  const count = hit.cluster_stats.nodes.count.total;
+  const count = hit?.cluster_stats.nodes.count.total || 0;
   const buckets = get(esResponse, 'aggregations.indices.buckets', []) as ESIndicesBucket[];
   const metricbeatUsed = Boolean(buckets.find((indexBucket) => indexBucket.key.includes('-mb-')));
 

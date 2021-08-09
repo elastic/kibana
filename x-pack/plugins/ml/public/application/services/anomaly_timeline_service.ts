@@ -25,6 +25,9 @@ import {
 } from '../explorer/explorer_utils';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
 import { MlResultsService } from './results_service';
+import { EntityField } from '../../../common/util/anomaly_utils';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { isPopulatedObject } from '../../../common';
 
 /**
  * Service for retrieving anomaly swim lanes data.
@@ -45,6 +48,21 @@ export class AnomalyTimelineService {
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
     this.timeFilter.enableTimeRangeSelector();
+  }
+
+  public static isSwimlaneData(arg: unknown): arg is SwimlaneData {
+    return isPopulatedObject(arg, ['interval', 'points', 'laneLabels']);
+  }
+
+  public static isOverallSwimlaneData(arg: unknown): arg is OverallSwimlaneData {
+    // Important to check if all laneLabels are 'Overall'
+    // because ViewBySwimLaneData also extends OverallSwimlaneData
+    return (
+      this.isSwimlaneData(arg) &&
+      isPopulatedObject(arg, ['earliest', 'latest']) &&
+      arg.laneLabels.length === 1 &&
+      arg.laneLabels[0] === OVERALL_LABEL
+    );
   }
 
   public setTimeRange(timeRange: TimeRange) {
@@ -98,7 +116,8 @@ export class AnomalyTimelineService {
   public async loadOverallData(
     selectedJobs: ExplorerJob[],
     chartWidth?: number,
-    bucketInterval?: TimeBucketsInterval
+    bucketInterval?: TimeBucketsInterval,
+    overallScore?: number
   ): Promise<OverallSwimlaneData> {
     const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
@@ -127,7 +146,8 @@ export class AnomalyTimelineService {
       1,
       overallBucketsBounds.min.valueOf(),
       overallBucketsBounds.max.valueOf(),
-      interval.asSeconds() + 's'
+      interval.asSeconds() + 's',
+      overallScore
     );
     const overallSwimlaneData = this.processOverallResults(
       resp.results,
@@ -161,7 +181,8 @@ export class AnomalyTimelineService {
     fromPage: number,
     swimlaneContainerWidth?: number,
     influencersFilterQuery?: any,
-    bucketInterval?: TimeBucketsInterval
+    bucketInterval?: TimeBucketsInterval,
+    swimLaneSeverity?: number
   ): Promise<SwimlaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
 
@@ -195,7 +216,8 @@ export class AnomalyTimelineService {
         searchBounds.max.valueOf(),
         intervalMs,
         perPage,
-        fromPage
+        fromPage,
+        swimLaneSeverity
       );
     } else {
       response = await this.mlResultsService.getInfluencerValueMaxScoreByTime(
@@ -208,7 +230,8 @@ export class AnomalyTimelineService {
         swimlaneLimit,
         perPage,
         fromPage,
-        influencersFilterQuery
+        influencersFilterQuery,
+        swimLaneSeverity
       );
     }
 
@@ -236,7 +259,9 @@ export class AnomalyTimelineService {
     swimlaneLimit: number,
     perPage: number,
     fromPage: number,
-    swimlaneContainerWidth: number
+    swimlaneContainerWidth: number,
+    selectionInfluencers: EntityField[],
+    influencersFilterQuery: InfluencersFilterQuery
   ) {
     const selectedJobIds = selectedJobs.map((d) => d.id);
 
@@ -249,7 +274,9 @@ export class AnomalyTimelineService {
         latestMs,
         swimlaneLimit,
         perPage,
-        fromPage
+        fromPage,
+        selectionInfluencers,
+        influencersFilterQuery
       );
       if (resp.influencers[viewBySwimlaneFieldName] === undefined) {
         return [];
@@ -271,6 +298,8 @@ export class AnomalyTimelineService {
         earliestMs,
         latestMs,
         this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asMilliseconds(),
+        perPage,
+        fromPage,
         swimlaneLimit
       );
       return Object.keys(resp.results);

@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { UserActionContentToolbar } from './user_action_content_toolbar';
+import {
+  UserActionContentToolbar,
+  UserActionContentToolbarProps,
+} from './user_action_content_toolbar';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -18,24 +21,22 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../common/lib/kibana', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        application: {
-          getUrlForApp: jest.fn(),
-        },
+jest.mock('../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: jest.fn(),
       },
-    }),
-  };
-});
+    },
+  }),
+}));
 
-const props = {
+const props: UserActionContentToolbarProps = {
   getCaseDetailHrefWithCommentId: jest.fn().mockReturnValue('case-detail-url-with-comment-id-1'),
   id: '1',
   editLabel: 'edit',
   quoteLabel: 'quote',
-  disabled: false,
+  userCanCrud: true,
   isLoading: false,
   onEdit: jest.fn(),
   onQuote: jest.fn(),

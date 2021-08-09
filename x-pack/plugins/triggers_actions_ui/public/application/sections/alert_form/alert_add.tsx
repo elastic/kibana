@@ -15,9 +15,10 @@ import {
   AlertTypeParams,
   AlertUpdates,
   AlertFlyoutCloseReason,
+  IErrorObject,
   AlertAddProps,
 } from '../../../types';
-import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
+import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
@@ -32,7 +33,7 @@ import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 const AlertAdd = ({
   consumer,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   actionTypeRegistry,
   onClose,
   canChangeTrigger,
@@ -102,6 +103,18 @@ const AlertAdd = ({
     }
   }, [alert.params, initialAlertParams, setInitialAlertParams]);
 
+  const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      setIsLoading(false);
+      setAlertActionsErrors([...res]);
+    })();
+  }, [alert, actionTypeRegistry]);
+
   const checkForChangesAndCloseFlyout = () => {
     if (
       hasAlertChanged(alert, initialAlert, false) ||
@@ -124,10 +137,9 @@ const AlertAdd = ({
     }
   };
 
-  const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
-  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+  const alertType = alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null;
+  const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    actionTypeRegistry,
     alertType
   );
 
@@ -163,6 +175,7 @@ const AlertAdd = ({
         aria-labelledby="flyoutAlertAddTitle"
         size="m"
         maxWidth={620}
+        ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
@@ -189,15 +202,16 @@ const AlertAdd = ({
                   }
                 )}
                 actionTypeRegistry={actionTypeRegistry}
-                alertTypeRegistry={alertTypeRegistry}
+                ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
               />
             </EuiFlyoutBody>
             <AlertAddFooter
               isSaving={isSaving}
+              isFormLoading={isLoading}
               onSave={async () => {
                 setIsSaving(true);
-                if (!isValidAlert(alert, alertErrors, alertActionsErrors)) {
+                if (isLoading || !isValidAlert(alert, alertErrors, alertActionsErrors)) {
                   setAlert(
                     getAlertWithInvalidatedFields(
                       alert as Alert,

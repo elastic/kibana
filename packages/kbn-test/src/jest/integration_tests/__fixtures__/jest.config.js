@@ -13,7 +13,7 @@ module.exports = {
   reporters: [
     'default',
     [
-      `${REPO_ROOT}/packages/kbn-test/target/jest/junit_reporter`,
+      `${REPO_ROOT}/node_modules/@kbn/test/target_node/jest/junit_reporter`,
       {
         reportName: 'JUnit Reporter Integration Test',
         rootDirectory: resolve(

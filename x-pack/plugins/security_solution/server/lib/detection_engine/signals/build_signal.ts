@@ -10,6 +10,7 @@ import { RulesSchema } from '../../../../common/detection_engine/schemas/respons
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 import { isEventTypeSignal } from './build_event_type_signal';
 import { Signal, Ancestor, BaseSignalHit, ThresholdResult } from './types';
+import { getValidDateFromDoc } from './utils';
 
 /**
  * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child
@@ -103,6 +104,7 @@ const isThresholdResult = (thresholdResult: SearchTypes): thresholdResult is Thr
 
 /**
  * Creates signal fields that are only available in the special case where a signal has only 1 parent signal/event.
+ * We copy the original time from the document as "original_time" since we override the timestamp with the current date time.
  * @param doc The parent signal/event of the new signal to be built.
  */
 export const additionalSignalFields = (doc: BaseSignalHit) => {
@@ -110,10 +112,13 @@ export const additionalSignalFields = (doc: BaseSignalHit) => {
   if (thresholdResult != null && !isThresholdResult(thresholdResult)) {
     throw new Error(`threshold_result failed to validate: ${thresholdResult}`);
   }
+  const originalTime = getValidDateFromDoc({
+    doc,
+    timestampOverride: undefined,
+  });
   return {
     parent: buildParent(removeClashes(doc)),
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    original_time: doc._source['@timestamp'], // This field has already been replaced with timestampOverride, if provided.
+    original_time: originalTime != null ? originalTime.toISOString() : undefined,
     original_event: doc._source?.event ?? undefined,
     threshold_result: thresholdResult,
     original_signal:

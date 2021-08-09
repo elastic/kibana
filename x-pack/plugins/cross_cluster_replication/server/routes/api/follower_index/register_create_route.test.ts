@@ -8,9 +8,8 @@
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError, License } from '../../../shared_imports';
-import { formatEsError } from '../../../lib/format_es_error';
-import { mockRouteContext } from '../test_lib';
+import { handleEsError } from '../../../shared_imports';
+import { mockRouteContext, mockLicense } from '../test_lib';
 import { registerCreateRoute } from './register_create_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -23,12 +22,9 @@ describe('[CCR API] Create follower index', () => {
 
     registerCreateRoute({
       router,
-      license: {
-        guardApiRoute: (route: any) => route,
-      } as License,
+      license: mockLicense,
       lib: {
-        isEsError,
-        formatEsError,
+        handleEsError,
       },
     });
 
@@ -37,7 +33,9 @@ describe('[CCR API] Create follower index', () => {
 
   it('should return 200 status when follower index is created', async () => {
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+      ccr: {
+        follow: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({

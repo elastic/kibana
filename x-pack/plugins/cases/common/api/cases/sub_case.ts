@@ -10,10 +10,12 @@ import * as rt from 'io-ts';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { CasesStatusResponseRt } from './status';
-import { CaseStatusRt } from './status';
+import { CaseStatusRt, CasesStatusResponseRt } from './status';
 
 const SubCaseBasicRt = rt.type({
+  /**
+   * The status of the sub case (open, closed, in-progress)
+   */
   status: CaseStatusRt,
 });
 
@@ -26,19 +28,48 @@ export const SubCaseAttributesRt = rt.intersection([
     created_by: rt.union([UserRT, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRT, rt.null]),
+    owner: rt.string,
   }),
 ]);
 
 export const SubCasesFindRequestRt = rt.partial({
+  /**
+   * The status of the sub case (open, closed, in-progress)
+   */
   status: CaseStatusRt,
+  /**
+   * Operator to use for the `search` field
+   */
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
+  /**
+   * The fields in the entity to return in the response
+   */
   fields: rt.array(rt.string),
+  /**
+   * The page of objects to return
+   */
   page: NumberFromString,
+  /**
+   * The number of objects to include in each page
+   */
   perPage: NumberFromString,
+  /**
+   * An Elasticsearch simple_query_string
+   */
   search: rt.string,
+  /**
+   * The fields to perform the simple_query_string parsed query against
+   */
   searchFields: rt.array(rt.string),
+  /**
+   * The field to use for sorting the found objects.
+   */
   sortField: rt.string,
+  /**
+   * The order to sort by
+   */
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+  owner: rt.string,
 });
 
 export const SubCaseResponseRt = rt.intersection([
@@ -78,3 +109,4 @@ export type SubCasesResponse = rt.TypeOf<typeof SubCasesResponseRt>;
 export type SubCasesFindResponse = rt.TypeOf<typeof SubCasesFindResponseRt>;
 export type SubCasePatchRequest = rt.TypeOf<typeof SubCasePatchRequestRt>;
 export type SubCasesPatchRequest = rt.TypeOf<typeof SubCasesPatchRequestRt>;
+export type SubCasesFindRequest = rt.TypeOf<typeof SubCasesFindRequestRt>;

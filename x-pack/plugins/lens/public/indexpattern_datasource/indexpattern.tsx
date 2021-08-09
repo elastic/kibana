@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -44,7 +43,7 @@ import {
 
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
+import { IndexPatternColumn, getErrorMessages } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -56,6 +55,7 @@ import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
+import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -69,11 +69,15 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
-export * from './rename_columns';
-export * from './format_column';
-export * from './time_scale';
-export * from './counter_rate';
-export * from './suffix_formatter';
+export {
+  CounterRateArgs,
+  ExpressionFunctionCounterRate,
+  counterRate,
+} from '../../common/expressions';
+export { FormatColumnArgs, supportedFormats, formatColumn } from '../../common/expressions';
+export { getSuffixFormatter, unitSuffixesLong } from '../../common/suffix_formatter';
+export { timeScale, TimeScaleArgs } from '../../common/expressions';
+export { renameColumns } from '../../common/expressions';
 
 export function getIndexPatternDatasource({
   core,
@@ -323,6 +327,11 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
+
+    canCloseDimensionEditor: (state) => {
+      return !state.isDimensionClosePrevented;
+    },
+
     getDropProps,
     onDrop,
 
@@ -357,17 +366,14 @@ export function getIndexPatternDatasource({
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId, columnId }) => {
-      const layer = { ...state.layers[layerId] };
-      const current = state.layers[layerId].incompleteColumns || {};
-      if (!Object.values(current).length) {
+      const layer = state.layers[layerId];
+      if (!Object.values(layer.incompleteColumns || {}).length) {
         return;
       }
-      const newIncomplete: Record<string, IncompleteColumn> = { ...current };
-      delete newIncomplete[columnId];
       return mergeLayer({
         state,
         layerId,
-        newLayer: { ...layer, incompleteColumns: newIncomplete },
+        newLayer: { ...layer, incompleteColumns: undefined },
       });
     },
 
@@ -408,13 +414,20 @@ export function getIndexPatternDatasource({
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.values(state.layers).map((layer) =>
-        (getErrorMessages(layer, state.indexPatterns[layer.indexPatternId]) ?? []).map(
-          (message) => ({
-            shortMessage: '', // Not displayed currently
-            longMessage: message,
-          })
-        )
+      const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
+        (
+          getErrorMessages(
+            layer,
+            state.indexPatterns[layer.indexPatternId],
+            state,
+            layerId,
+            core
+          ) ?? []
+        ).map((message) => ({
+          shortMessage: '', // Not displayed currently
+          longMessage: typeof message === 'string' ? message : message.message,
+          fixAction: typeof message === 'object' ? message.fixAction : undefined,
+        }))
       );
 
       // Single layer case, no need to explain more
@@ -450,6 +463,7 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
+    getWarningMessages: getStateTimeShiftWarningMessages,
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !state.indexPatterns[id]);

@@ -12,7 +12,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { SurrDocType } from '../../api/context';
 
 export function ActionBarWarning({ docCount, type }: { docCount: number; type: SurrDocType }) {
-  if (type === 'predecessors') {
+  if (type === SurrDocType.PREDECESSORS) {
     return (
       <EuiCallOut
         color="warning"

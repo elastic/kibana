@@ -35,6 +35,7 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
     | 'hosts'
     | 'username'
     | 'password'
+    | 'serviceAccountToken'
   > & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
@@ -61,6 +62,7 @@ interface LegacyElasticsearchClientConfigOverrides {
 /** @internal */
 type ExtendedConfigOptions = ConfigOptions &
   Partial<{
+    serviceAccountToken?: string;
     ssl: Partial<{
       rejectUnauthorized: boolean;
       checkServerIdentity: typeof checkServerIdentity;
@@ -106,9 +108,14 @@ export function parseElasticsearchClientConfig(
     esClientConfig.sniffInterval = getDurationAsMs(config.sniffInterval);
   }
 
-  const needsAuth = auth !== false && config.username && config.password;
+  const needsAuth =
+    auth !== false && ((config.username && config.password) || config.serviceAccountToken);
   if (needsAuth) {
-    esClientConfig.httpAuth = `${config.username}:${config.password}`;
+    if (config.username) {
+      esClientConfig.httpAuth = `${config.username}:${config.password}`;
+    } else if (config.serviceAccountToken) {
+      esClientConfig.serviceAccountToken = config.serviceAccountToken;
+    }
   }
 
   if (Array.isArray(config.hosts)) {

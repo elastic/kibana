@@ -28,7 +28,6 @@ export enum ReindexStatus {
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
-
 export interface QueueSettings extends SavedObjectAttributes {
   /**
    * A Unix timestamp of when the reindex operation was enqueued.
@@ -179,6 +178,9 @@ export interface DeprecationInfo {
   message: string;
   url: string;
   details?: string;
+  _meta?: {
+    [key: string]: string;
+  };
 }
 
 export interface IndexSettingsDeprecationInfo {
@@ -190,11 +192,9 @@ export interface DeprecationAPIResponse {
   node_settings: DeprecationInfo[];
   index_settings: IndexSettingsDeprecationInfo;
 }
-export interface EnrichedDeprecationInfo extends DeprecationInfo {
-  index?: string;
-  node?: string;
-  reindex?: boolean;
-  deprecatedIndexSettings?: string[];
+
+export interface ReindexAction {
+  type: 'reindex';
   /**
    * Indicate what blockers have been detected for calling reindex
    * against this index.
@@ -203,6 +203,21 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
    * In future this could be an array of blockers.
    */
   blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+}
+
+export interface MlAction {
+  type: 'mlSnapshot';
+  snapshotId: string;
+  jobId: string;
+}
+
+export interface IndexSettingAction {
+  type: 'indexSetting';
+  deprecatedSettings: string[];
+}
+export interface EnrichedDeprecationInfo extends DeprecationInfo {
+  index?: string;
+  correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
 }
 
 export interface UpgradeAssistantStatus {
@@ -224,4 +239,12 @@ export interface ResolveIndexResponseFromES {
     indices: string[];
   }>;
   data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
+}
+
+export const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
+
+export interface MlOperation extends SavedObjectAttributes {
+  nodeId: string;
+  snapshotId: string;
+  jobId: string;
 }

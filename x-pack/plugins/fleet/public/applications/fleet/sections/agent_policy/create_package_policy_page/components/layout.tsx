@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 
 import { WithHeaderLayout } from '../../../../layouts';
-import type { AgentPolicy, PackageInfo } from '../../../../types';
-import { PackageIcon } from '../../../../components/package_icon';
+import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
+import { PackageIcon } from '../../../../components';
 import type { CreatePackagePolicyFrom } from '../types';
 
 export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
@@ -29,7 +29,13 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
   onCancel?: React.ReactEventHandler;
   agentPolicy?: AgentPolicy;
   packageInfo?: PackageInfo;
+  integrationInfo?: RegistryPolicyTemplate;
   'data-test-subj'?: string;
+  tabs?: Array<{
+    title: string;
+    isSelected: boolean;
+    onClick: React.ReactEventHandler;
+  }>;
 }> = memo(
   ({
     from,
@@ -37,18 +43,24 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     onCancel,
     agentPolicy,
     packageInfo,
+    integrationInfo,
     children,
     'data-test-subj': dataTestSubj,
+    tabs = [],
   }) => {
     const pageTitle = useMemo(() => {
-      if ((from === 'package' || from === 'package-edit' || from === 'edit') && packageInfo) {
+      if (
+        (from === 'package' || from === 'package-edit' || from === 'edit' || from === 'policy') &&
+        packageInfo
+      ) {
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
               <PackageIcon
                 packageName={packageInfo?.name || ''}
+                integrationName={integrationInfo?.name}
                 version={packageInfo?.version || ''}
-                icons={packageInfo?.icons}
+                icons={integrationInfo?.icons || packageInfo?.icons}
                 size="xl"
               />
             </EuiFlexItem>
@@ -68,7 +80,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
                       id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
                       defaultMessage="Add {packageName} integration"
                       values={{
-                        packageName: packageInfo.title,
+                        packageName: integrationInfo?.title || packageInfo.title,
                       }}
                     />
                   )}
@@ -98,7 +110,14 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
           </h1>
         </EuiText>
       );
-    }, [dataTestSubj, from, packageInfo]);
+    }, [
+      dataTestSubj,
+      from,
+      integrationInfo?.icons,
+      integrationInfo?.name,
+      integrationInfo?.title,
+      packageInfo,
+    ]);
 
     const pageDescription = useMemo(() => {
       return from === 'edit' || from === 'package-edit' ? (
@@ -171,6 +190,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
         rightColumn={rightColumn}
         rightColumnGrow={false}
         data-test-subj={dataTestSubj}
+        tabs={tabs.map(({ title, ...rest }) => ({ name: title, ...rest }))}
       >
         {children}
       </WithHeaderLayout>

@@ -61,12 +61,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
 
-              // the custom tls connectors have dynamic ports, so remove them before
+              // the custom ssl connectors have dynamic ports, so remove them before
               // comparing to what we expect
-              const nonCustomTlsConnectors = response.body.filter(
-                (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+              const nonCustomSslConnectors = response.body.filter(
+                (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
               );
-              expect(nonCustomTlsConnectors).to.eql([
+              expect(nonCustomSslConnectors).to.eql([
                 {
                   id: createdAction.id,
                   is_preconfigured: false,
@@ -175,12 +175,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
 
-              // the custom tls connectors have dynamic ports, so remove them before
+              // the custom ssl connectors have dynamic ports, so remove them before
               // comparing to what we expect
-              const nonCustomTlsConnectors = response.body.filter(
-                (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+              const nonCustomSslConnectors = response.body.filter(
+                (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
               );
-              expect(nonCustomTlsConnectors).to.eql([
+              expect(nonCustomSslConnectors).to.eql([
                 {
                   id: createdAction.id,
                   is_preconfigured: false,
@@ -265,12 +265,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
 
-              // the custom tls connectors have dynamic ports, so remove them before
+              // the custom ssl connectors have dynamic ports, so remove them before
               // comparing to what we expect
-              const nonCustomTlsConnectors = response.body.filter(
-                (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+              const nonCustomSslConnectors = response.body.filter(
+                (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
               );
-              expect(nonCustomTlsConnectors).to.eql([
+              expect(nonCustomSslConnectors).to.eql([
                 {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,

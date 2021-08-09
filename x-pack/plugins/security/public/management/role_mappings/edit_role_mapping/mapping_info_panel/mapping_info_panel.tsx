@@ -61,7 +61,7 @@ export class MappingInfoPanel extends Component<Props, State> {
   }
   public render() {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiTitle>
           <h2>
             <FormattedMessage

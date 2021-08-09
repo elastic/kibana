@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, getByText, queryByLabelText } from '@testing-library/react';
+import { queryByLabelText } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
-import { Router } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
@@ -25,9 +24,10 @@ import {
 import { fromQuery } from '../../shared/Links/url_helpers';
 import { TransactionOverview } from './';
 
-const KibanaReactContext = createKibanaReactContext({
+const KibanaReactContext = createKibanaReactContext(({
+  uiSettings: { get: () => true },
   usageCollection: { reportUiCounter: () => {} },
-} as Partial<CoreStart>);
+} as unknown) as Partial<CoreStart>);
 
 const history = createMemoryHistory();
 jest.spyOn(history, 'push');
@@ -63,14 +63,12 @@ function setup({
 
   return renderWithTheme(
     <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper>
-        <Router history={history}>
-          <UrlParamsProvider>
-            <ApmServiceContextProvider>
-              <TransactionOverview serviceName="opbeans-python" />
-            </ApmServiceContextProvider>
-          </UrlParamsProvider>
-        </Router>
+      <MockApmPluginContextWrapper history={history}>
+        <UrlParamsProvider>
+          <ApmServiceContextProvider>
+            <TransactionOverview />
+          </ApmServiceContextProvider>
+        </UrlParamsProvider>
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );
@@ -106,46 +104,6 @@ describe('TransactionOverview', () => {
   });
 
   const FILTER_BY_TYPE_LABEL = 'Transaction type';
-
-  describe('when transactionType is selected and multiple transaction types are given', () => {
-    it('renders a radio group with transaction types', () => {
-      const { container } = setup({
-        serviceTransactionTypes: ['firstType', 'secondType'],
-        urlParams: {
-          transactionType: 'secondType',
-        },
-      });
-
-      expect(getByText(container, 'firstType')).toBeInTheDocument();
-      expect(getByText(container, 'secondType')).toBeInTheDocument();
-
-      expect(getByText(container, 'firstType')).not.toBeNull();
-    });
-
-    it('should update the URL when a transaction type is selected', () => {
-      const { container } = setup({
-        serviceTransactionTypes: ['firstType', 'secondType'],
-        urlParams: {
-          transactionType: 'secondType',
-        },
-      });
-
-      expect(history.location.search).toEqual(
-        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now'
-      );
-      expect(getByText(container, 'firstType')).toBeInTheDocument();
-      expect(getByText(container, 'secondType')).toBeInTheDocument();
-
-      fireEvent.change(getByText(container, 'firstType').parentElement!, {
-        target: { value: 'firstType' },
-      });
-
-      expect(history.push).toHaveBeenCalled();
-      expect(history.location.search).toEqual(
-        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now'
-      );
-    });
-  });
 
   describe('when a transaction type is selected, and there are no other transaction types', () => {
     it('does not render a radio group with transaction types', () => {

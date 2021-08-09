@@ -169,7 +169,8 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
 
       try {
         const response = await http.get(
-          `/api/app_search/engines/${engineName}/curations/${props.curationId}`
+          `/api/app_search/engines/${engineName}/curations/${props.curationId}`,
+          { query: { skip_record_analytics: 'true' } }
         );
         actions.onCurationLoad(response);
       } catch (e) {

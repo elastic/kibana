@@ -101,7 +101,7 @@ export interface IEventQueryBuilder<TEvent> {
   buildQuery(): IEventQuery<TEvent>;
 }
 
-export type SortingParams = estypes.Sort;
+export type SortingParams = estypes.SearchSort;
 
 export interface PaginationParams {
   page: number;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
@@ -15,25 +14,13 @@ import moment from 'moment';
 
 import { EuiTableRow } from '@elastic/eui';
 
-import { GroupRow, NO_USERS_MESSAGE, NO_SOURCES_MESSAGE } from './group_row';
-import { GroupUsers } from './group_users';
+import { GroupRow, NO_SOURCES_MESSAGE } from './group_row';
 
 describe('GroupRow', () => {
-  beforeEach(() => {
-    setMockValues({ isFederatedAuth: true });
-  });
-
   it('renders', () => {
     const wrapper = shallow(<GroupRow {...groups[0]} />);
 
     expect(wrapper.find(EuiTableRow)).toHaveLength(1);
-  });
-
-  it('renders group users', () => {
-    setMockValues({ isFederatedAuth: false });
-    const wrapper = shallow(<GroupRow {...groups[0]} />);
-
-    expect(wrapper.find(GroupUsers)).toHaveLength(1);
   });
 
   it('renders fromNow date string when in range', () => {
@@ -48,13 +35,6 @@ describe('GroupRow', () => {
     const wrapper = shallow(<GroupRow {...groups[0]} updatedAt={'2020-01-01'} />);
 
     expect(wrapper.find('small').text()).toEqual('Last updated January 1, 2020.');
-  });
-
-  it('renders empty users message when no users present', () => {
-    setMockValues({ isFederatedAuth: false });
-    const wrapper = shallow(<GroupRow {...groups[0]} usersCount={0} />);
-
-    expect(wrapper.find('.user-group__accounts').text()).toEqual(NO_USERS_MESSAGE);
   });
 
   it('renders empty sources message when no sources present', () => {

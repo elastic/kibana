@@ -7,8 +7,6 @@
 A new Kibana plugin exposing an API on both public and server side, to allow consumers to search for various objects and
 register result providers.
 
-Note: whether this will be an oss or xpack plugin still depends on https://github.com/elastic/dev/issues/1404.
-
 # Basic example
 
 - registering a result provider:
@@ -43,8 +41,7 @@ Kibana should do its best to assist users searching for and navigating to the va
 
 We should expose an API to make it possible for plugins to search for the various objects present on a Kibana instance.
 
-The first consumer of this API will be the global search bar [#57576](https://github.com/elastic/kibana/issues/57576). This API
-should still be generic to answer similar needs from any other consumer, either client or server side.
+The first consumer of this API will be the global search bar [#57576](https://github.com/elastic/kibana/issues/57576). This API should still be generic to answer similar needs from any other consumer, either client or server side.
 
 # Detailed design
 
@@ -84,7 +81,7 @@ interface GlobalSearchProviderFindOptions {
   aborted$: Observable<void>;
   /**
    * The total maximum number of results (including all batches / emissions) that should be returned by the provider for a given `find` request.
-   * Any result emitted exceeding this quota will be ignored by the service and not emitted to the consumer. 
+   * Any result emitted exceeding this quota will be ignored by the service and not emitted to the consumer.
    */
   maxResults: number;
 }
@@ -462,8 +459,8 @@ search(
 
 Notes:
 
-- The example implementation is not streaming results from the server, meaning that all results from server-side 
-  registered providers will all be fetched and emitted in a single batch. Ideally, we would leverage the `bfetch` plugin 
+- The example implementation is not streaming results from the server, meaning that all results from server-side
+  registered providers will all be fetched and emitted in a single batch. Ideally, we would leverage the `bfetch` plugin
   to stream the results to the client instead.
 
 ### results sorting

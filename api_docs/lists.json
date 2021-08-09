@@ -47,10 +47,7 @@
           "StartPlugins",
           ">"
         ],
-        "source": {
-          "path": "x-pack/plugins/lists/public/plugin.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/lists/public/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -63,10 +60,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/public/plugin.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/lists/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -86,10 +80,7 @@
                   },
                   "<object>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/public/plugin.ts",
-                  "lineNumber": 19
-                },
+                "path": "x-pack/plugins/lists/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -133,10 +124,7 @@
                 "text": "PluginSetup"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/public/plugin.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/lists/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -166,10 +154,7 @@
                   },
                   ">"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/public/plugin.ts",
-                  "lineNumber": 22
-                },
+                "path": "x-pack/plugins/lists/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -183,10 +168,7 @@
                 "signature": [
                   "SetupPlugins"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/public/plugin.ts",
-                  "lineNumber": 22
-                },
+                "path": "x-pack/plugins/lists/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -220,10 +202,7 @@
                 "text": "PluginStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/public/plugin.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/lists/public/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -242,10 +221,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/public/plugin.ts",
-                  "lineNumber": 27
-                },
+                "path": "x-pack/plugins/lists/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -259,10 +235,7 @@
                 "signature": [
                   "StartPlugins"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/public/plugin.ts",
-                  "lineNumber": 27
-                },
+                "path": "x-pack/plugins/lists/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -289,10 +262,7 @@
           "typeof ",
           "x-pack/plugins/lists/public/exceptions/components/builder/index"
         ],
-        "source": {
-          "path": "x-pack/plugins/lists/public/shared_exports.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/lists/public/shared_exports.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -304,10 +274,7 @@
       "tags": [],
       "label": "PluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/lists/public/types.ts",
-        "lineNumber": 9
-      },
+      "path": "x-pack/plugins/lists/public/types.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
@@ -320,10 +287,7 @@
       "tags": [],
       "label": "PluginStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/lists/public/types.ts",
-        "lineNumber": 11
-      },
+      "path": "x-pack/plugins/lists/public/types.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "start",
@@ -339,10 +303,7 @@
         "tags": [],
         "label": "ExceptionListClient",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-          "lineNumber": 56
-        },
+        "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
         "deprecated": false,
         "children": [
           {
@@ -355,10 +316,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 61
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -371,10 +329,7 @@
                 "signature": [
                   "ConstructorOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 61
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -393,10 +348,7 @@
               "GetExceptionListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 66
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -409,10 +361,39 @@
                 "signature": [
                   "GetExceptionListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 66
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ExceptionListClient.getExceptionListSummary",
+            "type": "Function",
+            "tags": [],
+            "label": "getExceptionListSummary",
+            "description": [],
+            "signature": [
+              "({ listId, id, namespaceType, }: ",
+              "GetExceptionListSummaryOptions",
+              ") => Promise<{ windows: number; linux: number; macos: number; total: number; } | null>"
+            ],
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lists",
+                "id": "def-server.ExceptionListClient.getExceptionListSummary.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    listId,\n    id,\n    namespaceType,\n  }",
+                "description": [],
+                "signature": [
+                  "GetExceptionListSummaryOptions"
+                ],
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -429,12 +410,9 @@
             "signature": [
               "({ itemId, id, namespaceType, }: ",
               "GetExceptionListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -447,10 +425,7 @@
                 "signature": [
                   "GetExceptionListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 75
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -469,10 +444,7 @@
             "signature": [
               "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 90
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": [
@@ -491,30 +463,7 @@
             "signature": [
               "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 102
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "lists",
-            "id": "def-server.ExceptionListClient.createEndpointEventFiltersList",
-            "type": "Function",
-            "tags": [],
-            "label": "createEndpointEventFiltersList",
-            "description": [
-              "\nCreate the Endpoint Event Filters Agnostic list if it does not yet exist (`null` is returned if it does exist)"
-            ],
-            "signature": [
-              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
-            ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 114
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -531,12 +480,9 @@
             "signature": [
               "({ comments, description, entries, itemId, meta, name, osTypes, tags, type, }: ",
               "CreateEndpointListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 128
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -549,10 +495,7 @@
                 "signature": [
                   "CreateEndpointListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 128
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -571,12 +514,9 @@
             "signature": [
               "({ _version, comments, description, entries, id, itemId, meta, name, osTypes, tags, type, }: ",
               "UpdateEndpointListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 164
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -589,10 +529,7 @@
                 "signature": [
                   "UpdateEndpointListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 164
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -611,12 +548,9 @@
             "signature": [
               "({ itemId, id, }: ",
               "GetEndpointListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 200
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -629,10 +563,7 @@
                 "signature": [
                   "GetEndpointListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 200
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -651,10 +582,7 @@
               "CreateExceptionListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 208
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -667,10 +595,7 @@
                 "signature": [
                   "CreateExceptionListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 208
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -689,10 +614,7 @@
               "UpdateExceptionListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 235
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -705,10 +627,7 @@
                 "signature": [
                   "UpdateExceptionListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 235
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -727,10 +646,7 @@
               "DeleteExceptionListOptions",
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 266
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -743,10 +659,7 @@
                 "signature": [
                   "DeleteExceptionListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 266
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -769,12 +682,9 @@
                 "section": "def-server.CreateExceptionListItemOptions",
                 "text": "CreateExceptionListItemOptions"
               },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 280
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -793,10 +703,7 @@
                     "text": "CreateExceptionListItemOptions"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 280
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -819,12 +726,9 @@
                 "section": "def-server.UpdateExceptionListItemOptions",
                 "text": "UpdateExceptionListItemOptions"
               },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 311
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -843,10 +747,7 @@
                     "text": "UpdateExceptionListItemOptions"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 311
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -863,12 +764,9 @@
             "signature": [
               "({ id, itemId, namespaceType, }: ",
               "DeleteExceptionListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 344
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -881,10 +779,7 @@
                 "signature": [
                   "DeleteExceptionListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 344
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -903,10 +798,7 @@
               "DeleteExceptionListItemByIdOptions",
               ") => Promise<void>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 358
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -919,10 +811,7 @@
                 "signature": [
                   "DeleteExceptionListItemByIdOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 358
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -941,12 +830,9 @@
             "signature": [
               "({ id, itemId, }: ",
               "DeleteEndpointListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 373
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -959,10 +845,7 @@
                 "signature": [
                   "DeleteEndpointListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 373
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -979,12 +862,9 @@
             "signature": [
               "({ listId, filter, perPage, page, sortField, sortOrder, namespaceType, }: ",
               "FindExceptionListItemOptions",
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 386
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -997,10 +877,7 @@
                 "signature": [
                   "FindExceptionListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 386
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1017,12 +894,9 @@
             "signature": [
               "({ listId, filter, perPage, page, sortField, sortOrder, namespaceType, }: ",
               "FindExceptionListsItemOptions",
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 408
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1035,10 +909,7 @@
                 "signature": [
                   "FindExceptionListsItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 408
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1055,12 +926,9 @@
             "signature": [
               "({ perPage, page, sortField, sortOrder, valueListId, }: ",
               "FindValueListExceptionListsItems",
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 430
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1073,10 +941,7 @@
                 "signature": [
                   "FindValueListExceptionListsItems"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 430
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1095,10 +960,7 @@
               "FindExceptionListOptions",
               ") => Promise<{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 448
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1111,10 +973,7 @@
                 "signature": [
                   "FindExceptionListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 448
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1133,12 +992,9 @@
             "signature": [
               "({ filter, perPage, page, sortField, sortOrder, }: ",
               "FindEndpointListItemOptions",
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-              "lineNumber": 476
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1151,10 +1007,7 @@
                 "signature": [
                   "FindEndpointListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                  "lineNumber": 476
-                },
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1171,10 +1024,7 @@
         "tags": [],
         "label": "ListClient",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-          "lineNumber": 79
-        },
+        "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
         "deprecated": false,
         "children": [
           {
@@ -1187,10 +1037,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 85
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1203,10 +1050,7 @@
                 "signature": [
                   "ConstructorOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 85
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1223,10 +1067,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 92
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1241,10 +1082,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 100
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1259,12 +1097,9 @@
             "signature": [
               "({ id }: ",
               "GetListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 108
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1277,10 +1112,7 @@
                 "signature": [
                   "GetListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 108
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1297,12 +1129,9 @@
             "signature": [
               "({ id, deserializer, immutable, serializer, name, description, type, meta, version, }: ",
               "CreateListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 114
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1315,10 +1144,7 @@
                 "signature": [
                   "CreateListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 114
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1335,12 +1161,9 @@
             "signature": [
               "({ id, deserializer, serializer, name, description, immutable, type, meta, version, }: ",
               "CreateListIfItDoesNotExistOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 143
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1353,10 +1176,7 @@
                 "signature": [
                   "CreateListIfItDoesNotExistOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 143
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1373,10 +1193,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 172
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1391,10 +1208,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 178
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1409,10 +1223,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 184
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1427,10 +1238,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 190
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1445,10 +1253,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 196
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1463,10 +1268,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 202
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1481,10 +1283,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 208
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1499,10 +1298,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 214
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1517,10 +1313,7 @@
             "signature": [
               "() => Record<string, unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 220
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1535,10 +1328,7 @@
             "signature": [
               "() => Record<string, unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 225
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1553,10 +1343,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 230
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1571,10 +1358,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 237
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1589,10 +1373,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 244
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1607,10 +1388,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 250
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1625,10 +1403,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 256
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1643,10 +1418,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 262
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1661,10 +1433,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 268
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1679,10 +1448,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 274
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1697,10 +1463,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 280
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1715,10 +1478,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 286
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -1733,12 +1493,9 @@
             "signature": [
               "({ id }: ",
               "DeleteListItemOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 292
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1751,10 +1508,7 @@
                 "signature": [
                   "DeleteListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 292
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1771,12 +1525,9 @@
             "signature": [
               "({ listId, value, type, }: ",
               "DeleteListItemByValueOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 298
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1789,10 +1540,7 @@
                 "signature": [
                   "DeleteListItemByValueOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 298
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1809,12 +1557,9 @@
             "signature": [
               "({ id }: ",
               "DeleteListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 314
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1827,10 +1572,7 @@
                 "signature": [
                   "DeleteListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 314
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1849,10 +1591,7 @@
               "ExportListItemsToStreamOptions",
               ") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 326
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1865,10 +1604,7 @@
                 "signature": [
                   "ExportListItemsToStreamOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 326
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1885,12 +1621,9 @@
             "signature": [
               "({ deserializer, serializer, type, listId, stream, meta, version, }: ",
               "ImportListItemsToStreamOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 342
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1903,10 +1636,7 @@
                 "signature": [
                   "ImportListItemsToStreamOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 342
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1923,12 +1653,9 @@
             "signature": [
               "({ listId, value, type, }: ",
               "GetListItemByValueOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 370
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1941,10 +1668,7 @@
                 "signature": [
                   "GetListItemByValueOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 370
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1961,12 +1685,9 @@
             "signature": [
               "({ id, deserializer, serializer, listId, value, type, meta, }: ",
               "CreateListItemOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 386
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -1979,10 +1700,7 @@
                 "signature": [
                   "CreateListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 386
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1999,12 +1717,9 @@
             "signature": [
               "({ _version, id, value, meta, }: ",
               "UpdateListItemOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 411
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -2017,10 +1732,7 @@
                 "signature": [
                   "UpdateListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 411
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2037,12 +1749,9 @@
             "signature": [
               "({ _version, id, name, description, meta, version, }: ",
               "UpdateListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 430
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -2055,10 +1764,7 @@
                 "signature": [
                   "UpdateListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 430
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2075,12 +1781,9 @@
             "signature": [
               "({ id }: ",
               "GetListItemOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 453
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -2093,10 +1796,7 @@
                 "signature": [
                   "GetListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 453
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2113,12 +1813,9 @@
             "signature": [
               "({ type, listId, value, }: ",
               "GetListItemsByValueOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 463
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -2131,10 +1828,7 @@
                 "signature": [
                   "GetListItemsByValueOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 463
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2151,12 +1845,9 @@
             "signature": [
               "({ type, listId, value, }: ",
               "SearchListItemByValuesOptions",
-              ") => Promise<{ items: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
+              ") => Promise<{ items: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 479
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -2169,10 +1860,7 @@
                 "signature": [
                   "SearchListItemByValuesOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 479
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2189,12 +1877,9 @@
             "signature": [
               "({ filter, currentIndexPosition, perPage, page, sortField, sortOrder, searchAfter, }: ",
               "FindListOptions",
-              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 495
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -2207,10 +1892,7 @@
                 "signature": [
                   "FindListOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 495
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2227,12 +1909,9 @@
             "signature": [
               "({ listId, filter, currentIndexPosition, perPage, page, sortField, sortOrder, searchAfter, }: ",
               "FindListItemOptions",
-              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-              "lineNumber": 519
-            },
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
             "children": [
               {
@@ -2245,10 +1924,7 @@
                 "signature": [
                   "FindListItemOptions"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
-                  "lineNumber": 519
-                },
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2268,10 +1944,7 @@
         "tags": [],
         "label": "CreateExceptionListItemOptions",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-          "lineNumber": 118
-        },
+        "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2284,10 +1957,7 @@
             "signature": [
               "{ comment: string; }[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 119
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2298,12 +1968,9 @@
             "label": "entries",
             "description": [],
             "signature": [
-              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
+              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 120
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2313,10 +1980,7 @@
             "tags": [],
             "label": "itemId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 121
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2326,10 +1990,7 @@
             "tags": [],
             "label": "listId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 122
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2342,10 +2003,7 @@
             "signature": [
               "\"single\" | \"agnostic\""
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 123
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2355,10 +2013,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 124
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2371,10 +2026,7 @@
             "signature": [
               "(\"windows\" | \"linux\" | \"macos\")[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 125
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2384,10 +2036,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 126
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2400,10 +2049,7 @@
             "signature": [
               "object | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 127
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2416,10 +2062,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 128
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -2432,10 +2075,7 @@
             "signature": [
               "\"simple\""
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 129
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           }
         ],
@@ -2448,10 +2088,7 @@
         "tags": [],
         "label": "ListPluginSetup",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/server/types.ts",
-          "lineNumber": 40
-        },
+        "path": "x-pack/plugins/lists/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2479,10 +2116,7 @@
                 "text": "ExceptionListClient"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/types.ts",
-              "lineNumber": 41
-            },
+            "path": "x-pack/plugins/lists/server/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2796,10 +2430,7 @@
                   },
                   "; }"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/types.ts",
-                  "lineNumber": 36
-                },
+                "path": "x-pack/plugins/lists/server/types.ts",
                 "deprecated": false
               },
               {
@@ -2809,10 +2440,7 @@
                 "tags": [],
                 "label": "user",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/types.ts",
-                  "lineNumber": 37
-                },
+                "path": "x-pack/plugins/lists/server/types.ts",
                 "deprecated": false
               }
             ]
@@ -2842,10 +2470,7 @@
                 "text": "ListClient"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/types.ts",
-              "lineNumber": 42
-            },
+            "path": "x-pack/plugins/lists/server/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2859,7 +2484,7 @@
                 "signature": [
                   "Pick<",
                   "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"helpers\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                   "TransportRequestParams",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -2869,10 +2494,7 @@
                   "ApiResponse",
                   "<Record<string, any>, unknown>>; }; }"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/types.ts",
-                  "lineNumber": 30
-                },
+                "path": "x-pack/plugins/lists/server/types.ts",
                 "deprecated": false
               },
               {
@@ -2882,10 +2504,7 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/types.ts",
-                  "lineNumber": 31
-                },
+                "path": "x-pack/plugins/lists/server/types.ts",
                 "deprecated": false
               },
               {
@@ -2895,10 +2514,7 @@
                 "tags": [],
                 "label": "user",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/lists/server/types.ts",
-                  "lineNumber": 32
-                },
+                "path": "x-pack/plugins/lists/server/types.ts",
                 "deprecated": false
               }
             ]
@@ -2913,10 +2529,7 @@
         "tags": [],
         "label": "ListsApiRequestHandlerContext",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/server/types.ts",
-          "lineNumber": 48
-        },
+        "path": "x-pack/plugins/lists/server/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2936,13 +2549,10 @@
                 "text": "ListClient"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/types.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/lists/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "lists",
@@ -2961,13 +2571,10 @@
                 "text": "ExceptionListClient"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/types.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/lists/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2979,10 +2586,7 @@
         "tags": [],
         "label": "UpdateExceptionListItemOptions",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-          "lineNumber": 144
-        },
+        "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2995,10 +2599,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 145
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3011,10 +2612,7 @@
             "signature": [
               "({ comment: string; } & { id?: string | undefined; })[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 146
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3025,12 +2623,9 @@
             "label": "entries",
             "description": [],
             "signature": [
-              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
+              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"shape\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 147
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3043,10 +2638,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 148
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3059,10 +2651,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 149
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3075,10 +2664,7 @@
             "signature": [
               "\"single\" | \"agnostic\""
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 150
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3091,10 +2677,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 151
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3107,10 +2690,7 @@
             "signature": [
               "(\"windows\" | \"linux\" | \"macos\")[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 152
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3123,10 +2703,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 153
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3139,10 +2716,7 @@
             "signature": [
               "object | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 154
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3155,10 +2729,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 155
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           },
           {
@@ -3171,10 +2742,7 @@
             "signature": [
               "\"simple\" | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 156
-            },
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
           }
         ],

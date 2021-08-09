@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft 365 Exchange Anti-Phish Policy Deletion",
   "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"Remove-AntiPhishPolicy\" and event.outcome:success",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"Remove-AntiPhishPolicy\" and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/exchange/remove-antiphishpolicy?view=exchange-ps",
     "https://docs.microsoft.com/en-us/microsoft-365/security/office-365-security/set-up-anti-phishing-policies?view=o365-worldwide"

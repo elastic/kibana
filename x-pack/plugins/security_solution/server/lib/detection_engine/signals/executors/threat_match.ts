@@ -14,43 +14,52 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
-import { RefreshTypes } from '../../types';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, AlertAttributes } from '../types';
+import { RuleRangeTuple, AlertAttributes, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
 import { ThreatRuleParams } from '../../schemas/rule_schemas';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const threatMatchExecutor = async ({
   rule,
-  tuples,
+  tuple,
   listClient,
   exceptionItems,
   services,
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
+  experimentalFeatures,
   buildRuleMessage,
+  bulkCreate,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
-  tuples: RuleRangeTuple[];
+  tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
   return createThreatSignals({
-    tuples,
+    tuple,
     threatMapping: ruleParams.threatMapping,
     query: ruleParams.query,
     inputIndex,
@@ -67,7 +76,6 @@ export const threatMatchExecutor = async ({
     outputIndex: ruleParams.outputIndex,
     ruleSO: rule,
     searchAfterSize,
-    refresh,
     threatFilters: ruleParams.threatFilters ?? [],
     threatQuery: ruleParams.threatQuery,
     threatLanguage: ruleParams.threatLanguage,
@@ -76,5 +84,7 @@ export const threatMatchExecutor = async ({
     threatIndicatorPath: ruleParams.threatIndicatorPath,
     concurrentSearches: ruleParams.concurrentSearches ?? 1,
     itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+    bulkCreate,
+    wrapHits,
   });
 };

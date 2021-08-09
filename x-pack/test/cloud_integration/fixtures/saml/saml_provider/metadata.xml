@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+                     entityID="http://www.elastic.co/saml1">
+  <md:IDPSSODescriptor WantAuthnRequestsSigned="false"
+                       protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <!-- This certificate is extracted from KBN_CERT_PATH in @kbn/dev-utils and should always be in sync with it -->
+          <ds:X509Certificate>MIIDOTCCAiGgAwIBAgIVANNWkg9lzNiLqNkMFhFKHcXyaZmqMA0GCSqGSIb3DQEB
+CwUAMDQxMjAwBgNVBAMTKUVsYXN0aWMgQ2VydGlmaWNhdGUgVG9vbCBBdXRvZ2Vu
+ZXJhdGVkIENBMCAXDTE5MTIyNzE3MDM0MloYDzIwNjkxMjE0MTcwMzQyWjARMQ8w
+DQYDVQQDEwZraWJhbmEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCQ
+wYYbQtbRBKJ4uNZc2+IgRU+7NNL21ZebQlEIMgK7jAqOMrsW2b5DATz41Fd+GQFU
+FUYYjwo+PQj6sJHshOJo/gNb32HrydvMI7YPvevkszkuEGCfXxQ3Dw2RTACLgD0Q
+OCkwHvn3TMf0loloV/ePGWaZDYZaXi3a5DdWi/HFFoJysgF0JV2f6XyKhJkGaEfJ
+s9pWX269zH/XQvGNx4BEimJpYB8h4JnDYPFIiQdqj+sl2b+kS1hH9kL5gBAMXjFU
+vcNnX+PmyTjyJrGo75k0ku+spBf1bMwuQt3uSmM+TQIXkvFDmS0DOVESrpA5EC1T
+BUGRz6o/I88Xx4Mud771AgMBAAGjYzBhMB0GA1UdDgQWBBQLB1Eo23M3Ss8MsFaz
+V+Twcb3PmDAfBgNVHSMEGDAWgBQa7SYOe8NGcF00EbwPHA91YCsHSTAUBgNVHREE
+DTALgglsb2NhbGhvc3QwCQYDVR0TBAIwADANBgkqhkiG9w0BAQsFAAOCAQEAnEl/
+z5IElIjvkK4AgMPrNcRlvIGDt2orEik7b6Jsq6/RiJQ7cSsYTZf7xbqyxNsUOTxv
++frj47MEN448H2nRvUxH29YR3XygV5aEwADSAhwaQWn0QfWTCZbJTmSoNEDtDOzX
+TGDlAoCD9s9Xz9S1JpxY4H+WWRZrBSDM6SC1c6CzuEeZRuScNAjYD5mh2v6fOlSy
+b8xJWSg0AFlJPCa3ZsA2SKbNqI0uNfJTnkXRm88Z2NHcgtlADbOLKauWfCrpgsCk
+cZgo6yAYkOM148h/8wGla1eX+iE1R72NUABGydu8MSQKvc0emWJkGsC1/KqPlf/O
+eOUsdwn1yDKHRxDHyA==
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                            Location="/saml_provider/logout"/>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                            Location="/saml_provider/logout"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                            Location="/saml_provider/login"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                            Location="/saml_provider/login"/>
+  </md:IDPSSODescriptor>
+</md:EntityDescriptor>

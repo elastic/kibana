@@ -88,6 +88,8 @@ export async function runTests(options) {
       continue;
     }
 
+    console.log(`--- Running ${relative(process.cwd(), configPath)}`);
+
     await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
@@ -95,11 +97,15 @@ export async function runTests(options) {
       try {
         es = await runElasticsearch({ config, options: opts });
         await runKibanaServer({ procs, config, options: opts });
-        // workaround until https://github.com/elastic/kibana/issues/89828 is addressed
-        await delay(5000);
         await runFtr({ configPath, options: opts });
       } finally {
         try {
+          const delay = config.get('kbnTestServer.delayShutdown');
+          if (typeof delay === 'number') {
+            log.info('Delaying shutdown of Kibana for', delay, 'ms');
+            await new Promise((r) => setTimeout(r, delay));
+          }
+
           await procs.stop('kibana');
         } finally {
           if (es) {
@@ -161,8 +167,4 @@ async function silence(log, milliseconds) {
       take(1)
     )
     .toPromise();
-}
-
-async function delay(ms) {
-  await new Promise((resolve) => setTimeout(resolve, ms));
 }

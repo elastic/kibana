@@ -14,11 +14,10 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { RefreshTypes } from '../types';
-import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
+import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
-import { AlertAttributes } from './types';
+import { AlertAttributes, BulkCreate, WrapHits } from './types';
 import { MachineLearningRuleParams } from '../schemas/rule_schemas';
 
 interface BulkCreateMlSignalsParams {
@@ -28,8 +27,9 @@ interface BulkCreateMlSignalsParams {
   logger: Logger;
   id: string;
   signalsIndex: string;
-  refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 interface EcsAnomaly extends Anomaly {
@@ -85,9 +85,10 @@ const transformAnomalyResultsToEcs = (
 
 export const bulkCreateMlSignals = async (
   params: BulkCreateMlSignalsParams
-): Promise<SingleBulkCreateResponse> => {
+): Promise<GenericBulkCreateResponse<{}>> => {
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
-  const buildRuleMessage = params.buildRuleMessage;
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
+
+  const wrappedDocs = params.wrapHits(ecsResults.hits.hits);
+  return params.bulkCreate(wrappedDocs);
 };

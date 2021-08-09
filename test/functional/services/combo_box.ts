@@ -21,7 +21,7 @@ export class ComboBoxService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
-  private readonly PageObjects = this.ctx.getPageObjects(['common']);
+  private readonly common = this.ctx.getPageObject('common');
 
   private readonly WAIT_FOR_EXISTS_TIME: number = this.config.get('timeouts.waitForExists');
 
@@ -113,7 +113,7 @@ export class ComboBoxService extends FtrService {
     this.log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
     const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
     await this.setFilterValue(comboBoxElement, value);
-    await this.PageObjects.common.pressEnterKey();
+    await this.common.pressEnterKey();
     await this.closeOptionsList(comboBoxElement);
   }
 

@@ -42,12 +42,12 @@ const getTestActionType = (
     id: id || 'my-action-type',
     iconClass: iconClass || 'test',
     selectMessage: selectedMessage || 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({});
     },
-    validateParams: (): GenericValidationResult<unknown> => {
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
   });
@@ -57,16 +57,16 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('register()', () => {
   test('able to register alert types', () => {
-    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-    alertTypeRegistry.register(getTestAlertType());
-    expect(alertTypeRegistry.has('test-alet-type')).toEqual(true);
+    const ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    ruleTypeRegistry.register(getTestAlertType());
+    expect(ruleTypeRegistry.has('test-alet-type')).toEqual(true);
   });
 
   test('throws error if alert type already registered', () => {
-    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-    alertTypeRegistry.register(getTestAlertType('my-test-alert-type-1'));
+    const ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    ruleTypeRegistry.register(getTestAlertType('my-test-alert-type-1'));
     expect(() =>
-      alertTypeRegistry.register(getTestAlertType('my-test-alert-type-1'))
+      ruleTypeRegistry.register(getTestAlertType('my-test-alert-type-1'))
     ).toThrowErrorMatchingInlineSnapshot(
       `"Object type \\"my-test-alert-type-1\\" is already registered."`
     );
@@ -128,13 +128,13 @@ describe('list()', () => {
 
 describe('has()', () => {
   test('returns false for unregistered alert types', () => {
-    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-    expect(alertTypeRegistry.has('my-alert-type')).toEqual(false);
+    const ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    expect(ruleTypeRegistry.has('my-alert-type')).toEqual(false);
   });
 
   test('returns true after registering an alert type', () => {
-    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-    alertTypeRegistry.register(getTestAlertType());
-    expect(alertTypeRegistry.has('test-alet-type'));
+    const ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    ruleTypeRegistry.register(getTestAlertType());
+    expect(ruleTypeRegistry.has('test-alet-type'));
   });
 });

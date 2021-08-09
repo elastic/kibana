@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
@@ -33,16 +33,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
-  IndexPatternField,
-  FieldFormatInstanceType,
   IndexPattern,
-  IFieldType,
+  IndexPatternField,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
@@ -100,7 +99,7 @@ export interface FieldEditorState {
   isReady: boolean;
   isCreating: boolean;
   isDeprecatedLang: boolean;
-  scriptingLangs: string[];
+  scriptingLangs: estypes.ScriptLanguage[];
   fieldTypes: string[];
   fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
@@ -131,8 +130,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  supportedLangs: string[] = [];
-  deprecatedLangs: string[] = [];
+  supportedLangs: estypes.ScriptLanguage[] = [];
+  deprecatedLangs: estypes.ScriptLanguage[] = [];
   constructor(props: FieldEdiorProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
@@ -145,7 +144,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.getAll().map((f: IFieldType) => f.name),
+      existingFieldNames: indexPattern.fields.getAll().map((f: IndexPatternField) => f.name),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -189,6 +188,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.setState({
       isReady: true,
       isCreating: !indexPattern.fields.getByName(spec.name),
+      // @ts-expect-error '' is not a valid ScriptLanguage
       isDeprecatedLang: this.deprecatedLangs.includes(spec.lang || ''),
       errors: [],
       scriptingLangs,
@@ -224,7 +224,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onLangChange = (lang: string) => {
+  onLangChange = (lang: estypes.ScriptLanguage) => {
     const { spec } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, lang, DEFAULT_FIELD_TYPES);
     spec.lang = lang;
@@ -252,7 +252,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onFormatParamsChange = (newParams: { fieldType: string; [key: string]: any }) => {
+  onFormatParamsChange = (newParams: { [key: string]: any }) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId as string, newParams);
   };
@@ -373,7 +373,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           })}
           data-test-subj="editorFieldLang"
           onChange={(e) => {
-            this.onLangChange(e.target.value);
+            this.onLangChange(e.target.value as estypes.ScriptLanguage);
           }}
         />
       </EuiFormRow>

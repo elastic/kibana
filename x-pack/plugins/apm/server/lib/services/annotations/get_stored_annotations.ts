@@ -7,12 +7,13 @@
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../../../../../observability/server';
-import { ESSearchResponse } from '../../../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../../src/core/types/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';

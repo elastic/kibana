@@ -13,7 +13,7 @@ import { httpServerMock } from 'src/core/server/mocks';
 
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import type { AuthenticationServiceStart } from '../../authentication';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import {
   AuthenticationResult,
   DeauthenticationResult,
@@ -28,7 +28,7 @@ import { defineCommonRoutes } from './common';
 
 describe('Common authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let license: jest.Mocked<SecurityLicense>;
   let mockContext: SecurityRequestHandlerContext;
   beforeEach(() => {

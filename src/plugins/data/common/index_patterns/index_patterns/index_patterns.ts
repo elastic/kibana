@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientCommon } from '../..';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
 import type { RuntimeField } from '../types';
@@ -29,7 +29,7 @@ import {
   FieldSpec,
   IndexPatternFieldMap,
 } from '../types';
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../../field_formats/common/';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
@@ -38,7 +38,6 @@ import { DuplicateIndexPatternError } from '../errors';
 import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
-const savedObjectType = 'index-pattern';
 
 export interface IndexPatternSavedObjectAttrs {
   title: string;
@@ -94,7 +93,7 @@ export class IndexPatternsService {
    */
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
-      type: 'index-pattern',
+      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
       fields: ['title'],
       perPage: 10000,
     });
@@ -137,7 +136,7 @@ export class IndexPatternsService {
    */
   find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
     const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
-      type: 'index-pattern',
+      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
       fields: ['title'],
       search,
       searchFields: ['title'],
@@ -395,14 +394,24 @@ export class IndexPatternsService {
 
   private getSavedObjectAndInit = async (id: string): Promise<IndexPattern> => {
     const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
-      savedObjectType,
+      INDEX_PATTERN_SAVED_OBJECT_TYPE,
       id
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
+      throw new SavedObjectNotFound(
+        INDEX_PATTERN_SAVED_OBJECT_TYPE,
+        id,
+        'management/kibana/indexPatterns'
+      );
     }
 
+    return this.initFromSavedObject(savedObject);
+  };
+
+  private initFromSavedObject = async (
+    savedObject: SavedObject<IndexPatternAttributes>
+  ): Promise<IndexPattern> => {
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta, runtimeFieldMap } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
@@ -412,7 +421,7 @@ export class IndexPatternsService {
     try {
       spec.fields = await this.refreshFieldSpecMap(
         spec.fields || {},
-        id,
+        savedObject.id,
         spec.title as string,
         {
           pattern: title as string,
@@ -423,6 +432,7 @@ export class IndexPatternsService {
         },
         spec.fieldAttrs
       );
+
       // CREATE RUNTIME FIELDS
       for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
         // do not create runtime field if mapped field exists
@@ -450,7 +460,7 @@ export class IndexPatternsService {
         this.onError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-            values: { id, title },
+            values: { id: savedObject.id, title },
           }),
         });
       }
@@ -490,7 +500,7 @@ export class IndexPatternsService {
    * @returns IndexPattern
    */
   async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
-    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
     const indexPattern = new IndexPattern({
@@ -516,9 +526,9 @@ export class IndexPatternsService {
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
-    await this.createSavedObject(indexPattern, override);
-    await this.setDefault(indexPattern.id!);
-    return indexPattern;
+    const createdIndexPattern = await this.createSavedObject(indexPattern, override);
+    await this.setDefault(createdIndexPattern.id!);
+    return createdIndexPattern!;
   }
 
   /**
@@ -538,15 +548,20 @@ export class IndexPatternsService {
     }
 
     const body = indexPattern.getAsSavedObjectBody();
-    const response = await this.savedObjectsClient.create(savedObjectType, body, {
-      id: indexPattern.id,
-    });
-    indexPattern.id = response.id;
-    this.indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
+    const response: SavedObject<IndexPatternAttributes> = (await this.savedObjectsClient.create(
+      INDEX_PATTERN_SAVED_OBJECT_TYPE,
+      body,
+      {
+        id: indexPattern.id,
+      }
+    )) as SavedObject<IndexPatternAttributes>;
+
+    const createdIndexPattern = await this.initFromSavedObject(response);
+    this.indexPatternCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternSavedObjectAttrs>);
     }
-    return indexPattern;
+    return createdIndexPattern;
   }
 
   /**
@@ -575,7 +590,9 @@ export class IndexPatternsService {
     });
 
     return this.savedObjectsClient
-      .update(savedObjectType, indexPattern.id, body, { version: indexPattern.version })
+      .update(INDEX_PATTERN_SAVED_OBJECT_TYPE, indexPattern.id, body, {
+        version: indexPattern.version,
+      })
       .then((resp) => {
         indexPattern.id = resp.id;
         indexPattern.version = resp.version;
@@ -643,7 +660,7 @@ export class IndexPatternsService {
    */
   async delete(indexPatternId: string) {
     this.indexPatternCache.clear(indexPatternId);
-    return this.savedObjectsClient.delete('index-pattern', indexPatternId);
+    return this.savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, indexPatternId);
   }
 }
 

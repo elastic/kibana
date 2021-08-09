@@ -34,9 +34,15 @@ export const getComponents = ({
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
-  function wrapLazy<T>(fn: () => Promise<FC<T>>) {
+  function wrapLazy<T>(fn: () => Promise<FC<T>>, options: { showLoadingSpinner?: boolean } = {}) {
+    const { showLoadingSpinner } = options;
     return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
-      <LazyWrapper fn={fn} getStartServices={getStartServices} props={props} />
+      <LazyWrapper
+        fn={fn}
+        getStartServices={getStartServices}
+        props={props}
+        showLoadingSpinner={showLoadingSpinner}
+      />
     );
   }
 
@@ -44,7 +50,7 @@ export const getComponents = ({
     getSpacesContextProvider: wrapLazy(() =>
       getSpacesContextProviderWrapper({ spacesManager, getStartServices })
     ),
-    getShareToSpaceFlyout: wrapLazy(getShareToSpaceFlyoutComponent),
+    getShareToSpaceFlyout: wrapLazy(getShareToSpaceFlyoutComponent, { showLoadingSpinner: false }),
     getSpaceList: wrapLazy(getSpaceListComponent),
     getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),
     getSpaceAvatar: wrapLazy(getSpaceAvatarComponent),

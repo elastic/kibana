@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('line charts - split series', function () {
+    let isNewChartsLibraryEnabled = false;
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -42,7 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      await PageObjects.visualize.initTests();
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
       await initLineChart();
     });
 
@@ -205,19 +207,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          [
-            '0',
-            '1,000',
-            '2,000',
-            '3,000',
-            '4,000',
-            '5,000',
-            '6,000',
-            '7,000',
-            '8,000',
-            '9,000',
-            '10,000',
-          ],
+          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -228,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000'],
+          ['2,000', '4,000', '6,000', '8,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -241,19 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          [
-            '0',
-            '1,000',
-            '2,000',
-            '3,000',
-            '4,000',
-            '5,000',
-            '6,000',
-            '7,000',
-            '8,000',
-            '9,000',
-            '10,000',
-          ],
+          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);
@@ -264,7 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000'],
+          ['2,000', '4,000', '6,000', '8,000'],
           ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
         );
         expect(labels).to.eql(expectedLabels);

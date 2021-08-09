@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { flatten } from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Datatable } from 'src/plugins/expressions';
@@ -18,9 +18,11 @@ import {
   TableSuggestion,
   DatasourceSuggestion,
   DatasourcePublicAPI,
+  DatasourceMap,
+  VisualizationMap,
 } from '../../types';
-import { Action } from './state_management';
 import { DragDropIdentifier } from '../../drag_drop';
+import { LensDispatch, selectSuggestion, switchVisualization } from '../../state_management';
 
 export interface Suggestion {
   visualizationId: string;
@@ -57,7 +59,7 @@ export function getSuggestions({
   activeData,
   mainPalette,
 }: {
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
@@ -65,7 +67,7 @@ export function getSuggestions({
       state: unknown;
     }
   >;
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
   visualizationState: unknown;
@@ -79,7 +81,7 @@ export function getSuggestions({
   );
 
   // Collect all table suggestions from available datasources
-  const datasourceTableSuggestions = _.flatten(
+  const datasourceTableSuggestions = flatten(
     datasources.map(([datasourceId, datasource]) => {
       const datasourceState = datasourceStates[datasourceId].state;
       let dataSourceSuggestions;
@@ -103,9 +105,9 @@ export function getSuggestions({
 
   // Pass all table suggestions to all visualization extensions to get visualization suggestions
   // and rank them by score
-  return _.flatten(
+  return flatten(
     Object.entries(visualizationMap).map(([visualizationId, visualization]) =>
-      _.flatten(
+      flatten(
         datasourceTableSuggestions.map((datasourceSuggestion) => {
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
@@ -132,16 +134,15 @@ export function getSuggestions({
   ).sort((a, b) => b.score - a.score);
 }
 
-export function applyVisualizeFieldSuggestions({
+export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
   visualizationMap,
   activeVisualizationId,
   visualizationState,
   visualizeTriggerFieldContext,
-  dispatch,
 }: {
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
@@ -149,13 +150,12 @@ export function applyVisualizeFieldSuggestions({
       state: unknown;
     }
   >;
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
   visualizationState: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
-  dispatch: (action: Action) => void;
-}): void {
+}): Suggestion | undefined {
   const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
@@ -165,9 +165,7 @@ export function applyVisualizeFieldSuggestions({
     visualizeTriggerFieldContext,
   });
   if (suggestions.length) {
-    const selectedSuggestion =
-      suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-    switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
+    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
   }
 }
 
@@ -207,22 +205,25 @@ function getVisualizationSuggestions(
 }
 
 export function switchToSuggestion(
-  dispatch: (action: Action) => void,
+  dispatchLens: LensDispatch,
   suggestion: Pick<
     Suggestion,
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId'
   >,
   type: 'SWITCH_VISUALIZATION' | 'SELECT_SUGGESTION' = 'SELECT_SUGGESTION'
 ) {
-  const action: Action = {
-    type,
+  const pickedSuggestion = {
     newVisualizationId: suggestion.visualizationId,
     initialState: suggestion.visualizationState,
     datasourceState: suggestion.datasourceState,
     datasourceId: suggestion.datasourceId!,
   };
 
-  dispatch(action);
+  dispatchLens(
+    type === 'SELECT_SUGGESTION'
+      ? selectSuggestion(pickedSuggestion)
+      : switchVisualization(pickedSuggestion)
+  );
 }
 
 export function getTopSuggestionForField(

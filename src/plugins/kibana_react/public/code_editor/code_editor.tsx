@@ -34,7 +34,7 @@ export interface Props {
   value: string;
 
   /** Function invoked when text in editor is changed */
-  onChange: (value: string, event: monaco.editor.IModelContentChangedEvent) => void;
+  onChange?: (value: string, event: monaco.editor.IModelContentChangedEvent) => void;
 
   /**
    * Options for the Monaco Code Editor
@@ -95,6 +95,11 @@ export interface Props {
    * Should the editor use a transparent background
    */
   transparentBackground?: boolean;
+
+  /**
+   * Should the editor be rendered using the fullWidth EUI attribute
+   */
+  fullWidth?: boolean;
 }
 
 export class CodeEditor extends React.Component<Props, {}> {
@@ -187,10 +192,16 @@ export class CodeEditor extends React.Component<Props, {}> {
             wordBasedSuggestions: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
+            matchBrackets: 'never',
             ...options,
           }}
         />
-        <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
+        <ReactResizeDetector
+          handleWidth
+          handleHeight
+          onResize={this._updateDimensions}
+          refreshMode="debounce"
+        />
       </>
     );
   }

@@ -218,4 +218,81 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       },
     ]);
   });
+
+  it('returns agent inputs with deeply merged config values', () => {
+    expect(
+      storedPackagePoliciesToAgentInputs([
+        {
+          ...mockPackagePolicy,
+          inputs: [
+            {
+              ...mockInput,
+              compiled_input: {
+                agent_input_template_group1_vars: {
+                  inputVar: 'input-value',
+                },
+                agent_input_template_group2_vars: {
+                  inputVar3: {
+                    testFieldGroup: {
+                      subField1: 'subfield1',
+                    },
+                    testField: 'test',
+                  },
+                },
+              },
+              config: {
+                agent_input_template_group1_vars: {
+                  value: {
+                    inputVar2: {},
+                  },
+                },
+                agent_input_template_group2_vars: {
+                  value: {
+                    inputVar3: {
+                      testFieldGroup: {
+                        subField2: 'subfield2',
+                      },
+                    },
+                    inputVar4: '',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ])
+    ).toEqual([
+      {
+        id: 'some-uuid',
+        revision: 1,
+        name: 'mock-package-policy',
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        agent_input_template_group1_vars: {
+          inputVar: 'input-value',
+          inputVar2: {},
+        },
+        agent_input_template_group2_vars: {
+          inputVar3: {
+            testField: 'test',
+            testFieldGroup: {
+              subField1: 'subfield1',
+              subField2: 'subfield2',
+            },
+          },
+          inputVar4: '',
+        },
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+          { id: 'test-logs-bar', data_stream: { dataset: 'bar', type: 'logs' } },
+        ],
+      },
+    ]);
+  });
 });

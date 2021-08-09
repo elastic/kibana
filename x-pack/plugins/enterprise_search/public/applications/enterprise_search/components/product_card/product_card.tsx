@@ -80,6 +80,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
           {config.host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
         </EuiButtonTo>
       }
+      data-test-subj={`${product.ID}ProductCard`}
     />
   );
 };

@@ -14,34 +14,32 @@ import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';
 import { CaseConnectorMapping } from '../../containers/configure/types';
-import { connectorsConfiguration } from '../connectors';
 
 export interface MappingProps {
-  connectorActionTypeId: string;
+  actionTypeName: string;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
 }
 
-const MappingComponent: React.FC<MappingProps> = ({
-  connectorActionTypeId,
-  isLoading,
-  mappings,
-}) => {
-  const selectedConnector = useMemo(() => connectorsConfiguration[connectorActionTypeId], [
-    connectorActionTypeId,
-  ]);
+const MappingComponent: React.FC<MappingProps> = ({ actionTypeName, isLoading, mappings }) => {
   const fieldMappingDesc: { desc: string; color: TextColor } = useMemo(
     () =>
       mappings.length > 0 || isLoading
-        ? { desc: i18n.FIELD_MAPPING_DESC(selectedConnector.name), color: 'subdued' }
-        : { desc: i18n.FIELD_MAPPING_DESC_ERR(selectedConnector.name), color: 'danger' },
-    [isLoading, mappings.length, selectedConnector.name]
+        ? {
+            desc: i18n.FIELD_MAPPING_DESC(actionTypeName),
+            color: 'subdued',
+          }
+        : {
+            desc: i18n.FIELD_MAPPING_DESC_ERR(actionTypeName),
+            color: 'danger',
+          },
+    [isLoading, mappings.length, actionTypeName]
   );
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <h4>{i18n.FIELD_MAPPING_TITLE(selectedConnector.name)}</h4>
+        <EuiText size="xs" data-test-subj="field-mapping-text">
+          <h4>{i18n.FIELD_MAPPING_TITLE(actionTypeName)}</h4>
           <EuiTextColor data-test-subj="field-mapping-desc" color={fieldMappingDesc.color}>
             {fieldMappingDesc.desc}
           </EuiTextColor>
@@ -49,7 +47,7 @@ const MappingComponent: React.FC<MappingProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FieldMapping
-          connectorActionTypeId={connectorActionTypeId}
+          actionTypeName={actionTypeName}
           data-test-subj="case-mappings-field"
           isLoading={isLoading}
           mappings={mappings}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 
 export const parseFilterQuery = (
   filterQuery: string | null | undefined

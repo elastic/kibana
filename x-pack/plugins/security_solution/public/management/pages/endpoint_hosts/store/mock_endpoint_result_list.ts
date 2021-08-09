@@ -12,7 +12,7 @@ import {
   HostPolicyResponse,
   HostResultList,
   HostStatus,
-  MetadataQueryStrategyVersions,
+  PendingActionsResponse,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
@@ -28,6 +28,10 @@ import {
   GetAgentsResponse,
 } from '../../../../../../fleet/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
+import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
+import { ACTION_STATUS_ROUTE } from '../../../../../common/endpoint/constants';
+import { TRANSFORM_STATS_URL } from '../../../../../common/constants';
+import { TransformStats, TransformStatsResponse } from '../types';
 
 const generator = new EndpointDocGenerator('seed');
 
@@ -35,13 +39,11 @@ export const mockEndpointResultList: (options?: {
   total?: number;
   request_page_size?: number;
   request_page_index?: number;
-  query_strategy_version?: MetadataQueryStrategyVersions;
 }) => HostResultList = (options = {}) => {
   const {
     total = 1,
     request_page_size: requestPageSize = 10,
     request_page_index: requestPageIndex = 0,
-    query_strategy_version: queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
   } = options;
 
   // Skip any that are before the page we're on
@@ -55,7 +57,6 @@ export const mockEndpointResultList: (options?: {
     hosts.push({
       metadata: generator.generateHostMetadata(),
       host_status: HostStatus.UNHEALTHY,
-      query_strategy_version: queryStrategyVersion,
     });
   }
   const mock: HostResultList = {
@@ -63,7 +64,6 @@ export const mockEndpointResultList: (options?: {
     total,
     request_page_size: requestPageSize,
     request_page_index: requestPageIndex,
-    query_strategy_version: queryStrategyVersion,
   };
   return mock;
 };
@@ -75,7 +75,6 @@ export const mockEndpointDetailsApiResult = (): HostInfo => {
   return {
     metadata: generator.generateHostMetadata(),
     host_status: HostStatus.UNHEALTHY,
-    query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
 };
 
@@ -89,8 +88,8 @@ const endpointListApiPathHandlerMocks = ({
   endpointPackagePolicies = [],
   policyResponse = generator.generatePolicyResponse(),
   agentPolicy = generator.generateAgentPolicy(),
-  queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
   totalAgentsUsingEndpoint = 0,
+  transforms = [],
 }: {
   /** route handlers will be setup for each individual host in this array */
   endpointsResults?: HostResultList['hosts'];
@@ -98,8 +97,8 @@ const endpointListApiPathHandlerMocks = ({
   endpointPackagePolicies?: GetPolicyListResponse['items'];
   policyResponse?: HostPolicyResponse;
   agentPolicy?: GetAgentPoliciesResponseItem;
-  queryStrategyVersion?: MetadataQueryStrategyVersions;
   totalAgentsUsingEndpoint?: number;
+  transforms?: TransformStats[];
 } = {}) => {
   const apiHandlers = {
     // endpoint package info
@@ -116,7 +115,6 @@ const endpointListApiPathHandlerMocks = ({
         request_page_size: 10,
         request_page_index: 0,
         total: endpointsResults?.length || 0,
-        query_strategy_version: queryStrategyVersion,
       };
     },
 
@@ -159,6 +157,16 @@ const endpointListApiPathHandlerMocks = ({
         perPage: 10,
       };
     },
+
+    // Pending Actions
+    [ACTION_STATUS_ROUTE]: (): PendingActionsResponse => {
+      return pendingActionsResponseMock();
+    },
+
+    [TRANSFORM_STATS_URL]: (): TransformStatsResponse => ({
+      count: transforms.length,
+      transforms,
+    }),
   };
 
   // Build a GET route handler for each endpoint details based on the list of Endpoints passed on input
@@ -184,16 +192,11 @@ export const setEndpointListApiMockImplementation: (
   apiResponses?: Parameters<typeof endpointListApiPathHandlerMocks>[0]
 ) => void = (
   mockedHttpService,
-  {
-    endpointsResults = mockEndpointResultList({ total: 3 }).hosts,
-    queryStrategyVersion = MetadataQueryStrategyVersions.VERSION_2,
-    ...pathHandlersOptions
-  } = {}
+  { endpointsResults = mockEndpointResultList({ total: 3 }).hosts, ...pathHandlersOptions } = {}
 ) => {
   const apiHandlers = endpointListApiPathHandlerMocks({
     ...pathHandlersOptions,
     endpointsResults,
-    queryStrategyVersion,
   });
 
   mockedHttpService.post

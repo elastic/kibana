@@ -7,8 +7,39 @@
 
 import React from 'react';
 
-import { ServicesProvider } from '../../public/services';
+import { DecoratorFn } from '@storybook/react';
+import { I18nProvider } from '@kbn/i18n/react';
 
-export const servicesContextDecorator = (story: Function) => (
-  <ServicesProvider>{story()}</ServicesProvider>
-);
+import { PluginServiceRegistry } from '../../../../../src/plugins/presentation_util/public';
+import { pluginServices, CanvasPluginServices } from '../../public/services';
+import { pluginServiceProviders, StorybookParams } from '../../public/services/storybook';
+import { LegacyServicesProvider } from '../../public/services/legacy';
+import { startServices } from '../../public/services/legacy/stubs';
+
+export const servicesContextDecorator = (): DecoratorFn => {
+  const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices, StorybookParams>(
+    pluginServiceProviders
+  );
+
+  pluginServices.setRegistry(pluginServiceRegistry.start({}));
+
+  return (story: Function, storybook) => {
+    if (process.env.JEST_WORKER_ID !== undefined) {
+      storybook.args.useStaticData = true;
+    }
+
+    pluginServices.setRegistry(pluginServiceRegistry.start(storybook.args));
+    const ContextProvider = pluginServices.getContextProvider();
+
+    return (
+      <I18nProvider>
+        <ContextProvider>{story()}</ContextProvider>
+      </I18nProvider>
+    );
+  };
+};
+
+export const legacyContextDecorator = () => {
+  startServices();
+  return (story: Function) => <LegacyServicesProvider>{story()}</LegacyServicesProvider>;
+};

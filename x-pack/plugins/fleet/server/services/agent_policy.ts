@@ -47,6 +47,10 @@ import type {
   Output,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
+import {
+  storedPackagePoliciesToAgentPermissions,
+  DEFAULT_PERMISSIONS,
+} from '../services/package_policies_to_agent_permissions';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
@@ -58,6 +62,19 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
+
+const MONITORING_DATASETS = [
+  'elastic_agent',
+  'elastic_agent.elastic_agent',
+  'elastic_agent.apm_server',
+  'elastic_agent.filebeat',
+  'elastic_agent.fleet_server',
+  'elastic_agent.metricbeat',
+  'elastic_agent.osquerybeat',
+  'elastic_agent.packetbeat',
+  'elastic_agent.endpoint_security',
+  'elastic_agent.auditbeat',
+];
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
@@ -316,14 +333,30 @@ class AgentPolicyService {
       withPackagePolicies = false,
     } = options;
 
-    const agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+    const baseFindParams = {
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
       page,
       perPage,
-      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
-    });
+    };
+    const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
+    let agentPoliciesSO;
+    try {
+      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({ ...baseFindParams, filter });
+    } catch (e) {
+      const isBadRequest = e.output?.statusCode === 400;
+      const isKQLSyntaxError = e.message?.startsWith('KQLSyntaxError');
+      if (isBadRequest && !isKQLSyntaxError) {
+        // fall back to simple search if the kuery is just a search term i.e not KQL
+        agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+          ...baseFindParams,
+          search: kuery,
+        });
+      } else {
+        throw e;
+      }
+    }
 
     const agentPolicies = await Promise.all(
       agentPoliciesSO.saved_objects.map(async (agentPolicySO) => {
@@ -640,6 +673,10 @@ class AgentPolicyService {
       default_fleet_server: policy.is_default_fleet_server === true,
     };
 
+    if (policy.unenroll_timeout) {
+      fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
+    }
+
     await esClient.create({
       index: AGENT_POLICY_INDEX,
       body: fleetServerPolicy,
@@ -745,30 +782,53 @@ class AgentPolicyService {
           }),
     };
 
+    const permissions = (await storedPackagePoliciesToAgentPermissions(
+      soClient,
+      agentPolicy.package_policies
+    )) || { _fallback: DEFAULT_PERMISSIONS };
+
+    permissions._elastic_agent_checks = {
+      cluster: DEFAULT_PERMISSIONS.cluster,
+    };
+
+    // TODO: fetch this from the elastic agent package
+    const monitoringOutput = fullAgentPolicy.agent?.monitoring.use_output;
+    const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
+    if (
+      fullAgentPolicy.agent?.monitoring.enabled &&
+      monitoringNamespace &&
+      monitoringOutput &&
+      fullAgentPolicy.outputs[monitoringOutput]?.type === 'elasticsearch'
+    ) {
+      let names: string[] = [];
+      if (fullAgentPolicy.agent.monitoring.logs) {
+        names = names.concat(
+          MONITORING_DATASETS.map((dataset) => `logs-${dataset}-${monitoringNamespace}`)
+        );
+      }
+      if (fullAgentPolicy.agent.monitoring.metrics) {
+        names = names.concat(
+          MONITORING_DATASETS.map((dataset) => `metrics-${dataset}-${monitoringNamespace}`)
+        );
+      }
+
+      permissions._elastic_agent_checks.indices = [
+        {
+          names,
+          privileges: ['auto_configure', 'create_doc'],
+        },
+      ];
+    }
+
     // Only add permissions if output.type is "elasticsearch"
     fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
       NonNullable<FullAgentPolicy['output_permissions']>
-    >((permissions, outputName) => {
+    >((outputPermissions, outputName) => {
       const output = fullAgentPolicy.outputs[outputName];
       if (output && output.type === 'elasticsearch') {
-        permissions[outputName] = {};
-        permissions[outputName]._fallback = {
-          cluster: ['monitor'],
-          indices: [
-            {
-              names: [
-                'logs-*',
-                'metrics-*',
-                'traces-*',
-                '.logs-endpoint.diagnostic.collection-*',
-                'synthetics-*',
-              ],
-              privileges: ['auto_configure', 'create_doc'],
-            },
-          ],
-        };
+        outputPermissions[outputName] = permissions;
       }
-      return permissions;
+      return outputPermissions;
     }, {});
 
     // only add settings if not in standalone

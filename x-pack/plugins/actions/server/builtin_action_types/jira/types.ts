@@ -16,10 +16,10 @@ import {
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
   ExecutorSubActionGetCapabilitiesParamsSchema,
-  ExecutorSubActionGetIssueTypesParamsSchema,
   ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
   ExecutorSubActionGetIssuesParamsSchema,
   ExecutorSubActionGetIssueParamsSchema,
+  ExecutorSubActionCommonFieldsParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
@@ -124,8 +124,8 @@ export type ExecutorSubActionGetCapabilitiesParams = TypeOf<
   typeof ExecutorSubActionGetCapabilitiesParamsSchema
 >;
 
-export type ExecutorSubActionGetIssueTypesParams = TypeOf<
-  typeof ExecutorSubActionGetIssueTypesParamsSchema
+export type ExecutorSubActionCommonFieldsParams = TypeOf<
+  typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
 export type ExecutorSubActionGetFieldsByIssueTypeParams = TypeOf<
@@ -157,12 +157,12 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
 
 export interface GetIssueTypesHandlerArgs {
   externalService: ExternalService;
-  params: ExecutorSubActionGetIssueTypesParams;
+  params: ExecutorSubActionCommonFieldsParams;
 }
 
 export interface GetCommonFieldsHandlerArgs {
   externalService: ExternalService;
-  params: ExecutorSubActionGetIssueTypesParams;
+  params: ExecutorSubActionCommonFieldsParams;
 }
 
 export interface GetFieldsByIssueTypeHandlerArgs {

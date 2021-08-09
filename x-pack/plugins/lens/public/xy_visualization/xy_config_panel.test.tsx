@@ -13,7 +13,7 @@ import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../types';
 import { State } from './types';
 import { Position } from '@elastic/charts';
-import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
+import { createMockFramePublicAPI, createMockDatasource } from '../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 
@@ -260,6 +260,7 @@ describe('XY Config panels', () => {
           state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
         />
       );
 
@@ -283,6 +284,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
         />
       );
 
@@ -326,6 +328,7 @@ describe('XY Config panels', () => {
           }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
         />
       );
 
@@ -365,6 +368,7 @@ describe('XY Config panels', () => {
           }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
         />
       );
 

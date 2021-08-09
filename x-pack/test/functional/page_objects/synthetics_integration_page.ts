@@ -16,31 +16,25 @@ export function SyntheticsIntegrationPageProvider({
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
 
+  const fixedFooterHeight = 72; // Size of EuiBottomBar more or less
+
   return {
     /**
      * Navigates to the Synthetics Integration page
      *
      */
     async navigateToPackagePage(packageVersion: string) {
-      await pageObjects.common.navigateToUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'fleet',
-        `/integrations/synthetics-${packageVersion}/add-integration`,
-        {
-          shouldUseHashForSubUrl: true,
-          useActualUrl: true,
-        }
+        `/integrations/synthetics-${packageVersion}/add-integration`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async navigateToPackageEditPage(packageId: string, agentId: string) {
-      await pageObjects.common.navigateToUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'fleet',
-        `/policies/${agentId}/edit-integration/${packageId}`,
-        {
-          shouldUseHashForSubUrl: true,
-          useActualUrl: true,
-        }
+        `/policies/${agentId}/edit-integration/${packageId}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -84,7 +78,8 @@ export function SyntheticsIntegrationPageProvider({
      * @params {value} the value of the input
      */
     async fillTextInputByTestSubj(testSubj: string, value: string) {
-      const field = await testSubjects.find(testSubj, 5000);
+      const field = await testSubjects.find(testSubj);
+      await field.scrollIntoViewIfNecessary({ bottomOffset: fixedFooterHeight });
       await field.click();
       await field.clearValue();
       await field.type(value);
@@ -96,6 +91,7 @@ export function SyntheticsIntegrationPageProvider({
      * @params {value} the value of the input
      */
     async fillTextInput(field: WebElementWrapper, value: string) {
+      await field.scrollIntoViewIfNecessary({ bottomOffset: fixedFooterHeight });
       await field.click();
       await field.clearValue();
       await field.type(value);
@@ -114,7 +110,7 @@ export function SyntheticsIntegrationPageProvider({
      */
     async findHTTPAdvancedOptionsAccordion() {
       await this.ensureIsOnPackagePage();
-      const accordion = await testSubjects.find('syntheticsHTTPAdvancedFieldsAccordion', 5000);
+      const accordion = await testSubjects.find('syntheticsHTTPAdvancedFieldsAccordion');
       return accordion;
     },
 
@@ -182,7 +178,7 @@ export function SyntheticsIntegrationPageProvider({
      */
     async configureHeaders(testSubj: string, headers: Record<string, string>) {
       const headersContainer = await testSubjects.find(testSubj);
-      const addHeaderButton = await headersContainer.findByCssSelector('button');
+      const addHeaderButton = await testSubjects.find(`${testSubj}__button`);
       const keys = Object.keys(headers);
 
       await Promise.all(

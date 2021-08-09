@@ -10,12 +10,15 @@ import React, { MouseEventHandler, FC, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageContent,
   EuiPopover,
+  EuiSpacer,
   EuiTitle,
   EuiInMemoryTable,
   EuiSearchBarProps,
@@ -135,27 +138,36 @@ export const TransformList: FC<TransformListProps> = ({
 
   if (transforms.length === 0) {
     return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            {i18n.translate('xpack.transform.list.emptyPromptTitle', {
-              defaultMessage: 'No transforms found',
-            })}
-          </h2>
-        }
-        actions={[
-          <EuiButtonEmpty
-            onClick={onCreateTransform}
-            isDisabled={disabled}
-            data-test-subj="transformCreateFirstButton"
-          >
-            {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
-              defaultMessage: 'Create your first transform',
-            })}
-          </EuiButtonEmpty>,
-        ]}
-        data-test-subj="transformNoTransformsFound"
-      />
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="l" />
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+            <EuiEmptyPrompt
+              title={
+                <h2>
+                  {i18n.translate('xpack.transform.list.emptyPromptTitle', {
+                    defaultMessage: 'No transforms found',
+                  })}
+                </h2>
+              }
+              actions={[
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onCreateTransform}
+                  isDisabled={disabled}
+                  data-test-subj="transformCreateFirstButton"
+                >
+                  {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
+                    defaultMessage: 'Create your first transform',
+                  })}
+                </EuiButton>,
+              ]}
+              data-test-subj="transformNoTransformsFound"
+            />
+          </EuiPageContent>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

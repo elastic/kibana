@@ -6,7 +6,7 @@
  */
 
 import { handleActions, Action } from 'redux-actions';
-import { Ping, SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
+import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 import { pruneJourneyState } from '../actions/journey';
 import {
   FetchJourneyStepsParams,
@@ -18,7 +18,7 @@ import {
 
 export interface JourneyState {
   checkGroup: string;
-  steps: Ping[];
+  steps: JourneyStep[];
   details?: SyntheticsJourneyApiResponse['details'];
   loading: boolean;
   error?: Error;

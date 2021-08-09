@@ -162,12 +162,13 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Basic ZHVtbXlfaGFja2VyOnBhc3M=')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(401, {
-            statusCode: 401,
-            error: 'Unauthorized',
-            message:
-              '[security_exception]: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]',
-          });
+          .expect(401);
+
+        expect(apiResponse.body.statusCode).to.be(401);
+        expect(apiResponse.body.error).to.be('Unauthorized');
+        expect(apiResponse.body.message).to.include.string(
+          '[security_exception] Reason: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
+        );
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });

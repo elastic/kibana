@@ -8,12 +8,28 @@
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiTabbedContent } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 // @ts-expect-error unconverted component
 import { Datasource } from '../../datasource';
 // @ts-expect-error unconverted component
 import { FunctionFormList } from '../../function_form_list';
 import { PositionedElement } from '../../../../types';
-import { ComponentStrings } from '../../../../i18n';
+
+const strings = {
+  getDataTabLabel: () =>
+    i18n.translate('xpack.canvas.elementSettings.dataTabLabel', {
+      defaultMessage: 'Data',
+      description:
+        'This tab contains the settings for the data (i.e. Elasticsearch query) used as ' +
+        'the source for a Canvas element',
+    }),
+  getDisplayTabLabel: () =>
+    i18n.translate('xpack.canvas.elementSettings.displayTabLabel', {
+      defaultMessage: 'Display',
+      description: 'This tab contains the settings for how data is displayed in a Canvas element',
+    }),
+};
 
 interface Props {
   /**
@@ -21,8 +37,6 @@ interface Props {
    */
   element: PositionedElement;
 }
-
-const { ElementSettings: strings } = ComponentStrings;
 
 export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
   const tabs = [

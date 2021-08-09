@@ -123,14 +123,6 @@ export class Workpad extends React.PureComponent {
                   style={fsStyle}
                   data-shared-items-count={totalElementCount}
                 >
-                  {isFullscreen && (
-                    <Shortcuts
-                      name="PRESENTATION"
-                      handler={this.keyHandler}
-                      targetNodeSelector="body"
-                      global
-                    />
-                  )}
                   {pages.map((page, i) => (
                     <WorkpadPage
                       key={page.id}

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { tail } from './tail';
 
 describe('tail', () => {
   const fn = functionWrapper(tail);
+
   const lastIndex = testTable.rows.length - 1;
 
   it('returns a datatable with the last N rows of the context', () => {

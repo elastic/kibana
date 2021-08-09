@@ -32,6 +32,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
     });
 
+    describe('correlations/latency_ml', function () {
+      loadTestFile(require.resolve('./correlations/latency_ml'));
+    });
+
     describe('correlations/latency_overall', function () {
       loadTestFile(require.resolve('./correlations/latency_overall'));
     });
@@ -84,6 +88,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('services/annotations', function () {
       loadTestFile(require.resolve('./services/annotations'));
+      loadTestFile(require.resolve('./services/derived_annotations'));
     });
 
     describe('services/service_details', function () {
@@ -112,6 +117,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('services/error_groups_detailed_statistics', function () {
       loadTestFile(require.resolve('./services/error_groups_detailed_statistics'));
+    });
+
+    describe('services/detailed_statistics', function () {
+      loadTestFile(require.resolve('./services/services_detailed_statistics'));
     });
 
     // Settinges
@@ -159,14 +168,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('transactions/latency', function () {
       loadTestFile(require.resolve('./transactions/latency'));
-    });
-
-    describe('transactions/throughput', function () {
-      loadTestFile(require.resolve('./transactions/throughput'));
-    });
-
-    describe('transactions/top_transaction_groups', function () {
-      loadTestFile(require.resolve('./transactions/top_transaction_groups'));
     });
 
     describe('transactions/transactions_groups_main_statistics', function () {

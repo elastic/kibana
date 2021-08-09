@@ -39,7 +39,7 @@ export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, para
   });
 
   const schemas = getVisSchemas(vis, params);
-  const { scale, orientation, minFontSize, maxFontSize, showLabel } = vis.params;
+  const { scale, orientation, minFontSize, maxFontSize, showLabel, palette } = vis.params;
 
   const tagcloud = buildExpressionFunction<TagcloudExpressionFunctionDefinition>('tagcloud', {
     scale,
@@ -48,6 +48,7 @@ export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, para
     maxFontSize,
     showLabel,
     metric: prepareDimension(schemas.metric[0]),
+    palette: palette?.name,
   });
 
   if (schemas.segment) {

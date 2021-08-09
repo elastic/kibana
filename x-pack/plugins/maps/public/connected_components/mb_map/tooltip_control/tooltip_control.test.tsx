@@ -77,9 +77,11 @@ const defaultProps = {
   layerList: [mockLayer],
   isDrawingFilter: false,
   addFilters: async () => {},
-  geoFields: [],
+  geoFieldNames: [],
   openTooltips: [],
   hasLockedTooltips: false,
+  filterModeActive: false,
+  drawModeActive: false,
 };
 
 const hoverTooltipState = {
@@ -208,7 +210,6 @@ describe('TooltipControl', () => {
           {...defaultProps}
           closeOnClickTooltip={closeOnClickTooltipStub}
           openOnClickTooltip={openOnClickTooltipStub}
-          isDrawingFilter={true}
         />
       );
 

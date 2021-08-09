@@ -4,7 +4,7 @@
     "id": "M92ScEJT9M9QusfIi3hpEb0AAAAAAAAA",
     "index": "metrics-endpoint.metadata_current_default",
     "source": {
-      "@timestamp": 1618841405309,
+      "@timestamp": 1626897841950,
       "Endpoint": {
         "policy": {
           "applied": {
@@ -13,7 +13,13 @@
             "status": "failure"
           }
         },
-        "status": "enrolled"
+        "status": "enrolled",
+        "configuration": {
+          "isolation": false
+        },
+        "state": {
+          "isolation": false
+        }
       },
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
@@ -30,7 +36,7 @@
         "category": [
           "host"
         ],
-        "created": 1618841405309,
+        "created": 1626897841950,
         "dataset": "endpoint.metadata",
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d16",
         "ingested": "2020-09-09T18:25:15.853783Z",
@@ -72,7 +78,7 @@
     "id": "OU3RgCJaNnR90byeDEHutp8AAAAAAAAA",
     "index": "metrics-endpoint.metadata_current_default",
     "source": {
-      "@timestamp": 1618841405309,
+      "@timestamp": 1626897841950,
       "Endpoint": {
         "policy": {
           "applied": {
@@ -81,7 +87,13 @@
             "status": "failure"
           }
         },
-        "status": "enrolled"
+        "status": "enrolled",
+        "configuration": {
+          "isolation": false
+        },
+        "state": {
+          "isolation": false
+        }
       },
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
@@ -98,7 +110,7 @@
         "category": [
           "host"
         ],
-        "created": 1618841405309,
+        "created": 1626897841950,
         "dataset": "endpoint.metadata",
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d14",
         "ingested": "2020-09-09T18:25:14.919526Z",
@@ -143,7 +155,7 @@
     "id": "YjqDCEuI6JmLeLOSyZx_NhMAAAAAAAAA",
     "index": "metrics-endpoint.metadata_current_default",
     "source": {
-      "@timestamp": 1618841405309,
+      "@timestamp": 1626897841950,
       "Endpoint": {
         "policy": {
           "applied": {
@@ -152,7 +164,13 @@
             "status": "success"
           }
         },
-        "status": "enrolled"
+        "status": "enrolled",
+        "configuration": {
+          "isolation": false
+        },
+        "state": {
+          "isolation": false
+        }
       },
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
@@ -169,7 +187,7 @@
         "category": [
           "host"
         ],
-        "created": 1618841405309,
+        "created": 1626897841950,
         "dataset": "endpoint.metadata",
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d15",
         "ingested": "2020-09-09T18:25:15.853404Z",

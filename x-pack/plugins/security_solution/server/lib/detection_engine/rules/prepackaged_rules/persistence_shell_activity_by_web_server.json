@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Shell via Web Server",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:(bash or dash) and user.name:(apache or nginx or www or \"www-data\")",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:(bash or dash) and\n  user.name:(apache or nginx or www or \"www-data\")\n",
   "references": [
     "https://pentestlab.blog/tag/web-shell/"
   ],

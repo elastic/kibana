@@ -20,7 +20,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from './types';
+import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../common/expressions';
 import { ToolbarPopover, useDebouncedValue } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
@@ -31,6 +31,7 @@ import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/publ
 import { validateExtent } from './axes_configuration';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
+
 export interface AxisSettingsPopoverProps {
   /**
    * Determines the axis
@@ -56,6 +57,14 @@ export interface AxisSettingsPopoverProps {
    * Determines if the ticklabels of the axis are visible
    */
   areTickLabelsVisible: boolean;
+  /**
+   * Determines the axis labels orientation
+   */
+  orientation: number;
+  /**
+   * Callback on orientation option change
+   */
+  setOrientation: (axis: AxesSettingsConfigKeys, orientation: number) => void;
   /**
    * Toggles the axis tickLabels visibility
    */
@@ -93,8 +102,10 @@ export interface AxisSettingsPopoverProps {
    */
   setExtent?: (extent: AxisExtentConfig | undefined) => void;
   hasBarOrAreaOnAxis: boolean;
+  hasPercentageAxis: boolean;
   dataBounds?: { min: number; max: number };
 }
+
 const popoverConfig = (
   axis: AxesSettingsConfigKeys,
   isHorizontal: boolean
@@ -148,6 +159,33 @@ const popoverConfig = (
       };
   }
 };
+const axisOrientationOptions: Array<{
+  id: string;
+  value: 0 | -90 | -45;
+  label: string;
+}> = [
+  {
+    id: 'xy_axis_orientation_horizontal',
+    value: 0,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.horizontal', {
+      defaultMessage: 'Horizontal',
+    }),
+  },
+  {
+    id: 'xy_axis_orientation_vertical',
+    value: -90,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.vertical', {
+      defaultMessage: 'Vertical',
+    }),
+  },
+  {
+    id: 'xy_axis_orientation_angled',
+    value: -45,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.angled', {
+      defaultMessage: 'Angled',
+    }),
+  },
+];
 
 const noop = () => {};
 const idPrefix = htmlIdGenerator()();
@@ -162,12 +200,15 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   areTickLabelsVisible,
   areGridlinesVisible,
   isAxisTitleVisible,
+  orientation,
+  setOrientation,
   toggleAxisTitleVisibility,
   setEndzoneVisibility,
   endzonesVisible,
   extent,
   setExtent,
   hasBarOrAreaOnAxis,
+  hasPercentageAxis,
   dataBounds,
 }) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
@@ -255,16 +296,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
-        data-test-subj={`lnsshow${axis}AxisTickLabels`}
-        label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-          defaultMessage: 'Tick labels',
-        })}
-        onChange={() => toggleTickLabelsVisibility(axis)}
-        checked={areTickLabelsVisible}
-      />
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
         data-test-subj={`lnsshow${axis}AxisGridlines`}
         label={i18n.translate('xpack.lens.xyChart.Gridlines', {
           defaultMessage: 'Gridlines',
@@ -272,6 +303,41 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         onChange={() => toggleGridlinesVisibility(axis)}
         checked={areGridlinesVisible}
       />
+      <EuiSpacer size="m" />
+      <EuiSwitch
+        compressed
+        data-test-subj={`lnsshow${axis}AxisTickLabels`}
+        label={i18n.translate('xpack.lens.xyChart.tickLabels', {
+          defaultMessage: 'Tick labels',
+        })}
+        onChange={() => toggleTickLabelsVisibility(axis)}
+        checked={areTickLabelsVisible}
+      />
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        display="rowCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+          defaultMessage: 'Orientation',
+        })}
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+            defaultMessage: 'Orientation',
+          })}
+          data-test-subj="lnsXY_axisOrientation_groups"
+          name="axisOrientation"
+          isDisabled={!areTickLabelsVisible}
+          buttonSize="compressed"
+          options={axisOrientationOptions}
+          idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}
+          onChange={(optionId) => {
+            const newOrientation = axisOrientationOptions.find(({ id }) => id === optionId)!.value;
+            setOrientation(axis, newOrientation);
+          }}
+        />
+      </EuiFormRow>
       {setEndzoneVisibility && (
         <>
           <EuiSpacer size="m" />
@@ -333,10 +399,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                     defaultMessage: 'Custom',
                   }),
                   'data-test-subj': 'lnsXY_axisExtent_groups_custom',
+                  isDisabled: hasPercentageAxis,
                 },
               ]}
               idSelected={`${idPrefix}${
-                hasBarOrAreaOnAxis && localExtent.mode === 'dataBounds' ? 'full' : localExtent.mode
+                (hasBarOrAreaOnAxis && localExtent.mode === 'dataBounds') || hasPercentageAxis
+                  ? 'full'
+                  : localExtent.mode
               }`}
               onChange={(id) => {
                 const newMode = id.replace(idPrefix, '') as AxisExtentConfig['mode'];
@@ -350,7 +419,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
               }}
             />
           </EuiFormRow>
-          {localExtent.mode === 'custom' && (
+          {localExtent.mode === 'custom' && !hasPercentageAxis && (
             <>
               <EuiSpacer size="s" />
               <EuiFlexGroup gutterSize="s">

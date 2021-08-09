@@ -7,16 +7,19 @@
 
 import React, { useMemo } from 'react';
 
-import { CellValueElementProps } from '../../cell_rendering';
-import { ControlColumnProps, RowCellRender } from '../control_columns';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
+import { OnRowSelected } from '../../events';
 import { EventsTrData, EventsTdGroupActions } from '../../styles';
 import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
 import { inputsModel } from '../../../../../common/store';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import {
+  ColumnHeaderOptions,
+  CellValueElementProps,
+  ControlColumnProps,
+  RowCellRender,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 
 interface Props {
   id: string;
@@ -31,9 +34,7 @@ interface Props {
   loadingEventIds: Readonly<string[]>;
   notesCount: number;
   onEventDetailsPanelOpened: () => void;
-  onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
-  onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   onRuleChange?: () => void;
@@ -62,9 +63,7 @@ export const EventColumnView = React.memo<Props>(
     loadingEventIds,
     notesCount,
     onEventDetailsPanelOpened,
-    onPinEvent,
     onRowSelected,
-    onUnPinEvent,
     refetch,
     hasRowRenderers,
     onRuleChange,
@@ -134,10 +133,8 @@ export const EventColumnView = React.memo<Props>(
                   eventIdToNoteIds={eventIdToNoteIds}
                   isEventPinned={isEventPinned}
                   isEventViewer={isEventViewer}
-                  onPinEvent={onPinEvent}
-                  onUnPinEvent={onUnPinEvent}
-                  refetch={refetch}
                   onRuleChange={onRuleChange}
+                  refetch={refetch}
                   showNotes={showNotes}
                   tabType={tabType}
                   timelineId={timelineId}
@@ -161,10 +158,8 @@ export const EventColumnView = React.memo<Props>(
         leadingControlColumns,
         loadingEventIds,
         onEventDetailsPanelOpened,
-        onPinEvent,
         onRowSelected,
         onRuleChange,
-        onUnPinEvent,
         refetch,
         selectedEventIds,
         showCheckboxes,
@@ -201,8 +196,6 @@ export const EventColumnView = React.memo<Props>(
           eventIdToNoteIds={eventIdToNoteIds}
           isEventPinned={isEventPinned}
           isEventViewer={isEventViewer}
-          onPinEvent={onPinEvent}
-          onUnPinEvent={onUnPinEvent}
           refetch={refetch}
           onRuleChange={onRuleChange}
           selectedEventIds={selectedEventIds}

@@ -10,9 +10,8 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { useEndpointSelector } from '../hooks';
 import { nonExistingPolicies } from '../../store/selectors';
 import { getPolicyDetailPath } from '../../../../common/routing';
-import { useFormatUrl } from '../../../../../common/components/link_to';
-import { SecurityPageName } from '../../../../../../common/constants';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 
 /**
  * A policy link (to details) that first checks to see if the policy id exists against
@@ -25,14 +24,14 @@ export const EndpointPolicyLink = memo<
   }
 >(({ policyId, children, onClick, ...otherProps }) => {
   const missingPolicies = useEndpointSelector(nonExistingPolicies);
-  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+  const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    const toPath = getPolicyDetailPath(policyId);
+    const path = getPolicyDetailPath(policyId);
     return {
-      toRoutePath: toPath,
-      toRouteUrl: formatUrl(toPath),
+      toRoutePath: path,
+      toRouteUrl: getAppUrl({ path }),
     };
-  }, [formatUrl, policyId]);
+  }, [policyId, getAppUrl]);
   const clickHandler = useNavigateByRouterEventHandler(toRoutePath, onClick);
 
   if (missingPolicies[policyId]) {

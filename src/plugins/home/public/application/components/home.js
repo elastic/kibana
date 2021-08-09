@@ -13,8 +13,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import {
+  KibanaPageTemplate,
+  overviewPageActions,
   OverviewPageFooter,
-  OverviewPageHeader,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
@@ -113,7 +114,7 @@ export class Home extends Component {
 
   renderNormal() {
     const { addBasePath, solutions, directories } = this.props;
-    const { trackUiMetric } = getServices();
+    const { application, trackUiMetric } = getServices();
     const devTools = this.findDirectoryById('console');
     const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
     const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
@@ -124,58 +125,56 @@ export class Home extends Component {
     }
 
     return (
-      <main
-        aria-labelledby="kbnOverviewPageHeader__title"
-        className="homWrapper"
+      <KibanaPageTemplate
         data-test-subj="homeApp"
+        pageHeader={{
+          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Home" />,
+          rightSideItems: overviewPageActions({
+            addBasePath,
+            application,
+            showDevToolsLink: true,
+            showManagementLink: true,
+          }),
+        }}
+        template="empty"
       >
-        <OverviewPageHeader
-          addBasePath={addBasePath}
-          overlap={solutions.length}
-          showDevToolsLink
-          showManagementLink
-          title={<FormattedMessage id="home.header.title" defaultMessage="Home" />}
-        />
-
-        <div className="homContent">
-          {solutions.length ? (
-            <SolutionsSection
-              addBasePath={addBasePath}
-              solutions={solutions}
-              directories={directories}
-            />
-          ) : null}
-
-          <EuiFlexGroup
-            className={`homData ${
-              addDataFeatures.length === 1 && manageDataFeatures.length === 1
-                ? 'homData--compressed'
-                : 'homData--expanded'
-            }`}
-          >
-            <EuiFlexItem>
-              <AddData addBasePath={addBasePath} features={addDataFeatures} />
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiHorizontalRule margin="xl" aria-hidden="true" />
-
-          <OverviewPageFooter
+        {solutions.length ? (
+          <SolutionsSection
             addBasePath={addBasePath}
-            path={HOME_APP_BASE_PATH}
-            onSetDefaultRoute={() => {
-              trackUiMetric(METRIC_TYPE.CLICK, 'set_home_as_default_route');
-            }}
-            onChangeDefaultRoute={() => {
-              trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
-            }}
+            solutions={solutions}
+            directories={directories}
           />
-        </div>
-      </main>
+        ) : null}
+
+        <EuiFlexGroup
+          className={`homData ${
+            addDataFeatures.length === 1 && manageDataFeatures.length === 1
+              ? 'homData--compressed'
+              : 'homData--expanded'
+          }`}
+        >
+          <EuiFlexItem>
+            <AddData addBasePath={addBasePath} features={addDataFeatures} />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="xl" aria-hidden="true" />
+
+        <OverviewPageFooter
+          addBasePath={addBasePath}
+          path={HOME_APP_BASE_PATH}
+          onSetDefaultRoute={() => {
+            trackUiMetric(METRIC_TYPE.CLICK, 'set_home_as_default_route');
+          }}
+          onChangeDefaultRoute={() => {
+            trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
+          }}
+        />
+      </KibanaPageTemplate>
     );
   }
 

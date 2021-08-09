@@ -102,7 +102,7 @@ export enum INDEX_STATUS {
 
 export interface FieldSelectionItem {
   name: string;
-  mappings_types: string[];
+  mappings_types?: string[];
   is_included: boolean;
   is_required: boolean;
   feature_type?: string;

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { defer, of, interval, Observable, throwError, timer } from 'rxjs';
-import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
+import { catchError, mergeMap, retryWhen, startWith, switchMap } from 'rxjs/operators';
 import {
   Logger,
   SavedObjectsServiceStart,
@@ -121,6 +121,17 @@ export const getHealthStatusStream = (
   retryDelay?: number
 ): Observable<ServiceStatus<unknown>> =>
   interval(healthStatusInterval ?? HEALTH_STATUS_INTERVAL).pipe(
+    // Emit an initial check
+    startWith(
+      getHealthServiceStatusWithRetryAndErrorHandling(
+        taskManager,
+        logger,
+        savedObjects,
+        config,
+        retryDelay
+      )
+    ),
+    // On each interval do a new check
     switchMap(() =>
       getHealthServiceStatusWithRetryAndErrorHandling(
         taskManager,

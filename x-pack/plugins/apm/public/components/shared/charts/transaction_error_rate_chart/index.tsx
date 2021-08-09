@@ -8,7 +8,6 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { RULE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
 import { AlertType } from '../../../../../common/alert_types';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -52,7 +51,6 @@ export function TransactionErrorRateChart({
   showAnnotations = true,
 }: Props) {
   const theme = useTheme();
-  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
     urlParams: {
       environment,
@@ -64,7 +62,7 @@ export function TransactionErrorRateChart({
       comparisonType,
     },
   } = useUrlParams();
-  const { transactionType, alerts } = useApmServiceContext();
+  const { serviceName, transactionType, alerts } = useApmServiceContext();
   const comparisonChartThem = getComparisonChartTheme(theme);
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -135,7 +133,7 @@ export function TransactionErrorRateChart({
   ];
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.errorRate', {

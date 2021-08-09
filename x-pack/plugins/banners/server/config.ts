@@ -45,6 +45,12 @@ export const config: PluginConfigDescriptor<BannersConfigType> = {
       if (pluginConfig?.placement === 'header') {
         addDeprecation({
           message: 'The `header` value for xpack.banners.placement has been replaced by `top`',
+          correctiveActions: {
+            manualSteps: [
+              `Remove "xpack.banners.placement: header" from your kibana configs.`,
+              `Add "xpack.banners.placement: to" to your kibana configs instead.`,
+            ],
+          },
         });
         return {
           set: [{ path: `${fromPath}.placement`, value: 'top' }],

@@ -8,21 +8,36 @@
   position: absolute;
   left: 0;
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+
   @include euiBreakpoint('l', 'xl') {
     top: 0 !important;
     height: 100% !important;
   }
+
   @include euiBreakpoint('xs', 's', 'm') {
     @include euiFlyout;
+  }
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    border-left: $euiBorderThin; // Force border regardless of theme in fullscreen
+    box-shadow: none;
   }
 }
 
 .lnsDimensionContainer__footer {
   padding: $euiSizeS;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
+  }
 }
 
 .lnsDimensionContainer__header {
   padding: $euiSizeS $euiSizeXS;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
+  }
 }
 
 .lnsDimensionContainer__headerTitle {

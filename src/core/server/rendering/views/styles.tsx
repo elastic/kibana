@@ -52,7 +52,6 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
 
           .kbnWelcomeView {
             line-height: 1.5;
-            background-color: ${darkMode ? '#1D1E24' : '#FFF'};
             height: 100%;
             display: -webkit-box;
             display: -webkit-flex;

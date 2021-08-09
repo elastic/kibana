@@ -75,6 +75,12 @@ export interface GenericFtrProviderContext<
   getService<T extends keyof ServiceMap>(serviceName: T): ServiceMap[T];
 
   /**
+   * Get the instance of a page object
+   * @param pageObjectName
+   */
+  getPageObject<K extends keyof PageObjectMap>(pageObjectName: K): PageObjectMap[K];
+
+  /**
    * Get a map of PageObjects
    * @param pageObjects
    */

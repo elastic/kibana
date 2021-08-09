@@ -15,10 +15,10 @@ import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { getEnvOptions, configServiceMock } from '../config/mocks';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 
 import { PluginWrapper } from './plugin';
-import { PluginManifest } from './types';
+import { PluginManifest, PluginType } from './types';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
@@ -39,12 +39,18 @@ jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugi
   virtual: true,
 });
 
+const OSS_PLUGIN_PATH_POSIX = '/kibana/src/plugins/ossPlugin';
+const OSS_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\src\\plugins\\ossPlugin';
+const XPACK_PLUGIN_PATH_POSIX = '/kibana/x-pack/plugins/xPackPlugin';
+const XPACK_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\x-pack\\plugins\\xPackPlugin';
+
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
     id: 'some-plugin-id',
     version: 'some-version',
     configPath: 'path',
     kibanaVersion: '7.0.0',
+    type: PluginType.standard,
     requiredPlugins: ['some-required-dep'],
     optionalPlugins: ['some-optional-dep'],
     requiredBundles: [],
@@ -96,8 +102,47 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.name).toBe('some-plugin-id');
   expect(plugin.configPath).toBe('path');
   expect(plugin.path).toBe('some-plugin-path');
+  expect(plugin.source).toBe('external'); // see below for test cases for non-external sources (OSS and X-Pack)
   expect(plugin.requiredPlugins).toEqual(['some-required-dep']);
   expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
+});
+
+describe('`constructor` correctly sets non-external source', () => {
+  function createPlugin(path: string) {
+    const manifest = createPluginManifest();
+    const opaqueId = Symbol();
+    return new PluginWrapper({
+      path,
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo
+      ),
+    });
+  }
+
+  test('for OSS plugin in POSIX', () => {
+    const plugin = createPlugin(OSS_PLUGIN_PATH_POSIX);
+    expect(plugin.source).toBe('oss');
+  });
+
+  test('for OSS plugin in Windows', () => {
+    const plugin = createPlugin(OSS_PLUGIN_PATH_WINDOWS);
+    expect(plugin.source).toBe('oss');
+  });
+
+  test('for X-Pack plugin in POSIX', () => {
+    const plugin = createPlugin(XPACK_PLUGIN_PATH_POSIX);
+    expect(plugin.source).toBe('x-pack');
+  });
+
+  test('for X-Pack plugin in Windows', () => {
+    const plugin = createPlugin(XPACK_PLUGIN_PATH_WINDOWS);
+    expect(plugin.source).toBe('x-pack');
+  });
 });
 
 test('`setup` fails if `plugin` initializer is not exported', () => {
@@ -240,6 +285,31 @@ test('`start` fails if setup is not called first', () => {
 
   expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
     `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
+  );
+});
+
+test('`start` fails invoked for the `preboot` plugin', async () => {
+  const manifest = createPluginManifest({ type: PluginType.preboot });
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext(
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo
+    ),
+  });
+
+  const mockPluginInstance = { setup: jest.fn() };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  await plugin.setup({} as any, {} as any);
+
+  expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
+    `"Plugin \\"some-plugin-id\\" is a preboot plugin and cannot be started."`
   );
 });
 

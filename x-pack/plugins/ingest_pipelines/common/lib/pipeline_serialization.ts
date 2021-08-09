@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { Pipeline as ESPipeline } from '@elastic/elasticsearch/api/types';
+import { estypes } from '@elastic/elasticsearch';
 import { Pipeline, Processor } from '../types';
 
-export function deserializePipelines(pipelinesByName: { [key: string]: ESPipeline }): Pipeline[] {
+export function deserializePipelines(pipelinesByName: {
+  [key: string]: estypes.IngestPipeline;
+}): Pipeline[] {
   const pipelineNames: string[] = Object.keys(pipelinesByName);
 
   const deserializedPipelines = pipelineNames.map<Pipeline>((name: string) => {

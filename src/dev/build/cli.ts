@@ -33,8 +33,6 @@ if (showHelp) {
       build the Kibana distributable
 
       options:
-        --oss                   {dim Only produce the OSS distributable of Kibana}
-        --no-oss                {dim Only produce the default distributable of Kibana}
         --skip-archives         {dim Don't produce tar/zip archives}
         --skip-os-packages      {dim Don't produce rpm/deb/docker packages}
         --all-platforms         {dim Produce archives for all platforms, not just this one}

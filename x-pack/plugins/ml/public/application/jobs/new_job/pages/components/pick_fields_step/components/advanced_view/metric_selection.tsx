@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useState } from 'react';
+import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
@@ -33,11 +33,15 @@ const emptyRichDetector: RichDetector = {
 };
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
 
   const { fields, aggs } = newJobCapsService;
   const [modalPayload, setModalPayload] = useState<ModalPayload | null>(null);
+
+  useEffect(() => {
+    setIsValid(jobCreator.detectors.length > 0);
+  }, [jobCreatorUpdated]);
 
   function closeModal() {
     setModalPayload(null);

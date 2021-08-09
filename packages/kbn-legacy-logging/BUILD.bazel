@@ -25,6 +25,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 SRC_DEPS = [
   "//packages/kbn-config-schema",
+  "//packages/kbn-utils",
   "@npm//@elastic/numeral",
   "@npm//@hapi/hapi",
   "@npm//chokidar",

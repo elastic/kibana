@@ -17,6 +17,17 @@ exports.EcsCustomPropertyMappings = {
         type: 'keyword',
         ignore_above: 1024,
       },
+      // task specific fields
+      task: {
+        properties: {
+          scheduled: {
+            type: 'date',
+          },
+          schedule_delay: {
+            type: 'long',
+          },
+        },
+      },
       // alerting specific fields
       alerting: {
         properties: {
@@ -57,6 +68,10 @@ exports.EcsCustomPropertyMappings = {
             ignore_above: 1024,
           },
           type: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          type_id: {
             type: 'keyword',
             ignore_above: 1024,
           },

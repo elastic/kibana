@@ -140,7 +140,7 @@ export const getManifestManagerMock = (
         case ManifestManagerMockType.InitialSystemState:
           return null;
         case ManifestManagerMockType.NormalFlow:
-          return getMockManifest({ compress: true });
+          return getMockManifest();
       }
     });
 

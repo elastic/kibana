@@ -25,6 +25,7 @@ import { networkModel } from '../../store';
 import { NetworkHttpTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 
 describe('NetworkHttp Table Component', () => {

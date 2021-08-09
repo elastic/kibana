@@ -27,6 +27,7 @@ describe('agg_expression_functions', () => {
               "customLabel": undefined,
               "field": "machine.os.keyword",
               "json": undefined,
+              "timeShift": undefined,
               "values": undefined,
             },
             "schema": undefined,
@@ -51,6 +52,7 @@ describe('agg_expression_functions', () => {
               "customLabel": undefined,
               "field": "machine.os.keyword",
               "json": undefined,
+              "timeShift": undefined,
               "values": Array [
                 1,
                 2,

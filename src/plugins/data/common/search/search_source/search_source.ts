@@ -72,10 +72,17 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, Observable } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { AggConfigs, ES_SEARCH_STRATEGY, ISearchGeneric, ISearchOptions } from '../..';
+import {
+  AggConfigs,
+  ES_SEARCH_STRATEGY,
+  IEsSearchResponse,
+  ISearchGeneric,
+  ISearchOptions,
+} from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -87,14 +94,12 @@ import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
   getEsQueryConfig,
-  buildEsQuery,
-  Filter,
   UI_SETTINGS,
   isErrorResponse,
   isPartialResponse,
   IKibanaSearchResponse,
 } from '../../../common';
-import { getHighlightRequest } from '../../../common/field_formats';
+import { getHighlightRequest } from '../../../../field_formats/common';
 import { extractReferences } from './extract_references';
 
 /** @internal */
@@ -281,6 +286,8 @@ export class SearchSource {
     // This still uses bfetch for batching.
     if (!options?.strategy && syncSearchByDefault) {
       options.strategy = ES_SEARCH_STRATEGY;
+      // `ES_SEARCH_STRATEGY` doesn't support search sessions, hence remove sessionId
+      options.sessionId = undefined;
     }
 
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
@@ -307,7 +314,8 @@ export class SearchSource {
 
   /**
    * Fetch this source and reject the returned Promise on error
-   * @deprecated Use fetch$ instead
+   * @deprecated Use the `fetch$` method instead
+   * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
     return this.fetch$(options)
@@ -414,6 +422,15 @@ export class SearchSource {
     }
   }
 
+  private postFlightTransform(response: IEsSearchResponse<any>) {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      return aggs.postFlightTransform(response);
+    } else {
+      return response;
+    }
+  }
+
   private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
@@ -451,24 +468,26 @@ export class SearchSource {
           if (isErrorResponse(response)) {
             obs.error(response);
           } else if (isPartialResponse(response)) {
-            obs.next(response);
+            obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
-              obs.next(response);
+              obs.next(this.postFlightTransform(response));
               obs.complete();
             } else {
               // Treat the complete response as partial, then run the postFlightRequests.
               obs.next({
-                ...response,
+                ...this.postFlightTransform(response),
                 isPartial: true,
                 isRunning: true,
               });
               const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
                 next: (responseWithOther) => {
-                  obs.next({
-                    ...response,
-                    rawResponse: responseWithOther,
-                  });
+                  obs.next(
+                    this.postFlightTransform({
+                      ...response,
+                      rawResponse: responseWithOther!,
+                    })
+                  );
                 },
                 error: (e) => {
                   obs.error(e);
@@ -682,7 +701,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
-    const metaFields = getConfig(UI_SETTINGS.META_FIELDS);
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, storedFields, runtimeFields } = index

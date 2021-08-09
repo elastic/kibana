@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "Attempt to Revoke Okta API Token",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:system.api_token.revoke",
+  "query": "event.dataset:okta.system and event.action:system.api_token.revoke\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"

@@ -118,6 +118,16 @@ describe('TelemetrySender', () => {
       expect(shouldSendReport).toBe(true);
     });
 
+    it('returns false if we are in screenshot mode', () => {
+      const telemetryService = mockTelemetryService({ isScreenshotMode: true });
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
+      const telemetrySender = new TelemetrySender(telemetryService);
+      const shouldSendReport = telemetrySender['shouldSendReport']();
+
+      expect(telemetryService.getIsOptedIn).toBeCalledTimes(0);
+      expect(shouldSendReport).toBe(false);
+    });
+
     describe('sendIfDue', () => {
       let originalFetch: typeof window['fetch'];
       let mockFetch: jest.Mock<typeof window['fetch']>;
@@ -148,6 +158,15 @@ describe('TelemetrySender', () => {
         await telemetrySender['sendIfDue']();
 
         expect(telemetrySender['shouldSendReport']).toBeCalledTimes(1);
+        expect(mockFetch).toBeCalledTimes(0);
+      });
+
+      it('does not send if we are in screenshot mode', async () => {
+        const telemetryService = mockTelemetryService({ isScreenshotMode: true });
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetrySender['isSending'] = false;
+        await telemetrySender['sendIfDue']();
+
         expect(mockFetch).toBeCalledTimes(0);
       });
 

@@ -24,7 +24,6 @@ async function addLifecyclePolicy(
     },
   };
 
-  // @ts-expect-error @elastic/elasticsearch UpdateIndexSettingsRequest does not support index property
   return client.indices.putSettings({ index: indexName, body });
 }
 

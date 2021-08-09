@@ -12,6 +12,7 @@ import { User } from '../../common';
 import { getReporters } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 
 interface ReportersState {
   reporters: string[];
@@ -32,6 +33,7 @@ export interface UseGetReporters extends ReportersState {
 }
 
 export const useGetReporters = (): UseGetReporters => {
+  const owner = useOwnerContext();
   const [reportersState, setReporterState] = useState<ReportersState>(initialData);
 
   const toasts = useToasts();
@@ -48,7 +50,7 @@ export const useGetReporters = (): UseGetReporters => {
         isLoading: true,
       });
 
-      const response = await getReporters(abortCtrlRef.current.signal);
+      const response = await getReporters(abortCtrlRef.current.signal, owner);
       const myReporters = response
         .map((r) => (r.full_name == null || isEmpty(r.full_name) ? r.username ?? '' : r.full_name))
         .filter((u) => !isEmpty(u));
@@ -78,7 +80,7 @@ export const useGetReporters = (): UseGetReporters => {
         });
       }
     }
-  }, [reportersState, toasts]);
+  }, [owner, reportersState, toasts]);
 
   useEffect(() => {
     fetchReporters();

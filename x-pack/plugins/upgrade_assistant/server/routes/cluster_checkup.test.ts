@@ -32,9 +32,6 @@ describe('cluster checkup API', () => {
   beforeEach(() => {
     mockRouter = createMockRouter();
     routeDependencies = {
-      cloud: {
-        isCloudEnabled: true,
-      },
       router: mockRouter,
     };
     registerClusterCheckupRoutes(routeDependencies);
@@ -42,24 +39,6 @@ describe('cluster checkup API', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-  });
-
-  describe('with cloud enabled', () => {
-    it('is provided to getUpgradeAssistantStatus', async () => {
-      const spy = jest.spyOn(MigrationApis, 'getUpgradeAssistantStatus');
-
-      MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
-        cluster: [],
-        indices: [],
-        nodes: [],
-      });
-
-      await routeDependencies.router.getHandler({
-        method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
-      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
-      expect(spy.mock.calls[0][1]).toBe(true);
-    });
   });
 
   describe('GET /api/upgrade_assistant/reindex/{indexName}.json', () => {

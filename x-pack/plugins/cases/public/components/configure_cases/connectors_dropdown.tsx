@@ -11,8 +11,9 @@ import styled from 'styled-components';
 
 import { ConnectorTypes } from '../../../common';
 import { ActionConnector } from '../../containers/configure/types';
-import { connectorsConfiguration } from '../connectors';
 import * as i18n from './translations';
+import { useKibana } from '../../common/lib/kibana';
+import { getConnectorIcon } from '../utils';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -65,6 +66,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   appendAddConnectorButton = false,
   hideConnectorServiceNowSir = false,
 }) => {
+  const { triggersActionsUi } = useKibana().services;
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
       (acc, connector) => {
@@ -80,7 +82,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
               <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIconExtended
-                    type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}
+                    type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
                     size={ICON_SIZE}
                   />
                 </EuiFlexItem>

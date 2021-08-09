@@ -8,8 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
 import { useTransactionBreakdown } from './use_transaction_breakdown';
-import { TransactionBreakdownChartContents } from './transaction_breakdown_chart_contents';
+import { BreakdownChart } from '../breakdown_chart';
 
 export function TransactionBreakdownChart({
   height,
@@ -19,10 +20,11 @@ export function TransactionBreakdownChart({
   showAnnotations?: boolean;
 }) {
   const { data, status } = useTransactionBreakdown();
+  const { annotations } = useAnnotationsContext();
   const { timeseries } = data;
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -34,11 +36,13 @@ export function TransactionBreakdownChart({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <TransactionBreakdownChartContents
+          <BreakdownChart
             fetchStatus={status}
             height={height}
+            annotations={annotations}
             showAnnotations={showAnnotations}
             timeseries={timeseries}
+            yAxisType="percentage"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

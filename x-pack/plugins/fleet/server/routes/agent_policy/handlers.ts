@@ -23,7 +23,7 @@ import type {
   GetFullAgentPolicyRequestSchema,
 } from '../../types';
 import type { AgentPolicy, NewPackagePolicy } from '../../types';
-import { defaultPackages } from '../../../common';
+import { FLEET_SYSTEM_PACKAGE } from '../../../common';
 import type {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
@@ -120,7 +120,7 @@ export const createAgentPolicyHandler: RequestHandler<
       // successfully
       withSysMonitoring
         ? packagePolicyService
-            .buildPackagePolicyFromPackage(soClient, defaultPackages.System)
+            .buildPackagePolicyFromPackage(soClient, FLEET_SYSTEM_PACKAGE)
             .catch(() => undefined)
         : undefined,
     ]);

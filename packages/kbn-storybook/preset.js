@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line
 const webpackConfig = require('./target/webpack.config').default;
 
 module.exports = {

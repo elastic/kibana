@@ -19,7 +19,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiPageContent,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiSearchBar,
@@ -37,13 +37,18 @@ import {
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { reactRouterNavigate, attemptToURIDecode } from '../../../../../shared_imports';
+import {
+  PageLoading,
+  PageError,
+  reactRouterNavigate,
+  attemptToURIDecode,
+} from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { getDataStreamDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
-import { NoMatch, PageErrorForbidden, DataHealth } from '../../../../components';
+import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const HEADERS = {
@@ -332,42 +337,6 @@ export class IndexTable extends Component {
     });
   }
 
-  renderError() {
-    const { indicesError } = this.props;
-
-    const data = indicesError.body ? indicesError.body : indicesError;
-
-    const { error: errorString, cause, message } = data;
-
-    return (
-      <Fragment>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.indexTable.serverErrorTitle"
-              defaultMessage="Error loading indices"
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <div>{message || errorString}</div>
-          {cause && (
-            <Fragment>
-              <EuiSpacer size="m" />
-              <ul>
-                {cause.map((message, i) => (
-                  <li key={i}>{message}</li>
-                ))}
-              </ul>
-            </Fragment>
-          )}
-        </EuiCallOut>
-        <EuiSpacer size="xl" />
-      </Fragment>
-    );
-  }
-
   renderBanners(extensionsService) {
     const { allIndices = [], filterChanged } = this.props;
     return extensionsService.banners.map((bannerExtension, i) => {
@@ -470,29 +439,63 @@ export class IndexTable extends Component {
     } = this.props;
 
     const { includeHiddenIndices } = this.readURLParams();
+    const hasContent = !indicesLoading && !indicesError;
 
-    let emptyState;
+    if (!hasContent) {
+      const renderNoContent = () => {
+        if (indicesLoading) {
+          return (
+            <PageLoading>
+              <FormattedMessage
+                id="xpack.idxMgmt.indexTable.loadingIndicesDescription"
+                defaultMessage="Loading indices…"
+              />
+            </PageLoading>
+          );
+        }
 
-    if (indicesLoading) {
-      emptyState = (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        if (indicesError) {
+          if (indicesError.status === 403) {
+            return (
+              <PageError
+                title={
+                  <FormattedMessage
+                    id="xpack.idxMgmt.pageErrorForbidden.title"
+                    defaultMessage="You do not have permissions to use Index Management"
+                  />
+                }
+              />
+            );
+          }
+
+          return (
+            <PageError
+              title={
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexTable.serverErrorTitle"
+                  defaultMessage="Error loading indices"
+                />
+              }
+              error={indicesError.body}
+            />
+          );
+        }
+      };
+
+      return (
+        <EuiPageContent
+          hasShadow={false}
+          paddingSize="none"
+          verticalPosition="center"
+          horizontalPosition="center"
+        >
+          {renderNoContent()}
+        </EuiPageContent>
       );
-    }
-
-    if (!indicesLoading && !indicesError) {
-      emptyState = <NoMatch />;
     }
 
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
-
-    if (indicesError && indicesError.status === 403) {
-      return <PageErrorForbidden />;
-    }
 
     return (
       <AppContextConsumer>
@@ -500,7 +503,7 @@ export class IndexTable extends Component {
           const { extensionsService } = services;
 
           return (
-            <Fragment>
+            <EuiPageContent hasShadow={false} paddingSize="none">
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={true}>
                   <EuiText color="subdued">
@@ -556,8 +559,6 @@ export class IndexTable extends Component {
               <EuiSpacer size="l" />
 
               {this.renderBanners(extensionsService)}
-
-              {indicesError && this.renderError()}
 
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 {atLeastOneItemSelected ? (
@@ -665,13 +666,13 @@ export class IndexTable extends Component {
                   </EuiTable>
                 </div>
               ) : (
-                emptyState
+                <NoMatch />
               )}
 
               <EuiSpacer size="m" />
 
               {indices.length > 0 ? this.renderPager() : null}
-            </Fragment>
+            </EuiPageContent>
           );
         }}
       </AppContextConsumer>

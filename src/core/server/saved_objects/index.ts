@@ -41,6 +41,7 @@ export type {
   SavedObjectsExportError,
   SavedObjectsExportTransformContext,
   SavedObjectsExportTransform,
+  SavedObjectsExportExcludedObject,
 } from './export';
 
 export { SavedObjectsSerializer } from './serialization';
@@ -72,8 +73,6 @@ export type {
 } from './service/lib/repository';
 
 export type {
-  SavedObjectsCoreFieldMapping,
-  SavedObjectsComplexFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinition,
@@ -91,6 +90,7 @@ export type {
   SavedObjectStatusMeta,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from './types';
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';

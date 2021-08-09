@@ -37,6 +37,8 @@ export class RuleGroupEditor extends Component<Props, {}> {
     return (
       <EuiPanel
         className={`secRoleMapping__ruleEditorGroup--${this.props.ruleDepth % 2 ? 'odd' : 'even'}`}
+        hasBorder={true}
+        hasShadow={false}
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem>

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   ENDPOINT_LIST_ID,
@@ -27,7 +26,6 @@ import {
 import {
   ManifestConstants,
   getArtifactId,
-  isCompressed,
   translateToEndpointExceptions,
   Manifest,
 } from '../../../lib/artifacts';
@@ -40,10 +38,8 @@ import {
 import { ManifestManager } from './manifest_manager';
 import { EndpointArtifactClientInterface } from '../artifact_client';
 
-const uncompressData = async (data: Buffer) => JSON.parse(await inflateSync(data).toString());
-
-const uncompressArtifact = async (artifact: InternalArtifactSchema) =>
-  uncompressData(Buffer.from(artifact.body!, 'base64'));
+const getArtifactObject = (artifact: InternalArtifactSchema) =>
+  JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
 
 describe('ManifestManager', () => {
   const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -77,7 +73,7 @@ describe('ManifestManager', () => {
   let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
   beforeAll(async () => {
-    ARTIFACTS = await getMockArtifacts({ compress: true });
+    ARTIFACTS = await getMockArtifacts();
     ARTIFACTS_BY_ID = {
       [ARTIFACT_ID_EXCEPTIONS_MACOS]: ARTIFACTS[0],
       [ARTIFACT_ID_EXCEPTIONS_WINDOWS]: ARTIFACTS[1],
@@ -270,10 +266,9 @@ describe('ManifestManager', () => {
 
       expect(artifacts.length).toBe(9);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
-      expect(artifacts.every(isCompressed)).toBe(true);
 
       for (const artifact of artifacts) {
-        expect(await uncompressArtifact(artifact)).toStrictEqual({ entries: [] });
+        expect(getArtifactObject(artifact)).toStrictEqual({ entries: [] });
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
         expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
           new Set([TEST_POLICY_ID_1])
@@ -308,21 +303,20 @@ describe('ManifestManager', () => {
 
       expect(artifacts.length).toBe(9);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
-      expect(artifacts.every(isCompressed)).toBe(true);
 
-      expect(await uncompressArtifact(artifacts[0])).toStrictEqual({
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
         entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
       });
-      expect(await uncompressArtifact(artifacts[1])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[2])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[3])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[4])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[5])).toStrictEqual({
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
         entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
       });
-      expect(await uncompressArtifact(artifacts[6])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[7])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
 
       for (const artifact of artifacts) {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
@@ -364,19 +358,18 @@ describe('ManifestManager', () => {
 
       expect(artifacts.length).toBe(9);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
-      expect(artifacts.every(isCompressed)).toBe(true);
 
       expect(artifacts[0]).toStrictEqual(oldManifest.getAllArtifacts()[0]);
-      expect(await uncompressArtifact(artifacts[1])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[2])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[3])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[4])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[5])).toStrictEqual({
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
         entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
       });
-      expect(await uncompressArtifact(artifacts[6])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[7])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
 
       for (const artifact of artifacts) {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
@@ -426,27 +419,26 @@ describe('ManifestManager', () => {
 
       expect(artifacts.length).toBe(10);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
-      expect(artifacts.every(isCompressed)).toBe(true);
 
-      expect(await uncompressArtifact(artifacts[0])).toStrictEqual({
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
         entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
       });
-      expect(await uncompressArtifact(artifacts[1])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[2])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[3])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[4])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[5])).toStrictEqual({
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
         entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
       });
-      expect(await uncompressArtifact(artifacts[6])).toStrictEqual({
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({
         entries: translateToEndpointExceptions(
           [trustedAppListItem, trustedAppListItemPolicy2],
           'v1'
         ),
       });
-      expect(await uncompressArtifact(artifacts[7])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[8])).toStrictEqual({ entries: [] });
-      expect(await uncompressArtifact(artifacts[9])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
 
       for (const artifact of artifacts.slice(0, 5)) {
         expect(manifest.isDefaultArtifact(artifact)).toBe(true);
@@ -520,9 +512,13 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
 
       await expect(
-        manifestManager.pushArtifacts([ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_EXCEPTIONS_WINDOWS])
+        manifestManager.pushArtifacts(
+          [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_EXCEPTIONS_WINDOWS],
+          newManifest
+        )
       ).resolves.toStrictEqual([]);
 
       expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
@@ -533,17 +529,18 @@ describe('ManifestManager', () => {
         ...ARTIFACT_EXCEPTIONS_WINDOWS,
       });
       expect(
-        await uncompressData(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!)
-      ).toStrictEqual(await uncompressArtifact(ARTIFACT_EXCEPTIONS_MACOS));
+        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
+      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
       expect(
-        await uncompressData(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))!)
-      ).toStrictEqual(await uncompressArtifact(ARTIFACT_EXCEPTIONS_WINDOWS));
+        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))!.toString())
+      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_WINDOWS));
     });
 
     test('Returns errors for partial failures', async () => {
       const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
       const error = new Error();
       const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_APPS_MACOS;
 
@@ -558,11 +555,14 @@ describe('ManifestManager', () => {
       );
 
       await expect(
-        manifestManager.pushArtifacts([
-          ARTIFACT_EXCEPTIONS_MACOS,
-          ARTIFACT_EXCEPTIONS_WINDOWS,
-          incompleteArtifact as InternalArtifactCompleteSchema,
-        ])
+        manifestManager.pushArtifacts(
+          [
+            ARTIFACT_EXCEPTIONS_MACOS,
+            ARTIFACT_EXCEPTIONS_WINDOWS,
+            incompleteArtifact as InternalArtifactCompleteSchema,
+          ],
+          newManifest
+        )
       ).resolves.toStrictEqual([
         error,
         new Error(`Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`),
@@ -573,8 +573,8 @@ describe('ManifestManager', () => {
         ...ARTIFACT_EXCEPTIONS_MACOS,
       });
       expect(
-        await uncompressData(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!)
-      ).toStrictEqual(await uncompressArtifact(ARTIFACT_EXCEPTIONS_MACOS));
+        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
+      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
       expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))).toBeUndefined();
     });
   });
@@ -843,10 +843,7 @@ describe('ManifestManager', () => {
                 artifacts: toArtifactRecords({
                   [ARTIFACT_NAME_EXCEPTIONS_MACOS]: await getEmptyInternalArtifactMock(
                     'macos',
-                    'v1',
-                    {
-                      compress: true,
-                    }
+                    'v1'
                   ),
                 }),
                 manifest_version: '1.0.0',

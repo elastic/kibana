@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
 import fs from 'fs';
 import Path from 'path';
 import dedent from 'dedent';
@@ -19,6 +18,7 @@ import {
   groupPluginApi,
 } from '../utils';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
+import { WritePluginDocsOpts } from './types';
 
 /**
  * Converts the plugin doc to mdx and writes it into the file system. If the plugin,
@@ -28,12 +28,15 @@ import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
  * @param doc Contains the information of the plugin that will be written into mdx.
  * @param log Used for logging debug and error information.
  */
-export function writePluginDocs(folder: string, doc: PluginApi, log: ToolingLog): void {
+export function writePluginDocs(
+  folder: string,
+  { doc, plugin, pluginStats, log }: WritePluginDocsOpts
+): void {
   if (doc.serviceFolders) {
     log.debug(`Splitting plugin ${doc.id}`);
-    writePluginDocSplitByFolder(folder, doc, log);
+    writePluginDocSplitByFolder(folder, { doc, log, plugin, pluginStats });
   } else {
-    writePluginDoc(folder, doc, log);
+    writePluginDoc(folder, { doc, plugin, pluginStats, log });
   }
 }
 
@@ -50,7 +53,10 @@ function hasPublicApi(doc: PluginApi): boolean {
  * @param doc Contains the information of the plugin that will be written into mdx.
  * @param log Used for logging debug and error information.
  */
-export function writePluginDoc(folder: string, doc: PluginApi, log: ToolingLog): void {
+export function writePluginDoc(
+  folder: string,
+  { doc, log, plugin, pluginStats }: WritePluginDocsOpts
+): void {
   if (!hasPublicApi(doc)) {
     log.debug(`${doc.id} does not have a public api. Skipping.`);
     return;
@@ -62,6 +68,7 @@ export function writePluginDoc(folder: string, doc: PluginApi, log: ToolingLog):
   // Append "obj" to avoid special names in here. 'case' is one in particular that
   // caused issues.
   const json = getJsonName(fileName) + 'Obj';
+  const name = plugin.manifest.owner?.name;
   let mdx =
     dedent(`
 ---
@@ -74,8 +81,25 @@ date: 2020-11-16
 tags: ['contributor', 'dev', 'apidocs', 'kibana', '${doc.id}']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-
 import ${json} from './${fileName}.json';
+
+${plugin.manifest.description ?? ''}
+
+${
+  plugin.manifest.owner?.githubTeam && name
+    ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner?.githubTeam}) for questions regarding this plugin.`
+    : name
+    ? `Contact ${name} for questions regarding this plugin.`
+    : ''
+}
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports | 
+|-------------------|-----------|------------------------|-----------------|
+| ${pluginStats.apiCount} | ${pluginStats.isAnyType.length} | ${
+      pluginStats.missingComments.length
+    } | ${pluginStats.missingExports} |
 
 `) + '\n\n';
 

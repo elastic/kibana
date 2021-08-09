@@ -11,7 +11,7 @@ import { Meta } from '../../../../../common/types';
 import { DEFAULT_META } from '../../../shared/constants';
 import {
   clearFlashMessages,
-  setSuccessMessage,
+  flashSuccessToast,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -95,7 +95,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
         try {
           await http.delete(`/api/app_search/engines/${engineName}/curations/${id}`);
           actions.loadCurations();
-          setSuccessMessage(SUCCESS_MESSAGE);
+          flashSuccessToast(SUCCESS_MESSAGE);
         } catch (e) {
           flashAPIErrors(e);
         }

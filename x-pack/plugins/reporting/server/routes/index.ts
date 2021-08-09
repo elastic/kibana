@@ -6,15 +6,17 @@
  */
 
 import { LevelLogger as Logger } from '../lib';
+import { registerDeprecationsRoutes } from './deprecations';
+import { registerDiagnosticRoutes } from './diagnostic';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
 import { ReportingCore } from '../core';
-import { registerDiagnosticRoutes } from './diagnostic';
 
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
+  registerDeprecationsRoutes(reporting, logger);
+  registerDiagnosticRoutes(reporting, logger);
   registerJobGenerationRoutes(reporting, logger);
   registerJobInfoRoutes(reporting);
-  registerDiagnosticRoutes(reporting, logger);
 }
 
 export interface ReportingRequestPre {

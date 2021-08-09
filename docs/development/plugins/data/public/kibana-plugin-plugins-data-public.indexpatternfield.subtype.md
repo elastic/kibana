@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-get subType(): import("../types").IFieldSubType | undefined;
+get subType(): import("@kbn/es-query").IFieldSubType | undefined;
 ```

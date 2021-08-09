@@ -13,7 +13,7 @@ import {
   isEscape,
   focusColumn,
   OnColumnFocused,
-} from '../../../../../../common/components/accessibility/helpers';
+} from '../../../../../../../../timelines/public';
 
 type FocusOwnership = 'not-owned' | 'owned';
 

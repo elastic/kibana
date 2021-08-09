@@ -26,13 +26,13 @@ export const COMMENT_PLACEHOLDER = i18n.translate(
 
 export const GET_ISOLATION_SUCCESS_MESSAGE = (hostName: string) =>
   i18n.translate('xpack.securitySolution.endpoint.hostIsolation.isolation.successfulMessage', {
-    defaultMessage: 'Host Isolation on {hostName} successfully submitted',
+    defaultMessage: 'Isolation on host {hostName} successfully submitted',
     values: { hostName },
   });
 
 export const GET_UNISOLATION_SUCCESS_MESSAGE = (hostName: string) =>
   i18n.translate('xpack.securitySolution.endpoint.hostIsolation.unisolate.successfulMessage', {
-    defaultMessage: 'Host Unisolation on {hostName} successfully submitted',
+    defaultMessage: 'Release on host {hostName} successfully submitted',
     values: { hostName },
   });
 
@@ -41,7 +41,7 @@ export const ISOLATE = i18n.translate('xpack.securitySolution.endpoint.hostisola
 });
 
 export const UNISOLATE = i18n.translate('xpack.securitySolution.endpoint.hostisolation.unisolate', {
-  defaultMessage: 'unisolate',
+  defaultMessage: 'release',
 });
 
 export const NOT_ISOLATED = i18n.translate(

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
+import 'jest-canvas-mock';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, IndexPatternColumn } from './indexpattern';
-import { DatasourcePublicAPI, Operation, Datasource } from '../types';
+import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
@@ -18,7 +20,6 @@ import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
-
 jest.mock('./loader');
 jest.mock('../id_generator');
 jest.mock('./operations');
@@ -289,7 +290,7 @@ describe('IndexPattern Data Source', () => {
       expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
     });
 
-    it('should generate an empty expression when there is a formula without aggs', async () => {
+    it('should create a table when there is a formula without aggs', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
@@ -310,7 +311,21 @@ describe('IndexPattern Data Source', () => {
         },
       };
       const state = enrichBaseState(queryBaseState);
-      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual({
+        chain: [
+          {
+            function: 'createTable',
+            type: 'function',
+            arguments: { ids: [], names: [], rowCount: [1] },
+          },
+          {
+            arguments: { expression: [''], id: ['col1'], name: ['Formula'] },
+            function: 'mapColumn',
+            type: 'function',
+          },
+        ],
+        type: 'expression',
+      });
     });
 
     it('should generate an expression for an aggregated query', async () => {
@@ -382,7 +397,16 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "extended_bounds": Array [
-                            "{}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {},
+                                  "function": "extendedBounds",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "field": Array [
                             "timestamp",
@@ -500,6 +524,43 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
+    it('should pass time shift parameter to metric agg functions', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col2', 'col1'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeShift: '1d',
+              },
+              col2: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      expect((ast.chain[0].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
+    });
+
     it('should wrap filtered metrics in filtered metric aggregation', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
@@ -560,7 +621,20 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "filter": Array [
-                            "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "bytes > 5",
+                                    ],
+                                  },
+                                  "function": "kql",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "id": Array [
                             "0-filter",
@@ -1267,6 +1341,135 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#getWarningMessages', () => {
+    it('should return mismatched time shifts', () => {
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
+            columns: {
+              col1: {
+                operationType: 'date_histogram',
+                params: {
+                  interval: '12h',
+                },
+                label: '',
+                dataType: 'date',
+                isBucketed: true,
+                sourceField: 'timestamp',
+              },
+              col2: {
+                operationType: 'count',
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'records',
+              },
+              col3: {
+                operationType: 'count',
+                timeShift: '1h',
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'records',
+              },
+              col4: {
+                operationType: 'count',
+                timeShift: '13h',
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'records',
+              },
+              col5: {
+                operationType: 'count',
+                timeShift: '1w',
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'records',
+              },
+              col6: {
+                operationType: 'count',
+                timeShift: 'previous',
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'records',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      const warnings = indexPatternDatasource.getWarningMessages!(state, ({
+        activeData: {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [
+              {
+                id: 'col1',
+                name: 'col1',
+                meta: {
+                  type: 'date',
+                  source: 'esaggs',
+                  sourceParams: {
+                    type: 'date_histogram',
+                    params: {
+                      used_interval: '12h',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      } as unknown) as FramePublicAPI);
+      expect(warnings!.length).toBe(2);
+      expect((warnings![0] as React.ReactElement).props.id).toEqual(
+        'xpack.lens.indexPattern.timeShiftSmallWarning'
+      );
+      expect((warnings![1] as React.ReactElement).props.id).toEqual(
+        'xpack.lens.indexPattern.timeShiftMultipleWarning'
+      );
+    });
+
+    it('should prepend each error with its layer number on multi-layer chart', () => {
+      (getErrorMessages as jest.Mock).mockClear();
+      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
+        { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
+        { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
+      ]);
+      expect(getErrorMessages).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('#updateStateOnCloseDimension', () => {
     it('should not update when there are no incomplete columns', () => {
       expect(
@@ -1300,7 +1503,7 @@ describe('IndexPattern Data Source', () => {
       ).toBeUndefined();
     });
 
-    it('should clear the incomplete column', () => {
+    it('should clear all incomplete columns', () => {
       const state = {
         indexPatternRefs: [],
         existingFields: {},
@@ -1332,7 +1535,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
-            incompleteColumns: { col2: { operationType: 'sum' } },
+            incompleteColumns: undefined,
           },
         },
       });

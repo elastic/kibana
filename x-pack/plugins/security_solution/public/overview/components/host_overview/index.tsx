@@ -203,7 +203,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
     return (
       <>
         <InspectButtonContainer>
-          <OverviewWrapper direction={isInDetailsSidePanel ? 'column' : 'row'}>
+          <OverviewWrapper
+            direction={isInDetailsSidePanel ? 'column' : 'row'}
+            data-test-subj="host-overview"
+          >
             {!isInDetailsSidePanel && (
               <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
             )}

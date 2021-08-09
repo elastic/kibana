@@ -9,7 +9,7 @@
 import { last } from 'lodash';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { UI_SETTINGS } from '../../../../../../plugins/data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../../../plugins/field_formats/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 function getMax(handler, config, isGauge) {
@@ -31,6 +31,7 @@ export function pointSeriesTooltipFormatter() {
 
     const details = [];
     const isGauge = config.get('gauge', false);
+    const chartType = config.get('type', undefined);
     const isPercentageMode = config.get(isGauge ? 'gauge.percentageMode' : 'percentageMode', false);
     const isSetColorRange = config.get('setColorRange', false);
 
@@ -44,7 +45,8 @@ export function pointSeriesTooltipFormatter() {
       });
     }
 
-    if (datum.x !== null && datum.x !== undefined) {
+    // For goal and gauge we have only one value for x - '_all'. It doesn't have sense to show it
+    if (datum.x !== null && datum.x !== undefined && !['goal', 'gauge'].includes(chartType)) {
       addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));
     }
 
@@ -53,7 +55,7 @@ export function pointSeriesTooltipFormatter() {
       if (isPercentageMode && !isSetColorRange) {
         const percentageFormatPattern = config.get(
           isGauge ? 'gauge.percentageFormatPattern' : 'percentageFormatPattern',
-          uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
+          uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
         );
         value = getValueForPercentageMode(
           value / getMax(handler, config, isGauge),

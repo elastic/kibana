@@ -25,6 +25,7 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   appRoute: '/app/app1',
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
+  searchable: true,
   chromeless: false,
   keywords: [],
   deepLinks: [],
@@ -44,6 +45,11 @@ describe('getAppResults', () => {
     const apps = [
       createApp({ id: 'dashboard', title: 'dashboard' }),
       createApp({ id: 'visualize', title: 'visualize' }),
+      createApp({
+        id: 'dashboard_not_searchable',
+        title: 'dashboard not searchable',
+        searchable: false,
+      }),
     ];
 
     const results = getAppResults('dashboard', apps);
@@ -63,6 +69,7 @@ describe('getAppResults', () => {
             deepLinks: [],
             keywords: [],
             navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
           },
           {
             id: 'sub2',
@@ -76,10 +83,12 @@ describe('getAppResults', () => {
                 deepLinks: [],
                 keywords: [],
                 navLinkStatus: AppNavLinkStatus.hidden,
+                searchable: true,
               },
             ],
             keywords: [],
-            navLinkStatus: AppNavLinkStatus.hidden,
+            navLinkStatus: AppNavLinkStatus.visible,
+            searchable: false,
           },
         ],
         keywords: [],
@@ -88,11 +97,9 @@ describe('getAppResults', () => {
 
     const results = getAppResults('App 1', apps);
 
-    expect(results.length).toBe(4);
     expect(results.map(({ title }) => title)).toEqual([
       'App 1',
       'App 1 / Sub1',
-      'App 1 / Sub2',
       'App 1 / Sub2 / Sub2Sub1',
     ]);
   });
@@ -108,9 +115,15 @@ describe('getAppResults', () => {
             deepLinks: [],
             keywords: [],
             navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
           },
         ],
         keywords: [],
+      }),
+      createApp({
+        id: 'AppNotSearchable',
+        title: 'App 1 not searchable',
+        searchable: false,
       }),
     ];
 
@@ -135,6 +148,7 @@ describe('getAppResults', () => {
             deepLinks: [],
             keywords: [],
             navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
           },
           {
             id: 'sub2',
@@ -148,10 +162,12 @@ describe('getAppResults', () => {
                 deepLinks: [],
                 keywords: ['TwoOne'],
                 navLinkStatus: AppNavLinkStatus.hidden,
+                searchable: true,
               },
             ],
             keywords: ['two'],
             navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
           },
         ],
         keywords: [],

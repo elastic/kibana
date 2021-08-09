@@ -7,28 +7,28 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Toolbar } from '../toolbar.component';
 
-// @ts-expect-error untyped local
-import { getDefaultElement } from '../../../state/defaults';
+// @ts-expect-error
+import { getDefaultPage } from '../../../state/defaults';
+import { reduxDecorator } from '../../../../storybook';
+import { Toolbar } from '../toolbar';
+
+const pages = [...new Array(10)].map(() => getDefaultPage());
+
+const Pages = ({ story }: { story: Function }) => (
+  <div>
+    {story()}
+    <div style={{ visibility: 'hidden', position: 'absolute' }}>
+      {pages.map((page, index) => (
+        <div style={{ height: 66, width: 100, textAlign: 'center' }} id={page.id}>
+          <h1 style={{ paddingTop: 22 }}>Page {index}</h1>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 storiesOf('components/Toolbar', module)
-  .add('no element selected', () => (
-    <Toolbar
-      isWriteable={true}
-      selectedPageNumber={1}
-      totalPages={1}
-      workpadId={'abc'}
-      workpadName={'My Canvas Workpad'}
-    />
-  ))
-  .add('element selected', () => (
-    <Toolbar
-      isWriteable={true}
-      selectedElement={getDefaultElement()}
-      selectedPageNumber={1}
-      totalPages={1}
-      workpadId={'abc'}
-      workpadName={'My Canvas Workpad'}
-    />
-  ));
+  .addDecorator((story) => <Pages story={story} />)
+  .addDecorator(reduxDecorator({ pages }))
+  .add('redux', () => <Toolbar />);

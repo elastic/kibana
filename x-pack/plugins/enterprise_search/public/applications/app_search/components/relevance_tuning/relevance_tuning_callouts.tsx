@@ -7,12 +7,11 @@
 
 import React from 'react';
 
-import { FormattedMessage } from 'react-intl';
-
 import { useValues } from 'kea';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { DOCS_PREFIX, ENGINE_SCHEMA_PATH } from '../../routes';

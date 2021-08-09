@@ -17,6 +17,8 @@ import type {
   ApplicationStart,
 } from 'src/core/public';
 
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
@@ -38,6 +40,8 @@ export interface TelemetryServicePublicApis {
   getIsOptedIn: () => boolean | null;
   /** Is the user allowed to change the opt-in/out status? **/
   userCanChangeSettings: boolean;
+  /** Can phone-home telemetry calls be made? This depends on whether we have opted-in or if we are rendering a report */
+  canSendTelemetry: () => boolean;
   /** Is the cluster allowed to change the opt-in/out status? **/
   getCanChangeOptInStatus: () => boolean;
   /** Fetches an unencrypted telemetry payload so we can show it to the user **/
@@ -76,22 +80,24 @@ export interface TelemetryPluginStart {
   };
 }
 
+interface TelemetryPluginSetupDependencies {
+  screenshotMode: ScreenshotModePluginSetup;
+}
+
 /**
  * Public-exposed configuration
  */
 export interface TelemetryPluginConfig {
   /** Is the plugin enabled? **/
   enabled: boolean;
-  /** Remote telemetry service's URL **/
-  url: string;
   /** The banner is expected to be shown when needed **/
   banner: boolean;
   /** Does the cluster allow changing the opt-in/out status via the UI? **/
   allowChangingOptInStatus: boolean;
   /** Is the cluster opted-in? **/
   optIn: boolean | null;
-  /** Opt-in/out notification URL **/
-  optInStatusUrl: string;
+  /** Specify if telemetry should send usage to the prod or staging remote telemetry service **/
+  sendUsageTo: 'prod' | 'staging';
   /** Should the telemetry payloads be sent from the server or the browser? **/
   sendUsageFrom: 'browser' | 'server';
   /** Should notify the user about the opt-in status? **/
@@ -113,11 +119,15 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.config = initializerContext.config.get();
   }
 
-  public setup({ http, notifications }: CoreSetup): TelemetryPluginSetup {
+  public setup(
+    { http, notifications }: CoreSetup,
+    { screenshotMode }: TelemetryPluginSetupDependencies
+  ): TelemetryPluginSetup {
     const config = this.config;
     const currentKibanaVersion = this.currentKibanaVersion;
     this.telemetryService = new TelemetryService({
       config,
+      isScreenshotMode: screenshotMode.isScreenshotMode(),
       http,
       notifications,
       currentKibanaVersion,
@@ -181,6 +191,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return {
       getIsOptedIn: () => telemetryService.getIsOptedIn(),
       setOptIn: (optedIn) => telemetryService.setOptIn(optedIn),
+      canSendTelemetry: () => telemetryService.canSendTelemetry(),
       userCanChangeSettings: telemetryService.userCanChangeSettings,
       getCanChangeOptInStatus: () => telemetryService.getCanChangeOptInStatus(),
       fetchExample: () => telemetryService.fetchExample(),

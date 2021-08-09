@@ -326,21 +326,21 @@ export class ESGeoLineSource extends AbstractESAggSource {
       ? i18n.translate('xpack.maps.esGeoLine.areEntitiesTrimmedMsg', {
           defaultMessage: `Results limited to first {entityCount} tracks of ~{totalEntities}.`,
           values: {
-            entityCount: meta.entityCount,
-            totalEntities: meta.totalEntities,
+            entityCount: meta.entityCount.toLocaleString(),
+            totalEntities: meta.totalEntities.toLocaleString(),
           },
         })
       : i18n.translate('xpack.maps.esGeoLine.tracksCountMsg', {
           defaultMessage: `Found {entityCount} tracks.`,
-          values: { entityCount: meta.entityCount },
+          values: { entityCount: meta.entityCount.toLocaleString() },
         });
     const tracksTrimmedMsg =
       meta.numTrimmedTracks > 0
         ? i18n.translate('xpack.maps.esGeoLine.tracksTrimmedMsg', {
             defaultMessage: `{numTrimmedTracks} of {entityCount} tracks are incomplete.`,
             values: {
-              entityCount: meta.entityCount,
-              numTrimmedTracks: meta.numTrimmedTracks,
+              entityCount: meta.entityCount.toLocaleString(),
+              numTrimmedTracks: meta.numTrimmedTracks.toLocaleString(),
             },
           })
         : undefined;

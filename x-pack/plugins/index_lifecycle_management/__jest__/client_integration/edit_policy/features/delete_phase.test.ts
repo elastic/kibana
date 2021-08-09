@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
+import { API_BASE_PATH } from '../../../../common/constants';
+import { setupEnvironment } from '../../helpers';
 import {
   DELETE_PHASE_POLICY,
   getDefaultHotPhasePolicy,
   NEW_SNAPSHOT_POLICY_NAME,
   SNAPSHOT_POLICY_NAME,
 } from '../constants';
-import { act } from 'react-dom/test-utils';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { API_BASE_PATH } from '../../../../common/constants';
-import { setupEnvironment } from '../../helpers/setup_environment';
+import { DeleteTestBed, setupDeleteTestBed } from './delete_phase.helpers';
 
 describe('<EditPolicy /> delete phase', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: DeleteTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
@@ -32,7 +32,7 @@ describe('<EditPolicy /> delete phase', () => {
     ]);
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupDeleteTestBed();
     });
 
     const { component } = testBed;
@@ -43,30 +43,17 @@ describe('<EditPolicy /> delete phase', () => {
     httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupDeleteTestBed();
     });
 
     const { component, actions } = testBed;
     component.update();
 
     expect(actions.delete.isShown()).toBeFalsy();
-    await actions.delete.enable(true);
+    await actions.togglePhase('delete');
     expect(actions.delete.isShown()).toBeTruthy();
-  });
-
-  test('shows timing after it was enabled', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-
-    await act(async () => {
-      testBed = await setup();
-    });
-
-    const { component, actions } = testBed;
-    component.update();
-
-    expect(actions.delete.hasMinAgeInput()).toBeFalsy();
-    await actions.delete.enable(true);
-    expect(actions.delete.hasMinAgeInput()).toBeTruthy();
+    await actions.togglePhase('delete');
+    expect(actions.delete.isShown()).toBeFalsy();
   });
 
   describe('wait for snapshot', () => {
@@ -81,7 +68,7 @@ describe('<EditPolicy /> delete phase', () => {
     test('updates snapshot policy name', async () => {
       const { actions } = testBed;
 
-      await actions.setWaitForSnapshotPolicy(NEW_SNAPSHOT_POLICY_NAME);
+      await actions.delete.setSnapshotPolicy(NEW_SNAPSHOT_POLICY_NAME);
       await actions.savePolicy();
 
       const expected = {
@@ -109,16 +96,16 @@ describe('<EditPolicy /> delete phase', () => {
     test('shows a callout when the input is not an existing policy', async () => {
       const { actions } = testBed;
 
-      await actions.setWaitForSnapshotPolicy('my_custom_policy');
-      expect(testBed.find('noPoliciesCallout').exists()).toBeFalsy();
-      expect(testBed.find('policiesErrorCallout').exists()).toBeFalsy();
-      expect(testBed.find('customPolicyCallout').exists()).toBeTruthy();
+      await actions.delete.setSnapshotPolicy('my_custom_policy');
+      expect(actions.delete.hasNoPoliciesCallout()).toBeFalsy();
+      expect(actions.delete.hasPolicyErrorCallout()).toBeFalsy();
+      expect(actions.delete.hasCustomPolicyCallout()).toBeTruthy();
     });
 
     test('removes the action if field is empty', async () => {
       const { actions } = testBed;
 
-      await actions.setWaitForSnapshotPolicy('');
+      await actions.delete.setSnapshotPolicy('');
       await actions.savePolicy();
 
       const expected = {
@@ -144,26 +131,30 @@ describe('<EditPolicy /> delete phase', () => {
       // need to call setup on testBed again for it to use a newly defined snapshot policies response
       httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
       await act(async () => {
-        testBed = await setup();
+        testBed = await setupDeleteTestBed();
       });
 
-      testBed.component.update();
-      expect(testBed.find('customPolicyCallout').exists()).toBeFalsy();
-      expect(testBed.find('policiesErrorCallout').exists()).toBeFalsy();
-      expect(testBed.find('noPoliciesCallout').exists()).toBeTruthy();
+      const { component, actions } = testBed;
+      component.update();
+
+      expect(actions.delete.hasCustomPolicyCallout()).toBeFalsy();
+      expect(actions.delete.hasPolicyErrorCallout()).toBeFalsy();
+      expect(actions.delete.hasNoPoliciesCallout()).toBeTruthy();
     });
 
     test('shows a callout when there is an error loading snapshot policies', async () => {
       // need to call setup on testBed again for it to use a newly defined snapshot policies response
       httpRequestsMockHelpers.setLoadSnapshotPolicies([], { status: 500, body: 'error' });
       await act(async () => {
-        testBed = await setup();
+        testBed = await setupDeleteTestBed();
       });
 
-      testBed.component.update();
-      expect(testBed.find('customPolicyCallout').exists()).toBeFalsy();
-      expect(testBed.find('noPoliciesCallout').exists()).toBeFalsy();
-      expect(testBed.find('policiesErrorCallout').exists()).toBeTruthy();
+      const { component, actions } = testBed;
+      component.update();
+
+      expect(actions.delete.hasCustomPolicyCallout()).toBeFalsy();
+      expect(actions.delete.hasNoPoliciesCallout()).toBeFalsy();
+      expect(actions.delete.hasPolicyErrorCallout()).toBeTruthy();
     });
   });
 });

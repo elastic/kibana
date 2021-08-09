@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { pluck } from 'rxjs/operators';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -55,7 +56,9 @@ class VisEditorVisualizationUI extends Component {
     await this._handler.render(this._visEl.current);
     this.props.eventEmitter.emit('embeddableRendered');
 
-    this._subscription = this._handler.handler.data$.subscribe((data) => onDataChange(data.value));
+    this._subscription = this._handler.handler.data$
+      .pipe(pluck('result'))
+      .subscribe((data) => onDataChange(data.value));
   }
 
   /**

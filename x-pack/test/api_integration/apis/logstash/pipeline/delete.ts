@@ -11,7 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('delete', () => {
-    const archive = 'logstash/empty';
+    const archive = 'x-pack/test/functional/es_archives/logstash/empty';
 
     before('load pipelines archive', async () => {
       await esArchiver.load(archive);

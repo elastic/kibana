@@ -14,6 +14,8 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { Duration } from '.';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('Duration', () => {
   const mount = useMountAppended();
 
@@ -24,6 +26,7 @@ describe('Duration', () => {
           contextId="test"
           eventId="abc"
           fieldName="event.duration"
+          isDraggable={true}
           value={`${ONE_MILLISECOND_AS_NANOSECONDS}`}
         />
       </TestProviders>

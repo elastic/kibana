@@ -10,17 +10,18 @@ import { ThunkDispatch } from 'redux-thunk';
 import { Query } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
+  createLayerInstance,
+  getEditState,
   getLayerById,
   getLayerList,
   getLayerListRaw,
-  getSelectedLayerId,
-  getMapReady,
   getMapColors,
-  createLayerInstance,
+  getMapReady,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest } from '../reducers/non_serializable_instances';
-import { updateFlyout } from './ui_actions';
+import { setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -46,14 +47,16 @@ import {
   JoinDescriptor,
   LayerDescriptor,
   StyleDescriptor,
+  TileMetaFeature,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
-import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
+import { getDrawMode } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -254,6 +257,10 @@ export function setSelectedLayer(layerId: string | null) {
     }
     if (layerId) {
       dispatch(trackCurrentLayerState(layerId));
+      // Reset draw mode only if setting a new selected layer
+      if (getDrawMode(getState()) !== DRAW_MODE.NONE) {
+        dispatch(setDrawMode(DRAW_MODE.NONE));
+      }
     }
     dispatch({
       type: SET_SELECTED_LAYER,
@@ -477,6 +484,11 @@ function removeLayerFromLayerList(layerId: string) {
       type: REMOVE_LAYER,
       id: layerId,
     });
+    // Clean up draw state if needed
+    const editState = getEditState(getState());
+    if (layerId === editState?.layerId) {
+      dispatch(setDrawMode(DRAW_MODE.NONE));
+    }
   };
 }
 
@@ -578,5 +590,25 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
     id: layerId,
     propName: '__areTilesLoaded',
     newValue: areTilesLoaded,
+  };
+}
+
+export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFeature[]) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__metaFromTiles',
+      newValue: mbMetaFeatures,
+    });
+    await dispatch(updateStyleMeta(layerId));
   };
 }

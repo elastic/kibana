@@ -7,6 +7,7 @@
 
 import { isEmpty, isString, flow } from 'lodash/fp';
 
+import { JsonObject } from '@kbn/common-utils';
 import {
   EsQueryConfig,
   Query,
@@ -15,7 +16,6 @@ import {
   esKuery,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
@@ -80,20 +80,23 @@ export const convertToBuildEsQuery = ({
   indexPattern: IIndexPattern;
   queries: Query[];
   filters: Filter[];
-}) => {
+}): [string, undefined] | [undefined, Error] => {
   try {
-    return JSON.stringify(
-      esQuery.buildEsQuery(
-        indexPattern,
-        queries,
-        filters.filter((f) => f.meta.disabled === false),
-        {
-          ...config,
-          dateFormatTZ: undefined,
-        }
-      )
-    );
-  } catch (exp) {
-    return '';
+    return [
+      JSON.stringify(
+        esQuery.buildEsQuery(
+          indexPattern,
+          queries,
+          filters.filter((f) => f.meta.disabled === false),
+          {
+            ...config,
+            dateFormatTZ: undefined,
+          }
+        )
+      ),
+      undefined,
+    ];
+  } catch (error) {
+    return [undefined, error];
   }
 };

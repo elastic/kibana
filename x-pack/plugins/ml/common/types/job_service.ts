@@ -8,6 +8,7 @@
 import { Job, JobStats, IndicesOptions } from './anomaly_detection_jobs';
 import { RuntimeMappings } from './fields';
 import { ES_AGGREGATION } from '../constants/aggregation_types';
+import { ErrorType } from '../util/errors';
 
 export interface MlJobsResponse {
   jobs: Job[];
@@ -39,4 +40,11 @@ export interface BucketSpanEstimatorData {
   timeField?: string;
   runtimeMappings?: RuntimeMappings;
   indicesOptions?: IndicesOptions;
+}
+
+export interface BulkCreateResults {
+  [id: string]: {
+    job: { success: boolean; error?: ErrorType };
+    datafeed: { success: boolean; error?: ErrorType };
+  };
 }

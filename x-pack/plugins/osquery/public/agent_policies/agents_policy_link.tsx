@@ -8,6 +8,7 @@
 import { EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import { PLUGIN_ID } from '../../../fleet/common';
 import { pagePathGetters } from '../../../fleet/public';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { useAgentPolicy } from './use_agent_policy';
@@ -25,8 +26,8 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
 
   const href = useMemo(
     () =>
-      getUrlForApp('fleet', {
-        path: `#` + pagePathGetters.policy_details({ policyId }),
+      getUrlForApp(PLUGIN_ID, {
+        path: `#` + pagePathGetters.policy_details({ policyId })[1],
       }),
     [getUrlForApp, policyId]
   );
@@ -36,8 +37,8 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
 
-        return navigateToApp('fleet', {
-          path: `#` + pagePathGetters.policy_details({ policyId }),
+        return navigateToApp(PLUGIN_ID, {
+          path: `#` + pagePathGetters.policy_details({ policyId })[1],
         });
       }
     },

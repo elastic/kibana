@@ -23,6 +23,10 @@ describe('Configuration Statistics Aggregator', () => {
       max_poll_inactivity_cycles: 10,
       request_capacity: 1000,
       monitored_aggregated_stats_refresh_rate: 5000,
+      monitored_stats_health_verbose_log: {
+        enabled: false,
+        warn_delayed_task_start_in_seconds: 60,
+      },
       monitored_stats_running_average_window: 50,
       monitored_task_execution_thresholds: {
         default: {
@@ -30,6 +34,10 @@ describe('Configuration Statistics Aggregator', () => {
           warn_threshold: 80,
         },
         custom: {},
+      },
+      ephemeral_tasks: {
+        enabled: true,
+        request_capacity: 10,
       },
     };
 

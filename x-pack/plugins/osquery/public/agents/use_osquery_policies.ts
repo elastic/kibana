@@ -12,12 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { packagePolicyRouteService, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useOsqueryPolicies = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies = [] } = useQuery(
     ['osqueryPolicies'],
@@ -30,8 +29,9 @@ export const useOsqueryPolicies = () => {
     {
       select: (response) =>
         uniq<string>(response.items.map((p: { policy_id: string }) => p.policy_id)),
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.osquery_policies.fetchError', {
             defaultMessage: 'Error while fetching osquery policies',
           }),

@@ -18,6 +18,7 @@ const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
  * public method named `generate()` which should be implemented by sub-classes.
  */
 export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
+  /** A javascript seeded random number (float between 0 and 1). Don't use `Math.random()` */
   protected random: seedrandom.prng;
 
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
@@ -47,9 +48,14 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     return new Date(now - this.randomChoice(DAY_OFFSETS)).toISOString();
   }
 
-  /** Generate either `true` or `false` */
-  protected randomBoolean(): boolean {
-    return Math.random() < 0.5;
+  /**
+   * Generate either `true` or `false`. By default, the boolean is calculated by determining if a
+   * float is less than `0.5`, but that can be adjusted via the input argument
+   *
+   * @param isLessThan
+   */
+  protected randomBoolean(isLessThan: number = 0.5): boolean {
+    return this.random() < isLessThan;
   }
 
   /** generate random OS family value */
@@ -96,10 +102,10 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   protected randomVersion(): string {
-    return [6, ...this.randomNGenerator(10, 2)].map((x) => x.toString()).join('.');
+    return [7, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
   }
 
-  protected randomChoice<T>(choices: T[]): T {
+  protected randomChoice<T>(choices: T[] | readonly T[]): T {
     return choices[this.randomN(choices.length)];
   }
 

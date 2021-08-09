@@ -1,28 +1,23 @@
 {
   "id": "observability",
+  "owner": {
+    "name": "Observability UI",
+    "gitHubTeam": "observability-ui"
+  },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": [
-    "xpack",
-    "observability"
-  ],
-  "optionalPlugins": [
-    "licensing",
-    "home",
-    "usageCollection",
-    "lens"
-  ],
+  "configPath": ["xpack", "observability"],
+  "optionalPlugins": ["home", "discover", "lens", "licensing", "usageCollection"],
   "requiredPlugins": [
-    "data",
     "alerting",
+    "cases",
+    "data",
+    "features",
     "ruleRegistry",
+    "timelines",
     "triggersActionsUi"
   ],
   "ui": true,
   "server": true,
-  "requiredBundles": [
-    "data",
-    "kibanaReact",
-    "kibanaUtils"
-  ]
+  "requiredBundles": ["data", "kibanaReact", "kibanaUtils"]
 }

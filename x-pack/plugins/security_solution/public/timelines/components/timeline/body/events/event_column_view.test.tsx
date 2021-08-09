@@ -23,16 +23,33 @@ import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeli
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-
 jest.mock('../../../../../common/hooks/use_selector');
-
-jest.mock('../../../../../cases/components/timeline_actions/add_to_case_action', () => {
-  return {
-    AddToCaseAction: () => {
-      return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      timelines: {
+        getAddToCaseAction: () => <div data-test-subj="add-to-case-action">{'Add to case'}</div>,
+      },
     },
-  };
-});
+  }),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
+  useGetUserCasesPermissions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../../../../timelines/public/components/actions/timeline/cases/add_to_case_action',
+  () => {
+    return {
+      AddToCaseAction: () => {
+        return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
+      },
+    };
+  }
+);
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
@@ -60,9 +77,7 @@ describe('EventColumnView', () => {
     loadingEventIds: [],
     notesCount: 0,
     onEventDetailsPanelOpened: jest.fn(),
-    onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
-    onUnPinEvent: jest.fn(),
     refetch: jest.fn(),
     renderCellValue: DefaultCellRenderer,
     selectedEventIds: {},
@@ -118,16 +133,6 @@ describe('EventColumnView', () => {
     });
 
     expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
-  });
-
-  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(props.onPinEvent).not.toHaveBeenCalled();
-
-    wrapper.find('[data-test-subj="pin"]').first().simulate('click');
-
-    expect(props.onPinEvent).toHaveBeenCalled();
   });
 
   test('it render AddToCaseAction if timelineId === TimelineId.detectionsPage', () => {

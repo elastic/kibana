@@ -43,13 +43,11 @@ export function runKbnArchiverCli() {
   new RunWithCommands({
     description: 'Import/export saved objects from archives, for testing',
     globalFlags: {
-      string: ['config', 'space', 'kibana-url', 'dir'],
+      string: ['config', 'space', 'kibana-url'],
       help: `
         --space            space id to operate on, defaults to the default space
         --config           optional path to an FTR config file that will be parsed and used for defaults
         --kibana-url       set the url that kibana can be reached at, uses the "servers.kibana" setting from --config by default
-        --dir              directory that contains exports to be imported, or where exports will be saved, uses the "kbnArchiver.directory"
-                             setting from --config by default
       `,
     },
     async extendContext({ log, flags }) {
@@ -79,23 +77,6 @@ export function runKbnArchiverCli() {
         );
       }
 
-      let importExportDir;
-      if (flags.dir) {
-        if (typeof flags.dir !== 'string') {
-          throw createFlagError('expected --dir to be a string');
-        }
-
-        importExportDir = flags.dir;
-      } else if (config) {
-        importExportDir = config.get('kbnArchiver.directory');
-      }
-
-      if (!importExportDir) {
-        throw createFlagError(
-          '--config does not include a kbnArchiver.directory, specify it or include --dir flag'
-        );
-      }
-
       const space = flags.space;
       if (!(space === undefined || typeof space === 'string')) {
         throw createFlagError('--space must be a string');
@@ -106,7 +87,7 @@ export function runKbnArchiverCli() {
         kbnClient: new KbnClient({
           log,
           url: kibanaUrl,
-          importExportDir,
+          importExportBaseDir: process.cwd(),
         }),
       };
     },

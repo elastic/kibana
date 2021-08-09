@@ -78,7 +78,9 @@ export class CustomTimeRangeAction implements Action<TimeRangeActionContext> {
     const isMarkdown =
       isVisualizeEmbeddable(embeddable) &&
       (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
-    return Boolean(embeddable && hasTimeRange(embeddable) && !isInputControl && !isMarkdown);
+    return Boolean(
+      embeddable && embeddable.parent && hasTimeRange(embeddable) && !isInputControl && !isMarkdown
+    );
   }
 
   public async execute({ embeddable }: TimeRangeActionContext) {

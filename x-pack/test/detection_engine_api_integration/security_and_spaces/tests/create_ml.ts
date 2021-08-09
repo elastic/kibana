@@ -23,6 +23,7 @@ import {
   deleteListsIndex,
   importFile,
 } from '../../../lists_api_integration/utils';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -76,14 +77,14 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
-      await esArchiver.load('auditbeat/hosts');
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await executeSetupModuleRequest(siemModule, 200);
       await forceStartDatafeeds(mlJobId, 200);
-      await esArchiver.load('security_solution/anomalies');
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
     after(async () => {
-      await esArchiver.unload('auditbeat/hosts');
-      await esArchiver.unload('security_solution/anomalies');
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
 
     beforeEach(async () => {
@@ -99,6 +100,10 @@ export default ({ getService }: FtrProviderContext) => {
       const signalsOpen = await getOpenSignals(supertest, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(1);
       const signal = signalsOpen.hits.hits[0];
+      if (!signal._source) {
+        return expect(signal._source).to.be.ok();
+      }
+
       expect(signal._source).eql({
         '@timestamp': signal._source['@timestamp'],
         actual: [1],
@@ -127,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
         host: { name: ['mothra'] },
         event: { kind: 'signal' },
         signal: {
-          _meta: { version: 35 },
+          _meta: { version: SIGNALS_TEMPLATE_VERSION },
           parents: [
             {
               id:
@@ -151,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
             id: createdRule.id,
             rule_id: createdRule.rule_id,
             created_at: createdRule.created_at,
-            updated_at: signal._source.signal.rule.updated_at,
+            updated_at: signal._source?.signal.rule.updated_at,
             actions: [],
             interval: '5m',
             name: 'Test ML rule',
@@ -190,6 +195,13 @@ export default ({ getService }: FtrProviderContext) => {
           },
           original_time: '2020-11-16T22:58:08.000Z',
         },
+        all_field_values: [
+          'store',
+          'linux_anomalous_network_activity_ecs',
+          'root',
+          'store',
+          'mothra',
+        ],
       });
     });
 

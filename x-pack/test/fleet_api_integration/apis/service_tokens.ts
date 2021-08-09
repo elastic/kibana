@@ -16,11 +16,11 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_service_tokens', async () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('POST /api/fleet/service-tokens', () => {

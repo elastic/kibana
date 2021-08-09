@@ -5,7 +5,7 @@ PKG_REQUIRE_NAME = "@kbn/expect"
 
 SOURCE_FILES = glob([
   "expect.js",
-  "expect.js.d.ts",
+  "expect.d.ts",
 ])
 
 SRCS = SOURCE_FILES

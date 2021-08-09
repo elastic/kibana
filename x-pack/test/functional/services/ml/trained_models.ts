@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import fs from 'fs';
-import path from 'path';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlApi } from './api';
-import { PutTrainedModelConfig } from '../../../../plugins/ml/common/types/trained_models';
 import { MlCommonUI } from './common_ui';
 
 type ModelType = 'regression' | 'classification';
@@ -24,38 +21,7 @@ export function TrainedModelsProvider(
 
   return {
     async createdTestTrainedModels(modelType: ModelType, count: number = 10) {
-      const compressedDefinition = this.getCompressedModelDefinition(modelType);
-
-      const models = new Array(count).fill(null).map((v, i) => {
-        return {
-          model_id: `dfa_${modelType}_model_n_${i}`,
-          body: {
-            compressed_definition: compressedDefinition,
-            inference_config: {
-              [modelType]: {},
-            },
-            input: {
-              field_names: ['common_field'],
-            },
-          } as PutTrainedModelConfig,
-        };
-      });
-
-      for (const model of models) {
-        await mlApi.createTrainedModel(model.model_id, model.body);
-      }
-    },
-
-    getCompressedModelDefinition(modelType: ModelType) {
-      return fs.readFileSync(
-        path.resolve(
-          __dirname,
-          'resources',
-          'trained_model_definitions',
-          `minimum_valid_config_${modelType}.json.gz.b64`
-        ),
-        'utf-8'
-      );
+      await mlApi.createdTestTrainedModels(modelType, count);
     },
 
     async assertStats(expectedTotalCount: number) {

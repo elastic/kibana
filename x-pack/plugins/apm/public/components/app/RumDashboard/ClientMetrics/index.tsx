@@ -24,7 +24,7 @@ export function ClientMetrics() {
   } = useUrlParams();
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiTitle size="xs">

@@ -19,9 +19,7 @@ import {
   PreIndexedShape,
 } from '../../../../../common/elasticsearch_util';
 import { ES_SPATIAL_RELATIONS, GEO_JSON_TYPE } from '../../../../../common/constants';
-// @ts-expect-error
-import { GeometryFilterForm } from '../../../../components/geometry_filter_form';
-import { GeoFieldWithIndex } from '../../../../components/geo_field_with_index';
+import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
 const META_OVERHEAD = 100;
@@ -29,11 +27,11 @@ const META_OVERHEAD = 100;
 interface Props {
   onClose: () => void;
   geometry: Geometry;
-  geoFields: GeoFieldWithIndex[];
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   loadPreIndexedShape: () => Promise<PreIndexedShape | null>;
+  geoFieldNames: string[];
 }
 
 interface State {
@@ -77,13 +75,9 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
 
   _createFilter = async ({
     geometryLabel,
-    indexPatternId,
-    geoFieldName,
     relation,
   }: {
     geometryLabel: string;
-    indexPatternId: string;
-    geoFieldName: string;
     relation: ES_SPATIAL_RELATIONS;
   }) => {
     this.setState({ errorMsg: undefined });
@@ -97,8 +91,7 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
       preIndexedShape,
       geometry: this.props.geometry as Polygon,
       geometryLabel,
-      indexPatternId,
-      geoFieldName,
+      geoFieldNames: this.props.geoFieldNames,
       relation,
     });
 
@@ -130,7 +123,6 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
             defaultMessage: 'Create filter',
           }
         )}
-        geoFields={this.props.geoFields}
         getFilterActions={this.props.getFilterActions}
         getActionContext={this.props.getActionContext}
         intitialGeometryLabel={this.props.geometry.type.toLowerCase()}

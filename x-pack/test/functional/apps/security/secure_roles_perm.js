@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
     'security',
@@ -27,9 +28,11 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('security/discover');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
@@ -87,6 +90,9 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await PageObjects.security.forceLogout();
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
+      );
     });
   });
 }

@@ -9,7 +9,7 @@
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
-import { ChartsPluginSetup } from '../../charts/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
@@ -20,10 +20,11 @@ import {
   setDocLinks,
   setPalettesService,
   setTrackUiMetric,
+  setActiveCursor,
 } from './services';
 
 import { visTypesDefinitions } from './vis_types';
-import { LEGACY_CHARTS_LIBRARY } from '../common';
+import { LEGACY_CHARTS_LIBRARY } from '../common/';
 import { xyVisRenderer } from './vis_renderer';
 
 import * as expressionFunctions from './expression_functions';
@@ -46,6 +47,7 @@ export interface VisTypeXyPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
 }
 
 type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, VisTypeXyPluginStart>;
@@ -77,7 +79,6 @@ export class VisTypeXyPlugin
       expressions.registerFunction(expressionFunctions.thresholdLine);
       expressions.registerFunction(expressionFunctions.label);
       expressions.registerFunction(expressionFunctions.visScale);
-      expressions.registerFunction(expressionFunctions.xyDimension);
 
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);
     }
@@ -87,11 +88,11 @@ export class VisTypeXyPlugin
     return {};
   }
 
-  public start(core: CoreStart, { data }: VisTypeXyPluginStartDependencies) {
+  public start(core: CoreStart, { data, charts }: VisTypeXyPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
     setDocLinks(core.docLinks);
-
+    setActiveCursor(charts.activeCursor);
     return {};
   }
 }

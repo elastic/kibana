@@ -80,6 +80,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'timelion:legacyChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'timelion:target_buckets': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -384,11 +388,23 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'autocomplete:valueSuggestionMethod': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:timeout': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'bfetch:disableCompression': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:visualize:legacyChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'visualization:visualize:legacyPieChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -409,10 +425,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'apm:enableSignificantTerms': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'apm:enableServiceOverview': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -449,6 +461,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:showMultiFields': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

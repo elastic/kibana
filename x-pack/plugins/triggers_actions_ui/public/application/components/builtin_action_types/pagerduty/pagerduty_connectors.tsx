@@ -20,6 +20,9 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
   const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
+  const isRoutingKeyInvalid: boolean =
+    routingKey !== undefined && errors.routingKey !== undefined && errors.routingKey.length > 0;
+
   return (
     <>
       <EuiFormRow
@@ -60,7 +63,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
           </EuiLink>
         }
         error={errors.routingKey}
-        isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
+        isInvalid={isRoutingKeyInvalid}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
@@ -80,7 +83,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
           )}
           <EuiFieldText
             fullWidth
-            isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
+            isInvalid={isRoutingKeyInvalid}
             name="routingKey"
             readOnly={readOnly}
             value={routingKey || ''}

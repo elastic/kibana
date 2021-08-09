@@ -3,20 +3,20 @@ pageLoadAssetSize:
   alerting: 106936
   apm: 64385
   apmOss: 18996
-  bfetch: 41874
+  bfetch: 51874
   canvas: 1066647
-  charts: 195358
+  charts: 95000
   cloud: 21076
   console: 46091
-  core: 432925
+  core: 434325
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 900000
+  data: 824229
   dataEnhanced: 50420
   devTools: 38637
-  discover: 105145
+  discover: 99999
   discoverEnhanced: 42730
   embeddable: 312874
   embeddableEnhanced: 41145
@@ -24,6 +24,7 @@ pageLoadAssetSize:
   esUiShared: 326654
   expressions: 224136
   features: 21723
+  fieldFormats: 92628
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -33,8 +34,9 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   indexPatternManagement: 28222
+  indexPatternEditor: 25000
   infra: 184320
-  fleet: 415829
+  fleet: 465774
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -67,7 +69,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 95864
   securityOss: 30806
-  securitySolution: 76000
+  securitySolution: 217673
   share: 99061
   snapshotRestore: 79032
   spaces: 57868
@@ -99,14 +101,22 @@ pageLoadAssetSize:
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
-  presentationUtil: 49767
+  presentationUtil: 94301
   spacesOss: 18817
-  indexPatternFieldEditor: 90489
+  indexPatternFieldEditor: 50000
   osquery: 107090
   fileUpload: 25664
-  fileDataVisualizer: 27530
+  dataVisualizer: 27530
   banners: 17946
   mapsEms: 26072
-  timelines: 28613
-  cases: 162385
+  timelines: 327300
   screenshotMode: 17856
+  visTypePie: 35583
+  expressionRevealImage: 25675
+  cases: 144442
+  expressionError: 22127
+  expressionRepeatImage: 22341
+  expressionImage: 19288
+  expressionMetric: 22238
+  expressionShape: 34008
+  interactiveSetup: 18532

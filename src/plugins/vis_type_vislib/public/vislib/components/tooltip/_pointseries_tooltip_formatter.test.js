@@ -96,4 +96,27 @@ describe('tooltipFormatter', function () {
     const $rows = $el.find('tr');
     expect($rows.length).toBe(3);
   });
+
+  it('renders correctly for gauge/goal visualizations', function () {
+    const event = _.cloneDeep(baseEvent);
+    let type = 'gauge';
+    event.config.get = (name) => {
+      const config = {
+        setColorRange: false,
+        gauge: false,
+        percentageMode: false,
+        type,
+      };
+      return config[name];
+    };
+
+    let $el = $(tooltipFormatter(event, uiSettings));
+    let $rows = $el.find('tr');
+    expect($rows.length).toBe(2);
+
+    type = 'goal';
+    $el = $(tooltipFormatter(event, uiSettings));
+    $rows = $el.find('tr');
+    expect($rows.length).toBe(2);
+  });
 });

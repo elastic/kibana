@@ -35,7 +35,7 @@ export function MockUrlParamsContextProvider({
         rangeId: 0,
         refreshTimeRange,
         urlParams,
-        uiFilters: {},
+        uxUiFilters: {},
       }}
       children={children}
     />

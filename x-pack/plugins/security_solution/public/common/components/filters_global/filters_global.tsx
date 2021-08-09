@@ -8,17 +8,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { InPortal } from 'react-reverse-portal';
-
+import { EuiPanel } from '@elastic/eui';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
-
-const Wrapper = styled.aside`
-  position: relative;
-  z-index: ${({ theme }) => theme.eui.euiZNavigation};
-  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
-  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-  padding: ${({ theme }) => theme.eui.paddingSizes.m} ${({ theme }) => theme.eui.paddingSizes.l};
-`;
-Wrapper.displayName = 'Wrapper';
 
 const FiltersGlobalContainer = styled.header<{ show: boolean }>`
   display: ${({ show }) => (show ? 'block' : 'none')};
@@ -32,13 +23,15 @@ export interface FiltersGlobalProps {
 }
 
 export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, show = true }) => {
-  const { globalHeaderPortalNode } = useGlobalHeaderPortal();
+  const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
 
   return (
-    <InPortal node={globalHeaderPortalNode}>
-      <FiltersGlobalContainer data-test-subj="filters-global-container" show={show}>
-        <Wrapper className="siemFiltersGlobal">{children}</Wrapper>
-      </FiltersGlobalContainer>
+    <InPortal node={globalKQLHeaderPortalNode}>
+      <EuiPanel borderRadius="none" color="subdued" paddingSize="s">
+        <FiltersGlobalContainer data-test-subj="filters-global-container" show={show}>
+          {children}
+        </FiltersGlobalContainer>
+      </EuiPanel>
     </InPortal>
   );
 });

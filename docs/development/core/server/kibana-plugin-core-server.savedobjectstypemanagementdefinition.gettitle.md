@@ -9,5 +9,5 @@ Function returning the title to display in the management table. If not defined,
 <b>Signature:</b>
 
 ```typescript
-getTitle?: (savedObject: SavedObject<any>) => string;
+getTitle?: (savedObject: SavedObject<Attributes>) => string;
 ```

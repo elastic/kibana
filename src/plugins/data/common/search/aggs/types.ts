@@ -95,7 +95,6 @@ export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
 export { IFieldParamType } from './param_types';
 export { IMetricAggType } from './metrics/metric_agg_type';
-export { DateRangeKey } from './buckets/lib/date_range';
 export { IpRangeKey } from './buckets/lib/ip_range';
 export { OptionedValueProp } from './param_types/optioned';
 
@@ -132,6 +131,7 @@ export type AggsStart = Assign<AggsCommonStart, { types: AggTypesRegistryStart }
 export interface BaseAggParams {
   json?: string;
   customLabel?: string;
+  timeShift?: string;
 }
 
 /** @internal */

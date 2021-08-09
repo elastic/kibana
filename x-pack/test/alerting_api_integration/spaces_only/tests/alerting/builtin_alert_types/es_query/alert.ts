@@ -32,7 +32,7 @@ const ES_GROUPS_TO_WRITE = 3;
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
@@ -79,6 +79,50 @@ export default function alertTests({ getService }: FtrProviderContext) {
         size: 100,
         thresholdComparator: '>',
         threshold: [-1],
+      });
+
+      const docs = await waitForDocs(2);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { previousTimestamp, hits } = doc._source;
+        const { name, title, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+        expect(title).to.be(`alert 'always fire' matched query`);
+        const messagePattern = /alert 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
+        expect(hits).not.to.be.empty();
+
+        // during the first execution, the latestTimestamp value should be empty
+        // since this alert always fires, the latestTimestamp value should be updated each execution
+        if (!i) {
+          expect(previousTimestamp).to.be.empty();
+        } else {
+          expect(previousTimestamp).not.to.be.empty();
+        }
+      }
+    });
+
+    it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
+      // write documents from now to the future end date in groups
+      createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+
+      await createAlert({
+        name: 'never fire',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        thresholdComparator: '<',
+        threshold: [0],
+        timeField: 'date_epoch_millis',
+      });
+
+      await createAlert({
+        name: 'always fire',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [-1],
+        timeField: 'date_epoch_millis',
       });
 
       const docs = await waitForDocs(2);

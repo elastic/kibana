@@ -65,6 +65,10 @@ fields.getByName = (name: string) => {
   return fields.find((field) => field.name === name);
 };
 
+fields.getAll = () => {
+  return fields;
+};
+
 const indexPattern = ({
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',

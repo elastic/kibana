@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { identity, range } from 'lodash';
 import { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'src/core/server';
@@ -13,7 +14,8 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'src/core/server/mocks';
-import { FieldFormatsRegistry, ISearchStartSearchSource } from 'src/plugins/data/common';
+import { ISearchStartSearchSource } from 'src/plugins/data/common';
+import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
@@ -40,6 +42,8 @@ let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
 let mockConfig: ReportingConfig;
 let uiSettingsClient: IUiSettingsClient;
+let stream: jest.Mocked<Writable>;
+let content: string;
 
 const searchSourceMock = { ...searchSourceInstanceMock };
 const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
@@ -83,6 +87,8 @@ const mockFieldFormatsRegistry = ({
 } as unknown) as FieldFormatsRegistry;
 
 beforeEach(async () => {
+  content = '';
+  stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
   mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
   mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
   mockDataClient.search = mockDataClientSearchDefault;
@@ -131,10 +137,11 @@ it('formats an empty search result to CSV content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger
+    logger,
+    stream
   );
   const csvResult = await generateCsv.generateData();
-  expect(csvResult.content).toMatchSnapshot();
+  expect(content).toMatchSnapshot();
   expect(csvResult.csv_contains_formulas).toBe(false);
 });
 
@@ -170,10 +177,11 @@ it('formats a search result to CSV content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger
+    logger,
+    stream
   );
   const csvResult = await generateCsv.generateData();
-  expect(csvResult.content).toMatchSnapshot();
+  expect(content).toMatchSnapshot();
   expect(csvResult.csv_contains_formulas).toBe(false);
 });
 
@@ -214,7 +222,8 @@ it('calculates the bytes of the content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger
+    logger,
+    stream
   );
   const csvResult = await generateCsv.generateData();
   expect(csvResult.size).toBe(2608);
@@ -266,12 +275,13 @@ it('warns if max size was reached', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger
+    logger,
+    stream
   );
   const csvResult = await generateCsv.generateData();
   expect(csvResult.max_size_reached).toBe(true);
   expect(csvResult.warnings).toEqual([]);
-  expect(csvResult.content).toMatchSnapshot();
+  expect(content).toMatchSnapshot();
 });
 
 it('uses the scrollId to page all the data', async () => {
@@ -319,11 +329,29 @@ it('uses the scrollId to page all the data', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger
+    logger,
+    stream
   );
   const csvResult = await generateCsv.generateData();
   expect(csvResult.warnings).toEqual([]);
-  expect(csvResult.content).toMatchSnapshot();
+  expect(content).toMatchSnapshot();
+
+  expect(mockDataClient.search).toHaveBeenCalledTimes(1);
+  expect(mockDataClient.search).toBeCalledWith(
+    { params: { scroll: '30s', size: 500 } },
+    { strategy: 'es' }
+  );
+
+  // `scroll` and `clearScroll` must be called with scroll ID in the post body!
+  expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledTimes(9);
+  expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledWith({
+    body: { scroll: '30s', scroll_id: 'awesome-scroll-hero' },
+  });
+
+  expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledTimes(1);
+  expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
+    body: { scroll_id: ['awesome-scroll-hero'] },
+  });
 });
 
 describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
@@ -367,11 +395,12 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
-    const csvResult = await generateCsv.generateData();
+    await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
   });
 
   it('provides top-level underscored fields as columns', async () => {
@@ -423,12 +452,13 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
   });
 
@@ -487,12 +517,13 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
   });
 });
@@ -533,11 +564,12 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
-    const csvResult = await generateCsv.generateData();
+    await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
   });
 
   it('columns can be top-level fields such as _id and _index', async () => {
@@ -575,11 +607,12 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
-    const csvResult = await generateCsv.generateData();
+    await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
   });
 
   it('empty columns defaults to using searchSource.getFields()', async () => {
@@ -623,11 +656,12 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
-    const csvResult = await generateCsv.generateData();
+    await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
   });
 });
 
@@ -667,12 +701,13 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
   });
 
@@ -716,12 +751,13 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
   });
 
@@ -768,12 +804,13 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger
+      logger,
+      stream
     );
 
     const csvResult = await generateCsv.generateData();
 
-    expect(csvResult.content).toMatchSnapshot();
+    expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(true);
   });
 });

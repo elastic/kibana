@@ -6,25 +6,13 @@
  */
 
 import React, { FC, memo } from 'react';
-import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
+import { EuiPanel, CommonProps } from '@elastic/eui';
 import styled from 'styled-components';
 import { SecurityPageName } from '../../../common/constants';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
-import { SiemNavigation } from '../../common/components/navigation';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { AdministrationSubTab } from '../types';
-import {
-  ENDPOINTS_TAB,
-  TRUSTED_APPS_TAB,
-  BETA_BADGE_LABEL,
-  EVENT_FILTERS_TAB,
-} from '../common/translations';
-import {
-  getEndpointListPath,
-  getEventFiltersListPath,
-  getTrustedAppsListPath,
-} from '../common/routing';
+import { BETA_BADGE_LABEL } from '../common/translations';
 
 /** Ensure that all flyouts z-index in Administation area show the flyout header */
 const EuiPanelStyled = styled(EuiPanel)`
@@ -46,7 +34,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
     return (
-      <WrapperPage noTimeline {...otherProps}>
+      <SecuritySolutionPageWrapper noTimeline {...otherProps}>
         <HeaderPage
           hideSourcerer={true}
           title={title}
@@ -57,41 +45,10 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           {actions}
         </HeaderPage>
 
-        <SiemNavigation
-          navTabs={{
-            [AdministrationSubTab.endpoints]: {
-              name: ENDPOINTS_TAB,
-              id: AdministrationSubTab.endpoints,
-              href: getEndpointListPath({ name: 'endpointList' }),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            [AdministrationSubTab.trustedApps]: {
-              name: TRUSTED_APPS_TAB,
-              id: AdministrationSubTab.trustedApps,
-              href: getTrustedAppsListPath(),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            [AdministrationSubTab.eventFilters]: {
-              name: EVENT_FILTERS_TAB,
-              id: AdministrationSubTab.eventFilters,
-              href: getEventFiltersListPath(),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-          }}
-        />
-
-        <EuiSpacer />
-
-        <EuiPanelStyled>{children}</EuiPanelStyled>
+        <EuiPanelStyled hasBorder>{children}</EuiPanelStyled>
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 );

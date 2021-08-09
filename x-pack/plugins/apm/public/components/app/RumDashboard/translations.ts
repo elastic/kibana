@@ -104,8 +104,8 @@ export const I18LABELS = {
       defaultMessage: 'Page load duration by region (avg.)',
     }
   ),
-  searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
-    defaultMessage: 'Search by URL',
+  filterByUrl: i18n.translate('xpack.apm.rum.filters.filterByUrl', {
+    defaultMessage: 'Filter by URL',
   }),
   getSearchResultsLabel: (total: number) =>
     i18n.translate('xpack.apm.rum.filters.searchResults', {

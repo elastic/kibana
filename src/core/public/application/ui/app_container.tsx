@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './app_container.scss';
 
 import React, {
   Fragment,
@@ -16,11 +17,12 @@ import React, {
 } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
-import './app_container.scss';
+import { APP_WRAPPER_CLASS } from '../../../utils';
 
 interface Props {
   /** Path application is mounted on without the global basePath */
@@ -107,12 +109,16 @@ export const AppContainer: FunctionComponent<Props> = ({
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
-      {showSpinner && (
-        <div className="appContainer__loading">
-          <EuiLoadingElastic aria-label="Loading application" size="xxl" />
-        </div>
+      {showSpinner && !appNotFound && (
+        <EuiLoadingElastic
+          className="appContainer__loading"
+          aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+            defaultMessage: 'Loading application',
+          })}
+          size="xxl"
+        />
       )}
-      <div key={appId} ref={elementRef} />
+      <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
     </Fragment>
   );
 };

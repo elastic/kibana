@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { pluck } from 'rxjs/operators';
 import {
   EuiCodeBlock,
   EuiFlexItem,
@@ -34,8 +35,8 @@ interface Props {
 }
 
 export function RunExpressionsExample({ expressions, inspector }: Props) {
-  const [expression, updateExpression] = useState('markdown "## expressions explorer"');
-  const [result, updateResult] = useState({});
+  const [expression, updateExpression] = useState('markdownVis "## expressions explorer"');
+  const [result, updateResult] = useState<unknown>({});
 
   const expressionChanged = (value: string) => {
     updateExpression(value);
@@ -49,17 +50,13 @@ export function RunExpressionsExample({ expressions, inspector }: Props) {
   );
 
   useEffect(() => {
-    const runExpression = async () => {
-      const execution = expressions.execute(expression, null, {
-        debug: true,
-        inspectorAdapters,
-      });
+    const execution = expressions.execute(expression, null, {
+      debug: true,
+      inspectorAdapters,
+    });
+    const subscription = execution.getData().pipe(pluck('result')).subscribe(updateResult);
 
-      const data: any = await execution.getData();
-      updateResult(data);
-    };
-
-    runExpression();
+    return () => subscription.unsubscribe();
   }, [expression, expressions, inspectorAdapters]);
 
   return (

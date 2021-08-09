@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, ReactNode } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
@@ -13,34 +13,41 @@ import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translat
 import {
   EndpointIsolatedFormProps,
   EndpointIsolateForm,
-  EndpointIsolateSuccess,
+  ActionCompletionReturnButton,
 } from '../../../common/components/endpoint/host_isolation';
+import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
 export const IsolateHost = React.memo(
   ({
-    agentId,
+    endpointId,
     hostName,
-    alertRule,
-    cases,
-    caseIds,
+    casesInfo,
     cancelCallback,
+    successCallback,
   }: {
-    agentId: string;
+    endpointId: string;
     hostName: string;
-    alertRule: string;
-    cases: ReactNode;
-    caseIds: string[];
+    casesInfo: CasesFromAlertsResponse;
     cancelCallback: () => void;
+    successCallback?: () => void;
   }) => {
     const [comment, setComment] = useState('');
     const [isIsolated, setIsIsolated] = useState(false);
 
-    const { loading, isolateHost } = useHostIsolation({ agentId, comment, caseIds });
+    const caseIds: string[] = casesInfo.map((caseInfo): string => {
+      return caseInfo.id;
+    });
+
+    const { loading, isolateHost } = useHostIsolation({ endpointId, comment, caseIds });
 
     const confirmHostIsolation = useCallback(async () => {
       const hostIsolated = await isolateHost();
       setIsIsolated(hostIsolated);
-    }, [isolateHost]);
+
+      if (hostIsolated && successCallback) {
+        successCallback();
+      }
+    }, [isolateHost, successCallback]);
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
 
@@ -49,22 +56,16 @@ export const IsolateHost = React.memo(
       []
     );
 
-    const caseCount: number = useMemo(() => caseIds.length, [caseIds]);
+    const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
 
-    const hostIsolatedSuccess = useMemo(() => {
+    const hostIsolatedSuccessButton = useMemo(() => {
       return (
-        <>
-          <EuiSpacer size="m" />
-          <EndpointIsolateSuccess
-            hostName={hostName}
-            isolateAction="isolateHost"
-            completeButtonLabel={RETURN_TO_ALERT_DETAILS}
-            onComplete={backToAlertDetails}
-            additionalInfo={cases}
-          />
-        </>
+        <ActionCompletionReturnButton
+          onClick={backToAlertDetails}
+          buttonText={RETURN_TO_ALERT_DETAILS}
+        />
       );
-    }, [backToAlertDetails, hostName, cases]);
+    }, [backToAlertDetails]);
 
     const hostNotIsolated = useMemo(() => {
       return (
@@ -80,15 +81,9 @@ export const IsolateHost = React.memo(
             messageAppend={
               <FormattedMessage
                 id="xpack.securitySolution.detections.hostIsolation.impactedCases"
-                defaultMessage="This action will be added to the {cases}."
+                defaultMessage="This action will be added to {cases}."
                 values={{
-                  cases: (
-                    <b>
-                      {caseCount}
-                      {CASES_ASSOCIATED_WITH_ALERT(caseCount)}
-                      {alertRule}
-                    </b>
-                  ),
+                  cases: <b>{CASES_ASSOCIATED_WITH_ALERT(caseCount)}</b>,
                 }}
               />
             }
@@ -103,10 +98,9 @@ export const IsolateHost = React.memo(
       comment,
       loading,
       caseCount,
-      alertRule,
     ]);
 
-    return isIsolated ? hostIsolatedSuccess : hostNotIsolated;
+    return isIsolated ? hostIsolatedSuccessButton : hostNotIsolated;
   }
 );
 

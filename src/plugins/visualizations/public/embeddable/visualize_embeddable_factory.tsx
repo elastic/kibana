@@ -59,7 +59,10 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient'>
+    Pick<
+      VisualizationsStartDeps,
+      'inspector' | 'embeddable' | 'savedObjectsClient' | 'executionContext'
+    >
   >;
 }
 
@@ -103,6 +106,9 @@ export class VisualizeEmbeddableFactory
         return true;
       }
       return visType.stage !== 'experimental';
+    },
+    getSavedObjectSubType: (savedObject) => {
+      return JSON.parse(savedObject.attributes.visState).type;
     },
   };
 

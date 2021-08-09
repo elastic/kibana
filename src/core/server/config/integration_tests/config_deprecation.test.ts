@@ -26,6 +26,7 @@ describe('configuration deprecations', () => {
   it('should not log deprecation warnings for default configuration that is not one of `logging.verbose`, `logging.quiet` or `logging.silent`', async () => {
     root = kbnTestServer.createRoot();
 
+    await root.preboot();
     await root.setup();
 
     const logs = loggingSystemMock.collect(mockLoggingSystem);
@@ -44,6 +45,7 @@ describe('configuration deprecations', () => {
       },
     });
 
+    await root.preboot();
     await root.setup();
 
     const logs = loggingSystemMock.collect(mockLoggingSystem);

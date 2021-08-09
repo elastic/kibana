@@ -23,6 +23,8 @@ import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 
+jest.mock('../../../../common/lib/kibana');
+
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
@@ -66,6 +68,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 
 describe('Body', () => {
   const mount = useMountAppended();
+  const mockRefetch = jest.fn();
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
@@ -78,7 +81,7 @@ describe('Body', () => {
     isSelectAllChecked: false,
     loadingEventIds: [],
     pinnedEventIds: {},
-    refetch: jest.fn(),
+    refetch: mockRefetch,
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
     selectedEventIds: {},
@@ -251,11 +254,12 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            refetch: mockRefetch,
           },
           tabType: 'query',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -275,11 +279,12 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            refetch: mockRefetch,
           },
           tabType: 'pinned',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -299,11 +304,12 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            refetch: mockRefetch,
           },
           tabType: 'notes',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
   });

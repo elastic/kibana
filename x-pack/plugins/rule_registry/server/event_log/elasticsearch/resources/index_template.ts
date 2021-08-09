@@ -9,7 +9,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { IndexNames } from './index_names';
 import { IndexMappings } from './index_mappings';
 
-export type IndexTemplate = estypes.PutIndexTemplateRequest['body'];
+export type IndexTemplate = estypes.IndicesPutTemplateRequest['body'];
 
 export const createIndexTemplate = (
   names: IndexNames,
@@ -39,6 +39,7 @@ export const createIndexTemplate = (
         order: 'desc',
       },
     },
+    // @ts-expect-error IndexMappings is not assignale to estypes.MappingTypeMapping
     mappings: {
       ...mappings,
       _meta: {

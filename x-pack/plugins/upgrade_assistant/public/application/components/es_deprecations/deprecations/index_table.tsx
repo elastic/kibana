@@ -10,7 +10,11 @@ import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EnrichedDeprecationInfo } from '../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  IndexSettingAction,
+  ReindexAction,
+} from '../../../../../common/types';
 import { AppContext } from '../../../app_context';
 import { ReindexButton } from './reindex';
 import { FixIndexSettingsButton } from './index_settings';
@@ -19,9 +23,7 @@ const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
 export interface IndexDeprecationDetails {
   index: string;
-  reindex: boolean;
-  deprecatedIndexSettings?: string[];
-  blockerForReindexing?: EnrichedDeprecationInfo['blockerForReindexing'];
+  correctiveAction?: EnrichedDeprecationInfo['correctiveAction'];
   details?: string;
 }
 
@@ -152,9 +154,9 @@ export class IndexDeprecationTable extends React.Component<
     // NOTE: this naive implementation assumes all indices in the table
     // should show the reindex button or fix indices button. This should work for known use cases.
     const { indices } = this.props;
-    const showReindexButton = Boolean(indices.find((i) => i.reindex === true));
+    const showReindexButton = Boolean(indices.find((i) => i.correctiveAction?.type === 'reindex'));
     const showFixSettingsButton = Boolean(
-      indices.find((i) => i.deprecatedIndexSettings && i.deprecatedIndexSettings.length > 0)
+      indices.find((i) => i.correctiveAction?.type === 'indexSetting')
     );
 
     if (showReindexButton === false && showFixSettingsButton === false) {
@@ -172,7 +174,9 @@ export class IndexDeprecationTable extends React.Component<
                     return (
                       <ReindexButton
                         docLinks={docLinks}
-                        reindexBlocker={indexDep.blockerForReindexing}
+                        reindexBlocker={
+                          (indexDep.correctiveAction as ReindexAction).blockerForReindexing
+                        }
                         indexName={indexDep.index!}
                         http={http}
                       />
@@ -184,7 +188,7 @@ export class IndexDeprecationTable extends React.Component<
 
             return (
               <FixIndexSettingsButton
-                settings={indexDep.deprecatedIndexSettings!}
+                settings={(indexDep.correctiveAction as IndexSettingAction).deprecatedSettings}
                 index={indexDep.index}
               />
             );

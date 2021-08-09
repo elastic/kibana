@@ -37,6 +37,7 @@ const FlexGroupFullHeight = styled(EuiFlexGroup)`
 const VerticalOverflowContainer = styled.div((props: { maxHeight: number }) => ({
   'max-height': `${props.maxHeight}px`,
   'overflow-y': 'hidden',
+  'word-break': 'break-word',
 }));
 
 const VerticalOverflowContent = styled.div((props: { maxHeight: number }) => ({
@@ -82,7 +83,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   );
 
   return (
-    <MyPanel>
+    <MyPanel hasBorder>
       {loading && (
         <>
           <EuiProgress size="xs" color="accent" position="absolute" />

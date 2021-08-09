@@ -432,9 +432,10 @@ describe('OptimizerConfig::create()', () => {
 
     expect(config).toMatchInlineSnapshot(`
       OptimizerConfig {
-        "bundles": Symbol(filtered bundles),
+        "bundles": Symbol(focused bundles),
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
+        "filteredBundles": Symbol(filtered bundles),
         "inspectWorkers": Symbol(parsed inspect workers),
         "maxWorkerCount": Symbol(parsed max worker count),
         "plugins": Symbol(new platform plugins),

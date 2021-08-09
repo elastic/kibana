@@ -9,8 +9,15 @@ Returns Kibana Platform \*start\* life-cycle contract. Useful to return the same
 <b>Signature:</b>
 
 ```typescript
-start(): ExpressionsServiceStart;
+start(...args: unknown[]): ExpressionsServiceStart;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  args | <code>unknown[]</code> |  |
+
 <b>Returns:</b>
 
 `ExpressionsServiceStart`

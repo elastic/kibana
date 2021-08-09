@@ -20,7 +20,7 @@ export const TimeDropdown = (props: Props) => (
     options={[
       {
         text: i18n.translate('xpack.infra.nodeDetails.metrics.last15Minutes', {
-          defaultMessage: 'Last 15 mintues',
+          defaultMessage: 'Last 15 minutes',
         }),
         value: 15 * 60 * 1000,
       },

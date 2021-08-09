@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../..';
@@ -16,6 +16,7 @@ import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker } from '../../components/shared/date_picker';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -39,6 +40,14 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 export function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.overviewLinkText', {
+        defaultMessage: 'Overview',
+      }),
+    },
+  ]);
+
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
@@ -48,13 +57,13 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
-  const { hasData, hasAnyData } = useHasData();
+  const { hasDataMap, hasAnyData } = useHasData();
 
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
 
-  const alerts = (hasData.alert?.hasData as Alert[]) || [];
+  const alerts = (hasDataMap.alert?.hasData as Alert[]) || [];
 
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
@@ -82,27 +91,22 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexItem grow={6}>
           {/* Data sections */}
           {hasAnyData && <DataSections bucketSize={bucketSize?.intervalString!} />}
-
           <EmptySections />
-        </EuiFlexItem>
-
-        {/* Alert section */}
-        {!!alerts.length && (
-          <EuiFlexItem grow={3}>
-            <AlertsSection alerts={alerts} />
-          </EuiFlexItem>
-        )}
-
-        {/* Resources section */}
-        <EuiFlexItem grow={1}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <Resources />
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {/* Resources / What's New sections */}
+              <EuiPanel hasBorder={true}>
+                <Resources />
+                <EuiSpacer size="l" />
+                {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
+              </EuiPanel>
             </EuiFlexItem>
-
-            {!!newsFeed?.items?.length && (
-              <EuiFlexItem grow={false}>
-                <NewsFeed items={newsFeed.items.slice(0, 5)} />
+            {!!alerts.length && (
+              <EuiFlexItem>
+                <EuiPanel hasBorder={true}>
+                  <AlertsSection alerts={alerts} />
+                </EuiPanel>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

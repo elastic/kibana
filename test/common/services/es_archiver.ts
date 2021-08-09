@@ -19,15 +19,8 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
-  if (!config.get('esArchiver')) {
-    throw new Error(`esArchiver can't be used unless you specify it's config in your config file`);
-  }
-
-  const dataDir = config.get('esArchiver.directory');
-
   const esArchiver = new EsArchiver({
     client,
-    dataDir,
     log,
     kbnClient: kibanaServer,
   });

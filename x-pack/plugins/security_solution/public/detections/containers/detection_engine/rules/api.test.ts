@@ -29,7 +29,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
-import { buildEsQuery } from 'src/plugins/data/common';
+import { buildEsQuery } from '@kbn/es-query';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
@@ -209,6 +209,32 @@ describe('Detections Rules API', () => {
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
+          sort_order: 'desc',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, passed sort field is snake case', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: '',
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          showCustomRules: false,
+          showElasticRules: false,
+          tags: ['hello', 'world'],
+        },
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
+        method: 'GET',
+        query: {
+          filter: 'alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
+          page: 1,
+          per_page: 20,
+          sort_field: 'updatedAt',
           sort_order: 'desc',
         },
         signal: abortCtrl.signal,

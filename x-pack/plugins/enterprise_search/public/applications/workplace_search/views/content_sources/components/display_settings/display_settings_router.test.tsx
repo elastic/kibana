@@ -7,7 +7,7 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues } from '../../../../../__mocks__';
+import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';

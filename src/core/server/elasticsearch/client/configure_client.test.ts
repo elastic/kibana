@@ -10,7 +10,11 @@ import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
 import { RequestEvent, errors } from '@elastic/elasticsearch';
-import { TransportRequestParams, RequestBody } from '@elastic/elasticsearch/lib/Transport';
+import type {
+  TransportRequestOptions,
+  TransportRequestParams,
+  RequestBody,
+} from '@elastic/elasticsearch/lib/Transport';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -39,12 +43,14 @@ const createApiResponse = <T>({
   headers = {},
   warnings = [],
   params,
+  requestOptions = {},
 }: {
   body: T;
   statusCode?: number;
   headers?: Record<string, string>;
   warnings?: string[];
   params?: TransportRequestParams;
+  requestOptions?: TransportRequestOptions;
 }): RequestEvent<T> => {
   return {
     body,
@@ -54,6 +60,7 @@ const createApiResponse = <T>({
     meta: {
       request: {
         params: params!,
+        options: requestOptions,
       } as any,
     } as any,
   };
@@ -98,7 +105,7 @@ describe('configureClient', () => {
     const client = configureClient(config, { logger, type: 'test', scoped: false });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
-    expect(ClientMock).toHaveBeenCalledWith(parsedOptions);
+    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining(parsedOptions));
     expect(client).toBe(ClientMock.mock.results[0].value);
   });
 
@@ -146,6 +153,7 @@ describe('configureClient', () => {
                       "200
                   GET /foo?hello=dolly
                   {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
+                      undefined,
                     ],
                   ]
               `);
@@ -170,6 +178,7 @@ describe('configureClient', () => {
                       "200
                   GET /foo?hello=dolly
                   {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
+                      undefined,
                     ],
                   ]
               `);
@@ -196,6 +205,7 @@ describe('configureClient', () => {
               "200
           GET /foo?hello=dolly
           [buffer]",
+              undefined,
             ],
           ]
         `);
@@ -222,6 +232,7 @@ describe('configureClient', () => {
               "200
           GET /foo?hello=dolly
           [stream]",
+              undefined,
             ],
           ]
         `);
@@ -238,6 +249,7 @@ describe('configureClient', () => {
             Array [
               "200
           GET /foo?hello=dolly",
+              undefined,
             ],
           ]
         `);
@@ -263,6 +275,7 @@ describe('configureClient', () => {
                     Array [
                       "200
                   GET /foo?city=M%C3%BCnich",
+                      undefined,
                     ],
                   ]
               `);
@@ -298,6 +311,7 @@ describe('configureClient', () => {
               "500
           GET /foo?hello=dolly
           {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}} [internal server error]: internal server error",
+              undefined,
             ],
           ]
         `);
@@ -313,6 +327,7 @@ describe('configureClient', () => {
                   Array [
                     Array [
                       "[TimeoutError]: message",
+                      undefined,
                     ],
                   ]
               `);
@@ -343,6 +358,7 @@ describe('configureClient', () => {
             Array [
               "400
           GET /_path?hello=dolly [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
+              undefined,
             ],
           ]
         `);
@@ -369,6 +385,7 @@ describe('configureClient', () => {
             Array [
               "400
           GET /_path [undefined]: Response Error",
+              undefined,
             ],
           ]
         `);
@@ -391,8 +408,65 @@ describe('configureClient', () => {
             Array [
               "400
           GET /_path [undefined]: Response Error",
+              undefined,
             ],
           ]
+        `);
+      });
+
+      it('adds meta information to logs', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
+
+        let response = createApiResponse({
+          statusCode: 400,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/_path',
+          },
+          requestOptions: {
+            opaqueId: 'opaque-id',
+          },
+          body: {
+            error: {},
+          },
+        });
+        client.emit('response', null, response);
+
+        expect(loggingSystemMock.collect(logger).debug[0][1]).toMatchInlineSnapshot(`
+          Object {
+            "http": Object {
+              "request": Object {
+                "id": "opaque-id",
+              },
+            },
+          }
+        `);
+
+        logger.debug.mockClear();
+
+        response = createApiResponse({
+          statusCode: 400,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/_path',
+          },
+          requestOptions: {
+            opaqueId: 'opaque-id',
+          },
+          body: {} as any,
+        });
+        client.emit('response', new errors.ResponseError(response), response);
+
+        expect(loggingSystemMock.collect(logger).debug[0][1]).toMatchInlineSnapshot(`
+          Object {
+            "http": Object {
+              "request": Object {
+                "id": "opaque-id",
+              },
+            },
+          }
         `);
       });
     });

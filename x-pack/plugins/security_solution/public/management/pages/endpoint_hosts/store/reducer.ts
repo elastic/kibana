@@ -6,65 +6,99 @@
  */
 
 import {
+  EndpointDetailsActivityLogChanged,
+  EndpointPackageInfoStateChanged,
+  EndpointPendingActionsStateChanged,
+  MetadataTransformStatsChanged,
+} from './action';
+import {
   isOnEndpointPage,
   hasSelectedEndpoint,
   uiQueryParams,
+  getIsOnEndpointDetailsActivityLog,
   getCurrentIsolationRequestState,
 } from './selectors';
 import { EndpointState } from '../types';
+import { initialEndpointPageState } from './builders';
 import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
-import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
 
-export const initialEndpointListState: Immutable<EndpointState> = {
-  hosts: [],
-  pageSize: 10,
-  pageIndex: 0,
-  total: 0,
-  loading: false,
-  error: undefined,
-  details: undefined,
-  detailsLoading: false,
-  detailsError: undefined,
-  policyResponse: undefined,
-  policyResponseLoading: false,
-  policyResponseError: undefined,
-  location: undefined,
-  policyItems: [],
-  selectedPolicyId: undefined,
-  policyItemsLoading: false,
-  endpointPackageInfo: undefined,
-  nonExistingPolicies: {},
-  agentPolicies: {},
-  endpointsExist: true,
-  patterns: [],
-  patternsError: undefined,
-  isAutoRefreshEnabled: true,
-  autoRefreshInterval: DEFAULT_POLL_INTERVAL,
-  agentsWithEndpointsTotal: 0,
-  agentsWithEndpointsTotalError: undefined,
-  endpointsTotal: 0,
-  endpointsTotalError: undefined,
-  queryStrategyVersion: undefined,
-  policyVersionInfo: undefined,
-  hostStatus: undefined,
-  isolationRequestState: createUninitialisedResourceState(),
-};
+type StateReducer = ImmutableReducer<EndpointState, AppAction>;
+type CaseReducer<T extends AppAction> = (
+  state: Immutable<EndpointState>,
+  action: Immutable<T>
+) => Immutable<EndpointState>;
 
-/* eslint-disable-next-line complexity */
-export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
-  state = initialEndpointListState,
+const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivityLogChanged> = (
+  state,
   action
 ) => {
+  const pagingOptions =
+    action.payload.type === 'LoadedResourceState'
+      ? {
+          ...state.endpointDetails.activityLog,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            page: action.payload.data.page,
+            pageSize: action.payload.data.pageSize,
+            startDate: action.payload.data.startDate,
+            endDate: action.payload.data.endDate,
+          },
+        }
+      : { ...state.endpointDetails.activityLog };
+  return {
+    ...state!,
+    endpointDetails: {
+      ...state.endpointDetails!,
+      activityLog: {
+        ...pagingOptions,
+        logData: action.payload,
+      },
+    },
+  };
+};
+
+const handleEndpointPendingActionsStateChanged: CaseReducer<EndpointPendingActionsStateChanged> = (
+  state,
+  action
+) => {
+  if (isOnEndpointPage(state)) {
+    return {
+      ...state,
+      endpointPendingActions: action.payload,
+    };
+  }
+  return state;
+};
+
+const handleEndpointPackageInfoStateChanged: CaseReducer<EndpointPackageInfoStateChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    endpointPackageInfo: action.payload,
+  };
+};
+
+const handleMetadataTransformStatsChanged: CaseReducer<MetadataTransformStatsChanged> = (
+  state,
+  action
+) => ({
+  ...state,
+  metadataTransformStats: action.payload,
+});
+
+/* eslint-disable-next-line complexity */
+export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
     const {
       hosts,
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
-      query_strategy_version: queryStrategyVersion,
       policy_info: policyVersionInfo,
     } = action.payload;
     return {
@@ -73,7 +107,6 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       total,
       pageSize,
       pageIndex,
-      queryStrategyVersion,
       policyVersionInfo,
       loading: false,
       error: undefined,
@@ -115,18 +148,62 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
   } else if (action.type === 'serverReturnedEndpointDetails') {
     return {
       ...state,
-      details: action.payload.metadata,
+      endpointDetails: {
+        ...state.endpointDetails,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          details: action.payload.metadata,
+          detailsLoading: false,
+          detailsError: undefined,
+        },
+      },
       policyVersionInfo: action.payload.policy_info,
       hostStatus: action.payload.host_status,
-      detailsLoading: false,
-      detailsError: undefined,
     };
   } else if (action.type === 'serverFailedToReturnEndpointDetails') {
     return {
       ...state,
-      detailsError: action.payload,
-      detailsLoading: false,
+      endpointDetails: {
+        ...state.endpointDetails,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          detailsError: action.payload,
+          detailsLoading: false,
+        },
+      },
     };
+  } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
+    return {
+      ...state,
+      endpointDetails: {
+        ...state.endpointDetails!,
+        activityLog: {
+          ...state.endpointDetails.activityLog,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            ...action.payload,
+          },
+        },
+      },
+    };
+  } else if (action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange') {
+    return {
+      ...state,
+      endpointDetails: {
+        ...state.endpointDetails!,
+        activityLog: {
+          ...state.endpointDetails.activityLog,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            ...action.payload,
+          },
+        },
+      },
+    };
+  } else if (action.type === 'endpointDetailsActivityLogChanged') {
+    return handleEndpointDetailsActivityLogChanged(state, action);
+  } else if (action.type === 'endpointPendingActionsStateChanged') {
+    return handleEndpointPendingActionsStateChanged(state, action);
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {
       ...state,
@@ -168,11 +245,8 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       ...state,
       policyItemsLoading: false,
     };
-  } else if (action.type === 'serverReturnedEndpointPackageInfo') {
-    return {
-      ...state,
-      endpointPackageInfo: action.payload,
-    };
+  } else if (action.type === 'endpointPackageInfoStateChanged') {
+    return handleEndpointPackageInfoStateChanged(state, action);
   } else if (action.type === 'serverReturnedEndpointExistValue') {
     return {
       ...state,
@@ -217,12 +291,34 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     const wasPreviouslyOnListPage = isOnEndpointPage(state) && !hasSelectedEndpoint(state);
     const isCurrentlyOnDetailsPage = isOnEndpointPage(newState) && hasSelectedEndpoint(newState);
     const wasPreviouslyOnDetailsPage = isOnEndpointPage(state) && hasSelectedEndpoint(state);
+    const wasPreviouslyOnActivityLogPage =
+      isOnEndpointPage(state) &&
+      hasSelectedEndpoint(state) &&
+      getIsOnEndpointDetailsActivityLog(state);
+    const isCurrentlyOnActivityLogPage =
+      isOnEndpointPage(newState) &&
+      hasSelectedEndpoint(newState) &&
+      getIsOnEndpointDetailsActivityLog(newState);
+
+    const isNotLoadingDetails =
+      isCurrentlyOnActivityLogPage ||
+      (wasPreviouslyOnActivityLogPage &&
+        uiQueryParams(state).selected_endpoint === uiQueryParams(newState).selected_endpoint);
 
     const stateUpdates: Partial<EndpointState> = {
       location: action.payload,
       error: undefined,
-      detailsError: undefined,
       policyResponseError: undefined,
+    };
+
+    const activityLog = {
+      logData: createUninitialisedResourceState(),
+      paging: {
+        disabled: false,
+        page: 1,
+        pageSize: 50,
+        isInvalidDateRange: false,
+      },
     };
 
     // Reset `isolationRequestState` if needed
@@ -239,6 +335,14 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         return {
           ...state,
           ...stateUpdates,
+          endpointDetails: {
+            ...state.endpointDetails,
+            activityLog,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsError: undefined,
+            },
+          },
           loading: true,
           policyItemsLoading: true,
         };
@@ -249,6 +353,15 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         return {
           ...state,
           ...stateUpdates,
+          endpointDetails: {
+            ...state.endpointDetails,
+            activityLog,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsLoading: !isNotLoadingDetails,
+              detailsError: undefined,
+            },
+          },
           detailsLoading: true,
           policyResponseLoading: true,
         };
@@ -257,8 +370,16 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         return {
           ...state,
           ...stateUpdates,
+          endpointDetails: {
+            ...state.endpointDetails,
+            activityLog,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsLoading: true,
+              detailsError: undefined,
+            },
+          },
           loading: true,
-          detailsLoading: true,
           policyResponseLoading: true,
           policyItemsLoading: true,
         };
@@ -268,8 +389,18 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     return {
       ...state,
       ...stateUpdates,
+      endpointDetails: {
+        ...state.endpointDetails,
+        activityLog,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          detailsError: undefined,
+        },
+      },
       endpointsExist: true,
     };
+  } else if (action.type === 'metadataTransformStatsChanged') {
+    return handleMetadataTransformStatsChanged(state, action);
   }
 
   return state;
