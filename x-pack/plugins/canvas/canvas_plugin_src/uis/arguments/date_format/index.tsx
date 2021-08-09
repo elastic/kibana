@@ -22,7 +22,7 @@ const getDateFormatArgInput = (defaultDateFormats: ComponentProps['dateFormats']
 
 export const dateFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,
-  _
+  plugins
 ) => {
   const formatMap = {
     DEFAULT: core.uiSettings.get('dateFormat'),
