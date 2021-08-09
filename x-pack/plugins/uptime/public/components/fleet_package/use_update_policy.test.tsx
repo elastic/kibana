@@ -20,7 +20,6 @@ import {
   ITLSFields,
   HTTPFields,
   BrowserFields,
-  Mode,
 } from './types';
 import { defaultConfig } from './synthetics_policy_create_extension';
 
