@@ -24,7 +24,7 @@ import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { AuditLogger } from '../../../security/server';
 import {
   ALERT_STATUS,
-  ALERT_CONSUMER,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
@@ -39,7 +39,7 @@ type AlertType = NonNullableProps<
 >;
 
 const isValidAlert = (source?: ParsedTechnicalFields): source is AlertType => {
-  return source?.[ALERT_RULE_TYPE_ID] != null && source?.[ALERT_CONSUMER] != null;
+  return source?.[ALERT_RULE_TYPE_ID] != null && source?.[ALERT_RULE_CONSUMER] != null;
 };
 export interface ConstructorOptions {
   logger: Logger;
@@ -159,7 +159,7 @@ export class AlertsClient {
       // client exposed to us for reuse
       await this.authorization.ensureAuthorized({
         ruleTypeId: alert[ALERT_RULE_TYPE_ID],
-        consumer: alert[ALERT_CONSUMER],
+        consumer: alert[ALERT_RULE_CONSUMER],
         operation: ReadOperations.Get,
         entity: AlertingAuthorizationEntity.Alert,
       });
@@ -203,7 +203,7 @@ export class AlertsClient {
 
       await this.authorization.ensureAuthorized({
         ruleTypeId: alert[ALERT_RULE_TYPE_ID],
-        consumer: alert[ALERT_CONSUMER],
+        consumer: alert[ALERT_RULE_CONSUMER],
         operation: WriteOperations.Update,
         entity: AlertingAuthorizationEntity.Alert,
       });

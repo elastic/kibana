@@ -8,7 +8,7 @@
 import {
   ALERT_DURATION,
   ALERT_ID,
-  ALERT_PRODUCER,
+  ALERT_RULE_PRODUCER,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -193,7 +193,7 @@ export const requiredFieldMappingsForActionsRuleRegistry = {
   'rule.id': ALERT_RULE_ID,
   'rule.name': ALERT_RULE_NAME,
   'rule.category': ALERT_RULE_CATEGORY,
-  producer: ALERT_PRODUCER,
+  producer: ALERT_RULE_PRODUCER,
   tags: 'tags',
 };
 

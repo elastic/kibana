@@ -7,8 +7,8 @@
 
 import {
   SPACE_IDS,
-  ALERT_CONSUMER,
-  ALERT_PRODUCER,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import signalsMapping from './signals_mapping.json';
@@ -29,7 +29,7 @@ import aadFieldConversion from './signal_aad_mapping.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 56;
+export const SIGNALS_TEMPLATE_VERSION = 55;
 /**
   @constant
   @type {number}
@@ -116,11 +116,11 @@ export const getRbacRequiredFields = (spaceId: string) => {
       type: 'constant_keyword',
       value: spaceId,
     },
-    [ALERT_CONSUMER]: {
+    [ALERT_RULE_CONSUMER]: {
       type: 'constant_keyword',
       value: 'siem',
     },
-    [ALERT_PRODUCER]: {
+    [ALERT_RULE_PRODUCER]: {
       type: 'constant_keyword',
       value: 'siem',
     },

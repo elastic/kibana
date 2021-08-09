@@ -7,7 +7,7 @@
 
 import { AlertExecutorOptions } from '../../../alerting/server';
 import {
-  ALERT_PRODUCER,
+  ALERT_RULE_PRODUCER,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_NAME,
@@ -20,7 +20,7 @@ export interface RuleExecutorData {
   [ALERT_RULE_TYPE_ID]: string;
   [ALERT_RULE_UUID]: string;
   [ALERT_RULE_NAME]: string;
-  [ALERT_PRODUCER]: string;
+  [ALERT_RULE_PRODUCER]: string;
   [TAGS]: string[];
 }
 
@@ -31,6 +31,6 @@ export function getRuleData(options: AlertExecutorOptions<any, any, any, any, an
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
     [ALERT_RULE_NAME]: options.rule.name,
     [TAGS]: options.tags,
-    [ALERT_PRODUCER]: options.rule.producer,
+    [ALERT_RULE_PRODUCER]: options.rule.producer,
   };
 }

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_CONSUMER, ALERT_STATUS, SPACE_IDS, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_STATUS,
+  SPACE_IDS,
+  ALERT_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -60,7 +65,7 @@ describe('get()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  [ALERT_CONSUMER]: 'apm',
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: ['test_default_space_id'],
                 },
@@ -74,13 +79,13 @@ describe('get()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_version": "WzM2MiwyXQ==",
-        "kibana.alert.rule.consumer": "apm",
         "kibana.alert.rule.rule_type_id": "apm.error_rate",
         "kibana.alert.status": "open",
         "kibana.space_ids": Array [
           "test_default_space_id",
         ],
         "message": "hello world 1",
+        "undefined": "apm",
       }
     `);
     expect(esClientMock.search).toHaveBeenCalledTimes(1);
@@ -141,7 +146,7 @@ describe('get()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  [ALERT_CONSUMER]: 'apm',
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: ['test_default_space_id'],
                 },
@@ -203,7 +208,7 @@ describe('get()', () => {
                   _source: {
                     [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
-                    [ALERT_CONSUMER]: 'apm',
+                    [ALERT_RULE_CONSUMER]: 'apm',
                     [ALERT_STATUS]: 'open',
                     [SPACE_IDS]: ['test_default_space_id'],
                   },
@@ -228,13 +233,13 @@ describe('get()', () => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "_version": "WzM2MiwyXQ==",
-          "kibana.alert.rule.consumer": "apm",
           "kibana.alert.rule.rule_type_id": "apm.error_rate",
           "kibana.alert.status": "open",
           "kibana.space_ids": Array [
             "test_default_space_id",
           ],
           "message": "hello world 1",
+          "undefined": "apm",
         }
       `);
     });

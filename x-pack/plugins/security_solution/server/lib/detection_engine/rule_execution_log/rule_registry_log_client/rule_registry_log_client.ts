@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import {
-  ALERT_CONSUMER,
+  ALERT_RULE_CONSUMER,
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
@@ -228,7 +228,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [getMetricField(metric)]: value,
         [RULE_ID]: ruleId,
         [TIMESTAMP]: new Date().toISOString(),
-        [ALERT_CONSUMER]: SERVER_APP_ID,
+        [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       },
       namespace
     );
@@ -252,7 +252,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [RULE_STATUS_SEVERITY]: statusSeverityDict[newStatus],
         [RULE_STATUS]: newStatus,
         [TIMESTAMP]: new Date().toISOString(),
-        [ALERT_CONSUMER]: SERVER_APP_ID,
+        [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       },
       namespace
     );

@@ -29,7 +29,7 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
-  ALERT_CONSUMER,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   TIMESTAMP,
@@ -156,7 +156,7 @@ export const createLifecycleExecutor = (
         ...fields,
         [ALERT_ID]: id,
         [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
-        [ALERT_CONSUMER]: rule.consumer,
+        [ALERT_RULE_CONSUMER]: rule.consumer,
       };
       return alertInstanceFactory(id);
     },
@@ -230,7 +230,7 @@ export const createLifecycleExecutor = (
         ...fields,
         [ALERT_ID]: alertId,
         [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
-        [ALERT_CONSUMER]: rule.consumer,
+        [ALERT_RULE_CONSUMER]: rule.consumer,
       };
     });
   }
@@ -247,7 +247,7 @@ export const createLifecycleExecutor = (
       ...ruleExecutorData,
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
-      [ALERT_CONSUMER]: rule.consumer,
+      [ALERT_RULE_CONSUMER]: rule.consumer,
       [ALERT_ID]: alertId,
     } as ParsedTechnicalFields;
 

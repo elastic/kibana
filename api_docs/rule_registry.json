@@ -850,10 +850,10 @@
           },
           {
             "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleExecutorData.ALERT_PRODUCER",
+            "id": "def-server.RuleExecutorData.ALERT_RULE_PRODUCER",
             "type": "string",
             "tags": [],
-            "label": "[ALERT_PRODUCER]",
+            "label": "[ALERT_RULE_PRODUCER]",
             "description": [],
             "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
             "deprecated": false

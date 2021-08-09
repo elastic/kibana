@@ -18,7 +18,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
-  ALERT_PRODUCER,
+  ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 
 export const apmAlertResponseExample = [
@@ -36,7 +36,7 @@ export const apmAlertResponseExample = [
     '@timestamp': ['2021-04-12T13:53:49.550Z'],
     [ALERT_ID]: ['apm.error_rate_opbeans-java_production'],
     [ALERT_START]: ['2021-04-12T13:50:49.493Z'],
-    [ALERT_PRODUCER]: ['apm'],
+    [ALERT_RULE_PRODUCER]: ['apm'],
     'event.kind': ['state'],
     [ALERT_RULE_CATEGORY]: ['Error count threshold'],
     'service.environment': ['production'],
@@ -56,7 +56,7 @@ export const apmAlertResponseExample = [
     '@timestamp': ['2021-04-12T13:49:49.446Z'],
     [ALERT_ID]: ['apm.error_rate_opbeans-java_production'],
     [ALERT_START]: ['2021-04-12T13:09:30.441Z'],
-    [ALERT_PRODUCER]: ['apm'],
+    [ALERT_RULE_PRODUCER]: ['apm'],
     'event.kind': ['state'],
     [ALERT_RULE_CATEGORY]: ['Error count threshold'],
     'service.environment': ['production'],
@@ -163,7 +163,7 @@ export const dynamicIndexPattern = {
       readFromDocValues: true,
     },
     {
-      name: [ALERT_PRODUCER],
+      name: [ALERT_RULE_PRODUCER],
       type: 'string',
       esTypes: ['keyword'],
       searchable: true,

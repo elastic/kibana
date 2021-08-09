@@ -18,7 +18,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
-  ALERT_PRODUCER,
+  ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
@@ -133,7 +133,7 @@ Example.args = {
         [ALERT_STATUS]: ['open'],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        [ALERT_PRODUCER]: ['apm'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
@@ -154,7 +154,7 @@ Example.args = {
         [ALERT_STATUS]: ['open'],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        [ALERT_PRODUCER]: ['apm'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
         [ALERT_SEVERITY_LEVEL]: ['warning'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
@@ -176,7 +176,7 @@ Example.args = {
         [ALERT_STATUS]: ['open'],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        [ALERT_PRODUCER]: ['apm'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
         [ALERT_SEVERITY_LEVEL]: ['critical'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],

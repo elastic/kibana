@@ -72,11 +72,11 @@ const ALERT_RULE_VERSION = `${ALERT_RULE_NAMESPACE}.version` as const;
 // the feature instantiating a rule type.
 // Rule created in stack --> alerts
 // Rule created in siem --> siem
-const ALERT_CONSUMER = `${ALERT_RULE_NAMESPACE}.consumer` as const;
+const ALERT_RULE_CONSUMER = `${ALERT_RULE_NAMESPACE}.consumer` as const;
 // the plugin that registered the rule type.
 // Rule type apm.error_rate --> apm
 // Rule type siem.signals --> siem
-const ALERT_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
+const ALERT_RULE_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 
 const namespaces = {
@@ -98,8 +98,8 @@ const fields = {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
-  ALERT_CONSUMER,
-  ALERT_PRODUCER,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
   ALERT_REASON,
   ALERT_RISK_SCORE,
   ALERT_RULE_AUTHOR,
@@ -152,8 +152,8 @@ export {
   ALERT_ID,
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
-  ALERT_CONSUMER,
-  ALERT_PRODUCER,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
   ALERT_REASON,
   ALERT_RISK_SCORE,
   ALERT_STATUS,

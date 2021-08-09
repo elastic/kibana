@@ -12,8 +12,8 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
-  ALERT_CONSUMER,
-  ALERT_PRODUCER,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -363,7 +363,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "${ALERT_CONSUMER}": Array [
+            "${ALERT_RULE_CONSUMER}": Array [
               "apm",
             ],
             "${ALERT_DURATION}": Array [
@@ -378,7 +378,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_PRODUCER}": Array [
+            "${ALERT_RULE_PRODUCER}": Array [
               "apm",
             ],
             "${ALERT_STATUS}": Array [
@@ -439,7 +439,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "${ALERT_CONSUMER}": Array [
+            "${ALERT_RULE_CONSUMER}": Array [
               "apm",
             ],
             "${ALERT_DURATION}": Array [
@@ -454,7 +454,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_PRODUCER}": Array [
+            "${ALERT_RULE_PRODUCER}": Array [
               "apm",
             ],
             "${ALERT_STATUS}": Array [
@@ -555,10 +555,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_CONSUMER}": Array [
+            "${ALERT_RULE_CONSUMER}": Array [
               "apm",
             ],
-            "${ALERT_PRODUCER}": Array [
+            "${ALERT_RULE_PRODUCER}": Array [
               "apm",
             ],
             "${ALERT_STATUS}": Array [

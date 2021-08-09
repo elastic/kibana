@@ -192,9 +192,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.duration.us": 0,
               "kibana.alert.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
-              "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.name": "name",
-              "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
@@ -206,6 +204,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "tags": Array [
                 "tags",
               ],
+              "undefined": "consumer",
             },
             Object {
               "@timestamp": "2021-06-16T09:01:00.000Z",
@@ -214,9 +213,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.duration.us": 0,
               "kibana.alert.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
-              "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.name": "name",
-              "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
@@ -228,6 +225,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "tags": Array [
                 "tags",
               ],
+              "undefined": "consumer",
             },
           ]
         `);
