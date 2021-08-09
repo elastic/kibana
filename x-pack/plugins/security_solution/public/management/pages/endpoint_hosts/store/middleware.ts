@@ -94,7 +94,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     };
     return [indexPattern];
   }
-  // eslint-disable-next-line complexity
   return (store) => (next) => async (action) => {
     next(action);
 
@@ -108,152 +107,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       isOnEndpointPage(getState()) &&
       hasSelectedEndpoint(getState()) !== true
     ) {
-      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-      let endpointResponse;
-
-      try {
-        const decodedQuery: Query = searchBarQuery(getState());
-
-        endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
-          body: JSON.stringify({
-            paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-            filters: { kql: decodedQuery.query },
-          }),
-        });
-        endpointResponse.request_page_index = Number(pageIndex);
-
-        dispatch({
-          type: 'serverReturnedEndpointList',
-          payload: endpointResponse,
-        });
-
-        loadEndpointsPendingActions(store);
-
-        try {
-          const endpointsTotalCount = await endpointsTotal(coreStart.http);
-          dispatch({
-            type: 'serverReturnedEndpointsTotal',
-            payload: endpointsTotalCount,
-          });
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnEndpointsTotal',
-            payload: error,
-          });
-        }
-
-        try {
-          const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
-          dispatch({
-            type: 'serverReturnedAgenstWithEndpointsTotal',
-            payload: agentsWithEndpoint.total,
-          });
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnAgenstWithEndpointsTotal',
-            payload: error,
-          });
-        }
-
-        try {
-          const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-            coreStart.http,
-            endpointResponse.hosts,
-            nonExistingPolicies(getState())
-          );
-          if (ingestPolicies?.packagePolicy !== undefined) {
-            dispatch({
-              type: 'serverReturnedEndpointNonExistingPolicies',
-              payload: ingestPolicies.packagePolicy,
-            });
-          }
-          if (ingestPolicies?.agentPolicy !== undefined) {
-            dispatch({
-              type: 'serverReturnedEndpointAgentPolicies',
-              payload: ingestPolicies.agentPolicy,
-            });
-          }
-        } catch (error) {
-          // TODO should handle the error instead of logging it to the browser
-          // Also this is an anti-pattern we shouldn't use
-          // Ignore Errors, since this should not hinder the user's ability to use the UI
-          logError(error);
-        }
-      } catch (error) {
-        dispatch({
-          type: 'serverFailedToReturnEndpointList',
-          payload: error,
-        });
-      }
-
-      // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0) {
-        try {
-          const indexPatterns = await fetchIndexPatterns();
-          if (indexPatterns !== undefined) {
-            dispatch({
-              type: 'serverReturnedMetadataPatterns',
-              payload: indexPatterns,
-            });
-          }
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnMetadataPatterns',
-            payload: error,
-          });
-        }
-      }
-
-      // No endpoints, so we should check to see if there are policies for onboarding
-      if (endpointResponse && endpointResponse.hosts.length === 0) {
-        const http = coreStart.http;
-
-        // The original query to the list could have had an invalid param (ex. invalid page_size),
-        // so we check first if endpoints actually do exist before pulling in data for the onboarding
-        // messages.
-        if (await doEndpointsExist(http)) {
-          return;
-        }
-
-        dispatch({
-          type: 'serverReturnedEndpointExistValue',
-          payload: false,
-        });
-
-        try {
-          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
-            http,
-            {
-              query: {
-                perPage: 50, // Since this is an oboarding flow, we'll cap at 50 policies.
-                page: 1,
-              },
-            }
-          );
-
-          dispatch({
-            type: 'serverReturnedPoliciesForOnboarding',
-            payload: {
-              policyItems: policyDataResponse.items,
-            },
-          });
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnPoliciesForOnboarding',
-            payload: error.body ?? error,
-          });
-          return;
-        }
-      } else {
-        dispatch({
-          type: 'serverCancelledPolicyItemsLoading',
-        });
-
-        dispatch({
-          type: 'serverReturnedEndpointExistValue',
-          payload: true,
-        });
-      }
+      endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
     }
 
     // Endpoint Details
@@ -507,6 +361,164 @@ const loadEndpointsPendingActions = async ({
     logError(error);
   }
 };
+
+async function endpointDetailsListMiddleware({
+  store,
+  coreStart,
+  fetchIndexPatterns,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: CoreStart;
+  fetchIndexPatterns: () => Promise<IIndexPattern[]>;
+}) {
+  const { getState, dispatch } = store;
+
+  const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
+  let endpointResponse;
+
+  try {
+    const decodedQuery: Query = searchBarQuery(getState());
+
+    endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
+      body: JSON.stringify({
+        paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+        filters: { kql: decodedQuery.query },
+      }),
+    });
+    endpointResponse.request_page_index = Number(pageIndex);
+
+    dispatch({
+      type: 'serverReturnedEndpointList',
+      payload: endpointResponse,
+    });
+
+    loadEndpointsPendingActions(store);
+
+    try {
+      const endpointsTotalCount = await endpointsTotal(coreStart.http);
+      dispatch({
+        type: 'serverReturnedEndpointsTotal',
+        payload: endpointsTotalCount,
+      });
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnEndpointsTotal',
+        payload: error,
+      });
+    }
+
+    try {
+      const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
+      dispatch({
+        type: 'serverReturnedAgenstWithEndpointsTotal',
+        payload: agentsWithEndpoint.total,
+      });
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnAgenstWithEndpointsTotal',
+        payload: error,
+      });
+    }
+
+    try {
+      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+        coreStart.http,
+        endpointResponse.hosts,
+        nonExistingPolicies(getState())
+      );
+      if (ingestPolicies?.packagePolicy !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointNonExistingPolicies',
+          payload: ingestPolicies.packagePolicy,
+        });
+      }
+      if (ingestPolicies?.agentPolicy !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointAgentPolicies',
+          payload: ingestPolicies.agentPolicy,
+        });
+      }
+    } catch (error) {
+      // TODO should handle the error instead of logging it to the browser
+      // Also this is an anti-pattern we shouldn't use
+      // Ignore Errors, since this should not hinder the user's ability to use the UI
+      logError(error);
+    }
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointList',
+      payload: error,
+    });
+  }
+
+  // get index pattern and fields for search bar
+  if (patterns(getState()).length === 0) {
+    try {
+      const indexPatterns = await fetchIndexPatterns();
+      if (indexPatterns !== undefined) {
+        dispatch({
+          type: 'serverReturnedMetadataPatterns',
+          payload: indexPatterns,
+        });
+      }
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnMetadataPatterns',
+        payload: error,
+      });
+    }
+  }
+
+  // No endpoints, so we should check to see if there are policies for onboarding
+  if (endpointResponse && endpointResponse.hosts.length === 0) {
+    const http = coreStart.http;
+
+    // The original query to the list could have had an invalid param (ex. invalid page_size),
+    // so we check first if endpoints actually do exist before pulling in data for the onboarding
+    // messages.
+    if (await doEndpointsExist(http)) {
+      return;
+    }
+
+    dispatch({
+      type: 'serverReturnedEndpointExistValue',
+      payload: false,
+    });
+
+    try {
+      const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
+        http,
+        {
+          query: {
+            perPage: 50, // Since this is an oboarding flow, we'll cap at 50 policies.
+            page: 1,
+          },
+        }
+      );
+
+      dispatch({
+        type: 'serverReturnedPoliciesForOnboarding',
+        payload: {
+          policyItems: policyDataResponse.items,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnPoliciesForOnboarding',
+        payload: error.body ?? error,
+      });
+    }
+  } else {
+    dispatch({
+      type: 'serverCancelledPolicyItemsLoading',
+    });
+
+    dispatch({
+      type: 'serverReturnedEndpointExistValue',
+      payload: true,
+    });
+  }
+}
 
 async function endpointDetailsActivityLogPagingMiddleware({
   store,
