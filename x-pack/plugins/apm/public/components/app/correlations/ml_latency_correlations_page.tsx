@@ -61,12 +61,14 @@ interface MlCorrelationsTerms {
 }
 
 interface Props {
-  onChartSelection: BrushEndListener;
-  onClearSelection: () => void;
+  correlationAnalysisEnabled: boolean;
+  onChartSelection?: BrushEndListener;
+  onClearSelection?: () => void;
   selection?: [number, number];
 }
 
 export function MlLatencyCorrelations({
+  correlationAnalysisEnabled,
   onChartSelection,
   onClearSelection,
   selection,
@@ -89,22 +91,24 @@ export function MlLatencyCorrelations({
     }
   );
 
-  const showCorrelationsButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.showCorrelationsButtonLabel',
-    {
-      defaultMessage: 'Analyze correlations',
-    }
-  );
+  // const showCorrelationsButtonLabel = i18n.translate(
+  //   'xpack.apm.transactionDetails.showCorrelationsButtonLabel',
+  //   {
+  //     defaultMessage: 'Analyze correlations',
+  //   }
+  // );
 
-  const hideCorrelationsButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.hideCorrelationsButtonLabel',
-    {
-      defaultMessage: 'Hide correlations',
-    }
-  );
+  // const hideCorrelationsButtonLabel = i18n.translate(
+  //   'xpack.apm.transactionDetails.hideCorrelationsButtonLabel',
+  //   {
+  //     defaultMessage: 'Hide correlations',
+  //   }
+  // );
 
-  const [showCorrelations, setShowCorrelations] = useState(false);
-  const toggleShowCorrelations = () => setShowCorrelations(!showCorrelations);
+  // const [showCorrelations, setShowCorrelations] = useState(
+  //   correlationAnalysisEnabled
+  // );
+  // const toggleShowCorrelations = () => setShowCorrelations(!showCorrelations);
 
   const {
     ccsWarning,
@@ -127,7 +131,7 @@ export function MlLatencyCorrelations({
       start,
       end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      analyzeCorrelations: showCorrelations,
+      analyzeCorrelations: correlationAnalysisEnabled,
     },
   });
 
@@ -147,7 +151,7 @@ export function MlLatencyCorrelations({
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showCorrelations]);
+  }, [correlationAnalysisEnabled]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -331,7 +335,7 @@ export function MlLatencyCorrelations({
                     </EuiButton>
                   </EuiFlexItem>
                 )}
-                {!showCorrelations && (
+                {/* {correlationAnalysisEnabled && !showCorrelations && (
                   <EuiFlexItem grow={false}>
                     <EuiButton fill onClick={toggleShowCorrelations}>
                       {showCorrelations
@@ -339,7 +343,7 @@ export function MlLatencyCorrelations({
                         : showCorrelationsButtonLabel}
                     </EuiButton>
                   </EuiFlexItem>
-                )}
+                )} */}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -357,7 +361,7 @@ export function MlLatencyCorrelations({
         </>
       ) : null}
 
-      {showCorrelations && (
+      {correlationAnalysisEnabled && (
         <>
           <EuiSpacer size="s" />
           <EuiTitle size="xs">
