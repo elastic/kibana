@@ -212,7 +212,24 @@
               "((element: HTMLDivElement) => () => void) | undefined"
             ],
             "path": "src/core/public/chrome/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ChromeHelpExtension.content.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "HTMLDivElement"
+                ],
+                "path": "src/core/public/chrome/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2157,7 +2174,7 @@
         "description": [],
         "signature": [
           "CommonProps",
-          " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; }"
+          " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; 'aria-current'?: boolean | \"date\" | \"location\" | \"page\" | \"true\" | \"false\" | \"step\" | \"time\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,

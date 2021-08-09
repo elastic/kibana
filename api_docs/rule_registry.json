@@ -505,7 +505,7 @@
             "description": [],
             "signature": [
               "(feature: ",
-              "ALERTS_CONSUMERS",
+              "AlertConsumers",
               ", alias: string, initialize: () => Promise<void>) => ",
               {
                 "pluginId": "ruleRegistry",
@@ -526,7 +526,7 @@
                 "label": "feature",
                 "description": [],
                 "signature": [
-                  "ALERTS_CONSUMERS"
+                  "AlertConsumers"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index.ts",
                 "deprecated": false,
@@ -659,7 +659,9 @@
         "label": "createLifecycleRuleTypeFactory",
         "description": [],
         "signature": [
-          "({ logger, ruleDataClient, }: { ruleDataClient: ",
+          "({ logger, ruleDataClient, }: { logger: ",
+          "Logger",
+          "; ruleDataClient: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -667,8 +669,6 @@
             "section": "def-server.RuleDataClient",
             "text": "RuleDataClient"
           },
-          "; logger: ",
-          "Logger",
           "; }) => <TParams extends Record<string, unknown>, TAlertInstanceContext extends { [x: string]: unknown; }, TServices extends { alertWithLifecycle: ",
           {
             "pluginId": "ruleRegistry",
@@ -677,7 +677,7 @@
             "section": "def-server.LifecycleAlertService",
             "text": "LifecycleAlertService"
           },
-          "<TAlertInstanceContext, string>; }>(type: ",
+          "<Record<string, any>, TAlertInstanceContext, string>; }>(type: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -685,7 +685,7 @@
             "section": "def-server.AlertTypeWithExecutor",
             "text": "AlertTypeWithExecutor"
           },
-          "<TParams, TAlertInstanceContext, TServices>) => ",
+          "<Record<string, any>, TParams, TAlertInstanceContext, TServices>) => ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -693,7 +693,7 @@
             "section": "def-server.AlertTypeWithExecutor",
             "text": "AlertTypeWithExecutor"
           },
-          "<TParams, TAlertInstanceContext, any>"
+          "<Record<string, any>, TParams, TAlertInstanceContext, any>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
         "deprecated": false,
@@ -710,6 +710,19 @@
             "children": [
               {
                 "parentPluginId": "ruleRegistry",
+                "id": "def-server.createLifecycleRuleTypeFactory.$1.loggerruleDataClient.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "ruleRegistry",
                 "id": "def-server.createLifecycleRuleTypeFactory.$1.loggerruleDataClient.ruleDataClient",
                 "type": "Object",
                 "tags": [],
@@ -723,19 +736,6 @@
                     "section": "def-server.RuleDataClient",
                     "text": "RuleDataClient"
                   }
-                ],
-                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.createLifecycleRuleTypeFactory.$1.loggerruleDataClient.logger",
-                "type": "Object",
-                "tags": [],
-                "label": "logger",
-                "description": [],
-                "signature": [
-                  "Logger"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
                 "deprecated": false
@@ -764,7 +764,15 @@
           },
           "; logger: ",
           "Logger",
-          "; }) => <TParams extends Record<string, unknown>, TAlertInstanceContext extends { [x: string]: unknown; }, TServices extends { alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>; findAlerts: PersistenceAlertQueryService; }>(type: ",
+          "; }) => <TState extends Record<string, unknown>, TParams extends Record<string, unknown>, TServices extends ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.PersistenceServices",
+            "text": "PersistenceServices"
+          },
+          "<TAlertInstanceContext>, TAlertInstanceContext extends { [x: string]: unknown; } = {}>(type: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -772,7 +780,7 @@
             "section": "def-server.AlertTypeWithExecutor",
             "text": "AlertTypeWithExecutor"
           },
-          "<TParams, TAlertInstanceContext, TServices>) => { executor: (options: ",
+          "<TState, TParams, TAlertInstanceContext, TServices>) => { executor: (options: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -780,7 +788,7 @@
             "section": "def-server.AlertExecutorOptions",
             "text": "AlertExecutorOptions"
           },
-          "<TParams, Record<string, unknown>, { [x: string]: unknown; }, TAlertInstanceContext, never> & { services: any; }) => Promise<any>; id: string; name: string; validate?: { params?: ",
+          "<TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, never> & { services: TServices; }) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
           "AlertTypeParamsValidator",
           "<TParams> | undefined; } | undefined; actionGroups: ",
           {
@@ -1096,7 +1104,7 @@
             "signature": [
               "(alert: { id: string; fields: Record<string, unknown> & Partial<Pick<OutputOf<",
               "Optional",
-              "<{ readonly \"kibana.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.alert.producer\" | \"kibana.alert.owner\" | \"kibana.alert.id\" | \"kibana.alert.uuid\" | \"kibana.alert.start\" | \"kibana.alert.end\" | \"kibana.alert.duration.us\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.reason\" | \"kibana.space_ids\">>, \"tags\" | \"@timestamp\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.alert.producer\" | \"kibana.alert.owner\" | \"kibana.alert.uuid\" | \"kibana.alert.start\" | \"kibana.alert.end\" | \"kibana.alert.duration.us\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.reason\" | \"kibana.space_ids\">>; }) => Pick<",
+              "<{ readonly \"kibana.alert.owner\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.risk_score_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.id\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.version\">>, \"tags\" | \"@timestamp\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.id\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.owner\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.space_ids\" | \"kibana.version\">>; }) => Pick<",
               "AlertInstance",
               "<InstanceState, InstanceContext, ActionGroupIds>, \"getState\" | \"replaceState\" | \"scheduleActions\" | \"scheduleActionsWithSubGroup\">"
             ],
@@ -1114,9 +1122,80 @@
                 "signature": [
                   "{ id: string; fields: Record<string, unknown> & Partial<Pick<OutputOf<",
                   "Optional",
-                  "<{ readonly \"kibana.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.alert.producer\" | \"kibana.alert.owner\" | \"kibana.alert.id\" | \"kibana.alert.uuid\" | \"kibana.alert.start\" | \"kibana.alert.end\" | \"kibana.alert.duration.us\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.reason\" | \"kibana.space_ids\">>, \"tags\" | \"@timestamp\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.alert.producer\" | \"kibana.alert.owner\" | \"kibana.alert.uuid\" | \"kibana.alert.start\" | \"kibana.alert.end\" | \"kibana.alert.duration.us\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.reason\" | \"kibana.space_ids\">>; }"
+                  "<{ readonly \"kibana.alert.owner\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.risk_score_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.id\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.version\">>, \"tags\" | \"@timestamp\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.id\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.owner\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.space_ids\" | \"kibana.version\">>; }"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.PersistenceServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "PersistenceServices",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.PersistenceServices",
+            "text": "PersistenceServices"
+          },
+          "<TAlertInstanceContext>"
+        ],
+        "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.PersistenceServices.alertWithPersistence",
+            "type": "Function",
+            "tags": [],
+            "label": "alertWithPersistence",
+            "description": [],
+            "signature": [
+              "(alerts: { id: string; fields: Record<string, unknown>; }[], refresh: ",
+              "Refresh",
+              ") => Promise<",
+              "ApiResponse",
+              "<",
+              "BulkResponse",
+              ", unknown>>"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.alerts",
+                "type": "Array",
+                "tags": [],
+                "label": "alerts",
+                "description": [],
+                "signature": [
+                  "{ id: string; fields: Record<string, unknown>; }[]"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.refresh",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "refresh",
+                "description": [],
+                "signature": [
+                  "boolean | \"wait_for\""
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false
               }
             ]
@@ -1148,8 +1227,8 @@
             ],
             "path": "x-pack/plugins/rule_registry/server/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1249,12 +1328,86 @@
             "section": "def-server.AlertType",
             "text": "AlertType"
           },
-          "<TParams, TParams, Record<string, unknown>, { [x: string]: unknown; }, TAlertInstanceContext, string, string>, \"id\" | \"name\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\"> & { executor: ",
+          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string>, \"id\" | \"name\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\"> & { executor: ",
           "AlertTypeExecutor",
-          "<TParams, TAlertInstanceContext, TServices>; }"
+          "<TState, TParams, TAlertInstanceContext, TServices>; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/types.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.CreatePersistenceRuleTypeFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "CreatePersistenceRuleTypeFactory",
+        "description": [],
+        "signature": [
+          "(options: { ruleDataClient: ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.RuleDataClient",
+            "text": "RuleDataClient"
+          },
+          "; logger: ",
+          "Logger",
+          "; }) => <TState extends Record<string, unknown>, TParams extends Record<string, unknown>, TServices extends ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.PersistenceServices",
+            "text": "PersistenceServices"
+          },
+          "<TAlertInstanceContext>, TAlertInstanceContext extends { [x: string]: unknown; } = {}>(type: ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.AlertTypeWithExecutor",
+            "text": "AlertTypeWithExecutor"
+          },
+          "<TState, TParams, TAlertInstanceContext, TServices>) => ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.AlertTypeWithExecutor",
+            "text": "AlertTypeWithExecutor"
+          },
+          "<TState, TParams, TAlertInstanceContext, TServices>"
+        ],
+        "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ ruleDataClient: ",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleDataClient",
+                "text": "RuleDataClient"
+              },
+              "; logger: ",
+              "Logger",
+              "; }"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1265,12 +1418,32 @@
         "label": "LifecycleAlertService",
         "description": [],
         "signature": [
-          "(alert: { id: string; fields: Record<string, unknown>; }) => Pick<",
+          "(alert: { id: string; fields: Record<string, unknown> & Partial<Pick<OutputOf<",
+          "Optional",
+          "<{ readonly \"kibana.alert.owner\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.risk_score_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.id\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.version\">>, \"tags\" | \"@timestamp\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.id\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.owner\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.space_ids\" | \"kibana.version\">>; }) => Pick<",
           "AlertInstance",
-          "<{ [x: string]: unknown; }, TAlertInstanceContext, TActionGroupIds>, \"getState\" | \"replaceState\" | \"scheduleActions\" | \"scheduleActionsWithSubGroup\">"
+          "<InstanceState, InstanceContext, ActionGroupIds>, \"getState\" | \"replaceState\" | \"scheduleActions\" | \"scheduleActionsWithSubGroup\">"
         ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+        "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.alert",
+            "type": "Object",
+            "tags": [],
+            "label": "alert",
+            "description": [],
+            "signature": [
+              "{ id: string; fields: Record<string, unknown> & Partial<Pick<OutputOf<",
+              "Optional",
+              "<{ readonly \"kibana.alert.owner\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.risk_score_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.id\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.version\">>, \"tags\" | \"@timestamp\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.id\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.owner\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.space_ids\" | \"kibana.version\">>; }"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1295,6 +1468,127 @@
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.options",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertExecutorOptions",
+                "text": "AlertExecutorOptions"
+              },
+              "<Params, State, InstanceState, InstanceContext, ActionGroupIds>, \"name\" | \"params\" | \"tags\" | \"spaceId\" | \"rule\" | \"createdBy\" | \"updatedBy\" | \"previousStartedAt\" | \"state\" | \"alertId\" | \"namespace\" | \"startedAt\"> & { services: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertServices",
+                "text": "AlertServices"
+              },
+              "<InstanceState, InstanceContext, ActionGroupIds> & ",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.LifecycleAlertServices",
+                "text": "LifecycleAlertServices"
+              },
+              "<InstanceState, InstanceContext, ActionGroupIds>; }"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.PersistenceAlertQueryService",
+        "type": "Type",
+        "tags": [],
+        "label": "PersistenceAlertQueryService",
+        "description": [],
+        "signature": [
+          "(query: ",
+          "SearchRequest",
+          ") => Promise<Record<string, unknown>[]>"
+        ],
+        "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "SearchRequest"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.PersistenceAlertService",
+        "type": "Type",
+        "tags": [],
+        "label": "PersistenceAlertService",
+        "description": [],
+        "signature": [
+          "(alerts: { id: string; fields: Record<string, unknown>; }[], refresh: ",
+          "Refresh",
+          ") => Promise<",
+          "ApiResponse",
+          "<",
+          "BulkResponse",
+          ", unknown>>"
+        ],
+        "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.alerts",
+            "type": "Array",
+            "tags": [],
+            "label": "alerts",
+            "description": [],
+            "signature": [
+              "{ id: string; fields: Record<string, unknown>; }[]"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [],
+            "signature": [
+              "boolean | \"wait_for\""
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1391,11 +1685,10 @@
           ],
           "path": "x-pack/plugins/rule_registry/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "ruleRegistry",
-              "id": "def-server.req",
+              "id": "def-server.RuleRegistryPluginStartContract.getRacClientWithRequest.$1",
               "type": "Object",
               "tags": [],
               "label": "req",
@@ -1411,9 +1704,11 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/plugins/rule_registry/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "ruleRegistry",
@@ -1452,7 +1747,7 @@
         "signature": [
           "(input: unknown) => OutputOf<",
           "Optional",
-          "<{ readonly \"kibana.alert.owner\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.alert.producer\" | \"kibana.alert.owner\" | \"kibana.alert.id\" | \"kibana.alert.uuid\" | \"kibana.alert.start\" | \"kibana.alert.end\" | \"kibana.alert.duration.us\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.reason\" | \"kibana.space_ids\">>"
+          "<{ readonly \"kibana.alert.owner\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.consumers\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.risk_score_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.severity_mapping\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"kibana.consumers\" | \"ecs.version\" | \"event.action\" | \"rule.category\" | \"rule.name\" | \"rule.uuid\" | \"kibana.alert.action_group\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.evaluation.threshold\" | \"kibana.alert.evaluation.value\" | \"kibana.alert.id\" | \"kibana.alert.producer\" | \"kibana.alert.reason\" | \"kibana.alert.rule.author\" | \"kibana.alert.rule.consumers\" | \"kibana.alert.rule.created_at\" | \"kibana.alert.rule.created_by\" | \"kibana.alert.rule.description\" | \"kibana.alert.rule.enabled\" | \"kibana.alert.rule.from\" | \"kibana.alert.rule.id\" | \"kibana.alert.rule.interval\" | \"kibana.alert.rule.license\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.note\" | \"kibana.alert.rule.references\" | \"kibana.alert.rule.risk_score\" | \"kibana.alert.rule.risk_score_mapping\" | \"kibana.alert.rule.rule_id\" | \"kibana.alert.rule.rule_name_override\" | \"kibana.alert.rule.severity\" | \"kibana.alert.rule.severity_mapping\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.to\" | \"kibana.alert.rule.type\" | \"kibana.alert.rule.updated_at\" | \"kibana.alert.rule.updated_by\" | \"kibana.alert.rule.version\" | \"kibana.alert.start\" | \"kibana.alert.severity.level\" | \"kibana.alert.severity.value\" | \"kibana.alert.status\" | \"kibana.alert.system_status\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_reason\" | \"kibana.alert.workflow_status\" | \"kibana.alert.workflow_user\" | \"kibana.version\">>"
         ],
         "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
         "deprecated": false,

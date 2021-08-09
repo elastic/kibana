@@ -2143,7 +2143,23 @@
                   "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
                 ],
                 "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "features",
+                    "id": "def-server.licenseType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "licenseType",
+                    "description": [],
+                    "signature": [
+                      "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                    ],
+                    "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           }
