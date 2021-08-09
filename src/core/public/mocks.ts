@@ -39,7 +39,6 @@ export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { applicationServiceMock } from './application/application_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
-export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 function createCoreSetupMock({
   basePath = '',
