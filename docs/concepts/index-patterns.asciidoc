@@ -42,7 +42,7 @@ If you loaded your own data, follow these steps to create an index pattern.
 image:management/index-patterns/images/create-index-pattern.png["Create index pattern"]
 
 . Start typing in the *Index pattern* field, and {kib} looks for the names of
-{es} indices that match your input.
+indices, data streams, and aliases that match your input.
 +
 ** To match multiple sources, use a wildcard (*). For example, `filebeat-*` matches
 `filebeat-apache-a`, `filebeat-apache-b`, and so on.
