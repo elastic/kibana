@@ -7,7 +7,7 @@
  */
 
 import { identity } from 'lodash';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
 import { ExpressionValue } from '../expression_types/types';

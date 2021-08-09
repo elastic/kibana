@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
 import { MANAGEMENT_APP_ID } from './contants';
 

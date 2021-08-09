@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 
 import { ExpressionTypeDefinition } from '../types';

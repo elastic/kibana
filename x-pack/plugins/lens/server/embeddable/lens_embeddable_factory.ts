@@ -6,7 +6,7 @@
  */
 
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { DOC_TYPE } from '../../common';
 import {
   commonRemoveTimezoneDateHistogramParam,

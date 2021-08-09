@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ManagementAppLocator } from 'src/plugins/management/common';
 import {
   LocatorPublic,

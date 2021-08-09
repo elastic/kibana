@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDependencies } from './locator';
 import type { LocatorDefinition, LocatorPublic, ILocatorClient } from './types';
 import { Locator } from './locator';

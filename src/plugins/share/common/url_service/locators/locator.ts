@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from 'kibana/server';
 import { DependencyList } from 'react';
 import type { PersistableState } from 'src/plugins/kibana_utils/common';

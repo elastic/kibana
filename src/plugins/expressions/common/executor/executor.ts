@@ -10,7 +10,7 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';

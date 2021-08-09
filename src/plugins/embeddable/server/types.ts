@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { PersistableState, PersistableStateDefinition } from '../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../common/types';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from 'src/plugins/share/public';
 import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';

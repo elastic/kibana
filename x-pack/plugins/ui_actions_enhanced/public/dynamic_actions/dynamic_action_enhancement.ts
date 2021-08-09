@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { EnhancementRegistryDefinition } from '../../../../../src/plugins/embeddable/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { DynamicActionsState } from '../../../ui_actions_enhanced/public';

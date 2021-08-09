@@ -7,7 +7,7 @@
 
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,

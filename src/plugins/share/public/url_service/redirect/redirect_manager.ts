@@ -9,7 +9,7 @@
 import type { CoreSetup } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { migrateToLatest } from '../../../../kibana_utils/common';
 import type { UrlService } from '../../../common/url_service';
 import { render } from './render';

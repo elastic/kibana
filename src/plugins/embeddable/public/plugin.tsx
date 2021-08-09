@@ -9,7 +9,7 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';

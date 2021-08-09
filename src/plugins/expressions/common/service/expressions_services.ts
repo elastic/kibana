@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
 import type { IExecutionContextContainer } from 'src/core/public';

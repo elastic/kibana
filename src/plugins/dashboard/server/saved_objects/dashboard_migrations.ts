@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '@kbn/common-utils';
+import { Serializable } from '@kbn/utility-types';
 import { get, flow, mapValues } from 'lodash';
 import {
   SavedObjectAttributes,

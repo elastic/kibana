@@ -7,7 +7,7 @@
  */
 
 import { mergeWith } from 'lodash';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { MigrateFunctionsObject, MigrateFunction } from './types';
 
 export const mergeMigrationFunctionMaps = (

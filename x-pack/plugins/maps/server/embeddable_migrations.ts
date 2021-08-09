@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { moveAttribution } from '../common/migrations/move_attribution';
 

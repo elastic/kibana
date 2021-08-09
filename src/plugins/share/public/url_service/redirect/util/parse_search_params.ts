@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import type { RedirectOptions } from '../redirect_manager';
 

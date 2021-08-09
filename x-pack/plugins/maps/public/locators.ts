@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import rison from 'rison-node';
-import type { SerializableRecord } from '@kbn/common-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   TimeRange,
   Filter,
