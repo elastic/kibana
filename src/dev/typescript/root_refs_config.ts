@@ -10,6 +10,7 @@ import Path from 'path';
 import Fs from 'fs/promises';
 
 import { REPO_ROOT, ToolingLog, createFailError } from '@kbn/dev-utils';
+import dedent from 'dedent';
 
 import { PROJECTS } from './projects';
 import { Project } from './project';
@@ -82,6 +83,18 @@ export async function validateRootRefsConfig(log: ToolingLog) {
   }
 }
 
+function generateTsConfig(refs: string[]) {
+  return dedent`
+    // This file is automatically updated when you run \`node scripts/build_ts_refs\` and validated to be up-to-date by CI
+    {
+      "include": [],
+      "references": [
+${refs.map((p) => `        { "path": ${JSON.stringify(p)} },`).join('\n')}
+      ]
+    }
+  `;
+}
+
 export async function updateRootRefsConfig(log: ToolingLog) {
   const { refs, addedRefs, removedRefs } = await analyzeRootRefsConfig(log);
 
@@ -97,15 +110,5 @@ export async function updateRootRefsConfig(log: ToolingLog) {
     log.info('Removing ref to composite project', removedRef, 'to root refs config file');
   }
 
-  await Fs.writeFile(
-    ROOT_REFS_CONFIG_PATH,
-    JSON.stringify(
-      {
-        include: [],
-        references: refs.map((path) => ({ path })),
-      },
-      null,
-      2
-    ) + '\n'
-  );
+  await Fs.writeFile(ROOT_REFS_CONFIG_PATH, generateTsConfig(refs) + '\n');
 }
