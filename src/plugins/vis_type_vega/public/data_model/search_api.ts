@@ -70,17 +70,19 @@ export class SearchAPI {
           getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
 
-        if (this.inspectorAdapters) {
-          requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
-            ...request,
-            searchSessionId: this.searchSessionId,
-          });
-          requestResponders[requestId].json(requestParams.body);
-        }
-
         return from(
           extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, request.index)
         ).pipe(
+          tap((params) => {
+            /** inspect request data **/
+            if (this.inspectorAdapters) {
+              requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
+                ...request,
+                searchSessionId: this.searchSessionId,
+              });
+              requestResponders[requestId].json(params.body);
+            }
+          }),
           switchMap((params) =>
             search
               .search(
