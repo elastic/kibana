@@ -60,7 +60,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
 
   it('formats successful response', async () => {
     const clientResponse = {
-      savedObject: {
+      saved_object: {
         id: 'logstash-*',
         title: 'logstash-*',
         type: 'logstash-type',

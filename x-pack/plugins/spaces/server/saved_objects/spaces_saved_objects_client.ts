@@ -263,7 +263,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @param id - The ID of the SavedObject to retrieve
    * @param {object} [options={}]
    * @property {string} [options.namespace]
-   * @returns {promise} - { savedObject, outcome }
+   * @returns {promise} - { saved_object, outcome }
    */
   public async resolve<T = unknown>(
     type: string,

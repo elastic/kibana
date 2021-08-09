@@ -1041,7 +1041,7 @@ export class SavedObjectsRepository {
    * @param {string} id
    * @param {object} [options={}]
    * @property {string} [options.namespace]
-   * @returns {promise} - { savedObject, outcome }
+   * @returns {promise} - { saved_object, outcome }
    */
   async resolve<T = unknown>(
     type: string,
@@ -1138,7 +1138,7 @@ export class SavedObjectsRepository {
     if (foundExactMatch && foundAliasMatch) {
       result = {
         // @ts-expect-error MultiGetHit._source is optional
-        savedObject: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
+        saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
         outcome: 'conflict',
         aliasTargetId: legacyUrlAlias.targetId,
       };
@@ -1146,13 +1146,13 @@ export class SavedObjectsRepository {
     } else if (foundExactMatch) {
       result = {
         // @ts-expect-error MultiGetHit._source is optional
-        savedObject: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
+        saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
         outcome: 'exactMatch',
       };
       outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH;
     } else if (foundAliasMatch) {
       result = {
-        savedObject: getSavedObjectFromSource(
+        saved_object: getSavedObjectFromSource(
           this._registry,
           type,
           legacyUrlAlias.targetId,
@@ -2105,7 +2105,7 @@ export class SavedObjectsRepository {
     try {
       const object = await this.get<T>(type, id, options);
       await this.incrementResolveOutcomeStats(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-      return { savedObject: object, outcome: 'exactMatch' };
+      return { saved_object: object, outcome: 'exactMatch' };
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         await this.incrementResolveOutcomeStats(REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);

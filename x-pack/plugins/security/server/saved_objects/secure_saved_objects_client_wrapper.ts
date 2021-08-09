@@ -382,13 +382,13 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.RESOLVE,
-        savedObject: { type, id: resolveResult.savedObject.id },
+        savedObject: { type, id: resolveResult.saved_object.id },
       })
     );
 
     return {
       ...resolveResult,
-      savedObject: await this.redactSavedObjectNamespaces(resolveResult.savedObject, [
+      saved_object: await this.redactSavedObjectNamespaces(resolveResult.saved_object, [
         options.namespace,
       ]),
     };

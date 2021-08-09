@@ -153,7 +153,7 @@ describe('SavedObjectsClient', () => {
     beforeEach(() => {
       beforeEach(() => {
         http.fetch.mockResolvedValue({
-          savedObject: doc,
+          saved_object: doc,
           outcome: 'conflict',
           aliasTargetId: 'another-id',
         } as SavedObjectsResolveResponse);
