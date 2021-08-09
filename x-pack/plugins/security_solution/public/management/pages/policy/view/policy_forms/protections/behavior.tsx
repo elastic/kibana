@@ -25,7 +25,12 @@ import { SecurityPageName } from '../../../../../../app/types';
 export const BehaviorProtection = React.memo(() => {
   const OSes: Immutable<BehaviorProtectionOSes[]> = [OS.windows];
   const protection = 'behavior_protection';
-  const protectionLabel = 'behavior';
+  const protectionLabel = i18n.translate(
+    'xpack.securitySolution.endpoint.policy.protections.behavior',
+    {
+      defaultMessage: 'Behaviour protections',
+    }
+  );
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.behavior_protection', {

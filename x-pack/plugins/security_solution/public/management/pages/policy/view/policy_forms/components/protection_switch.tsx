@@ -35,7 +35,6 @@ export const ProtectionSwitch = React.memo(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const dispatch = useDispatch<(action: AppAction) => void>();
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
-    const protectionName = protectionLabel ?? protection;
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -96,10 +95,9 @@ export const ProtectionSwitch = React.memo(
     return (
       <EuiSwitch
         label={i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {
-          defaultMessage:
-            '{protectionName} protections {mode, select, true {enabled} false {disabled}}',
+          defaultMessage: '{protectionLabel} {mode, select, true {enabled} false {disabled}}',
           values: {
-            protectionName: protectionName.charAt(0).toUpperCase() + protectionName.substring(1),
+            protectionLabel,
             mode: selected !== ProtectionModes.off,
           },
         })}
