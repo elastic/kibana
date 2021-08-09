@@ -21,7 +21,6 @@ interface ServiceLinkProps {
   agentName?: AgentName;
   query?: TypeOf<ApmRoutes, '/services/:serviceName/overview'>['query'];
   serviceName: string;
-  onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
 }
 
 export function ServiceLink({
