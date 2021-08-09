@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../translations';
 

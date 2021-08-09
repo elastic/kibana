@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
-import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-
+import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../translations';
 
 interface AddExceptionProps {
   disabled?: boolean;
-  onClick: (type: ExceptionListType) => void;
+  onClick: () => void;
 }
 
 const AddExceptionComponent: React.FC<AddExceptionProps> = ({ disabled, onClick }) => {
