@@ -209,8 +209,8 @@ describe('bulkUpdate()', () => {
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized for fake.rule and apm"`);
-        expect(auditLogger.log.mock.calls).toHaveLength(2);
-        expect(auditLogger.log.mock.calls[0][0]).toEqual({
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
           message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
           event: {
             action: 'alert_update',
@@ -223,7 +223,7 @@ describe('bulkUpdate()', () => {
             message: 'Unauthorized for fake.rule and apm',
           },
         });
-        expect(auditLogger.log.mock.calls[1][0]).toEqual({
+        expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
           message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
           event: {
             action: 'alert_update',
@@ -422,8 +422,8 @@ describe('bulkUpdate()', () => {
                 Error: Error: Unauthorized for fake.rule and apm"
               `);
 
-        expect(auditLogger.log.mock.calls).toHaveLength(2);
-        expect(auditLogger.log.mock.calls[0][0]).toEqual({
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
           message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
           event: {
             action: 'alert_update',
@@ -436,7 +436,7 @@ describe('bulkUpdate()', () => {
             message: 'Unauthorized for fake.rule and apm',
           },
         });
-        expect(auditLogger.log.mock.calls[1][0]).toEqual({
+        expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
           message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
           event: {
             action: 'alert_update',
