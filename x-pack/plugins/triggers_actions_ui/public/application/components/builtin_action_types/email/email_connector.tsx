@@ -109,7 +109,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     },
   ] as Array<EuiComboBoxOptionOption<unknown>>;
   const [selectedOptions, setSelected] = useState([
-    authOptions.find((opt) => opt.key === authType)!,
+    authType ? authOptions.find((opt) => opt.key === authType)! : authOptions[0],
   ]);
   const onChange = (selectedOptionsList: Array<EuiComboBoxOptionOption<unknown>>) => {
     // We should only get back either 0 or 1 options.
@@ -315,7 +315,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               }
             )
           )}
-          {selectedOptions[0].key === 'basic' ? (
+          {selectedOptions.length > 0 && selectedOptions[0].key === 'basic' ? (
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>
                 <EuiFormRow
@@ -381,7 +381,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
-          {selectedOptions[0].key === 'oauth2' ? (
+          {selectedOptions.length > 0 && selectedOptions[0].key === 'oauth2' ? (
             <>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>

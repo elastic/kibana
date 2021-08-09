@@ -68,7 +68,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   const proxySettings = configurationUtilities.getProxySettings();
   const generalSSLSettings = configurationUtilities.getSSLSettings();
 
-  if (hasAuth && transport.type !== 'OAuth2' && user != null && password != null) {
+  if (hasAuth && transport.type === 'basic' && user != null && password != null) {
     transportConfig.auth = {
       user,
       pass: password,
