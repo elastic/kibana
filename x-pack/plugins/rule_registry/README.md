@@ -124,7 +124,6 @@ The following fields are defined in the technical field component template and s
 - `rule.uuid`: the saved objects id of the rule.
 - `rule.name`: the name of the rule (as specified by the user).
 - `rule.category`: the name of the rule type (as defined by the rule type producer)
-- `kibana.alert.producer`: the producer of the rule type. Usually a Kibana plugin. e.g., `APM`.
 - `kibana.alert.owner`: the feature which produced the alert. Usually a Kibana feature id like `apm`, `siem`...
 - `kibana.alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
 - `kibana.alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.

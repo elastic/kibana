@@ -55,11 +55,39 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
         expect(response.status).to.be(200);
 
-        expect(response.body.avgCpuUsage).to.be(null);
-        expect(response.body.avgErrorRate).to.be(null);
-        expect(response.body.avgMemoryUsage).to.be(null);
-        expect(response.body.transactionStats.avgRequestsPerMinute).to.be(null);
-        expect(response.body.transactionStats.avgTransactionDuration).to.be(null);
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "avgCpuUsage": null,
+            "avgErrorRate": null,
+            "avgMemoryUsage": null,
+            "transactionStats": Object {
+              "avgRequestsPerMinute": null,
+              "avgTransactionDuration": null,
+            },
+          }
+        `);
+      });
+    });
+
+    describe('/api/apm/service-map/backend/{backendName}', () => {
+      it('returns an object with nulls', async () => {
+        const q = querystring.stringify({
+          start: metadata.start,
+          end: metadata.end,
+        });
+        const response = await supertest.get(`/api/apm/service-map/backend/postgres?${q}`);
+
+        expect(response.status).to.be(200);
+
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "avgErrorRate": null,
+            "transactionStats": Object {
+              "avgRequestsPerMinute": null,
+              "avgTransactionDuration": null,
+            },
+          }
+        `);
       });
     });
   });
@@ -241,6 +269,52 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             expect(response.body.elements.length).to.be.greaterThan(1);
           });
         });
+      });
+    });
+
+    describe('/api/apm/service-map/service/{serviceName}', () => {
+      it('returns an object with data', async () => {
+        const q = querystring.stringify({
+          start: metadata.start,
+          end: metadata.end,
+        });
+        const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
+
+        expect(response.status).to.be(200);
+
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "avgCpuUsage": 0.240216666666667,
+            "avgErrorRate": 0,
+            "avgMemoryUsage": 0.202572668763642,
+            "transactionStats": Object {
+              "avgRequestsPerMinute": 5.2,
+              "avgTransactionDuration": 53906.6603773585,
+            },
+          }
+        `);
+      });
+    });
+
+    describe('/api/apm/service-map/backend/{backendName}', () => {
+      it('returns an object with data', async () => {
+        const q = querystring.stringify({
+          start: metadata.start,
+          end: metadata.end,
+        });
+        const response = await supertest.get(`/api/apm/service-map/backend/postgresql?${q}`);
+
+        expect(response.status).to.be(200);
+
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "avgErrorRate": 0,
+            "transactionStats": Object {
+              "avgRequestsPerMinute": 82.9666666666667,
+              "avgTransactionDuration": 18307.583366814,
+            },
+          }
+        `);
       });
     });
   });
