@@ -19,6 +19,7 @@ import { getPageHeaderActions } from '../../../test_helpers';
 
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
+import { DeleteDomainPanel } from './components/delete_domain_panel';
 import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CrawlerOverview } from './crawler_overview';
 import { CrawlerSingleDomain } from './crawler_single_domain';
@@ -51,6 +52,7 @@ describe('CrawlerSingleDomain', () => {
   it('renders', () => {
     const wrapper = shallow(<CrawlerSingleDomain />);
 
+    expect(wrapper.find(DeleteDomainPanel)).toHaveLength(1);
     expect(wrapper.find(EuiCode).render().text()).toContain('https://elastic.co');
     expect(wrapper.prop('pageHeader').pageTitle).toEqual('https://elastic.co');
   });

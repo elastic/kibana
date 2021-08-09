@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCode, EuiSpacer } from '@elastic/eui';
+import { EuiCode, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -20,6 +20,7 @@ import { AppSearchPageTemplate } from '../layout';
 
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
+import { DeleteDomainPanel } from './components/delete_domain_panel';
 import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerSingleDomainLogic } from './crawler_single_domain_logic';
@@ -52,6 +53,19 @@ export const CrawlerSingleDomain: React.FC = () => {
     >
       <CrawlerStatusBanner />
       <EuiSpacer size="l" />
+      <EuiTitle size="s">
+        <h2>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.crawler.singleDomain.deleteDomainTitle',
+            {
+              defaultMessage: 'Delete domain',
+            }
+          )}
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <DeleteDomainPanel />
+      <EuiSpacer size="xl" />
       <EuiCode>{JSON.stringify(domain, null, 2)}</EuiCode>
     </AppSearchPageTemplate>
   );
