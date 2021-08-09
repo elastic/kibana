@@ -29,8 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const searchSessions = getService('searchSessions');
 
-  // Failing: See https://github.com/elastic/kibana/issues/97701
-  describe.skip('save a search sessions with relative time', () => {
+  describe('save a search sessions with relative time', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,

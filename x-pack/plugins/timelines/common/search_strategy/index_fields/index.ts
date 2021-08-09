@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
-import {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IFieldSubType,
-} from '../../../../../../src/plugins/data/common';
+import { IFieldSubType, IndexPatternBase } from '@kbn/es-query';
+import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 import { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
@@ -83,7 +79,7 @@ export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
-export const EMPTY_INDEX_PATTERN: IIndexPattern = {
+export const EMPTY_INDEX_PATTERN: IndexPatternBase = {
   fields: [],
   title: '',
 };

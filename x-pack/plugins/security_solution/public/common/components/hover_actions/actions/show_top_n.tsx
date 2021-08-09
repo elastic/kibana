@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StatefulTopN } from '../../top_n';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -23,17 +23,30 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 interface Props {
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   field: string;
   onClick: () => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
   showTopN: boolean;
+  showTooltip?: boolean;
   timelineId?: string | null;
   value?: string[] | string | null;
 }
 
 export const ShowTopNButton: React.FC<Props> = React.memo(
-  ({ field, onClick, onFilterAdded, ownFocus, showTopN, timelineId, value }) => {
+  ({
+    Component,
+    field,
+    onClick,
+    onFilterAdded,
+    ownFocus,
+    showTooltip = true,
+    showTopN,
+    timelineId,
+    value,
+  }) => {
     const activeScope: SourcererScopeName =
       timelineId === TimelineId.active
         ? SourcererScopeName.timeline
@@ -45,17 +58,44 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         : SourcererScopeName.default;
     const { browserFields, indexPattern } = useSourcererScope(activeScope);
 
+    const button = useMemo(
+      () =>
+        Component ? (
+          <Component
+            aria-label={SHOW_TOP(field)}
+            data-test-subj="show-top-field"
+            iconType="visBarVertical"
+            onClick={onClick}
+            title={SHOW_TOP(field)}
+          >
+            {SHOW_TOP(field)}
+          </Component>
+        ) : (
+          <EuiButtonIcon
+            aria-label={SHOW_TOP(field)}
+            className="securitySolution__hoverActionButton"
+            data-test-subj="show-top-field"
+            iconSize="s"
+            iconType="visBarVertical"
+            onClick={onClick}
+          />
+        ),
+      [Component, field, onClick]
+    );
+
     return showTopN ? (
-      <StatefulTopN
-        browserFields={browserFields}
-        field={field}
-        indexPattern={indexPattern}
-        onFilterAdded={onFilterAdded}
-        timelineId={timelineId ?? undefined}
-        toggleTopN={onClick}
-        value={value}
-      />
-    ) : (
+      <EuiPopover button={button} isOpen={showTopN} closePopover={onClick}>
+        <StatefulTopN
+          browserFields={browserFields}
+          field={field}
+          indexPattern={indexPattern}
+          onFilterAdded={onFilterAdded}
+          timelineId={timelineId ?? undefined}
+          toggleTopN={onClick}
+          value={value}
+        />
+      </EuiPopover>
+    ) : showTooltip ? (
       <EuiToolTip
         content={
           <TooltipWithKeyboardShortcut
@@ -69,15 +109,10 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           />
         }
       >
-        <EuiButtonIcon
-          aria-label={SHOW_TOP(field)}
-          className="securitySolution__hoverActionButton"
-          data-test-subj="show-top-field"
-          iconSize="s"
-          iconType="visBarVertical"
-          onClick={onClick}
-        />
+        {button}
       </EuiToolTip>
+    ) : (
+      button
     );
   }
 );

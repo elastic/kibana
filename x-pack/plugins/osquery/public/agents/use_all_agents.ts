@@ -34,8 +34,7 @@ export const useAllAgents = (
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
-      const policyFragment = osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ');
-      let kuery = `last_checkin_status: online and (${policyFragment})`;
+      let kuery = `${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`;
 
       if (searchValue) {
         kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;

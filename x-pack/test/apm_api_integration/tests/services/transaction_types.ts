@@ -51,8 +51,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(response.body).toMatchInline(`
           Object {
             "transactionTypes": Array [
-              "Worker",
               "request",
+              "Worker",
             ],
           }
         `);

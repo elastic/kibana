@@ -9,10 +9,7 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  createExploratoryViewUrl,
-  SeriesUrl,
-} from '../../../../../../observability/public';
+import { createExploratoryViewUrl } from '../../../../../../observability/public';
 import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
 import {
   isIosAgentName,
@@ -21,6 +18,7 @@ import {
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
@@ -29,13 +27,11 @@ import {
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-function getEnvironmentDefinition(environment?: string) {
+function getEnvironmentDefinition(environment: string) {
   switch (environment) {
     case ENVIRONMENT_ALL.value:
       return { [SERVICE_ENVIRONMENT]: [ALL_VALUES_SELECTED] };
     case ENVIRONMENT_NOT_DEFINED.value:
-    case undefined:
-      return {};
     default:
       return { [SERVICE_ENVIRONMENT]: [environment] };
   }
@@ -47,21 +43,30 @@ export function AnalyzeDataButton() {
   const { urlParams } = useUrlParams();
   const { rangeTo, rangeFrom, environment } = urlParams;
   const basepath = services.http?.basePath.get();
+  const canShowDashboard = services.application?.capabilities.dashboard.show;
 
-  if (isRumAgentName(agentName) || isIosAgentName(agentName)) {
+  if (
+    (isRumAgentName(agentName) || isIosAgentName(agentName)) &&
+    rangeFrom &&
+    canShowDashboard &&
+    rangeTo
+  ) {
     const href = createExploratoryViewUrl(
       {
-        'apm-series': {
-          dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
-          time: { from: rangeFrom, to: rangeTo },
-          reportType: 'kpi-over-time',
-          reportDefinitions: {
-            [SERVICE_NAME]: [serviceName],
-            ...getEnvironmentDefinition(environment),
+        reportType: 'kpi-over-time',
+        allSeries: [
+          {
+            name: `${serviceName}-response-latency`,
+            selectedMetricField: TRANSACTION_DURATION,
+            dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
+            time: { from: rangeFrom, to: rangeTo },
+            reportDefinitions: {
+              [SERVICE_NAME]: [serviceName],
+              ...(environment ? getEnvironmentDefinition(environment) : {}),
+            },
+            operationType: 'average',
           },
-          operationType: 'average',
-          isNew: true,
-        } as SeriesUrl,
+        ],
       },
       basepath
     );

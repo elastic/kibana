@@ -11,6 +11,9 @@ import {
   EuiSpacer,
   EuiLoadingContent,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -128,7 +131,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       isAlert
         ? {
             id: EventsViewType.summaryView,
-            name: i18n.SUMMARY,
+            name: i18n.OVERVIEW,
             content: (
               <>
                 <AlertSummaryView
@@ -137,10 +140,13 @@ const EventDetailsComponent: React.FC<Props> = ({
                     eventId: id,
                     browserFields,
                     timelineId,
+                    title: i18n.DUCOMENT_SUMMARY,
                   }}
                 />
                 {enrichmentCount > 0 && (
                   <ThreatSummaryView
+                    browserFields={browserFields}
+                    data={data}
                     eventId={id}
                     timelineId={timelineId}
                     enrichments={allEnrichments}
@@ -174,10 +180,25 @@ const EventDetailsComponent: React.FC<Props> = ({
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
             name: (
-              <span>
-                {`${i18n.THREAT_INTEL} `}
-                {enrichmentsLoading ? <EuiLoadingSpinner /> : `(${enrichmentCount})`}
-              </span>
+              <EuiFlexGroup
+                direction="row"
+                alignItems={'center'}
+                justifyContent={'spaceAround'}
+                gutterSize="xs"
+              >
+                <EuiFlexItem>
+                  <span>{i18n.THREAT_INTEL}</span>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {enrichmentsLoading ? (
+                    <EuiLoadingSpinner />
+                  ) : (
+                    <EuiNotificationBadge data-test-subj="enrichment-count-notification">
+                      {enrichmentCount}
+                    </EuiNotificationBadge>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ),
             content: (
               <>
@@ -224,7 +245,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       content: (
         <>
           <EuiSpacer size="m" />
-          <TabContentWrapper>
+          <TabContentWrapper data-test-subj="jsonViewWrapper">
             <JsonView data={data} />
           </TabContentWrapper>
         </>

@@ -7,12 +7,12 @@
 
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { SanitizedAlert, AlertTypeParams } from '../../../../../alerting/common';
-import { AlertsClient } from '../../../../../alerting/server';
+import { RulesClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
 
 export const installPrepackagedRules = (
-  alertsClient: AlertsClient,
+  rulesClient: RulesClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
 ): Array<Promise<SanitizedAlert<AlertTypeParams>>> =>
@@ -70,7 +70,7 @@ export const installPrepackagedRules = (
     return [
       ...acc,
       createRules({
-        alertsClient,
+        rulesClient,
         anomalyThreshold,
         author,
         buildingBlockType,

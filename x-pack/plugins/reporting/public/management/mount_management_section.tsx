@@ -15,7 +15,8 @@ import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/repo
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
 import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
-import { ReportListing } from './report_listing';
+import { KibanaContextProvider } from '../shared_imports';
+import { ReportListing } from '.';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,
@@ -28,18 +29,22 @@ export async function mountManagementSection(
 ) {
   render(
     <I18nProvider>
-      <InternalApiClientClientProvider http={coreSetup.http} apiClient={apiClient}>
-        <IlmPolicyStatusContextProvider>
-          <ReportListing
-            toasts={coreSetup.notifications.toasts}
-            license$={license$}
-            pollConfig={pollConfig}
-            redirect={coreStart.application.navigateToApp}
-            navigateToUrl={coreStart.application.navigateToUrl}
-            urlService={urlService}
-          />
-        </IlmPolicyStatusContextProvider>
-      </InternalApiClientClientProvider>
+      <KibanaContextProvider
+        services={{ http: coreSetup.http, application: coreStart.application }}
+      >
+        <InternalApiClientClientProvider apiClient={apiClient}>
+          <IlmPolicyStatusContextProvider>
+            <ReportListing
+              toasts={coreSetup.notifications.toasts}
+              license$={license$}
+              pollConfig={pollConfig}
+              redirect={coreStart.application.navigateToApp}
+              navigateToUrl={coreStart.application.navigateToUrl}
+              urlService={urlService}
+            />
+          </IlmPolicyStatusContextProvider>
+        </InternalApiClientClientProvider>
+      </KibanaContextProvider>
     </I18nProvider>,
     params.element
   );

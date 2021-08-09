@@ -23,7 +23,6 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
@@ -46,10 +45,11 @@ export const patchRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
+      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -59,7 +59,6 @@ export const patchRulesBulkRoute = (
         request,
         savedObjectsClient,
       });
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const {
@@ -123,7 +122,7 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ alertsClient, ruleId, id });
+            const existingRule = await readRules({ rulesClient, ruleId, id });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
@@ -131,7 +130,7 @@ export const patchRulesBulkRoute = (
 
             const rule = await patchRules({
               rule: existingRule,
-              alertsClient,
+              rulesClient,
               author,
               buildingBlockType,
               description,
@@ -144,7 +143,8 @@ export const patchRulesBulkRoute = (
               license,
               outputIndex,
               savedId,
-              savedObjectsClient,
+              spaceId: context.securitySolution.getSpaceId(),
+              ruleStatusClient,
               timelineId,
               timelineTitle,
               meta,
@@ -182,7 +182,7 @@ export const patchRulesBulkRoute = (
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: rule.id,
-                alertsClient,
+                rulesClient,
                 savedObjectsClient,
                 enabled: rule.enabled,
                 actions,
@@ -190,11 +190,9 @@ export const patchRulesBulkRoute = (
                 name: rule.name,
               });
               const ruleStatuses = await ruleStatusClient.find({
-                perPage: 1,
-                sortField: 'statusDate',
-                sortOrder: 'desc',
-                search: rule.id,
-                searchFields: ['alertId'],
+                logsCount: 1,
+                ruleId: rule.id,
+                spaceId: context.securitySolution.getSpaceId(),
               });
               return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {

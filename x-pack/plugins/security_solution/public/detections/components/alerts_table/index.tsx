@@ -52,6 +52,8 @@ import { buildTimeRangeFilter } from './helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -343,10 +345,19 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ? alertsDefaultModelRuleRegistry
     : alertsDefaultModel;
 
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
-        defaultColumns: columns,
+        defaultColumns: columns.map((c) =>
+          !tGridEnabled && c.initialWidth == null
+            ? {
+                ...c,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+              }
+            : c
+        ),
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
         excludedRowRendererIds: defaultTimelineModel.excludedRowRendererIds as RowRendererId[],
         filterManager,
@@ -359,7 +370,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         showCheckboxes: true,
       })
     );
-  }, [dispatch, defaultTimelineModel, filterManager, timelineId]);
+  }, [dispatch, defaultTimelineModel, filterManager, tGridEnabled, timelineId]);
 
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
@@ -378,8 +389,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   return (
     <StatefulEventsViewer
       pageFilters={defaultFiltersMemo}
+      defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
       end={to}
+      currentFilter={filterGroup}
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
       onRuleChange={onRuleChange}

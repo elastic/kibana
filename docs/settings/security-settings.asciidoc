@@ -271,7 +271,7 @@ You can configure the following settings in the `kibana.yml` file.
 
 |[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
   | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
-highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is _not_ set or set to `0`, then sessions will never expire due to inactivity. By default, this setting is not set.
+highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 1 hour.
 
 2+a|
 [TIP]
@@ -281,8 +281,8 @@ Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w
 
 |[[xpack-session-lifespan]] `xpack.security.session.lifespan` {ess-icon}
   | Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
-this is _not_ set or set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
-recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this setting is not set.
+this is set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
+recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this value is 30 days.
 
 2+a|
 [TIP]

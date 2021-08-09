@@ -54,13 +54,18 @@ export const AlertDropdown = () => {
     setPopoverOpen(true);
   }, [setPopoverOpen]);
 
+  const openFlyout = useCallback(() => {
+    setFlyoutVisible(true);
+    closePopover();
+  }, [setFlyoutVisible, closePopover]);
+
   const menuItems = useMemo(() => {
     return [
       <EuiContextMenuItem
         disabled={!canCreateAlerts}
         icon="bell"
         key="createLink"
-        onClick={() => setFlyoutVisible(true)}
+        onClick={openFlyout}
         toolTipContent={!canCreateAlerts ? readOnlyUserTooltipContent : undefined}
         toolTipTitle={!canCreateAlerts ? readOnlyUserTooltipTitle : undefined}
       >
@@ -76,7 +81,7 @@ export const AlertDropdown = () => {
         />
       </EuiContextMenuItem>,
     ];
-  }, [manageAlertsLinkProps, canCreateAlerts]);
+  }, [manageAlertsLinkProps, canCreateAlerts, openFlyout]);
 
   return (
     <>

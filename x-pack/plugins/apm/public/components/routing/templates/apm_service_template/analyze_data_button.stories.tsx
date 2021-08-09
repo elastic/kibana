@@ -13,12 +13,9 @@ import { APMServiceContext } from '../../../../context/apm_service/apm_service_c
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { AnalyzeDataButton } from './analyze_data_button';
 
-const KibanaContext = createKibanaReactContext(({
-  http: { basePath: { get: () => '' } },
-} as unknown) as Partial<CoreStart>);
-
 interface Args {
   agentName: string;
+  canShowDashboard: boolean;
   environment?: string;
   serviceName: string;
 }
@@ -28,7 +25,14 @@ export default {
   component: AnalyzeDataButton,
   decorators: [
     (StoryComponent: ComponentType, { args }: StoryContext) => {
-      const { agentName, environment, serviceName } = args;
+      const { agentName, canShowDashboard, environment, serviceName } = args;
+
+      const KibanaContext = createKibanaReactContext(({
+        application: {
+          capabilities: { dashboard: { show: canShowDashboard } },
+        },
+        http: { basePath: { get: () => '' } },
+      } as unknown) as Partial<CoreStart>);
 
       return (
         <MockUrlParamsContextProvider
@@ -52,6 +56,7 @@ export const Example: Story<Args> = () => {
 };
 Example.args = {
   agentName: 'iOS/swift',
+  canShowDashboard: true,
   environment: 'testEnvironment',
   serviceName: 'testServiceName',
 };

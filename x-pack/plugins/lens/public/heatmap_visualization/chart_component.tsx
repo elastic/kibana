@@ -16,11 +16,11 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { CustomPaletteState } from 'src/plugins/charts/public';
+import type { CustomPaletteState } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../visualization_container';
-import { HeatmapRenderProps } from './types';
+import type { HeatmapRenderProps } from './types';
 import './index.scss';
-import { LensBrushEvent, LensFilterEvent } from '../types';
+import type { LensBrushEvent, LensFilterEvent } from '../types';
 import {
   applyPaletteParams,
   defaultPaletteParams,
@@ -314,8 +314,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     return <EmptyPlaceholder icon={LensIconChartHeatmap} />;
   }
 
-  // const colorPalette = euiPaletteForTemperature(5);
-
   return (
     <Chart>
       <Settings
@@ -351,7 +349,7 @@ export function HeatmapChartReportable(props: HeatmapRenderProps) {
     isReady: false,
   });
 
-  // It takes a cycle for the XY chart to render. This prevents
+  // It takes a cycle for the chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setState({ isReady: true });

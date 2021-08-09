@@ -149,6 +149,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     <>
       <EuiFlexGroup>
         <EuiPopover
+          data-test-subj="savedViews-popover"
           button={
             <EuiFlexGroup gutterSize={'s'} alignItems="center">
               <EuiFlexItem>
@@ -163,8 +164,8 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                       id="xpack.infra.savedView.currentView"
                     />
                   </EuiDescriptionListTitle>
-                  <EuiLink>
-                    <EuiDescriptionListDescription>
+                  <EuiLink data-test-subj="savedViews-openPopover">
+                    <EuiDescriptionListDescription data-test-subj="savedViews-currentViewName">
                       {currentView
                         ? currentView.name
                         : i18n.translate('xpack.infra.savedView.unknownView', {
@@ -182,6 +183,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         >
           <EuiListGroup flush={true}>
             <EuiListGroupItem
+              data-test-subj="savedViews-manageViews"
               iconType={'indexSettings'}
               onClick={loadViews}
               label={i18n.translate('xpack.infra.savedView.manageViews', {
@@ -190,6 +192,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             />
 
             <EuiListGroupItem
+              data-test-subj="savedViews-updateView"
               iconType={'refresh'}
               onClick={openUpdateModal}
               disabled={!currentView || currentView.id === '0'}
@@ -199,6 +202,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             />
 
             <EuiListGroupItem
+              data-test-subj="savedViews-loadView"
               iconType={'importAction'}
               onClick={openViewListModal}
               label={i18n.translate('xpack.infra.savedView.loadView', {
@@ -207,6 +211,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             />
 
             <EuiListGroupItem
+              data-test-subj="savedViews-saveNewView"
               iconType={'save'}
               onClick={openSaveModal}
               label={i18n.translate('xpack.infra.savedView.saveNewView', {

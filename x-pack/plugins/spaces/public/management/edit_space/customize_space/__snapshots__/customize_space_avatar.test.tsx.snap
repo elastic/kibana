@@ -7,58 +7,67 @@ exports[`renders without crashing 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
+    fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    label="Initials (2 max)"
+    label="Avatar type"
+    labelType="label"
+  >
+    <EuiButtonGroup
+      buttonSize="m"
+      idSelected="initials"
+      legend=""
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "initials",
+            "label": "Initials",
+          },
+          Object {
+            "id": "image",
+            "label": "Image",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error="Enter initials."
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText="Enter up to two characters."
+    isInvalid={true}
+    label="Initials"
     labelType="label"
   >
     <EuiFieldText
       data-test-subj="spaceLetterInitial"
-      disabled={false}
-      inputRef={[Function]}
+      fullWidth={true}
+      isInvalid={true}
       name="spaceInitials"
       onChange={[Function]}
       value=""
     />
   </EuiFormRow>
-  <EuiSpacer
-    size="m"
-  />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
+    error="Select a background color."
+    fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    isInvalid={false}
-    label="Color"
+    isInvalid={true}
+    label="Background color"
     labelType="label"
   >
     <EuiColorPicker
-      color="#DA8B45"
-      isInvalid={false}
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Custom image"
-    labelType="label"
-  >
-    <EuiFilePicker
-      accept="image/svg+xml,image/jpeg,image/png,image/gif"
-      compressed={false}
-      data-test-subj="uploadCustomImageFile"
-      display="default"
-      initialPromptText="Select image file"
+      color=""
+      fullWidth={true}
+      isInvalid={true}
       onChange={[Function]}
     />
   </EuiFormRow>

@@ -24,7 +24,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
           onClick={[Function]}
         >
           <FormattedMessage
-            defaultMessage="Create a space"
+            defaultMessage="Create space"
             id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
             values={Object {}}
           />

@@ -19,7 +19,6 @@ import { deleteRules } from '../../rules/delete_rules';
 import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 
 export const deleteRulesRoute = (
@@ -48,15 +47,15 @@ export const deleteRulesRoute = (
       try {
         const { id, rule_id: ruleId } = request.query;
 
-        const alertsClient = context.alerting?.getAlertsClient();
+        const rulesClient = context.alerting?.getRulesClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
-        if (!alertsClient) {
+        if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const rule = await readRules({ alertsClient, id, ruleId });
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const rule = await readRules({ rulesClient, id, ruleId });
         if (!rule) {
           const error = getIdError({ id, ruleId });
           return siemResponse.error({
@@ -66,18 +65,18 @@ export const deleteRulesRoute = (
         }
 
         const ruleStatuses = await ruleStatusClient.find({
-          perPage: 6,
-          search: rule.id,
-          searchFields: ['alertId'],
+          logsCount: 6,
+          ruleId: rule.id,
+          spaceId: context.securitySolution.getSpaceId(),
         });
         await deleteRules({
-          alertsClient,
+          rulesClient,
           savedObjectsClient,
           ruleStatusClient,
           ruleStatuses,
           id: rule.id,
         });
-        const transformed = transform(rule, undefined, ruleStatuses.saved_objects[0]);
+        const transformed = transform(rule, undefined, ruleStatuses[0]);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
         } else {

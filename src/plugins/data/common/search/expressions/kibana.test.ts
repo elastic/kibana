@@ -37,6 +37,7 @@ describe('interpreter/functions#kibana', () => {
     context = {
       getSearchContext: () => search,
       getSearchSessionId: () => undefined,
+      getExecutionContext: () => undefined,
       types: {},
       variables: {},
       abortSignal: {} as any,

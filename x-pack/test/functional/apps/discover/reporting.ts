@@ -56,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('remains available regardless of the saved search state', async () => {
         // create new search, csv export is not available
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.reporting.setTimepickerInDataRange();
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         // save search, csv export is available
@@ -73,8 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/104372
-    describe.skip('Generate CSV: new search', () => {
+    describe('Generate CSV: new search', () => {
       beforeEach(async () => {
         await kibanaServer.importExport.load(ecommerceSOPath);
         await PageObjects.common.navigateToApp('discover');
