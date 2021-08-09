@@ -82,6 +82,25 @@ export const CreateDockerUBI: Task = {
   },
 };
 
+export const CreateDockerCloud: Task = {
+  description: 'Creating Docker Cloud image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      context: false,
+      cloud: true,
+      image: true,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      context: false,
+      cloud: true,
+      image: true,
+    });
+  },
+};
+
 export const CreateDockerContexts: Task = {
   description: 'Creating Docker build contexts',
 

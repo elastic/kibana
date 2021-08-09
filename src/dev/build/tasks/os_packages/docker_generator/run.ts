@@ -33,6 +33,7 @@ export async function runDockerGenerator(
     image: boolean;
     ubi?: boolean;
     ironbank?: boolean;
+    cloud?: boolean;
     dockerBuildDate?: string;
   }
 ) {
@@ -43,6 +44,7 @@ export async function runDockerGenerator(
   let imageFlavor = '';
   if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
   if (flags.ironbank) imageFlavor += '-ironbank';
+  if (flags.cloud) imageFlavor += '-cloud';
 
   // General docker var config
   const license = 'Elastic License';
@@ -51,6 +53,8 @@ export async function runDockerGenerator(
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   const artifactPrefix = `kibana-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
+  const metricbeatTarball = `metricbeat-${version}-linux-${artifactArchitecture}.tar.gz`;
+  const filebeatTarball = `filebeat-${version}-linux-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   // That would produce oss, default and default-ubi7
@@ -73,6 +77,9 @@ export async function runDockerGenerator(
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,
+    cloud: flags.cloud,
+    metricbeatTarball,
+    filebeatTarball,
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
@@ -97,6 +104,8 @@ export async function runDockerGenerator(
     await accessAsync(resolve(artifactsDir, artifactTarball));
     await mkdirp(dockerBuildDir);
     await unlinkAsync(resolve(dockerBuildDir, artifactTarball));
+    await unlinkAsync(resolve(dockerBuildDir, metricbeatTarball));
+    await unlinkAsync(resolve(dockerBuildDir, filebeatTarball));
   } catch (e) {
     if (e && e.code === 'ENOENT' && e.syscall === 'access') {
       throw new Error(
@@ -108,6 +117,16 @@ export async function runDockerGenerator(
   // Create the kibana linux target inside the
   // Kibana docker build
   await linkAsync(resolve(artifactsDir, artifactTarball), resolve(dockerBuildDir, artifactTarball));
+  if (flags.cloud) {
+    await linkAsync(
+      resolve(artifactsDir, metricbeatTarball),
+      resolve(dockerBuildDir, metricbeatTarball)
+    );
+    await linkAsync(
+      resolve(artifactsDir, filebeatTarball),
+      resolve(dockerBuildDir, filebeatTarball)
+    );
+  }
 
   // Write all the needed docker config files
   // into kibana-docker folder

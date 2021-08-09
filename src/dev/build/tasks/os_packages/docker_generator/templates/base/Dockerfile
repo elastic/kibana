@@ -36,6 +36,15 @@ RUN tar --strip-components=1 -zxf /opt/kibana.tar.gz
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
 
+{{#cloud}}
+COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
+COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
+
+RUN mkdir -p /opt/filebeat /opt/metricbeat && \
+  tar xf /tmp/filebeat.tar.gz -C /opt/filebeat --strip-components=1 && \
+  tar xf /tmp/metricbeat.tar.gz -C /opt/metricbeat --strip-components=1
+{{/cloud}}
+
 ################################################################################
 # Build stage 1 (the actual Kibana image):
 #
