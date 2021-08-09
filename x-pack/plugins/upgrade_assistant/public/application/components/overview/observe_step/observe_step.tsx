@@ -105,6 +105,7 @@ const DeprecationLogsPreview = () => {
                 { type: 'timestamp', header: false },
                 { type: 'message', header: false },
               ]}
+              hasColumnHeaders={false}
             />
           );
         })()}
