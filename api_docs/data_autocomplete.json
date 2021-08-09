@@ -381,6 +381,28 @@
         ],
         "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.args",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataAutocompletePluginApi",
+                "section": "def-public.QuerySuggestionGetFnArgs",
+                "text": "QuerySuggestionGetFnArgs"
+              }
+            ],
+            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

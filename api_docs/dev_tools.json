@@ -178,11 +178,10 @@
           ],
           "path": "src/plugins/dev_tools/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "devTools",
-              "id": "def-public.devTool",
+              "id": "def-public.DevToolsSetup.register.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "devTool",
@@ -190,14 +189,14 @@
                 "The dev tools descriptor"
               ],
               "signature": [
-                "Pick<",
-                "DevToolApp",
-                ", \"title\" | \"id\" | \"order\" | \"mount\" | \"tooltipContent\" | \"enableRouting\"> & { disabled?: boolean | undefined; }"
+                "CreateDevToolArgs"
               ],
               "path": "src/plugins/dev_tools/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const ADD_EXCEPTION_BTN = '[data-test-subj="addExceptionButton"]';
+export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
 export const ALERTS = '[data-test-subj="events-viewer-panel"] [data-test-subj="event"]';
 

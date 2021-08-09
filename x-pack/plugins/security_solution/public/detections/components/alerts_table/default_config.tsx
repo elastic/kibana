@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import {
+  ALERT_DURATION,
+  ALERT_ID,
+  ALERT_PRODUCER,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -134,14 +143,14 @@ export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => 
       negate: false,
       disabled: false,
       type: 'phrase',
-      key: 'kibana.rac.alert.status',
+      key: ALERT_STATUS,
       params: {
         query: status,
       },
     },
     query: {
       term: {
-        'kibana.rac.alert.status': status,
+        [ALERT_STATUS]: status,
       },
     },
   },
@@ -159,28 +168,28 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.rac.rule.building_block_type',
+            key: 'kibana.rule.building_block_type',
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'kibana.rac.rule.building_block_type' },
+          exists: { field: 'kibana.rule.building_block_type' },
         },
       ];
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.id': 'kibana.rac.alert.id',
+  'alert.id': ALERT_ID,
   'event.kind': 'event.kind',
-  'alert.start': 'kibana.rac.alert.start',
-  'alert.uuid': 'kibana.rac.alert.uuid',
+  'alert.start': ALERT_START,
+  'alert.uuid': ALERT_UUID,
   'event.action': 'event.action',
-  'alert.status': 'kibana.rac.alert.status',
-  'alert.duration.us': 'kibana.rac.alert.duration.us',
+  'alert.status': ALERT_STATUS,
+  'alert.duration.us': ALERT_DURATION,
   'rule.uuid': 'rule.uuid',
   'rule.id': 'rule.id',
   'rule.name': 'rule.name',
   'rule.category': 'rule.category',
-  producer: 'kibana.rac.alert.producer',
+  producer: ALERT_PRODUCER,
   tags: 'tags',
 };
 
