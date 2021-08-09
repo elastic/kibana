@@ -3163,6 +3163,7 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 export class SavedObjectsUtils {
     static createEmptyFindResponse: <T, A>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T, A>;
     static generateId(): string;
+    static getConvertedObjectId(namespace: string | undefined, type: string, id: string): string;
     static isRandomId(id: string | undefined): boolean;
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;

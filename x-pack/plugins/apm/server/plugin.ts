@@ -33,7 +33,6 @@ import { createApmAgentConfigurationIndex } from './lib/settings/agent_configura
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
-import { uiSettings } from './ui_settings';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -80,8 +79,6 @@ export class APMPlugin
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
-
-    core.uiSettings.register(uiSettings);
 
     const currentConfig = mergeConfigs(
       plugins.apmOss.config,
@@ -133,20 +130,23 @@ export class APMPlugin
             settings: {
               number_of_shards: 1,
             },
-            mappings: mappingFromFieldMap({
-              [SERVICE_NAME]: {
-                type: 'keyword',
+            mappings: mappingFromFieldMap(
+              {
+                [SERVICE_NAME]: {
+                  type: 'keyword',
+                },
+                [SERVICE_ENVIRONMENT]: {
+                  type: 'keyword',
+                },
+                [TRANSACTION_TYPE]: {
+                  type: 'keyword',
+                },
+                [PROCESSOR_EVENT]: {
+                  type: 'keyword',
+                },
               },
-              [SERVICE_ENVIRONMENT]: {
-                type: 'keyword',
-              },
-              [TRANSACTION_TYPE]: {
-                type: 'keyword',
-              },
-              [PROCESSOR_EVENT]: {
-                type: 'keyword',
-              },
-            }),
+              'strict'
+            ),
           },
         },
       });

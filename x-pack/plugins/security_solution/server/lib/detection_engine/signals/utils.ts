@@ -5,18 +5,20 @@
  * 2.0.
  */
 import { createHash } from 'crypto';
+import { chunk, get, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
+
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
-import { chunk, isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
-
+import { ALERT_ID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ElasticsearchClient } from '@kbn/securitysolution-es-utils';
+
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -39,6 +41,8 @@ import {
   RuleRangeTuple,
   BaseSignalHit,
   SignalSourceHit,
+  SimpleHit,
+  WrappedEventHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { ShardError } from '../../types';
@@ -52,6 +56,8 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
+import { WrappedRACAlert } from '../rule_types/types';
+import { SearchTypes } from '../../../../common/detection_engine/types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -927,4 +933,26 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
       return `${field}: (${joinedValues})`;
     })
     .join(' OR ');
+};
+
+export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
+  return !isWrappedSignalHit(event) && !isWrappedRACAlert(event);
+};
+
+export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
+  return (event as WrappedSignalHit)?._source?.signal != null;
+};
+
+export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
+  return (event as WrappedRACAlert)?._source?.[ALERT_ID] != null;
+};
+
+export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
+  if (isWrappedRACAlert(event)) {
+    return event._source, field.replace('signal', 'kibana.alert') as T; // TODO: handle special cases
+  } else if (isWrappedSignalHit(event)) {
+    return get(event._source, field) as T;
+  } else if (isWrappedEventHit(event)) {
+    return get(event._source, field) as T;
+  }
 };
