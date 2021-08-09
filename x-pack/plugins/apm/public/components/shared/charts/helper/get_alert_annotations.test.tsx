@@ -18,6 +18,9 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   SPACE_IDS,
+  ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
 } from '@kbn/rule-data-utils';
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -39,7 +42,7 @@ const alert: Alert = {
   [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
   [ALERT_EVALUATION_VALUE]: [2057657.39],
   'service.name': ['frontend-rum'],
-  'rule.name': ['Latency threshold | frontend-rum'],
+  [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
   [ALERT_DURATION]: [62879000],
   [ALERT_STATUS]: ['open'],
   tags: ['apm', 'service.name:frontend-rum'],
@@ -47,7 +50,7 @@ const alert: Alert = {
   [ALERT_PRODUCER]: ['apm'],
   [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
   [ALERT_CONSUMER]: ['apm'],
-  'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+  [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
   'event.action': ['active'],
   '@timestamp': ['2021-06-01T16:16:05.183Z'],
   [ALERT_ID]: ['apm.transaction_duration_All'],
@@ -55,7 +58,7 @@ const alert: Alert = {
   [ALERT_EVALUATION_THRESHOLD]: [500000],
   [ALERT_START]: ['2021-06-01T16:15:02.304Z'],
   'event.kind': ['state'],
-  'rule.category': ['Latency threshold'],
+  [ALERT_RULE_CATEGORY]: ['Latency threshold'],
 };
 const chartStartTime = new Date(alert[ALERT_START]![0] as string).getTime();
 const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => ({

@@ -7,7 +7,7 @@
 
 import {
   ALERT_RULE_TYPE_ID,
-  RULE_NAME,
+  ALERT_RULE_NAME,
   ALERT_STATUS,
   ALERT_START,
 } from '@kbn/rule-data-utils/target/technical_field_names';
@@ -25,7 +25,7 @@ export function decorateResponse(
     const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
-      reason: parsedFields[RULE_NAME]!,
+      reason: parsedFields[ALERT_RULE_NAME]!,
       ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
     };
 

@@ -14,7 +14,10 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_TYPE_ID, RULE_NAME } from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import React, { useState } from 'react';
 import { format, parse } from 'url';
 
@@ -32,7 +35,7 @@ export function RowCellActionsRender({ data }: ActionProps) {
   const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
   const formatted = {
     link: undefined,
-    reason: parsedFields[RULE_NAME]!,
+    reason: parsedFields[ALERT_RULE_NAME]!,
     ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
   };
 

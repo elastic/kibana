@@ -335,7 +335,7 @@ const createDefaultAlertExecutorOptions = <
   ActionGroupIds extends string = ''
 >({
   alertId = 'ALERT_ID',
-  ruleName = 'RULE_NAME',
+  ruleName = 'ALERT_RULE_NAME',
   params,
   state,
   createdAt = new Date(),

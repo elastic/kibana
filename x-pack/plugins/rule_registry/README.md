@@ -121,9 +121,9 @@ The following fields are defined in the technical field component template and s
 - `event.action`: the reason for the event. This might be `open`, `close`, `active`, or `evaluate`.
 - `tags`: tags attached to the alert. Right now they are copied over from the rule.
 - `kibana.alert.rule.rule_type_id`: the identifier of the rule type, e.g. `apm.transaction_duration`
-- `rule.uuid`: the saved objects id of the rule.
-- `rule.name`: the name of the rule (as specified by the user).
-- `rule.category`: the name of the rule type (as defined by the rule type producer)
+- `kibana.alert.rule.uuid`: the saved objects id of the rule.
+- `kibana.alert.rule.name`: the name of the rule (as specified by the user).
+- `kibana.alert.rule.category`: the name of the rule type (as defined by the rule type producer)
 - `kibana.alert.rule.consumer`: the feature which produced the alert (inherited from the rule producer field). Usually a Kibana feature id like `apm`, `siem`...
 - `kibana.alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
 - `kibana.alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.

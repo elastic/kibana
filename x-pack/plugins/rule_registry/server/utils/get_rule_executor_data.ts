@@ -8,18 +8,18 @@
 import { AlertExecutorOptions } from '../../../alerting/server';
 import {
   ALERT_PRODUCER,
-  RULE_CATEGORY,
+  ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
-  RULE_NAME,
-  RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
   TAGS,
 } from '../../common/technical_rule_data_field_names';
 
 export interface RuleExecutorData {
-  [RULE_CATEGORY]: string;
+  [ALERT_RULE_CATEGORY]: string;
   [ALERT_RULE_TYPE_ID]: string;
-  [RULE_UUID]: string;
-  [RULE_NAME]: string;
+  [ALERT_RULE_UUID]: string;
+  [ALERT_RULE_NAME]: string;
   [ALERT_PRODUCER]: string;
   [TAGS]: string[];
 }
@@ -27,9 +27,9 @@ export interface RuleExecutorData {
 export function getRuleData(options: AlertExecutorOptions<any, any, any, any, any>) {
   return {
     [ALERT_RULE_TYPE_ID]: options.rule.ruleTypeId,
-    [RULE_UUID]: options.alertId,
-    [RULE_CATEGORY]: options.rule.ruleTypeName,
-    [RULE_NAME]: options.rule.name,
+    [ALERT_RULE_UUID]: options.alertId,
+    [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
+    [ALERT_RULE_NAME]: options.rule.name,
     [TAGS]: options.tags,
     [ALERT_PRODUCER]: options.rule.producer,
   };

@@ -31,7 +31,7 @@ import {
   EVENT_KIND,
   ALERT_CONSUMER,
   ALERT_RULE_TYPE_ID,
-  RULE_UUID,
+  ALERT_RULE_UUID,
   TIMESTAMP,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
@@ -197,7 +197,7 @@ export const createLifecycleExecutor = (
             filter: [
               {
                 term: {
-                  [RULE_UUID]: ruleExecutorData[RULE_UUID],
+                  [ALERT_RULE_UUID]: ruleExecutorData[ALERT_RULE_UUID],
                 },
               },
               {

@@ -74,13 +74,13 @@ describe('get()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_version": "WzM2MiwyXQ==",
-        "${ALERT_CONSUMER}": "apm",
-        "${ALERT_STATUS}": "open",
-        "${SPACE_IDS}": Array [
+        "kibana.alert.rule.consumer": "apm",
+        "kibana.alert.rule.rule_type_id": "apm.error_rate",
+        "kibana.alert.status": "open",
+        "kibana.space_ids": Array [
           "test_default_space_id",
         ],
         "message": "hello world 1",
-        "${ALERT_RULE_TYPE_ID}: "apm.error_rate",
       }
     `);
     expect(esClientMock.search).toHaveBeenCalledTimes(1);
@@ -228,13 +228,13 @@ describe('get()', () => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "_version": "WzM2MiwyXQ==",
-          "${ALERT_CONSUMER}": "apm",
-          "${ALERT_STATUS}": "open",
-          "${SPACE_IDS}": Array [
+          "kibana.alert.rule.consumer": "apm",
+          "kibana.alert.rule.rule_type_id": "apm.error_rate",
+          "kibana.alert.status": "open",
+          "kibana.space_ids": Array [
             "test_default_space_id",
           ],
           "message": "hello world 1",
-          "${ALERT_RULE_TYPE_ID}: "apm.error_rate",
         }
       `);
     });

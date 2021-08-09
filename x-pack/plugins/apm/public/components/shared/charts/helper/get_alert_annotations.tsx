@@ -18,7 +18,7 @@ import {
   ALERT_START,
   ALERT_UUID,
   ALERT_RULE_TYPE_ID,
-  RULE_NAME,
+  ALERT_RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
@@ -109,7 +109,7 @@ export function getAlertAnnotations({
     const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
-      reason: parsed[RULE_NAME],
+      reason: parsed[ALERT_RULE_NAME],
       ...(formatter?.({
         fields: parsed,
         formatters: { asDuration, asPercent },

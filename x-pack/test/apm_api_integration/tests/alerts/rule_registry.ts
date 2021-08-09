@@ -18,6 +18,7 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   EVENT_KIND,
+  ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
 import { merge, omit } from 'lodash';
 import { format } from 'url';
@@ -350,7 +351,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, 'rule.uuid'];
+        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID];
 
         const toCompare = omit(alertEvent, exclude);
 
@@ -389,13 +390,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "processor.event": Array [
               "transaction",
             ],
-            "rule.category": Array [
+            "kibana.alert.rule.category": Array [
               "Transaction error rate threshold",
             ],
             "kibana.alert.rule.rule_type_id": Array [
               "apm.transaction_error_rate",
             ],
-            "rule.name": Array [
+            "kibana.alert.rule.name": Array [
               "Transaction error rate threshold | opbeans-go",
             ],
             "service.name": Array [
@@ -465,13 +466,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "processor.event": Array [
               "transaction",
             ],
-            "rule.category": Array [
+            "kibana.alert.rule.category": Array [
               "Transaction error rate threshold",
             ],
             "kibana.alert.rule.rule_type_id": Array [
               "apm.transaction_error_rate",
             ],
-            "rule.name": Array [
+            "kibana.alert.rule.name": Array [
               "Transaction error rate threshold | opbeans-go",
             ],
             "service.name": Array [
@@ -569,13 +570,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "processor.event": Array [
               "transaction",
             ],
-            "rule.category": Array [
+            "kibana.alert.rule.category": Array [
               "Transaction error rate threshold",
             ],
             "kibana.alert.rule.rule_type_id": Array [
               "apm.transaction_error_rate",
             ],
-            "rule.name": Array [
+            "kibana.alert.rule.name": Array [
               "Transaction error rate threshold | opbeans-go",
             ],
             "service.name": Array [

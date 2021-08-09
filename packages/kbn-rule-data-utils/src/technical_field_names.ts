@@ -17,15 +17,12 @@ const CONSUMERS = `${KIBANA_NAMESPACE}.consumers` as const;
 const ECS_VERSION = 'ecs.version' as const;
 const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
-const RULE_CATEGORY = 'rule.category' as const;
-const RULE_ID = 'rule.id' as const;
-const RULE_NAME = 'rule.name' as const;
-const RULE_UUID = 'rule.uuid' as const;
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
 const TAGS = 'tags' as const;
 const TIMESTAMP = '@timestamp' as const;
 const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 
+// Fields pertaining to the alert
 const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
 const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 const ALERT_END = `${ALERT_NAMESPACE}.end` as const;
@@ -45,6 +42,7 @@ const ALERT_WORKFLOW_REASON = `${ALERT_NAMESPACE}.workflow_reason` as const;
 const ALERT_WORKFLOW_STATUS = `${ALERT_NAMESPACE}.workflow_status` as const;
 const ALERT_WORKFLOW_USER = `${ALERT_NAMESPACE}.workflow_user` as const;
 
+// Fields pertaining to the rule associated with the alert
 const ALERT_RULE_AUTHOR = `${ALERT_RULE_NAMESPACE}.author` as const;
 const ALERT_RULE_CREATED_AT = `${ALERT_RULE_NAMESPACE}.created_at` as const;
 const ALERT_RULE_CREATED_BY = `${ALERT_RULE_NAMESPACE}.created_by` as const;
@@ -54,6 +52,7 @@ const ALERT_RULE_FROM = `${ALERT_RULE_NAMESPACE}.from` as const;
 const ALERT_RULE_ID = `${ALERT_RULE_NAMESPACE}.id` as const;
 const ALERT_RULE_INTERVAL = `${ALERT_RULE_NAMESPACE}.interval` as const;
 const ALERT_RULE_LICENSE = `${ALERT_RULE_NAMESPACE}.license` as const;
+const ALERT_RULE_CATEGORY = `${ALERT_RULE_NAMESPACE}.category` as const;
 const ALERT_RULE_NAME = `${ALERT_RULE_NAMESPACE}.name` as const;
 const ALERT_RULE_NOTE = `${ALERT_RULE_NAMESPACE}.note` as const;
 const ALERT_RULE_REFERENCES = `${ALERT_RULE_NAMESPACE}.references` as const;
@@ -78,6 +77,7 @@ const ALERT_CONSUMER = `${ALERT_RULE_NAMESPACE}.consumer` as const;
 // Rule type apm.error_rate --> apm
 // Rule type siem.signals --> siem
 const ALERT_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
+const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 
 const namespaces = {
   KIBANA_NAMESPACE,
@@ -90,10 +90,6 @@ const fields = {
   ECS_VERSION,
   EVENT_KIND,
   EVENT_ACTION,
-  RULE_CATEGORY,
-  RULE_ID,
-  RULE_NAME,
-  RULE_UUID,
   TAGS,
   TIMESTAMP,
   ALERT_ACTION_GROUP,
@@ -141,6 +137,8 @@ const fields = {
   ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_USER,
+  ALERT_RULE_UUID,
+  ALERT_RULE_CATEGORY,
   SPACE_IDS,
   VERSION,
 };
@@ -198,10 +196,8 @@ export {
   EVENT_ACTION,
   EVENT_KIND,
   KIBANA_NAMESPACE,
-  RULE_CATEGORY,
-  RULE_ID,
-  RULE_NAME,
-  RULE_UUID,
+  ALERT_RULE_UUID,
+  ALERT_RULE_CATEGORY,
   TAGS,
   TIMESTAMP,
   SPACE_IDS,
