@@ -27,7 +27,7 @@ export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({
 
   const validationErrors = useMemo(() => validators(value), [value]);
 
-  const isInvalid = value !== undefined && !!validationErrors;
+  const isInvalid = !!value && !!validationErrors;
 
   return (
     <EuiFormRow

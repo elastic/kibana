@@ -34,7 +34,7 @@ export function ServiceOverviewDependenciesTable() {
   const {
     query,
     query: { kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/overview');
+  } = useApmParams('/services/:serviceName/*');
 
   const { offset } = getTimeRangeComparison({
     start,

@@ -4843,20 +4843,29 @@ exports[`Header renders 1`] = `
                 truncate={true}
               >
                 <nav
-                  aria-label="breadcrumb"
+                  aria-label="Breadcrumbs"
                   className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <EuiInnerText>
-                    <span
-                      aria-current="page"
+                  <ol
+                    className="euiBreadcrumbs__list"
+                  >
+                    <li
                       className="euiBreadcrumb euiBreadcrumb--last"
-                      data-test-subj="breadcrumb first last"
-                      title="test"
+                      key="0"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb__content"
+                          data-test-subj="breadcrumb first last"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </li>
+                  </ol>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
