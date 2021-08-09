@@ -74,8 +74,6 @@ export const serviceDetail = {
         }),
         t.partial({
           environment: t.string,
-          rangeFrom: t.string,
-          rangeTo: t.string,
           comparisonEnabled: t.string,
           comparisonType: t.string,
           latencyAggregationType: t.string,

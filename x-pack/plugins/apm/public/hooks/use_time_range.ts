@@ -37,6 +37,10 @@ export function useTimeRange({
     setTimeRangeId((id) => id + 1);
   }, [setTimeRangeId, updateParsedTime]);
 
+  if (!start || !end) {
+    throw new Error('start and/or end were unexpectedly not set');
+  }
+
   return {
     start,
     end,
