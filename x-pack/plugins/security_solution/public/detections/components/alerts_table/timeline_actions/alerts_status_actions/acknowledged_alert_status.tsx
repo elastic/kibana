@@ -7,30 +7,30 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
-import { FILTER_IN_PROGRESS } from '../../alerts_filter_group';
+import { FILTER_ACKNOWLEDGED } from '../../alerts_filter_group';
 import * as i18n from '../../translations';
 
-interface InProgressAlertStatusProps {
+interface AcknowledgedAlertStatusProps {
   onClick: () => void;
   disabled?: boolean;
 }
 
-const InProgressAlertStatusComponent: React.FC<InProgressAlertStatusProps> = ({
+const AcknowledgedAlertStatusComponent: React.FC<AcknowledgedAlertStatusProps> = ({
   onClick,
   disabled,
 }) => {
   return (
     <EuiContextMenuItem
-      key="in-progress-alert"
-      aria-label={i18n.ACTION_IN_PROGRESS_ALERT}
-      data-test-subj="in-progress-alert-status"
-      id={FILTER_IN_PROGRESS}
+      key="acknowledged-alert"
+      aria-label={i18n.ACTION_ACKNOWLEDGED_ALERT}
+      data-test-subj="acknowledged-alert-status"
+      id={FILTER_ACKNOWLEDGED}
       onClick={onClick}
       disabled={disabled}
     >
-      {i18n.ACTION_IN_PROGRESS_ALERT}
+      {i18n.ACTION_ACKNOWLEDGED_ALERT}
     </EuiContextMenuItem>
   );
 };
 
-export const InProgressAlertStatus = React.memo(InProgressAlertStatusComponent);
+export const AcknowledgedAlertStatus = React.memo(AcknowledgedAlertStatusComponent);

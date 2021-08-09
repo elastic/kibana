@@ -14,7 +14,7 @@ import * as i18n from '../translations';
 
 export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';
-export const FILTER_IN_PROGRESS: Status = 'in-progress';
+export const FILTER_ACKNOWLEDGED: Status = 'acknowledged';
 
 const StatusFilterButton = styled(EuiFilterButton)<{ $isActive: boolean }>`
   background: ${({ $isActive, theme }) => ($isActive ? theme.eui.euiColorPrimary : '')};
@@ -44,9 +44,9 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
     onFilterGroupChanged(FILTER_CLOSED);
   }, [setFilterGroup, onFilterGroupChanged]);
 
-  const onClickInProgressFilterCallback = useCallback(() => {
-    setFilterGroup(FILTER_IN_PROGRESS);
-    onFilterGroupChanged(FILTER_IN_PROGRESS);
+  const onClickAcknowledgedFilterCallback = useCallback(() => {
+    setFilterGroup(FILTER_ACKNOWLEDGED);
+    onFilterGroupChanged(FILTER_ACKNOWLEDGED);
   }, [setFilterGroup, onFilterGroupChanged]);
 
   return (
@@ -63,14 +63,14 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
       </StatusFilterButton>
 
       <StatusFilterButton
-        data-test-subj="inProgressAlerts"
-        hasActiveFilters={filterGroup === FILTER_IN_PROGRESS}
-        $isActive={filterGroup === FILTER_IN_PROGRESS}
-        onClick={onClickInProgressFilterCallback}
+        data-test-subj="acknowledgedAlerts"
+        hasActiveFilters={filterGroup === FILTER_ACKNOWLEDGED}
+        $isActive={filterGroup === FILTER_ACKNOWLEDGED}
+        onClick={onClickAcknowledgedFilterCallback}
         withNext
-        color={filterGroup === FILTER_IN_PROGRESS ? 'ghost' : 'primary'}
+        color={filterGroup === FILTER_ACKNOWLEDGED ? 'ghost' : 'primary'}
       >
-        {i18n.IN_PROGRESS_ALERTS}
+        {i18n.ACKNOWLEDGED_ALERTS}
       </StatusFilterButton>
 
       <StatusFilterButton
