@@ -18,13 +18,18 @@ on alerts as data.
 - [authorization](alertsclient.md#authorization)
 - [esClient](alertsclient.md#esclient)
 - [logger](alertsclient.md#logger)
+- [spaceId](alertsclient.md#spaceid)
 
 ### Methods
 
-- [fetchAlert](alertsclient.md#fetchalert)
+- [buildEsQueryWithAuthz](alertsclient.md#buildesquerywithauthz)
+- [bulkUpdate](alertsclient.md#bulkupdate)
+- [ensureAllAuthorized](alertsclient.md#ensureallauthorized)
 - [get](alertsclient.md#get)
-- [getAlertsIndex](alertsclient.md#getalertsindex)
 - [getAuthorizedAlertsIndices](alertsclient.md#getauthorizedalertsindices)
+- [mgetAlertsAuditOperate](alertsclient.md#mgetalertsauditoperate)
+- [queryAndAuditAllAlerts](alertsclient.md#queryandauditallalerts)
+- [singleSearchAfterAndAudit](alertsclient.md#singlesearchafterandaudit)
 - [update](alertsclient.md#update)
 
 ## Constructors
@@ -41,7 +46,7 @@ on alerts as data.
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:59](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L59)
+[alerts_client.ts:93](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L93)
 
 ## Properties
 
@@ -51,7 +56,7 @@ on alerts as data.
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:57](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L57)
+[alerts_client.ts:90](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L90)
 
 ___
 
@@ -61,7 +66,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:58](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L58)
+[alerts_client.ts:91](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L91)
 
 ___
 
@@ -71,7 +76,7 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:59](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L59)
+[alerts_client.ts:92](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L92)
 
 ___
 
@@ -81,60 +86,33 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:56](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L56)
+[alerts_client.ts:89](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L89)
+
+___
+
+### spaceId
+
+• `Private` `Readonly` **spaceId**: `undefined` \| `string`
+
+#### Defined in
+
+[alerts_client.ts:93](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L93)
 
 ## Methods
 
-### fetchAlert
+### buildEsQueryWithAuthz
 
-▸ `Private` **fetchAlert**(`__namedParameters`): `Promise`<undefined \| ``null`` \| `Omit`<OutputOf<SetOptional<`Object`\>\>, ``"kibana.rac.alert.owner"`` \| ``"rule.id"``\> & { `kibana.rac.alert.owner`: `string` ; `rule.id`: `string`  } & { `_version`: `undefined` \| `string`  }\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `__namedParameters` | `GetAlertParams` |
-
-#### Returns
-
-`Promise`<undefined \| ``null`` \| `Omit`<OutputOf<SetOptional<`Object`\>\>, ``"kibana.rac.alert.owner"`` \| ``"rule.id"``\> & { `kibana.rac.alert.owner`: `string` ; `rule.id`: `string`  } & { `_version`: `undefined` \| `string`  }\>
-
-#### Defined in
-
-[rule_registry/server/alert_data_client/alerts_client.ts:79](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L79)
-
-___
-
-### get
-
-▸ **get**(`__namedParameters`): `Promise`<undefined \| ``null`` \| OutputOf<SetOptional<`Object`\>\>\>
+▸ `Private` **buildEsQueryWithAuthz**(`query`, `id`, `alertSpaceId`, `operation`, `config`): `Promise`<`Object`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `__namedParameters` | `GetAlertParams` |
-
-#### Returns
-
-`Promise`<undefined \| ``null`` \| OutputOf<SetOptional<`Object`\>\>\>
-
-#### Defined in
-
-[rule_registry/server/alert_data_client/alerts_client.ts:115](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L115)
-
-___
-
-### getAlertsIndex
-
-▸ **getAlertsIndex**(`featureIds`, `operations`): `Promise`<`Object`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `featureIds` | `string`[] |
-| `operations` | (`ReadOperations` \| `WriteOperations`)[] |
+| `query` | `undefined` \| ``null`` \| `string` |
+| `id` | `undefined` \| ``null`` \| `string` |
+| `alertSpaceId` | `string` |
+| `operation` | `Get` \| `Find` \| `Update` |
+| `config` | `EsQueryConfig` |
 
 #### Returns
 
@@ -142,7 +120,76 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:68](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L68)
+[alerts_client.ts:305](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L305)
+
+___
+
+### bulkUpdate
+
+▸ **bulkUpdate**<Params\>(`__namedParameters`): `Promise`<ApiResponse<BulkResponse, unknown\> \| ApiResponse<UpdateByQueryResponse, unknown\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `Params` | `Params`: `AlertTypeParams` = `never` |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `__namedParameters` | [BulkUpdateOptions](../interfaces/bulkupdateoptions.md)<Params\> |
+
+#### Returns
+
+`Promise`<ApiResponse<BulkResponse, unknown\> \| ApiResponse<UpdateByQueryResponse, unknown\>\>
+
+#### Defined in
+
+[alerts_client.ts:475](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L475)
+
+___
+
+### ensureAllAuthorized
+
+▸ `Private` **ensureAllAuthorized**(`items`, `operation`): `Promise`<(undefined \| void)[]\>
+
+Accepts an array of ES documents and executes ensureAuthorized for the given operation
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `items` | { `_id`: `string` ; `_source?`: ``null`` \| { `kibana.alert.owner?`: ``null`` \| `string` ; `rule.id?`: ``null`` \| `string`  }  }[] |
+| `operation` | `Get` \| `Find` \| `Update` |
+
+#### Returns
+
+`Promise`<(undefined \| void)[]\>
+
+#### Defined in
+
+[alerts_client.ts:111](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L111)
+
+___
+
+### get
+
+▸ **get**(`__namedParameters`): `Promise`<undefined \| OutputOf<SetOptional<`Object`\>\>\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `__namedParameters` | `GetAlertParams` |
+
+#### Returns
+
+`Promise`<undefined \| OutputOf<SetOptional<`Object`\>\>\>
+
+#### Defined in
+
+[alerts_client.ts:407](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L407)
 
 ___
 
@@ -162,13 +209,87 @@ ___
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:219](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L219)
+[alerts_client.ts:533](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L533)
+
+___
+
+### mgetAlertsAuditOperate
+
+▸ `Private` **mgetAlertsAuditOperate**(`__namedParameters`): `Promise`<ApiResponse<BulkResponse, unknown\>\>
+
+When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `__namedParameters` | `Object` |
+| `__namedParameters.ids` | `string`[] |
+| `__namedParameters.indexName` | `string` |
+| `__namedParameters.operation` | `Get` \| `Find` \| `Update` |
+| `__namedParameters.status` | `STATUS\_VALUES` |
+
+#### Returns
+
+`Promise`<ApiResponse<BulkResponse, unknown\>\>
+
+#### Defined in
+
+[alerts_client.ts:252](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L252)
+
+___
+
+### queryAndAuditAllAlerts
+
+▸ `Private` **queryAndAuditAllAlerts**(`__namedParameters`): `Promise`<undefined \| { `auditedAlerts`: `boolean` = true; `authorizedQuery`: {}  }\>
+
+executes a search after to find alerts with query (+ authz filter)
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `__namedParameters` | `Object` |
+| `__namedParameters.index` | `string` |
+| `__namedParameters.operation` | `Get` \| `Find` \| `Update` |
+| `__namedParameters.query` | `string` |
+
+#### Returns
+
+`Promise`<undefined \| { `auditedAlerts`: `boolean` = true; `authorizedQuery`: {}  }\>
+
+#### Defined in
+
+[alerts_client.ts:343](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L343)
+
+___
+
+### singleSearchAfterAndAudit
+
+▸ `Private` **singleSearchAfterAndAudit**(`__namedParameters`): `Promise`<SearchResponse<OutputOf<SetOptional<`Object`\>\>\>\>
+
+This will be used as a part of the "find" api
+In the future we will add an "aggs" param
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `__namedParameters` | `SingleSearchAfterAndAudit` |
+
+#### Returns
+
+`Promise`<SearchResponse<OutputOf<SetOptional<`Object`\>\>\>\>
+
+#### Defined in
+
+[alerts_client.ts:176](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L176)
 
 ___
 
 ### update
 
-▸ **update**<Params\>(`__namedParameters`): `Promise`<undefined \| { `_version`: `undefined` \| `string`  }\>
+▸ **update**<Params\>(`__namedParameters`): `Promise`<`Object`\>
 
 #### Type parameters
 
@@ -184,8 +305,8 @@ ___
 
 #### Returns
 
-`Promise`<undefined \| { `_version`: `undefined` \| `string`  }\>
+`Promise`<`Object`\>
 
 #### Defined in
 
-[rule_registry/server/alert_data_client/alerts_client.ts:160](https://github.com/elastic/kibana/blob/f2a94addc85/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L160)
+[alerts_client.ts:432](https://github.com/elastic/kibana/blob/daf6871ba4b/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L432)

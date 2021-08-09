@@ -16,8 +16,8 @@ export interface KibanaExecutionContext
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [description](./kibana-plugin-core-server.kibanaexecutioncontext.description.md) | <code>string</code> | human readable description. For example, a vis title, action name |
-|  [id](./kibana-plugin-core-server.kibanaexecutioncontext.id.md) | <code>string</code> | unique value to indentify find the source |
+|  [id](./kibana-plugin-core-server.kibanaexecutioncontext.id.md) | <code>string</code> | unique value to identify the source |
 |  [name](./kibana-plugin-core-server.kibanaexecutioncontext.name.md) | <code>string</code> | public name of a user-facing feature |
-|  [type](./kibana-plugin-core-server.kibanaexecutioncontext.type.md) | <code>string</code> | Kibana application initated an operation. Can be narrowed to an enum later. |
+|  [type](./kibana-plugin-core-server.kibanaexecutioncontext.type.md) | <code>string</code> | Kibana application initated an operation. |
 |  [url](./kibana-plugin-core-server.kibanaexecutioncontext.url.md) | <code>string</code> | in browser - url to navigate to a current page, on server - endpoint path, for task: task SO url |
 

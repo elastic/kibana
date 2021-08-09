@@ -41,7 +41,12 @@ export const CtiDisabledModuleComponent = () => {
   );
 
   return (
-    <ThreatIntelPanelView totalEventCount={0} splitPanel={danger} listItems={EMPTY_LIST_ITEMS} />
+    <ThreatIntelPanelView
+      totalEventCount={0}
+      splitPanel={danger}
+      listItems={EMPTY_LIST_ITEMS}
+      isInspectEnabled={false}
+    />
   );
 };
 

@@ -13,6 +13,7 @@ import type { ExecutionContextContainer } from './execution_context_container';
 const createContainerMock = () => {
   const mock: jest.Mocked<PublicMethodsOf<ExecutionContextContainer>> = {
     toHeader: jest.fn(),
+    toJSON: jest.fn(),
   };
   return mock;
 };

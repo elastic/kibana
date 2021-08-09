@@ -10,23 +10,32 @@ import { Type } from '@kbn/config-schema';
 
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
-import { ContextSetup } from './context';
+import { InternalContextPreboot, ContextSetup } from './context';
 import {
+  InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './elasticsearch';
-import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
+import {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+  InternalHttpServiceStart,
+} from './http';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
 } from './saved_objects';
-import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
+import {
+  InternalUiSettingsServicePreboot,
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+} from './ui_settings';
 import { InternalEnvironmentServiceSetup } from './environment';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
-import { InternalHttpResourcesSetup } from './http_resources';
+import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { InternalLoggingServiceSetup } from './logging';
+import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup } from './deprecations';
@@ -34,6 +43,18 @@ import type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
 } from './execution_context';
+import { InternalPrebootServicePreboot } from './preboot';
+
+/** @internal */
+export interface InternalCorePreboot {
+  context: InternalContextPreboot;
+  http: InternalHttpServicePreboot;
+  elasticsearch: InternalElasticsearchServicePreboot;
+  uiSettings: InternalUiSettingsServicePreboot;
+  httpResources: InternalHttpResourcesPreboot;
+  logging: InternalLoggingServicePreboot;
+  preboot: InternalPrebootServicePreboot;
+}
 
 /** @internal */
 export interface InternalCoreSetup {

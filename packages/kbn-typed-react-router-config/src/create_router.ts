@@ -45,10 +45,12 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
   const matchRoutes = (...args: any[]) => {
     let path: string = args[0];
     let location: Location = args[1];
+    let optional: boolean = args[2];
 
     if (args.length === 1) {
       location = args[0] as Location;
       path = location.pathname;
+      optional = args[1];
     }
 
     const greedy = path.endsWith('/*') || args.length === 1;
@@ -64,6 +66,9 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       : findLastIndex(matches, (match) => match.route.path === path);
 
     if (matchIndex === -1) {
+      if (optional) {
+        return [];
+      }
       throw new Error(`No matching route found for ${path}`);
     }
 
@@ -144,9 +149,11 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     link: (path, ...args) => {
       return link(path, ...args);
     },
-    getParams: (path, location) => {
-      const matches = matchRoutes(path, location);
-      return merge({ path: {}, query: {} }, ...matches.map((match) => match.match.params));
+    getParams: (...args: any[]) => {
+      const matches = matchRoutes(...args);
+      return matches.length
+        ? merge({ path: {}, query: {} }, ...matches.map((match) => match.match.params))
+        : undefined;
     },
     matchRoutes: (...args: any[]) => {
       return matchRoutes(...args) as any;

@@ -38,8 +38,9 @@ import {
   ALERT_CCR_READ_EXCEPTIONS,
   ALERT_LARGE_SHARD_SIZE,
 } from '../../common/constants';
-import { AlertsClient } from '../../../alerting/server';
+import { RulesClient } from '../../../alerting/server';
 import { Alert } from '../../../alerting/common';
+import { CommonAlertParams } from '../../common/types/alerts';
 
 const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
@@ -61,24 +62,22 @@ const BY_TYPE = {
 export class AlertsFactory {
   public static async getByType(
     type: string,
-    alertsClient: AlertsClient | undefined
-  ): Promise<BaseAlert | undefined> {
+    alertsClient: RulesClient | undefined
+  ): Promise<BaseAlert[]> {
     const alertCls = BY_TYPE[type];
     if (!alertCls || !alertsClient) {
-      return;
+      return [];
     }
-    const alertClientAlerts = await alertsClient.find({
+    const alertClientAlerts = await alertsClient.find<CommonAlertParams>({
       options: {
         filter: `alert.attributes.alertTypeId:${type}`,
       },
     });
 
     if (!alertClientAlerts.total || !alertClientAlerts.data?.length) {
-      return;
+      return [];
     }
-
-    const [rawAlert] = alertClientAlerts.data as [Alert];
-    return new alertCls(rawAlert) as BaseAlert;
+    return alertClientAlerts.data.map((alert) => new alertCls(alert as Alert) as BaseAlert);
   }
 
   public static getAll() {

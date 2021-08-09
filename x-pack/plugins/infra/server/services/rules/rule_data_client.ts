@@ -9,7 +9,6 @@ import { once } from 'lodash';
 import { CoreSetup, Logger } from 'src/core/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../../../rule_registry/common/assets';
 import { RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
-import { logThresholdRuleDataNamespace } from '../../../common/alerting/logs/log_threshold';
 import type { InfraFeatureId } from '../../../common/constants';
 import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
 
@@ -44,18 +43,7 @@ export const createRuleDataClient = ({
           settings: {
             number_of_shards: 1,
           },
-          mappings: {
-            properties: {
-              [logThresholdRuleDataNamespace]: {
-                properties: {
-                  serialized_params: {
-                    type: 'keyword',
-                    index: false,
-                  },
-                },
-              },
-            },
-          },
+          mappings: {},
         },
       },
     });

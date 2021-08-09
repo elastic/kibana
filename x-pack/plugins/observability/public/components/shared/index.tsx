@@ -6,6 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
 import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
 
@@ -26,7 +27,7 @@ const HeaderMenuPortalLazy = lazy(() => import('./header_menu_portal'));
 
 export function HeaderMenuPortal(props: HeaderMenuPortalProps) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<EuiLoadingSpinner />}>
       <HeaderMenuPortalLazy {...props} />
     </Suspense>
   );

@@ -43,6 +43,7 @@ describe('http service', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      await root.preboot();
     }, 30000);
 
     afterEach(async () => {
@@ -189,6 +190,7 @@ describe('http service', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      await root.preboot();
     }, 30000);
 
     afterEach(async () => {
@@ -282,6 +284,7 @@ describe('http service', () => {
 
     beforeEach(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      await root.preboot();
     }, 30000);
 
     afterEach(async () => {

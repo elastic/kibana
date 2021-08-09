@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { SIGNIFICANT_VALUE_DIGITS } from './constants';
@@ -28,7 +28,7 @@ interface ResponseHit {
 }
 
 export const getTransactionDurationPercentilesRequest = (
-  params: SearchServiceParams,
+  params: SearchServiceFetchParams,
   percents?: number[],
   fieldName?: string,
   fieldValue?: string
@@ -58,7 +58,7 @@ export const getTransactionDurationPercentilesRequest = (
 
 export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceParams,
+  params: SearchServiceFetchParams,
   percents?: number[],
   fieldName?: string,
   fieldValue?: string

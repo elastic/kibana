@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+export const mockCreatePluginPrebootSetupContext = jest.fn();
 export const mockCreatePluginSetupContext = jest.fn();
 export const mockCreatePluginStartContext = jest.fn();
 jest.mock('./plugin_context', () => ({
+  createPluginPrebootSetupContext: mockCreatePluginPrebootSetupContext,
   createPluginSetupContext: mockCreatePluginSetupContext,
   createPluginStartContext: mockCreatePluginStartContext,
 }));

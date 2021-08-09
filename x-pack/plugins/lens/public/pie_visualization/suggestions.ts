@@ -7,8 +7,8 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SuggestionRequest, VisualizationSuggestion } from '../types';
-import { PieVisualizationState } from './types';
+import type { SuggestionRequest, VisualizationSuggestion } from '../types';
+import type { PieVisualizationState } from '../../common/expressions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 
 function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizationState>) {

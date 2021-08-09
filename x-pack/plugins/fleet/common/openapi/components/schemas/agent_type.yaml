@@ -1,5 +1,5 @@
 type: string
-title: AgentType
+title: Agent type
 enum:
   - PERMANENT
   - EPHEMERAL

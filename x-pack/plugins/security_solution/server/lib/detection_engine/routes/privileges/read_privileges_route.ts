@@ -7,12 +7,10 @@
 
 import { merge } from 'lodash/fp';
 
-import { transformError } from '@kbn/securitysolution-es-utils';
+import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-
-import { readPrivileges } from '../../privileges/read_privileges';
 
 export const readPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -30,7 +28,7 @@ export const readPrivilegesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient) {
@@ -38,7 +36,7 @@ export const readPrivilegesRoute = (
         }
 
         const index = siemClient.getSignalsIndex();
-        const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
+        const clusterPrivileges = await readPrivileges(esClient, index);
         const privileges = merge(clusterPrivileges, {
           is_authenticated: request.auth.isAuthenticated ?? false,
           has_encryption_key: hasEncryptionKey,

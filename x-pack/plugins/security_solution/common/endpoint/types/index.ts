@@ -864,6 +864,8 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields;
+    memory_protection: ProtectionFields & SupportedFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -874,6 +876,14 @@ export interface PolicyConfig {
         enabled: boolean;
       };
       ransomware: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -890,8 +900,13 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -908,8 +923,13 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -929,16 +949,29 @@ export interface UIPolicyConfig {
    */
   windows: Pick<
     PolicyConfig['windows'],
-    'events' | 'malware' | 'ransomware' | 'popup' | 'antivirus_registration' | 'advanced'
+    | 'events'
+    | 'malware'
+    | 'ransomware'
+    | 'popup'
+    | 'antivirus_registration'
+    | 'advanced'
+    | 'memory_protection'
+    | 'behavior_protection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  mac: Pick<
+    PolicyConfig['mac'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  linux: Pick<
+    PolicyConfig['linux'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
 }
 
 /** Policy:  Protection fields */

@@ -174,8 +174,8 @@ export function FieldValueSelection({
           }}
           options={options}
           onChange={onChange}
-          isLoading={loading && !query && options.length === 0}
           allowExclusions={allowExclusions}
+          isLoading={loading && !query && options.length === 0}
         >
           {(list, search) => (
             <div style={{ width: 240 }}>

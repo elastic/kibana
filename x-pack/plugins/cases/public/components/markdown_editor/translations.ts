@@ -7,9 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MARKDOWN = i18n.translate('xpack.cases.markdownEditor.markdown', {
-  defaultMessage: 'Markdown',
-});
 export const PREVIEW = i18n.translate('xpack.cases.markdownEditor.preview', {
   defaultMessage: 'Preview',
 });

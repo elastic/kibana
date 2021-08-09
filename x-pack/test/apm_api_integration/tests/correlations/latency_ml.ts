@@ -26,7 +26,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const getRequestBody = () => {
     const partialSearchRequest: PartialSearchRequest = {
       params: {
-        index: 'apm-*',
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
         end: '2021',
@@ -141,7 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Correlations latency_ml with data and opbeans-node args',
-    { config: 'trial', archives: ['ml_8.0.0'] },
+    { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
       it('queries the search strategy and returns results', async () => {
@@ -235,30 +234,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { rawResponse: finalRawResponse } = followUpResult;
 
         expect(typeof finalRawResponse?.took).to.be('number');
-        expect(finalRawResponse?.percentileThresholdValue).to.be(1404927.875);
+        expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram.length).to.be(101);
 
         expect(finalRawResponse?.values.length).to.eql(
-          1,
-          `Expected 1 identified correlations, got ${finalRawResponse?.values.length}.`
+          13,
+          `Expected 13 identified correlations, got ${finalRawResponse?.values.length}.`
         );
         expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
-          'Fetched 95th percentile value of 1404927.875 based on 989 documents.',
+          'Fetched 95th percentile value of 1309695.875 based on 1244 documents.',
           'Loaded histogram range steps.',
           'Loaded overall histogram chart data.',
           'Loaded percentiles.',
-          'Identified 67 fieldCandidates.',
-          'Identified 339 fieldValuePairs.',
-          'Loaded fractions and totalDocCount of 989.',
-          'Identified 1 significant correlations out of 339 field/value pairs.',
+          'Identified 69 fieldCandidates.',
+          'Identified 379 fieldValuePairs.',
+          'Loaded fractions and totalDocCount of 1244.',
+          'Identified 13 significant correlations out of 379 field/value pairs.',
         ]);
 
         const correlation = finalRawResponse?.values[0];
         expect(typeof correlation).to.be('object');
         expect(correlation?.field).to.be('transaction.result');
         expect(correlation?.value).to.be('success');
-        expect(correlation?.correlation).to.be(0.37418510688551887);
-        expect(correlation?.ksTest).to.be(1.1238496968312214e-10);
+        expect(correlation?.correlation).to.be(0.6275246559191225);
+        expect(correlation?.ksTest).to.be(4.806503252860024e-13);
         expect(correlation?.histogram.length).to.be(101);
       });
     }

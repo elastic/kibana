@@ -13,7 +13,6 @@ import {
   getAlertMock,
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
-  getFindResultStatus,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
@@ -34,9 +33,8 @@ describe('update_rules_bulk', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.alertsClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
 
     updateRulesBulkRoute(server.router, ml);
   });
@@ -48,7 +46,7 @@ describe('update_rules_bulk', () => {
     });
 
     test('returns 200 as a response when updating a single rule that does not exist', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const expected: BulkError[] = [
         {
           error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
@@ -62,7 +60,7 @@ describe('update_rules_bulk', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting!.getRulesClient = jest.fn();
       const response = await server.inject(getUpdateBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -77,7 +75,7 @@ describe('update_rules_bulk', () => {
     });
 
     test('returns an error if update throws', async () => {
-      clients.alertsClient.update.mockImplementation(() => {
+      clients.rulesClient.update.mockImplementation(() => {
         throw new Error('Test error');
       });
 

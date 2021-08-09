@@ -15,6 +15,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
+  EphemeralTask,
 } from '../../../../../plugins/task_manager/server';
 import { DEFAULT_MAX_WORKERS } from '../../../../../plugins/task_manager/server/config';
 
@@ -37,6 +38,8 @@ export class SampleTaskManagerFixturePlugin
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
+
+    const tmStart = this.taskManagerStart;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -155,6 +158,85 @@ export class SampleTaskManagerFixturePlugin
       },
     });
 
+    const taskWithTiming = {
+      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+        async run() {
+          const stopTiming = startTaskTimer();
+
+          const {
+            params: { delay = 0 },
+            state: { timings = [] },
+          } = taskInstance;
+
+          if (delay) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, delay);
+            });
+          }
+
+          return {
+            state: { timings: [...timings, stopTiming()] },
+          };
+        },
+      }),
+    };
+
+    taskManager.registerTaskDefinitions({
+      timedTask: {
+        title: 'Task With Tracked Timings',
+        timeout: '60s',
+        description: 'A task that tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      timedTaskWithSingleConcurrency: {
+        title: 'Task With Tracked Timings and Single Concurrency',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description:
+          'A task that can only have one concurrent instance and tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      timedTaskWithLimitedConcurrency: {
+        title: 'Task With Tracked Timings and Limited Concurrency',
+        maxConcurrency: 2,
+        timeout: '60s',
+        description:
+          'A task that can only have two concurrent instance and tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      taskWhichExecutesOtherTasksEphemerally: {
+        title: 'Task Which Executes Other Tasks Ephemerally',
+        description: 'A sample task used to validate how ephemeral tasks are executed.',
+        maxAttempts: 1,
+        timeout: '60s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const {
+              params: { tasks = [] },
+            } = taskInstance;
+
+            const tm = await tmStart;
+            const executions = await Promise.all(
+              (tasks as EphemeralTask[]).map(async (task) => {
+                return tm
+                  .ephemeralRunNow(task)
+                  .then((result) => ({
+                    result,
+                  }))
+                  .catch((error) => ({
+                    error,
+                  }));
+              })
+            );
+
+            return {
+              state: { executions },
+            };
+          },
+        }),
+      },
+    });
+
     taskManager.addMiddleware({
       async beforeSave({ taskInstance, ...opts }) {
         const modifiedInstance = {
@@ -213,3 +295,8 @@ const once = function (emitter: EventEmitter, event: string): Promise<Record<str
     emitter.once(event, (data) => resolve(data || {}));
   });
 };
+
+function startTaskTimer(): () => { start: number; stop: number } {
+  const start = Date.now();
+  return () => ({ start, stop: Date.now() });
+}

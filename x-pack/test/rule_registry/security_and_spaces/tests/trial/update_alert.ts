@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { omit } from 'lodash/fp';
 
 import {
   superUser,
@@ -104,14 +105,12 @@ export default ({ getService }: FtrProviderContext) => {
             _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
           })
           .expect(200);
-        expect(res.body).to.eql({
+        expect(omit(['_version', '_seq_no'], res.body)).to.eql({
           success: true,
           _index: '.alerts-observability-apm',
           _id: 'NoxgpHkBqbdrfX07MqXV',
           result: 'updated',
           _shards: { total: 2, successful: 1, failed: 0 },
-          _version: 'WzEsMV0=',
-          _seq_no: 1,
           _primary_term: 1,
         });
       });
@@ -167,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
             index: apmIndex,
             _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
           })
-          .expect(403);
+          .expect(404);
       });
 
       it(`${obsMinAllSpacesAll.username} should NOT be able to update the APM alert in ${SPACE1}`, async () => {
@@ -182,7 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
             index: apmIndex,
             _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
           })
-          .expect(403);
+          .expect(404);
       });
     });
   });

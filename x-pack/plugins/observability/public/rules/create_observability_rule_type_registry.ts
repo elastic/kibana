@@ -8,7 +8,7 @@
 import {
   AlertTypeModel,
   AlertTypeParams,
-  AlertTypeRegistryContract,
+  RuleTypeRegistryContract,
 } from '../../../triggers_actions_ui/public';
 import { ParsedTechnicalFields } from '../../../rule_registry/common/parse_technical_fields';
 import { AsDuration, AsPercent } from '../../common/utils/formatters';
@@ -23,14 +23,14 @@ export interface ObservabilityRuleTypeModel<Params extends AlertTypeParams = Ale
   format: ObservabilityRuleTypeFormatter;
 }
 
-export function createObservabilityRuleTypeRegistry(alertTypeRegistry: AlertTypeRegistryContract) {
+export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRegistryContract) {
   const formatters: Array<{ typeId: string; fn: ObservabilityRuleTypeFormatter }> = [];
 
   return {
     register: (type: ObservabilityRuleTypeModel<any>) => {
       const { format, ...rest } = type;
       formatters.push({ typeId: type.id, fn: format });
-      alertTypeRegistry.register(rest);
+      ruleTypeRegistry.register(rest);
     },
     getFormatter: (typeId: string) => {
       return formatters.find((formatter) => formatter.typeId === typeId)?.fn;

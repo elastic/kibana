@@ -6,10 +6,15 @@
  */
 
 import React from 'react';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
-import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { DurationAnomalyTranslations } from './translations';
+import moment from 'moment';
+
+import { ALERT_END, ALERT_STATUS } from '@kbn/rule-data-utils';
+
 import { AlertTypeInitializer } from '.';
+import { getMonitorRouteFromMonitorId } from './common';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
+import { DurationAnomalyTranslations } from '../../../common/translations';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 
 const { defaultActionMessage, description } = DurationAnomalyTranslations;
 const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_anomaly'));
@@ -17,7 +22,7 @@ const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_an
 export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): AlertTypeModel => ({
+}): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
@@ -30,4 +35,12 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   requiresAppContext: true,
+  format: ({ fields }) => ({
+    reason: fields.reason,
+    link: getMonitorRouteFromMonitorId({
+      monitorId: fields['monitor.id']!,
+      dateRangeEnd: fields[ALERT_STATUS] === 'open' ? 'now' : fields[ALERT_END]!,
+      dateRangeStart: moment(new Date(fields['anomaly.start']!)).subtract('5', 'm').toISOString(),
+    }),
+  }),
 });

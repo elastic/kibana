@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/public';
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { EditorFrameSetup, FormatFactory } from '../types';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import type { CoreSetup } from 'src/core/public';
+import type { ExpressionsSetup } from 'src/plugins/expressions/public';
+import type { EditorFrameSetup } from '../types';
+import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import type { FormatFactory } from '../../common';
 
 export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;

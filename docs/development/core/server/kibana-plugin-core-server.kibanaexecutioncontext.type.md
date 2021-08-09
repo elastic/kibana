@@ -4,7 +4,7 @@
 
 ## KibanaExecutionContext.type property
 
-Kibana application initated an operation. Can be narrowed to an enum later.
+Kibana application initated an operation.
 
 <b>Signature:</b>
 
