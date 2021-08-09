@@ -61,12 +61,14 @@ interface MlCorrelationsTerms {
 }
 
 interface Props {
-  onChartSelection: BrushEndListener;
-  onClearSelection: () => void;
+  correlationAnalysisEnabled: boolean;
+  onChartSelection?: BrushEndListener;
+  onClearSelection?: () => void;
   selection?: [number, number];
 }
 
 export function MlLatencyCorrelations({
+  correlationAnalysisEnabled,
   onChartSelection,
   onClearSelection,
   selection,
@@ -89,22 +91,24 @@ export function MlLatencyCorrelations({
     }
   );
 
-  const showCorrelationsButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.showCorrelationsButtonLabel',
-    {
-      defaultMessage: 'Analyze correlations',
-    }
-  );
+  // const showCorrelationsButtonLabel = i18n.translate(
+  //   'xpack.apm.transactionDetails.showCorrelationsButtonLabel',
+  //   {
+  //     defaultMessage: 'Analyze correlations',
+  //   }
+  // );
 
-  const hideCorrelationsButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.hideCorrelationsButtonLabel',
-    {
-      defaultMessage: 'Hide correlations',
-    }
-  );
+  // const hideCorrelationsButtonLabel = i18n.translate(
+  //   'xpack.apm.transactionDetails.hideCorrelationsButtonLabel',
+  //   {
+  //     defaultMessage: 'Hide correlations',
+  //   }
+  // );
 
-  const [showCorrelations, setShowCorrelations] = useState(false);
-  const toggleShowCorrelations = () => setShowCorrelations(!showCorrelations);
+  // const [showCorrelations, setShowCorrelations] = useState(
+  //   correlationAnalysisEnabled
+  // );
+  // const toggleShowCorrelations = () => setShowCorrelations(!showCorrelations);
 
   const {
     ccsWarning,
@@ -127,7 +131,7 @@ export function MlLatencyCorrelations({
       start,
       end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      analyzeCorrelations: showCorrelations,
+      analyzeCorrelations: correlationAnalysisEnabled,
     },
   });
 
@@ -147,7 +151,7 @@ export function MlLatencyCorrelations({
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showCorrelations]);
+  }, [correlationAnalysisEnabled]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -303,35 +307,33 @@ export function MlLatencyCorrelations({
 
   return (
     <EuiPanel hasBorder={true}>
-      {overallHistogram !== undefined ? (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <EuiTitle size="xs">
-                <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
-                  {i18n.translate(
-                    'xpack.apm.correlations.latencyCorrelations.chartTitle',
-                    {
-                      defaultMessage:
-                        'Latency distribution for {name} (Log-Log Plot)',
-                      values: {
-                        name: transactionName ?? serviceName,
-                      },
-                    }
-                  )}
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexEnd">
-                {selection && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={onClearSelection}>
-                      {clearSelectionButtonLabel}
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-                {!showCorrelations && (
+      <EuiFlexGroup>
+        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <EuiTitle size="xs">
+            <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.chartTitle',
+                {
+                  defaultMessage:
+                    'Latency distribution for {name} (Log-Log Plot)',
+                  values: {
+                    name: transactionName ?? serviceName,
+                  },
+                }
+              )}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd">
+            {selection && (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={onClearSelection}>
+                  {clearSelectionButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {/* {correlationAnalysisEnabled && !showCorrelations && (
                   <EuiFlexItem grow={false}>
                     <EuiButton fill onClick={toggleShowCorrelations}>
                       {showCorrelations
@@ -339,25 +341,23 @@ export function MlLatencyCorrelations({
                         : showCorrelationsButtonLabel}
                     </EuiButton>
                   </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+                )} */}
           </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-          <EuiSpacer size="s" />
+      <EuiSpacer size="s" />
 
-          <CorrelationsChart
-            markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-            markerValue={percentileThresholdValue ?? 0}
-            {...selectedHistogram}
-            overallHistogram={overallHistogram}
-            onChartSelection={onChartSelection}
-            selection={selection}
-          />
-        </>
-      ) : null}
+      <CorrelationsChart
+        markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
+        markerValue={percentileThresholdValue ?? 0}
+        {...selectedHistogram}
+        overallHistogram={overallHistogram}
+        onChartSelection={onChartSelection}
+        selection={selection}
+      />
 
-      {showCorrelations && (
+      {correlationAnalysisEnabled && (
         <>
           <EuiSpacer size="s" />
           <EuiTitle size="xs">
