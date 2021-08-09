@@ -17,7 +17,8 @@ import { Metric } from '../../../../common/types';
 export function isAggSupported(metrics: Metric[]) {
   const parentPipelineAggs = Object.values<string>(PARENT_PIPELINE_AGGREGATIONS);
   const metricTypes = metrics.filter(
-    (metric) => parentPipelineAggs.includes(metric.type) || metric.type === SPECIAL_AGGREGATIONS.SERIES_AGG
+    (metric) =>
+      parentPipelineAggs.includes(metric.type) || metric.type === SPECIAL_AGGREGATIONS.SERIES_AGG
   );
 
   if (metricTypes.length) {

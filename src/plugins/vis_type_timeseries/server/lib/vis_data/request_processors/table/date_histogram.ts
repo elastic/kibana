@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  overwrite,
-  getBucketSize,
-  isLastValueTimerangeMode,
-  getTimerange,
-} from '../../helpers';
+import { overwrite, getBucketSize, isLastValueTimerangeMode, getTimerange } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 import { METRIC_AGGREGATIONS } from '../../../../../common/enums';

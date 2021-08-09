@@ -76,7 +76,7 @@ export async function getTableData(
     if (isEntireTimeRangeMode(panel)) {
       panel.series.forEach((column) => {
         isAggSupported(column.metrics);
-      })
+      });
     }
 
     const body = await buildTableRequest({
