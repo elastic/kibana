@@ -22,7 +22,7 @@ describe('usage_collection', () => {
     jest.clearAllMocks();
   });
 
-  test('mlUsageCollection', () => {
+  test('should use usageCollection for usage events', () => {
     const mlUsageCollection = mlUsageCollectionProvider(usageCollection);
 
     mlUsageCollection.click('exported_anomaly_detector_jobs');
@@ -42,7 +42,7 @@ describe('usage_collection', () => {
     );
   });
 
-  test('mlUsageCollection1', () => {
+  test('should not use usageCollection if usageCollection is disabled', () => {
     const mlUsageCollection = mlUsageCollectionProvider(undefined);
     mlUsageCollection.click('imported_anomaly_detector_jobs', 1);
     mlUsageCollection.count('imported_data_frame_analytics_jobs', 2);
