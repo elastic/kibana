@@ -92,10 +92,6 @@ export function registerTransactionDurationAlertType({
         savedObjectsClient: services.savedObjectsClient,
       });
 
-      console.log(
-        '### caue ~ alertParams.transactionType',
-        alertParams.transactionType
-      );
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
         body: {
