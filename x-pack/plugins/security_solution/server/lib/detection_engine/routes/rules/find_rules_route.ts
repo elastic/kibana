@@ -6,6 +6,8 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { PublicContract } from '@kbn/utility-types';
+
 import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
@@ -19,11 +21,13 @@ import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
 import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
+import { RACRuleParams, RuleParams } from '../../schemas/rule_schemas';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: PublicContract<RuleDataClient> | null
 ) => {
+  const isRuleRegistryEnabled = ruleDataClient != null;
   router.get(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -54,6 +58,7 @@ export const findRulesRoute = (
 
         const execLogClient = context.securitySolution.getExecutionLogClient();
         const rules = await findRules({
+          isRuleRegistryEnabled,
           rulesClient,
           perPage: query.per_page,
           page: query.page,
@@ -72,7 +77,12 @@ export const findRulesRoute = (
           }),
           getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
-        const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
+        let transformed = null;
+        if (isRuleRegistryEnabled) {
+          transformed = transformFindAlerts<RACRuleParams>(rules, ruleActions, ruleStatuses);
+        } else {
+          transformed = transformFindAlerts<RuleParams>(rules, ruleActions, ruleStatuses);
+        }
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

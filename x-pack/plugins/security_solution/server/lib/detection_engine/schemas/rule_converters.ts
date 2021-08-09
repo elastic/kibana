@@ -12,16 +12,17 @@ import {
 } from '../../../../common/detection_engine/utils';
 import {
   InternalRuleCreate,
-  RuleParams,
   TypeSpecificRuleParams,
   BaseRuleParams,
   InternalRuleCreateBase,
   InternalRACRuleCreate,
+  BaseRACRuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
   CreateRulesSchema,
   CreateTypeSpecific,
+  FullRACResponseSchema,
   FullResponseSchema,
   RACCreateRulesSchema,
   ResponseTypeSpecific,
@@ -289,13 +290,14 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
   };
 };
 
-export const internalRuleToAPIResponse = (
-  rule: SanitizedAlert<RuleParams>,
+export const internalRuleToAPIResponse = <TRuleParams extends BaseRuleParams>(
+  rule: SanitizedAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: IRuleStatusSOAttributes
+  ruleStatus?: IRuleStatusSOAttributes,
+  isRuleRegistryEnabled?: boolean
 ): FullResponseSchema => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
-  return {
+  const response = {
     // Alerting framework params
     id: rule.id,
     updated_at: rule.updatedAt.toISOString(),
@@ -309,7 +311,7 @@ export const internalRuleToAPIResponse = (
     // Security solution shared rule params
     ...commonParamsCamelToSnake(rule.params),
     // Type specific security solution rule params
-    ...typeSpecificCamelToSnake(rule.params),
+    ...typeSpecificCamelToSnake((rule.params as unknown) as TypeSpecificRuleParams),
     // Actions
     throttle: ruleActions?.ruleThrottle || 'no_actions',
     actions: ruleActions?.actions ?? [],
@@ -321,10 +323,19 @@ export const internalRuleToAPIResponse = (
     last_failure_message: mergedStatus?.lastFailureMessage ?? undefined,
     last_success_message: mergedStatus?.lastSuccessMessage ?? undefined,
   };
+
+  if (isRuleRegistryEnabled) {
+    return {
+      ...response,
+      namespace: ((rule as unknown) as BaseRACRuleParams).namespace,
+    } as FullRACResponseSchema;
+  }
+
+  return response as FullResponseSchema;
 };
 
 export const mergeAlertWithSidecarStatus = (
-  alert: SanitizedAlert<RuleParams>,
+  alert: SanitizedAlert<BaseRuleParams>,
   status: IRuleStatusSOAttributes
 ): IRuleStatusSOAttributes => {
   if (

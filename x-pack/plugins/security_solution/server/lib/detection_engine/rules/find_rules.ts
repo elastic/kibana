@@ -8,17 +8,27 @@
 import { FindResult } from '../../../../../alerting/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
+import { ruleTypeMappings } from '../signals/utils';
 import { FindRuleOptions } from './types';
 
-export const getFilter = (filter: string | null | undefined) => {
+export const getFilter = (
+  filter: string | null | undefined,
+  isRuleRegistryEnabled: boolean = false
+) => {
+  const alertTypeFilter = isRuleRegistryEnabled
+    ? `(${Object.values(ruleTypeMappings)
+        .map((type) => `alert.attributes.alertTypeId: ${type}`)
+        .join(' OR ')})`
+    : `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
   if (filter == null) {
-    return `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
+    return alertTypeFilter;
   } else {
-    return `alert.attributes.alertTypeId: ${SIGNALS_ID} AND ${filter}`;
+    return `${alertTypeFilter} AND ${filter}`;
   }
 };
 
 export const findRules = ({
+  isRuleRegistryEnabled,
   rulesClient,
   perPage,
   page,
@@ -29,6 +39,7 @@ export const findRules = ({
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
+      isRuleRegistryEnabled,
       fields,
       page,
       perPage,

@@ -341,6 +341,7 @@ export interface DeleteRuleOptions {
 }
 
 export interface FindRuleOptions {
+  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;

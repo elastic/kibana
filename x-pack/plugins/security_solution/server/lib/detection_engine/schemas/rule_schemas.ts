@@ -65,37 +65,45 @@ import {
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
-export const baseRuleParams = t.exact(
+export const baseRuleParamsObj = {
+  author,
+  buildingBlockType: buildingBlockTypeOrUndefined,
+  description,
+  note: noteOrUndefined,
+  falsePositives: false_positives,
+  from,
+  ruleId: rule_id,
+  immutable,
+  license: licenseOrUndefined,
+  outputIndex: output_index,
+  timelineId: timelineIdOrUndefined,
+  timelineTitle: timelineTitleOrUndefined,
+  meta: metaOrUndefined,
+  // maxSignals not used in ML rules but probably should be used
+  maxSignals: max_signals,
+  riskScore: risk_score,
+  riskScoreMapping: risk_score_mapping,
+  ruleNameOverride: ruleNameOverrideOrUndefined,
+  severity,
+  severityMapping: severity_mapping,
+  timestampOverride: timestampOverrideOrUndefined,
+  threat: threats,
+  to,
+  references,
+  version,
+  exceptionsList: listArray,
+};
+
+export const baseRuleParams = t.exact(t.type(baseRuleParamsObj));
+export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
+
+export const baseRACRuleParams = t.exact(
   t.type({
-    author,
-    buildingBlockType: buildingBlockTypeOrUndefined,
-    description,
-    note: noteOrUndefined,
-    falsePositives: false_positives,
-    from,
-    ruleId: rule_id,
-    immutable,
-    license: licenseOrUndefined,
-    outputIndex: output_index,
-    timelineId: timelineIdOrUndefined,
-    timelineTitle: timelineTitleOrUndefined,
-    meta: metaOrUndefined,
-    // maxSignals not used in ML rules but probably should be used
-    maxSignals: max_signals,
-    riskScore: risk_score,
-    riskScoreMapping: risk_score_mapping,
-    ruleNameOverride: ruleNameOverrideOrUndefined,
-    severity,
-    severityMapping: severity_mapping,
-    timestampOverride: timestampOverrideOrUndefined,
-    threat: threats,
-    to,
-    references,
-    version,
-    exceptionsList: listArray,
+    ...baseRuleParamsObj,
+    namespace: t.string,
   })
 );
-export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
+export type BaseRACRuleParams = t.TypeOf<typeof baseRACRuleParams>;
 
 const eqlSpecificRuleParams = t.type({
   type: t.literal('eql'),
@@ -188,6 +196,9 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
+
+export const racRuleParams = t.intersection([baseRACRuleParams, typeSpecificRuleParams]);
+export type RACRuleParams = t.TypeOf<typeof racRuleParams>;
 
 const internalRuleCreateBase = {
   name,

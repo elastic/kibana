@@ -32,7 +32,7 @@ import {
 } from '../utils';
 import { RuleActions } from '../../rule_actions/types';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
-import { RuleParams } from '../../schemas/rule_schemas';
+import { BaseRuleParams, RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
@@ -114,8 +114,8 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
   return alerts.map((alert) => transformAlertToRule(alert));
 };
 
-export const transformFindAlerts = (
-  findResults: FindResult<RuleParams>,
+export const transformFindAlerts = <TRuleParams extends BaseRuleParams>(
+  findResults: FindResult<TRuleParams>,
   ruleActions: { [key: string]: RuleActions | undefined },
   ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
 ): {
@@ -131,7 +131,7 @@ export const transformFindAlerts = (
     data: findResults.data.map((alert) => {
       const statuses = ruleStatuses[alert.id];
       const status = statuses ? statuses[0] : undefined;
-      return internalRuleToAPIResponse(alert, ruleActions[alert.id], status);
+      return internalRuleToAPIResponse<TRuleParams>(alert, ruleActions[alert.id], status);
     }),
   };
 };

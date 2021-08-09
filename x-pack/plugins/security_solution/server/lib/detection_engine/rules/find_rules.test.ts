@@ -8,14 +8,34 @@
 import { getFilter } from './find_rules';
 import { SIGNALS_ID } from '../../../../common/constants';
 
-describe('find_rules', () => {
-  test('it returns a full filter with an AND if sent down', () => {
-    expect(getFilter('alert.attributes.enabled: true')).toEqual(
-      `alert.attributes.alertTypeId: ${SIGNALS_ID} AND alert.attributes.enabled: true`
-    );
-  });
+const allAlertTypeIds = `(alert.attributes.alertTypeId: siem.eql
+ OR alert.attributes.alertTypeId: siem.machine_learning
+ OR alert.attributes.alertTypeId: siem.query
+ OR alert.attributes.alertTypeId: siem.saved_query
+ OR alert.attributes.alertTypeId: siem.threat_match
+ OR alert.attributes.alertTypeId: siem.threshold)`.replace(/[\n\r]/g, '');
 
-  test('it returns existing filter with no AND when not set', () => {
-    expect(getFilter(null)).toEqual(`alert.attributes.alertTypeId: ${SIGNALS_ID}`);
-  });
+describe('find_rules', () => {
+  const fullFilterTestCases: Array<[boolean, string]> = [
+    [false, `alert.attributes.alertTypeId: ${SIGNALS_ID} AND alert.attributes.enabled: true`],
+    [true, `${allAlertTypeIds} AND alert.attributes.enabled: true`],
+  ];
+  const nullFilterTestCases: Array<[boolean, string]> = [
+    [false, `alert.attributes.alertTypeId: ${SIGNALS_ID}`],
+    [true, allAlertTypeIds],
+  ];
+
+  test.each(fullFilterTestCases)(
+    'it returns a full filter with an AND if sent down [rule registry enabled: %p]',
+    (isRuleRegistryEnabled, expected) => {
+      expect(getFilter('alert.attributes.enabled: true', isRuleRegistryEnabled)).toEqual(expected);
+    }
+  );
+
+  test.each(nullFilterTestCases)(
+    'it returns existing filter with no AND when not set [rule registry enabled: %p]',
+    (isRuleRegistryEnabled, expected) => {
+      expect(getFilter(null, isRuleRegistryEnabled)).toEqual(expected);
+    }
+  );
 });

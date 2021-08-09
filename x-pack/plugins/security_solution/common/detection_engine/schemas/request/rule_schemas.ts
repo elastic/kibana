@@ -193,7 +193,7 @@ const {
 
 const {
   create: racBaseCreateParams,
-  patch: racBasePatchParams,
+  // patch: racBasePatchParams,
   response: racBaseResponseParams,
 } = buildAPISchemas(racBaseParams);
 
@@ -445,3 +445,11 @@ export const fullResponseSchema = t.intersection([
   t.exact(t.partial(responseOptionalFields)),
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
+
+export const fullRACResponseSchema = t.intersection([
+  racBaseResponseParams,
+  responseTypeSpecific,
+  t.exact(t.type(responseRequiredFields)),
+  t.exact(t.partial(responseOptionalFields)),
+]);
+export type FullRACResponseSchema = t.TypeOf<typeof fullRACResponseSchema>;
