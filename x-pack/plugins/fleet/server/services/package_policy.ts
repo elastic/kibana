@@ -829,9 +829,10 @@ export function overridePackageInputs(
   const inputs = [...basePackagePolicy.inputs];
   const packageName = basePackagePolicy.package!.name;
   const errors = [];
+  let responseMissingVars: string[] = [];
 
   for (const override of inputsOverride) {
-    const originalInput = inputs.find((i) => i.type === override.type);
+    let originalInput = inputs.find((i) => i.type === override.type);
     if (!originalInput) {
       const e = {
         error: new Error(
@@ -860,7 +861,9 @@ export function overridePackageInputs(
 
     if (override.vars) {
       try {
-        deepMergeVars(override, originalInput);
+        const { result, missingVars } = deepMergeVars(override, originalInput);
+        originalInput = result;
+        responseMissingVars = [...responseMissingVars, ...missingVars];
       } catch (e) {
         const varName = e.message;
         const err = {
@@ -888,7 +891,7 @@ export function overridePackageInputs(
 
     if (override.streams) {
       for (const stream of override.streams) {
-        const originalStream = originalInput.streams.find(
+        let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
         if (!originalStream) {
@@ -920,7 +923,9 @@ export function overridePackageInputs(
 
         if (stream.vars) {
           try {
-            deepMergeVars(stream as InputsOverride, originalStream);
+            const { result, missingVars } = deepMergeVars(stream as InputsOverride, originalStream);
+            originalStream = result;
+            responseMissingVars = [...responseMissingVars, ...missingVars];
           } catch (e) {
             const varName = e.message;
             const streamSet = stream.data_stream.dataset;
@@ -951,25 +956,33 @@ export function overridePackageInputs(
     }
   }
 
-  if (dryRun && errors.length) return { ...basePackagePolicy, inputs, errors };
-  return { ...basePackagePolicy, inputs };
+  if (dryRun && errors.length) {
+    return { ...basePackagePolicy, inputs, errors, missingVars: responseMissingVars };
+  }
+
+  return { ...basePackagePolicy, inputs, missingVars: responseMissingVars };
 }
 
-function deepMergeVars(
-  override: NewPackagePolicyInput | InputsOverride,
-  original: NewPackagePolicyInput | NewPackagePolicyInputStream
-) {
+function deepMergeVars(override: any, original: any): { result: any; missingVars: string[] } {
+  const result = { ...original };
+  const missingVars: string[] = [];
+
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
     : Object.entries(override.vars!).map(([key, rest]) => ({
         name: key,
-        ...rest,
+        ...(rest as any),
       }));
+
   for (const { name, ...val } of overrideVars) {
-    if (!original.vars || !Reflect.has(original.vars, name)) {
-      throw new Error(name);
+    if (!original.vars || !(name in original.vars)) {
+      missingVars.push(name);
+      continue;
     }
+
     const originalVar = original.vars[name];
-    Reflect.set(original.vars, name, { ...originalVar, ...val });
+    result[name] = { ...originalVar, ...val };
   }
+
+  return { result, missingVars };
 }
