@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DataFormatPicker } from './data_format_picker';
 import { createTextHandler } from './lib/create_text_handler';
+import { getSelectedFieldType } from './lib/get_selected_field_type';
 import { YesNo } from './yes_no';
 import { IndexPattern } from './index_pattern';
 import {
@@ -23,6 +25,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
+import { DATA_FORMATTERS } from '../../../common/enums';
 
 export const SeriesConfig = (props) => {
   const defaults = { offset_time: '', value_template: '{{value}}' };
@@ -32,19 +35,23 @@ export const SeriesConfig = (props) => {
   const seriesIndexPattern = props.model.override_index_pattern
     ? props.model.series_index_pattern
     : props.indexPatternForQuery;
-  const isFieldFormattingIgnored = props.panel.use_kibana_indexes && !model.ignore_field_formatting;
+
+  const changeModelFormatter = useCallback((formatter) => props.onChange({ formatter }), [props]);
+  const selectedFieldType = getSelectedFieldType(
+    last(model.metrics)?.field,
+    props.fields,
+    seriesIndexPattern
+  );
 
   return (
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DataFormatPicker
-            onChange={props.onChange}
-            value={model.formatter}
-            disabled={isFieldFormattingIgnored}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
+        <DataFormatPicker
+          formatterValue={model.formatter}
+          changeModelFormatter={changeModelFormatter}
+          isNumericField={selectedFieldType ? selectedFieldType === 'number' : true}
+        />
+        <EuiFlexItem grow={3}>
           <EuiFormRow
             id={htmlId('template')}
             label={
@@ -67,23 +74,8 @@ export const SeriesConfig = (props) => {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
-              disabled={isFieldFormattingIgnored}
+              disabled={model.formatter === DATA_FORMATTERS.DEFAULT}
               fullWidth
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.seriesConfig.ignoreFieldFormatting', {
-              defaultMessage: 'Ignore common formatting?',
-            })}
-          >
-            <YesNo
-              value={model.ignore_field_formatting}
-              name="ignore_field_formatting"
-              onChange={props.onChange}
-              disabled={!props.panel.use_kibana_indexes}
-              data-test-subj="seriesIgnoreFieldFormatting"
             />
           </EuiFormRow>
         </EuiFlexItem>

@@ -20,3 +20,12 @@ export enum TOOLTIP_MODES {
   SHOW_ALL = 'show_all',
   SHOW_FOCUSED = 'show_focused',
 }
+
+export enum DATA_FORMATTERS {
+  BYTES = 'bytes',
+  CUSTOM = 'custom',
+  DEFAULT = 'default',
+  DURATION = 'duration',
+  NUMBER = 'number',
+  PERCENT = 'percent',
+}

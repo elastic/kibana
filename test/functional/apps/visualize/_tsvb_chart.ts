@@ -175,6 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display correct data for max aggregation with entire time range mode', async () => {
         await visualBuilder.selectAggType('Max');
         await visualBuilder.setFieldForAggregation('bytes');
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
 
         const gaugeLabel = await visualBuilder.getGaugeLabel();
         const gaugeCount = await visualBuilder.getGaugeCount();
@@ -270,6 +272,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display correct data for sum of squares aggregation with entire time range mode', async () => {
         await visualBuilder.selectAggType('Sum of squares');
         await visualBuilder.setFieldForAggregation('bytes');
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
         await visualBuilder.clickPanelOptions('topN');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
 
@@ -482,6 +486,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visChart.waitForVisualizationRenderingStabilized();
       });
 
+      it('should display title field formatted labels with byte field formatted values by default', async () => {
+        const expectedLegendItems = [
+          'Win 8: 4.968KB',
+          'Win Xp: 4.23KB',
+          'Win 7: 6.181KB',
+          'Ios: 5.84KB',
+          'Osx: 5.928KB',
+        ];
+
+        const legendItems = await visualBuilder.getLegendItemsContent();
+        expect(legendItems).to.eql(expectedLegendItems);
+      });
+
       it('should display title field formatted labels with raw values', async () => {
         const expectedLegendItems = [
           'Win 8: 5,087.5',
@@ -490,12 +507,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Ios: 5,980',
           'Osx: 6,070',
         ];
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
         const legendItems = await visualBuilder.getLegendItemsContent();
 
         expect(legendItems).to.eql(expectedLegendItems);
       });
 
-      it('should display title field formatted labels with TSVB formatted values by default', async () => {
+      it('should display title field formatted labels with TSVB formatted values', async () => {
         const expectedLegendItems = [
           'Win 8: 5,087.5 format',
           'Win Xp: 4,332 format',
@@ -505,6 +524,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ];
 
         await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
         await visualBuilder.enterSeriesTemplate('{{value}} format');
         await visChart.waitForVisualizationRenderingStabilized();
 
@@ -512,28 +532,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(legendItems).to.eql(expectedLegendItems);
       });
 
-      it('should display title field formatted labels with byte field formatted values', async () => {
-        const expectedLegendItems = [
-          'Win 8: 4.968KB',
-          'Win Xp: 4.23KB',
-          'Win 7: 6.181KB',
-          'Ios: 5.84KB',
-          'Osx: 5.928KB',
-        ];
-
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.setSeriesIgnoreFieldFormatting(false);
-
-        const legendItems = await visualBuilder.getLegendItemsContent();
-        expect(legendItems).to.eql(expectedLegendItems);
-      });
-
       describe('formatting values for Metric, TopN and Gauge', () => {
-        beforeEach(async () => {
-          await visualBuilder.clickSeriesOption();
-          await visualBuilder.setSeriesIgnoreFieldFormatting(false);
-        });
-
         it('should display field formatted value for Metric', async () => {
           await visualBuilder.clickMetric();
           await visualBuilder.checkMetricTabIsPresent();

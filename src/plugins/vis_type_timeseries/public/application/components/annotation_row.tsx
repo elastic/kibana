@@ -62,7 +62,6 @@ const getAnnotationDefaults = () => ({
 export const AnnotationRow = ({
   annotation,
   fields,
-  useKibanaIndexes,
   onChange,
   handleAdd,
   handleDelete,
@@ -276,21 +275,6 @@ export const AnnotationRow = ({
                   value={model.template}
                   fullWidth
                   data-test-subj="annotationRowTemplateInput"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow
-                label={i18n.translate('visTypeTimeseries.annotationsEditor.ignoreFieldFormatting', {
-                  defaultMessage: 'Ignore common formatting?',
-                })}
-              >
-                <YesNo
-                  value={model.ignore_field_formatting}
-                  name="ignore_field_formatting"
-                  onChange={onChange}
-                  disabled={!useKibanaIndexes}
-                  data-test-subj="annotationsIgnoreFieldFormatting"
                 />
               </EuiFormRow>
             </EuiFlexItem>

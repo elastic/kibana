@@ -22,7 +22,7 @@ import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { PluginStart } from '../../data/server';
-import { FieldFormatsRegistry, IndexPatternsService } from '../../data/common';
+import { IndexPatternsService } from '../../data/common';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { getUiSettings } from './ui_settings';
@@ -30,6 +30,7 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from './types';
+import type { FieldFormatsRegistry } from '../../field_formats/common';
 
 import {
   SearchStrategyRegistry,

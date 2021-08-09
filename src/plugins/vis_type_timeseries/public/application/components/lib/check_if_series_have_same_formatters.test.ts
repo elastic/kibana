@@ -7,6 +7,7 @@
  */
 
 import { checkIfSeriesHaveSameFormatters } from './check_if_series_have_same_formatters';
+import { DATA_FORMATTERS } from '../../../../common/enums';
 import type { Series } from '../../../../common/types';
 
 describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
@@ -15,27 +16,25 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
     anotherField: { id: 'number', params: { pattern: '$0,0.[00]' } },
   };
 
-  it('should return true for the same series formatters when ignore_field_formatting set to true', () => {
+  it('should return true for the same series formatters', () => {
     const seriesModel = [
-      { formatter: 'byte', ignore_field_formatting: true, metrics: [{ field: 'someField' }] },
-      { formatter: 'byte', ignore_field_formatting: true, metrics: [{ field: 'anotherField' }] },
+      { formatter: DATA_FORMATTERS.BYTES, metrics: [{ field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.BYTES, metrics: [{ field: 'anotherField' }] },
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
 
     expect(result).toBe(true);
   });
 
-  it('should return false for the different value_template series formatters when ignore_field_formatting set to true', () => {
+  it('should return false for the different value_template series formatters', () => {
     const seriesModel = [
       {
-        formatter: 'custom',
+        formatter: DATA_FORMATTERS.PERCENT,
         value_template: '{{value}} first',
-        ignore_field_formatting: true,
       },
       {
-        formatter: 'custom',
+        formatter: DATA_FORMATTERS.PERCENT,
         value_template: '{{value}} second',
-        ignore_field_formatting: true,
       },
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
@@ -43,32 +42,22 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
     expect(result).toBe(false);
   });
 
-  it('should return false the same formatters, but different ignore_field_formatting ', () => {
+  it('should return true for the same field formatters', () => {
     const seriesModel = [
-      { formatter: 'percent', ignore_field_formatting: true, metrics: [{ field: 'someField' }] },
-      { formatter: 'percent', ignore_field_formatting: false, metrics: [{ field: 'someField' }] },
-    ] as Series[];
-    const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
-
-    expect(result).toBe(false);
-  });
-
-  it('should return true for the same field formatters when ignore_field_formatting set to false', () => {
-    const seriesModel = [
-      { formatter: 'byte', ignore_field_formatting: false, metrics: [{ field: 'someField' }] },
-      { formatter: 'percent', ignore_field_formatting: false, metrics: [{ field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ field: 'someField' }] },
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
 
     expect(result).toBe(true);
   });
 
-  it('should return false for the different field formatters when ignore_field_formatting set to false', () => {
+  it('should return false for the different field formatters', () => {
     const seriesModel = [
-      { formatter: 'percent', ignore_field_formatting: false, metrics: [{ field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ field: 'someField' }] },
       {
-        formatter: 'percent',
-        ignore_field_formatting: false,
+        formatter: DATA_FORMATTERS.DEFAULT,
+
         metrics: [{ field: 'anotherField' }],
       },
     ] as Series[];
@@ -77,14 +66,14 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
     expect(result).toBe(false);
   });
 
-  it('should return false for when there is no custom formatter for a field and ignore_field_formatting set to false', () => {
+  it('should return false for when there is no custom formatter for a field', () => {
     const seriesModel = [
       {
-        formatter: 'percent',
-        ignore_field_formatting: false,
+        formatter: DATA_FORMATTERS.DEFAULT,
+
         metrics: [{ field: 'someField' }, { field: 'field' }],
       },
-      { formatter: 'percent', ignore_field_formatting: false, metrics: [{ field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ field: 'someField' }] },
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
 

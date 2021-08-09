@@ -14,7 +14,6 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
-import { createFieldFormatAccessor } from './create_field_format_accessor';
 import { extractFieldLabel } from '../../../common/fields_utils';
 
 import type {
@@ -34,7 +33,6 @@ export async function getTableData(
     indexPatternsService,
     searchStrategyRegistry,
     cachedIndexPatternFetcher,
-    fieldFormatService,
     buildSeriesMetaParams,
   }: VisTypeTimeseriesRequestServices
 ) {
@@ -103,14 +101,7 @@ export async function getTableData(
       []
     );
 
-    const getFieldFormatByName = createFieldFormatAccessor(
-      fieldFormatService,
-      panelIndex.indexPattern?.fieldFormatMap
-    );
-
-    const series = await Promise.all(
-      buckets.map(processBucket({ panel, extractFields, getFieldFormatByName }))
-    );
+    const series = await Promise.all(buckets.map(processBucket({ panel, extractFields })));
 
     return {
       ...meta,

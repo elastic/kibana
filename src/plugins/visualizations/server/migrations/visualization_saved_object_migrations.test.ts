@@ -2233,45 +2233,4 @@ describe('migration visualization', () => {
       expect(palette.name).toEqual('default');
     });
   });
-
-  describe('7.15.0 tsvb - set ignore field formatting param to true for series and annotations by default', () => {
-    const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.15.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
-
-    const testDoc = {
-      attributes: {
-        title: 'My Vis',
-        description: 'This is my super cool vis.',
-        visState:
-          '{"type": "metrics", "params": {"series": [{"metrics": []}, {"metrics": []}], "annotations": [{}, {}] } }',
-      },
-    };
-
-    it('should set ignore_field_formatting param to true to all series', () => {
-      const migratedTestDoc = migrate(testDoc);
-
-      const {
-        series: [firstSeries, secondSeries],
-      } = JSON.parse(migratedTestDoc.attributes.visState).params;
-
-      expect(firstSeries).toHaveProperty('ignore_field_formatting');
-      expect(firstSeries.ignore_field_formatting).toBeTruthy();
-      expect(secondSeries.ignore_field_formatting).toBeTruthy();
-    });
-
-    it('should set ignore_field_formatting param to true to all annotations', () => {
-      const migratedTestDoc = migrate(testDoc);
-
-      const {
-        annotations: [firstAnnotation, secondAnnotation],
-      } = JSON.parse(migratedTestDoc.attributes.visState).params;
-
-      expect(firstAnnotation).toHaveProperty('ignore_field_formatting');
-      expect(firstAnnotation.ignore_field_formatting).toBeTruthy();
-      expect(secondAnnotation.ignore_field_formatting).toBeTruthy();
-    });
-  });
 });

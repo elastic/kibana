@@ -7,6 +7,7 @@
  */
 
 import { last } from 'lodash';
+import { DATA_FORMATTERS } from '../../../../common/enums';
 import type { Series } from '../../../../common/types';
 import type { FieldFormatMap } from '../../../../../data/common';
 
@@ -14,24 +15,20 @@ export const checkIfSeriesHaveSameFormatters = (
   seriesModel: Series[],
   fieldFormatMap?: FieldFormatMap
 ) => {
-  const allSeriesHaveSameIgnoreFieldFormatting = seriesModel.every(
-    (seriesGroup) => seriesGroup.ignore_field_formatting === seriesModel[0].ignore_field_formatting
+  const allSeriesHaveDefaultFormatting = seriesModel.every(
+    (seriesGroup) => seriesGroup.formatter === DATA_FORMATTERS.DEFAULT
   );
 
-  if (allSeriesHaveSameIgnoreFieldFormatting) {
-    return seriesModel[0].ignore_field_formatting
-      ? seriesModel.every(
-          (series) =>
-            series.formatter === seriesModel[0].formatter &&
-            series.value_template === seriesModel[0].value_template
+  return allSeriesHaveDefaultFormatting && fieldFormatMap
+    ? seriesModel
+        .map(({ metrics }) => fieldFormatMap[last(metrics)?.field ?? ''])
+        .every(
+          (fieldFormat, index, [firstSeriesFieldFormat]) =>
+            JSON.stringify(fieldFormat) === JSON.stringify(firstSeriesFieldFormat)
         )
-      : seriesModel
-          .map(({ metrics }) => fieldFormatMap?.[last(metrics)?.field ?? ''])
-          .every(
-            (fieldFormat, index, [firstSeriesFieldFormat]) =>
-              JSON.stringify(fieldFormat) === JSON.stringify(firstSeriesFieldFormat)
-          );
-  }
-
-  return false;
+    : seriesModel.every(
+        (series) =>
+          series.formatter === seriesModel[0].formatter &&
+          series.value_template === seriesModel[0].value_template
+      );
 };

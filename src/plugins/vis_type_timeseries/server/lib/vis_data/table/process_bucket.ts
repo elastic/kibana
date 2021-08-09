@@ -15,7 +15,6 @@ import type { Panel } from '../../../../common/types';
 import type { TableSearchRequestMeta } from '../request_processors/table/types';
 import type { PanelDataArray } from '../../../../common/types/vis_data';
 import type { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
-import type { createFieldFormatAccessor } from '../create_field_format_accessor';
 
 function trendSinceLastBucket(data: PanelDataArray[]) {
   if (data.length < 2) {
@@ -31,14 +30,9 @@ function trendSinceLastBucket(data: PanelDataArray[]) {
 interface ProcessTableBucketParams {
   panel: Panel;
   extractFields: ReturnType<typeof createFieldsFetcher>;
-  getFieldFormatByName: ReturnType<typeof createFieldFormatAccessor>;
 }
 
-export function processBucket({
-  panel,
-  extractFields,
-  getFieldFormatByName,
-}: ProcessTableBucketParams) {
+export function processBucket({ panel, extractFields }: ProcessTableBucketParams) {
   return async (bucket: Record<string, unknown>) => {
     const resultSeries = await Promise.all(
       getActiveSeries(panel).map(async (series) => {
@@ -73,11 +67,6 @@ export function processBucket({
       })
     );
 
-    const key =
-      getFieldFormatByName && panel.pivot_id && panel.use_kibana_indexes
-        ? getFieldFormatByName(panel.pivot_id).convert(bucket.key)
-        : bucket.key;
-
-    return { key, series: resultSeries };
+    return { key: bucket.key, series: resultSeries };
   };
 }

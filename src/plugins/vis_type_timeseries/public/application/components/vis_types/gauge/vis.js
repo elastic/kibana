@@ -14,6 +14,7 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { get, isUndefined, assign, includes, last } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../common/last_value_utils';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
 
 function getColors(props) {
@@ -36,7 +37,7 @@ function getColors(props) {
 }
 
 function GaugeVisualization(props) {
-  const { backgroundColor, model, visData, fieldFormatMap } = props;
+  const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
   const colors = getColors(props);
 
   const series = get(visData, `${model.id}.series`, [])
@@ -46,9 +47,9 @@ function GaugeVisualization(props) {
       const newProps = {};
       if (seriesDef) {
         newProps.formatter =
-          model.use_kibana_indexes && !seriesDef.ignore_field_formatting
-            ? createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap)
-            : createTickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
+          seriesDef.formatter === DATA_FORMATTERS.DEFAULT
+            ? createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap, getConfig)
+            : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
       return assign({}, row, newProps);

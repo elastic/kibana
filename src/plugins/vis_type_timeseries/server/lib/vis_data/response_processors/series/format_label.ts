@@ -8,8 +8,8 @@
 
 import { BUCKET_TYPES, PANEL_TYPES } from '../../../../../common/enums';
 import { createFieldFormatAccessor } from '../../../../lib/vis_data/create_field_format_accessor';
-import type { Panel, Series, PanelData } from '../../../../../common/types';
-import type { FieldFormatsRegistry } from '../../../../../../data/common';
+import type { Panel, PanelData, Series } from '../../../../../common/types';
+import type { FieldFormatsRegistry } from '../../../../../../field_formats/common';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
 
@@ -23,10 +23,17 @@ export function formatLabel(
   cachedIndexPatternFetcher: CachedIndexPatternFetcher
 ) {
   return (next: (results: PanelData[]) => unknown) => async (results: PanelData[]) => {
-    const termsField = series.terms_field;
+    const { terms_field: termsField, split_mode: splitMode } = series;
 
+    const isKibanaIndexPattern = panel.use_kibana_indexes || panel.index_pattern === '';
     // no need to format labels for markdown as they also used there as variables keys
-    if (termsField && panel.type !== PANEL_TYPES.MARKDOWN && panel.use_kibana_indexes) {
+    const shouldFormatLabels =
+      isKibanaIndexPattern &&
+      termsField &&
+      splitMode === BUCKET_TYPES.TERMS &&
+      panel.type !== PANEL_TYPES.MARKDOWN;
+
+    if (shouldFormatLabels) {
       const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.index });
       const getFieldFormatByName = createFieldFormatAccessor(
         fieldFormatService,
@@ -34,11 +41,9 @@ export function formatLabel(
       );
 
       results
-        .filter(
-          ({ seriesId }) => series.split_mode === BUCKET_TYPES.TERMS && series.id === seriesId
-        )
+        .filter(({ seriesId }) => series.id === seriesId)
         .forEach((item) => {
-          const itemFieldFormat = getFieldFormatByName(termsField);
+          const itemFieldFormat = getFieldFormatByName(termsField!);
           item.label = item.labelFormatted = itemFieldFormat.convert(item.label);
         });
     }

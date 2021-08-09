@@ -119,6 +119,16 @@ export const outputFormats = {
 };
 type OutputFormat = keyof typeof outputFormats;
 
+export const getDurationParams = (format: string) => {
+  const [from, to, decimals] = format.split(',');
+
+  return {
+    from,
+    to,
+    decimals,
+  };
+};
+
 export const isDuration = (format: string) => {
   const splittedFormat = format.split(',');
   const [input, output] = splittedFormat;

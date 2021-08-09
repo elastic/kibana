@@ -6,12 +6,32 @@
  * Side Public License, v 1.
  */
 
+import { isNumber } from 'lodash';
+import type { IUiSettingsClient } from 'kibana/public';
 import { getFieldFormats } from '../../../services';
-import type { FieldFormatMap, FieldFormatsContentType } from '../../../../../data/common';
+import type { FieldFormatMap } from '../../../../../data/common';
+import type { FieldFormatsContentType } from '../../../../../field_formats/common';
 
-export const createFieldFormatter = (fieldName: string = '', fieldFormatMap?: FieldFormatMap) => {
-  const fieldFormat = getFieldFormats().deserialize(fieldFormatMap?.[fieldName]);
+export const createFieldFormatter = (
+  fieldName: string = '',
+  fieldFormatMap?: FieldFormatMap,
+  getConfig?: IUiSettingsClient['get'],
+  contextType?: FieldFormatsContentType
+) => {
+  const serializedFieldFormat = fieldFormatMap?.[fieldName];
+  const fieldFormats = getFieldFormats();
 
-  return (value: unknown, contextType?: FieldFormatsContentType) =>
-    fieldFormat.convert(value, contextType);
+  if (serializedFieldFormat) {
+    const fieldFormat = fieldFormats.deserialize(serializedFieldFormat);
+
+    return (value: unknown) => fieldFormat.convert(value, contextType);
+  } else {
+    const DecoratedFieldFormat = fieldFormats.getType('number');
+    const numberFormatter = DecoratedFieldFormat
+      ? new DecoratedFieldFormat({ pattern: '0,0.[00]' }, getConfig)
+      : undefined;
+
+    return (value: unknown) =>
+      isNumber(value) && numberFormatter ? numberFormatter.convert(value, 'text') : value;
+  }
 };

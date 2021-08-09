@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FieldFormatMap, FieldFormatsRegistry } from '../../../../data/common';
+import type { FieldFormatMap } from '../../../../data/common';
+import type { FieldFormatsRegistry } from '../../../../field_formats/common';
 
 export const createFieldFormatAccessor = (
   fieldFormatsService: FieldFormatsRegistry,

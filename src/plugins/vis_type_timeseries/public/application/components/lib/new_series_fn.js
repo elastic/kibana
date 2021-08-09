@@ -24,7 +24,7 @@ export const newSeriesFn = (obj = {}) => {
       metrics: [newMetricAggFn()],
       separate_axis: 0,
       axis_position: 'right',
-      formatter: 'number',
+      formatter: 'default',
       chart_type: 'line',
       line_width: 1,
       point_size: 1,

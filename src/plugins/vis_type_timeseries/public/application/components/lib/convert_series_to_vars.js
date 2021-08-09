@@ -8,7 +8,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { startsWith, snakeCase, last } from 'lodash';
-import { BUCKET_TYPES } from '../../../../common/enums';
+import { BUCKET_TYPES, DATA_FORMATTERS } from '../../../../common/enums';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty, emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
@@ -32,8 +32,8 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
         const varName = [label, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
         const formatter =
-          model.use_kibana_indexes && !seriesModel.ignore_field_formatting
-            ? createFieldFormatter(last(seriesModel.metrics)?.field, fieldFormatMap)
+          seriesModel.formatter === DATA_FORMATTERS.DEFAULT
+            ? createFieldFormatter(last(seriesModel.metrics)?.field, fieldFormatMap, getConfig)
             : createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig);
         const lastValue = getLastValue(row.data);
 

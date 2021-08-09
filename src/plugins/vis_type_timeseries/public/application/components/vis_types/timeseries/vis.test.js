@@ -34,7 +34,7 @@ describe('TimeseriesVisualization', () => {
       })
     );
 
-    const setupTimeSeriesProps = (formatters, valueTemplates, ignoreFieldFormattingParams) => {
+    const setupTimeSeriesProps = (formatters, valueTemplates) => {
       const series = formatters.map((formatter, index) => ({
         id: id + index,
         formatter,
@@ -45,7 +45,6 @@ describe('TimeseriesVisualization', () => {
             field: `field${index}`,
           },
         ],
-        ignore_field_formatting: ignoreFieldFormattingParams?.[index] ?? true,
       }));
 
       const fieldFormatMap = {
@@ -152,19 +151,16 @@ describe('TimeseriesVisualization', () => {
       expect(yAxis[0].tickFormatter(value)).toBe(value);
     });
 
-    test('should return custom field formatted value for yAxis and single series when ignoreFieldFormatting is false', () => {
-      const timeSeriesProps = setupTimeSeriesProps(['0.00bitd'], undefined, [false]);
+    test('should return field formatted value for yAxis and single series with default formatter', () => {
+      const timeSeriesProps = setupTimeSeriesProps(['default']);
       const { series, yAxis } = timeSeriesProps;
 
       expect(series[0].tickFormat(value)).toBe('500 years');
       expect(yAxis[0].tickFormatter(value)).toBe('500 years');
     });
 
-    test('should return custom field formatted value for yAxis and both series having same custom fieldFormats when ignoreFieldFormatting is false', () => {
-      const timeSeriesProps = setupTimeSeriesProps(['number', 'percent'], undefined, [
-        false,
-        false,
-      ]);
+    test('should return custom field formatted value for yAxis and both series having same fieldFormats', () => {
+      const timeSeriesProps = setupTimeSeriesProps(['default', 'default']);
       const { series, yAxis } = timeSeriesProps;
 
       expect(series[0].tickFormat(value)).toBe('500 years');
@@ -172,12 +168,8 @@ describe('TimeseriesVisualization', () => {
       expect(yAxis[0].tickFormatter(value)).toBe('500 years');
     });
 
-    test('should return simple number from yAxis formatter and differently formatted series when ignoreFieldFormatting is false', () => {
-      const timeSeriesProps = setupTimeSeriesProps(
-        ['number', 'byte', 'byte', 'percent'],
-        undefined,
-        Array(4).fill(false)
-      );
+    test('should return simple number from yAxis formatter and default formatted values for series', () => {
+      const timeSeriesProps = setupTimeSeriesProps(['default', 'default', 'default', 'default']);
       const { series, yAxis } = timeSeriesProps;
 
       expect(series[0].tickFormat(value)).toBe('500 years');
@@ -187,12 +179,8 @@ describe('TimeseriesVisualization', () => {
       expect(yAxis[0].tickFormatter(value)).toBe(value);
     });
 
-    test('should return simple number from yAxis formatter and differently formatted series respecting ignoreFieldFormatting setting', () => {
-      const timeSeriesProps = setupTimeSeriesProps(
-        ['number', 'byte', 'percent', 'percent'],
-        undefined,
-        [false, true, true, false]
-      );
+    test('should return simple number from yAxis formatter and correctly formatted series values', () => {
+      const timeSeriesProps = setupTimeSeriesProps(['default', 'byte', 'percent', 'default']);
       const { series, yAxis } = timeSeriesProps;
 
       expect(series[0].tickFormat(value)).toBe('500 years');

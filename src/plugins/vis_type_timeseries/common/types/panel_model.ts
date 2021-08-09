@@ -80,7 +80,6 @@ export interface Series {
   hidden?: boolean;
   hide_in_legend?: number;
   id: string;
-  ignore_field_formatting?: boolean;
   ignore_global_filter?: number;
   label?: string;
   line_width?: number;

@@ -6,259 +6,290 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, ChangeEvent } from 'react';
+import React, { ChangeEvent, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  htmlIdGenerator,
   EuiComboBox,
-  EuiFlexGroup,
+  EuiFieldText,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
   EuiLink,
+  EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Series } from '../../../common/types';
-import { durationOutputOptions, durationInputOptions, isDuration } from './lib/durations';
+import { DATA_FORMATTERS } from '../../../common/enums';
+import {
+  durationInputOptions,
+  durationOutputOptions,
+  getDurationParams,
+  isDuration,
+} from './lib/durations';
 
-enum DATA_FORMATTERS {
-  BYTES = 'bytes',
-  NUMBER = 'number',
-  PERCENT = 'percent',
-  DURATION = 'duration',
-  CUSTOM = 'custom',
-}
 const DEFAULT_OUTPUT_PRECISION = '2';
 
-const dataFormatPickerOptions = [
-  {
-    label: i18n.translate('visTypeTimeseries.dataFormatPicker.bytesLabel', {
-      defaultMessage: 'Bytes',
-    }),
-    value: DATA_FORMATTERS.BYTES,
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.dataFormatPicker.numberLabel', {
-      defaultMessage: 'Number',
-    }),
-    value: DATA_FORMATTERS.NUMBER,
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.dataFormatPicker.percentLabel', {
-      defaultMessage: 'Percent',
-    }),
-    value: DATA_FORMATTERS.PERCENT,
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.dataFormatPicker.durationLabel', {
-      defaultMessage: 'Duration',
-    }),
-    value: DATA_FORMATTERS.DURATION,
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.dataFormatPicker.customLabel', {
-      defaultMessage: 'Custom',
-    }),
-    value: DATA_FORMATTERS.CUSTOM,
-  },
-];
+const defaultOptionLabel = i18n.translate('visTypeTimeseries.dataFormatPicker.defaultLabel', {
+  defaultMessage: 'Default',
+});
+
+const getDataFormatPickerOptions = (isNumericField: boolean) => {
+  let numericFieldOptions;
+
+  if (isNumericField) {
+    numericFieldOptions = [
+      {
+        value: DATA_FORMATTERS.NUMBER,
+        inputDisplay: i18n.translate('visTypeTimeseries.dataFormatPicker.numberLabel', {
+          defaultMessage: 'Number',
+        }),
+        'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.NUMBER}`,
+      },
+      {
+        value: DATA_FORMATTERS.BYTES,
+        inputDisplay: i18n.translate('visTypeTimeseries.dataFormatPicker.bytesLabel', {
+          defaultMessage: 'Bytes',
+        }),
+        'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.BYTES}`,
+      },
+      {
+        value: DATA_FORMATTERS.PERCENT,
+        inputDisplay: i18n.translate('visTypeTimeseries.dataFormatPicker.percentLabel', {
+          defaultMessage: 'Percent',
+        }),
+        'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.PERCENT}`,
+      },
+      {
+        value: DATA_FORMATTERS.DURATION,
+        inputDisplay: i18n.translate('visTypeTimeseries.dataFormatPicker.durationLabel', {
+          defaultMessage: 'Duration',
+        }),
+        'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.DURATION}`,
+      },
+    ];
+  }
+
+  return [
+    {
+      value: DATA_FORMATTERS.DEFAULT,
+      inputDisplay: defaultOptionLabel,
+      dropdownDisplay: (
+        <>
+          <span>{defaultOptionLabel}</span>
+          <EuiText size="s" color="subdued">
+            <p className="euiTextColor--subdued">Applies common formatting</p>
+          </EuiText>
+        </>
+      ),
+      'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.DEFAULT}`,
+    },
+    ...(numericFieldOptions || []),
+    {
+      value: DATA_FORMATTERS.CUSTOM,
+      inputDisplay: i18n.translate('visTypeTimeseries.dataFormatPicker.customLabel', {
+        defaultMessage: 'Custom',
+      }),
+      'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.CUSTOM}`,
+    },
+  ];
+};
+
+const getSelectedFormatter = (formatter: string) => {
+  if (
+    [
+      DATA_FORMATTERS.NUMBER,
+      DATA_FORMATTERS.BYTES,
+      DATA_FORMATTERS.PERCENT,
+      DATA_FORMATTERS.DEFAULT,
+    ].includes(formatter as DATA_FORMATTERS)
+  ) {
+    return formatter as DATA_FORMATTERS;
+  }
+
+  return formatter && isDuration(formatter) ? DATA_FORMATTERS.DURATION : DATA_FORMATTERS.CUSTOM;
+};
 
 interface DataFormatPickerProps {
-  value: string;
-  onChange: (partialModel: Partial<Series>) => void;
-  disabled?: boolean;
+  formatterValue: string;
+  changeModelFormatter: (formatter: string) => void;
+  isNumericField: boolean;
 }
 
-interface DataFormatPickerState {
-  from?: string;
-  to?: string;
-  decimals?: string;
-}
+export const DataFormatPicker = ({
+  formatterValue,
+  changeModelFormatter,
+  isNumericField,
+}: DataFormatPickerProps) => {
+  const [selectedFormatter, setSelectedFormatter] = useState(getSelectedFormatter(formatterValue));
+  const [customFormatString, setCustomFormatString] = useState('');
+  const [durationParams, setDurationParams] = useState(
+    getDurationParams(selectedFormatter === DATA_FORMATTERS.DURATION ? formatterValue : 'ms,ms,')
+  );
 
-export class DataFormatPicker extends Component<DataFormatPickerProps, DataFormatPickerState> {
-  constructor(props: DataFormatPickerProps) {
-    super(props);
-    const [from, to, decimals] =
-      props.value && isDuration(props.value) ? props.value.split(',') : ['ms', 'ms', ''];
-
-    this.state = {
-      from,
-      to,
-      decimals,
-    };
-  }
-
-  updateDuration = () => {
-    const { from, to, decimals } = this.state;
-    this.props.onChange({ formatter: `${from},${to},${decimals}` });
-  };
-
-  handleChange = ([{ value: selectedOptionValue }]: Array<EuiComboBoxOptionOption<string>>) => {
-    if (!selectedOptionValue) {
-      return;
-    }
-
-    if (selectedOptionValue === DATA_FORMATTERS.DURATION) {
-      this.updateDuration();
-    } else {
-      this.props.onChange({ formatter: selectedOptionValue });
-    }
-  };
-
-  handleDurationOptionsChange = (optionName: string, value: string) =>
-    this.setState(
-      {
-        [optionName]: value,
-      },
-      this.updateDuration
-    );
-
-  handleDurationChange(optionName: 'from' | 'to') {
-    return ([{ value: selectedOptionValue }]: Array<EuiComboBoxOptionOption<string>>) => {
-      if (selectedOptionValue) {
-        this.handleDurationOptionsChange(optionName, selectedOptionValue);
+  const handleChange = useCallback(
+    (selectedOption: DATA_FORMATTERS) => {
+      setSelectedFormatter(selectedOption);
+      if (selectedOption === DATA_FORMATTERS.DURATION) {
+        const { from, to, decimals } = durationParams;
+        changeModelFormatter(`${from},${to},${decimals}`);
+      } else if (selectedOption === DATA_FORMATTERS.CUSTOM) {
+        changeModelFormatter(customFormatString);
+      } else {
+        changeModelFormatter(selectedOption);
       }
-    };
-  }
+    },
+    [changeModelFormatter, customFormatString, durationParams]
+  );
 
-  handleDecimalsChange = (event: ChangeEvent<HTMLInputElement>) =>
-    this.handleDurationOptionsChange('decimals', event.target.value);
+  const handleCustomFormatStringChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const formatString = event.target.value;
+      changeModelFormatter(formatString);
+      setCustomFormatString(formatString);
+    },
+    [changeModelFormatter]
+  );
 
-  handleCustomChange = (event: ChangeEvent<HTMLInputElement>) => {
-    this.props.onChange({ formatter: event.target.value });
-  };
+  const handleDurationParamsChange = useCallback(
+    (paramName: string, paramValue: string) => {
+      const newDurationParams = { ...durationParams, [paramName]: paramValue };
+      setDurationParams(newDurationParams);
+      const { from, to, decimals } = newDurationParams;
+      changeModelFormatter(`${from},${to},${decimals}`);
+    },
+    [changeModelFormatter, durationParams]
+  );
 
-  render() {
-    const htmlId = htmlIdGenerator();
-    const value = this.props.value || '';
-    let defaultValue = value;
-    const isCustomFormatter = ![
-      DATA_FORMATTERS.BYTES,
-      DATA_FORMATTERS.NUMBER,
-      DATA_FORMATTERS.PERCENT,
-    ].includes(value as DATA_FORMATTERS);
+  const handleDurationChange = useCallback(
+    (optionName: 'from' | 'to') => {
+      return ([{ value }]: Array<EuiComboBoxOptionOption<string>>) =>
+        handleDurationParamsChange(optionName, value!);
+    },
+    [handleDurationParamsChange]
+  );
 
-    let custom;
-    let duration;
+  const handleDecimalsChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) =>
+      handleDurationParamsChange('decimals', event.target.value),
+    [handleDurationParamsChange]
+  );
 
-    if (isCustomFormatter) {
-      defaultValue = DATA_FORMATTERS.CUSTOM;
-      custom = (
+  let duration;
+  if (selectedFormatter === DATA_FORMATTERS.DURATION) {
+    const { from, to, decimals = DEFAULT_OUTPUT_PRECISION } = durationParams;
+    const selectedFrom = durationInputOptions.find(({ value }) => value === from);
+    const selectedTo = durationOutputOptions.find(({ value }) => value === to);
+
+    duration = (
+      <>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.dataFormatPicker.formatStringLabel', {
-              defaultMessage: 'Format string',
-            })}
-            helpText={
-              <span>
-                <FormattedMessage
-                  id="visTypeTimeseries.dataFormatPicker.formatStringHelpText"
-                  defaultMessage="See {numeralJsLink}"
-                  values={{
-                    numeralJsLink: (
-                      <EuiLink href="http://numeraljs.com/#format" target="_BLANK">
-                        Numeral.js
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </span>
-            }
-          >
-            <EuiFieldText onChange={this.handleCustomChange} disabled={this.props.disabled} />
-          </EuiFormRow>
-        </EuiFlexItem>
-      );
-    }
-
-    if (isDuration(value)) {
-      defaultValue = DATA_FORMATTERS.DURATION;
-      const [from, to, decimals = DEFAULT_OUTPUT_PRECISION] = value.split(',');
-      const selectedFrom = durationInputOptions.find((option) => from === option.value);
-      const selectedTo = durationOutputOptions.find((option) => to === option.value);
-
-      duration = (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              id={htmlId('from')}
-              label={i18n.translate('visTypeTimeseries.dataFormatPicker.fromLabel', {
-                defaultMessage: 'From',
-              })}
-            >
-              <EuiComboBox
-                isClearable={false}
-                options={durationInputOptions}
-                selectedOptions={selectedFrom ? [selectedFrom] : []}
-                onChange={this.handleDurationChange('from')}
-                singleSelection={{ asPlainText: true }}
-                isDisabled={this.props.disabled}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              id={htmlId('to')}
-              label={i18n.translate('visTypeTimeseries.dataFormatPicker.toLabel', {
-                defaultMessage: 'To',
-              })}
-            >
-              <EuiComboBox
-                isClearable={false}
-                options={durationOutputOptions}
-                selectedOptions={selectedTo ? [selectedTo] : []}
-                onChange={this.handleDurationChange('to')}
-                singleSelection={{ asPlainText: true }}
-                isDisabled={this.props.disabled}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-
-          {selectedTo?.value !== 'humanize' && (
-            <EuiFlexItem grow={false}>
-              <EuiFormRow
-                id={htmlId('decimal')}
-                label={i18n.translate('visTypeTimeseries.dataFormatPicker.decimalPlacesLabel', {
-                  defaultMessage: 'Decimal places',
-                })}
-              >
-                <EuiFieldText
-                  defaultValue={decimals}
-                  placeholder={DEFAULT_OUTPUT_PRECISION}
-                  onChange={this.handleDecimalsChange}
-                  disabled={this.props.disabled}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
-        </>
-      );
-    }
-
-    const selectedOption = dataFormatPickerOptions.find((option) => defaultValue === option.value);
-
-    return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.defaultDataFormatterLabel', {
-              defaultMessage: 'Data Formatter',
+            label={i18n.translate('visTypeTimeseries.dataFormatPicker.fromLabel', {
+              defaultMessage: 'From',
             })}
           >
             <EuiComboBox
               isClearable={false}
-              options={dataFormatPickerOptions}
-              selectedOptions={selectedOption ? [selectedOption] : []}
-              onChange={this.handleChange}
+              options={durationInputOptions}
+              selectedOptions={selectedFrom ? [selectedFrom] : []}
+              onChange={handleDurationChange('from')}
               singleSelection={{ asPlainText: true }}
-              data-test-subj="tsvbDataFormatPicker"
-              isDisabled={this.props.disabled}
+              data-test-subj="dataFormatPickerDurationFrom"
             />
           </EuiFormRow>
         </EuiFlexItem>
-        {duration ?? custom}
-      </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.dataFormatPicker.toLabel', {
+              defaultMessage: 'To',
+            })}
+          >
+            <EuiComboBox
+              isClearable={false}
+              options={durationOutputOptions}
+              selectedOptions={selectedTo ? [selectedTo] : []}
+              onChange={handleDurationChange('to')}
+              singleSelection={{ asPlainText: true }}
+              data-test-subj="dataFormatPickerDurationTo"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        {selectedTo?.value !== 'humanize' && (
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              label={i18n.translate('visTypeTimeseries.dataFormatPicker.decimalPlacesLabel', {
+                defaultMessage: 'Decimal places',
+              })}
+            >
+              <EuiFieldText
+                defaultValue={decimals}
+                placeholder={DEFAULT_OUTPUT_PRECISION}
+                onChange={handleDecimalsChange}
+                data-test-subj="dataFormatPickerDurationDecimal"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
+      </>
     );
   }
-}
+
+  let custom;
+  if (selectedFormatter === DATA_FORMATTERS.CUSTOM) {
+    custom = (
+      <EuiFlexItem grow={false}>
+        <EuiFormRow
+          label={i18n.translate('visTypeTimeseries.dataFormatPicker.formatStringLabel', {
+            defaultMessage: 'Format string',
+          })}
+          helpText={
+            <span>
+              <FormattedMessage
+                id="visTypeTimeseries.dataFormatPicker.formatStringHelpText"
+                defaultMessage="See {numeralJsLink}"
+                values={{
+                  numeralJsLink: (
+                    <EuiLink href="http://numeraljs.com/#format" target="_BLANK">
+                      Numeral.js
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </span>
+          }
+        >
+          <EuiFieldText
+            value={customFormatString}
+            onChange={handleCustomFormatStringChange}
+            disabled={!isNumericField}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    );
+  }
+
+  return (
+    <>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('visTypeTimeseries.defaultDataFormatterLabel', {
+            defaultMessage: 'Data Formatter',
+          })}
+          fullWidth
+        >
+          <EuiSuperSelect
+            options={getDataFormatPickerOptions(isNumericField)}
+            valueOfSelected={selectedFormatter}
+            onChange={handleChange}
+            data-test-subj="tsvbDataFormatPicker"
+            fullWidth
+            hasDividers
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      {selectedFormatter === DATA_FORMATTERS.DURATION && duration}
+      {selectedFormatter === DATA_FORMATTERS.CUSTOM && custom}
+    </>
+  );
+};

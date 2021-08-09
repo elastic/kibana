@@ -18,7 +18,6 @@ import {
   commonMigrateVislibPie,
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
-  commonAddTSVBIgnoreFilterFormatting,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -946,26 +945,6 @@ const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
-/**
- * [TSVB] Set ignore field formatting param to true for series and annotations by default
- */
-const addTSVBIgnoreFilterFormatting: SavedObjectMigrationFn<any, any> = (doc) => {
-  try {
-    const visState = JSON.parse(doc.attributes.visState);
-    const newVisState = commonAddTSVBIgnoreFilterFormatting(visState);
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        visState: JSON.stringify(newVisState),
-      },
-    };
-  } catch (e) {
-    // Let it go, the data is invalid and we'll leave it as is
-  }
-  return doc;
-};
-
 const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn<any, any> = (
   doc
 ) => {
@@ -1123,5 +1102,4 @@ export const visualizationSavedObjectTypeMigrations = {
     migrateTagCloud,
     replaceIndexPatternReference
   ),
-  '7.15.0': flow(addTSVBIgnoreFilterFormatting),
 };

@@ -8,7 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 import PropTypes from 'prop-types';
-import React, { useState, useEffect } from 'react';
+import { last } from 'lodash';
+import React, { useState, useEffect, useCallback } from 'react';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
@@ -29,6 +31,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 import { PalettePicker } from '../../palette_picker';
 import { getCharts } from '../../../../services';
+import { getSelectedFieldType } from '../../lib/get_selected_field_type';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
@@ -327,7 +330,13 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const seriesIndexPattern = props.model.override_index_pattern
     ? props.model.series_index_pattern
     : props.indexPatternForQuery;
-  const isFieldFormattingIgnored = props.panel.use_kibana_indexes && !model.ignore_field_formatting;
+
+  const changeModelFormatter = useCallback((formatter) => props.onChange({ formatter }), [props]);
+  const selectedFieldType = getSelectedFieldType(
+    last(model.metrics)?.field,
+    props.fields,
+    seriesIndexPattern
+  );
 
   const initialPalette = model.palette ?? {
     type: 'palette',
@@ -345,14 +354,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
   return (
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DataFormatPicker
-            onChange={props.onChange}
-            value={model.formatter}
-            disabled={isFieldFormattingIgnored}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
+        <DataFormatPicker
+          formatterValue={model.formatter}
+          changeModelFormatter={changeModelFormatter}
+          isNumericField={selectedFieldType ? selectedFieldType === 'number' : true}
+        />
+        <EuiFlexItem grow={3}>
           <EuiFormRow
             id={htmlId('template')}
             label={
@@ -375,24 +382,9 @@ export const TimeseriesConfig = injectI18n(function (props) {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
-              disabled={isFieldFormattingIgnored}
+              disabled={model.formatter === DATA_FORMATTERS.DEFAULT}
               fullWidth
               data-test-subj="tsvb_series_value"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.timeSeries.ignoreFieldFormatting', {
-              defaultMessage: 'Ignore common formatting?',
-            })}
-          >
-            <YesNo
-              value={model.ignore_field_formatting}
-              name="ignore_field_formatting"
-              onChange={props.onChange}
-              disabled={!props.panel.use_kibana_indexes}
-              data-test-subj="seriesIgnoreFieldFormatting"
             />
           </EuiFormRow>
         </EuiFlexItem>

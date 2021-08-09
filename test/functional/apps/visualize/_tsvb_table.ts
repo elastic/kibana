@@ -157,31 +157,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.setFieldForAggregation('bytes');
         });
 
+        it('should display field formatted row labels with field formatted data by default', async () => {
+          const expected =
+            'OS Average of bytes\nWIN 8 6.786KB\nWIN XP 3.804KB\nWIN 7 6.596KB\nIOS 4.844KB\nOSX 3.06KB';
+
+          const tableData = await visualBuilder.getViewTable();
+          expect(tableData).to.be(expected);
+        });
+
         it('should display field formatted row labels with raw data', async () => {
           const expected =
             'OS Average of bytes\nWIN 8 6,948.846\nWIN XP 3,895.6\nWIN 7 6,753.833\nIOS 4,960.2\nOSX 3,133';
 
+          await visualBuilder.clickSeriesOption();
+          await visualBuilder.changeDataFormatter('number');
+
           const tableData = await visualBuilder.getViewTable();
           expect(tableData).to.be(expected);
         });
 
-        it('should display field formatted row labels with TSVB formatted data by default', async () => {
+        it('should display field formatted row labels with TSVB formatted data', async () => {
           const expected =
             'OS Average of bytes\nWIN 8 694,884.615%\nWIN XP 389,560%\nWIN 7 675,383.333%\nIOS 496,020%\nOSX 313,300%';
 
           await visualBuilder.clickSeriesOption();
-          await visualBuilder.changeDataFormatter('Percent');
-
-          const tableData = await visualBuilder.getViewTable();
-          expect(tableData).to.be(expected);
-        });
-
-        it('should display field formatted row labels with field formatted data when ignore field formatting is disabled', async () => {
-          const expected =
-            'OS Average of bytes\nWIN 8 6.786KB\nWIN XP 3.804KB\nWIN 7 6.596KB\nIOS 4.844KB\nOSX 3.06KB';
-
-          await visualBuilder.clickSeriesOption();
-          await visualBuilder.setSeriesIgnoreFieldFormatting(false);
+          await visualBuilder.changeDataFormatter('percent');
 
           const tableData = await visualBuilder.getViewTable();
           expect(tableData).to.be(expected);

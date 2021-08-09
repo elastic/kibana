@@ -21,6 +21,7 @@ import { replaceVars } from '../../lib/replace_vars';
 import { FIELD_FORMAT_IDS } from '../../../../../../../plugins/field_formats/common';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
 
 function getColor(rules, colorKey, value) {
@@ -60,7 +61,7 @@ class TableVis extends Component {
   }
 
   renderRow = (row) => {
-    const { model, fieldFormatMap } = this.props;
+    const { model, fieldFormatMap, getConfig } = this.props;
 
     let rowDisplay = getValueOrEmpty(
       model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key
@@ -68,8 +69,8 @@ class TableVis extends Component {
 
     // we should skip url field formatting for key if tsvb have drilldown_url
     if (fieldFormatMap[model.pivot_id]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
-      const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap);
-      rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay, 'html') }} />;
+      const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap, undefined, 'html');
+      rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay) }} />;
     }
 
     if (model.drilldown_url) {
@@ -82,19 +83,20 @@ class TableVis extends Component {
       .map((item) => {
         const column = this.visibleSeries.find((c) => c.id === item.id);
         if (!column) return null;
+        const isFieldFormatter = column.formatter === DATA_FORMATTERS.DEFAULT;
         const field = last(column.metrics)?.field;
-        const formatter = column.ignore_field_formatting
-          ? createTickFormatter(column.formatter, column.value_template, this.props.getConfig)
-          : createFieldFormatter(field, fieldFormatMap);
-        let value = item.last;
+        const formatter = isFieldFormatter
+          ? createFieldFormatter(field, fieldFormatMap, getConfig, 'html')
+          : createTickFormatter(column.formatter, column.value_template, getConfig);
         // we should skip color field formatting for value if tsvb column have color_rules
-        if (
-          column.ignore_field_formatting ||
-          fieldFormatMap[field]?.id !== FIELD_FORMAT_IDS.COLOR ||
-          !column.color_rules.length
-        ) {
-          value = formatter(item.last, 'html');
-        }
+        const hasColorRules = column.color_rules?.some(
+          ({ value, operator, text }) => value || operator || text
+        );
+        const value =
+          isFieldFormatter && fieldFormatMap[field]?.id === FIELD_FORMAT_IDS.COLOR && hasColorRules
+            ? item.last
+            : formatter(item.last);
+
         let trend;
         if (column.trend_arrows) {
           const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';

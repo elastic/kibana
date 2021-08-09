@@ -17,7 +17,7 @@ import {
   FieldsFetcherServices,
 } from '../../search_strategies/lib/fields_fetcher';
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
-import type { FieldFormatsRegistry } from '../../../../../data/common';
+import type { FieldFormatsRegistry } from '../../../../../field_formats/common';
 
 export function handleResponseBody(
   panel: Panel,

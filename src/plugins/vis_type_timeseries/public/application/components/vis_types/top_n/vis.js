@@ -16,6 +16,7 @@ import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { sortBy, first, last, get } from 'lodash';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
 
 function sortByDirection(data, direction, fn) {
@@ -39,15 +40,17 @@ function sortSeries(visData, model) {
 }
 
 function TopNVisualization(props) {
-  const { backgroundColor, model, visData, fieldFormatMap } = props;
+  const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
 
   const series = sortSeries(visData, model).map((item) => {
     const id = first(item.id.split(/:/));
     const seriesConfig = model.series.find((s) => s.id === id);
     if (seriesConfig) {
-      const tickFormatter = seriesConfig.ignore_field_formatting
-        ? createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, props.getConfig)
-        : createFieldFormatter(last(seriesConfig.metrics)?.field, fieldFormatMap);
+      const tickFormatter =
+        seriesConfig.formatter === DATA_FORMATTERS.DEFAULT
+          ? createFieldFormatter(last(seriesConfig.metrics)?.field, fieldFormatMap, getConfig)
+          : createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, getConfig);
+
       const value = getLastValue(item.data);
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {

@@ -149,18 +149,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.clickSeriesOption();
         });
 
-        it('should apply TSVB formatting by default', async () => {
-          await visualBuilder.changeDataFormatter('Percent');
+        it('should apply field formatting by default', async () => {
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('5.588KB');
+        });
+
+        it('should apply TSVB formatting', async () => {
+          await visualBuilder.changeDataFormatter('percent');
 
           const text = await visualBuilder.getMarkdownText();
           expect(text).to.be('572,241.265%');
-        });
-
-        it('should apply field formatting when ignore field formatting is disabled', async () => {
-          await visualBuilder.setSeriesIgnoreFieldFormatting(false);
-
-          const text = await visualBuilder.getMarkdownText();
-          expect(text).to.be('5.588KB');
         });
       });
     });
