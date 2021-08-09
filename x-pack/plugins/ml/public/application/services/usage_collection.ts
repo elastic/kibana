@@ -12,10 +12,10 @@ import { PLUGIN_ID } from '../../../common/constants/app';
 export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup) {
   if (usageCollection === undefined) {
     // if usageCollection is disabled, swallow the clicks and counts
-    const reportUiCounter = (eventNames: string | string[], count?: number) => undefined;
+    const noop = (eventNames: string | string[], count?: number) => undefined;
     return {
-      click: reportUiCounter,
-      count: reportUiCounter,
+      click: noop,
+      count: noop,
     };
   }
 

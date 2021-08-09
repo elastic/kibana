@@ -10,30 +10,30 @@ import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { mlUsageCollectionProvider } from './usage_collection';
 
 describe('usage_collection', () => {
-  let usageCollection: UsageCollectionSetup | null = null;
+  let usageCollection: jest.Mocked<UsageCollectionSetup>;
 
   beforeEach(() => {
     usageCollection = ({
       reportUiCounter: jest.fn(),
-    } as unknown) as UsageCollectionSetup;
+    } as unknown) as jest.Mocked<UsageCollectionSetup>;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   test('mlUsageCollection', () => {
-    const mlUsageCollection = mlUsageCollectionProvider(
-      (usageCollection as unknown) as UsageCollectionSetup
-    );
+    const mlUsageCollection = mlUsageCollectionProvider(usageCollection);
 
     mlUsageCollection.click('test');
     mlUsageCollection.count('test');
-    // @ts-expect-error reportUiCounter is a mock function
-    expect(usageCollection.reportUiCounter.mock.calls).toHaveLength(2);
+    expect(usageCollection.reportUiCounter).toHaveBeenCalledTimes(2);
   });
 
   test('mlUsageCollection1', () => {
     const mlUsageCollection = mlUsageCollectionProvider(undefined);
     mlUsageCollection.click('test', 1);
     mlUsageCollection.count('test', 2);
-    // @ts-expect-error reportUiCounter is a mock function
-    expect(usageCollection.reportUiCounter.mock.calls).toHaveLength(0);
+    expect(usageCollection.reportUiCounter).toHaveBeenCalledTimes(0);
   });
 });
