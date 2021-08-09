@@ -32,10 +32,10 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
   const { api, notifications } = useAppContext();
   const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();
 
+  const [isEnabled, setIsEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [hasLoggerDeprecationWarning, setLoggerDeprecationWarning] = useState(false);
-  const [isEnabled, setIsEnabled] = useState<boolean | undefined>(undefined);
-  const [updateError, setUpdateError] = useState<ResponseError | undefined>(undefined);
+  const [updateError, setUpdateError] = useState<ResponseError | undefined>();
 
   useEffect(() => {
     if (isLoading === false && data) {
@@ -75,6 +75,7 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
   return {
     isEnabled,
     isLoading: isLoading || isUpdating,
+    isUpdating,
     toggleLogging,
     fetchError,
     updateError,

@@ -7,7 +7,14 @@
 
 import React from 'react';
 
-import { EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
@@ -25,7 +32,7 @@ const DeprecationLogsPreview = () => {
 
   const endTimestamp = Date.now();
   const startTimestamp = endTimestamp - 120 * 60 * 1000; // 2 hours
-  const showFooter = !state.fetchError && !state.isLoading && !state.isEnabled;
+  const showFooter = state.isEnabled && (!state.fetchError || !state.isLoading);
 
   return (
     <>
@@ -36,15 +43,46 @@ const DeprecationLogsPreview = () => {
       <Collapsible renderFooter={<ExternalLinks />} showFooter={showFooter}>
         {(() => {
           if (state.isLoading) {
-            return <p>Is loading...</p>;
+            return (
+              <>
+                <EuiFlexGroup
+                  direction="column"
+                  alignItems="center"
+                  gutterSize="s"
+                  justifyContent="center"
+                  className="eui-fullHeight"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      <p>Loading deprecation logs</p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            );
           }
 
-          if (!state.isEnabled) {
-            return <p>Is Disabled...</p>;
-          }
-
-          if (state.fetchError) {
-            return <p>Has error...</p>;
+          if (!state.isEnabled || state.fetchError) {
+            return (
+              <>
+                <EuiFlexGroup
+                  direction="column"
+                  alignItems="center"
+                  gutterSize="s"
+                  justifyContent="center"
+                  className="eui-fullHeight"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      <p>Deprecation logs will appear here when collected.</p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            );
           }
 
           return (
