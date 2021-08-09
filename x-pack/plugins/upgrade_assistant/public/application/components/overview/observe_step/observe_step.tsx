@@ -31,7 +31,7 @@ const DeprecationLogsPreview = () => {
   const state = useDeprecationLogging();
 
   const endTimestamp = Date.now();
-  const startTimestamp = endTimestamp - 120 * 60 * 1000; // 2 hours
+  const startTimestamp = endTimestamp - 1000 * 60 * 60 * 24 * 7; // 7 days
   const showFooter = state.isEnabled && (!state.fetchError || !state.isLoading);
 
   return (
