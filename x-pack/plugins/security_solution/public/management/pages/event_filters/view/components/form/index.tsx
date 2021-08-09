@@ -119,7 +119,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const exceptionBuilderComponentMemo = useMemo(
       () =>
         ExceptionBuilder.getExceptionBuilderComponentLazy({
-          allowLargeValueLists: true,
+          allowLargeValueLists: false,
           httpService: http,
           autocompleteService: data.autocomplete,
           exceptionListItems: [exception as ExceptionListItemSchema],

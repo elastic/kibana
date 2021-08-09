@@ -27,7 +27,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
-  return async function runTask(jobId, job, cancellationToken) {
+  return async function runTask(jobId, job, cancellationToken, stream) {
     const jobLogger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
@@ -46,7 +46,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
         const urls = getFullUrls(config, job);
 
         const { browserTimezone, layout, title } = job;
-        if (apmGetAssets) apmGetAssets.end();
+        apmGetAssets?.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
@@ -60,15 +60,15 @@ export const runTaskFnFactory: RunTaskFnFactory<
         );
       }),
       map(({ buffer, warnings }) => {
-        if (apmGeneratePdf) apmGeneratePdf.end();
-
+        apmGeneratePdf?.end();
         const apmEncode = apmTrans?.startSpan('encode_pdf', 'output');
         const content = buffer?.toString('base64') || null;
-        if (apmEncode) apmEncode.end();
+        apmEncode?.end();
+
+        stream.write(content);
 
         return {
           content_type: 'application/pdf',
-          content,
           size: buffer?.byteLength || 0,
           warnings,
         };
@@ -81,7 +81,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    if (apmTrans) apmTrans.end();
+    apmTrans?.end();
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 };

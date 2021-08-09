@@ -13,7 +13,7 @@ import {
   SPACE_IDS,
   isValidFeatureId,
   mapConsumerToIndexName,
-  ALERTS_CONSUMERS,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -127,7 +127,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   alerting: AlertingPluginStartContract;
   queryFactory: TimelineFactory<T>;
-  alertConsumers: ALERTS_CONSUMERS[];
+  alertConsumers: AlertConsumers[];
 }) => {
   // Based on what solution alerts you want to see, figures out what corresponding
   // index to query (ex: siem --> .alerts-security.alerts)
