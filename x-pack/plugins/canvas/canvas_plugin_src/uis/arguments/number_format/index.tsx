@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { Assign } from '@kbn/utility-types';
 import { NumberFormatArgInput, Props as ComponentProps } from './number_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
@@ -16,12 +17,12 @@ import { FORMATS_UI_SETTINGS } from '../../../../../../../src/plugins/field_form
 const { NumberFormat: strings } = ArgumentStrings;
 
 const getNumberFormatArgInput = (defaultNumberFormats: ComponentProps['numberFormats']) => (
-  props: Omit<ComponentProps, 'numberFormats'> & Partial<Pick<ComponentProps, 'numberFormats'>>
+  props: Assign<ComponentProps, { numberFormats?: ComponentProps['numberFormats'] }>
 ) => <NumberFormatArgInput numberFormats={defaultNumberFormats} {...props} />;
 
 export const numberFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,
-  _
+  plugins
 ) => {
   const formatMap = {
     NUMBER: core.uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN),
