@@ -140,7 +140,7 @@ aggregations using that index pattern in {kib} take advantage of {ccs}.
 [[delete-index-pattern]]
 === Delete index patterns
 
-When you delete an index pattern, you cannot to recover the associated field formatters, runtime fields, source filters,
+When you delete an index pattern, you cannot recover the associated field formatters, runtime fields, source filters,
 and field popularity data. Deleting an index pattern does not remove any indices or data documents from {es}.
 
 WARNING: Deleting an index pattern breaks all visualizations, saved searches, and other saved objects that reference the index pattern.
