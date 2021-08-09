@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 
-import { fieldFormats } from '../../../../../../data/public';
+import { DEFAULT_CONVERTER_COLOR } from '../../../../../../field_formats/common';
 import { FormatEditorProps } from '../types';
 
 interface Color {
@@ -56,7 +56,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
   addColor = () => {
     const colors = [...(this.props.formatParams.colors || [])];
     this.onChange({
-      colors: [...colors, { ...fieldFormats.DEFAULT_CONVERTER_COLOR }],
+      colors: [...colors, { ...DEFAULT_CONVERTER_COLOR }],
     });
   };
 

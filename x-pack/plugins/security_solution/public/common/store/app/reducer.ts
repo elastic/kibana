@@ -19,6 +19,7 @@ export const initialAppState: AppState = {
   errors: [],
   enableExperimental: {
     trustedAppsByPolicyEnabled: false,
+    excludePoliciesInFilterEnabled: false,
     metricsEntitiesEnabled: false,
     ruleRegistryEnabled: false,
     tGridEnabled: false,
