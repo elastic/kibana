@@ -12,7 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import { UIM_APP_LOAD } from './constants';
 import { EditPolicy } from './sections/edit_policy';
-import { PolicyTable } from './sections/policy_table';
+import { PolicyList } from './sections/policy_list';
 import { trackUiMetric } from './services/ui_metric';
 import { ROUTES } from './services/navigation';
 
@@ -23,7 +23,7 @@ export const App = ({ history }: { history: ScopedHistory }) => {
     <Router history={history}>
       <Switch>
         <Redirect exact from="/" to={ROUTES.list} />
-        <Route exact path={ROUTES.list} component={PolicyTable} />
+        <Route exact path={ROUTES.list} component={PolicyList} />
         <Route path={ROUTES.edit} component={EditPolicy} />
       </Switch>
     </Router>

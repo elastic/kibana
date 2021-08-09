@@ -15,7 +15,7 @@
  * setting, with which the user can change the index prefix.
  */
 
-export const ALERTS_CONSUMERS = {
+export const AlertConsumers = {
   APM: 'apm',
   LOGS: 'logs',
   INFRASTRUCTURE: 'infrastructure',
@@ -23,9 +23,9 @@ export const ALERTS_CONSUMERS = {
   SIEM: 'siem',
   SYNTHETICS: 'synthetics',
 } as const;
-export type ALERTS_CONSUMERS = typeof ALERTS_CONSUMERS[keyof typeof ALERTS_CONSUMERS];
+export type AlertConsumers = typeof AlertConsumers[keyof typeof AlertConsumers];
 
-export const mapConsumerToIndexName: Record<ALERTS_CONSUMERS, string | string[]> = {
+export const mapConsumerToIndexName: Record<AlertConsumers, string | string[]> = {
   apm: '.alerts-observability-apm',
   logs: '.alerts-observability.logs',
   infrastructure: '.alerts-observability.metrics',
