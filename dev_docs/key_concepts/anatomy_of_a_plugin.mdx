@@ -1,13 +1,13 @@
 ---
 id: kibDevTutorialBuildAPlugin
-slug: /kibana-dev-docs/tutorials/build-a-plugin
-title: Kibana plugin tutorial
-summary: Anatomy of a Kibana plugin and how to build one
-date: 2021-02-05
-tags: ['kibana', 'onboarding', 'dev', 'tutorials']
+slug: /kibana-dev-docs/tutorials/anatomy-of-a-plugin
+title: Anatomy of a plugin
+summary: Anatomy of a Kibana plugin.
+date: 2021-08-03
+tags: ['kibana', 'onboarding', 'dev']
 ---
 
-Prereading material:
+Pre-reading material:
 
 - <DocLink id="kibPlatformIntro" />
 
@@ -39,27 +39,50 @@ plugins/
 
 ```
 {
-  "id": "demo",
-  "version": "kibana",
+  "id": "examplePluginId",
+  "version": "1.0.0",
+  "kibanaVersion": "7.14.0",
   "server": true,
   "ui": true,
-  "owner": { [1]
+  "configPath": "path/to/config",
+  "type": "standard",
+  "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
-  "description": "This plugin extends Kibana by doing xyz, and allows other plugins to extend Kibana by offering abc functionality. It also exposes some helper utilities that do efg", [2]
-  "requiredPlugins": ["data"], [3]
-  "optionalPlugins": ["alerting"] [4]
-  "requiredBundles": ["anotherPlugin"] [5]
+  "description": "A description about this plugin!",
+  "requiredPlugins": ["data"],
+  "optionalPlugins": ["alerting"]
+  "requiredBundles": ["anotherPlugin"]
 }
 ```
 
-[1], [2]: Every internal plugin should fill in the owner and description properties.
+`id` - [Required] The id of your plugin can be anything, though it should be fairly unique, as every plugin in an installation needs to be unique. It must be snakeCase.
 
-[3], [4]: Any plugin that you have a dependency on should be listed in `requiredPlugins` or `optionalPlugins`. Doing this will ensure that you have access to that plugin's start and setup contract inside your own plugin's start and setup lifecycle methods. If a plugin you optionally depend on is not installed or disabled, it will be undefined if you try to access it. If a plugin you require is not installed or disabled, kibana will fail to build.
+`version` - [Required] Note the version of your plugin. For internal plugins that don't specify a `kibanaVersion`, this will have to match the version of Kibana or ci will fail. Because teams won't want to be bumping this number for every release, internal plugins should set `kibanaVersion` to "kibana", and set this to anything.
 
-[5]: Don't worry too much about getting 5 right. The build optimizer will complain if any of these values are incorrect.
+`kibanaVersion` - [Optional] If your plugin is only compatible with a specific version of Kibana, put it here. Internal, first-party plugins should set this to "kibana", otherwise they will need to bump this value, or the one in `version`, every time the Kibana version is bumped. When [#61087](https://github.com/elastic/kibana/issues/61087) is fixed, we will stop requiring this field for internal plugins.
 
+`server` - [Optional] If your plugin contains server-side code, this must be true.
+
+`ui` - [Optional] If your plugin contains client-side code, this must be true.
+
+`configPath` - [Optional] Every plugin might allow Kibana users to adjust configuration via kibana.yml file. If your plugin needs to read config from `kibana.yml , you should declare what property name it should have access to.
+
+`type` - [Optional] Should be either `preboot` or `standard` which specifies the type of plugin. Default value, if unspecified, is `standard`. There are two types of plugins:
+
+- preboot plugins are bootstrapped to prepare the environment before Kibana starts.
+- standard plugins define Kibana functionality while Kibana is running.
+
+`owner` - [Required] Help users of your plugin know who manages this plugin and how to get in touch. This is required for internal plugins. `Owner.name` should be the name of the team that manages this plugin. This should match the team that owns this code in the [CODEOWNERS](https://github.com/elastic/kibana/blob/master/.github/CODEOWNERS) file (however, this is not currently enforced). Internal teams should also use a [GitHub team alias](https://github.com/orgs/elastic/teams) for `owner.githubTeam`. While many teams can contribute to a plugin, only a single team should be the primary owner.
+
+`description` - [Required] Give your plugin a description to help other developers understand what it does. This is required for internal plugins.
+
+`requiredPlugins` - [Optional] If your plugin requires any other plugins to work, you must list them here by id. If any of the required plugins are disabled or not installed, then your plugin will be disabled.
+
+`optionalPlugins` - [Optional] If your plugin has an optional dependency on other plugins, you must list them here by id. If any of the optional plugins are disabled or not installed, your plugin will still load, however that plugin's API contract will be undefined in the second parameter of the setup and start functions.
+
+`requiredBundles` - [Required in certain situations] Don't worry about getting this right. The build optimizer will complain if any of these values are incorrect.
 
 <DocCallOut>
   You don't need to declare a dependency on a plugin if you only wish to access its types.
@@ -233,7 +256,7 @@ With that specified in the plugin manifest, the appropriate interfaces are then 
 import type { CoreSetup, CoreStart } from 'kibana/server';
 import type { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
 
-interface DemoSetupPlugins { [1]
+interface DemoSetupPlugins { [1];
   foobar: FoobarPluginSetup;
 }
 
@@ -242,13 +265,13 @@ interface DemoStartPlugins {
 }
 
 export class DemoPlugin {
-  public setup(core: CoreSetup, plugins: DemoSetupPlugins) { [2]
+  public setup(core: CoreSetup, plugins: DemoSetupPlugins) { [2];
     const { foobar } = plugins;
     foobar.getFoo(); // 'foo'
     foobar.getBar(); // throws because getBar does not exist
   }
 
-  public start(core: CoreStart, plugins: DemoStartPlugins) { [3]
+  public start(core: CoreStart, plugins: DemoStartPlugins) { [3];
     const { foobar } = plugins;
     foobar.getFoo(); // throws because getFoo does not exist
     foobar.getBar(); // 'bar'
