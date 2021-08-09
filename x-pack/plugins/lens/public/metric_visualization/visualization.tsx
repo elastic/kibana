@@ -111,7 +111,7 @@ export const metricVisualization: Visualization<MetricState> = {
     };
   },
 
-  getLayerTypes() {
+  getSupportedLayers() {
     return [
       {
         type: layerTypes.DATA,

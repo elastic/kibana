@@ -43,7 +43,7 @@ export function AddLayerButton({
   if (!hasMultipleLayers) {
     return null;
   }
-  const supportedLayers = visualization.getLayerTypes?.(visualizationState, layersMeta);
+  const supportedLayers = visualization.getSupportedLayers?.(visualizationState, layersMeta);
   if (supportedLayers?.length === 1) {
     return (
       <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">

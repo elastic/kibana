@@ -265,7 +265,7 @@ export const getHeatmapVisualization = ({
     );
   },
 
-  getLayerTypes() {
+  getSupportedLayers() {
     return [
       {
         type: layerTypes.DATA,

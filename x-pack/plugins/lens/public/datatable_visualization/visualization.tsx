@@ -300,7 +300,7 @@ export const getDatatableVisualization = ({
     );
   },
 
-  getLayerTypes() {
+  getSupportedLayers() {
     return [
       {
         type: layerTypes.DATA,

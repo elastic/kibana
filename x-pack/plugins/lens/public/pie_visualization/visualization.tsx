@@ -233,7 +233,7 @@ export const getPieVisualization = ({
     );
   },
 
-  getLayerTypes() {
+  getSupportedLayers() {
     return [
       {
         type: layerTypes.DATA,

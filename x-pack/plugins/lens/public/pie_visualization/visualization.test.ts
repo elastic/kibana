@@ -58,9 +58,9 @@ describe('pie_visualization', () => {
     });
   });
 
-  describe('#getLayerTypes', () => {
+  describe('#getSupportedLayers', () => {
     it('should return a single layer type', () => {
-      expect(pieVisualization.getLayerTypes()).toHaveLength(1);
+      expect(pieVisualization.getSupportedLayers()).toHaveLength(1);
     });
   });
 

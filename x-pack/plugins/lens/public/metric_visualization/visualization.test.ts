@@ -155,9 +155,9 @@ describe('metric_visualization', () => {
     });
   });
 
-  describe('#getLayerTypes', () => {
+  describe('#getSupportedLayers', () => {
     it('should return a single layer type', () => {
-      expect(metricVisualization.getLayerTypes()).toHaveLength(1);
+      expect(metricVisualization.getSupportedLayers()).toHaveLength(1);
     });
   });
 

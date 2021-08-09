@@ -82,9 +82,9 @@ describe('Datatable Visualization', () => {
     });
   });
 
-  describe('#getLayerTypes', () => {
+  describe('#getSupportedLayers', () => {
     it('should return a single layer type', () => {
-      expect(datatableVisualization.getLayerTypes()).toHaveLength(1);
+      expect(datatableVisualization.getSupportedLayers()).toHaveLength(1);
     });
   });
 

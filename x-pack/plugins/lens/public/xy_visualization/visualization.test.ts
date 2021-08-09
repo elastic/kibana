@@ -215,13 +215,13 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#getLayerTypes', () => {
+  describe('#getSupportedLayers', () => {
     it('should return a single layer type', () => {
-      expect(xyVisualization.getLayerTypes()).toHaveLength(1);
+      expect(xyVisualization.getSupportedLayers()).toHaveLength(1);
     });
 
     it('should return the icon for the visualization type', () => {
-      expect(xyVisualization.getLayerTypes()[0].icon).not.toBeUndefined();
+      expect(xyVisualization.getSupportedLayers()[0].icon).not.toBeUndefined();
     });
   });
 

@@ -611,7 +611,7 @@ export interface Visualization<T = unknown> {
   appendLayer?: (state: T, layerId: string, type: LayerType) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
-  getLayerTypes: (
+  getSupportedLayers: (
     state?: T,
     frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
   ) => Array<{

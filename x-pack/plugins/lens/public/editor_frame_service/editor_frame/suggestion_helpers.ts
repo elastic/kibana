@@ -126,7 +126,7 @@ export function getSuggestions({
   // and rank them by score
   return Object.entries(visualizationMap)
     .flatMap(([visualizationId, visualization]) => {
-      const supportedLayerTypes = visualization.getLayerTypes().map(({ type }) => type);
+      const supportedLayerTypes = visualization.getSupportedLayers().map(({ type }) => type);
       return datasourceTableSuggestions
         .filter((datasourceSuggestion) => {
           const filteredCount = datasourceSuggestion.keptLayerIds.filter((layerId) =>

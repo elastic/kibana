@@ -249,12 +249,12 @@ describe('heatmap', () => {
     });
   });
 
-  describe('#getLayerTypes', () => {
+  describe('#getSupportedLayers', () => {
     it('should return a single layer type', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
-        }).getLayerTypes()
+        }).getSupportedLayers()
       ).toHaveLength(1);
     });
   });

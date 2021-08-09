@@ -185,7 +185,7 @@ export const getXyVisualization = ({
     return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
-  getLayerTypes(state, frame) {
+  getSupportedLayers(state, frame) {
     const layers = [
       {
         type: layerTypes.DATA,

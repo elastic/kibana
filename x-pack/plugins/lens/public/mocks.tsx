@@ -47,7 +47,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     clearLayer: jest.fn((state, _layerId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
-    getLayerTypes: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+    getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
     getLayerType: jest.fn((_state, _layerId) => layerTypes.DATA),
     visualizationTypes: [
       {
