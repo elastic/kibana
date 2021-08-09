@@ -474,7 +474,6 @@ export class ActionsClient {
     actionId,
     params,
     source,
-    relatedSavedObjects,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
@@ -487,7 +486,6 @@ export class ActionsClient {
       params,
       source,
       request: this.request,
-      relatedSavedObjects,
     });
   }
 

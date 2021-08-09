@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { omit } from 'lodash';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -15,6 +16,7 @@ import {
 import { ActionTaskParams, RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+import { RelatedSavedObjects } from '../lib/related_saved_objects';
 
 interface ActionsLogMeta<T = RawAction> extends LogMeta {
   migrations: { actionDocument: SavedObjectUnsanitizedDoc<T> };
@@ -49,7 +51,18 @@ export function getActionTaskParamsMigrations(
     pipeMigrations(resolveSavedObjectIdsInActionTaskParams)
   );
 
+  const migrationActionsMoveRelatedSavedObjects = createEsoMigration(
+    encryptedSavedObjects,
+    (
+      doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
+    ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => {
+      return doc.type === 'action_task_params';
+    },
+    pipeMigrations(moveRelatedSavedObjects)
+  );
+
   return {
+    // '7.15.0': executeMigrationWithErrorHandling(migrationActionsMoveRelatedSavedObjects, '7.15.0'),
     '8.0.0': executeMigrationWithErrorHandling(
       migrationResolveSavedObjectsIdsInActionTaskParams,
       '8.0.0'
@@ -191,6 +204,29 @@ const addisMissingSecretsField = (
       isMissingSecrets: false,
     },
   };
+};
+
+const moveRelatedSavedObjects = (
+  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
+): SavedObjectUnsanitizedDoc<ActionTaskParams> => {
+  const relatedSavedObjects = (doc.attributes
+    .relatedSavedObjects as unknown) as RelatedSavedObjects[];
+  if (relatedSavedObjects) {
+    const references = doc.references ?? [];
+    references.push(
+      ...relatedSavedObjects.map((relatedSavedObject) => ({
+        name: relatedSavedObject.typeId ?? 'unknown',
+        type: relatedSavedObject.type,
+        id: relatedSavedObject.id,
+      }))
+    );
+    return {
+      ...doc,
+      references,
+      attributes: omit(doc.attributes, ['relatedSavedObjects']),
+    };
+  }
+  return doc;
 };
 
 const resolveSavedObjectIdsInActionTaskParams = (
