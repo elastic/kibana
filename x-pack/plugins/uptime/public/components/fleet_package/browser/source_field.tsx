@@ -136,7 +136,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
           >
             <CodeEditor
               ariaLabel={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
+                'xpack.uptime.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
                 {
                   defaultMessage: 'JSON code editor',
                 }
