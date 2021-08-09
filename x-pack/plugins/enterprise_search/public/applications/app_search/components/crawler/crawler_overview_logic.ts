@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
@@ -145,7 +145,7 @@ export const CrawlerOverviewLogic = kea<
         );
         const crawlerData = crawlerDataServerToClient(response);
         actions.onReceiveCrawlerData(crawlerData);
-        setSuccessMessage(DELETE_DOMAIN_MESSAGE(domain.url));
+        flashSuccessToast(DELETE_DOMAIN_MESSAGE(domain.url));
       } catch (e) {
         flashAPIErrors(e);
       }
