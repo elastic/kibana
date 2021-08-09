@@ -65,7 +65,7 @@ export interface LoadExploreDataArg {
   searchQuery: SavedSearchQuery;
 }
 
-export interface MetricItem {
+export interface ClassificationMetricItem {
   className: string;
   accuracy?: number;
   recall?: number;

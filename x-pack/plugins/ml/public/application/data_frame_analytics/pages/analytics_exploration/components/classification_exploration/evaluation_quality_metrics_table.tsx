@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
 
-import { MetricItem } from '../../../../common/analytics';
+import { ClassificationMetricItem } from '../../../../common/analytics';
 
 const columns = [
   {
@@ -25,16 +25,6 @@ const columns = [
     truncateText: true,
   },
   {
-    field: 'recall',
-    name: i18n.translate(
-      'xpack.ml.dataframe.analytics.classificationExploration.recallAndAccuracyRecallColumn',
-      {
-        defaultMessage: 'Recall',
-      }
-    ),
-    render: (value: number) => Math.round(value * 1000) / 1000,
-  },
-  {
     field: 'accuracy',
     name: i18n.translate(
       'xpack.ml.dataframe.analytics.classificationExploration.recallAndAccuracyAccuracyColumn',
@@ -44,11 +34,21 @@ const columns = [
     ),
     render: (value: number) => Math.round(value * 1000) / 1000,
   },
+  {
+    field: 'recall',
+    name: i18n.translate(
+      'xpack.ml.dataframe.analytics.classificationExploration.recallAndAccuracyRecallColumn',
+      {
+        defaultMessage: 'Recall',
+      }
+    ),
+    render: (value: number) => Math.round(value * 1000) / 1000,
+  },
 ];
 
-export const EvaluationQualityMetricsTable: FC<{ evaluationMetricsItems: MetricItem[] }> = ({
-  evaluationMetricsItems,
-}) => (
+export const EvaluationQualityMetricsTable: FC<{
+  evaluationMetricsItems: ClassificationMetricItem[];
+}> = ({ evaluationMetricsItems }) => (
   <>
     <EuiAccordion
       id="recall-and-accuracy"
@@ -60,7 +60,7 @@ export const EvaluationQualityMetricsTable: FC<{ evaluationMetricsItems: MetricI
       }
     >
       <EuiPanel>
-        <EuiInMemoryTable<MetricItem>
+        <EuiInMemoryTable<ClassificationMetricItem>
           items={evaluationMetricsItems}
           columns={columns}
           pagination={true}

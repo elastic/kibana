@@ -13,7 +13,7 @@ import {
   ConfusionMatrix,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
-  MetricItem,
+  ClassificationMetricItem,
 } from '../../../../common/analytics';
 import { isKeywordAndTextType } from '../../../../common/fields';
 
@@ -39,7 +39,7 @@ function getEvalutionMetricsItems(evalMetrics?: ClassificationEvaluateResponse['
       accuracy: accuracyMetric.value,
     };
     return acc;
-  }, {} as Record<string, MetricItem>);
+  }, {} as Record<string, ClassificationMetricItem>);
 
   recallMetrics.forEach((recallMetric) => {
     if (metricsMap[recallMetric.class_name] !== undefined) {
