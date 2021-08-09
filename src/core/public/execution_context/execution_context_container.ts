@@ -34,7 +34,7 @@ export interface IExecutionContextContainer {
 }
 
 export class ExecutionContextContainer implements IExecutionContextContainer {
-  readonly #context: KibanaExecutionContext;
+  readonly #context: Readonly<KibanaExecutionContext>;
   constructor(context: Readonly<KibanaExecutionContext>) {
     this.#context = context;
   }

@@ -29,7 +29,7 @@ export interface IExecutionContext {
   /**
    * The sole purpose of this imperative internal API is to be used by the http service.
    * The event-based nature of Hapi server doesn't allow us to wrap a request handler with "withContext".
-   * Since all the Hapi even lifecycle will lose the execution context.
+   * Since all the Hapi event lifecycle will lose the execution context.
    * Nodejs docs also recommend using AsyncLocalStorage.run() over AsyncLocalStorage.enterWith().
    * https://nodejs.org/api/async_context.html#async_context_asynclocalstorage_enterwith_store
    */

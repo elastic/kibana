@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-/** @public */
-
+/**
+ * @public
+ * Represents a meta-information about a Kibana entity initiating a search request.
+ */
 // use type to make it compatible with SerializableState
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type KibanaExecutionContext = {

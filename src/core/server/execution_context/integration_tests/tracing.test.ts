@@ -561,11 +561,13 @@ describe('trace', () => {
           description: 'nested-description',
         };
         router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-          return executionContext.withContext(parentContext, () =>
-            executionContext.withContext(nestedContext, () =>
-              res.ok({ body: executionContext.get() })
-            )
-          );
+          return executionContext.withContext(parentContext, async () => {
+            await delay(100);
+            return executionContext.withContext(nestedContext, async () => {
+              await delay(100);
+              return res.ok({ body: executionContext.get() });
+            });
+          });
         });
 
         await root.start();

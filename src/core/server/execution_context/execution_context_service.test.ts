@@ -114,6 +114,26 @@ describe('ExecutionContextService', () => {
           ]
         `);
       });
+
+      it('can be disabled', async () => {
+        const coreWithDisabledService = mockCoreContext.create();
+        coreWithDisabledService.configService.atPath.mockReturnValue(
+          new BehaviorSubject({ enabled: false })
+        );
+        const disabledService = new ExecutionContextService(coreWithDisabledService).setup();
+        const chainA = await Promise.resolve().then(async () => {
+          disabledService.set({
+            type: 'type-a',
+            name: 'name-a',
+            id: 'id-a',
+            description: 'description-a',
+          });
+          await delay(100);
+          return disabledService.get();
+        });
+
+        expect(chainA).toBeUndefined();
+      });
     });
 
     describe('withContext', () => {
@@ -336,6 +356,28 @@ describe('ExecutionContextService', () => {
                   ]
               `);
       });
+
+      it('can be disabled', async () => {
+        const coreWithDisabledService = mockCoreContext.create();
+        coreWithDisabledService.configService.atPath.mockReturnValue(
+          new BehaviorSubject({ enabled: false })
+        );
+        const disabledService = new ExecutionContextService(coreWithDisabledService).setup();
+        const result = await disabledService.withContext(
+          {
+            type: 'type-b',
+            name: 'name-b',
+            id: 'id-b',
+            description: 'description-b',
+          },
+          async () => {
+            await delay(10);
+            return service.get();
+          }
+        );
+
+        expect(result).toBeUndefined();
+      });
     });
 
     describe('getAsHeader', () => {
@@ -356,28 +398,27 @@ describe('ExecutionContextService', () => {
 
         expect(service.getAsHeader()).toBe('1234;kibana:type-a:name-a:id-a');
       });
-    });
-  });
 
-  describe('config', () => {
-    it('can be disabled', async () => {
-      const core = mockCoreContext.create();
-      core.configService.atPath.mockReturnValue(new BehaviorSubject({ enabled: false }));
-      const service = new ExecutionContextService(core).setup();
-      const chainA = await Promise.resolve().then(async () => {
-        service.set({
+      it('can be disabled', async () => {
+        const coreWithDisabledService = mockCoreContext.create();
+        coreWithDisabledService.configService.atPath.mockReturnValue(
+          new BehaviorSubject({ enabled: false })
+        );
+        const disabledService = new ExecutionContextService(coreWithDisabledService).setup();
+        disabledService.setRequestId('1234');
+        disabledService.set({
           type: 'type-a',
           name: 'name-a',
           id: 'id-a',
           description: 'description-a',
         });
-        await delay(100);
-        return service.get();
+
+        expect(disabledService.getAsHeader()).toBeUndefined();
       });
-
-      expect(chainA).toBeUndefined();
     });
+  });
 
+  describe('config', () => {
     it('reacts to config changes', async () => {
       const core = mockCoreContext.create();
       const config$ = new BehaviorSubject({ enabled: false });
