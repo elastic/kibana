@@ -24,7 +24,7 @@ import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
 
-/** @internal **/
+/** @public **/
 export type AggConfigSerialized = Ensure<
   {
     type: string;
