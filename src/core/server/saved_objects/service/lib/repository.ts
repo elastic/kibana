@@ -1024,7 +1024,7 @@ export class SavedObjectsRepository {
       { ignore: [404] }
     );
     const indexNotFound = statusCode === 404;
-    // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
+    // check if we have the elasticsearch header when index is not found and if we do, ensure it is Elasticsearch
     if (!isFoundGetResponse(body) && !isSupportedEsServer(headers)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
@@ -2105,7 +2105,7 @@ export class SavedObjectsRepository {
 
     const indexFound = statusCode !== 404;
 
-    // check if we have the elasticsearch header when doc.found is not true (false, undefined or null) and if we do, ensure it is Elasticsearch
+    // check if we have the elasticsearch header when index is not found and if we do, ensure it is Elasticsearch
     const esServerSupported = isSupportedEsServer(headers);
 
     if (!isFoundGetResponse(body) && !esServerSupported) {
