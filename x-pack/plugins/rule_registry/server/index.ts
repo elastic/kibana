@@ -14,6 +14,7 @@ export type { RacRequestHandlerContext, RacApiRequestHandlerContext } from './ty
 export { RuleDataPluginService } from './rule_data_plugin_service';
 export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';
+export { createRuleDataClientMock } from './rule_data_client/create_rule_data_client_mock';
 export { getRuleData, RuleExecutorData } from './utils/get_rule_executor_data';
 export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 export {

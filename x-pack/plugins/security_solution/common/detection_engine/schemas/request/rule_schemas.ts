@@ -179,8 +179,8 @@ const baseParams = {
 
 const racBaseParams = {
   ...baseParams,
-  defaultable: {
-    ...baseParams.defaultable,
+  required: {
+    ...baseParams.required,
     namespace: t.string,
   },
 };

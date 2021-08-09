@@ -249,11 +249,14 @@ export const getDeleteRequestById = () =>
     query: { id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' },
   });
 
-export const getCreateRequest = () =>
+export const getCreateRequest = (isRuleRegistryEnabled: boolean = false) =>
   requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: getCreateRulesSchemaMock(),
+    body: {
+      ...getCreateRulesSchemaMock(),
+      ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
+    },
   });
 
 // TODO: Replace this with the mocks version from the mocks file
@@ -268,11 +271,14 @@ export const typicalMlRulePayload = () => {
   };
 };
 
-export const createMlRuleRequest = () => {
+export const createMlRuleRequest = (isRuleRegistryEnabled: boolean = false) => {
   return requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: typicalMlRulePayload(),
+    body: {
+      ...typicalMlRulePayload(),
+      ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
+    },
   });
 };
 

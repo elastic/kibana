@@ -957,9 +957,16 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
   }
 };
 
-export const getRACRuleType = (ruleType: 'query'): string => {
+export const getRACRuleType = (
+  ruleType: 'eql' | 'machine_learning' | 'query' | 'saved_query' | 'threat_match' | 'threshold'
+): string => {
   const ruleTypeMapping = {
+    eql: 'siem.eql',
+    machine_learning: 'siem.machine_learning',
     query: 'siem.query',
+    saved_query: 'siem.saved_query',
+    threat_match: 'siem.threat_match',
+    threshold: 'siem.threshold',
   };
   return ruleTypeMapping[ruleType];
 };

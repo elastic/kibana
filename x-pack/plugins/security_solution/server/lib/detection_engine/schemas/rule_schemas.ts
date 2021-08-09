@@ -189,10 +189,9 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
 
-const internalRuleSchema = {
+const internalRuleCreateBase = {
   name,
   tags,
-  alertTypeId: t.literal(SIGNALS_ID),
   consumer: t.literal(SERVER_APP_ID),
   schedule: t.type({
     interval: t.string,
@@ -203,17 +202,33 @@ const internalRuleSchema = {
   throttle: throttleOrNull,
   notifyWhen: t.null,
 };
+const internalRuleCreateBaseType = t.type(internalRuleCreateBase);
+export type InternalRuleCreateBase = t.TypeOf<typeof internalRuleCreateBaseType>;
 
-
-export const internalRuleCreate = t.type(internalRuleSchema);
+export const internalRuleCreate = t.type({
+  ...internalRuleCreateBase,
+  alertTypeId: t.literal(SIGNALS_ID),
+  params: ruleParams,
+});
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
 export const internalRACRuleCreate = t.type({
-  ...internalRuleSchema,
+  ...internalRuleCreateBase,
   alertTypeId: t.literal('siem.query'),
   params: t.intersection([ruleParams, t.type({ namespace: t.string })]), // TODO: is this right?
 });
 export type InternalRACRuleCreate = t.TypeOf<typeof internalRACRuleCreate>;
+
+export const isInternalRuleCreate = (obj: InternalRuleCreateBase): obj is InternalRuleCreate => {
+  return !('namespace' in obj.params);
+};
+
+export const isInternalRACRuleCreate = (
+  obj: InternalRuleCreateBase
+): obj is InternalRACRuleCreate => {
+  const namespace = (obj as InternalRACRuleCreate).params.namespace;
+  return namespace != null;
+};
 
 export const internalRuleUpdate = t.type({
   name,
