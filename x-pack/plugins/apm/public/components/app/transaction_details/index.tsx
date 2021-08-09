@@ -90,21 +90,21 @@ function LatencyCorrelationsTab({
 
 const traceSamplesTab = {
   key: 'traceSamples',
-  label: i18n.translate('xpack.apm.correlations.tabs.traceSamplesLabel', {
+  label: i18n.translate('xpack.apm.transactionDetails.tabs.traceSamplesLabel', {
     defaultMessage: 'Trace samples',
   }),
   component: TraceSamplesTab,
 };
 const errorRateTab = {
   key: 'errorRate',
-  label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
+  label: i18n.translate('xpack.apm.transactionDetails.tabs.errorRateLabel', {
     defaultMessage: 'Failing transactions',
   }),
   component: () => <MlErrorCorrelations onClose={() => {}} />,
 };
 const latencyCorrelationsTab = {
   key: 'latencyCorrelations',
-  label: i18n.translate('xpack.apm.correlations.tabs.latencyLabel', {
+  label: i18n.translate('xpack.apm.transactionDetails.tabs.latencyLabel', {
     defaultMessage: 'Latency correlations analysis',
   }),
   component: LatencyCorrelationsTab,
