@@ -27,10 +27,6 @@ import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions } from './components/hover_actions';
-// import {
-//   useStatusBulkActionItems,
-//   StatusBulkActionsProps,
-// } from './hooks/use_status_bulk_action_items';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -70,9 +66,6 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
           store: this._store!,
         });
       },
-      // getUseStatusBulkActionItems: (props: StatusBulkActionsProps) => {
-      //   return useStatusBulkActionItems(props);
-      // },
       getUseAddToTimeline: () => {
         return useAddToTimeline;
       },
