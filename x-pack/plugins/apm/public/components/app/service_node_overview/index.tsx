@@ -79,7 +79,7 @@ function ServiceNodeOverview() {
       ),
       field: 'name',
       sortable: true,
-      render: (name: string) => {
+      render: (_, { name }) => {
         const { displayedName, tooltip } =
           name === SERVICE_NODE_NAME_MISSING
             ? {
@@ -112,7 +112,7 @@ function ServiceNodeOverview() {
       }),
       field: 'cpu',
       sortable: true,
-      render: (value: number | null) => asPercent(value, 1),
+      render: (_, { cpu }) => asPercent(cpu, 1),
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {

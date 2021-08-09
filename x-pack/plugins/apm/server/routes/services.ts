@@ -42,6 +42,7 @@ import {
 } from './default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
 import { getServicesDetailedStatistics } from '../lib/services/get_services_detailed_statistics';
+import { getServiceDependenciesBreakdown } from '../lib/services/get_service_dependencies_breakdown';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
@@ -692,6 +693,38 @@ export const serviceDependenciesRoute = createApmServerRoute({
   },
 });
 
+export const serviceDependenciesBreakdownRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/dependencies/breakdown',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([environmentRt, rangeRt, kueryRt]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { environment, start, end, kuery } = params.query;
+
+    const breakdown = await getServiceDependenciesBreakdown({
+      setup,
+      start,
+      end,
+      serviceName,
+      environment,
+      kuery,
+    });
+
+    return {
+      breakdown,
+    };
+  },
+});
+
 const serviceProfilingTimelineRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/profiling/timeline',
   params: t.type({
@@ -822,6 +855,7 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceInstancesMainStatisticsRoute)
   .add(serviceInstancesDetailedStatisticsRoute)
   .add(serviceDependenciesRoute)
+  .add(serviceDependenciesBreakdownRoute)
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute)
   .add(serviceAlertsRoute);
