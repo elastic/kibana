@@ -8,15 +8,17 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiIcon,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
   EuiToolTip,
-  EuiSuperSelect,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -27,6 +29,7 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
+import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -46,14 +49,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
-  const { selectedKipId, loading } = sourcererScope;
+  const { selectedKipId, selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  // const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-  //   selectedPatterns.map((indexSelected) => ({
-  //     label: indexSelected,
-  //     value: indexSelected,
-  //   }))
-  // );
   const getSelectedPatterns = useCallback(
     (kipId) => {
       const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
@@ -62,77 +59,89 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [kibanaIndexPatterns]
   );
   const [selectedOption, setSelectedOption] = useState<string>(selectedKipId ?? '');
-  // const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
+  const selectablePatternList = useMemo(() => {
+    const theKip = kibanaIndexPatterns.find((kip) => kip.id === selectedOption);
+    return theKip != null ? theKip.title.split(',') : [];
+  }, [kibanaIndexPatterns, selectedOption]);
+
+  const selectableOptions = useMemo(
+    () =>
+      selectablePatternList.map((indexName) => ({
+        label: indexName,
+        value: indexName,
+      })),
+    [selectablePatternList]
+  );
+
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    selectedPatterns.map((indexName) => ({
+      label: indexName,
+      value: indexName,
+    }))
+  );
+  const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
 
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
   const onChangeKip = useCallback(
-    (newSelectedKip: string) => {
+    (newSelectedKip: string, newSelectedPatterns: string[]) => {
       dispatch(
         sourcererActions.setSelectedKip({
           id: scopeId,
           selectedKipId: newSelectedKip,
-          selectedPatterns: getSelectedPatterns(newSelectedKip),
+          selectedPatterns: newSelectedPatterns,
         })
       );
     },
-    [dispatch, getSelectedPatterns, scopeId]
+    [dispatch, scopeId]
   );
-  // const onChangeIndexPattern = useCallback(
-  //   (newSelectedPatterns: string[]) => {
-  //     dispatch(
-  //       sourcererActions.setSelectedIndexPatterns({
-  //         id: scopeId,
-  //         selectedPatterns: newSelectedPatterns,
-  //       })
-  //     );
-  //   },
-  //   [dispatch, scopeId]
-  // );
 
-  // const renderOption = useCallback(
-  //   ({ value }) =>
-  //     kibanaIndexPatterns.some((kip) => kip.title === value) ? (
-  //       <span data-test-subj="kip-option">
-  //         <EuiIcon type="logoKibana" size="s" /> {value}
-  //       </span>
-  //     ) : (
-  //       <span data-test-subj="config-option">{value}</span>
-  //     ),
-  //   [kibanaIndexPatterns]
-  // );
-  //
-  // const onChangeCombo = useCallback((newSelectedOptions) => {
-  //   setSelectedOptions(newSelectedOptions);
-  // }, []);
+  const renderOption = useCallback(
+    ({ value }) => <span data-test-subj="index-name-option">{value}</span>,
+    []
+  );
 
-  const onChangeSuper = useCallback((newSelectedOption) => {
-    setSelectedOption(newSelectedOption);
+  const onChangeCombo = useCallback((newSelectedOptions) => {
+    setSelectedOptions(newSelectedOptions);
   }, []);
+
+  const onChangeSuper = useCallback(
+    (newSelectedOption) => {
+      setSelectedOption(newSelectedOption);
+      setSelectedOptions(
+        getScopePatternListSelection(kibanaIndexPatterns, newSelectedOption, scopeId).map(
+          (indexSelected: string) => ({
+            label: indexSelected,
+            value: indexSelected,
+          })
+        )
+      );
+    },
+    [kibanaIndexPatterns, scopeId]
+  );
 
   const resetDataSources = useCallback(() => {
     setSelectedOption(defaultIndexPattern.id);
-    // setSelectedOptions(
-    //   getPatternList(defaultIndexPattern).map((indexSelected: string) => ({
-    //     label: indexSelected,
-    //     value: indexSelected,
-    //   }))
-    // );
-  }, [defaultIndexPattern]);
+    setSelectedOptions(
+      getScopePatternListSelection(kibanaIndexPatterns, defaultIndexPattern.id, scopeId).map(
+        (indexSelected: string) => ({
+          label: indexSelected,
+          value: indexSelected,
+        })
+      )
+    );
+  }, [defaultIndexPattern.id, kibanaIndexPatterns, scopeId]);
 
   const handleSaveIndices = useCallback(() => {
-    // onChangeIndexPattern(selectedOptions.map((so) => so.label));
-    onChangeKip(selectedOption);
+    onChangeKip(
+      selectedOption,
+      selectedOptions.map((so) => so.label)
+    );
     setPopoverIsOpen(false);
-  }, [onChangeKip, selectedOption]);
+  }, [onChangeKip, selectedOption, selectedOptions]);
 
   const handleClosePopOver = useCallback(() => {
     setPopoverIsOpen(false);
   }, []);
-
-  // const indexesPatternOptions = useMemo(
-  //   () => kibanaIndexPatterns.map(({ title: index }) => ({ label: index, value: index })),
-  //   [kibanaIndexPatterns]
-  // );
   const trigger = useMemo(
     () => (
       <EuiButtonEmpty
@@ -163,20 +172,26 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       })),
     [kibanaIndexPatterns]
   );
-  // const comboBox = useMemo(
-  //   () => (
-  //     <EuiComboBox
-  //       data-test-subj="indexPattern-switcher"
-  //       placeholder={i18n.PICK_INDEX_PATTERNS}
-  //       fullWidth
-  //       options={indexesPatternOptions}
-  //       selectedOptions={selectedOptions}
-  //       onChange={onChangeCombo}
-  //       renderOption={renderOption}
-  //     />
-  //   ),
-  //   [indexesPatternOptions, onChangeCombo, renderOption, selectedOptions]
-  // );
+  console.log('selectedOptions', {
+    selectableOptions,
+    selectedOptions,
+    selectedKipId,
+    selectedPatterns,
+  });
+  const comboBox = useMemo(
+    () => (
+      <EuiComboBox
+        data-test-subj="indexPattern-switcher"
+        placeholder={i18n.PICK_INDEX_PATTERNS}
+        fullWidth
+        options={selectableOptions}
+        selectedOptions={selectedOptions}
+        onChange={onChangeCombo}
+        renderOption={renderOption}
+      />
+    ),
+    [selectableOptions, onChangeCombo, renderOption, selectedOptions]
+  );
   const superSelect = useMemo(
     () => (
       <EuiSuperSelect
@@ -193,9 +208,19 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   useEffect(() => {
     setSelectedOption((prevSelectedOption) =>
-      !deepEqual(selectedKipId, prevSelectedOption) ? selectedKipId : prevSelectedOption
+      !deepEqual(selectedKipId, prevSelectedOption) && selectedKipId != null
+        ? selectedKipId
+        : prevSelectedOption
     );
   }, [selectedKipId]);
+  useEffect(() => {
+    setSelectedOptions(
+      selectedPatterns.map((indexName) => ({
+        label: indexName,
+        value: indexName,
+      }))
+    );
+  }, [selectedPatterns]);
 
   const tooltipContent = useMemo(
     () => (isPopoverOpen ? null : getSelectedPatterns(selectedKipId)),
@@ -222,6 +247,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           <EuiText color="default">{i18n.INDEX_PATTERNS_SELECTION_LABEL}</EuiText>
           <EuiSpacer size="xs" />
           {superSelect}
+          <EuiSpacer size="xs" />
+          {comboBox}
           <EuiSpacer size="s" />
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -238,7 +265,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={handleSaveIndices}
-                // disabled={isSavingDisabled}
+                disabled={isSavingDisabled}
                 data-test-subj="add-index"
                 fill
                 fullWidth

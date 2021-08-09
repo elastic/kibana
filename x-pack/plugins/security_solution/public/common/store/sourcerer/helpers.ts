@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import { KibanaIndexPattern, SourcererModel, SourcererScopeName } from './model';
 import { TimelineEventsType } from '../../../../common';
+import { DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
 
 export interface Args {
   eventType?: TimelineEventsType;
@@ -18,12 +19,22 @@ export interface Args {
 
 export const getPatternList = (kip: KibanaIndexPattern): string[] => [kip.title]; // kip.title.split(','); // TODO: Steph/sourcerer implement splitting KIPs
 
-export const getPatternListByKipId = (
+export const getScopePatternListSelection = (
   kibanaIndexPatterns: KibanaIndexPattern[],
-  kipId: string
+  kipId: string,
+  sourcererScope: SourcererScopeName
 ): string[] => {
   const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
-  return theKip != null ? [theKip.title] : [];
+  let patternList: string[] = theKip != null ? theKip.title.split(',') : [];
+  if (kipId === DEFAULT_INDEX_PATTERN_ID) {
+    // last index in DEFAULT_INDEX_PATTERN_ID is always signals index
+    if (sourcererScope === SourcererScopeName.default) {
+      patternList.pop();
+    } else if (sourcererScope === SourcererScopeName.detections) {
+      patternList = [patternList[patternList.length - 1]];
+    }
+  }
+  return patternList;
 };
 
 export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, state }: Args) => {
@@ -44,6 +55,22 @@ export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, st
     return defaultIndexPatterns;
   }
   return newSelectedPatterns;
+};
+
+export const defaultSelectedPatternListByEventType = ({
+  state,
+  eventType,
+}: {
+  state: SourcererModel;
+  eventType?: TimelineEventsType;
+}) => {
+  let defaultIndexPatterns = getPatternList(state.defaultIndexPattern);
+  if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
+    defaultIndexPatterns = [...defaultIndexPatterns, state.signalIndexName ?? ''];
+  } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
+    defaultIndexPatterns = [state.signalIndexName ?? ''];
+  }
+  return defaultIndexPatterns;
 };
 
 export const defaultIndexPatternByEventType = ({

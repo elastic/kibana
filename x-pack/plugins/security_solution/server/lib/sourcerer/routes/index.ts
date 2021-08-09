@@ -25,7 +25,7 @@ const getKibanaIndexPattern = async (
   patternId: string
 ): Promise<IndexPattern> => {
   let indexPattern: IndexPattern;
-  const patternListAsTitle = patternList.join(',');
+  const patternListAsTitle = patternList.join();
   try {
     indexPattern = await indexPatternsService.get(patternId);
     if (patternListAsTitle !== indexPattern.title) {

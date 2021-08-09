@@ -20,7 +20,7 @@ import { initialSourcererState, SourcererModel } from './model';
 import {
   createDefaultIndexPatterns,
   defaultIndexPatternByEventType,
-  getPatternListByKipId,
+  getScopePatternListSelection,
 } from './helpers';
 
 export type SourcererState = SourcererModel;
@@ -44,7 +44,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     const sPatterns =
       selectedPatterns != null
         ? selectedPatterns
-        : getPatternListByKipId(state.kibanaIndexPatterns, selectedKipId);
+        : getScopePatternListSelection(state.kibanaIndexPatterns, selectedKipId, id);
     return {
       ...state,
       sourcererScopes: {
@@ -57,6 +57,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     };
   })
+  // TODO: Steph/sourcerer can delete
   .case(setSelectedIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
     return {
       ...state,
