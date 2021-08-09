@@ -23,7 +23,7 @@ import { TopAlert } from '.';
 import { parseAlert } from './parse_alert';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
-const getMappedNonEcsValue = ({
+export const getMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
