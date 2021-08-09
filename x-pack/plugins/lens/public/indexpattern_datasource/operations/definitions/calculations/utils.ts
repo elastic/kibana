@@ -29,7 +29,7 @@ export function checkForDataLayerType(layerType: LayerType, name: string) {
   if (layerType !== layerTypes.DATA) {
     return [
       i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
-        defaultMessage: '{name} is currently disabled for this type of layer.',
+        defaultMessage: '{name} is disabled for this type of layer.',
         values: {
           name,
         },

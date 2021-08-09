@@ -22,7 +22,7 @@ describe('utils', () => {
   describe('checkForDataLayerType', () => {
     it('should return an error if the layer is of the wrong type', () => {
       expect(checkForDataLayerType(layerTypes.THRESHOLD, 'Operation')).toEqual([
-        'Operation is currently disabled for this of layer.',
+        'Operation is disabled for this type of layer.',
       ]);
     });
   });

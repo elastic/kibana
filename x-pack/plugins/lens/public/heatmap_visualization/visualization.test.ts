@@ -263,7 +263,6 @@ describe('heatmap', () => {
     it('should return the type only if the layer is in the state', () => {
       const state: HeatmapVisualizationState = {
         ...exampleState(),
-        layerId: 'first',
         xAccessor: 'x-accessor',
         valueAccessor: 'value-accessor',
       };
