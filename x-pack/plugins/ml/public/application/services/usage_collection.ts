@@ -8,6 +8,7 @@
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { PLUGIN_ID } from '../../../common/constants/app';
+import { MlUsageEvent } from '../../../common/constants/usage_collection';
 
 export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup) {
   if (usageCollection === undefined) {
@@ -20,9 +21,9 @@ export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup
   }
 
   return {
-    click: (eventNames: string | string[], count?: number) =>
+    click: (eventNames: MlUsageEvent | MlUsageEvent[], count?: number) =>
       usageCollection.reportUiCounter(PLUGIN_ID, METRIC_TYPE.CLICK, eventNames, count),
-    count: (eventNames: string | string[], count?: number) =>
+    count: (eventNames: MlUsageEvent | MlUsageEvent[], count?: number) =>
       usageCollection.reportUiCounter(PLUGIN_ID, METRIC_TYPE.COUNT, eventNames, count),
   };
 }
