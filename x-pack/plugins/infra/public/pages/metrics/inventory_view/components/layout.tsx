@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SavedView } from '../../../../containers/saved_view/saved_view';
 import { AutoSizer } from '../../../../components/auto_sizer';
 import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
@@ -28,7 +28,6 @@ import { IntervalLabel } from './waffle/interval_label';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
-import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { BottomDrawer } from './bottom_drawer';
 import { Legend } from './waffle/legend';
 
@@ -97,7 +96,7 @@ export const Layout = React.memo(
     const bounds = autoBounds ? dataBounds : boundsOverride;
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
-    const { viewState, onViewChange } = useWaffleViewState();
+    const { onViewChange } = useWaffleViewState();
 
     useEffect(() => {
       if (currentView) {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
