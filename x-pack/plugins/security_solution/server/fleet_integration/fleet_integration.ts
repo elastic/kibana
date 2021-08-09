@@ -133,18 +133,17 @@ export const getPackagePolicyUpdateCallback = (
   };
 };
 
-export const getPackagePolicyDeleteCallback = (logger: Logger): PostPackagePolicyDeleteCallback => {
-  return async (
-    deletePackagePolicy: DeletePackagePoliciesResponse,
-    context: RequestHandlerContext
-    // request: KibanaRequest
-  ): Promise<void> => {
+export const getPackagePolicyDeleteCallback = (
+  logger: Logger,
+  exceptionsClient: ExceptionListClient | undefined
+): PostPackagePolicyDeleteCallback => {
+  return async (deletePackagePolicy: DeletePackagePoliciesResponse): Promise<void> => {
     const promises: Array<Promise<void>> = [];
     for (const policy of deletePackagePolicy) {
       if (!isEndpointPackagePolicy(policy)) {
         return undefined;
       }
-      promises.push(removePolicyFromTrustedApps(context, policy));
+      promises.push(removePolicyFromTrustedApps(exceptionsClient, policy));
     }
     Promise.all(promises);
   };

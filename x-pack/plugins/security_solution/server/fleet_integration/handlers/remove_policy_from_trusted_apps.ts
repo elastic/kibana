@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { RequestHandlerContext } from 'kibana/server';
 import { without } from 'lodash/fp';
+import { ExceptionListClient } from '../../../../lists/server';
 
 interface DeletePolicy {
   id: string;
@@ -18,36 +20,48 @@ interface DeletePolicy {
  * Removes policy from trusted apps
  */
 export const removePolicyFromTrustedApps = async (
-  context: RequestHandlerContext,
+  exceptionsClient: ExceptionListClient | undefined,
   policy: DeletePolicy
 ) => {
-  const savedObjectsClient = context.core.savedObjects.client;
+  if (!exceptionsClient) return;
   let page = 1;
 
   const findTrustedAppsByPolicy = async (currentPage: number) => {
-    return savedObjectsClient.find({
-      type: 'exception-list-agnostic',
-      search: `policy:${policy.id}`,
-      searchFields: ['tags'],
+    return exceptionsClient.findExceptionListItem({
+      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      filter: `policy:${policy.id}`,
+      namespaceType: 'agnostic',
       page: currentPage,
       perPage: 50,
+      sortField: undefined,
+      sortOrder: undefined,
     });
   };
 
   let findResponse = await findTrustedAppsByPolicy(page);
-  const trustedApps = findResponse.saved_objects;
+  if (!findResponse) return;
+  const trustedApps = findResponse.data;
 
-  while (trustedApps.length < findResponse.total || findResponse.saved_objects.length) {
+  while (findResponse && (trustedApps.length < findResponse.total || findResponse.data.length)) {
     page += 1;
     findResponse = await findTrustedAppsByPolicy(page);
-    trustedApps.concat(findResponse.saved_objects);
+    if (findResponse) {
+      trustedApps.concat(findResponse.data);
+    }
   }
 
+  const updates = [];
   for (const trustedApp of trustedApps) {
-    // TODO: do bulk update
-    await savedObjectsClient.update('exception-list-agnostic', trustedApp.id, {
-      // TODO: There is a ts error here because I'm missing the type in the find response. Where should I pick this type?
-      tags: without(trustedApp.attributes.tags, `policy:${policy.id}`),
-    });
+    updates.push(
+      exceptionsClient.updateExceptionListItem({
+        ...trustedApp,
+        itemId: trustedApp.item_id,
+        namespaceType: trustedApp.namespace_type,
+        osTypes: trustedApp.os_types,
+        tags: without(trustedApp.tags, `policy:${policy.id}`),
+      })
+    );
   }
+
+  Promise.all(updates);
 };

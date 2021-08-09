@@ -106,7 +106,7 @@ export class EndpointAppContextService {
 
       dependencies.registerIngestCallback(
         'postPackagePolicyDelete',
-        getPackagePolicyDeleteCallback(dependencies.logger)
+        getPackagePolicyDeleteCallback(dependencies.logger, dependencies.exceptionListsClient)
       );
     }
   }
