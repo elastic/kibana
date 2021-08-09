@@ -13,7 +13,6 @@ import { BaseParams, BasePayload } from '../../types';
 // Job params: structure of incoming user request data
 export interface JobParamsPNGV2 extends BaseParams {
   layout: LayoutParams;
-  forceNow: string;
   /**
    * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
    */

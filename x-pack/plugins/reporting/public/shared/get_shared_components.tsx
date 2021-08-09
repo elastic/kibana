@@ -44,7 +44,8 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           layoutOption={props.layoutOption}
           requiresSavedState={false}
           reportType={PDF_REPORT_TYPE_V2}
-          apiClient={new ReportingAPIClient(core.http)}
+          apiClient={apiClient}
+          uiSettings={core.uiSettings}
           toasts={core.notifications.toasts}
           {...props}
         />
@@ -56,7 +57,8 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           layoutOption={props.layoutOption}
           requiresSavedState={false}
           reportType={PNG_REPORT_TYPE_V2}
-          apiClient={new ReportingAPIClient(core.http)}
+          apiClient={apiClient}
+          uiSettings={core.uiSettings}
           toasts={core.notifications.toasts}
           {...props}
         />

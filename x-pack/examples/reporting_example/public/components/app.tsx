@@ -24,6 +24,7 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
+import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -105,7 +106,7 @@ export const ReportingExampleApp = ({
       ],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
-      forceNow: new Date().toISOString(),
+      browserTimezone: moment.tz.guess(),
     };
   };
 
@@ -123,7 +124,7 @@ export const ReportingExampleApp = ({
       },
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
-      forceNow: new Date().toISOString(),
+      browserTimezone: moment.tz.guess(),
     };
   };
 
