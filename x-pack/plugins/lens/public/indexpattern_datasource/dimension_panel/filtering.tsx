@@ -92,6 +92,7 @@ export function Filtering({
             isOpen={filterPopoverOpen}
             closePopover={() => {
               setFilterPopoverOpen(false);
+              setQueryInput(inputFilter);
             }}
             anchorClassName="eui-fullWidth"
             panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
