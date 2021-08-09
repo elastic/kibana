@@ -38,7 +38,7 @@ export function ApmMainTemplate({
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
 
-  // TODO: NEEDS A DATA GET A CHECK
+  // TODO: NEEDS A DATA CHECK
   const hasData = false;
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
     solution: 'Observability',

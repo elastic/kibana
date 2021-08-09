@@ -31,7 +31,9 @@ export type WrappedPageTemplateProps = Pick<
   | 'template'
   | 'isEmptyState'
   | 'noDataConfig'
->;
+> & {
+  showSolutionNav?: boolean;
+};
 
 export interface ObservabilityPageTemplateDependencies {
   currentAppId$: Observable<string | undefined>;
@@ -49,6 +51,7 @@ export function ObservabilityPageTemplate({
   getUrlForApp,
   navigateToApp,
   navigationSections$,
+  showSolutionNav = true,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -105,11 +108,15 @@ export function ObservabilityPageTemplate({
     <KibanaPageTemplate
       restrictWidth={false}
       {...pageTemplateProps}
-      solutionNav={{
-        icon: 'logoObservability',
-        items: sideNavItems,
-        name: sideNavTitle,
-      }}
+      solutionNav={
+        showSolutionNav
+          ? {
+              icon: 'logoObservability',
+              items: sideNavItems,
+              name: sideNavTitle,
+            }
+          : undefined
+      }
     >
       {children}
     </KibanaPageTemplate>

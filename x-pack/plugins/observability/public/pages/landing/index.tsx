@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
+import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 import { FleetPanel } from '../../components/app/fleet_panel';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -26,10 +27,6 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTrackPageview } from '../../hooks/use_track_metric';
 import { appsSection } from '../home/section';
 import './styles.scss';
-
-const EuiCardWithoutPadding = styled(EuiCard)`
-  padding: 0;
-`;
 
 export function LandingPage() {
   useTrackPageview({ app: 'observability-overview', path: 'landing' });
@@ -45,92 +42,95 @@ export function LandingPage() {
   const { core, ObservabilityPageTemplate } = usePluginContext();
   const theme = useContext(ThemeContext);
 
+  // TODO: NEEDS A DATA CHECK
+  // NO SIDE NAV since nothing is setup
+  const hasData = false;
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
+    solution: 'Observability',
+    actions: {
+      elasticAgent: {
+        href: 'app/integrations/browse',
+        recommended: false,
+      },
+      beats: {
+        href: `app/home#/tutorial_directory/logging`,
+        recommended: true,
+      },
+    },
+    docsLink: '#',
+  };
+
   return (
-    <ObservabilityPageTemplate restrictWidth={1200}>
+    <ObservabilityPageTemplate
+      noDataConfig={hasData ? undefined : noDataConfig}
+      restrictWidth
+      showSolutionNav={false}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.observability.home.sectionTitle', {
+          defaultMessage: 'Unified visibility across your entire ecosystem',
+        }),
+        description: i18n.translate('xpack.observability.home.sectionsubtitle', {
+          defaultMessage:
+            'Monitor, analyze, and react to events happening anywhere in your environment by bringing logs, metrics, and traces together at scale in a single stack.',
+        }),
+        alignItems: 'center',
+        rightSideItems: [
+          <EuiImage
+            size="l"
+            alt="observability overview image"
+            url={core.http.basePath.prepend(
+              `/plugins/observability/assets/illustration_${theme.darkMode ? 'dark' : 'light'}.svg`
+            )}
+            width={240}
+          />,
+        ],
+      }}
+    >
       <ObservabilityHeaderMenu />
-      <EuiFlexGroup direction="column">
-        {/* title and description */}
-        <EuiFlexItem className="obsLanding__title">
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.observability.home.sectionTitle', {
-                defaultMessage: 'Unified visibility across your entire ecosystem',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.observability.home.sectionsubtitle', {
-              defaultMessage:
-                'Monitor, analyze, and react to events happening anywhere in your environment by bringing logs, metrics, and traces together at scale in a single stack.',
-            })}
-          </EuiText>
-        </EuiFlexItem>
 
-        {/* Apps sections */}
-        <EuiFlexItem>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGrid columns={2} className="obsLanding__appSection">
-                {appsSection.map((app) => (
-                  <EuiFlexItem key={app.id}>
-                    <EuiCardWithoutPadding
-                      display="plain"
-                      layout="horizontal"
-                      title={
-                        <EuiTitle size="xs" className="title">
-                          <h3>{app.title}</h3>
-                        </EuiTitle>
-                      }
-                      description={app.description}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGrid>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiImage
-                size="xl"
-                alt="observability overview image"
-                url={core.http.basePath.prepend(
-                  `/plugins/observability/assets/illustration_${
-                    theme.darkMode ? 'dark' : 'light'
-                  }.svg`
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+      <EuiSpacer size="m" />
 
-        <EuiSpacer size="xxl" />
+      {/* Apps sections */}
+      <EuiFlexGroup gutterSize="xl" wrap alignItems="center">
+        {appsSection.map((app) => (
+          <EuiFlexItem key={app.id}>
+            <EuiCard
+              paddingSize="none"
+              display="plain"
+              layout="horizontal"
+              title={
+                <EuiTitle size="xs" className="title">
+                  <h3>{app.title}</h3>
+                </EuiTitle>
+              }
+              description={app.description}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
 
+      <EuiSpacer size="xxl" />
+
+      <EuiFlexGroup direction="column" alignItems="center">
         {/* Get started button */}
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                iconType="sortRight"
-                iconSide="right"
-                href={core.http.basePath.prepend('/app/home#/tutorial_directory/logging')}
-              >
-                {i18n.translate('xpack.observability.home.getStatedButton', {
-                  defaultMessage: 'Get started',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <div>
+            <EuiButton
+              fill
+              iconType="sortRight"
+              iconSide="right"
+              href={core.http.basePath.prepend('/app/home#/tutorial_directory/logging')}
+            >
+              {i18n.translate('xpack.observability.home.getStatedButton', {
+                defaultMessage: 'Get started',
+              })}
+            </EuiButton>
+
+            <EuiSpacer size="xxl" />
+          </div>
         </EuiFlexItem>
-
-        <EuiSpacer size="xxl" />
-
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceAround">
-            <EuiFlexItem grow={false}>
-              <FleetPanel />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexItem style={{ maxWidth: 600 }}>
+          <FleetPanel />
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
