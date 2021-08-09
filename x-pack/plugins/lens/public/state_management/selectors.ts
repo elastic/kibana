@@ -12,12 +12,15 @@ import { extractFilterReferences } from '../persistence';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { createDatasourceLayers } from '../editor_frame_service/editor_frame';
 
-const selectQuery = (state: LensState) => state.lens.query;
-const selectFilters = (state: LensState) => state.lens.filters;
-const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
-const selectVisualization = (state: LensState) => state.lens.visualization;
-const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
-const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
+export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
+export const selectQuery = (state: LensState) => state.lens.query;
+export const selectFilters = (state: LensState) => state.lens.filters;
+export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
+export const selectVisualization = (state: LensState) => state.lens.visualization;
+export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
+export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
+export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
+export const selectActiveData = (state: LensState) => state.lens.activeData;
 
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
@@ -37,9 +40,10 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
   filters: res.filters,
 }));
 
+// to correct
 export const selectDocState = createSelector(
-  (state: LensState) => state.lens,
-  ({ persistedDoc, query, visualization, datasourceStates, filters }) => ({
+  [selectPersistedDoc, selectQuery, selectVisualization, selectDatasourceStates, selectFilters],
+  (persistedDoc, query, visualization, datasourceStates, filters) => ({
     savedObjectId: persistedDoc?.savedObjectId,
     title: persistedDoc?.title || '',
     description: persistedDoc?.description,
@@ -53,21 +57,16 @@ export const selectDocState = createSelector(
   })
 );
 
+const selectDatasourceMap = (state: LensState, datasourceMap: DatasourceMap) => datasourceMap;
+
 const selectVisualizationMap = (
   state: LensState,
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap
 ) => visualizationMap;
 
-const selectDatasourceMap = (state: LensState, datasourceMap: DatasourceMap) => datasourceMap;
-
 export const selectSavedObjectFormat = createSelector(
-  [
-    selectDocState,
-    (state: LensState) => state.lens.activeDatasourceId,
-    selectDatasourceMap,
-    selectVisualizationMap,
-  ],
+  [selectDocState, selectActiveDatasourceId, selectDatasourceMap, selectVisualizationMap],
   (docState, activeDatasourceId, datasourceMap, visualizationMap) => {
     const { datasourceStates, visualization, filters } = docState.state;
     const activeVisualization =
@@ -134,6 +133,14 @@ export const selectAreDatasourcesLoaded = createSelector(
 );
 
 export const selectDatasourceLayers = createSelector(
-  [(state: LensState) => state.lens.datasourceStates, selectDatasourceMap],
+  [selectDatasourceStates, selectDatasourceMap],
   (datasourceStates, datasourceMap) => createDatasourceLayers(datasourceStates, datasourceMap)
+);
+
+export const selectFramePublicAPI = createSelector(
+  [selectDatasourceStates, selectActiveData, selectDatasourceMap],
+  (datasourceStates, activeData, datasourceMap) => ({
+    datasourceLayers: createDatasourceLayers(datasourceStates, datasourceMap),
+    activeData,
+  })
 );

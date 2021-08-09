@@ -13,13 +13,7 @@ import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance, EditorFrameProps } from '../types';
 import { Document } from '../persistence';
-import {
-  createMockDatasource,
-  createMockVisualization,
-  DatasourceMock,
-  makeDefaultServices,
-  mountWithProvider,
-} from '../mocks';
+import { visualizationMap, datasourceMap, makeDefaultServices, mountWithProvider } from '../mocks';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   SavedObjectSaveModal,
@@ -70,29 +64,6 @@ const sessionIdSubject = new Subject<string>();
 describe('Lens App', () => {
   let defaultDoc: Document;
   let defaultSavedObjectId: string;
-
-  const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
-  const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
-  const datasourceMap = {
-    testDatasource2: mockDatasource2,
-    testDatasource: mockDatasource,
-  };
-
-  const mockVisualization = {
-    ...createMockVisualization(),
-    id: 'testVis',
-    visualizationTypes: [
-      {
-        icon: 'empty',
-        id: 'testVis',
-        label: 'TEST1',
-        groupLabel: 'testVisGroup',
-      },
-    ],
-  };
-  const visualizationMap = {
-    testVis: mockVisualization,
-  };
 
   function createMockFrame(): jest.Mocked<EditorFrameInstance> {
     return {

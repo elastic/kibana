@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useMemo } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { CoreStart } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../types';
@@ -16,14 +16,16 @@ import { SuggestionPanelWrapper } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { EditorFrameStartPlugins } from '../service';
-import { createDatasourceLayers } from './state_helpers';
 import { getTopSuggestionForField, switchToSuggestion, Suggestion } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
   useLensSelector,
   useLensDispatch,
-  selectDatasourceLayers,
   selectAreDatasourcesLoaded,
+  selectFramePublicAPI,
+  selectActiveDatasourceId,
+  selectDatasourceStates,
+  selectVisualization,
 } from '../../state_management';
 
 export interface EditorFrameProps {
@@ -38,17 +40,13 @@ export interface EditorFrameProps {
 export function EditorFrame(props: EditorFrameProps) {
   const { datasourceMap, visualizationMap } = props;
   const dispatchLens = useLensDispatch();
-  const { activeData, activeDatasourceId, datasourceStates, visualization } = useLensSelector(
-    (state) => state.lens
-  );
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
+  const visualization = useLensSelector(selectVisualization);
   const allLoaded = useLensSelector(selectAreDatasourcesLoaded);
-  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
-
-  const framePublicAPI: FramePublicAPI = useMemo(() => ({ datasourceLayers, activeData }), [
-    activeData,
-    datasourceLayers,
-  ]);
-
+  const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
+    selectFramePublicAPI(state, datasourceMap)
+  );
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
   getSuggestionForField.current = (field: DragDropIdentifier) => {
@@ -56,7 +54,7 @@ export function EditorFrame(props: EditorFrameProps) {
       return;
     }
     return getTopSuggestionForField(
-      datasourceLayers,
+      framePublicAPI.datasourceLayers,
       visualization,
       datasourceStates,
       visualizationMap,

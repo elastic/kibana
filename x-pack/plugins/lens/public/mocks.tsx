@@ -47,6 +47,15 @@ import {
   FrameDatasourceAPI,
 } from './types';
 
+export function mockDatasourceStates() {
+  return {
+    testDatasource: {
+      state: {},
+      isLoading: false,
+    },
+  };
+}
+
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     id: 'TEST_VIS',
@@ -89,9 +98,9 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
   };
 }
 
-const visualizationMap = {
-  vis: createMockVisualization(),
-  vis2: createMockVisualization(),
+export const visualizationMap = {
+  testVis: createMockVisualization(),
+  testVis2: createMockVisualization(),
 };
 
 export type DatasourceMock = jest.Mocked<Datasource> & {
@@ -140,7 +149,7 @@ export function createMockDatasource(id: string): DatasourceMock {
 
 const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
 const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
-const datasourceMap = {
+export const datasourceMap = {
   testDatasource2: mockDatasource2,
   testDatasource: mockDatasource,
 };
@@ -405,12 +414,7 @@ export const defaultState = {
     state: {},
     activeId: 'testVis',
   },
-  datasourceStates: {
-    testDatasource: {
-      isLoading: false,
-      state: {},
-    },
-  },
+  datasourceStates: mockDatasourceStates(),
 };
 
 export function makeLensStore({
