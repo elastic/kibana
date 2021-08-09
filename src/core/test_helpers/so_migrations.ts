@@ -8,6 +8,7 @@
 
 import * as kbnTestServer from './kbn_server';
 import { SavedObject } from '../types';
+import { SavedObjectsType } from '../server';
 
 type ExportOptions = { type: string } | { objects: Array<{ id: string; type: string }> };
 
@@ -44,7 +45,11 @@ export const createTestHarness = () => {
   let stopped = false;
   let esServer: kbnTestServer.TestElasticsearchUtils;
   const { startES } = kbnTestServer.createTestServers({ adjustTimeout: jest.setTimeout });
-  const root = kbnTestServer.createRootWithCorePlugins({}, { oss: false });
+  const root = kbnTestServer.createRootWithCorePlugins(
+    // Disable reporting due to browser install issue on CI. See https://github.com/elastic/kibana/issues/102919
+    { xpack: { reporting: { enabled: false } } },
+    { oss: false }
+  );
 
   /**
    * Imports an array of objects into Kibana and applies migrations before persisting to Elasticsearch. Will overwrite
@@ -96,8 +101,7 @@ export const createTestHarness = () => {
       })
       .expect(200);
 
-    // Parse ndjson response
-    return response.text.split('\n').map((s: string) => JSON.parse(s));
+    return parseNdjson(response.text);
   };
 
   return {
@@ -105,23 +109,32 @@ export const createTestHarness = () => {
      * Start Kibana and Elasticsearch for migration testing. Must be called before `migrate`.
      * In most cases, this can be called during your test's `beforeAll` hook and does not need to be called for each
      * individual test.
+     *
+     * @param customTypes - Additional SO types to register for this test.
      */
-    start: async () => {
+    start: async ({ customTypes = [] }: { customTypes?: SavedObjectsType[] } = {}) => {
       if (started)
         throw new Error(`SavedObjectTestHarness already started! Cannot call start again`);
       if (stopped)
         throw new Error(`SavedObjectTestHarness already stopped! Cannot call start again`);
 
-      started = true;
       esServer = await startES();
-      await root.setup();
+      await root.preboot();
+
+      const { savedObjects } = await root.setup();
+      customTypes.forEach((type) => savedObjects.registerType(type));
+
       await root.start();
 
-      await waitForTrue(async () => {
-        const statusApi = kbnTestServer.getSupertest(root, 'get', '/api/status');
-        const response = await statusApi.send();
-        return response.status === 200;
+      await waitForTrue({
+        predicate: async () => {
+          const statusApi = kbnTestServer.getSupertest(root, 'get', '/api/status');
+          const response = await statusApi.send();
+          return response.status === 200;
+        },
       });
+
+      started = true;
     },
 
     /**
@@ -134,9 +147,9 @@ export const createTestHarness = () => {
       if (stopped)
         throw new Error(`SavedObjectTestHarness already stopped! Cannot call stop again`);
 
-      stopped = true;
       await root.shutdown();
       await esServer.stop();
+      stopped = true;
     },
 
     /**
@@ -147,7 +160,7 @@ export const createTestHarness = () => {
      */
     migrate: async (objects: SavedObject[]) => {
       await importObjects(objects);
-      return exportObjects({
+      return await exportObjects({
         objects: objects.map(({ type, id }) => ({ type, id })),
       });
     },
@@ -159,7 +172,7 @@ export const createTestHarness = () => {
 
 export type SavedObjectTestHarness = ReturnType<typeof createTestHarness>;
 
-const waitForTrue = async (predicate: () => Promise<boolean>) => {
+const waitForTrue = async ({ predicate }: { predicate: () => Promise<boolean> }) => {
   let attempt = 0;
   do {
     attempt++;
@@ -173,3 +186,5 @@ const waitForTrue = async (predicate: () => Promise<boolean>) => {
 
   throw new Error(`Predicate never resolved after ${attempt} attempts`);
 };
+
+const parseNdjson = (ndjson: string): any => ndjson.split('\n').map((l: string) => JSON.parse(l));
