@@ -319,7 +319,7 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/crawler/process_crawls', () => {
+  describe('POST /api/app_search/engines/{name}/crawler/process_crawls', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
