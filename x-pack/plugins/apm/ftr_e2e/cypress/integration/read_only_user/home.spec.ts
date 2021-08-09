@@ -11,9 +11,8 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
-const servicesPath = '/app/apm/services';
-const baseUrl = url.format({
-  pathname: servicesPath,
+const serviceInventoryHref = url.format({
+  pathname: '/app/apm/services',
   query: { rangeFrom: start, rangeTo: end },
 });
 
@@ -34,12 +33,11 @@ describe('Home page', () => {
       'include',
       'app/apm/services?rangeFrom=now-15m&rangeTo=now'
     );
-    cy.get('.euiTabs .euiTab-isSelected').contains('Services');
   });
 
   it('includes services with only metric documents', () => {
     cy.visit(
-      `${baseUrl}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
+      `${serviceInventoryHref}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
     );
     cy.contains('opbeans-python');
     cy.contains('opbeans-java');
@@ -48,15 +46,13 @@ describe('Home page', () => {
 
   describe('navigations', () => {
     it('navigates to service overview page with transaction type', () => {
-      const kuery = encodeURIComponent(
-        'transaction.name : "taskManager markAvailableTasksAsClaimed"'
-      );
-      cy.visit(`${baseUrl}&kuery=${kuery}`);
-      cy.contains('taskManager');
-      cy.contains('kibana').click();
+      cy.visit(serviceInventoryHref);
+      cy.get('[data-test-subj="serviceLink_rum-js"]').then((element) => {
+        element[0].click();
+      });
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
-        'taskManager'
+        'page-load'
       );
     });
   });
