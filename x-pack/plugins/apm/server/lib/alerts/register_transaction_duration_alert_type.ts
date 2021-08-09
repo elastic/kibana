@@ -92,6 +92,10 @@ export function registerTransactionDurationAlertType({
         savedObjectsClient: services.savedObjectsClient,
       });
 
+      console.log(
+        '### caue ~ alertParams.transactionType',
+        alertParams.transactionType
+      );
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
         body: {
@@ -149,9 +153,10 @@ export function registerTransactionDurationAlertType({
       const transactionDuration =
         'values' in latency ? Object.values(latency.values)[0] : latency?.value;
 
-      const threshold = alertParams.threshold * 1000;
+      // Converts threshold to microseconds because this is the unit used on transactionDuration
+      const thresholdMicroseconds = alertParams.threshold * 1000;
 
-      if (transactionDuration && transactionDuration > threshold) {
+      if (transactionDuration && transactionDuration > thresholdMicroseconds) {
         const durationFormatter = getDurationFormatter(transactionDuration);
         const transactionDurationFormatted = durationFormatter(
           transactionDuration
@@ -168,14 +173,14 @@ export function registerTransactionDurationAlertType({
               [TRANSACTION_TYPE]: alertParams.transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
-              [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold * 1000,
+              [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
             },
           })
           .scheduleActions(alertTypeConfig.defaultActionGroupId, {
             transactionType: alertParams.transactionType,
             serviceName: alertParams.serviceName,
             environment: getEnvironmentLabel(alertParams.environment),
-            threshold,
+            threshold: alertParams.threshold,
             triggerValue: transactionDurationFormatted,
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
           });
