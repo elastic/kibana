@@ -7,9 +7,9 @@
 
 import Url from 'url';
 import cypress from 'cypress';
-import childProcess from 'child_process';
 import { FtrProviderContext } from './ftr_provider_context';
 import archives_metadata from './cypress/fixtures/es_archiver/archives_metadata';
+import { createKibanaUserRole } from '../scripts/kibana-security/create_kibana_user_role';
 
 export async function cypressRunTests({ getService }: FtrProviderContext) {
   await cypressStart(getService, cypress.run);
@@ -35,20 +35,19 @@ async function cypressStart(
   });
 
   // Creates APM users
-  childProcess.execSync(
-    `node ../scripts/setup-kibana-security.js --role-suffix e2e_tests --username ${config.get(
-      'servers.elasticsearch.username'
-    )} --password ${config.get(
-      'servers.elasticsearch.password'
-    )} --kibana-url ${kibanaUrl}`
-  );
+  await createKibanaUserRole({
+    esUserName: config.get('servers.elasticsearch.username'),
+    esPassword: config.get('servers.elasticsearch.password'),
+    kibanaBaseUrl: kibanaUrl,
+    kibanaRoleSuffix: 'e2e_tests',
+  });
+
   try {
     const result = await cypressExecution({
       config: { baseUrl: kibanaUrl },
       env: {
         START_DATE: start,
         END_DATE: end,
-        ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         KIBANA_URL: kibanaUrl,
       },
     });
