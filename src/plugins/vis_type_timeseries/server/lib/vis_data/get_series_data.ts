@@ -13,6 +13,8 @@ import { getAnnotations } from './get_annotations';
 import { handleResponseBody } from './series/handle_response_body';
 import { getSeriesRequestParams } from './series/get_request_params';
 import { getActiveSeries } from './helpers/get_active_series';
+import { isAggSupported } from './helpers/check_aggs';
+import { isLastValueTimerangeMode } from './helpers/get_timerange_mode';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
@@ -52,9 +54,13 @@ export async function getSeriesData(
   const handleError = handleErrorResponse(panel);
 
   try {
-    const bodiesPromises = getActiveSeries(panel).map((series) =>
-      getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services)
-    );
+    const bodiesPromises = getActiveSeries(panel).map((series) => {
+      if (!isLastValueTimerangeMode(panel, series)) {
+        isAggSupported(series.metrics);
+      }
+
+      return getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services)
+    });
 
     const searches = await Promise.all(bodiesPromises);
     const data = await searchStrategy.search(requestContext, req, searches);

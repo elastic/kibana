@@ -21,7 +21,9 @@ interface InvalidAggProps {
   onDelete: () => void;
 }
 
-export const getInvalidAggComponent = (message: JSX.Element) => (props: InvalidAggProps) => {
+export const getInvalidAggComponent = (message: JSX.Element | string) => (
+  props: InvalidAggProps
+) => {
   return (
     <AggRow
       disableDelete={props.disableDelete}

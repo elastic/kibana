@@ -11,7 +11,6 @@ import {
   getBucketSize,
   isLastValueTimerangeMode,
   getTimerange,
-  isAggSupported,
 } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
@@ -66,20 +65,19 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
 
   const overwriteDateHistogramForEntireTimerangeMode = () => {
     const metricAggs = Object.values<string>(METRIC_AGGREGATIONS);
-    let intervalForEntireTimerangeMode;
+    let bucketInterval;
 
     panel.series.forEach((column) => {
-      isAggSupported(column.metrics);
-
       const aggRoot = calculateAggRoot(doc, column);
 
+      // we should use auto_date_histogram only for metric aggregations
       if (column.metrics.every((metric) => metricAggs.includes(metric.type))) {
         overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
           field: timeField,
           buckets: 1,
         });
 
-        intervalForEntireTimerangeMode = `${to.valueOf() - from.valueOf()}ms`;
+        bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
       } else {
         overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
           field: timeField,
@@ -91,12 +89,12 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
           },
           ...dateHistogramInterval(intervalString),
         });
-        intervalForEntireTimerangeMode = intervalString;
+        bucketInterval = intervalString;
       }
 
       overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
         ...meta,
-        intervalForEntireTimerangeMode,
+        intervalString: bucketInterval,
       });
     });
   };

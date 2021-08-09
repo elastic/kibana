@@ -18,6 +18,8 @@ import {
   PANEL_TYPES,
   METRIC_AGGREGATIONS,
   SIBLING_PIPELINE_AGGREGATIONS,
+  SPECIAL_AGGREGATIONS,
+  BUCKET_TYPES,
 } from '../../../../common/enums';
 import type { Panel } from '../../../../common/types';
 
@@ -50,7 +52,12 @@ export class DefaultSearchCapabilities {
     ) {
       const metricAggs = Object.values<string>(METRIC_AGGREGATIONS);
       const siblingPipelineAggs = Object.values<string>(SIBLING_PIPELINE_AGGREGATIONS);
-      const allAvailableAggs = [...metricAggs, ...siblingPipelineAggs, 'math'].reduce(
+      const allAvailableAggs = [
+        ...metricAggs,
+        ...siblingPipelineAggs,
+        SPECIAL_AGGREGATIONS.MATH,
+        BUCKET_TYPES.TERMS,
+      ].reduce(
         (availableAggs, aggType) => ({
           ...availableAggs,
           [aggType]: {

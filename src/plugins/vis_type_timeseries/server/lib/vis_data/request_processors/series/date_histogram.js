@@ -9,7 +9,6 @@
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
-import { isAggSupported } from '../../helpers/check_aggs';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 import { METRIC_AGGREGATIONS } from '../../../../../common/enums';
@@ -59,8 +58,8 @@ export function dateHistogram(
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
       const metricAggs = Object.values(METRIC_AGGREGATIONS);
-      isAggSupported(series.metrics);
 
+      // we should use auto_date_histogram only for metric aggregations
       if (series.metrics.every((metric) => metricAggs.includes(metric.type))) {
         overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
           field: timeField,

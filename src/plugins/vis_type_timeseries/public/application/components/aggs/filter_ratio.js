@@ -85,7 +85,6 @@ export const FilterRatioAgg = (props) => {
           <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
-            timeRangeMode={props.panel.time_range_mode}
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
@@ -145,7 +144,6 @@ export const FilterRatioAgg = (props) => {
           <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('metric')}
-            timeRangeMode={props.panel.time_range_mode}
             siblings={props.siblings}
             panelType={
               isFieldHistogram(fields, indexPattern, model.field) ? 'histogram' : 'filter_ratio'

@@ -61,6 +61,11 @@ export enum PARENT_PIPELINE_AGGREGATIONS {
   SERIAL_DIFF = 'serial_diff',
 }
 
+export enum SPECIAL_AGGREGATIONS {
+  SERIES_AGG = 'series_agg',
+  MATH = 'math',
+}
+
 // We should probably use BUCKET_TYPES from data plugin in future.
 export enum BUCKET_TYPES {
   TERMS = 'terms',
