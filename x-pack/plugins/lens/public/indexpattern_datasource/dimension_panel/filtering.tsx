@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiPopoverProps,
 } from '@elastic/eui';
 import type { Query } from 'src/plugins/data/public';
 import { IndexPatternColumn, operationDefinitionMap } from '../operations';
@@ -72,6 +73,13 @@ export function Filtering({
     }
   }, [columnId, layer, queryInput, indexPattern, updateLayer, inputFilter]);
 
+  const onClosePopup: EuiPopoverProps['closePopover'] = useCallback(() => {
+    setFilterPopoverOpen(false);
+    if (inputFilter) {
+      setQueryInput(inputFilter);
+    }
+  }, [inputFilter]);
+
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
 
   if (!selectedOperation.filterable || !inputFilter) {
@@ -90,10 +98,7 @@ export function Filtering({
         <EuiFlexItem>
           <EuiPopover
             isOpen={filterPopoverOpen}
-            closePopover={() => {
-              setFilterPopoverOpen(false);
-              setQueryInput(inputFilter);
-            }}
+            closePopover={onClosePopup}
             anchorClassName="eui-fullWidth"
             panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
             button={
