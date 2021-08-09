@@ -13,5 +13,6 @@ export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 export const FILTER_OPEN: AlertStatus = 'open';
 export const FILTER_CLOSED: AlertStatus = 'closed';
 export const FILTER_IN_PROGRESS: AlertStatus = 'in-progress';
+export const FILTER_ACKNOWLEDGED: AlertStatus = 'acknowledged';
 
 export const RAC_ALERTS_BULK_UPDATE_URL = '/internal/rac/alerts/bulk_update';

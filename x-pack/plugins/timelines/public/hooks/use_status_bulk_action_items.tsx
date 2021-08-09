@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../../common/constants';
+import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../common/constants';
 import * as i18n from '../components/t_grid/translations';
 import type { AlertStatus, StatusBulkActionsProps } from '../../common/types/timeline';
 import { useUpdateAlertsStatus } from '../container/use_update_alerts';
@@ -131,15 +131,15 @@ export const useStatusBulkActionItems = ({
         </EuiContextMenuItem>
       );
     }
-    if (currentStatus !== FILTER_IN_PROGRESS) {
+    if (currentStatus !== FILTER_ACKNOWLEDGED) {
       actionItems.push(
         <EuiContextMenuItem
-          key="progress"
-          data-test-subj="in-progress-alert-status"
-          onClick={() => onClickUpdate(FILTER_IN_PROGRESS)}
+          key="acknowledge"
+          data-test-subj="acknowledge-alert-status"
+          onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
           size="s"
         >
-          {i18n.BULK_ACTION_IN_PROGRESS_SELECTED}
+          {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
         </EuiContextMenuItem>
       );
     }
