@@ -9,7 +9,7 @@ import { ErrorCorrelationValue } from '../../../../common/search_strategies/erro
 
 interface Progress {
   started: number;
-  loadedFieldCanditates: number;
+  loadedFieldCandidates: number;
   loadedErrorCorrelations: number;
 }
 export const asyncErrorCorrelationsSearchServiceStateProvider = () => {
@@ -35,12 +35,12 @@ export const asyncErrorCorrelationsSearchServiceStateProvider = () => {
 
   let progress: Progress = {
     started: Date.now(),
-    loadedFieldCanditates: 0,
+    loadedFieldCandidates: 0,
     loadedErrorCorrelations: 0,
   };
   function getOverallProgress() {
     return (
-      progress.loadedFieldCanditates * 0.025 +
+      progress.loadedFieldCandidates * 0.025 +
       progress.loadedErrorCorrelations * (1 - 0.025)
     );
   }

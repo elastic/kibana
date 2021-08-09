@@ -60,7 +60,7 @@ export const getErrorCorrelationRequest = (
   };
 };
 
-export const fetchErrorCorrelationPValues = async (
+export const fetchFailedTransactionsCorrelationPValues = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams,
   fieldName: string
