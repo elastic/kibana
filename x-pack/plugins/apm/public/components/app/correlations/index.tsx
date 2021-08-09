@@ -51,11 +51,14 @@ import {
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { MlErrorCorrelations } from './ml_error_correlations';
 
-const errorRateTab = {
-  key: 'errorRate',
-  label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
-    defaultMessage: 'Error',
-  }),
+const failedTransactionsTab = {
+  key: 'failedTransactions',
+  label: i18n.translate(
+    'xpack.apm.correlations.tabs.failingTransactionsLabel',
+    {
+      defaultMessage: 'Failing transactions',
+    }
+  ),
   component: MlErrorCorrelations,
 };
 const latencyCorrelationsTab = {
@@ -65,7 +68,7 @@ const latencyCorrelationsTab = {
   }),
   component: MlLatencyCorrelations,
 };
-const tabs = [latencyCorrelationsTab, errorRateTab];
+const tabs = [latencyCorrelationsTab, failedTransactionsTab];
 
 export function Correlations() {
   const license = useLicenseContext();
