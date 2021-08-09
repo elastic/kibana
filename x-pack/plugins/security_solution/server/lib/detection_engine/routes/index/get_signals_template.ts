@@ -29,7 +29,7 @@ import aadFieldConversion from './signal_aad_mapping.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 58;
+export const SIGNALS_TEMPLATE_VERSION = 56;
 /**
   @constant
   @type {number}

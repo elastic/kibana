@@ -228,7 +228,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [getMetricField(metric)]: value,
         [ALERT_RULE_ID]: ruleId,
         [TIMESTAMP]: new Date().toISOString(),
-        [ALERT_CONSUMER]: 'siem',
+        [ALERT_CONSUMER]: SERVER_APP_ID,
       },
       namespace
     );
@@ -252,7 +252,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [RULE_STATUS_SEVERITY]: statusSeverityDict[newStatus],
         [RULE_STATUS]: newStatus,
         [TIMESTAMP]: new Date().toISOString(),
-        [ALERT_CONSUMER]: 'siem',
+        [ALERT_CONSUMER]: SERVER_APP_ID,
       },
       namespace
     );
