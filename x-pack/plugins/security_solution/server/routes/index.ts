@@ -6,7 +6,7 @@
  */
 
 import { StartServicesAccessor } from 'kibana/server';
-import { RuleDataClient } from '../../../rule_registry/server';
+import { RuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -65,6 +65,7 @@ export const initRoutes = (
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
+  ruleDataService: RuleDataPluginService,
   ruleDataClient: RuleDataClient | null,
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
@@ -120,7 +121,7 @@ export const initRoutes = (
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router);
+  createIndexRoute(router, ruleDataService, config);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
 

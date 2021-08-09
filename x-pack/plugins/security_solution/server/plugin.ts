@@ -8,6 +8,7 @@
 import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
+import { estypes } from '@elastic/elasticsearch';
 
 import {
   CoreSetup,
@@ -87,6 +88,7 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
 import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
@@ -201,17 +203,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
 
     let ruleDataClient: RuleDataClient | null = null;
+    const { ruleDataService } = plugins.ruleRegistry;
     if (isRuleRegistryEnabled) {
-      const { ruleDataService } = plugins.ruleRegistry;
-
       const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
 
       const initializeRuleDataTemplates = once(async () => {
         if (!ruleDataService.isWriteEnabled()) {
           return;
         }
-        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
+        // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
+        // Split aliases by component template since we need to alias some fields in technical field mappings,
+        // some fields in security solution specific component template.
+        const aliases: Record<string, estypes.MappingProperty> = {};
+        Object.entries(aadFieldConversion).forEach(([key, value]) => {
+          aliases[key] = {
+            type: 'alias',
+            path: value,
+          };
+        });
+
+        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
         await ruleDataService.createOrUpdateComponentTemplate({
           name: componentTemplateName,
           body: {
@@ -266,6 +278,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
+    // TODO We need to get the endpoint routes inside of initRoutes
+    initRoutes(
+      router,
+      config,
+      plugins.encryptedSavedObjects?.canEncrypt === true,
+      plugins.security,
+      plugins.ml,
+      ruleDataService,
+      ruleDataClient,
+      core.getStartServices
+    );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router);
@@ -320,16 +343,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         taskManager: plugins.taskManager!,
       });
     }
-    // TO DO We need to get the endpoint routes inside of initRoutes
-    initRoutes(
-      router,
-      config,
-      plugins.encryptedSavedObjects?.canEncrypt === true,
-      plugins.security,
-      plugins.ml,
-      ruleDataClient,
-      core.getStartServices
-    );
 
     core.getStartServices().then(([_, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
