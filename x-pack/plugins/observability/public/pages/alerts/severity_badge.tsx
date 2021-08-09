@@ -6,7 +6,6 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export interface SeverityBadgeProps {
