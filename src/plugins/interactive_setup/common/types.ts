@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { PeerCertificate } from 'tls';
+
 import type { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
 
 /**
@@ -42,4 +44,25 @@ export interface EnrollmentToken {
    * An Elasticsearch API key (not encoded) that can be used as credentials authorized to call the enrollment related APIs in Elasticsearch.
    */
   key: string;
+}
+
+export interface Certificate {
+  issuer: PeerCertificate['issuer'];
+  valid_from: PeerCertificate['valid_from'];
+  valid_to: PeerCertificate['valid_to'];
+  subject: PeerCertificate['subject'];
+  fingerprint256: PeerCertificate['fingerprint256'];
+  raw: string;
+}
+
+export interface PingResponse {
+  /**
+   * Response status code of ping request.
+   */
+  statusCode: number;
+
+  /**
+   * Full certificate chain of cluster at requested address. Only present if cluster uses HTTPS.
+   */
+  certificateChain?: Certificate[];
 }

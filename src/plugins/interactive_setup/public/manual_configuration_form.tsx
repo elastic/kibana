@@ -33,6 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
+import type { Certificate, PingResponse } from '../common/types';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useHttp } from './use_http';
@@ -65,16 +66,16 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
   const [state, pingCluster] = useAsyncFn(async (values: ManualConfigurationFormValues) => {
     const requiresCert = values.host.trim().startsWith('https://');
     let requiresAuth = false;
-    let body: any;
+    let body: PingResponse;
 
     try {
-      const response = await http.post('/internal/interactive_setup/ping', {
+      const response = await http.post<PingResponse>('/internal/interactive_setup/ping', {
         body: JSON.stringify({
           hosts: [values.host],
         }),
         asResponse: true,
       });
-      body = response.body;
+      body = response.body!;
     } catch (error) {
       if (error.response?.status !== 401) {
         throw error;
@@ -216,10 +217,25 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
     >
       {state.value?.statusCode === 200 && (
         <>
-          <EuiCallOut color="warning" title="Your cluster is not secure.">
-            <p>Anyone with the address could access your data.</p>
+          <EuiCallOut
+            color="warning"
+            title={i18n.translate('interactiveSetup.manualConfigurationForm.insecureClusterTitle', {
+              defaultMessage: 'Your cluster is not secure.',
+            })}
+          >
             <p>
-              <EuiLink>Learn how to enable security features.</EuiLink>
+              <FormattedMessage
+                id="interactiveSetup.manualConfigurationForm.insecureClusterDescription"
+                defaultMessage="Anyone with the address could access your data."
+              />
+            </p>
+            <p>
+              <EuiLink>
+                <FormattedMessage
+                  id="interactiveSetup.manualConfigurationForm.insecureClusterLink"
+                  defaultMessage="Learn how to enable security features."
+                />
+              </EuiLink>
             </p>
           </EuiCallOut>
           <EuiSpacer />
@@ -239,95 +255,92 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
           isLoading={form.isValidating}
         />
       </EuiFormRow>
-      {state.value && (
+
+      {state.value?.statusCode === 401 && (
         <>
-          {state.value.statusCode === 401 && (
-            <>
-              <EuiFormRow
-                label={i18n.translate('interactiveSetup.manualConfigurationForm.usernameLabel', {
-                  defaultMessage: 'Username',
-                })}
-                error={form.errors.username}
-                isInvalid={form.touched.username && !!form.errors.username}
-              >
-                <EuiFieldText
-                  icon="user"
-                  name="username"
-                  value={form.values.username}
-                  isInvalid={form.touched.username && !!form.errors.username}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label={i18n.translate('interactiveSetup.manualConfigurationForm.passwordLabel', {
-                  defaultMessage: 'Password',
-                })}
-                error={form.errors.password}
-                isInvalid={form.touched.password && !!form.errors.password}
-              >
-                <EuiFieldPassword
-                  type="dual"
-                  name="password"
-                  value={form.values.password}
-                  isInvalid={form.touched.password && !!form.errors.password}
-                />
-              </EuiFormRow>
-            </>
-          )}
-          {form.values.host.trim().startsWith('https://') && (
-            <EuiFormRow
-              label={i18n.translate('interactiveSetup.manualConfigurationForm.caLabel', {
-                defaultMessage: 'Certificate authority',
-              })}
-              error={form.errors.caCert}
-              isInvalid={form.touched.caCert && !!form.errors.caCert}
-            >
-              {state.value.certificateChain ? (
-                <EuiCheckableCard
-                  id="trustCaCert"
-                  label="I recognize and trust this certificate:"
-                  checkableType="checkbox"
-                  value="true"
-                  checked={!!form.values.caCert}
-                  onChange={async (event) => {
-                    await form.setValue(
-                      'caCert',
-                      event.target.checked
-                        ? state.value.certificateChain[state.value.certificateChain.length - 1].raw
-                        : ''
-                    );
-                    form.setTouched('caCert');
-                  }}
-                >
-                  <CertificatePanel certificate={state.value.certificateChain[0]} />
-                </EuiCheckableCard>
-              ) : (
-                <EuiFilePicker
-                  name="caCert"
-                  isInvalid={form.touched.caCert && !!form.errors.caCert}
-                  accept=".pem,.crt,.cert"
-                  onChange={async (files) => {
-                    if (!files || !files.length) {
-                      await form.setValue('caCert', '');
-                      return;
-                    }
-                    if (files[0].type !== 'application/x-x509-ca-cert') {
-                      form.setError(
-                        'caCert',
-                        'Invalid certificate, upload x509 CA cert in PEM format'
-                      );
-                      return;
-                    }
-                    const cert = await readFile(files[0]);
-                    await form.setValue('caCert', cert);
-                    form.setTouched('caCert');
-                  }}
-                />
-              )}
-            </EuiFormRow>
-          )}
+          <EuiFormRow
+            label={i18n.translate('interactiveSetup.manualConfigurationForm.usernameLabel', {
+              defaultMessage: 'Username',
+            })}
+            error={form.errors.username}
+            isInvalid={form.touched.username && !!form.errors.username}
+          >
+            <EuiFieldText
+              icon="user"
+              name="username"
+              value={form.values.username}
+              isInvalid={form.touched.username && !!form.errors.username}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('interactiveSetup.manualConfigurationForm.passwordLabel', {
+              defaultMessage: 'Password',
+            })}
+            error={form.errors.password}
+            isInvalid={form.touched.password && !!form.errors.password}
+          >
+            <EuiFieldPassword
+              type="dual"
+              name="password"
+              value={form.values.password}
+              isInvalid={form.touched.password && !!form.errors.password}
+            />
+          </EuiFormRow>
         </>
       )}
+
+      {state.value && form.values.host.trim().startsWith('https://') && (
+        <EuiFormRow
+          label={i18n.translate('interactiveSetup.manualConfigurationForm.caCertLabel', {
+            defaultMessage: 'Certificate authority',
+          })}
+          error={form.errors.caCert}
+          isInvalid={form.touched.caCert && !!form.errors.caCert}
+        >
+          {state.value.certificateChain ? (
+            <EuiCheckableCard
+              id="trustCaCert"
+              label={i18n.translate('interactiveSetup.manualConfigurationForm.trustCaCertLabel', {
+                defaultMessage: 'I recognize and trust this certificate:',
+              })}
+              checkableType="checkbox"
+              value="true"
+              checked={!!form.values.caCert}
+              onChange={async (event) => {
+                const intermediateCa =
+                  state.value?.certificateChain?.[
+                    Math.min(1, state.value.certificateChain.length - 1)
+                  ].raw;
+                await form.setValue('caCert', event.target.checked ? intermediateCa ?? '' : '');
+                form.setTouched('caCert');
+              }}
+            >
+              <CertificatePanel certificate={state.value.certificateChain[0]} />
+            </EuiCheckableCard>
+          ) : (
+            <EuiFilePicker
+              name="caCert"
+              isInvalid={form.touched.caCert && !!form.errors.caCert}
+              accept=".pem,.crt,.cert"
+              onChange={async (files) => {
+                if (!files || !files.length) {
+                  await form.setValue('caCert', '');
+                  return;
+                }
+                if (files[0].type !== 'application/x-x509-ca-cert') {
+                  form.setError('caCert', 'Invalid certificate, upload x509 CA cert in PEM format');
+                  return;
+                }
+                const cert = await readFile(files[0]);
+                await form.setValue('caCert', cert);
+                form.setTouched('caCert');
+              }}
+            />
+          )}
+        </EuiFormRow>
+      )}
       <EuiSpacer />
+
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
@@ -381,7 +394,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
 };
 
 export interface CertificatePanelProps {
-  certificate: any;
+  certificate: Certificate;
 }
 
 export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({ certificate }) => {
@@ -396,9 +409,23 @@ export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({ cer
             <h3>{certificate.subject.O || certificate.subject.CN}</h3>
           </EuiTitle>
           <EuiText size="xs">
-            Issued by: <EuiLink>{certificate.issuer.O || certificate.issuer.CN}</EuiLink>
+            <FormattedMessage
+              id="interactiveSetup.certificatePanel.issuer"
+              defaultMessage="Issued by: {issuer}"
+              values={{
+                issuer: <EuiLink>{certificate.issuer.O || certificate.issuer.CN}</EuiLink>,
+              }}
+            />
           </EuiText>
-          <EuiText size="xs">{`Expires: ${certificate.valid_to}`}</EuiText>
+          <EuiText size="xs">
+            <FormattedMessage
+              id="interactiveSetup.certificatePanel.validTo"
+              defaultMessage="Expires: {validTo}"
+              values={{
+                validTo: certificate.valid_to,
+              }}
+            />
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -72,6 +72,12 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
     // We should check if we can connect to Elasticsearch with default configuration to know if we
     // need to activate interactive setup. This check can take some time, so we should register our
     // routes to let interactive setup UI to handle user requests until the check is complete.
+    const setupInstructions = `
+
+${chalk.bold(chalk.whiteBright(`${chalk.cyanBright('i')} Kibana has not been configured.`))}
+
+Go to ${chalk.underline(chalk.cyanBright('http://localhost:5601'))} to get started.
+`;
     core.elasticsearch
       .createClient('ping')
       .asInternalUser.ping()
@@ -88,14 +94,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
               'Kibana is not properly configured to connect to Elasticsearch. Interactive setup mode will be activated.'
             );
             this.#elasticsearchConnectionStatus = ElasticsearchConnectionStatus.NotConfigured;
-            this.#logger.info(
-              `
-
-${chalk.bold(chalk.whiteBright(`${chalk.cyanBright('i')} Kibana has not been configured.`))}
-
-Go to ${chalk.underline(chalk.cyanBright('http://localhost:5601'))} to get started.
-`
-            );
+            this.#logger.info(setupInstructions);
           }
         },
         () => {
@@ -103,14 +102,7 @@ Go to ${chalk.underline(chalk.cyanBright('http://localhost:5601'))} to get start
           // Do we want to constantly ping ES if interactive mode UI isn't active? Just in case user runs Kibana and then
           // configure Elasticsearch so that it can eventually connect to it without any configuration changes?
           this.#elasticsearchConnectionStatus = ElasticsearchConnectionStatus.NotConfigured;
-          this.#logger.info(
-            `
-
-${chalk.bold(chalk.whiteBright(`${chalk.cyanBright('i')} Kibana has not been configured.`))}
-
-Go to ${chalk.underline(chalk.cyanBright('http://localhost:5601'))} to get started.
-`
-          );
+          this.#logger.info(setupInstructions);
         }
       );
 
@@ -121,7 +113,7 @@ Go to ${chalk.underline(chalk.cyanBright('http://localhost:5601'))} to get start
         logger: this.#logger.get('routes'),
         getConfig: this.#getConfig.bind(this),
         getElasticsearchConnectionStatus: this.#getElasticsearchConnectionStatus.bind(this),
-        completeSetup: (result) => completeSetup(result),
+        completeSetup,
         core,
         initializerContext: this.initializerContext,
       });

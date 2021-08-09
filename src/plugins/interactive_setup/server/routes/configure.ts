@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import Boom from '@hapi/boom';
-import { constants } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '.';
-import { generateCertificate } from './enroll';
+import { createCertificate, createConfig, isWriteable } from './enroll';
 
 export function defineConfigureRoute({
   router,
@@ -28,28 +25,41 @@ export function defineConfigureRoute({
     {
       path: '/internal/interactive_setup/configure',
       validate: {
-        body: schema.object({
-          hosts: schema.arrayOf(schema.string(), { minSize: 1 }),
-          username: schema.string(),
-          password: schema.string(),
-          caCert: schema.string(),
-        }),
+        body: schema.oneOf([
+          schema.object({
+            hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
+              minSize: 1,
+              maxSize: 1,
+            }),
+            username: schema.maybe(schema.string()),
+            password: schema.maybe(schema.string()),
+            caCert: schema.string(),
+          }),
+          schema.object({
+            hosts: schema.arrayOf(schema.uri({ scheme: 'http' }), {
+              minSize: 1,
+              maxSize: 1,
+            }),
+            username: schema.maybe(schema.string()),
+            password: schema.maybe(schema.string()),
+          }),
+        ]),
       },
       options: { authRequired: false },
     },
     async (context, request, response) => {
       if (!core.preboot.isSetupOnHold()) {
-        logger.error('Invalid attempt to access enrollment endpoint outside of preboot phase');
+        logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot phase`);
         return response.badRequest();
       }
 
-      const certificateAuthority = generateCertificate(request.body.caCert);
+      const ca = 'caCert' in request.body ? createCertificate(request.body.caCert) : undefined;
 
       const client = core.elasticsearch.createClient('configure', {
         hosts: request.body.hosts,
         username: request.body.username,
         password: request.body.password,
-        ssl: { certificateAuthorities: [certificateAuthority] },
+        ssl: ca ? { certificateAuthorities: [ca] } : undefined,
       });
 
       const configPath = initializerContext.env.mode.dev
@@ -60,61 +70,35 @@ export function defineConfigureRoute({
         logger.error('Cannot find config file');
         return response.customError({ statusCode: 500, body: 'Cannot find config file.' });
       }
-      // TODO: Use fingerprint/timestamp as file name
-      const caPath = path.join(path.dirname(configPath), 'ca.crt');
+      const caPath = path.join(path.dirname(configPath), `ca_${Date.now()}.crt`);
 
       try {
-        await Promise.all([
-          fs.access(configPath, constants.W_OK),
-          fs.access(path.dirname(caPath), constants.W_OK),
-        ]);
+        await Promise.all([isWriteable(configPath), isWriteable(caPath)]);
 
-        // TODO: validate kibana system user permissions
-        await client.asInternalUser.security.authenticate();
+        await client.asInternalUser.ping();
 
-        await Promise.all([
-          fs.appendFile(
-            configPath,
-            generateConfig(request.body.hosts, request.body.username, request.body.password, caPath)
-          ),
-          fs.writeFile(caPath, certificateAuthority),
-        ]);
+        if (ca) {
+          await fs.writeFile(caPath, ca);
+        }
+        await fs.appendFile(
+          configPath,
+          createConfig({
+            elasticsearch: {
+              hosts: request.body.hosts,
+              username: request.body.username,
+              password: request.body.password,
+              ssl: { certificateAuthorities: [caPath] },
+            },
+          })
+        );
 
         completeSetup({ shouldReloadConfig: true });
 
         return response.noContent();
       } catch (error) {
         logger.error(error);
-        return response.customError({ statusCode: 500, body: getDetailedErrorMessage(error) });
+        return response.customError({ statusCode: 500 });
       }
     }
   );
-}
-
-export function generateConfig(
-  hosts: string[],
-  username: string,
-  password: string,
-  caPath: string
-) {
-  return `
-
-# This section was automatically generated during setup.
-elasticsearch.hosts: [ "${hosts.join('", "')}" ]
-elasticsearch.username: "${username}"
-elasticsearch.password: "${password}"
-elasticsearch.ssl.certificateAuthorities: [ "${caPath}" ]
-`;
-}
-
-export function getDetailedErrorMessage(error: any): string {
-  if (error instanceof errors.ResponseError) {
-    return JSON.stringify(error.body);
-  }
-
-  if (Boom.isBoom(error)) {
-    return JSON.stringify(error.output.payload);
-  }
-
-  return error.message;
 }

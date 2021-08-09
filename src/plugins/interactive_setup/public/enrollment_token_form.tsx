@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
-import type { EnrollmentToken } from './decode_enrollment_token';
+import type { EnrollmentToken } from '../common/types';
 import { decodeEnrollmentToken } from './decode_enrollment_token';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
@@ -51,7 +51,6 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
   onSuccess,
 }) => {
   const http = useHttp();
-
   const [form, eventHandlers] = useForm({
     defaultValues,
     validate: (values) => {
@@ -73,24 +72,19 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
       return errors;
     },
     onSubmit: async (values) => {
-      const decoded = decodeEnrollmentToken(values.token);
-      if (decoded) {
-        await Promise.all([
-          http.post('/internal/interactive_setup/enroll', {
-            body: JSON.stringify({
-              hosts: decoded.adr.map((host) => `https://${host}`),
-              apiKey: decoded.key,
-              caFingerprint: decoded.fgr,
-            }),
-          }),
-          new Promise((resolve) => setTimeout(resolve, 1600)), // Shorten perceived duration of preboot step
-        ]);
-        onSuccess?.();
-      }
+      const decoded = decodeEnrollmentToken(values.token)!;
+      await http.post('/internal/interactive_setup/enroll', {
+        body: JSON.stringify({
+          hosts: decoded.adr.map((host) => `https://${host}`),
+          apiKey: decoded.key,
+          caFingerprint: decoded.fgr,
+        }),
+      });
+      onSuccess?.();
     },
   });
 
-  const token = decodeEnrollmentToken(form.values.token);
+  const enrollmentToken = decodeEnrollmentToken(form.values.token);
 
   return (
     <EuiForm
@@ -100,22 +94,26 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
       style={{ width: euiThemeVars.euiFormMaxWidth }}
     >
       {form.submitError && (
-        <EuiCallOut
-          color="danger"
-          title={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
-            defaultMessage: "Couldn't enroll to cluster",
-          })}
-        >
-          {(form.submitError as elasticsearchErrors.ResponseError).body?.message}
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
+              defaultMessage: "Couldn't connect to cluster",
+            })}
+          >
+            {(form.submitError as elasticsearchErrors.ResponseError).body?.message}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
       )}
+
       <EuiFormRow
         label={i18n.translate('interactiveSetup.enrollmentTokenForm.tokenLabel', {
           defaultMessage: 'Enrollment token',
         })}
         error={form.errors.token}
         isInvalid={form.touched.token && !!form.errors.token}
-        helpText={token && <EnrollmentTokenDetails token={token} />}
+        helpText={enrollmentToken && <EnrollmentTokenDetails token={enrollmentToken} />}
       >
         <EuiTextArea
           name="token"
@@ -124,24 +122,10 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           placeholder={i18n.translate('interactiveSetup.enrollmentTokenForm.tokenPlaceholder', {
             defaultMessage: 'Paste enrollment token from terminal',
           })}
-          onKeyUp={() =>
-            form.setValue(
-              'token',
-              btoa(
-                JSON.stringify({
-                  ver: '8.0.0',
-                  adr: ['localhost:9200'],
-                  fgr:
-                    'AA:C8:2C:2E:09:58:F4:FE:A1:D2:AB:7F:13:70:C2:7D:EB:FD:A2:23:88:13:E4:DA:3A:D0:59:D0:09:00:07:36',
-                  key: 'JH-36HoBo4EYIoVhHh2F:uEo4dksARMq_BSHaAHUr8Q',
-                })
-              )
-            )
-          }
         />
       </EuiFormRow>
-
       <EuiSpacer />
+
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty flush="right" iconType="gear" onClick={onCancel}>
@@ -175,9 +159,19 @@ interface EnrollmentTokenDetailsProps {
 }
 
 const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = ({ token }) => (
-  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+  <EuiFlexGroup
+    responsive={false}
+    alignItems="center"
+    gutterSize="s"
+    style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}
+  >
     <EuiFlexItem grow={false}>
-      <EuiText size="xs">Connect to</EuiText>
+      <EuiText size="xs">
+        <FormattedMessage
+          id="interactiveSetup.enrollmentTokenDetails.infoPart"
+          defaultMessage="Connect to"
+        />
+      </EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiIcon type="lock" />
@@ -189,7 +183,13 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
       <EuiIcon type="logoElasticsearch" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText size="xs">{`Elasticsearch (v${token.ver})`}</EuiText>
+      <EuiText size="xs">
+        <FormattedMessage
+          id="interactiveSetup.enrollmentTokenDetails.versionPart"
+          defaultMessage="Elasticsearch (v{version})"
+          values={{ version: token.ver }}
+        />
+      </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
