@@ -47,20 +47,23 @@ export const useUpgradeSecurityPackages = () => {
 
       (async () => {
         try {
+          // Make sure fleet is initialized first
+          await context.services.fleet?.isInitialized();
+
           // ignore the response for now since we aren't notifying the user
           await sendUpgradeSecurityPackages(context.services.http, { signal });
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
 
-          // ignore the error that occurs from aborting a request
+          // log to console, except if the error occurred due to aborting a request
           if (!abortController.signal.aborted) {
             // eslint-disable-next-line no-console
             console.error(error);
           }
         }
-
-        return abortRequests;
       })();
+
+      return abortRequests;
     }
-  }, [canAccessFleet, context.services.http]);
+  }, [canAccessFleet, context.services.fleet, context.services.http]);
 };
