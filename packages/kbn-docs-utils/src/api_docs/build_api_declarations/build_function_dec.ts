@@ -27,14 +27,21 @@ import { buildBasicApiDeclaration } from './build_basic_api_declaration';
  * @param anchorLink
  * @param log
  */
-export function buildFunctionDec(
-  node: FunctionDeclaration | MethodDeclaration | ConstructorDeclaration | MethodSignature,
-  plugins: KibanaPlatformPlugin[],
-  anchorLink: AnchorLink,
-  currentPluginId: string,
-  log: ToolingLog,
-  captureReferences: boolean
-): ApiDeclaration {
+export function buildFunctionDec({
+  node,
+  plugins,
+  anchorLink,
+  currentPluginId,
+  log,
+  captureReferences,
+}: {
+  node: FunctionDeclaration | MethodDeclaration | ConstructorDeclaration | MethodSignature;
+  plugins: KibanaPlatformPlugin[];
+  anchorLink: AnchorLink;
+  currentPluginId: string;
+  log: ToolingLog;
+  captureReferences: boolean;
+}): ApiDeclaration {
   const label = Node.isConstructorDeclaration(node)
     ? 'Constructor'
     : node.getName() || '(WARN: Missing name)';

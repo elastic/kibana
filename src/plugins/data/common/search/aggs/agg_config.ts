@@ -30,7 +30,7 @@ export interface SerializableState {
   [key: string]: State | State[];
 }
 
-/** @internal **/
+/** @public **/
 export type AggConfigSerialized = Ensure<
   {
     type: string;
@@ -317,7 +317,8 @@ export class AggConfig {
   }
 
   /**
-   * @deprecated - Use serialize() instead.
+   * @deprecated Use serialize() instead.
+   * @removeBy 8.1
    */
   toJSON(): AggConfigSerialized {
     return this.serialize();

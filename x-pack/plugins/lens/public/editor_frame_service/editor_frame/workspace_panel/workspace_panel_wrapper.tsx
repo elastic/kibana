@@ -10,7 +10,7 @@ import './workspace_panel_wrapper.scss';
 import React, { useCallback } from 'react';
 import { EuiPageContent, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
-import { Datasource, FramePublicAPI, Visualization } from '../../../types';
+import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
 import { WarningsPopover } from './warnings_popover';
@@ -21,9 +21,9 @@ export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   visualizationId: string | null;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   datasourceStates: Record<
     string,
     {
