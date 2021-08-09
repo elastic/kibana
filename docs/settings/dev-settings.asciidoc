@@ -12,31 +12,20 @@ They are enabled by default.
 [[grok-settings]]
 ==== Grok Debugger settings
 
-[cols="2*<"]
-|===
-| `xpack.grokdebugger.enabled` {ess-icon}
-  | Set to `true` to enable the <<xpack-grokdebugger,Grok Debugger>>. Defaults to `true`.
+`xpack.grokdebugger.enabled` {ess-icon}::
+Set to `true` to enable the <<xpack-grokdebugger,Grok Debugger>>. Defaults to `true`.
 
-|===
 
 [float]
 [[profiler-settings]]
 ==== {searchprofiler} settings
 
-[cols="2*<"]
-|===
-| `xpack.searchprofiler.enabled`
-  | Set to `true` to enable the <<xpack-profiler,{searchprofiler}>>. Defaults to `true`.
-
-|===
+`xpack.searchprofiler.enabled`::
+Set to `true` to enable the <<xpack-profiler,{searchprofiler}>>. Defaults to `true`.
 
 [float]
 [[painless_lab-settings]]
 ==== Painless Lab settings
 
-[cols="2*<"]
-|===
-| `xpack.painless_lab.enabled`
-  | When set to `true`, enables the <<painlesslab, Painless Lab>>. Defaults to `true`.
-
-|===
+`xpack.painless_lab.enabled`::
+When set to `true`, enables the <<painlesslab, Painless Lab>>. Defaults to `true`.
