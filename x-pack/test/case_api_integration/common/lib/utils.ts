@@ -56,6 +56,8 @@ import { SignalHit } from '../../../../plugins/security_solution/server/lib/dete
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
+import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
+import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -603,6 +605,49 @@ export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) =
   });
 
   return mappings;
+};
+
+interface ConfigureSavedObject {
+  'cases-configure': ESCasesConfigureAttributes;
+}
+
+/**
+ * Returns configure saved objects from Elasticsearch directly.
+ */
+export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
+  const configure: ApiResponse<estypes.SearchResponse<ConfigureSavedObject>> = await es.search({
+    index: '.kibana',
+    body: {
+      query: {
+        term: {
+          type: {
+            value: 'cases-configure',
+          },
+        },
+      },
+    },
+  });
+
+  return configure;
+};
+
+export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
+  const configure: ApiResponse<
+    estypes.SearchResponse<{ cases: ESCaseAttributes }>
+  > = await es.search({
+    index: '.kibana',
+    body: {
+      query: {
+        term: {
+          type: {
+            value: 'cases',
+          },
+        },
+      },
+    },
+  });
+
+  return configure;
 };
 
 export const createCaseWithConnector = async ({

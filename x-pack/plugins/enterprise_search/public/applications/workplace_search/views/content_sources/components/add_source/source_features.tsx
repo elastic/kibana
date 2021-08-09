@@ -25,6 +25,7 @@ import { AppLogic } from '../../../../app_logic';
 import { Features, FeatureIds } from '../../../../types';
 
 import {
+  INCLUDED_FEATURES_TITLE,
   SOURCE_FEATURES_SEARCHABLE,
   SOURCE_FEATURES_REMOTE_FEATURE,
   SOURCE_FEATURES_PRIVATE_FEATURE,
@@ -179,9 +180,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
     return (
       <>
         <EuiTitle size="s">
-          <h3>
-            <strong>Included features</strong>
-          </h3>
+          <h2>{INCLUDED_FEATURES_TITLE}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup>

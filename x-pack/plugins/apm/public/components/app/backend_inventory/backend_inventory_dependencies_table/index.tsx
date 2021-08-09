@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -14,6 +15,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { BackendLink } from '../../../shared/backend_link';
+import { DependenciesTableServiceMapLink } from '../../../shared/dependencies_table/dependencies_table_service_map_link';
 
 export function BackendInventoryDependenciesTable() {
   const {
@@ -23,6 +25,15 @@ export function BackendInventoryDependenciesTable() {
   const {
     query: { rangeFrom, rangeTo, kuery },
   } = useApmParams('/backends');
+
+  const router = useApmRouter();
+  const serviceMapLink = router.link('/service-map', {
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+    },
+  });
 
   const { offset } = getTimeRangeComparison({
     start,
@@ -40,11 +51,11 @@ export function BackendInventoryDependenciesTable() {
       return callApmApi({
         endpoint: 'GET /api/apm/backends/top_backends',
         params: {
-          query: { start, end, environment, numBuckets: 20, offset },
+          query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
       });
     },
-    [start, end, environment, offset]
+    [start, end, environment, offset, kuery]
   );
 
   const dependencies =
@@ -96,6 +107,7 @@ export function BackendInventoryDependenciesTable() {
       )}
       status={status}
       compact={false}
+      link={<DependenciesTableServiceMapLink href={serviceMapLink} />}
     />
   );
 }

@@ -167,6 +167,7 @@ exports[`Source Viewer component renders error state 1`] = `
       >
         <span
           className="euiTextColor euiTextColor--subdued"
+          style={Object {}}
         >
           <EuiSpacer
             size="m"
@@ -742,6 +743,7 @@ exports[`Source Viewer component renders loading state 1`] = `
         >
           <div
             className="euiTextColor euiTextColor--subdued"
+            style={Object {}}
           >
             <FormattedMessage
               defaultMessage="Loading JSON"
