@@ -108,6 +108,6 @@ export const BATCH_ACTION_CLOSE_SELECTED = i18n.translate(
 export const BATCH_ACTION_ACKNOWLEDGED_SELECTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.acknowledgedSelectedTitle',
   {
-    defaultMessage: 'Mark acknowledged',
+    defaultMessage: 'Mark as acknowledged',
   }
 );

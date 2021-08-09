@@ -118,4 +118,4 @@ export interface BulkActionsObjectProp {
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 
-export type AlertStatus = 'open' | 'closed' | 'in-progress';
+export type AlertStatus = 'open' | 'closed' | 'acknowledged';
