@@ -8,10 +8,10 @@
 import {
   LensDocShape,
   migrations as lensMigrations,
-} from '../../../lens/server/migrations/saved_object_migrations';
-import { createCommentsMigrations } from './migrations';
+} from '../../../../lens/server/migrations/saved_object_migrations';
+import { createCommentsMigrations } from './index';
 import { SavedObjectMigrationFn } from 'src/core/server';
-import { getLensVisualizations, parseCommentString } from '../common';
+import { getLensVisualizations, parseCommentString } from '../../common';
 
 describe('Comments migrations', () => {
   describe('7.14.0 remove time zone from Lens visualization date histogram', () => {

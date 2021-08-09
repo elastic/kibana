@@ -408,7 +408,7 @@ export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) 
  *
  * @returns the 'none' connector
  */
- export const getNoneCaseConnector = () => ({
+export const getNoneCaseConnector = () => ({
   id: 'none',
   name: 'none',
   type: ConnectorTypes.none,
