@@ -53,6 +53,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -388,6 +389,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   return (
     <StatefulEventsViewer
       pageFilters={defaultFiltersMemo}
+      defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
       end={to}
       currentFilter={filterGroup}

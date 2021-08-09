@@ -25,6 +25,7 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
+import { getTags } from '../utils';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -57,7 +58,6 @@ export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
     const {
       uiSettings,
-      indexPatternManagementStart,
       overlays,
       chrome,
       data,
@@ -77,13 +77,8 @@ export const EditIndexPattern = withRouter(
     }, [indexPattern]);
 
     useEffect(() => {
-      const indexPatternTags =
-        indexPatternManagementStart.list.getIndexPatternTags(
-          indexPattern,
-          indexPattern.id === defaultIndex
-        ) || [];
-      setTags(indexPatternTags);
-    }, [defaultIndex, indexPattern, indexPatternManagementStart.list]);
+      setTags(getTags(indexPattern, indexPattern.id === defaultIndex));
+    }, [defaultIndex, indexPattern]);
 
     const setDefaultPattern = useCallback(() => {
       uiSettings.set('defaultIndex', indexPattern.id);

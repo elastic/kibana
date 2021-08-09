@@ -9,7 +9,7 @@
 import { last } from 'lodash';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { UI_SETTINGS } from '../../../../../../plugins/data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../../../plugins/field_formats/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 function getMax(handler, config, isGauge) {
@@ -55,7 +55,7 @@ export function pointSeriesTooltipFormatter() {
       if (isPercentageMode && !isSetColorRange) {
         const percentageFormatPattern = config.get(
           isGauge ? 'gauge.percentageFormatPattern' : 'percentageFormatPattern',
-          uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
+          uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
         );
         value = getValueForPercentageMode(
           value / getMax(handler, config, isGauge),

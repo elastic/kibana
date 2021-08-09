@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use [IndexPatternField](./kibana-plugin-plugins-data-server.indexpatternfield.md)  8.0
+> Use [IndexPatternField](./kibana-plugin-plugins-data-server.indexpatternfield.md)  8.1
 > 
 
 <b>Signature:</b>

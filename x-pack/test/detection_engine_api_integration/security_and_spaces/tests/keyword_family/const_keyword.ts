@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits
-          .map((hit) => (hit._source.event as EventModule).dataset)
+          .map((hit) => (hit._source?.event as EventModule).dataset)
           .sort();
         expect(hits).to.eql([
           'dataset_name_1',
@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits
-          .map((hit) => (hit._source.event as EventModule).dataset)
+          .map((hit) => (hit._source?.event as EventModule).dataset)
           .sort();
         expect(hits).to.eql([
           'dataset_name_1',
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits
-          .map((hit) => hit._source.signal.threshold_result ?? null)
+          .map((hit) => hit._source?.signal.threshold_result ?? null)
           .sort();
         expect(hits).to.eql([
           {
