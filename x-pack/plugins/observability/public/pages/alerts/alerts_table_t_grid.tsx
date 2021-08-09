@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -34,6 +36,8 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { decorateResponse } from './decorate_response';
 import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
+
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 interface AlertsTableTGridProps {
   indexName: string;
