@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
+    "composite": false,
     "outDir": "./target/types",
     "stripInternal": false,
     "emitDeclarationOnly": true,
@@ -18,12 +18,5 @@
     "src/plugins/expressions/public/index.ts",
     "src/plugins/ui_actions/public/index.ts",
     "typings"
-  ],
-  "references": [
-    { "path": "src/core/tsconfig.json" },
-    { "path": "src/plugins/data/tsconfig.json" },
-    { "path": "src/plugins/embeddable/tsconfig.json" },
-    { "path": "src/plugins/expressions/tsconfig.json" },
-    { "path": "src/plugins/ui_actions/tsconfig.json" },
   ]
 }
