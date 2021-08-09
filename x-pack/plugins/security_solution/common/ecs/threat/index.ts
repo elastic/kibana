@@ -16,6 +16,7 @@ interface ThreatMatchEcs {
 }
 
 export interface LegacyThreatIndicatorEcs {
+  domain?: string[];
   matched?: ThreatMatchEcs;
   event?: EventEcs & { reference?: string[] };
   provider?: string[];

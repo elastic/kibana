@@ -13,7 +13,7 @@
     "mappings": {
       "_meta": {
         "aliases_version": 1,
-        "version": 55
+        "version": 45
       },
       "dynamic": "false",
       "properties": {

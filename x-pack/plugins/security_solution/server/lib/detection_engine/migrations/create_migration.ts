@@ -59,6 +59,21 @@ export const createMigration = async ({
                   ctx._source.signal._meta = [:];
                 }
                 ctx._source.signal._meta.version = params.version;
+
+                // migrate 7.14 indicators to ECS 1.10
+                if (ctx._source.threat?.indicator instanceof List && ctx._source.threat?.enrichments == null) {
+                  ctx._source.threat.enrichments = [];
+                  for (indicator in ctx._source.threat.indicator) {
+                    def enrichment = [:];
+                    enrichment.indicator = indicator;
+                    enrichment.matched = indicator.matched;
+                    enrichment.indicator.reference = indicator.event?.reference;
+                    enrichment.indicator.remove("matched");
+
+                    ctx._source.threat.enrichments.add(enrichment);
+                  }
+                  ctx._source.threat.remove("indicator");
+                }
               `,
         params: {
           version,

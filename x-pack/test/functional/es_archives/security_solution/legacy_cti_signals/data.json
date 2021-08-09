@@ -7,9 +7,9 @@
       "@timestamp": "2021-08-04T04:14:58.974Z",
       "agent": {
         "ephemeral_id": "07c24b1e-3663-4372-b982-f2d831e033eb",
-        "hostname": "rylastic2.local",
+        "hostname": "elastic.local",
         "id": "ce7741d9-3f0a-466d-8ae6-d7d8f883fcec",
-        "name": "rylastic2.local",
+        "name": "elastic.local",
         "type": "auditbeat",
         "version": "7.14.0"
       },
@@ -30,7 +30,7 @@
       },
       "host": {
         "architecture": "x86_64",
-        "hostname": "rylastic2.local",
+        "hostname": "elastic.local",
         "id": "1633D595-A115-5BF5-870B-A471B49446C3",
         "ip": [
           "fe80::aede:48ff:fe00:1122",
@@ -57,7 +57,7 @@
           "82:7e:2a:21:48:00",
           "82:7e:2a:21:48:01"
         ],
-        "name": "rylastic2.local",
+        "name": "elastic.local",
         "os": {
           "build": "20G80",
           "family": "darwin",
@@ -164,7 +164,7 @@
           },
           "name": "Indicator Match on host.name",
           "output_index": ".siem-signals-default",
-          "query": "host.name: \"rylastic2.local\" ",
+          "query": "host.name: \"elastic.local\" ",
           "references": [
           ],
           "risk_score": 21,
@@ -209,7 +209,7 @@
       "threat": {
         "indicator": [
           {
-            "domain": "rylastic2.local",
+            "domain": "elastic.local",
             "event": {
               "category": "threat",
               "created": "2021-08-04T03:53:30.761Z",
@@ -222,7 +222,7 @@
             },
             "first_seen": "2021-08-03T20:35:17.000Z",
             "matched": {
-              "atomic": "rylastic2.local",
+              "atomic": "elastic.local",
               "field": "host.name",
               "id": "_tdUD3sBcVT20cvWAkpd",
               "index": "filebeat-7.14.0-2021.08.04-000001",
@@ -274,9 +274,9 @@
       "@timestamp": "2021-08-04T04:14:58.973Z",
       "agent": {
         "ephemeral_id": "07c24b1e-3663-4372-b982-f2d831e033eb",
-        "hostname": "rylastic2.local",
+        "hostname": "elastic.local",
         "id": "ce7741d9-3f0a-466d-8ae6-d7d8f883fcec",
-        "name": "rylastic2.local",
+        "name": "elastic.local",
         "type": "auditbeat",
         "version": "7.14.0"
       },
@@ -297,7 +297,7 @@
       },
       "host": {
         "architecture": "x86_64",
-        "hostname": "rylastic2.local",
+        "hostname": "elastic.local",
         "id": "1633D595-A115-5BF5-870B-A471B49446C3",
         "ip": [
           "fe80::aede:48ff:fe00:1122",
@@ -324,7 +324,7 @@
           "82:7e:2a:21:48:00",
           "82:7e:2a:21:48:01"
         ],
-        "name": "rylastic2.local",
+        "name": "elastic.local",
         "os": {
           "build": "20G80",
           "family": "darwin",
@@ -431,7 +431,7 @@
           },
           "name": "Indicator Match on host.name",
           "output_index": ".siem-signals-default",
-          "query": "host.name: \"rylastic2.local\" ",
+          "query": "host.name: \"elastic.local\" ",
           "references": [
           ],
           "risk_score": 21,
@@ -476,7 +476,7 @@
       "threat": {
         "indicator": [
           {
-            "domain": "rylastic2.local",
+            "domain": "elastic.local",
             "event": {
               "category": "threat",
               "created": "2021-08-04T03:53:30.761Z",
@@ -489,7 +489,7 @@
             },
             "first_seen": "2021-08-03T20:35:17.000Z",
             "matched": {
-              "atomic": "rylastic2.local",
+              "atomic": "elastic.local",
               "field": "host.name",
               "id": "_tdUD3sBcVT20cvWAkpd",
               "index": "filebeat-7.14.0-2021.08.04-000001",
