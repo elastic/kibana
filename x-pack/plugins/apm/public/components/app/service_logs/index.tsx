@@ -66,6 +66,7 @@ export function ServiceLogs() {
     />
   ) : (
     <LogStream
+      columns={[{ type: 'timestamp' }, { type: 'message' }]}
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
