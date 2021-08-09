@@ -21535,7 +21535,6 @@
     "xpack.securitySolution.endpoint.policy.details.platinum": "プラチナ",
     "xpack.securitySolution.endpoint.policy.details.prevent": "防御",
     "xpack.securitySolution.endpoint.policy.details.protections": "保護",
-    "xpack.securitySolution.endpoint.policy.details.protectionsEnabled": "{protectionName}保護は{mode, select, true {有効です} false {無効です}}",
     "xpack.securitySolution.endpoint.policy.details.ransomware": "ランサムウェア",
     "xpack.securitySolution.endpoint.policy.details.save": "保存",
     "xpack.securitySolution.endpoint.policy.details.settings": "設定",

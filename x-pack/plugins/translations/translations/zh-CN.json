@@ -22022,7 +22022,6 @@
     "xpack.securitySolution.endpoint.policy.details.platinum": "白金级",
     "xpack.securitySolution.endpoint.policy.details.prevent": "防御",
     "xpack.securitySolution.endpoint.policy.details.protections": "防护",
-    "xpack.securitySolution.endpoint.policy.details.protectionsEnabled": "{protectionName}防护{mode, select, true {已启用} false {已禁用}}",
     "xpack.securitySolution.endpoint.policy.details.ransomware": "勒索软件",
     "xpack.securitySolution.endpoint.policy.details.save": "保存",
     "xpack.securitySolution.endpoint.policy.details.settings": "设置",
