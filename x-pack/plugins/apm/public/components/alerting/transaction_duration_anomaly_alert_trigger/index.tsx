@@ -6,84 +6,67 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { defaults, omit } from 'lodash';
 import React from 'react';
-import { defaults } from 'lodash';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
+import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import {
+  EnvironmentField,
+  ServiceField,
+  TransactionTypeField,
+} from '../fields';
+import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 import {
   AnomalySeverity,
   SelectAnomalySeverity,
 } from './select_anomaly_severity';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import {
-  EnvironmentField,
-  ServiceField,
-  TransactionTypeField,
-} from '../fields';
-import { useServiceName } from '../../../hooks/use_service_name';
-import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useServiceAgentNameFetcher } from '../../../context/apm_service/use_service_agent_name_fetcher';
-import { getTransactionType } from '../../../context/apm_service/apm_service_context';
 
 interface AlertParams {
-  windowSize: number;
-  windowUnit: string;
-  serviceName?: string;
-  transactionType?: string;
-  environment: string;
   anomalySeverityType:
     | ANOMALY_SEVERITY.CRITICAL
     | ANOMALY_SEVERITY.MAJOR
     | ANOMALY_SEVERITY.MINOR
     | ANOMALY_SEVERITY.WARNING;
+  environment: string;
+  serviceName?: string;
+  transactionType?: string;
+  windowSize: number;
+  windowUnit: string;
 }
 
 interface Props {
   alertParams: AlertParams;
+  metadata?: AlertMetadata;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
-  const { setAlertParams, alertParams, setAlertProperty } = props;
-  const { urlParams } = useUrlParams();
-
-  const serviceNameFromUrl = useServiceName();
+  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
   const transactionTypes = useServiceTransactionTypesFetcher(
-    serviceNameFromUrl
+    metadata?.serviceName
   );
-  const { agentName } = useServiceAgentNameFetcher(serviceNameFromUrl);
-
-  const transactionTypeFromUrl = getTransactionType({
-    transactionType: urlParams.transactionType,
-    transactionTypes,
-    agentName,
-  });
-
-  const { start, end, environment: environmentFromUrl } = urlParams;
 
   const params = defaults(
     {
+      ...omit(metadata, ['start', 'end']),
       ...alertParams,
     },
     {
       windowSize: 15,
       windowUnit: 'm',
-      transactionType: transactionTypeFromUrl,
-      environment: environmentFromUrl || ENVIRONMENT_ALL.value,
       anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
-      serviceName: serviceNameFromUrl,
     }
   );
 
   const { environmentOptions } = useEnvironmentsFetcher({
     serviceName: params.serviceName,
-    start,
-    end,
+    start: metadata?.start,
+    end: metadata?.end,
   });
 
   const fields = [

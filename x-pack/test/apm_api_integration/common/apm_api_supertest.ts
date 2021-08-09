@@ -44,6 +44,8 @@ export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
   };
 }
 
+export type ApmApiSupertest = ReturnType<typeof createApmApiSupertest>;
+
 export class ApmApiError extends Error {
   res: request.Response;
 

@@ -10,9 +10,10 @@ import sinon from 'sinon';
 
 import { CoreSetup } from 'src/core/public';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-import { IFieldType, FieldSpec } from '../../common/index_patterns';
-import { IndexPattern, indexPatterns, KBN_FIELD_TYPES, fieldList } from '../';
+import { IFieldType, FieldSpec, fieldList } from '../../common/index_patterns';
+import { IndexPattern, KBN_FIELD_TYPES } from '../';
 import { getFieldFormatsRegistry } from '../test_utils';
+import { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
 export function getStubIndexPattern(
   pattern: string,
@@ -81,11 +82,8 @@ export class StubIndexPattern {
     };
 
     this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
-    this.flattenHit = indexPatterns.flattenHitWrapper(
-      (this as unknown) as IndexPattern,
-      this.metaFields
-    );
-    this.formatHit = indexPatterns.formatHitProvider(
+    this.flattenHit = flattenHitWrapper((this as unknown) as IndexPattern, this.metaFields);
+    this.formatHit = formatHitProvider(
       (this as unknown) as IndexPattern,
       registeredFieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
     );

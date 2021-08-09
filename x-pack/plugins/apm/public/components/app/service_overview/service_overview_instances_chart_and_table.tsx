@@ -25,14 +25,6 @@ interface ServiceOverviewInstancesChartAndTableProps {
   serviceName: string;
 }
 
-export interface MainStatsServiceInstanceItem {
-  serviceNodeName: string;
-  errorRate: number;
-  throughput: number;
-  latency: number;
-  cpuUsage: number;
-  memoryUsage: number;
-}
 type ApiResponseMainStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type ApiResponseDetailedStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 

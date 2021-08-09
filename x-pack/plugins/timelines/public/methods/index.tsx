@@ -11,11 +11,8 @@ import type { Store } from 'redux';
 import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { TGridProps } from '../types';
-import type {
-  LastUpdatedAtProps,
-  LoadingPanelProps,
-  FieldBrowserWrappedProps,
-} from '../components';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '../components';
+import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 
 const TimelineLazy = lazy(() => import('../components'));
 export const getTGridLazy = (
@@ -58,13 +55,19 @@ export const getLoadingPanelLazy = (props: LoadingPanelProps) => {
 };
 
 const FieldsBrowserLazy = lazy(() => import('../components/fields_browser'));
-export const getFieldsBrowserLazy = (
-  props: FieldBrowserWrappedProps,
-  { store }: { store: Store }
-) => {
+export const getFieldsBrowserLazy = (props: FieldBrowserProps, { store }: { store: Store }) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <FieldsBrowserLazy {...props} store={store} />
+    </Suspense>
+  );
+};
+
+const AddToCaseLazy = lazy(() => import('../components/actions/timeline/cases/add_to_case_action'));
+export const getAddToCaseLazy = (props: AddToCaseActionProps) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <AddToCaseLazy {...props} />
     </Suspense>
   );
 };

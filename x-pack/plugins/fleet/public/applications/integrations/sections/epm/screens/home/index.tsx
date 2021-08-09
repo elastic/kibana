@@ -141,7 +141,6 @@ const AvailablePackages: React.FC = memo(() => {
   const queryParams = new URLSearchParams(useLocation().search);
   const initialCategory = queryParams.get('category') || '';
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
   const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
     category: selectedCategory,
   });
@@ -168,16 +167,16 @@ const AvailablePackages: React.FC = memo(() => {
         title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
           defaultMessage: 'All',
         }),
-        count: allPackagesRes?.response?.length || 0,
+        count: packages?.length || 0,
       },
       ...(categoriesRes ? categoriesRes.response : []),
     ],
-    [allPackagesRes?.response?.length, categoriesRes]
+    [packages?.length, categoriesRes]
   );
 
   const controls = categories ? (
     <CategoryFacets
-      isLoading={isLoadingCategories || isLoadingAllPackages}
+      isLoading={isLoadingCategories}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => {

@@ -10,11 +10,13 @@ import { Ast } from '@kbn/interpreter/common';
 import memoizeOne from 'memoize-one';
 import {
   Datasource,
+  DatasourceMap,
   DatasourcePublicAPI,
   FramePublicAPI,
   InitializationOptions,
   Visualization,
   VisualizationDimensionGroupConfig,
+  VisualizationMap,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
@@ -28,7 +30,7 @@ import {
 } from '../error_helper';
 
 export async function initializeDatasources(
-  datasourceMap: Record<string, Datasource>,
+  datasourceMap: DatasourceMap,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext,
@@ -55,7 +57,7 @@ export async function initializeDatasources(
 }
 
 export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
-  datasourceMap: Record<string, Datasource>,
+  datasourceMap: DatasourceMap,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>
 ) {
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
@@ -78,7 +80,7 @@ export const createDatasourceLayers = memoizeOne(function createDatasourceLayers
 
 export async function persistedStateToExpression(
   datasources: Record<string, Datasource>,
-  visualizations: Record<string, Visualization>,
+  visualizations: VisualizationMap,
   doc: Document
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {

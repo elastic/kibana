@@ -14,7 +14,6 @@ import { AlertSeverity } from '../../common/enums';
 import { formatDateTimeLocal } from '../../common/formatting';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
-import { AlertsContext } from './context';
 import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';
 import { getAlertPanelsByNode } from './lib/get_alert_panels_by_node';
 
@@ -40,16 +39,16 @@ const GROUP_BY_TYPE = i18n.translate('xpack.monitoring.alerts.badge.groupByType'
 });
 
 interface Props {
-  alerts: { [alertTypeId: string]: CommonAlertStatus };
+  alerts: { [alertTypeId: string]: CommonAlertStatus[] };
   stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
   // We do not always have the alerts that each consumer wants due to licensing
   const { stateFilter = () => true } = props;
-  const alerts = Object.values(props.alerts).filter((alertItem) => Boolean(alertItem?.rawAlert));
+  const alertsList = Object.values(props.alerts).flat();
+  const alerts = alertsList.filter((alertItem) => Boolean(alertItem?.rawAlert));
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
-  const alertsContext = React.useContext(AlertsContext);
   const alertCount = inSetupMode
     ? alerts.length
     : alerts.reduce(
@@ -74,8 +73,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const groupByType = GROUP_BY_NODE;
   const panels = showByNode
     ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter)
-    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, alertsContext, stateFilter);
-
+    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, stateFilter);
   if (panels.length && !inSetupMode && panels[0].items) {
     panels[0].items.push(
       ...[

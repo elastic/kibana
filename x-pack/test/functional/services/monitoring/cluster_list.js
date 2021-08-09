@@ -15,7 +15,7 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
   const SUBJ_CLUSTER_ROW_PREFIX = `${SUBJ_TABLE_CONTAINER} > clusterRow_`;
-  const ALERTS_MODAL_BUTTON = 'alerts-modal-button';
+  const ALERTS_MODAL_BUTTON = 'alerts-modal-remind-later-button';
 
   return new (class ClusterList {
     async assertDefaults() {
