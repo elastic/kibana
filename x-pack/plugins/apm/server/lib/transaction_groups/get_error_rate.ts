@@ -183,9 +183,7 @@ export async function getErrorRatePeriods({
     previousPeriodPromise,
   ]);
 
-  const firstCurrentPeriod = currentPeriod.transactionErrorRate.length
-    ? currentPeriod.transactionErrorRate
-    : undefined;
+  const firstCurrentPeriod = currentPeriod.transactionErrorRate;
 
   return {
     currentPeriod,
