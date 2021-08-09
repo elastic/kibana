@@ -1922,6 +1922,7 @@ export interface QueryStringInputProps {
     storageKey?: string;
     // (undocumented)
     submitOnBlur?: boolean;
+    timeRangeForSuggestionsOverride?: boolean;
 }
 
 // @public (undocumented)
