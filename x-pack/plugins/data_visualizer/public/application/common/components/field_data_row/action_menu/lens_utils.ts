@@ -13,7 +13,6 @@ import type {
   TypedLensByValueInput,
   XYLayerConfig,
 } from '../../../../../../../lens/public';
-import { layerTypes } from '../../../../../../../lens/common';
 import { FieldVisConfig } from '../../stats_table/types';
 import { JOB_FIELD_TYPES } from '../../../../../../common';
 interface ColumnsAndLayer {
@@ -56,7 +55,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
     const layer: XYLayerConfig = {
       accessors: ['col2'],
       layerId: 'layer1',
-      layerType: layerTypes.DATA,
+      layerType: 'data',
       seriesType: 'bar',
       xAccessor: 'col1',
     };
@@ -88,7 +87,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
   const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
-    layerType: layerTypes.DATA,
+    layerType: 'data',
     seriesType: 'line',
     xAccessor: 'col1',
   };
@@ -118,7 +117,7 @@ export function getDateSettings(item: FieldVisConfig) {
   const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
-    layerType: layerTypes.DATA,
+    layerType: 'data',
     seriesType: 'line',
     xAccessor: 'col1',
   };
@@ -151,7 +150,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
   const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
-    layerType: layerTypes.DATA,
+    layerType: 'data',
     seriesType: 'bar',
     xAccessor: 'col1',
   };
@@ -184,7 +183,7 @@ export function getBooleanSettings(item: FieldVisConfig) {
   const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
-    layerType: layerTypes.DATA,
+    layerType: 'data',
     seriesType: 'bar',
     xAccessor: 'col1',
   };

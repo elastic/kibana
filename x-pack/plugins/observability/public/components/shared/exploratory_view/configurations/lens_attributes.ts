@@ -40,7 +40,6 @@ import {
   ReportTypes,
 } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
-import { layerTypes } from '../../../../../../lens/common/constants';
 import { PersistableFilter } from '../../../../../../lens/common';
 import { parseAbsoluteDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
@@ -632,7 +631,7 @@ export class LensAttributes {
           ...Object.keys(this.getChildYAxises(layerConfig)),
         ],
         layerId: `layer${index}`,
-        layerType: layerTypes.DATA,
+        layerType: 'data',
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
         palette: layerConfig.seriesConfig.palette,
         yConfig: layerConfig.seriesConfig.yConfig || [
