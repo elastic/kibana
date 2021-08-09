@@ -19,7 +19,6 @@ import { getMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from './stateful_event_context';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,

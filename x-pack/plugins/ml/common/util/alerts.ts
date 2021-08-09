@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
 import { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 import { resolveMaxTimeInterval } from './job_utils';
 import { isDefined } from '../types/guards';
 import { parseInterval } from './parse_interval';
-import { JobsHealthRuleTestsConfig } from '../types/alerts';
+import { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
 
 const narrowBucketLength = 60;
 
@@ -53,12 +54,14 @@ export function getTopNBuckets(job: Job): number {
   return Math.ceil(narrowBucketLength / bucketSpan.asSeconds());
 }
 
+const implementedTests = ['datafeed', 'mml', 'delayedData'] as JobsHealthTests[];
+
 /**
  * Returns tests configuration combined with default values.
  * @param config
  */
 export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig) {
-  return {
+  const result = {
     datafeed: {
       enabled: config?.datafeed?.enabled ?? true,
     },
@@ -67,6 +70,8 @@ export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig)
     },
     delayedData: {
       enabled: config?.delayedData?.enabled ?? true,
+      docsCount: config?.delayedData?.docsCount ?? 1,
+      timeInterval: config?.delayedData?.timeInterval ?? null,
     },
     behindRealtime: {
       enabled: config?.behindRealtime?.enabled ?? true,
@@ -75,4 +80,6 @@ export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig)
       enabled: config?.errorMessages?.enabled ?? true,
     },
   };
+
+  return pick(result, implementedTests);
 }

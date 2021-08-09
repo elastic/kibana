@@ -4,6 +4,6 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "inspector", "embeddable", "embeddableExamples", "developerExamples"],
+  "requiredPlugins": ["uiActions", "inspector", "embeddable", "embeddableExamples", "developerExamples", "dashboard", "kibanaReact", "savedObjects"],
   "optionalPlugins": []
 }
