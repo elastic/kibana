@@ -108,7 +108,10 @@ function getFormatsAccordingToDateDifference(
 }
 
 export function asAbsoluteDateTime(
-  time: number,
+  /**
+   * timestamp in milliseconds or ISO timestamp
+   */
+  time: number | string,
   timeUnit: TimeUnit = 'milliseconds'
 ) {
   const momentTime = moment(time);
