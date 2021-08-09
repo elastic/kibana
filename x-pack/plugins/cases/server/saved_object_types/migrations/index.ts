@@ -138,12 +138,10 @@ export interface CreateCommentsMigrationsDeps {
 }
 
 export const createCommentsMigrations = (migrationDeps: CreateCommentsMigrationsDeps) => {
-  // @ts-expect-error
-  const lensMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
-    // @ts-expect-error
+  const lensMigrations = (mapValues(
     migrationDeps.getLensMigrations(),
     migrateByValueLensVisualizations
-  ) as MigrateFunctionsObject;
+  ) as unknown) as MigrateFunctionsObject;
 
   const commentsMigrations = {
     '7.11.0': flow(
