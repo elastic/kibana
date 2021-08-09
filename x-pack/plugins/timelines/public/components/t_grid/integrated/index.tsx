@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -15,7 +17,7 @@ import { Direction } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -100,10 +102,13 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
   ${({ show }) => (show ? '' : 'visibility: hidden;')}
 `;
 
+const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
+
 export interface TGridIntegratedProps {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
+  defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
@@ -138,6 +143,7 @@ export interface TGridIntegratedProps {
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   browserFields,
   columns,
+  defaultCellActions,
   dataProviders,
   deletedEventIds,
   docValueFields,
@@ -235,6 +241,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     loading,
     { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
     fields,
     filterQuery: combinedQueries!.filterQuery,
@@ -309,6 +316,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
                     id={id}
                     isEventViewer={true}
                     loadPage={loadPage}
