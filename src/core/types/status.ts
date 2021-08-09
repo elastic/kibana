@@ -8,14 +8,12 @@
 
 import type { OpsMetrics } from '../server/metrics';
 
+export type ServerStatusLevel = 'available' | 'degraded' | 'unavailable' | 'critical';
+
 export interface ServerStatus {
-  id: string;
-  title: string;
-  state: string;
-  message: string;
-  uiColor: string;
-  icon?: string;
-  since?: string;
+  level: ServerStatusLevel;
+  summary: string;
+  meta?: Record<string, unknown>;
 }
 
 export type ServerMetrics = OpsMetrics & {
@@ -35,7 +33,8 @@ export interface StatusResponse {
   version: ServerVersion;
   status: {
     overall: ServerStatus;
-    statuses: ServerStatus[];
+    core: Record<string, ServerStatus>;
+    plugins: Record<string, ServerStatus>;
   };
   metrics: ServerMetrics;
 }

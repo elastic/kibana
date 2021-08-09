@@ -22,28 +22,20 @@ const mockedResponse: StatusResponse = {
   },
   status: {
     overall: {
-      id: 'overall',
-      state: 'yellow',
-      title: 'Yellow',
-      message: 'yellow',
-      uiColor: 'secondary',
+      level: 'degraded',
+      summary: 'yellow',
     },
-    statuses: [
-      {
-        id: 'plugin:1',
-        state: 'green',
-        title: 'Green',
-        message: 'Ready',
-        uiColor: 'secondary',
+    core: {},
+    plugins: {
+      '1': {
+        level: 'available',
+        summary: 'Ready',
       },
-      {
-        id: 'plugin:2',
-        state: 'yellow',
-        title: 'Yellow',
-        message: 'Something is weird',
-        uiColor: 'warning',
+      '2': {
+        level: 'degraded',
+        summary: 'Something is weird',
       },
-    ],
+    },
   },
   metrics: {
     collected_at: new Date('2020-01-01 01:00:00'),
@@ -150,11 +142,16 @@ describe('response processing', () => {
     expect(data.statuses).toEqual([
       {
         id: 'plugin:1',
-        state: { id: 'green', title: 'Green', message: 'Ready', uiColor: 'secondary' },
+        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'secondary' },
       },
       {
         id: 'plugin:2',
-        state: { id: 'yellow', title: 'Yellow', message: 'Something is weird', uiColor: 'warning' },
+        state: {
+          id: 'degraded',
+          title: 'Yellow',
+          message: 'Something is weird',
+          uiColor: 'warning',
+        },
       },
     ]);
   });
@@ -162,10 +159,10 @@ describe('response processing', () => {
   test('includes the serverState', async () => {
     const data = await loadStatus({ http, notifications });
     expect(data.serverState).toEqual({
-      id: 'yellow',
+      id: 'degraded',
       title: 'Yellow',
       message: 'yellow',
-      uiColor: 'secondary',
+      uiColor: 'warning',
     });
   });
 
