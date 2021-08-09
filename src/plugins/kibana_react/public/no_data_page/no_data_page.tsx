@@ -34,9 +34,12 @@ export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
   },
 };
 
-export const NO_DATA_RECOMMENDED = i18n.translate('kbn.noDataPage.recommended', {
-  defaultMessage: 'Recommended',
-});
+export const NO_DATA_RECOMMENDED = i18n.translate(
+  'kibana-react.noDataPage.noDataPage.recommended',
+  {
+    defaultMessage: 'Recommended',
+  }
+);
 
 export type NoDataPageActions = Partial<EuiCardProps> & {
   /**
@@ -136,7 +139,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         <h1>
           {pageTitle || (
             <FormattedMessage
-              id="kbn.noDataPage.welcomeTitle"
+              id="kibana-react.noDataPage.welcomeTitle"
               defaultMessage="Welcome to Elastic {solution}!"
               values={{ solution }}
             />
@@ -145,13 +148,16 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         <EuiTextColor color="subdued">
           <p>
             <FormattedMessage
-              id="kbn.noDataPage.intro"
+              id="kibana-react.noDataPage.intro"
               defaultMessage="Add your data to get started or {link} about {solution}."
               values={{
                 solution,
                 link: (
                   <EuiLink href={docsLink}>
-                    <FormattedMessage id="kbn.noDataPage.intro.link" defaultMessage="learn more" />
+                    <FormattedMessage
+                      id="kibana-react.noDataPage.intro.link"
+                      defaultMessage="learn more"
+                    />
                   </EuiLink>
                 ),
               }}
@@ -170,13 +176,13 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
           <EuiText textAlign="center" color="subdued">
             <p>
               <FormattedMessage
-                id="kbn.noDataPage.cantDecide"
+                id="kibana-react.noDataPage.cantDecide"
                 defaultMessage="Confused on which to use? {link}"
                 values={{
                   link: (
                     <EuiLink href="https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html">
                       <FormattedMessage
-                        id="kbn.noDataPage.cantDecide.link"
+                        id="kibana-react.noDataPage.cantDecide.link"
                         defaultMessage="Check our docs for more information."
                       />
                     </EuiLink>

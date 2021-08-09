@@ -39,7 +39,7 @@ export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
         fill={recommended}
       >
         {button ||
-          i18n.translate('elasticBeatsCard.buttonLabel', {
+          i18n.translate('kibana-react.noDataPage.elasticBeatsCard.buttonLabel', {
             defaultMessage: 'Setup Beats',
           })}
       </EuiButton>
@@ -49,10 +49,10 @@ export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
     <EuiCard
       paddingSize="l"
       href={href}
-      title={i18n.translate('elasticBeatsCard.title', {
+      title={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.title', {
         defaultMessage: 'Add data with Beats',
       })}
-      description={i18n.translate('elasticBeatsCard.title', {
+      description={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.description', {
         defaultMessage: `While Agent is the best we have to offer, we are still
         adding features. If Elastic Agent is missing a feature
         you need, use Beats instead.`,

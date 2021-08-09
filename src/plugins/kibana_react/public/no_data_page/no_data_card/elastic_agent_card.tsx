@@ -46,7 +46,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
         fill={recommended}
       >
         {button ||
-          i18n.translate('elasticAgentCard.buttonLabel', {
+          i18n.translate('kibana-react.noDataPage.elasticAgentCard.buttonLabel', {
             defaultMessage: 'Find an integration for {solution}',
             values: { solution },
           })}
@@ -57,10 +57,10 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     <EuiCard
       paddingSize="l"
       href={href}
-      title={i18n.translate('elasticAgentCard.title', {
+      title={i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
         defaultMessage: 'Add integrations with Elastic Agent',
       })}
-      description={i18n.translate('elasticAgentCard.title', {
+      description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `The Elastic Agent provides a simple, unified way to
         collect logs, metrics, and other types of
         data from your hosts.`,
