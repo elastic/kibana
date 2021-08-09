@@ -27,7 +27,7 @@ export function RumHome() {
 
   const { isSmall, isXXL } = useBreakPoints();
 
-  const envStyle = isSmall ? {} : { maxWidth: 200 };
+  const envStyle = isSmall ? {} : { maxWidth: 500 };
 
   return (
     <CsmSharedContextProvider>
@@ -59,7 +59,7 @@ export function RumHome() {
 function PageHeader() {
   const { isSmall } = useBreakPoints();
 
-  const envStyle = isSmall ? {} : { maxWidth: 200 };
+  const envStyle = isSmall ? {} : { maxWidth: 400 };
 
   return (
     <div style={{ width: '100%' }}>

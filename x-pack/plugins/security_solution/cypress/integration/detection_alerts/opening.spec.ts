@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import {
   ALERTS_COUNT,
   SELECTED_ALERTS,
@@ -37,7 +37,7 @@ describe('Opening alerts', () => {
     loginAndWaitForPage(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);
     selectNumberOfAlerts(5);

@@ -80,7 +80,6 @@ export type {
 } from './update_and_pickup_mappings';
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
-import type { UnknownDocsFound } from './check_for_unknown_docs';
 export type {
   CheckForUnknownDocsParams,
   UnknownDocsFound,
@@ -98,6 +97,12 @@ export { searchForOutdatedDocuments } from './search_for_outdated_documents';
 
 export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
 export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
+
+export type {
+  CalculateExcludeFiltersParams,
+  CalculatedExcludeFilter,
+} from './calculate_exclude_filters';
+export { calculateExcludeFilters } from './calculate_exclude_filters';
 
 export { pickupUpdatedMappings, waitForTask, waitForIndexStatusYellow };
 export type { AliasNotFound, RemoveIndexNotAConcreteIndex };
@@ -131,7 +136,6 @@ export interface ActionErrorTypeMap {
   alias_not_found_exception: AliasNotFound;
   remove_index_not_a_concrete_index: RemoveIndexNotAConcreteIndex;
   documents_transform_failed: DocumentsTransformFailed;
-  unknown_docs_found: UnknownDocsFound;
 }
 
 /**

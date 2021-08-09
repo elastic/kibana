@@ -18,6 +18,12 @@ export const ALERTS_DOCUMENT_TYPE = i18n.translate(
   }
 );
 
+export const ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+  });
+
 export const OPEN_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openAlertsTitle',
   {
@@ -172,6 +178,13 @@ export const ACTION_ADD_EVENT_FILTER = i18n.translate(
   }
 );
 
+export const ACTION_ADD_TO_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
+  {
+    defaultMessage: 'Add to case',
+  }
+);
+
 export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEndpointException',
   {
@@ -245,9 +258,23 @@ export const STATUS = i18n.translate(
   }
 );
 
+export const SIGNAL_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const TRIGGERED = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
   {
     defaultMessage: 'Triggered',
+  }
+);
+
+export const TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle',
+  {
+    defaultMessage: 'Timestamp',
   }
 );

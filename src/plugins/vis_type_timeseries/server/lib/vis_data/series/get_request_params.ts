@@ -13,14 +13,14 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import type { DefaultSearchCapabilities } from '../../search_strategies';
+import type { SearchCapabilities } from '../../search_strategies';
 
 export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
   panel: Panel,
   panelIndex: FetchedIndexPattern,
   series: Series,
-  capabilities: DefaultSearchCapabilities,
+  capabilities: SearchCapabilities,
   {
     esQueryConfig,
     esShardTimeout,

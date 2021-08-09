@@ -33,13 +33,12 @@ import { createDocViewerDirective } from './doc_viewer';
 import { createDiscoverGridDirective } from './create_discover_grid_directive';
 import { createRenderCompleteDirective } from './directives/render_complete';
 import {
-  initAngularBootstrap,
   configureAppAngularModule,
   PrivateProvider,
-  PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
 } from '../../../../kibana_legacy/public';
+import { PromiseServiceCreator } from './helpers';
 import { DiscoverStartPlugins } from '../../plugin';
 import { getScopedHistory } from '../../kibana_services';
 import { createDiscoverDirective } from './create_discover_directive';
@@ -54,7 +53,6 @@ export function getInnerAngularModule(
   deps: DiscoverStartPlugins,
   context: PluginInitializerContext
 ) {
-  initAngularBootstrap();
   const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data);
   configureAppAngularModule(module, { core, env: context.env }, true, getScopedHistory);
   return module;

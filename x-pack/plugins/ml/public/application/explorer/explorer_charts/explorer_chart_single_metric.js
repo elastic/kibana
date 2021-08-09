@@ -196,12 +196,6 @@ export class ExplorerChartSingleMetric extends React.Component {
       const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
       // +1 ms to account for the ms that was subtracted for query aggregations.
       const interval = config.selectedLatest - config.selectedEarliest + 1;
-      const tickValues = getTickValues(
-        tickValuesStart,
-        interval,
-        config.plotEarliest,
-        config.plotLatest
-      );
 
       const xAxis = d3.svg
         .axis()
@@ -212,10 +206,18 @@ export class ExplorerChartSingleMetric extends React.Component {
         .tickPadding(10)
         .tickFormat((d) => moment(d).format(xAxisTickFormat));
 
-      // With tooManyBuckets the chart would end up with no x-axis labels
-      // because the ticks are based on the span of the emphasis section,
-      // and the highlighted area spans the whole chart.
-      if (tooManyBuckets === false) {
+      // With tooManyBuckets, or when the chart is used as an embeddable,
+      // the chart would end up with no x-axis labels because the ticks are based on the span of the
+      // emphasis section, and the selected area spans the whole chart.
+      const useAutoTicks =
+        tooManyBuckets === true || interval >= config.plotLatest - config.plotEarliest;
+      if (useAutoTicks === false) {
+        const tickValues = getTickValues(
+          tickValuesStart,
+          interval,
+          config.plotEarliest,
+          config.plotLatest
+        );
         xAxis.tickValues(tickValues);
       } else {
         xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
@@ -243,7 +245,7 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       axes.append('g').attr('class', 'y axis').call(yAxis);
 
-      if (tooManyBuckets === false) {
+      if (useAutoTicks === false) {
         removeLabelOverlap(gAxis, tickValuesStart, interval, vizWidth);
       }
     }

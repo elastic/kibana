@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -59,14 +60,15 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
         <EuiPageHeader>
           <EuiPageHeaderSection className="enterpriseSearchOverview__header">
             <EuiTitle size="l">
-              <h1 className="enterpriseSearchOverview__heading">
+              <h1>
                 {i18n.translate('xpack.enterpriseSearch.overview.heading', {
                   defaultMessage: 'Welcome to Elastic Enterprise Search',
                 })}
               </h1>
             </EuiTitle>
-            <EuiTitle size="s">
-              <p className="enterpriseSearchOverview__subheading">
+            <EuiSpacer />
+            <EuiText>
+              <p>
                 {config.host
                   ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
                       defaultMessage: 'Select a product to get started.',
@@ -75,7 +77,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
                       defaultMessage: 'Choose a product to set up and get started.',
                     })}
               </p>
-            </EuiTitle>
+            </EuiText>
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContentBody>

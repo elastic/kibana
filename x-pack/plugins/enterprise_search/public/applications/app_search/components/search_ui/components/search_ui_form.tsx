@@ -22,6 +22,8 @@ import {
   URL_FIELD_LABEL,
   URL_FIELD_HELP_TEXT,
   GENERATE_PREVIEW_BUTTON_LABEL,
+  THUMBNAIL_FIELD_LABEL,
+  THUMBNAIL_FIELD_HELP_TEXT,
 } from '../i18n';
 import { SearchUILogic } from '../search_ui_logic';
 import { ActiveField } from '../types';
@@ -36,6 +38,7 @@ export const SearchUIForm: React.FC = () => {
     validFacetFields,
     titleField,
     urlField,
+    thumbnailField,
     facetFields,
     sortFields,
   } = useValues(SearchUILogic);
@@ -45,11 +48,13 @@ export const SearchUIForm: React.FC = () => {
     onSortFieldsChange,
     onTitleFieldChange,
     onUrlFieldChange,
+    onThumbnailFieldChange,
   } = useActions(SearchUILogic);
 
   const previewHref = generatePreviewUrl({
     titleField,
     urlField,
+    thumbnailField,
     facets: facetFields,
     sortFields,
   });
@@ -69,6 +74,7 @@ export const SearchUIForm: React.FC = () => {
   const facetOptionFields = formatMultiOptions(validFacetFields);
   const selectedTitleOption = formatSelectOption(titleField);
   const selectedURLOption = formatSelectOption(urlField);
+  const selectedThumbnailOption = formatSelectOption(thumbnailField);
   const selectedSortOptions = formatMultiOptions(sortFields);
   const selectedFacetOptions = formatMultiOptions(facetFields);
 
@@ -112,7 +118,6 @@ export const SearchUIForm: React.FC = () => {
           data-test-subj="selectSort"
         />
       </EuiFormRow>
-
       <EuiFormRow label={URL_FIELD_LABEL} helpText={URL_FIELD_HELP_TEXT} fullWidth>
         <EuiSelect
           disabled={dataLoading}
@@ -124,6 +129,19 @@ export const SearchUIForm: React.FC = () => {
           onBlur={() => onActiveFieldChange(ActiveField.None)}
           hasNoInitialSelection
           data-test-subj="selectUrl"
+        />
+      </EuiFormRow>
+      <EuiFormRow label={THUMBNAIL_FIELD_LABEL} helpText={THUMBNAIL_FIELD_HELP_TEXT} fullWidth>
+        <EuiSelect
+          disabled={dataLoading}
+          options={optionFields}
+          value={selectedThumbnailOption && selectedThumbnailOption.value}
+          onChange={(e) => onThumbnailFieldChange(e.target.value)}
+          fullWidth
+          onFocus={() => onActiveFieldChange(ActiveField.Thumb)}
+          onBlur={() => onActiveFieldChange(ActiveField.None)}
+          hasNoInitialSelection
+          data-test-subj="selectThumbnail"
         />
       </EuiFormRow>
       <EuiButton

@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardName = 'dashboard with filter';
   const filterBar = getService('filterBar');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/104467
-  describe.skip('dashboard view edit mode', function viewEditModeTests() {
+  describe('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({

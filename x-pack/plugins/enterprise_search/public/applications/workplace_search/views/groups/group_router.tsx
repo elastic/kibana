@@ -14,7 +14,6 @@ import { GROUP_SOURCE_PRIORITIZATION_PATH, GROUP_PATH } from '../../routes';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';
-import { ManageUsersModal } from './components/manage_users_modal';
 import { SharedSourcesModal } from './components/shared_sources_modal';
 import { GroupLogic } from './group_logic';
 
@@ -22,7 +21,7 @@ export const GroupRouter: React.FC = () => {
   const { groupId } = useParams() as { groupId: string };
 
   const { initializeGroup, resetGroup } = useActions(GroupLogic);
-  const { sharedSourcesModalVisible, manageUsersModalVisible } = useValues(GroupLogic);
+  const { sharedSourcesModalVisible } = useValues(GroupLogic);
 
   useEffect(() => {
     initializeGroup(groupId);
@@ -40,7 +39,6 @@ export const GroupRouter: React.FC = () => {
         </Route>
       </Switch>
       {sharedSourcesModalVisible && <SharedSourcesModal />}
-      {manageUsersModalVisible && <ManageUsersModal />}
     </>
   );
 };

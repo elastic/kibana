@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { EuiPageTemplate } from '@elastic/eui';
 import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { MemoryRouter } from 'react-router-dom';
+import { CoreStart } from '../../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
 import { LandingPage } from './';
 
@@ -15,6 +18,13 @@ export default {
   component: LandingPage,
   decorators: [
     (Story: ComponentType) => {
+      const KibanaReactContext = createKibanaReactContext(({
+        application: { getUrlForApp: () => '', navigateToUrl: () => {} },
+        chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
+        uiSettings: { get: () => true },
+        observability: { ObservabilityPageTemplate: EuiPageTemplate },
+      } as unknown) as Partial<CoreStart>);
+
       const pluginContextValue = ({
         appMountParameters: { setHeaderActionMenu: () => {} },
         core: {
@@ -24,13 +34,17 @@ export default {
             },
           },
         },
+        ObservabilityPageTemplate: EuiPageTemplate,
       } as unknown) as PluginContextValue;
+
       return (
-        <PluginContext.Provider value={pluginContextValue}>
-          <EuiThemeProvider>
-            <Story />
-          </EuiThemeProvider>
-        </PluginContext.Provider>
+        <MemoryRouter>
+          <KibanaReactContext.Provider>
+            <PluginContext.Provider value={pluginContextValue}>
+              <Story />
+            </PluginContext.Provider>
+          </KibanaReactContext.Provider>
+        </MemoryRouter>
       );
     },
   ],

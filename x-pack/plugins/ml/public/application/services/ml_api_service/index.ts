@@ -366,10 +366,10 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    checkIndexExists({ index }: { index: string }) {
-      const body = JSON.stringify({ index });
+    checkIndicesExists({ indices }: { indices: string[] }) {
+      const body = JSON.stringify({ indices });
 
-      return httpService.http<{ exists: boolean }>({
+      return httpService.http<Record<string, { exists: boolean }>>({
         path: `${basePath()}/index_exists`,
         method: 'POST',
         body,

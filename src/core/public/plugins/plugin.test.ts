@@ -8,7 +8,7 @@
 
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
-import { DiscoveredPlugin } from '../../server';
+import { DiscoveredPlugin, PluginType } from '../../server';
 import { coreMock } from '../mocks';
 import { PluginWrapper } from './plugin';
 
@@ -19,6 +19,7 @@ function createManifest(
   return {
     id,
     version: 'some-version',
+    type: PluginType.standard,
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,

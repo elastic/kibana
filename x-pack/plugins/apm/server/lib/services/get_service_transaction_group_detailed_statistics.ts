@@ -15,11 +15,8 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import {
-  environmentQuery,
-  kqlQuery,
-  rangeQuery,
-} from '../../../server/utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,

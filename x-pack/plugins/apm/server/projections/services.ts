@@ -7,7 +7,7 @@
 
 import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
-import { rangeQuery, kqlQuery } from '../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
 import { getProcessorEventForAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 

@@ -191,6 +191,7 @@ export const RelevanceTuningLogic = kea<
     unsavedChanges: [
       false,
       {
+        updatePrecision: () => true,
         setSearchSettings: () => true,
         setSearchSettingsResponse: () => false,
       },

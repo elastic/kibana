@@ -8,7 +8,7 @@
 import { act, render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
-import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { TraceLink } from './';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -17,6 +17,7 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as hooks from '../../../hooks/use_fetcher';
 import * as urlParamsHooks from '../../../context/url_params_context/use_url_params';
+import * as useApmParamsHooks from '../../../hooks/use_apm_params';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -46,12 +47,19 @@ describe('TraceLink', () => {
   });
 
   it('renders a transition page', async () => {
-    const props = ({
-      match: { params: { traceId: 'x' } },
-    } as unknown) as RouteComponentProps<{ traceId: string }>;
+    jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+      path: {
+        traceId: 'x',
+      },
+      query: {
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+      },
+    });
+
     let result;
     act(() => {
-      const component = render(<TraceLink {...props} />, renderOptions);
+      const component = render(<TraceLink />, renderOptions);
 
       result = component.getByText('Fetching trace...');
     });
@@ -76,10 +84,17 @@ describe('TraceLink', () => {
         refetch: jest.fn(),
       });
 
-      const props = ({
-        match: { params: { traceId: '123' } },
-      } as unknown) as RouteComponentProps<{ traceId: string }>;
-      const component = shallow(<TraceLink {...props} />);
+      jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+        path: {
+          traceId: '123',
+        },
+        query: {
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
+        },
+      });
+
+      const component = shallow(<TraceLink />);
 
       expect(component.prop('to')).toEqual(
         '/traces?kuery=trace.id%2520%253A%2520%2522123%2522&rangeFrom=now-24h&rangeTo=now'
@@ -93,10 +108,7 @@ describe('TraceLink', () => {
         rangeId: 0,
         refreshTimeRange: jest.fn(),
         uxUiFilters: {},
-        urlParams: {
-          rangeFrom: 'now-24h',
-          rangeTo: 'now',
-        },
+        urlParams: {},
       });
     });
 
@@ -116,10 +128,17 @@ describe('TraceLink', () => {
         refetch: jest.fn(),
       });
 
-      const props = ({
-        match: { params: { traceId: '123' } },
-      } as unknown) as RouteComponentProps<{ traceId: string }>;
-      const component = shallow(<TraceLink {...props} />);
+      jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+        path: {
+          traceId: '123',
+        },
+        query: {
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
+        },
+      });
+
+      const component = shallow(<TraceLink />);
 
       expect(component.prop('to')).toEqual(
         '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now'

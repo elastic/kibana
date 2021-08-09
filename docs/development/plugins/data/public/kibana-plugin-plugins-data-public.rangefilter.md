@@ -4,18 +4,13 @@
 
 ## RangeFilter type
 
+> Warning: This API is now obsolete.
+> 
+> Import from the "<!-- -->@<!-- -->kbn/es-query" package directly instead.  8.1
+> 
+
 <b>Signature:</b>
 
 ```typescript
-export declare type RangeFilter = Filter & EsRangeFilter & {
-    meta: RangeFilterMeta;
-    script?: {
-        script: {
-            params: any;
-            lang: estypes.ScriptLanguage;
-            source: any;
-        };
-    };
-    match_all?: any;
-};
+declare type RangeFilter = oldRangeFilter;
 ```

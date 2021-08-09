@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
@@ -21,7 +21,7 @@ import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'data-distribution',
+    reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: 'bar',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
@@ -49,19 +49,16 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
         label: RESPONSE_LATENCY,
         field: TRANSACTION_DURATION,
         id: TRANSACTION_DURATION,
-        columnType: OPERATION_COLUMN,
       },
       {
         label: MEMORY_USAGE,
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
-        columnType: OPERATION_COLUMN,
       },
       {
         label: CPU_USAGE,
         field: METRIC_SYSTEM_CPU_USAGE,
         id: METRIC_SYSTEM_CPU_USAGE,
-        columnType: OPERATION_COLUMN,
       },
     ],
   };

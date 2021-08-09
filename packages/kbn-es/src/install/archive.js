@@ -12,7 +12,8 @@ const chalk = require('chalk');
 const execa = require('execa');
 const del = require('del');
 const url = require('url');
-const { log: defaultLog, decompress } = require('../utils');
+const { extract } = require('@kbn/dev-utils');
+const { log: defaultLog } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 const { Artifact } = require('../artifact');
 const { parseSettings, SettingsFilter } = require('../settings');
@@ -50,7 +51,11 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   }
 
   log.info('extracting %s', chalk.bold(dest));
-  await decompress(dest, installPath);
+  await extract({
+    archivePath: dest,
+    targetDir: installPath,
+    stripComponents: 1,
+  });
   log.info('extracted to %s', chalk.bold(installPath));
 
   const tmpdir = path.resolve(installPath, 'ES_TMPDIR');

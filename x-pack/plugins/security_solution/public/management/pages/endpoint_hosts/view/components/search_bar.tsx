@@ -37,7 +37,11 @@ export const AdminSearchBar = memo(() => {
       history.push(
         urlFromQueryParams({
           ...queryParams,
-          admin_query: encode((params.query as unknown) as RisonValue),
+          // ensure we reset the page back to the first one, so that user id not (possibly) being left on an invalid page
+          page_index: '0',
+          ...(params.query?.query.trim()
+            ? { admin_query: encode((params.query as unknown) as RisonValue) }
+            : {}),
         })
       );
     },

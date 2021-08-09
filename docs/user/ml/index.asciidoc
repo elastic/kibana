@@ -48,8 +48,9 @@ pane:
 image::user/ml/images/ml-job-management.png[Job Management]
 
 You can use the *Settings* pane to create and edit
-{ml-docs}/ml-calendars.html[calendars] and the filters that are used in
-{ml-docs}/ml-rules.html[custom rules]:
+{ml-docs}/ml-ad-finding-anomalies.html#ml-ad-calendars[calendars] and the
+filters that are used in
+{ml-docs}/ml-ad-finding-anomalies.html#ml-ad-rules[custom rules]:
 
 [role="screenshot"]
 image::user/ml/images/ml-settings.png[Calendar Management]

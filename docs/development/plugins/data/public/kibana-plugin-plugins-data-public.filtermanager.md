@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class FilterManager 
+export declare class FilterManager implements PersistableStateService 
 ```
 
 ## Constructors
@@ -15,6 +15,16 @@ export declare class FilterManager
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
 |  [(constructor)(uiSettings)](./kibana-plugin-plugins-data-public.filtermanager._constructor_.md) |  | Constructs a new instance of the <code>FilterManager</code> class |
+
+## Properties
+
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [extract](./kibana-plugin-plugins-data-public.filtermanager.extract.md) |  | <code>any</code> |  |
+|  [getAllMigrations](./kibana-plugin-plugins-data-public.filtermanager.getallmigrations.md) |  | <code>() =&gt; {}</code> |  |
+|  [inject](./kibana-plugin-plugins-data-public.filtermanager.inject.md) |  | <code>any</code> |  |
+|  [migrateToLatest](./kibana-plugin-plugins-data-public.filtermanager.migratetolatest.md) |  | <code>any</code> |  |
+|  [telemetry](./kibana-plugin-plugins-data-public.filtermanager.telemetry.md) |  | <code>(filters: import(&quot;../../../../kibana_utils/common/persistable_state&quot;).SerializableState, collector: unknown) =&gt; {}</code> |  |
 
 ## Methods
 

@@ -10,7 +10,12 @@
       "charts",
       "data",
       "embeddable",
+      "expressionError",
+      "expressionImage",
+      "expressionMetric",
+      "expressionRepeatImage",
       "expressionRevealImage",
+      "expressionShape",
       "expressions",
       "features",
       "inspector",
@@ -31,6 +36,7 @@
       "lens",
       "maps",
       "savedObjects",
-      "visualizations"
+      "visualizations",
+      "fieldFormats"
     ]
   }

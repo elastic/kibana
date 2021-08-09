@@ -137,7 +137,7 @@ export const SourceContent: React.FC = () => {
             <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
           )}
           {urlFieldIsLinkable && (
-            <EuiLink target="_blank" href={url}>
+            <EuiLink target="_blank" href={url.toString()}>
               <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
             </EuiLink>
           )}

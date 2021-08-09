@@ -62,6 +62,7 @@ describe('migration actions', () => {
       },
     });
 
+    await root.preboot();
     await root.setup();
     start = await root.start();
     client = start.elasticsearch.client.asInternalUser;
@@ -181,14 +182,17 @@ describe('migration actions', () => {
         { _source: { title: 'doc 3' } },
         { _source: { title: 'doc 4' } },
       ] as unknown) as SavedObjectsRawDoc[];
-      await expect(
-        bulkOverwriteTransformedDocuments({
-          client,
-          index: 'new_index_without_write_block',
-          transformedDocs: sourceDocs,
-          refresh: 'wait_for',
-        })()
-      ).rejects.toMatchObject(expect.anything());
+
+      const res = (await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'new_index_without_write_block',
+        transformedDocs: sourceDocs,
+        refresh: 'wait_for',
+      })()) as Either.Left<unknown>;
+
+      expect(res.left).toEqual({
+        type: 'target_index_had_write_block',
+      });
     });
     it('resolves left index_not_found_exception when the index does not exist', async () => {
       expect.assertions(1);
@@ -1094,6 +1098,7 @@ describe('migration actions', () => {
           return Either.right({ processedDocs });
         };
       }
+
       const transformTask = transformDocs({
         transformRawDocs: innerTransformRawDocs,
         outdatedDocuments: originalDocs,
@@ -1496,7 +1501,7 @@ describe('migration actions', () => {
                 }
               `);
     });
-    it('rejects if there are errors', async () => {
+    it('resolves left if there are write_block errors', async () => {
       const newDocs = ([
         { _source: { title: 'doc 5' } },
         { _source: { title: 'doc 6' } },
@@ -1509,7 +1514,14 @@ describe('migration actions', () => {
           transformedDocs: newDocs,
           refresh: 'wait_for',
         })()
-      ).rejects.toMatchObject(expect.anything());
+      ).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "target_index_had_write_block",
+                },
+              }
+            `);
     });
   });
 });

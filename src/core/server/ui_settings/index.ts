@@ -17,6 +17,7 @@ export type {
   IUiSettingsClient,
   UiSettingsParams,
   PublicUiSettingsParams,
+  InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
   UiSettingsType,

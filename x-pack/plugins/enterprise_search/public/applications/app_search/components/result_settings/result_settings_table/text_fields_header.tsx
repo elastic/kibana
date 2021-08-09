@@ -30,7 +30,7 @@ export const TextFieldsHeader: React.FC = () => {
             { defaultMessage: 'Raw' }
           )}
         </EuiTableHeaderCell>
-        <EuiTableHeaderCell align="center">
+        <EuiTableHeaderCell align="center" width="115">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.maxSizeTitle',
             { defaultMessage: 'Max size' }
@@ -48,7 +48,7 @@ export const TextFieldsHeader: React.FC = () => {
             { defaultMessage: 'Fallback' }
           )}
         </EuiTableHeaderCell>
-        <EuiTableHeaderCell align="center">
+        <EuiTableHeaderCell align="center" width="115">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.maxSizeTitle',
             { defaultMessage: 'Max size' }

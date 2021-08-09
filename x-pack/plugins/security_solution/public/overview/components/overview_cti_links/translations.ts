@@ -51,9 +51,10 @@ export const DANGER_TITLE = i18n.translate(
 );
 
 export const DANGER_BODY = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardDangerPanelBody',
+  'xpack.securitySolution.overview.ctiDashboardEnableThreatIntel',
   {
-    defaultMessage: 'You need to enable module in order to view data from different sources.',
+    defaultMessage:
+      'You need to enable the filebeat threatintel module in order to view data from different sources.',
   }
 );
 

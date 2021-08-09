@@ -27,11 +27,8 @@ import {
 } from '../../../state_management';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
-  const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
-  const { visualizationState } = props;
-
-  return activeVisualization && visualizationState ? (
-    <LayerPanels {...props} activeVisualization={activeVisualization} />
+  return props.activeVisualization && props.visualizationState ? (
+    <LayerPanels {...props} activeVisualization={props.activeVisualization} />
   ) : null;
 });
 
@@ -199,7 +196,7 @@ export function LayerPanels(
             })}
             content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
               defaultMessage:
-                'Use multiple layers to combine chart types or visualize different index patterns.',
+                'Use multiple layers to combine visualization types or visualize different index patterns.',
             })}
             position="bottom"
           >

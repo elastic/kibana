@@ -16,7 +16,7 @@ import {
   getTermsAggRequest,
 } from './query_field_value_pairs';
 
-const params = { index: 'apm-*' };
+const params = { index: 'apm-*', start: '2020', end: '2021' };
 
 describe('query_field_value_pairs', () => {
   describe('getTermsAggRequest', () => {

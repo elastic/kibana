@@ -691,4 +691,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.malware.quarantine',
+    first_supported_version: '7.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.quarantine',
+      {
+        defaultMessage:
+          'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
 ];

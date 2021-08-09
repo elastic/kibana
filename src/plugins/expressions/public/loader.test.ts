@@ -8,6 +8,7 @@
 
 import { of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs/operators';
+import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
 import {
@@ -21,6 +22,8 @@ import {
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
 const element: HTMLElement = null as any;
+
+let testScheduler: TestScheduler;
 
 jest.mock('./services', () => {
   let renderMode: RenderMode | undefined;
@@ -88,6 +91,10 @@ describe('execute helper function', () => {
 describe('ExpressionLoader', () => {
   const expressionString = 'demodata';
 
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
+  });
+
   describe('constructor', () => {
     it('accepts expression string', () => {
       const expressionLoader = new ExpressionLoader(element, expressionString, {});
@@ -130,11 +137,28 @@ describe('ExpressionLoader', () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', {
       variables: { foo: of(1, 2) },
       partial: true,
+      throttle: 0,
     });
     const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
 
     expect(partial).toBe(true);
     expect(result).toBe(1);
+  });
+
+  it('throttles partial results', async () => {
+    testScheduler.run(({ cold, expectObservable }) => {
+      const expressionLoader = new ExpressionLoader(element, 'var foo', {
+        variables: { foo: cold('a 5ms b 5ms c 10ms d', { a: 1, b: 2, c: 3, d: 4 }) },
+        partial: true,
+        throttle: 20,
+      });
+
+      expectObservable(expressionLoader.data$).toBe('a 19ms c 2ms d', {
+        a: expect.objectContaining({ result: 1 }),
+        c: expect.objectContaining({ result: 3 }),
+        d: expect.objectContaining({ result: 4 }),
+      });
+    });
   });
 
   it('emits on loading$ on initial load and on updates', async () => {

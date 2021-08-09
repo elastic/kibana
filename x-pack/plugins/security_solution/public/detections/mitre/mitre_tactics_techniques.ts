@@ -10143,7 +10143,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
  *
  * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
  */
-export const mockThreatData = {
+export const getMockThreatData = () => ({
   tactic: {
     name: 'Privilege Escalation',
     id: 'TA0004',
@@ -10162,4 +10162,4 @@ export const mockThreatData = {
     tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
   },
-};
+});

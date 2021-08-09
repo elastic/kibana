@@ -8,6 +8,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
+import type { IExecutionContextContainer } from 'src/core/public';
 
 import { ExpressionType, SerializableState } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
@@ -62,6 +63,11 @@ export interface ExecutionContext<
    * Returns the state (true|false) of the sync colors across panels switch.
    */
   isSyncColorsEnabled?: () => boolean;
+
+  /**
+   * Contains the meta-data about the source of the expression.
+   */
+  getExecutionContext: () => IExecutionContextContainer | undefined;
 }
 
 /**

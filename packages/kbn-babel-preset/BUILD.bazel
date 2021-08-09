@@ -8,6 +8,7 @@ SOURCE_FILES = glob([
   "common_preset.js",
   "istanbul_preset.js",
   "node_preset.js",
+  "styled_components_files.js",
   "webpack_preset.js",
 ])
 
@@ -32,6 +33,7 @@ DEPS = [
   "@npm//@babel/preset-env",
   "@npm//@babel/preset-react",
   "@npm//@babel/preset-typescript",
+  "@npm//@emotion/babel-preset-css-prop",
   "@npm//babel-plugin-add-module-exports",
   "@npm//babel-plugin-styled-components",
   "@npm//babel-plugin-transform-react-remove-prop-types",

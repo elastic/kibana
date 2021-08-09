@@ -15,7 +15,7 @@ import { createTickFormatter } from '../../lib/tick_formatter';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
-import { fieldFormats } from '../../../../../../../plugins/data/public';
+import { FIELD_FORMAT_IDS } from '../../../../../../../plugins/field_formats/common';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
@@ -47,7 +47,7 @@ class TableVis extends Component {
     super(props);
 
     const fieldFormatsService = getFieldFormats();
-    const DateFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
+    const DateFormat = fieldFormatsService.getType(FIELD_FORMAT_IDS.DATE);
 
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }
@@ -58,7 +58,11 @@ class TableVis extends Component {
 
   renderRow = (row) => {
     const { model } = this.props;
-    let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
+
+    let rowDisplay = getValueOrEmpty(
+      model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key
+    );
+
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
       rowDisplay = <a href={sanitizeUrl(url)}>{rowDisplay}</a>;
@@ -98,7 +102,7 @@ class TableVis extends Component {
       });
     return (
       <tr key={row.key}>
-        <td>{getValueOrEmpty(rowDisplay)}</td>
+        <td>{rowDisplay}</td>
         {columns}
       </tr>
     );

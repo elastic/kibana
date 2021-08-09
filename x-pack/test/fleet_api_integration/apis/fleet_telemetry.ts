@@ -30,6 +30,13 @@ export default function (providerContext: FtrProviderContext) {
       case 'offline':
         data = { last_checkin: '2017-06-07T18:59:04.498Z' };
         break;
+      // Agent with last checkin status as error and currently unenrolling => should displayd updating status
+      case 'error-unenrolling':
+        data = {
+          last_checkin_status: 'error',
+          unenrollment_started_at: '2017-06-07T18:59:04.498Z',
+        };
+        break;
       default:
         data = { last_checkin: new Date().toISOString() };
     }
@@ -95,6 +102,7 @@ export default function (providerContext: FtrProviderContext) {
       await generateAgent('offline', defaultServerPolicy.id);
       await generateAgent('error', defaultServerPolicy.id);
       await generateAgent('degraded', defaultServerPolicy.id);
+      await generateAgent('error-unenrolling', defaultServerPolicy.id);
     });
 
     it('should return the correct telemetry values for fleet', async () => {
@@ -109,12 +117,12 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse.stack_stats.kibana.plugins.fleet.agents).eql({
-        total_enrolled: 7,
+        total_enrolled: 8,
         healthy: 3,
         unhealthy: 3,
         offline: 1,
-        updating: 0,
-        total_all_statuses: 7,
+        updating: 1,
+        total_all_statuses: 8,
       });
 
       expect(apiResponse.stack_stats.kibana.plugins.fleet.fleet_server).eql({

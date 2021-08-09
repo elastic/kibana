@@ -7,11 +7,10 @@
 
 // @ts-ignore
 import contentDisposition from 'content-disposition';
-import { get } from 'lodash';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
-import { ExportTypesRegistry, statuses } from '../../lib';
-import { ReportDocument } from '../../lib/store';
-import { TaskRunResult } from '../../lib/tasks';
+import { ReportApiJSON } from '../../../common/types';
+import { ReportingCore } from '../../';
+import { getContentStream, statuses } from '../../lib';
 import { ExportTypeDefinition } from '../../types';
 
 export interface ErrorFromPayload {
@@ -26,6 +25,8 @@ interface Payload {
   headers: Record<string, any>;
 }
 
+type TaskRunResult = Required<ReportApiJSON>['output'];
+
 const DEFAULT_TITLE = 'report';
 
 const getTitle = (exportType: ExportTypeDefinition, title?: string): string =>
@@ -35,8 +36,8 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefini
   const metaDataHeaders: Record<string, boolean> = {};
 
   if (exportType.jobType === CSV_JOB_TYPE || exportType.jobType === CSV_JOB_TYPE_DEPRECATED) {
-    const csvContainsFormulas = get(output, 'csv_contains_formulas', false);
-    const maxSizedReach = get(output, 'max_size_reached', false);
+    const csvContainsFormulas = output.csv_contains_formulas ?? false;
+    const maxSizedReach = output.max_size_reached ?? false;
 
     metaDataHeaders['kbn-csv-contains-formulas'] = csvContainsFormulas;
     metaDataHeaders['kbn-max-size-reached'] = maxSizedReach;
@@ -45,7 +46,9 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefini
   return metaDataHeaders;
 };
 
-export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegistry) {
+export function getDocumentPayloadFactory(reporting: ReportingCore) {
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
+
   function encodeContent(
     content: string | null,
     exportType: ExportTypeDefinition
@@ -58,7 +61,12 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
     }
   }
 
-  function getCompleted(output: TaskRunResult, jobType: string, title: string): Payload {
+  async function getCompleted(
+    output: TaskRunResult,
+    jobType: string,
+    title: string,
+    content: string
+  ): Promise<Payload> {
     const exportType = exportTypesRegistry.get(
       (item: ExportTypeDefinition) => item.jobType === jobType
     );
@@ -67,7 +75,7 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
 
     return {
       statusCode: 200,
-      content: encodeContent(output.content, exportType),
+      content: encodeContent(content, exportType),
       contentType: output.content_type,
       headers: {
         ...headers,
@@ -78,11 +86,11 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
 
   // @TODO: These should be semantic HTTP codes as 500/503's indicate
   // error then these are really operating properly.
-  function getFailure(output: TaskRunResult): Payload {
+  function getFailure(content: string): Payload {
     return {
       statusCode: 500,
       content: {
-        message: `Reporting generation failed: ${output.content}`,
+        message: `Reporting generation failed: ${content}`,
       },
       contentType: 'application/json',
       headers: {},
@@ -98,17 +106,24 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
     };
   }
 
-  return function getDocumentPayload(doc: ReportDocument): Payload {
-    const { status, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
-    const { output } = doc._source;
-
+  return async function getDocumentPayload({
+    id,
+    index,
+    output,
+    status,
+    jobtype: jobType,
+    payload: { title },
+  }: ReportApiJSON): Promise<Payload> {
     if (output) {
+      const stream = await getContentStream(reporting, { id, index });
+      const content = await stream.toString();
+
       if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
-        return getCompleted(output, jobType, title);
+        return getCompleted(output, jobType, title, content);
       }
 
       if (status === statuses.JOB_STATUS_FAILED) {
-        return getFailure(output);
+        return getFailure(content);
       }
     }
 

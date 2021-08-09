@@ -21,7 +21,6 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { ApmPluginStartDeps } from '../../../plugin';
 
 interface CorrelationsOptions {
-  index: string;
   environment?: string;
   kuery?: string;
   serviceName?: string;
@@ -36,6 +35,8 @@ interface RawResponse {
   took: number;
   values: SearchServiceValue[];
   overallHistogram: HistogramItem[];
+  log: string[];
+  ccsWarning: boolean;
 }
 
 export const useCorrelations = (params: CorrelationsOptions) => {
@@ -105,6 +106,8 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   };
 
   return {
+    ccsWarning: rawResponse?.ccsWarning ?? false,
+    log: rawResponse?.log ?? [],
     error,
     histograms: rawResponse?.values ?? [],
     percentileThresholdValue:

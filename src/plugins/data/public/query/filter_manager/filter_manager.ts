@@ -11,22 +11,28 @@ import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 
+import { isFilterPinned, onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './types';
 
 import {
   FilterStateStore,
-  Filter,
   uniqFilters,
-  isFilterPinned,
   compareFilters,
   COMPARE_ALL_OPTIONS,
   UI_SETTINGS,
 } from '../../../common';
+import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
+import {
+  getAllMigrations,
+  migrateToLatest,
+  inject,
+  extract,
+  telemetry,
+} from '../../../common/query/persistable_state';
 
-export class FilterManager {
+export class FilterManager implements PersistableStateService {
   private filters: Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
@@ -221,4 +227,17 @@ export class FilterManager {
       }
     });
   }
+
+  // Filter needs to implement SerializableState
+  public extract = extract as any;
+
+  // Filter needs to implement SerializableState
+  public inject = inject as any;
+
+  public telemetry = telemetry;
+
+  // Filter needs to implement SerializableState
+  public migrateToLatest = migrateToLatest as any;
+
+  public getAllMigrations = getAllMigrations;
 }

@@ -412,38 +412,7 @@ describe('ElasticIndex', () => {
       expect(client.search).toHaveBeenCalledWith({
         body: {
           size: 100,
-          query: {
-            bool: {
-              must_not: [
-                {
-                  term: {
-                    type: 'fleet-agent-events',
-                  },
-                },
-                {
-                  term: {
-                    type: 'tsvb-validation-telemetry',
-                  },
-                },
-                {
-                  bool: {
-                    must: [
-                      {
-                        match: {
-                          type: 'search-session',
-                        },
-                      },
-                      {
-                        match: {
-                          'search-session.persisted': false,
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
+          query: Index.excludeUnusedTypesQuery,
         },
         index,
         scroll: '5m',

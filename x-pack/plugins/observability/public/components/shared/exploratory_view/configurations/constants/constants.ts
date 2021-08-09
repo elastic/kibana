@@ -44,6 +44,7 @@ import {
   TAGS_LABEL,
   TBT_LABEL,
   URL_LABEL,
+  BACKEND_TIME_LABEL,
 } from './labels';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
@@ -66,7 +67,7 @@ export const FieldLabels: Record<string, string> = {
   [TBT_FIELD]: TBT_LABEL,
   [FID_FIELD]: FID_LABEL,
   [CLS_FIELD]: CLS_LABEL,
-  [TRANSACTION_TIME_TO_FIRST_BYTE]: 'Page load time',
+  [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
 
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
@@ -92,6 +93,19 @@ export const DataViewLabels: Record<ReportViewType, string> = {
   'core-web-vitals': CORE_WEB_VITALS_LABEL,
   'device-data-distribution': DEVICE_DISTRIBUTION_LABEL,
 };
+
+export enum ReportTypes {
+  KPI = 'kpi-over-time',
+  DISTRIBUTION = 'data-distribution',
+  CORE_WEB_VITAL = 'core-web-vitals',
+  DEVICE_DISTRIBUTION = 'device-data-distribution',
+}
+
+export enum DataTypes {
+  SYNTHETICS = 'synthetics',
+  UX = 'ux',
+  MOBILE = 'mobile',
+}
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 export const FILTER_RECORDS = 'FILTER_RECORDS';

@@ -91,6 +91,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -123,6 +124,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -166,6 +168,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -199,6 +202,7 @@ describe('Background Search Session Management Table', () => {
               api={api}
               timezone="UTC"
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );

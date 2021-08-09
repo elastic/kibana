@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,7 @@ import { UptimePage, useUptimeTelemetry } from './hooks';
 import { OverviewPageComponent } from './pages/overview';
 import { SyntheticsCheckSteps } from './pages/synthetics/synthetics_checks';
 import { ClientPluginsStart } from './apps/plugin';
-import { MonitorPageTitle } from './components/monitor/monitor_title';
+import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
 import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
@@ -36,10 +37,16 @@ interface RouteProps {
   dataTestSubj: string;
   title: string;
   telemetryId: UptimePage;
-  pageHeader?: { pageTitle: string | JSX.Element; rightSideItems?: JSX.Element[] };
+  pageHeader?: {
+    children?: JSX.Element;
+    pageTitle: string | JSX.Element;
+    rightSideItems?: JSX.Element[];
+  };
 }
 
-const baseTitle = 'Uptime - Kibana';
+const baseTitle = i18n.translate('xpack.uptime.routes.baseTitle', {
+  defaultMessage: 'Uptime - Kibana',
+});
 
 export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.heading', {
   defaultMessage: 'Monitors',
@@ -47,18 +54,25 @@ export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.h
 
 const Routes: RouteProps[] = [
   {
-    title: `Monitor | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.monitorRoute.title', {
+      defaultMessage: 'Monitor | {baseTitle}',
+      values: { baseTitle },
+    }),
     path: MONITOR_ROUTE,
     component: MonitorPage,
     dataTestSubj: 'uptimeMonitorPage',
     telemetryId: UptimePage.Monitor,
     pageHeader: {
+      children: <MonitorPageTitleContent />,
       pageTitle: <MonitorPageTitle />,
       rightSideItems: [<UptimeDatePicker />],
     },
   },
   {
-    title: `Settings | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.settingsRoute.title', {
+      defaultMessage: `Settings | {baseTitle}`,
+      values: { baseTitle },
+    }),
     path: SETTINGS_ROUTE,
     component: SettingsPage,
     dataTestSubj: 'uptimeSettingsPage',
@@ -70,7 +84,10 @@ const Routes: RouteProps[] = [
     },
   },
   {
-    title: `Certificates | ${baseTitle}`,
+    title: i18n.translate('xpack.uptime.certificatesRoute.title', {
+      defaultMessage: `Certificates | {baseTitle}`,
+      values: { baseTitle },
+    }),
     path: CERTIFICATES_ROUTE,
     component: CertificatesPage,
     dataTestSubj: 'uptimeCertificatesPage',
@@ -81,7 +98,10 @@ const Routes: RouteProps[] = [
     },
   },
   {
-    title: baseTitle,
+    title: i18n.translate('xpack.uptime.stepDetailRoute.title', {
+      defaultMessage: 'Synthetics detail | {baseTitle}',
+      values: { baseTitle },
+    }),
     path: STEP_DETAIL_ROUTE,
     component: StepDetailPage,
     dataTestSubj: 'uptimeStepDetailPage',
@@ -125,6 +145,12 @@ export const PageRouter: FC = () => {
   } = useKibana<ClientPluginsStart>();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
+  const StyledPageTemplateComponent = styled(PageTemplateComponent)`
+    .euiPageHeaderContent > .euiFlexGroup {
+      flex-wrap: wrap;
+    }
+  `;
+
   return (
     <Switch>
       {Routes.map(
@@ -134,9 +160,9 @@ export const PageRouter: FC = () => {
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
               {pageHeader ? (
-                <PageTemplateComponent pageHeader={pageHeader}>
+                <StyledPageTemplateComponent pageHeader={pageHeader}>
                   <RouteComponent />
-                </PageTemplateComponent>
+                </StyledPageTemplateComponent>
               ) : (
                 <RouteComponent />
               )}

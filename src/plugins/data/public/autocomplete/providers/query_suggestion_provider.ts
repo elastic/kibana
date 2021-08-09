@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ValueSuggestionsMethod } from '../../../common';
 import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
 
 export enum QuerySuggestionTypes {
@@ -30,6 +31,7 @@ export interface QuerySuggestionGetFnArgs {
   signal?: AbortSignal;
   useTimeRange?: boolean;
   boolFilter?: any;
+  method?: ValueSuggestionsMethod;
 }
 
 /** @public **/

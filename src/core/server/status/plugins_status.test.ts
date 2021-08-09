@@ -303,12 +303,7 @@ describe('PluginStatusService', () => {
           summary: '[a]: Status check timed out after 30s',
           detail: 'See the status page for more information',
           meta: {
-            affectedServices: {
-              a: {
-                level: ServiceStatusLevels.unavailable,
-                summary: 'Status check timed out after 30s',
-              },
-            },
+            affectedServices: ['a'],
           },
         },
       });

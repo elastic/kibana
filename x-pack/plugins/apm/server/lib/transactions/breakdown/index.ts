@@ -18,11 +18,8 @@ import {
   TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
@@ -120,11 +117,11 @@ export async function getTransactionBreakdown({
       aggs: {
         ...subAggs,
         by_date: {
-          date_histogram: getMetricsDateHistogramParams(
+          date_histogram: getMetricsDateHistogramParams({
             start,
             end,
-            config['xpack.apm.metricsInterval']
-          ),
+            metricsInterval: config['xpack.apm.metricsInterval'],
+          }),
           aggs: subAggs,
         },
       },

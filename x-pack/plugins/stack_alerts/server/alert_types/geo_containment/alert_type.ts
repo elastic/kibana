@@ -140,6 +140,7 @@ export interface GeoContainmentInstanceContext extends AlertInstanceContext {
 
 export type GeoContainmentAlertType = AlertType<
   GeoContainmentParams,
+  never, // Only use if defining useSavedObjectReferences hook
   GeoContainmentState,
   GeoContainmentInstanceState,
   GeoContainmentInstanceContext,
