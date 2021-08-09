@@ -31,11 +31,13 @@ describe('field format map', function () {
   configMock[FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
     number: { id: 'number', params: {} },
   };
-  configMock[UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
-  const getConfig = ((key: string) => configMock[key]) as GetConfigFn;
   configMock[FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
+  const getConfig = ((key: string) => configMock[key]) as FieldFormatsGetConfigFn;
+  const testValue = '4000';
+  const mockTimezone = 'Browser';
 
   const fieldFormatsRegistry = new FieldFormatsRegistry();
+  fieldFormatsRegistry.init(getConfig, {}, [BytesFormat, NumberFormat]);
 
   const formatMap = fieldFormatMapFactory(
     indexPatternSavedObject,
