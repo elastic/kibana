@@ -412,7 +412,7 @@ export const ECSMappingEditorField = ({ field, query }: Props) => {
                 name: osqueryColumn.name,
                 description: osqueryColumn.description,
                 table: column.expr.table,
-                suggestion_label: `${column.expr.table}.${osqueryColumn.name}`,
+                suggestion_label: `${osqueryColumn.name}`,
               },
             }));
           }
@@ -431,7 +431,7 @@ export const ECSMappingEditorField = ({ field, query }: Props) => {
                   name: osqueryColumn.name,
                   description: osqueryColumn.description,
                   table: column.expr.table,
-                  suggestion_label: `${column.expr.table}.${label}`,
+                  suggestion_label: `${label}`,
                 },
               },
             ];
