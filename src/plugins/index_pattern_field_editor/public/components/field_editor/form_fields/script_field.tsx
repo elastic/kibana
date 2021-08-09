@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { first } from 'rxjs/operators';
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiLink, EuiCode, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { PainlessLang, PainlessContext } from '@kbn/monaco';
+import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
 
 import {
   UseField,
@@ -53,8 +55,10 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
   }
 };
 
+type CancelablePromise = Promise<any> & { cancel?(): void };
+
 export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxError }: Props) => {
-  const editorValidationTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const [painlessContext, setPainlessContext] = useState<PainlessContext>(
     mapReturnTypeToPainlessContext(schema.type.defaultValue[0].value!)
@@ -62,9 +66,9 @@ export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxEr
 
   const [editorId, setEditorId] = useState<string | undefined>();
 
-  const suggestionProvider = PainlessLang.getSuggestionProvider(
-    painlessContext,
-    existingConcreteFields
+  const suggestionProvider = useMemo(
+    () => PainlessLang.getSuggestionProvider(painlessContext, existingConcreteFields),
+    [painlessContext, existingConcreteFields]
   );
 
   const [{ type, script: { source } = { source: '' } }] = useFormData<FieldFormInternal>({
@@ -80,41 +84,53 @@ export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxEr
         ...schema.script.source.validations,
         {
           validator: () => {
-            if (editorValidationTimeout.current) {
-              clearTimeout(editorValidationTimeout.current);
-            }
+            let isValidatingSub: Subscription;
 
-            return new Promise((resolve) => {
-              // monaco waits 500ms before validating, so we also add a delay
-              // before checking if there are any syntax errors
-              editorValidationTimeout.current = setTimeout(() => {
-                const painlessSyntaxErrors = PainlessLang.getSyntaxErrors();
-                // It is possible for there to be more than one editor in a view,
-                // so we need to get the syntax errors based on the editor (aka model) ID
-                const editorHasSyntaxErrors =
-                  editorId &&
-                  painlessSyntaxErrors[editorId] &&
-                  painlessSyntaxErrors[editorId].length > 0;
+            const promise: CancelablePromise = new Promise((resolve) => {
+              // Wait to finish validating
+              isValidatingSub = PainlessLang.isValidating()
+                .pipe(first((isValidating) => isValidating === false))
+                .subscribe(() => {
+                  const painlessSyntaxErrors = PainlessLang.getSyntaxErrors();
+                  // It is possible for there to be more than one editor in a view,
+                  // so we need to get the syntax errors based on the editor (aka model) ID
+                  const editorHasSyntaxErrors =
+                    editorId &&
+                    painlessSyntaxErrors[editorId] &&
+                    painlessSyntaxErrors[editorId].length > 0;
 
-                if (editorHasSyntaxErrors) {
-                  return resolve({
-                    message: i18n.translate(
-                      'indexPatternFieldEditor.editor.form.scriptEditorValidationMessage',
-                      {
-                        defaultMessage: 'Invalid Painless syntax.',
-                      }
-                    ),
-                  });
-                }
+                  if (editorHasSyntaxErrors) {
+                    return resolve({
+                      message: i18n.translate(
+                        'indexPatternFieldEditor.editor.form.scriptEditorValidationMessage',
+                        {
+                          defaultMessage: 'Invalid Painless syntax.',
+                        }
+                      ),
+                    });
+                  }
 
-                resolve(undefined);
-              }, 600);
+                  resolve(undefined);
+                });
             });
+
+            promise.cancel = () => {
+              if (isValidatingSub) {
+                isValidatingSub.unsubscribe();
+              }
+            };
+
+            return promise;
           },
         },
       ],
     };
   }, [editorId]);
+
+  const onEditorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    monacoEditor.current = editor;
+    setEditorId(editor.getModel()?.id);
+  }, []);
 
   useEffect(() => {
     setPainlessContext(mapReturnTypeToPainlessContext(type[0]!.value!));
@@ -175,7 +191,7 @@ export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxEr
                 height="300px"
                 value={value}
                 onChange={setValue}
-                editorDidMount={(editor) => setEditorId(editor.getModel()?.id)}
+                editorDidMount={onEditorDidMount}
                 options={{
                   fontSize: 12,
                   minimap: {

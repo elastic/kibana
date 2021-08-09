@@ -236,8 +236,6 @@ export const useField = <T, FormType = FormData, I = T>(
         const validationErrors: ValidationError[] = [];
 
         for (const validation of validations) {
-          inflightValidation.current = null;
-
           const {
             validator,
             exitOnFail = true,
@@ -257,6 +255,8 @@ export const useField = <T, FormType = FormData, I = T>(
           }) as Promise<ValidationError>;
 
           const validationResult = await inflightValidation.current;
+
+          inflightValidation.current = null;
 
           if (!validationResult) {
             continue;
