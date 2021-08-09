@@ -106,7 +106,7 @@ that you set up for {ccs}, named `cluster_one` and `cluster_two`:
 ```
 
 Use wildcards in your cluster names
-to match any number of clusters.  To search {ls} indices across
+to match any number of clusters. To search {ls} indices across
 clusters named `cluster_foo`, `cluster_bar`, and so on:
 
 ```ts
