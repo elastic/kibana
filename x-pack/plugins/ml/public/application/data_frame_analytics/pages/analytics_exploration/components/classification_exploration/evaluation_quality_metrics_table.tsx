@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
 
-import { MetricItem } from '../../../common/analytics';
+import { MetricItem } from '../../../../common/analytics';
 
 const columns = [
   {
