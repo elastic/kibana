@@ -159,10 +159,6 @@ export const Layout = React.memo(
                             <ViewSwitcher view={view} onChange={changeView} />
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                        <EuiSpacer />
-                        <SavedViewContainer>
-                          <SavedViewsToolbarControls viewState={viewState} />
-                        </SavedViewContainer>
                       </TopActionContainer>
                       <AutoSizer bounds>
                         {({ measureRef, bounds: { height = 0 } }) => (
@@ -220,10 +216,4 @@ const MainContainer = euiStyled.div`
 
 const TopActionContainer = euiStyled.div`
   padding: ${(props) => `12px ${props.theme.eui.paddingSizes.m}`};
-`;
-
-const SavedViewContainer = euiStyled.div`
-  position: relative;
-  z-index: 1;
-  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
 `;

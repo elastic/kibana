@@ -12467,7 +12467,6 @@
     "xpack.infra.registerFeatures.logsDescription": "ログをリアルタイムでストリーするか、コンソール式の UI で履歴ビューをスクロールします。",
     "xpack.infra.registerFeatures.logsTitle": "ログ",
     "xpack.infra.sampleDataLinkLabel": "ログ",
-    "xpack.infra.savedView.currentView": "現在のビュー",
     "xpack.infra.savedView.defaultViewNameHosts": "デフォルトビュー",
     "xpack.infra.savedView.errorOnCreate.duplicateViewName": "その名前のビューはすでに存在します。",
     "xpack.infra.savedView.errorOnCreate.title": "ビューの保存中にエラーが発生しました。",
