@@ -120,7 +120,7 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FormattedMessage
-            id="xpack.upgradeAssistant.overview.pageDescriptionLink"
+            id="xpack.upgradeAssistant.overview.loadingLogsLabel"
             defaultMessage="Loading log collection state..."
           />
         </EuiFlexItem>

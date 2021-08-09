@@ -10,6 +10,7 @@ import {
   getDeprecationLoggingStatus,
   isDeprecationLoggingEnabled,
   setDeprecationLogging,
+  isClusterDeprecationLoggingEnabled,
 } from './es_deprecation_logging_apis';
 
 describe('getDeprecationLoggingStatus', () => {
@@ -96,6 +97,27 @@ describe('isDeprecationLoggingEnabled', () => {
       isDeprecationLoggingEnabled({
         default: { logger: { deprecation: 'FATAL' } },
         persistent: { logger: { deprecation: 'WARN' } },
+      })
+    ).toBe(true);
+  });
+});
+
+describe('isClusterDeprecationLoggingEnabled', () => {
+  it('allows transient to override persistent and default', () => {
+    expect(
+      isClusterDeprecationLoggingEnabled({
+        default: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        persistent: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        transient: { cluster: { deprecation_indexing: { enabled: 'true' } } },
+      })
+    ).toBe(true);
+  });
+
+  it('allows persistent to override default', () => {
+    expect(
+      isClusterDeprecationLoggingEnabled({
+        default: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        persistent: { cluster: { deprecation_indexing: { enabled: 'true' } } },
       })
     ).toBe(true);
   });
