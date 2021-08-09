@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
 import { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
@@ -62,7 +62,7 @@ export const updateAlertStatus = async ({
   query,
   status,
   signal,
-}: UpdateAlertStatusProps): Promise<UpdateDocumentByQueryResponse> =>
+}: UpdateAlertStatusProps): Promise<estypes.UpdateByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
     body: JSON.stringify({ conflicts: 'proceed', status, ...query }),
