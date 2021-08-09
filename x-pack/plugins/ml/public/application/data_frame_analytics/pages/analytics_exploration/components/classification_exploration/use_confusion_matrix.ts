@@ -13,6 +13,7 @@ import {
   ConfusionMatrix,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
+  MetricItem,
 } from '../../../../common/analytics';
 import { isKeywordAndTextType } from '../../../../common/fields';
 
@@ -25,12 +26,6 @@ import {
 } from '../../../../common';
 
 import { isTrainingFilter } from './is_training_filter';
-
-interface MetricItem {
-  className: string;
-  accuracy?: number;
-  recall?: number;
-}
 
 function getEvalutionMetricsItems(evalMetrics?: ClassificationEvaluateResponse['classification']) {
   if (evalMetrics === undefined) return [];

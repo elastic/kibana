@@ -8,8 +8,9 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
 import { EuiAccordion, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
+
+import { MetricItem } from '../../../common/analytics';
 
 const columns = [
   {
@@ -44,12 +45,6 @@ const columns = [
     render: (value: number) => Math.round(value * 1000) / 1000,
   },
 ];
-
-interface MetricItem {
-  className: string;
-  accuracy?: number;
-  recall?: number;
-}
 
 export const EvaluationQualityMetricsTable: FC<{ evaluationMetricsItems: MetricItem[] }> = ({
   evaluationMetricsItems,
