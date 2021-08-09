@@ -17,7 +17,7 @@ import { PackageInfo } from '@kbn/config';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 import { UnwrapObservable } from '@kbn/utility-types';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 

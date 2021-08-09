@@ -71,7 +71,7 @@ import { SavedObjectsFindOptions } from 'kibana/server';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 import { SerializedFieldFormat as SerializedFieldFormat_3 } from 'src/plugins/expressions/common';
 import { SharedGlobalConfig as SharedGlobalConfig_2 } from 'kibana/server';
 import { ToastInputFields } from 'src/core/public/notifications';
@@ -406,7 +406,7 @@ export const esFilters: {
 export const esKuery: {
     nodeTypes: import("@kbn/es-query/target_types/kuery/node_types").NodeTypes;
     fromKueryExpression: (expression: any, parseOptions?: Partial<import("@kbn/es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("@kbn/es-query").KueryNode;
-    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
+    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/utility-types").JsonObject;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

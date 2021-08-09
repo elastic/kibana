@@ -7,7 +7,7 @@
  */
 
 import { compare } from 'semver';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 import { VersionedState, MigrateFunctionsObject } from './types';
 
 export function migrateToLatest<S extends SerializableRecord>(

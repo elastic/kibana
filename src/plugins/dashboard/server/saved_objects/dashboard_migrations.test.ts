@@ -16,7 +16,7 @@ import {
   createInject,
 } from '../../common/embeddable/dashboard_container_persistable_state';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
 const extract = createExtract(embeddableSetupMock);

@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import { ObservableLike } from '@kbn/utility-types';
 import { Plugin as Plugin_2 } from 'src/core/server';
 import { PluginInitializerContext } from 'src/core/server';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 import { UnwrapObservable } from '@kbn/utility-types';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 

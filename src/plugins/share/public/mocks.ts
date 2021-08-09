@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 import { SharePluginSetup, SharePluginStart } from '.';
 import { LocatorPublic, UrlService } from '../common/url_service';
 

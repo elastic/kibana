@@ -53,7 +53,7 @@ import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
 import { Start as Start_2 } from 'src/plugins/inspector/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';

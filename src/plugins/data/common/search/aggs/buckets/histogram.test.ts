@@ -12,7 +12,7 @@ import { AggTypesDependencies } from '../agg_types';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;

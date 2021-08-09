@@ -10,7 +10,7 @@ import { testTable, relationalTable } from './__fixtures__/test_tables';
 import { dropdownControl } from './dropdownControl';
 import { ExecutionContext } from 'src/plugins/expressions';
 import { Adapters } from 'src/plugins/inspector';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('dropdownControl', () => {
   const fn = functionWrapper(dropdownControl);

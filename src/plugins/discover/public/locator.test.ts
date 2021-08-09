@@ -10,7 +10,7 @@ import { hashedItemStore, getStatesFromKbnUrl } from '../../kibana_utils/public'
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '../../data/common';
 import { DiscoverAppLocatorDefinition } from './locator';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 
 const indexPatternId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';

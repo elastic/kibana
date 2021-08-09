@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';

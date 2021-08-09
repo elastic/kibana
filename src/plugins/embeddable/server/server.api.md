@@ -7,7 +7,7 @@
 import { CoreSetup } from 'kibana/server';
 import { CoreStart } from 'kibana/server';
 import { Plugin } from 'kibana/server';
-import { SerializableRecord } from '@kbn/common-utils';
+import { SerializableRecord } from '@kbn/utility-types';
 
 // Warning: (ae-forgotten-export) The symbol "EmbeddableStateWithType" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PersistableStateDefinition" needs to be exported by the entry point index.d.ts
