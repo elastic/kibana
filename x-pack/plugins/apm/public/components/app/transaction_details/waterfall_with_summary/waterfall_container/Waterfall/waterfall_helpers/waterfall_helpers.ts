@@ -7,11 +7,12 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { first, flatten, groupBy, isEmpty, sortBy, sum, uniq } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
+import { APIReturnType } from '../../../../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+
+type TraceAPIResponse = APIReturnType<'GET /api/apm/traces/{traceId}'>;
 
 interface IWaterfallGroup {
   [key: string]: IWaterfallSpanOrTransaction[];

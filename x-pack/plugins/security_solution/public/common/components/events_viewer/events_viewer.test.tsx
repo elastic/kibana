@@ -29,6 +29,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 
 jest.mock('../../lib/kibana');
 
@@ -124,6 +125,7 @@ describe('EventsViewer', () => {
   const mount = useMountAppended();
 
   let testProps = {
+    defaultCellActions,
     defaultModel: eventsDefaultModel,
     end: to,
     id: TimelineId.test,
