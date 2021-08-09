@@ -24,118 +24,124 @@ import {
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { InternalRACRuleCreate, InternalRuleCreate } from '../../schemas/rule_schemas';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null // TODO: Use this for RAC (otherwise delete it)
+  ruleDataClient?: RuleDataClient | null
 ): void => {
-  const routeConfig =
-    ruleDataClient != null
-      ? {
-          path: DETECTION_ENGINE_RULES_URL,
-          validate: {
-            body: buildRouteValidation(racCreateRulesSchema),
-          },
-          options: {
-            tags: ['access:securitySolution'],
-          },
+  const isRuleRegistryEnabled = ruleDataClient != null;
+  router.post(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
+      validate: {
+        body: buildRouteValidation(
+          isRuleRegistryEnabled ? racCreateRulesSchema : createRulesSchema
+        ),
+      },
+      options: {
+        tags: ['access:securitySolution'],
+      },
+    },
+    async (context, request, response) => {
+      const handleRequest = async <TSchema extends Record<string, unknown>>() => {
+        const siemResponse = buildSiemResponse(response);
+        const validationErrors = createRuleValidateTypeDependents(request.body);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
-      : {
-          path: DETECTION_ENGINE_RULES_URL,
-          validate: {
-            body: buildRouteValidation(createRulesSchema),
-          },
-          options: {
-            tags: ['access:securitySolution'],
-          },
-        };
+        try {
+          const rulesClient = context.alerting?.getRulesClient();
+          const esClient = context.core.elasticsearch.client;
+          const savedObjectsClient = context.core.savedObjects.client;
+          const siemClient = context.securitySolution?.getAppClient();
 
-  router.post(routeConfig, async (context, request, response) => {
-    const siemResponse = buildSiemResponse(response);
-    const validationErrors = createRuleValidateTypeDependents(request.body);
-    if (validationErrors.length) {
-      return siemResponse.error({ statusCode: 400, body: validationErrors });
-    }
-    try {
-      const rulesClient = context.alerting?.getRulesClient();
-      const esClient = context.core.elasticsearch.client;
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution?.getAppClient();
+          if (!siemClient || !rulesClient) {
+            return siemResponse.error({ statusCode: 404 });
+          }
 
-      if (!siemClient || !rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+          if (request.body.rule_id != null) {
+            const rule = await readRules({
+              rulesClient,
+              ruleId: request.body.rule_id,
+              id: undefined,
+            });
+            if (rule != null) {
+              return siemResponse.error({
+                statusCode: 409,
+                body: `rule_id: "${request.body.rule_id}" already exists`,
+              });
+            }
+          }
 
-      if (request.body.rule_id != null) {
-        const rule = await readRules({
-          rulesClient,
-          ruleId: request.body.rule_id,
-          id: undefined,
-        });
-        if (rule != null) {
+          const internalRule = convertCreateAPIToInternalSchema<TSchema>(request.body, siemClient);
+
+          const mlAuthz = buildMlAuthz({
+            license: context.licensing.license,
+            ml,
+            request,
+            savedObjectsClient,
+          });
+          throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+
+          const indexExists = await getIndexExists(
+            esClient.asCurrentUser,
+            internalRule.params.outputIndex
+          );
+          if (!indexExists) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: `To create a rule, the index must exist first. Index ${internalRule.params.outputIndex} does not exist`,
+            });
+          }
+
+          // This will create the endpoint list if it does not exist yet
+          await context.lists?.getExceptionListClient().createEndpointList();
+
+          const createdRule = await rulesClient.create({
+            data: internalRule,
+          });
+
+          const ruleActions = await updateRulesNotifications({
+            ruleAlertId: createdRule.id,
+            rulesClient,
+            savedObjectsClient,
+            enabled: createdRule.enabled,
+            actions: request.body.actions,
+            throttle: request.body.throttle ?? null,
+            name: createdRule.name,
+          });
+
+          const ruleStatuses = await context.securitySolution.getExecutionLogClient().find({
+            logsCount: 1,
+            ruleId: createdRule.id,
+            spaceId: context.securitySolution.getSpaceId(),
+          });
+          const [validated, errors] = newTransformValidate(
+            createdRule,
+            ruleActions,
+            ruleStatuses[0]
+          );
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            statusCode: 409,
-            body: `rule_id: "${request.body.rule_id}" already exists`,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-      }
+      };
 
-      const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
-
-      const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
-        ml,
-        request,
-        savedObjectsClient,
-      });
-      throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
-
-      const indexExists = await getIndexExists(
-        esClient.asCurrentUser,
-        internalRule.params.outputIndex
-      );
-      if (!indexExists) {
-        return siemResponse.error({
-          statusCode: 400,
-          body: `To create a rule, the index must exist first. Index ${internalRule.params.outputIndex} does not exist`,
-        });
-      }
-
-      // This will create the endpoint list if it does not exist yet
-      await context.lists?.getExceptionListClient().createEndpointList();
-
-      const createdRule = await rulesClient.create({
-        data: internalRule,
-      });
-
-      const ruleActions = await updateRulesNotifications({
-        ruleAlertId: createdRule.id,
-        rulesClient,
-        savedObjectsClient,
-        enabled: createdRule.enabled,
-        actions: request.body.actions,
-        throttle: request.body.throttle ?? null,
-        name: createdRule.name,
-      });
-
-      const ruleStatuses = await context.securitySolution.getExecutionLogClient().find({
-        logsCount: 1,
-        ruleId: createdRule.id,
-        spaceId: context.securitySolution.getSpaceId(),
-      });
-      const [validated, errors] = newTransformValidate(createdRule, ruleActions, ruleStatuses[0]);
-      if (errors != null) {
-        return siemResponse.error({ statusCode: 500, body: errors });
+      if (isRuleRegistryEnabled) {
+        await handleRequest<InternalRACRuleCreate>();
       } else {
-        return response.ok({ body: validated ?? {} });
+        await handleRequest<InternalRuleCreate>();
       }
-    } catch (err) {
-      const error = transformError(err);
-      return siemResponse.error({
-        body: error.message,
-        statusCode: error.statusCode,
-      });
     }
-  });
+  );
 };

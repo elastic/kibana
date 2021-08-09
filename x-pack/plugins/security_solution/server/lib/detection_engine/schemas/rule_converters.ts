@@ -115,10 +115,10 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
   }
 };
 
-export const convertCreateAPIToInternalSchema = (
+export const convertCreateAPIToInternalSchema = <TSchema extends Record<string, unknown>>(
   input: CreateRulesSchema,
   siemClient: AppClient
-): InternalRuleCreate => {
+): TSchema => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
@@ -159,21 +159,6 @@ export const convertCreateAPIToInternalSchema = (
     actions: input.throttle === 'rule' ? (input.actions ?? []).map(transformRuleToAlertAction) : [],
     throttle: null,
     notifyWhen: null,
-  };
-};
-
-export const convertCreateAPIToInternalRACSchema = (
-  input: CreateRulesSchema,
-  siemClient: AppClient
-): InternalRuleCreate => {
-  const converted = convertCreateAPIToInternalSchema(input, siemClient);
-  return {
-    ...converted,
-    alertTypeId: 'query',
-    params: {
-      ...converted.params,
-      namespace: input.namespace,
-    }
   };
 };
 

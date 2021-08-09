@@ -189,7 +189,7 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
 
-export const internalRuleCreate = t.type({
+const internalRuleSchema = {
   name,
   tags,
   alertTypeId: t.literal(SIGNALS_ID),
@@ -202,8 +202,18 @@ export const internalRuleCreate = t.type({
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen: t.null,
-});
+};
+
+
+export const internalRuleCreate = t.type(internalRuleSchema);
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
+
+export const internalRACRuleCreate = t.type({
+  ...internalRuleSchema,
+  alertTypeId: t.literal('siem.query'),
+  params: t.intersection([ruleParams, t.type({ namespace: t.string })]), // TODO: is this right?
+});
+export type InternalRACRuleCreate = t.TypeOf<typeof internalRACRuleCreate>;
 
 export const internalRuleUpdate = t.type({
   name,
