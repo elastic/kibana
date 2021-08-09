@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import type { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../../common/lib/kibana';
 
@@ -28,7 +29,6 @@ import {
   ReturnUseAddOrUpdateException,
   AddOrUpdateExceptionItemsFunc,
 } from './use_add_exception';
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -39,7 +39,7 @@ const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('useAddOrUpdateException', () => {
-  let updateAlertStatus: jest.SpyInstance<Promise<UpdateDocumentByQueryResponse>>;
+  let updateAlertStatus: jest.SpyInstance<Promise<estypes.UpdateByQueryResponse>>;
   let addExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
   let updateExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
   let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getQueryFilter>>;

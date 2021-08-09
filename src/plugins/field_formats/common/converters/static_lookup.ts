@@ -21,6 +21,7 @@ function convertLookupEntriesToMap(lookupEntries: any[]) {
   );
 }
 
+/** @public */
 export class StaticLookupFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.STATIC_LOOKUP;
   static title = i18n.translate('fieldFormats.static_lookup.title', {

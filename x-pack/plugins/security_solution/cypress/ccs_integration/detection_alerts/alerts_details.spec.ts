@@ -58,7 +58,7 @@ describe('Alert details with unmapped fields', () => {
 
   it('Displays the unmapped field on the table', () => {
     const expectedUnmmappedField = {
-      row: 55,
+      row: 88,
       field: 'unmapped',
       text: 'This is the unmapped field',
     };

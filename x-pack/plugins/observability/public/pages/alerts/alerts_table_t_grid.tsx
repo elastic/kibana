@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -115,6 +116,13 @@ const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
 
+const OBSERVABILITY_ALERT_CONSUMERS = [
+  AlertConsumers.APM,
+  AlertConsumers.LOGS,
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.SYNTHETICS,
+];
+
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
@@ -190,6 +198,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         </Suspense>
       )}
       {timelines.getTGrid<'standalone'>({
+        alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
         type: 'standalone',
         columns,
         deletedEventIds: [],
