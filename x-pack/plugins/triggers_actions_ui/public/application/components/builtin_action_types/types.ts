@@ -6,6 +6,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
+import { NumberFormat } from 'src/plugins/data/common';
 import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {
@@ -78,11 +79,19 @@ export interface EmailConfig {
   port: number;
   secure?: boolean;
   hasAuth: boolean;
+  authType: string;
+  tokenExpirationDate?: number;
 }
 
 export interface EmailSecrets {
   user: string | null;
   password: string | null;
+  clientId: string | null;
+  clientSecret: string | null;
+  oauthScope: string | null;
+  refreshTokenUrl: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
 }
 
 export type EmailActionConnector = UserConfiguredActionConnector<EmailConfig, EmailSecrets>;

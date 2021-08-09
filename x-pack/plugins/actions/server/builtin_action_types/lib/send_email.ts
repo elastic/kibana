@@ -33,6 +33,13 @@ export interface Transport {
   host?: string;
   port?: number;
   secure?: boolean; // see: https://nodemailer.com/smtp/#tls-options
+  accessToken?: string;
+  clientId?: string;
+  clientSecret?: string;
+  refreshToken?: string;
+  expires?: string;
+  type?: string;
+  scope?: string;
 }
 
 export interface Routing {
@@ -61,10 +68,20 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   const proxySettings = configurationUtilities.getProxySettings();
   const generalSSLSettings = configurationUtilities.getSSLSettings();
 
-  if (hasAuth && user != null && password != null) {
+  if (hasAuth && transport.type !== 'OAuth2' && user != null && password != null) {
     transportConfig.auth = {
       user,
       pass: password,
+    };
+  } else if (hasAuth && transport.type === 'OAuth2') {
+    transportConfig.auth = {
+      type: 'OAuth2',
+      // user: 'user@example.com',
+      clientId: transport.clientId,
+      clientSecret: transport.clientSecret,
+      refreshToken: transport.refreshToken,
+      accessToken: transport.accessToken,
+      expires: transport.expires,
     };
   }
 

@@ -6,6 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import crypto from 'crypto';
+
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -19,6 +21,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiButton,
+  EuiText,
 } from '@elastic/eui';
 import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
@@ -29,12 +32,52 @@ import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
+let windowObjectReference: any = null;
+let previousUrl: string | null = null;
+
+const openSignInWindow = (url: string, name: string) => {
+  // window features
+  const strWindowFeatures = 'toolbar=no, menubar=no, width=600, height=700, top=100, left=100';
+
+  if (windowObjectReference === null || windowObjectReference.closed) {
+    /* if the pointer to the window object in memory does not exist
+     or if such pointer exists but the window was closed */
+    windowObjectReference = window.open(url, name, strWindowFeatures);
+  } else if (previousUrl !== url) {
+    /* if the resource to load is different,
+     then we load it in the already opened secondary window and then
+     we bring such window back on top/in front of its parent window. */
+    windowObjectReference = window.open(url, name, strWindowFeatures);
+    windowObjectReference.focus();
+  } else {
+    /* else the window reference must exist and the window
+     is not closed; therefore, we can bring it back on top of any other
+     window with the focus() method. There would be no need to re-create
+     the window or to reload the referenced resource. */
+    windowObjectReference.focus();
+  }
+  // assign the previous URL
+  previousUrl = url;
+};
+
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
+  const [authCodeUrl, setAuthCodeUrl] = useState<string | undefined>(undefined);
+  const [authTokenUrl, setAuthTokenUrl] = useState<string | undefined>(undefined);
+  const [redirectUrl, setRedirectTokenUrl] = useState<string | undefined>(undefined);
   const { docLinks, http } = useKibana().services;
-  const { from, host, port, secure, hasAuth } = action.config;
-  const { user, password } = action.secrets;
+  const { from, host, port, secure, hasAuth, authType, tokenExpirationDate } = action.config;
+  const {
+    user,
+    password,
+    accessToken,
+    clientId,
+    clientSecret,
+    oauthScope,
+    refreshToken,
+    refreshTokenUrl,
+  } = action.secrets;
   useEffect(() => {
     if (!action.id) {
       editActionConfig('hasAuth', true);
@@ -65,10 +108,13 @@ export const EmailActionConnectorFields: React.FunctionComponent<
       key: 'oauth2',
     },
   ] as Array<EuiComboBoxOptionOption<unknown>>;
-  const [selectedOptions, setSelected] = useState([authOptions[0]]);
+  const [selectedOptions, setSelected] = useState([
+    authOptions.find((opt) => opt.key === authType)!,
+  ]);
   const onChange = (selectedOptionsList: Array<EuiComboBoxOptionOption<unknown>>) => {
     // We should only get back either 0 or 1 options.
     setSelected(selectedOptionsList);
+    editActionConfig('authType', selectedOptionsList[0].key);
   };
   return (
     <>
@@ -251,6 +297,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
             <EuiComboBox
               placeholder="Select one or more options"
               options={authOptions}
+              defaultValue={authType}
               singleSelection={{ asPlainText: true }}
               selectedOptions={selectedOptions}
               onChange={onChange}
@@ -341,8 +388,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   <EuiFormRow
                     id="emailUser"
                     fullWidth
-                    error={errors.user}
-                    isInvalid={isUserInvalid}
                     label={i18n.translate(
                       'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
                       {
@@ -352,17 +397,14 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   >
                     <EuiFieldText
                       fullWidth
-                      isInvalid={isUserInvalid}
-                      name="user"
                       readOnly={readOnly}
-                      value={user || ''}
-                      data-test-subj="emailUserInput"
+                      value={clientId || ''}
                       onChange={(e) => {
-                        editActionSecrets('user', nullableString(e.target.value));
+                        editActionSecrets('clientId', nullableString(e.target.value));
                       }}
                       onBlur={() => {
-                        if (!user) {
-                          editActionSecrets('user', '');
+                        if (!clientId) {
+                          editActionSecrets('clientId', '');
                         }
                       }}
                     />
@@ -370,10 +412,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFormRow
-                    id="emailPassword"
                     fullWidth
-                    error={errors.password}
-                    isInvalid={isPasswordInvalid}
                     label={i18n.translate(
                       'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
                       {
@@ -381,23 +420,121 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                       }
                     )}
                   >
-                    <EuiFieldPassword
+                    <EuiFieldText
                       fullWidth
                       readOnly={readOnly}
-                      isInvalid={isPasswordInvalid}
-                      name="password"
-                      value={password || ''}
-                      data-test-subj="emailPasswordInput"
+                      value={clientSecret || ''}
                       onChange={(e) => {
-                        editActionSecrets('password', nullableString(e.target.value));
+                        editActionSecrets('clientSecret', nullableString(e.target.value));
                       }}
                       onBlur={() => {
-                        if (!password) {
-                          editActionSecrets('password', '');
+                        if (!clientSecret) {
+                          editActionSecrets('clientSecret', '');
                         }
                       }}
                     />
                   </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    id="emailUser"
+                    fullWidth
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                      {
+                        defaultMessage: 'Authorize Code URL',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      value={authCodeUrl || ''}
+                      data-test-subj="emailUserInput"
+                      onChange={(e) => {
+                        setAuthCodeUrl(e.target.value);
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    fullWidth
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                      {
+                        defaultMessage: 'Access Token URL',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      value={authTokenUrl || ''}
+                      onChange={(e) => {
+                        setAuthTokenUrl(e.target.value);
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    fullWidth
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                      {
+                        defaultMessage: 'Redirect URL',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      value={redirectUrl || ''}
+                      onChange={(e) => {
+                        setRedirectTokenUrl(e.target.value);
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    fullWidth
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                      {
+                        defaultMessage: 'Scope',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      value={oauthScope || ''}
+                      onChange={(e) => {
+                        editActionSecrets('oauthScope', nullableString(e.target.value));
+                      }}
+                      onBlur={() => {
+                        if (!oauthScope) {
+                          editActionSecrets('oauthScope', '');
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiText textAlign="left">
+                    <p>Access Token: {accessToken}</p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiText textAlign="left">
+                    <p>Refresh Token: {refreshToken}</p>
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiFlexGroup justifyContent="spaceBetween">
@@ -432,14 +569,21 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiLink
-                    onClick={() => getOAuth(http)}
+                  <EuiButton
+                    onClick={() =>
+                      getOAuth(
+                        http,
+                        oauthScope ?? '',
+                        redirectUrl ?? '',
+                        clientId ?? '',
+                        editActionSecrets,
+                        editActionConfig
+                      )
+                    }
                     data-test-subj="oauth"
-                    iconType="arrowRight"
-                    iconSide="right"
                   >
                     Get OAuth
-                  </EuiLink>
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>
@@ -456,16 +600,85 @@ function nullableString(str: string | null | undefined) {
   return str;
 }
 
-async function getOAuth(http: HttpSetup) {
-  
-  const newWindow = window.open(
-    `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=e9585117-2313-4f62-9a6d-d1aad4260d4f&response_type=code&redirect_uri=https://localhost:5601&response_mode=query&scope=openid%20offline_access%20https%3A%2F%2Foutlook.office.com%2FSMTP.Send&state=12345`,
-    'name',
-    'height=600,width=450'
-  );
-  newWindow?.focus();
-  console.log(res);
-  // https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=e9585117-2313-4f62-9a6d-d1aad4260d4f&response_type=code&redirect_uri=https://localhost:5601&response_mode=query&scope=openid%20offline_access%20https%3A%2F%2Foutlook.office.com%2FSMTP.Send&state=12345
+async function getOAuth(
+  http: HttpSetup,
+  scope: string,
+  redirectUrl: string,
+  clientId: string,
+  editActionSecrets: (property: string, value: unknown) => void,
+  editActionConfig: (property: string, value: unknown) => void
+) {
+  // const scope = 'https://outlook.office.com/SMTP.Send';
+  // const redirectUrl = 'https://localhost:5601/ntm/api/actions/connector/oauth_code';
+
+  function base64URLEncode(str: Buffer) {
+    return str.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+  const verifier = base64URLEncode(crypto.randomBytes(32));
+  function sha256(buffer: string) {
+    return crypto.createHash('sha256').update(buffer).digest();
+  }
+  const challenge = base64URLEncode(sha256(verifier));
+
+  const r = `https://login.microsoftonline.com/017707da-2f93-4a0b-83b0-b64da7903fb2/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUrl}&response_mode=query&scope=${scope}&state=12345&code_challenge=${challenge}&code_challenge_method=S256&prompt=consent`;
+  openSignInWindow(r, 'test');
+  let loopCount = 600;
+  const intervalId = window.setInterval(async () => {
+    if (loopCount-- < 0) {
+      window.clearInterval(intervalId);
+      windowObjectReference.close();
+    } else {
+      let href: string | null = null; // For referencing window url
+      try {
+        href = windowObjectReference.location.href; // set window location to href string
+      } catch (e) {
+        // console.log('Error:', e); // Handle any errors here
+      }
+      if (href !== null) {
+        // Method for getting query parameters from query string
+        const getQueryString = function (field: any, url: string) {
+          const windowLocationUrl = url ? url : href;
+          const reg = new RegExp('[?&]' + field + '=([^&#]*)', 'i');
+          const string = reg.exec(windowLocationUrl!);
+          return string ? string[1] : null;
+        };
+        /* As i was getting code and oauth-token i added for same, you can replace with your expected variables */
+        if (href.match('code')) {
+          window.clearInterval(intervalId);
+          const authorizationCode = getQueryString('code', href);
+          windowObjectReference.close();
+          const details = {
+            client_id: clientId,
+            scope,
+            redirect_uri: redirectUrl,
+            grant_type: 'authorization_code',
+            // client_secret: '.YoSkd9b0Pp_3n94qRZP.1ZykOi4m_2jQY',
+            code: authorizationCode,
+            state: '1234',
+            code_verifier: verifier,
+          };
+          http
+            .post(
+              'https://login.microsoftonline.com/017707da-2f93-4a0b-83b0-b64da7903fb2/oauth2/v2.0/token',
+              {
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                },
+                body: Object.keys(details)
+                  .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(details[key]))
+                  .join('&'),
+              }
+            )
+            .then((res) => {
+              console.log(res);
+              editActionSecrets('accessToken', res.access_token);
+              editActionSecrets('refreshToken', res.refresh_token);
+              editActionConfig('tokenExpirationDate', res.expires_in);
+            });
+        }
+      }
+    }
+  }, 100);
 }
 
 // eslint-disable-next-line import/no-default-export
