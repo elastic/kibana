@@ -187,4 +187,5 @@ const waitForTrue = async ({ predicate }: { predicate: () => Promise<boolean> })
   throw new Error(`Predicate never resolved after ${attempt} attempts`);
 };
 
-const parseNdjson = (ndjson: string): SavedObject[] => ndjson.split('\n').map((l: string) => JSON.parse(l));
+const parseNdjson = (ndjson: string): SavedObject[] =>
+  ndjson.split('\n').map((l: string) => JSON.parse(l));
