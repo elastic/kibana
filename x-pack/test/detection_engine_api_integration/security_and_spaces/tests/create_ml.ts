@@ -100,6 +100,10 @@ export default ({ getService }: FtrProviderContext) => {
       const signalsOpen = await getOpenSignals(supertest, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(1);
       const signal = signalsOpen.hits.hits[0];
+      if (!signal._source) {
+        return expect(signal._source).to.be.ok();
+      }
+
       expect(signal._source).eql({
         '@timestamp': signal._source['@timestamp'],
         actual: [1],
@@ -152,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
             id: createdRule.id,
             rule_id: createdRule.rule_id,
             created_at: createdRule.created_at,
-            updated_at: signal._source.signal.rule.updated_at,
+            updated_at: signal._source?.signal.rule.updated_at,
             actions: [],
             interval: '5m',
             name: 'Test ML rule',
