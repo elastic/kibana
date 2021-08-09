@@ -98,7 +98,7 @@ ___
 
 ### fetchAlert
 
-▸ `Private` **fetchAlert**(`__namedParameters`): `Promise`<undefined \| ``null`` \| `Omit`<OutputOf<SetOptional<`Object`\>\>, ``"kibana.rac.alert.owner"`` \| ``"rule.id"``\> & { `kibana.rac.alert.owner`: `string` ; `rule.id`: `string`  } & { `_version`: `undefined` \| `string`  }\>
+▸ `Private` **fetchAlert**(`__namedParameters`): `Promise`<undefined \| ``null`` \| `Omit`<OutputOf<SetOptional<`Object`\>\>, ``"kibana.alert.owner"`` \| ``"rule.id"``\> & { `kibana.alert.owner`: `string` ; `rule.id`: `string`  } & { `_version`: `undefined` \| `string`  }\>
 
 #### Parameters
 
@@ -108,7 +108,7 @@ ___
 
 #### Returns
 
-`Promise`<undefined \| ``null`` \| `Omit`<OutputOf<SetOptional<`Object`\>\>, ``"kibana.rac.alert.owner"`` \| ``"rule.id"``\> & { `kibana.rac.alert.owner`: `string` ; `rule.id`: `string`  } & { `_version`: `undefined` \| `string`  }\>
+`Promise`<undefined \| ``null`` \| `Omit`<OutputOf<SetOptional<`Object`\>\>, ``"kibana.alert.owner"`` \| ``"rule.id"``\> & { `kibana.alert.owner`: `string` ; `rule.id`: `string`  } & { `_version`: `undefined` \| `string`  }\>
 
 #### Defined in
 

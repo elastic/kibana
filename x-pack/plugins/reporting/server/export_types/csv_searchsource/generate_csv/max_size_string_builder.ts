@@ -5,35 +5,32 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
+
 export class MaxSizeStringBuilder {
-  private _buffer: Buffer;
-  private _size: number;
-  private _maxSize: number;
-  private _bom: string;
+  private size = 0;
+  private pristine = true;
 
-  constructor(maxSizeBytes: number, bom = '') {
-    this._buffer = Buffer.alloc(maxSizeBytes);
-    this._size = 0;
-    this._maxSize = maxSizeBytes;
-    this._bom = bom;
-  }
+  constructor(private stream: Writable, private maxSizeBytes: number, private bom = '') {}
 
-  tryAppend(str: string) {
-    const byteLength = Buffer.byteLength(str);
-    if (this._size + byteLength <= this._maxSize) {
-      this._buffer.write(str, this._size);
-      this._size += byteLength;
-      return true;
+  tryAppend(chunk: string): boolean {
+    const byteLength = Buffer.byteLength(chunk);
+    if (this.size + byteLength > this.maxSizeBytes) {
+      return false;
     }
 
-    return false;
+    if (this.pristine) {
+      this.stream.write(this.bom);
+      this.pristine = false;
+    }
+
+    this.stream.write(chunk);
+    this.size += byteLength;
+
+    return true;
   }
 
-  getSizeInBytes() {
-    return this._size;
-  }
-
-  getString() {
-    return this._bom + this._buffer.slice(0, this._size).toString();
+  getSizeInBytes(): number {
+    return this.size;
   }
 }

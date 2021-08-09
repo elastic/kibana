@@ -2749,8 +2749,8 @@
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3160,11 +3160,10 @@
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.DynamicActionManagerParams.isCompatible.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -3173,9 +3172,11 @@
                   "C"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3983,11 +3984,10 @@
           ],
           "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "uiActionsEnhanced",
-              "id": "def-server.definition",
+              "id": "def-server.SetupContract.registerActionFactory.$1",
               "type": "Object",
               "tags": [],
               "label": "definition",
@@ -4011,9 +4011,11 @@
                 ">"
               ],
               "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

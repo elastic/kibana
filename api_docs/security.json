@@ -119,8 +119,8 @@
             ],
             "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "security",
@@ -136,8 +136,8 @@
             ],
             "path": "x-pack/plugins/security/public/authentication/authentication_service.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -446,8 +446,8 @@
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "security",
@@ -471,11 +471,10 @@
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-public.newUserMenuLink",
+                "id": "def-public.SecurityNavControlServiceStart.addUserMenuLinks.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "newUserMenuLink",
@@ -491,9 +490,11 @@
                   "[]"
                 ],
                 "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -808,11 +809,10 @@
             ],
             "path": "x-pack/plugins/security/server/audit/audit_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.event",
+                "id": "def-server.AuditLogger.log.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -828,9 +828,11 @@
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -872,11 +874,10 @@
             ],
             "path": "x-pack/plugins/security/server/audit/audit_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.request",
+                "id": "def-server.AuditServiceSetup.asScoped.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -892,9 +893,11 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "security",
@@ -915,11 +918,10 @@
             ],
             "path": "x-pack/plugins/security/server/audit/audit_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.id",
+                "id": "def-server.AuditServiceSetup.getLogger.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -928,9 +930,11 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1147,11 +1151,10 @@
             ],
             "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.request",
+                "id": "def-server.AuthenticationServiceStart.getCurrentUser.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -1167,9 +1170,11 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/security/server/authentication/authentication_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1494,31 +1499,38 @@
             ],
             "path": "x-pack/plugins/security/server/audit/audit_service.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "security",
-                "id": "def-server.eventType",
+                "id": "def-server.LegacyAuditLogger.log.$1",
                 "type": "string",
                 "tags": [],
                 "label": "eventType",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "security",
-                "id": "def-server.message",
+                "id": "def-server.LegacyAuditLogger.log.$2",
                 "type": "string",
                 "tags": [],
                 "label": "message",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "security",
-                "id": "def-server.data",
+                "id": "def-server.LegacyAuditLogger.log.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "data",
@@ -1527,9 +1539,11 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

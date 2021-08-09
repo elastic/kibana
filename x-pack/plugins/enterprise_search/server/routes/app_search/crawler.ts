@@ -27,6 +27,48 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_requests/cancel',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests/active/cancel',
+    })
+  );
+
   router.post(
     {
       path: '/api/app_search/engines/{name}/crawler/domains',
@@ -49,6 +91,21 @@ export function registerCrawlerRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v0/engines/:name/crawler/domains',
+    })
+  );
+
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains/:id',
     })
   );
 
