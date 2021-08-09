@@ -27,7 +27,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
-  return async function runTask(jobId, job, cancellationToken) {
+  return async function runTask(jobId, job, cancellationToken, stream) {
     const jobLogger = parentLogger.clone([PDF_JOB_TYPE_V2, 'execute-job', jobId]);
     const apmTrans = apm.startTransaction('reporting execute_job pdf_v2', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
@@ -63,7 +63,9 @@ export const runTaskFnFactory: RunTaskFnFactory<
 
         const apmEncode = apmTrans?.startSpan('encode_pdf', 'output');
         const content = buffer?.toString('base64') || null;
-        if (apmEncode) apmEncode.end();
+        apmEncode?.end();
+
+        stream.write(content);
 
         return {
           content_type: 'application/pdf',
