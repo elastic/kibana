@@ -18797,7 +18797,6 @@
     "xpack.observability.section.apps.uptime.title": "アップタイム",
     "xpack.observability.section.errorPanel": "データの取得時にエラーが発生しました。再試行してください",
     "xpack.observability.seriesEditor.clone": "系列をコピー",
-    "xpack.observability.severityBadge.unknownDescription": "不明",
     "xpack.observability.transactionRateLabel": "{value} tpm",
     "xpack.observability.ux.coreVitals.average": "平均",
     "xpack.observability.ux.coreVitals.averageMessage": " {bad}未満",
