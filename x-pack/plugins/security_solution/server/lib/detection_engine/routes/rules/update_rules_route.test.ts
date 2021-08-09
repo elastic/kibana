@@ -12,7 +12,6 @@ import {
   getAlertMock,
   getUpdateRequest,
   getFindResultWithSingleHit,
-  getFindResultStatusEmpty,
   nonRuleFindResult,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
@@ -39,7 +38,7 @@ describe('update_rules', () => {
     clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
+    clients.ruleExecutionLogClient.find.mockResolvedValue([]); // successful transform: ;
 
     updateRulesRoute(server.router, ml);
   });
