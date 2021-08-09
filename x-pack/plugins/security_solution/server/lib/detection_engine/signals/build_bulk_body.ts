@@ -44,7 +44,10 @@ export const buildBulkBody = (
     ...additionalSignalFields(mergedDoc),
   };
   const event = buildEventTypeSignal(mergedDoc);
-  const { threshold_result: thresholdResult, ...filteredSource } = mergedDoc._source || {
+  // Filter out any kibana.* fields from the generated signal - kibana.* fields are aliases
+  // in siem-signals so we can't write to them, but for signals-on-signals they'll be returned
+  // in the fields API response and merged into the mergedDoc source
+  const { threshold_result: thresholdResult, kibana, ...filteredSource } = mergedDoc._source || {
     threshold_result: null,
   };
   const signalHit: SignalHit = {
@@ -145,9 +148,13 @@ export const buildSignalFromEvent = (
     ...additionalSignalFields(mergedEvent),
   };
   const eventFields = buildEventTypeSignal(mergedEvent);
+  // Filter out any kibana.* fields from the generated signal - kibana.* fields are aliases
+  // in siem-signals so we can't write to them, but for signals-on-signals they'll be returned
+  // in the fields API response and merged into the mergedDoc source
+  const { kibana, ...filteredSource } = mergedEvent._source || {};
   // TODO: better naming for SignalHit - it's really a new signal to be inserted
   const signalHit: SignalHit = {
-    ...mergedEvent._source,
+    ...filteredSource,
     '@timestamp': new Date().toISOString(),
     event: eventFields,
     signal,

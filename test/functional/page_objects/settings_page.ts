@@ -43,7 +43,10 @@ export class SettingsPageObject extends FtrService {
 
   async clickKibanaIndexPatterns() {
     this.log.debug('clickKibanaIndexPatterns link');
-    await this.testSubjects.click('indexPatterns');
+    const currentUrl = await this.browser.getCurrentUrl();
+    if (!currentUrl.endsWith('indexPatterns')) {
+      await this.testSubjects.click('indexPatterns');
+    }
 
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -122,38 +125,28 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getIndexPatternField() {
-    return await this.testSubjects.find('createIndexPatternNameInput');
-  }
-
-  async clickTimeFieldNameField() {
-    return await this.testSubjects.click('createIndexPatternTimeFieldSelect');
+    return this.testSubjects.find('createIndexPatternNameInput');
   }
 
   async getTimeFieldNameField() {
-    return await this.testSubjects.find('createIndexPatternTimeFieldSelect');
+    const wrapperElement = await this.testSubjects.find('timestampField');
+    return wrapperElement.findByTestSubject('comboBoxSearchInput');
   }
 
   async selectTimeFieldOption(selection: string) {
     // open dropdown
-    await this.clickTimeFieldNameField();
-    // close dropdown, keep focus
-    await this.clickTimeFieldNameField();
-    await this.header.waitUntilLoadingHasFinished();
-    return await this.retry.try(async () => {
-      this.log.debug(`selectTimeFieldOption(${selection})`);
-      const timeFieldOption = await this.getTimeFieldOption(selection);
-      await timeFieldOption.click();
-      const selected = await timeFieldOption.isSelected();
-      if (!selected) throw new Error('option not selected: ' + selected);
-    });
+    const timefield = await this.getTimeFieldNameField();
+    await timefield.click();
+    await this.browser.pressKeys(selection);
+    await this.browser.pressKeys(this.browser.keys.TAB);
   }
 
   async getTimeFieldOption(selection: string) {
     return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
   }
 
-  async getCreateIndexPatternButton() {
-    return await this.testSubjects.find('createIndexPatternButton');
+  async getSaveIndexPatternButton() {
+    return await this.testSubjects.find('saveIndexPatternButton');
   }
 
   async getCreateButton() {
@@ -350,25 +343,19 @@ export class SettingsPageObject extends FtrService {
 
       await this.header.waitUntilLoadingHasFinished();
       await this.clickAddNewIndexPatternButton();
-      if (!isStandardIndexPattern) {
-        await this.clickCreateNewRollupButton();
-      }
       await this.header.waitUntilLoadingHasFinished();
+      if (!isStandardIndexPattern) {
+        await this.selectRollupIndexPatternType();
+      }
       await this.retry.try(async () => {
         await this.setIndexPatternField(indexPatternName);
       });
-
-      const btn = await this.getCreateIndexPatternGoToStep2Button();
-      await this.retry.waitFor(`index pattern Go To Step 2 button to be enabled`, async () => {
-        return await btn.isEnabled();
-      });
-      await btn.click();
 
       await this.common.sleep(2000);
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
-      await (await this.getCreateIndexPatternButton()).click();
+      await (await this.getSaveIndexPatternButton()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
@@ -381,16 +368,38 @@ export class SettingsPageObject extends FtrService {
       }
     });
 
+    if (!isStandardIndexPattern) {
+      const badges = await this.find.allByCssSelector('.euiBadge__text');
+      const text = await badges[1].getVisibleText();
+      expect(text).to.equal('Rollup');
+    }
+
     return await this.getIndexPatternIdFromUrl();
   }
 
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
-    await this.testSubjects.click('createIndexPatternButton');
+
+    // if flyout is open
+    const flyoutView = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    if (flyoutView) {
+      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      return;
+    }
+
+    const tableView = await this.testSubjects.exists('createIndexPatternButton');
+    if (tableView) {
+      await this.testSubjects.click('createIndexPatternButton');
+    }
+    const flyoutView2 = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    if (flyoutView2) {
+      await this.testSubjects.click('createIndexPatternButtonFlyout');
+    }
   }
 
-  async clickCreateNewRollupButton() {
-    await this.testSubjects.click('createRollupIndexPatternButton');
+  async selectRollupIndexPatternType() {
+    await this.testSubjects.click('typeField');
+    await this.testSubjects.click('rollupType');
   }
 
   async getIndexPatternIdFromUrl() {
