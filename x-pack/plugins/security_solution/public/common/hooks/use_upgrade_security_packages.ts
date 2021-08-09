@@ -7,9 +7,8 @@
 
 import { useEffect } from 'react';
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../lib/kibana';
 import { epmRouteService, BulkInstallPackagesResponse } from '../../../../fleet/common';
-import { StartServices } from '../../types';
 import { useUserPrivileges } from '../components/user_privileges';
 
 /**
@@ -31,7 +30,7 @@ const sendUpgradeSecurityPackages = async (
 };
 
 export const useUpgradeSecurityPackages = () => {
-  const context = useKibana<StartServices>();
+  const context = useKibana();
   const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
 
   useEffect(() => {
