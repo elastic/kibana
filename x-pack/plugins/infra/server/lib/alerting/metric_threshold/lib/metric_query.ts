@@ -76,12 +76,13 @@ export const getElasticsearchMetricQuery = (
           aggregatedIntervals: {
             date_range: {
               field: timefield,
-              ranges: [
-                {
-                  from: to - intervalAsMS - deliveryDelay,
-                  to: to - deliveryDelay,
-                },
-              ],
+              // Generate an array of buckets, starting at `from` and ending at `to`
+              // This is usually only necessary for alert previews or rate aggs. Most alert evaluations
+              // will generate only one bucket from this logic.
+              ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
+                from: from + intervalAsMS * i - deliveryDelay,
+                to: from + intervalAsMS * (i + 1) - deliveryDelay,
+              })),
             },
             aggregations,
           },
