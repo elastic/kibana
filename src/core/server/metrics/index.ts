@@ -17,3 +17,5 @@ export type { OpsProcessMetrics, OpsServerMetrics, OpsOsMetrics } from './collec
 export { MetricsService } from './metrics_service';
 export { opsConfig } from './ops_config';
 export type { OpsConfigType } from './ops_config';
+export { EventLoopDelaysMonitor } from './event_loop_delays';
+export type { IntervalHistogram } from './event_loop_delays';

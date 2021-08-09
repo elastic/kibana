@@ -16,7 +16,7 @@ import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
 import { PluginName } from '../../plugins';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
 import { PackageInfo } from '../../config';
-
+import type { OpsProcessMetrics } from '../../metrics';
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 
 interface Deps {
@@ -55,19 +55,9 @@ interface StatusHttpBody {
     /** ISO-8601 date string w/o timezone */
     last_updated: string;
     collection_interval_in_millis: number;
-    process: {
-      memory: {
-        heap: {
-          total_in_bytes: number;
-          used_in_bytes: number;
-          size_limit: number;
-        };
-        resident_set_size_in_bytes: number;
-      };
-      event_loop_delay: number;
-      pid: number;
-      uptime_in_millis: number;
-    };
+    /** @deprecated */
+    process: OpsProcessMetrics;
+    processes: OpsProcessMetrics[];
     os: {
       load: Record<string, number>;
       memory: {
@@ -151,6 +141,7 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
           collection_interval_in_millis: metrics.collectionInterval,
           os: lastMetrics.os,
           process: lastMetrics.process,
+          processes: lastMetrics.processes,
           response_times: lastMetrics.response_times,
           concurrent_connections: lastMetrics.concurrent_connections,
           requests: {

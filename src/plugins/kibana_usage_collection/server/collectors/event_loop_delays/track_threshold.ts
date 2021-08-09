@@ -17,7 +17,7 @@ import {
   MONITOR_EVENT_LOOP_WARN_THRESHOLD,
   ONE_MILLISECOND_AS_NANOSECONDS,
 } from './constants';
-import { EventLoopDelaysCollector } from './event_loop_delays';
+import { EventLoopDelaysMonitor } from '../../../../../core/server';
 
 /**
  * The monitoring of the event loop starts immediately.
@@ -41,14 +41,14 @@ export function startTrackingEventLoopDelaysThreshold(
     collectionInterval = MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   } = configs;
 
-  const eventLoopDelaysCollector = new EventLoopDelaysCollector();
+  const eventLoopDelaysMonitor = new EventLoopDelaysMonitor();
   timer(collectionStartDelay, collectionInterval)
     .pipe(
       takeUntil(stopMonitoringEventLoop$),
-      finalize(() => eventLoopDelaysCollector.stop())
+      finalize(() => eventLoopDelaysMonitor.stop())
     )
     .subscribe(async () => {
-      const { mean } = eventLoopDelaysCollector.collect();
+      const { mean } = eventLoopDelaysMonitor.collect();
       const meanDurationMs = moment
         .duration(mean / ONE_MILLISECOND_AS_NANOSECONDS)
         .asMilliseconds();
@@ -64,6 +64,6 @@ export function startTrackingEventLoopDelaysThreshold(
         });
       }
 
-      eventLoopDelaysCollector.reset();
+      eventLoopDelaysMonitor.reset();
     });
 }
