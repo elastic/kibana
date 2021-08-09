@@ -6,10 +6,9 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPanel, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
-
-import './_collapsible.scss';
 
 interface CollapsibleProps {
   children: React.ReactNode;
@@ -33,8 +32,13 @@ export const Collapsible: FunctionComponent<CollapsibleProps> = ({
 }) => {
   const [isExpanded, setExpanded] = useState<boolean>(false);
 
+  const panelClassName = classNames('upgCollapsible', {
+    collapsed: !isExpanded,
+    compact: !showFooter,
+  });
+
   return (
-    <EuiPanel className={`upgCollapsible ${isExpanded ? '' : 'collapsed'}`}>
+    <EuiPanel className={panelClassName}>
       <div className="upgCollapsibleContent">{children}</div>
 
       {showFooter && (

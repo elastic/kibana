@@ -114,8 +114,8 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
 }) => {
   if (isLoading) {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" className="upgToggleLoading">
+        <EuiFlexItem grow={false} className="upgLoadingItem">
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -152,7 +152,7 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSwitch
             data-test-subj="upgradeAssistantDeprecationToggle"

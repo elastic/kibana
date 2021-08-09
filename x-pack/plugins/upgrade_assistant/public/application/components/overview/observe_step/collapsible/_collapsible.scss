@@ -1,3 +1,5 @@
+$collapsibleHeight: 100px;
+
 .upgCollapsible {
   position: relative;
 
@@ -17,9 +19,18 @@
     width: 100%;
   }
 
+  &.compact {
+    &.collapsed {
+      .upgCollapsibleContent {
+        margin-bottom: 0;
+        height: $collapsibleHeight + $euiSizeL;
+      }
+    }
+  }
+
   &.collapsed {
     .upgCollapsibleContent {
-      height: 100px;
+      height: $collapsibleHeight;
       overflow: hidden;
       pointer-events: none;
     }
