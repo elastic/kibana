@@ -85,7 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.typeFormula('count(kql=');
 
       input = await find.activeElement();
-      await input.type(`Men\'s Clothing`);
+      await input.type(`Men's Clothing`);
+
+      await PageObjects.common.sleep(100);
 
       await PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
     });
