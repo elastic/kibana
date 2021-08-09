@@ -30,10 +30,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
-import { CoreStart } from '../../../../../src/core/public';
-import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
-import type { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
 import type { JobParamsPDFV2 } from '../../../../plugins/reporting/server/export_types/printable_pdf_v2/types';
 import type { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png_v2/types';
 
@@ -41,11 +38,8 @@ import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 
 import { MyForwardableState } from '../types';
 
-interface ReportingExampleAppDeps {
+interface ReportingExampleAppProps {
   basename: string;
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
   screenshotMode: ScreenshotModePluginSetup;
   forwardedParams?: MyForwardableState;
@@ -55,12 +49,10 @@ const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
 
 export const ReportingExampleApp = ({
   basename,
-  notifications,
-  http,
   reporting,
   screenshotMode,
   forwardedParams,
-}: ReportingExampleAppDeps) => {
+}: ReportingExampleAppProps) => {
   const { getDefaultLayoutSelectors } = reporting;
 
   useEffect(() => {
@@ -89,7 +81,7 @@ export const ReportingExampleApp = ({
       });
   });
 
-  const getPDFJobParamsDefault = (): JobParamsPDF => {
+  const getPDFJobParamsDefault = () => {
     return {
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
@@ -103,6 +95,7 @@ export const ReportingExampleApp = ({
 
   const getPDFJobParamsDefaultV2 = (): JobParamsPDFV2 => {
     return {
+      version: '8.0.0',
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
         selectors: getDefaultLayoutSelectors(),
@@ -118,6 +111,7 @@ export const ReportingExampleApp = ({
 
   const getPNGJobParamsDefaultV2 = (): JobParamsPNGV2 => {
     return {
+      version: '8.0.0',
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
         selectors: getDefaultLayoutSelectors(),

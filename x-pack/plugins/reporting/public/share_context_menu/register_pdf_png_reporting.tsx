@@ -6,111 +6,62 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import React from 'react';
-import * as Rx from 'rxjs';
-import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
 import { ShareContext } from 'src/plugins/share/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
-import type { LayoutParams, LocatorParams } from '../../common/types';
+import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { isJobV2Params } from '../../common/job_utils';
-import type { JobParamsPNG } from '../../server/export_types/png/types';
-import type { JobParamsPNGV2 } from '../../server/export_types/png_v2/types';
-import type { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { JobParamsPDFV2 } from '../../server/export_types/printable_pdf_v2/types';
 import { checkLicense } from '../lib/license_check';
-import type { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
-interface JobParamsProviderOptions {
-  shareableUrl: string;
-  apiClient: ReportingAPIClient;
-  objectType: string;
-  browserTimezone: string;
-  sharingData: Record<string, unknown>;
-}
-
-const jobParamsProvider = ({
-  objectType,
-  browserTimezone,
-  sharingData,
-}: JobParamsProviderOptions) => {
-  return {
+const getJobParams = (
+  apiClient: ReportingAPIClient,
+  opts: JobParamsProviderOptions,
+  type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
+) => () => {
+  const {
     objectType,
-    browserTimezone,
-    layout: sharingData.layout as LayoutParams,
-    title: sharingData.title as string,
-  };
-};
+    sharingData: { title, layout, locatorParams },
+  } = opts;
 
-const getPdfV1JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => {
+  const baseParams = {
+    objectType,
+    layout,
+    title,
+  };
+
+  if (type === 'printablePdfV2') {
+    // multi locator for PDF V2
+    return { ...baseParams, locatorParams: [locatorParams] };
+  } else if (type === 'pngV2') {
+    // single locator for PNG V2
+    return { ...baseParams, locatorParams };
+  }
+
   // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
-    window.location.origin + opts.apiClient.getServerBasePath(),
+    window.location.origin + apiClient.getServerBasePath(),
     ''
   );
 
-  return {
-    ...jobParamsProvider(opts),
-    relativeUrls: [relativeUrl], // multi URL for PDF
-  };
+  if (type === 'printablePdf') {
+    // multi URL for PDF
+    return { ...baseParams, relativeUrls: [relativeUrl] };
+  }
+
+  // single URL for PNG
+  return { ...baseParams, relativeUrl };
 };
-
-const getPdfV2JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDFV2 => {
-  const locatorParams = opts.sharingData.locatorParams as LocatorParams;
-  return {
-    ...jobParamsProvider(opts),
-    forceNow: new Date().toISOString(),
-    locatorParams: [locatorParams], // multi locator for PDF
-  };
-};
-
-const getPdfJobParams = (opts: JobParamsProviderOptions) =>
-  isJobV2Params(opts) ? getPdfV2JobParams(opts) : getPdfV1JobParams(opts);
-
-const getPngJobParamsV1 = (opts: JobParamsProviderOptions) => (): JobParamsPNG => {
-  // Replace hashes with original RISON values.
-  const relativeUrl = opts.shareableUrl.replace(
-    window.location.origin + opts.apiClient.getServerBasePath(),
-    ''
-  );
-
-  return {
-    ...jobParamsProvider(opts),
-    relativeUrl, // single URL for PNG
-  };
-};
-
-const getPngJobParamsV2 = (opts: JobParamsProviderOptions) => (): JobParamsPNGV2 => {
-  const locatorParams = opts.sharingData.locatorParams as LocatorParams;
-  return {
-    ...jobParamsProvider(opts),
-    forceNow: new Date().toISOString(),
-    locatorParams,
-  };
-};
-
-const getPngJobParams = (opts: JobParamsProviderOptions) =>
-  isJobV2Params(opts) ? getPngJobParamsV2(opts) : getPngJobParamsV1(opts);
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
   toasts,
+  uiSettings,
   license$,
   startServices$,
-  uiSettings,
   usesUiCapabilities,
-}: {
-  apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  license$: LicensingPluginSetup['license$'];
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
-  uiSettings: IUiSettingsClient;
-  usesUiCapabilities: boolean;
-}) => {
+}: ExportPanelShareOpts) => {
   let licenseToolTipContent = '';
   let licenseDisabled = true;
   let licenseHasScreenshotReporting = false;
@@ -138,22 +89,13 @@ export const reportingScreenshotShareProvider = ({
     capabilityHasVisualizeScreenshotReporting = true;
   }
 
-  // If the TZ is set to the default "Browser", it will not be useful for
-  // server-side export. We need to derive the timezone and pass it as a param
-  // to the export API.
-  // TODO: create a helper utility in Reporting. This is repeated in a few places.
-  const browserTimezone =
-    uiSettings.get('dateFormat:tz') === 'Browser'
-      ? moment.tz.guess()
-      : uiSettings.get('dateFormat:tz');
-
   const getShareMenuItems = ({
     objectType,
     objectId,
-    sharingData,
     isDirty,
     onClose,
     shareableUrl,
+    ...shareOpts
   }: ShareContext) => {
     if (!licenseHasScreenshotReporting) {
       return [];
@@ -171,6 +113,7 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
+    const { sharingData } = (shareOpts as unknown) as { sharingData: ReportingSharingData };
     const shareActions = [];
 
     const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
@@ -179,11 +122,13 @@ export const reportingScreenshotShareProvider = ({
 
     const jobProviderOptions: JobParamsProviderOptions = {
       shareableUrl,
-      apiClient,
       objectType,
-      browserTimezone,
       sharingData,
     };
+
+    const isV2Job = isJobV2Params(jobProviderOptions);
+
+    const pngReportType = isV2Job ? 'pngV2' : 'png';
 
     const panelPng = {
       shareMenuItem: {
@@ -201,10 +146,15 @@ export const reportingScreenshotShareProvider = ({
           <ScreenCapturePanelContent
             apiClient={apiClient}
             toasts={toasts}
-            reportType={isJobV2Params(jobProviderOptions) ? 'pngV2' : 'png'}
+            uiSettings={uiSettings}
+            reportType={pngReportType}
             objectId={objectId}
             requiresSavedState={true}
-            getJobParams={getPngJobParams(jobProviderOptions)}
+            getJobParams={getJobParams(
+              apiClient,
+              { shareableUrl, objectType, sharingData },
+              pngReportType
+            )}
             isDirty={isDirty}
             onClose={onClose}
           />
@@ -215,6 +165,8 @@ export const reportingScreenshotShareProvider = ({
     const pdfPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
       defaultMessage: 'PDF Reports',
     });
+
+    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
 
     const panelPdf = {
       shareMenuItem: {
@@ -232,11 +184,16 @@ export const reportingScreenshotShareProvider = ({
           <ScreenCapturePanelContent
             apiClient={apiClient}
             toasts={toasts}
-            reportType={isJobV2Params(jobProviderOptions) ? 'printablePdfV2' : 'printablePdf'}
+            uiSettings={uiSettings}
+            reportType={pdfReportType}
             objectId={objectId}
-            getJobParams={getPdfJobParams(jobProviderOptions)}
             requiresSavedState={true}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
+            getJobParams={getJobParams(
+              apiClient,
+              { shareableUrl, objectType, sharingData },
+              pdfReportType
+            )}
             isDirty={isDirty}
             onClose={onClose}
           />

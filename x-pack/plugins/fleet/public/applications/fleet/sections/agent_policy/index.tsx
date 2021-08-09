@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route, useHistory } from 'react-router-dom';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
@@ -20,9 +20,10 @@ import { EditPackagePolicyPage } from './edit_package_policy_page';
 
 export const AgentPolicyApp: React.FunctionComponent = () => {
   useBreadcrumbs('policies');
+  const history = useHistory();
 
   return (
-    <Router>
+    <Router history={history}>
       <Switch>
         <Route path={FLEET_ROUTING_PATHS.edit_integration}>
           <EditPackagePolicyPage />

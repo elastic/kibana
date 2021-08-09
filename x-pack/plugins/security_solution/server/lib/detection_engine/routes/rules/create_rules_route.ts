@@ -17,7 +17,6 @@ import { readRules } from '../../rules/read_rules';
 import { buildSiemResponse } from '../utils';
 
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
@@ -106,18 +105,12 @@ export const createRulesRoute = (
           name: createdRule.name,
         });
 
-        const ruleStatuses = await ruleStatusSavedObjectsClientFactory(savedObjectsClient).find({
-          perPage: 1,
-          sortField: 'statusDate',
-          sortOrder: 'desc',
-          search: `${createdRule.id}`,
-          searchFields: ['alertId'],
+        const ruleStatuses = await context.securitySolution.getExecutionLogClient().find({
+          logsCount: 1,
+          ruleId: createdRule.id,
+          spaceId: context.securitySolution.getSpaceId(),
         });
-        const [validated, errors] = newTransformValidate(
-          createdRule,
-          ruleActions,
-          ruleStatuses.saved_objects[0]
-        );
+        const [validated, errors] = newTransformValidate(createdRule, ruleActions, ruleStatuses[0]);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

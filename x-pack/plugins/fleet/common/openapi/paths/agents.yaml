@@ -24,6 +24,6 @@ get:
               - total
               - page
               - perPage
-  operationId: get-fleet-agents
+  operationId: get-agents
   security:
     - basicAuth: []

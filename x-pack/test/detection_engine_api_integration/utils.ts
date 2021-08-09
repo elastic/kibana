@@ -7,12 +7,16 @@
 
 import { KbnClient } from '@kbn/test';
 import type { ApiResponse } from '@elastic/elasticsearch';
+import { Context } from '@elastic/elasticsearch/lib/Transport';
+import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { Context } from '@elastic/elasticsearch/lib/Transport';
-import { SearchResponse } from 'elasticsearch';
-import type { NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ListArray,
+  NonEmptyEntriesArray,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
@@ -21,7 +25,6 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
-import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
   CreateRulesSchema,
   UpdateRulesSchema,
@@ -45,7 +48,6 @@ import {
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
-import { getCreateExceptionListItemMinimalSchemaMockWithoutId } from '../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -1077,12 +1079,14 @@ export const getSignalsByRuleIds = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   ruleIds: string[]
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsRuleId(ruleIds))
@@ -1101,12 +1105,14 @@ export const getSignalsByIds = async (
   ids: string[],
   size?: number
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsId(ids, size))
@@ -1123,12 +1129,14 @@ export const getSignalsById = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   id: string
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsId([id]))
@@ -1149,28 +1157,97 @@ export const installPrePackagedRules = async (
 };
 
 /**
- * Convenience testing function where you can pass in just the entries and you will
- * get a rule created with the entries added to an exception list and exception list item
- * all auto-created at once.
+ * Convenience testing function where you can pass in just the endpoint entries and you will
+ * get a container created with the entries.
  * @param supertest super test agent
- * @param rule The rule to create and attach an exception list to
- * @param entries The entries to create the rule and exception list from
+ * @param endpointEntries The endpoint entries to create the rule and exception list from
+ * @param osTypes The os types to optionally add or not to add to the container
  */
-export const createRuleWithExceptionEntries = async (
+export const createContainerWithEndpointEntries = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  rule: CreateRulesSchema,
-  entries: NonEmptyEntriesArray[]
-): Promise<FullResponseSchema> => {
+  endpointEntries: Array<{
+    entries: NonEmptyEntriesArray;
+    osTypes: OsTypeArray | undefined;
+  }>
+): Promise<ListArray> => {
+  // If not given any endpoint entries, return without any
+  if (endpointEntries.length === 0) {
+    return [];
+  }
+
+  // create the endpoint exception list container
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, list_id, namespace_type, type } = await createExceptionList(
-    supertest,
-    getCreateExceptionListDetectionSchemaMock()
+  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, {
+    description: 'endpoint description',
+    list_id: 'endpoint_list',
+    name: 'endpoint_list',
+    type: 'endpoint',
+  });
+
+  // Add the endpoint exception list container to the backend
+  await Promise.all(
+    endpointEntries.map((endpointEntry) => {
+      const exceptionListItem: CreateExceptionListItemSchema = {
+        description: 'endpoint description',
+        entries: endpointEntry.entries,
+        list_id: 'endpoint_list',
+        name: 'endpoint_list',
+        os_types: endpointEntry.osTypes,
+        type: 'simple',
+      };
+      return createExceptionListItem(supertest, exceptionListItem);
+    })
   );
 
+  // To reduce the odds of in-determinism and/or bugs we ensure we have
+  // the same length of entries before continuing.
+  await waitFor(async () => {
+    const { body } = await supertest.get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
+    return body.data.length === endpointEntries.length;
+  }, `within createContainerWithEndpointEntries ${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
+
+  return [
+    {
+      id,
+      list_id,
+      namespace_type,
+      type,
+    },
+  ];
+};
+
+/**
+ * Convenience testing function where you can pass in just the endpoint entries and you will
+ * get a container created with the entries.
+ * @param supertest super test agent
+ * @param entries The entries to create the rule and exception list from
+ * @param osTypes The os types to optionally add or not to add to the container
+ */
+export const createContainerWithEntries = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  entries: NonEmptyEntriesArray[]
+): Promise<ListArray> => {
+  // If not given any endpoint entries, return without any
+  if (entries.length === 0) {
+    return [];
+  }
+  // Create the rule exception list container
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, {
+    description: 'some description',
+    list_id: 'some-list-id',
+    name: 'some name',
+    type: 'detection',
+  });
+
+  // Add the rule exception list container to the backend
   await Promise.all(
     entries.map((entry) => {
       const exceptionListItem: CreateExceptionListItemSchema = {
-        ...getCreateExceptionListItemMinimalSchemaMockWithoutId(),
+        description: 'some description',
+        list_id: 'some-list-id',
+        name: 'some name',
+        type: 'simple',
         entries: entry,
       };
       return createExceptionListItem(supertest, exceptionListItem);
@@ -1180,13 +1257,44 @@ export const createRuleWithExceptionEntries = async (
   // To reduce the odds of in-determinism and/or bugs we ensure we have
   // the same length of entries before continuing.
   await waitFor(async () => {
-    const { body } = await supertest.get(
-      `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
-        getCreateExceptionListDetectionSchemaMock().list_id
-      }`
-    );
+    const { body } = await supertest.get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
     return body.data.length === entries.length;
-  }, `within createRuleWithExceptionEntries ${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${getCreateExceptionListDetectionSchemaMock().list_id}`);
+  }, `within createContainerWithEntries ${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
+
+  return [
+    {
+      id,
+      list_id,
+      namespace_type,
+      type,
+    },
+  ];
+};
+
+/**
+ * Convenience testing function where you can pass in just the entries and you will
+ * get a rule created with the entries added to an exception list and exception list item
+ * all auto-created at once.
+ * @param supertest super test agent
+ * @param rule The rule to create and attach an exception list to
+ * @param entries The entries to create the rule and exception list from
+ * @param endpointEntries The endpoint entries to create the rule and exception list from
+ * @param osTypes The os types to optionally add or not to add to the container
+ */
+export const createRuleWithExceptionEntries = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  rule: CreateRulesSchema,
+  entries: NonEmptyEntriesArray[],
+  endpointEntries?: Array<{
+    entries: NonEmptyEntriesArray;
+    osTypes: OsTypeArray | undefined;
+  }>
+): Promise<FullResponseSchema> => {
+  const maybeExceptionList = await createContainerWithEntries(supertest, entries);
+  const maybeEndpointList = await createContainerWithEndpointEntries(
+    supertest,
+    endpointEntries ?? []
+  );
 
   // create the rule but don't run it immediately as running it immediately can cause
   // the rule to sometimes not filter correctly the first time with an exception list
@@ -1195,14 +1303,7 @@ export const createRuleWithExceptionEntries = async (
   const ruleWithException: CreateRulesSchema = {
     ...rule,
     enabled: false,
-    exceptions_list: [
-      {
-        id,
-        list_id,
-        namespace_type,
-        type,
-      },
-    ],
+    exceptions_list: [...maybeExceptionList, ...maybeEndpointList],
   };
   const ruleResponse = await createRule(supertest, ruleWithException);
   await supertest

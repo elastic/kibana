@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '../../';
-import { ReportApiJSON, ReportDocument, ReportSource } from '../../../common/types';
+import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
 
@@ -46,7 +46,6 @@ interface JobsQueryFactory {
   ): Promise<ReportApiJSON[]>;
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
-  getContent(user: ReportingUser, id: string): Promise<ReportContent | void>;
   delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
 }
 
@@ -165,44 +164,6 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const report = new Report({ ...result, ...result._source });
       return report.toApiJSON();
-    },
-
-    async getContent(user, id) {
-      if (!id) {
-        return;
-      }
-
-      const username = getUsername(user);
-      const body: SearchRequest['body'] = {
-        _source: { excludes: ['payload.headers'] },
-        query: {
-          constant_score: {
-            filter: {
-              bool: {
-                must: [{ term: { _id: id } }, { term: { created_by: username } }],
-              },
-            },
-          },
-        },
-        size: 1,
-      };
-
-      const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: getIndex() })
-      );
-
-      if (response?.body.hits?.hits?.length !== 1) {
-        return;
-      }
-
-      const report = response.body.hits.hits[0] as ReportDocument;
-
-      return {
-        status: report._source.status,
-        jobtype: report._source.jobtype,
-        output: report._source.output,
-        payload: report._source.payload,
-      };
     },
 
     async delete(deleteIndex, id) {

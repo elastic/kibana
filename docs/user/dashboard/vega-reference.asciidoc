@@ -363,7 +363,7 @@ results from {es}. To troubleshoot these requests, click *Inspect*, which shows 
 In case your specification has more than one request, you can switch between the views using the *View* dropdown.
 
 [role="screenshot"]
-image::visualize/images/vega_tutorial_inspect_requests.png[]
+image::images/vega_tutorial_inspect_requests.png[]
 
 [float]
 [[vega-debugging]]
@@ -375,7 +375,7 @@ The runtime data is read from the
 https://vega.github.io/vega/docs/api/debugging/#scope[runtime scope].
 
 [role="screenshot"]
-image::visualize/images/vega_tutorial_inspect_data_sets.png[]
+image::images/vega_tutorial_inspect_data_sets.png[]
 
 To debug more complex specs, access to the `view` variable.  For more information, refer to
 the <<vega-browser-debugging-console, Vega browser debugging process>>.
@@ -389,7 +389,7 @@ Because of the dynamic nature of the data in {es}, it is hard to help you with
 then select *Spec*.
 
 [role="screenshot"]
-image::visualize/images/vega_tutorial_getting_help.png[]
+image::images/vega_tutorial_getting_help.png[]
 
 To copy the response, click *Copy to clipboard*. Paste the copied data to
 https://gist.github.com/[gist.github.com], possibly with a .json extension. Use the [raw] button,

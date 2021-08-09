@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, finalize, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
@@ -26,7 +26,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
-  return async function runTask(jobId, job, cancellationToken) {
+  return async function runTask(jobId, job, cancellationToken, stream) {
     const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
@@ -51,9 +51,9 @@ export const runTaskFnFactory: RunTaskFnFactory<
           job.layout
         );
       }),
+      tap(({ base64 }) => stream.write(base64)),
       map(({ base64, warnings }) => ({
         content_type: 'image/png',
-        content: base64,
         size: (base64 && base64.length) || 0,
         warnings,
       })),

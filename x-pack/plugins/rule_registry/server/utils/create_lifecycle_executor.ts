@@ -29,7 +29,8 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
-  OWNER,
+  ALERT_OWNER,
+  RULE_ID,
   RULE_UUID,
   TIMESTAMP,
   SPACE_IDS,
@@ -38,13 +39,13 @@ import { RuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { getRuleData } from './get_rule_executor_data';
 
-type LifecycleAlertService<
+export type LifecycleAlertService<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > = (alert: {
   id: string;
-  fields: Record<string, unknown>;
+  fields: Record<string, unknown> & Partial<Omit<ParsedTechnicalFields, typeof ALERT_ID>>;
 }) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
@@ -141,7 +142,7 @@ export const createLifecycleExecutor = (
     })
   )(wrappedStateRt<State>().decode(previousState));
 
-  const currentAlerts: Record<string, { [ALERT_ID]: string }> = {};
+  const currentAlerts: Record<string, Partial<ParsedTechnicalFields>> = {};
 
   const timestamp = options.startedAt.toISOString();
 
@@ -154,6 +155,8 @@ export const createLifecycleExecutor = (
       currentAlerts[id] = {
         ...fields,
         [ALERT_ID]: id,
+        [RULE_ID]: rule.ruleTypeId,
+        [ALERT_OWNER]: rule.consumer,
       };
       return alertInstanceFactory(id);
     },
@@ -182,12 +185,7 @@ export const createLifecycleExecutor = (
     `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
   );
 
-  const alertsDataMap: Record<
-    string,
-    {
-      [ALERT_ID]: string;
-    }
-  > = {
+  const alertsDataMap: Record<string, Partial<ParsedTechnicalFields>> = {
     ...currentAlerts,
   };
 
@@ -231,6 +229,8 @@ export const createLifecycleExecutor = (
       alertsDataMap[alertId] = {
         ...fields,
         [ALERT_ID]: alertId,
+        [RULE_ID]: rule.ruleTypeId,
+        [ALERT_OWNER]: rule.consumer,
       };
     });
   }
@@ -247,9 +247,9 @@ export const createLifecycleExecutor = (
       ...ruleExecutorData,
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
-      [OWNER]: rule.consumer,
+      [ALERT_OWNER]: rule.consumer,
       [ALERT_ID]: alertId,
-    };
+    } as ParsedTechnicalFields;
 
     const isNew = !state.trackedAlerts[alertId];
     const isRecovered = !currentAlerts[alertId];
@@ -297,27 +297,12 @@ export const createLifecycleExecutor = (
     return event;
   });
 
-  if (eventsToIndex.length) {
-    const alertEvents: Map<string, ParsedTechnicalFields> = new Map();
-
-    for (const event of eventsToIndex) {
-      const uuid = event[ALERT_UUID]!;
-      let storedEvent = alertEvents.get(uuid);
-      if (!storedEvent) {
-        storedEvent = event;
-      }
-      alertEvents.set(uuid, {
-        ...storedEvent,
-        [EVENT_KIND]: 'signal',
-      });
-    }
+  if (eventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
     logger.debug(`Preparing to index ${eventsToIndex.length} alerts.`);
 
-    if (ruleDataClient.isWriteEnabled()) {
-      await ruleDataClient.getWriter().bulk({
-        body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
-      });
-    }
+    await ruleDataClient.getWriter().bulk({
+      body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
+    });
   }
 
   const nextTrackedAlerts = Object.fromEntries(
