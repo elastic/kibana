@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import { monaco } from '../monaco_imports';
 import { ID } from './constants';
 import { WorkerAccessor } from './language';
@@ -23,6 +25,7 @@ export interface SyntaxErrors {
 }
 export class DiagnosticsAdapter {
   private errors: SyntaxErrors = {};
+  private _isValidating = new BehaviorSubject(false);
 
   constructor(private worker: WorkerAccessor) {
     const onModelAdd = (model: monaco.editor.IModel): void => {
@@ -42,6 +45,7 @@ export class DiagnosticsAdapter {
 
           // Every time a new change is made, wait 500ms before validating
           clearTimeout(handle);
+          this._isValidating.next(true);
           handle = setTimeout(() => this.validate(model.uri), 500);
         });
 
@@ -75,9 +79,14 @@ export class DiagnosticsAdapter {
       // Set the error markers and underline them with "Error" severity
       monaco.editor.setModelMarkers(model!, ID, errorMarkers.map(toDiagnostics));
     }
+    this._isValidating.next(false);
   }
 
   public getSyntaxErrors() {
     return this.errors;
+  }
+
+  public get isValidating() {
+    return this._isValidating.asObservable();
   }
 }

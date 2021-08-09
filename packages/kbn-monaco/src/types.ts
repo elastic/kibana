@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { Observable } from 'rxjs';
+
 import { monaco } from './monaco_imports';
 
 export interface LangModule {
@@ -19,4 +21,5 @@ export interface CompleteLangModule extends LangModule {
   languageConfiguration: monaco.languages.LanguageConfiguration;
   getSuggestionProvider: Function;
   getSyntaxErrors: Function;
+  isValidating: () => Observable<boolean>;
 }

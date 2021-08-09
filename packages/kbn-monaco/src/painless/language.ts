@@ -40,6 +40,8 @@ export const getSyntaxErrors = (): SyntaxErrors => {
   return diagnosticsAdapter.getSyntaxErrors();
 };
 
+export const isValidating = () => diagnosticsAdapter.isValidating;
+
 monaco.languages.onLanguage(ID, async () => {
   workerProxyService.setup();
 
