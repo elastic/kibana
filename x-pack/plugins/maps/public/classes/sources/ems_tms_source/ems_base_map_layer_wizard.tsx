@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import {
+  GetLayerWizardParams,
+  LayerWizard,
+  RenderWizardArguments,
+} from '../../layers/layer_wizard_registry';
 // @ts-ignore
 import { EMSTMSSource, getSourceTitle } from './ems_tms_source';
 // @ts-ignore
@@ -30,7 +34,11 @@ function getDescription() {
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
-  checkVisibility: async () => {
+  checkVisibility: async (params: GetLayerWizardParams) => {
+    if (params.hasEmsBaseMap) {
+      return false;
+    }
+
     const emsSettings = getEMSSettings();
     return emsSettings.isIncludeElasticMapsService();
   },

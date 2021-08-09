@@ -28,6 +28,7 @@ import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   SOURCE_DATA_REQUEST_ID,
+  SOURCE_TYPES,
   SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
@@ -455,3 +456,9 @@ export const areLayersLoaded = createSelector(
     return true;
   }
 );
+
+export const getHasEmsBaseMap = createSelector(getLayerList, (layerList) => {
+  return layerList.some((layer: ILayer) => {
+    return layer.getSource().getType() === SOURCE_TYPES.EMS_TMS;
+  });
+});

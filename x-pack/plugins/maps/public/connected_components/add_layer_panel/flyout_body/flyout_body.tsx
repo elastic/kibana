@@ -16,12 +16,15 @@ type Props = RenderWizardArguments & {
   onClear: () => void;
   onWizardSelect: (layerWizard: LayerWizard) => void;
   showBackButton: boolean;
+  hasEmsBaseMap: boolean;
 };
 
 export const FlyoutBody = (props: Props) => {
   function renderContent() {
     if (!props.layerWizard || !props.currentStepId) {
-      return <LayerWizardSelect onSelect={props.onWizardSelect} />;
+      return (
+        <LayerWizardSelect onSelect={props.onWizardSelect} hasEmsBaseMap={props.hasEmsBaseMap} />
+      );
     }
 
     const renderWizardArgs = {

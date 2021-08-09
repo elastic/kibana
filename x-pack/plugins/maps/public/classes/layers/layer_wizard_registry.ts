@@ -27,9 +27,13 @@ export type RenderWizardArguments = {
   advanceToNextStep: () => void;
 };
 
+export type GetLayerWizardParams = {
+  hasEmsBaseMap: boolean;
+};
+
 export type LayerWizard = {
   categories: LAYER_WIZARD_CATEGORY[];
-  checkVisibility?: () => Promise<boolean>;
+  checkVisibility?: (params: GetLayerWizardParams) => Promise<boolean>;
   description: string;
   disabledReason?: string;
   getIsDisabled?: () => Promise<boolean> | boolean;
@@ -61,11 +65,13 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
   });
 }
 
-export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
+export async function getLayerWizards(
+  params: GetLayerWizardParams
+): Promise<LayerWizardWithMeta[]> {
   const promises = registry.map(async (layerWizard: LayerWizard) => {
     return {
       ...layerWizard,
-      isVisible: await layerWizard.checkVisibility!(),
+      isVisible: await layerWizard.checkVisibility!(params),
       isDisabled: await layerWizard.getIsDisabled!(),
     };
   });

@@ -14,6 +14,7 @@ import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 const defaultProps = {
   onSelect: () => {},
+  hasEmsBaseMap: false,
 };
 
 describe('LayerWizardSelect', () => {

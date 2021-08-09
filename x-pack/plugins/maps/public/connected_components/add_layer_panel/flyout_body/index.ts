@@ -8,11 +8,12 @@
 import { connect } from 'react-redux';
 import { FlyoutBody } from './flyout_body';
 import { MapStoreState } from '../../../reducers/store';
-import { getMapColors } from '../../../selectors/map_selectors';
+import { getHasEmsBaseMap, getMapColors } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     mapColors: getMapColors(state),
+    hasEmsBaseMap: getHasEmsBaseMap(state),
   };
 }
 

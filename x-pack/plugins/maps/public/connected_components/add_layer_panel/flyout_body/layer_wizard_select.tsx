@@ -30,6 +30,7 @@ import './layer_wizard_select.scss';
 
 interface Props {
   onSelect: (layerWizard: LayerWizard) => void;
+  hasEmsBaseMap: boolean;
 }
 
 interface State {
@@ -81,7 +82,7 @@ export class LayerWizardSelect extends Component<Props, State> {
   }
 
   async _loadLayerWizards() {
-    const layerWizards = await getLayerWizards();
+    const layerWizards = await getLayerWizards({ hasEmsBaseMap: this.props.hasEmsBaseMap });
     const activeCategories: LAYER_WIZARD_CATEGORY[] = [];
     layerWizards.forEach((layerWizard: LayerWizard) => {
       layerWizard.categories.forEach((category: LAYER_WIZARD_CATEGORY) => {
