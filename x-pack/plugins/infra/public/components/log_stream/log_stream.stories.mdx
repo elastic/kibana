@@ -394,6 +394,38 @@ The rendering of the column headers and the cell contents can also be customized
   </Story>
 </Canvas>
 
+### Render props for overwritting states
+
+By default the `<LogStream />` component will provide default empty and loading states. But if you were to need your own you can use the following props in order to overwrite it:
+
+```tsx
+<LogStream
+  sourceId="my_source"
+  startTimestamp={...}
+  endTimestamp={...}
+  loadingState={<p>Loading...</p>}
+  emptyState={({ handleReload }) => (
+    <div>
+      <p>No entries.</p>
+      <button>Click here to reload</button>
+    </div>
+  )}
+/>
+```
+
+### Hidding column headers
+
+By default the `<LogStream />` component will always show the column headers. We can control that by using the `hasColumnHeaders` prop:
+
+```tsx
+<LogStream
+  sourceId="my_source"
+  startTimestamp={...}
+  endTimestamp={...}
+  hasColumnHeaders={false}
+/>
+```
+
 ### With a source configuration
 
 The infra plugin has the concept of a "source configuration", a collection of settings that apply to the logs and metrics UIs. The component uses the source configuration to determine which indices to query or what columns to show.

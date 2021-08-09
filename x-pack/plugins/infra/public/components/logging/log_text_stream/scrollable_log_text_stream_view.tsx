@@ -60,6 +60,9 @@ interface ScrollableLogTextStreamViewProps {
   updateDateRange: (range: { startDateExpression?: string; endDateExpression?: string }) => void;
   startLiveStreaming: () => void;
   hideScrollbar?: boolean;
+  hasColumnHeaders?: boolean;
+  loadingState?: React.ReactNode;
+  emptyState?: (options: { handleReload: () => void }) => React.ReactNode;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -73,6 +76,10 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   ScrollableLogTextStreamViewProps,
   ScrollableLogTextStreamViewState
 > {
+  static defaultProps = {
+    hasColumnHeaders: true,
+  };
+
   public static getDerivedStateFromProps(
     nextProps: ScrollableLogTextStreamViewProps,
     prevState: ScrollableLogTextStreamViewState
@@ -144,6 +151,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       startLiveStreaming,
       onOpenLogEntryFlyout,
       setContextEntry,
+      hasColumnHeaders,
+      emptyState,
+      loadingState,
     } = this.props;
     const hideScrollbar = this.props.hideScrollbar ?? true;
 
@@ -155,39 +165,54 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     return (
       <ScrollableLogTextStreamViewWrapper>
         {isReloading && (!isStreaming || !hasItems) ? (
-          <InfraLoadingPanel
-            width="100%"
-            height="100%"
-            text={
-              <FormattedMessage
-                id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
-                defaultMessage="Loading entries"
+          <>
+            {loadingState ?? (
+              <InfraLoadingPanel
+                width="100%"
+                height="100%"
+                text={
+                  <FormattedMessage
+                    id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
+                    defaultMessage="Loading entries"
+                  />
+                }
               />
-            }
-          />
+            )}
+          </>
         ) : !hasItems ? (
-          <NoData
-            titleText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageTitle', {
-              defaultMessage: 'There are no log messages to display.',
-            })}
-            bodyText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageDescription', {
-              defaultMessage: 'Try adjusting your filter.',
-            })}
-            refetchText={i18n.translate('xpack.infra.logs.emptyView.checkForNewDataButtonLabel', {
-              defaultMessage: 'Check for new data',
-            })}
-            onRefetch={this.handleReload}
-            testString="logsNoDataPrompt"
-          />
+          <>
+            {emptyState ? (
+              emptyState({ handleReload: this.handleReload })
+            ) : (
+              <NoData
+                titleText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageTitle', {
+                  defaultMessage: 'There are no log messages to display.',
+                })}
+                bodyText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageDescription', {
+                  defaultMessage: 'Try adjusting your filter.',
+                })}
+                refetchText={i18n.translate(
+                  'xpack.infra.logs.emptyView.checkForNewDataButtonLabel',
+                  {
+                    defaultMessage: 'Check for new data',
+                  }
+                )}
+                onRefetch={this.handleReload}
+                testString="logsNoDataPrompt"
+              />
+            )}
+          </>
         ) : (
           <WithColumnWidths columnConfigurations={columnConfigurations} scale={scale}>
             {({ columnWidths, CharacterDimensionsProbe }) => (
               <>
                 <CharacterDimensionsProbe />
-                <LogColumnHeaders
-                  columnConfigurations={columnConfigurations}
-                  columnWidths={columnWidths}
-                />
+                {hasColumnHeaders && (
+                  <LogColumnHeaders
+                    columnConfigurations={columnConfigurations}
+                    columnWidths={columnWidths}
+                  />
+                )}
                 <AutoSizer bounds content detectAnyWindowResize="height">
                   {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => (
                     <ScrollPanelSizeProbe ref={measureRef}>
