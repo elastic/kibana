@@ -32,7 +32,6 @@ import type {
   PackageInfo,
   UpdatePackagePolicy,
   PackagePolicy,
-  DryRunPackagePolicy,
   EditPackagePolicyRouteState,
 } from '../../../types';
 import {
@@ -103,7 +102,7 @@ export const EditPackagePolicyForm = memo<{
     version: '',
   });
   const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
-    GetOnePackagePolicyResponse['item'] | DryRunPackagePolicy
+    GetOnePackagePolicyResponse['item']
   >();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
   const routeState = useIntraAppState<EditPackagePolicyRouteState>();
@@ -152,12 +151,17 @@ export const EditPackagePolicyForm = memo<{
           setDryRunData(upgradePackagePolicyDryRunData);
         }
 
-        let basePolicy: PackagePolicy | DryRunPackagePolicy | undefined = packagePolicyData?.item;
+        const basePolicy: PackagePolicy | undefined = packagePolicyData?.item;
+        let baseInputs: any = basePolicy?.inputs;
+        let basePackage: any = basePolicy?.package;
+
+        const proposedUpgradePackagePolicy = upgradePackagePolicyDryRunData?.[0]?.diff?.[1];
 
         // If we're upgrading the package, we need to "start from" the policy as it's returned from
         // the dry run so we can allow the user to edit any new variables before saving + upgrading
-        if (isUpgrade && !!upgradePackagePolicyDryRunData?.[0]?.diff?.[1]) {
-          basePolicy = upgradePackagePolicyDryRunData[0].diff?.[1];
+        if (isUpgrade && !!proposedUpgradePackagePolicy) {
+          baseInputs = proposedUpgradePackagePolicy.inputs;
+          basePackage = proposedUpgradePackagePolicy.package;
         }
 
         if (basePolicy) {
@@ -178,7 +182,7 @@ export const EditPackagePolicyForm = memo<{
           // Remove `compiled_stream` from all stream info, we assign this after saving
           const newPackagePolicy = {
             ...restOfPackagePolicy,
-            inputs: inputs.map((input: any) => {
+            inputs: baseInputs.map((input: any) => {
               // Remove `compiled_input` from all input info, we assign this after saving
               const { streams, compiled_input: compiledInput, ...restOfInput } = input;
               return {
@@ -190,6 +194,7 @@ export const EditPackagePolicyForm = memo<{
                 }),
               };
             }),
+            package: basePackage,
           };
 
           setPackagePolicy(newPackagePolicy);
