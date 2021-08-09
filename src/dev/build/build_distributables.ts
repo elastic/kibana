@@ -25,6 +25,7 @@ export interface BuildOptions {
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
+  createExamplePlugins: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
@@ -50,6 +51,13 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
 
   /**
+   * build example plugins
+   */
+  if (options.createExamplePlugins) {
+    await run(Tasks.BuildKibanaExamplePlugins);
+  }
+
+  /**
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
@@ -64,6 +72,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.TranspileBabel);
     await run(Tasks.CreatePackageJson);
     await run(Tasks.InstallDependencies);
+    await run(Tasks.GeneratePackagesOptimizedAssets);
     await run(Tasks.CleanPackages);
     await run(Tasks.CreateNoticeFile);
     await run(Tasks.UpdateLicenseFile);

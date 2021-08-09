@@ -19,14 +19,16 @@ export interface IExpressionLoaderParams
 |  [customRenderers](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.customrenderers.md) | <code>[]</code> |  |
 |  [debug](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.debug.md) | <code>boolean</code> |  |
 |  [disableCaching](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.disablecaching.md) | <code>boolean</code> |  |
+|  [executionContext](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.executioncontext.md) | <code>IExecutionContextContainer</code> |  |
 |  [hasCompatibleActions](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.hascompatibleactions.md) | <code>ExpressionRenderHandlerParams['hasCompatibleActions']</code> |  |
 |  [inspectorAdapters](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.inspectoradapters.md) | <code>Adapters</code> |  |
 |  [onRenderError](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.onrendererror.md) | <code>RenderErrorHandlerFnType</code> |  |
-|  [partial](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.partial.md) | <code>boolean</code> |  |
+|  [partial](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.partial.md) | <code>boolean</code> | The flag to toggle on emitting partial results. By default, the partial results are disabled. |
 |  [renderMode](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.rendermode.md) | <code>RenderMode</code> |  |
 |  [searchContext](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.searchcontext.md) | <code>SerializableState</code> |  |
 |  [searchSessionId](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.searchsessionid.md) | <code>string</code> |  |
 |  [syncColors](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.synccolors.md) | <code>boolean</code> |  |
+|  [throttle](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.throttle.md) | <code>number</code> | Throttling of partial results in milliseconds. 0 is disabling the throttling. By default, it equals 1000. |
 |  [uiState](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.uistate.md) | <code>unknown</code> |  |
 |  [variables](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.variables.md) | <code>Record&lt;string, any&gt;</code> |  |
 

@@ -21,11 +21,11 @@ it in <<advanced-options,Advanced Settings>>.
 * *Refresh every* to specify an automatic refresh rate.
 +
 [role="screenshot"]
-image::concepts/images/time-filter.png[Time filter menu]
+image::concepts/images/time-filter.png["Time filter menu", width=75%]
 
 . To set start and end times, click the bar next to the time filter.
 In the popup, select *Absolute*, *Relative* or *Now*, then specify the required
 options.
 +
 [role="screenshot"]
-image::concepts/images/time-relative.png[Time filter showing relative time]
+image::concepts/images/time-relative.png["Time filter showing relative time", width=75%]

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { AlertsClient } from '../../../../../alerting/server';
+import { RulesClient } from '../../../../../alerting/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';
 import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const getExportAll = async (
-  alertsClient: AlertsClient
+  rulesClient: RulesClient
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
 }> => {
-  const ruleAlertTypes = await getNonPackagedRules({ alertsClient });
+  const ruleAlertTypes = await getNonPackagedRules({ rulesClient });
   const rules = transformAlertsToRules(ruleAlertTypes);
   const rulesNdjson = transformDataToNdjson(rules);
   const exportDetails = getExportDetailsNdjson(rules);

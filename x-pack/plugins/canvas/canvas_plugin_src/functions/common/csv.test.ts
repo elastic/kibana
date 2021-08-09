@@ -15,6 +15,7 @@ const errors = getFunctionErrors().csv;
 
 describe('csv', () => {
   const fn = functionWrapper(csv);
+
   const expected: Datatable = {
     type: 'datatable',
     columns: [

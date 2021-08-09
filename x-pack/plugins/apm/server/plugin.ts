@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 import { isEmpty, mapValues, once } from 'lodash';
+import { SavedObjectsClient } from '../../../../src/core/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
@@ -32,7 +33,6 @@ import { createApmAgentConfigurationIndex } from './lib/settings/agent_configura
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
-import { uiSettings } from './ui_settings';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -79,8 +79,6 @@ export class APMPlugin
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
-
-    core.uiSettings.register(uiSettings);
 
     const currentConfig = mergeConfigs(
       plugins.apmOss.config,
@@ -132,20 +130,23 @@ export class APMPlugin
             settings: {
               number_of_shards: 1,
             },
-            mappings: mappingFromFieldMap({
-              [SERVICE_NAME]: {
-                type: 'keyword',
+            mappings: mappingFromFieldMap(
+              {
+                [SERVICE_NAME]: {
+                  type: 'keyword',
+                },
+                [SERVICE_ENVIRONMENT]: {
+                  type: 'keyword',
+                },
+                [TRANSACTION_TYPE]: {
+                  type: 'keyword',
+                },
+                [PROCESSOR_EVENT]: {
+                  type: 'keyword',
+                },
               },
-              [SERVICE_ENVIRONMENT]: {
-                type: 'keyword',
-              },
-              [TRANSACTION_TYPE]: {
-                type: 'keyword',
-              },
-              [PROCESSOR_EVENT]: {
-                type: 'keyword',
-              },
-            }),
+              'strict'
+            ),
           },
         },
       });
@@ -248,12 +249,24 @@ export class APMPlugin
     });
 
     // search strategies for async partial search results
-    if (plugins.data?.search?.registerSearchStrategy !== undefined) {
-      plugins.data.search.registerSearchStrategy(
-        'apmCorrelationsSearchStrategy',
-        apmCorrelationsSearchStrategyProvider()
-      );
-    }
+    core.getStartServices().then(([coreStart]) => {
+      (async () => {
+        const savedObjectsClient = new SavedObjectsClient(
+          coreStart.savedObjects.createInternalRepository()
+        );
+
+        plugins.data.search.registerSearchStrategy(
+          'apmCorrelationsSearchStrategy',
+          apmCorrelationsSearchStrategyProvider(
+            boundGetApmIndices,
+            await coreStart.uiSettings
+              .asScopedToClient(savedObjectsClient)
+              .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
+          )
+        );
+      })();
+    });
+
     return {
       config$: mergedConfig$,
       getApmIndices: boundGetApmIndices,

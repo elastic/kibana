@@ -11,7 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../correlations/get_filters';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -40,7 +40,7 @@ export const getTermsQuery = (
 };
 
 interface QueryParams {
-  params: SearchServiceParams;
+  params: SearchServiceFetchParams;
   fieldName?: string;
   fieldValue?: string;
 }

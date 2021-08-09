@@ -12,7 +12,10 @@ import {
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 import { calculateThroughput } from '../helpers/calculate_throughput';
 
 export async function getTransactionsPerMinute({
@@ -40,7 +43,12 @@ export async function getTransactionsPerMinute({
         size: 0,
         query: {
           bool: {
-            filter: rangeQuery(start, end),
+            filter: [
+              ...rangeQuery(start, end),
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+            ],
           },
         },
         aggs: {

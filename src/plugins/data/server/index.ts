@@ -10,33 +10,8 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
-import {
-  buildQueryFilter,
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  isFilterDisabled,
-} from '../common';
-
-/*
- * Filter helper namespace:
- */
-
-export const esFilters = {
-  buildQueryFilter,
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  isFilterDisabled,
-};
+export * from './deprecated';
+export { getEsQueryConfig, buildQueryFromFilters } from '../common';
 
 /**
  * Exporters (CSV)
@@ -49,80 +24,10 @@ export const exporters = {
 };
 
 /*
- * esQuery and esKuery:
- */
-
-import {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  buildEsQuery,
-  buildQueryFromFilters,
-  getEsQueryConfig,
-} from '../common';
-
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
-
-export const esQuery = {
-  buildQueryFromFilters,
-  getEsQueryConfig,
-  buildEsQuery,
-};
-
-export { EsQueryConfig, KueryNode } from '../common';
-
-/*
  * Field Formats:
  */
 
-import {
-  FieldFormatsRegistry,
-  FieldFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-} from '../common/field_formats';
-
-export const fieldFormats = {
-  FieldFormatsRegistry,
-  FieldFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-};
-
-export {
-  IFieldFormatsRegistry,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
-} from '../common';
+export { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../common';
 
 /*
  * Index patterns:
@@ -145,8 +50,8 @@ export {
 } from './index_patterns';
 
 export {
+  IndexPatternField,
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
@@ -281,10 +186,7 @@ export const search = {
 export {
   // kbn field types
   castEsToKbnFieldTypeName,
-  // query
-  Filter,
   getTime,
-  Query,
   // timefilter
   RefreshInterval,
   TimeRange,

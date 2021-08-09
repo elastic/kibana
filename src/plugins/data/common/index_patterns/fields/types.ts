@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPatternFieldBase, FieldSpec, IndexPattern } from '../..';
+import { IndexPatternFieldBase } from '@kbn/es-query';
+import { FieldSpec, IndexPattern } from '../..';
 
 /**
- * @deprecated
- * Use IndexPatternField or FieldSpec instead
+ * @deprecated Use {@link IndexPatternField}
+ * @removeBy 8.1
  */
 export interface IFieldType extends IndexPatternFieldBase {
   count?: number;

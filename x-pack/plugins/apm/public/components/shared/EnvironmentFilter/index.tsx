@@ -64,12 +64,15 @@ function getOptions(environments: string[]) {
 export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
-  const { path } = useApmParams('/*');
+  const apmParams = useApmParams('/*', true);
   const { urlParams } = useUrlParams();
 
   const { environment, start, end } = urlParams;
   const { environments, status = 'loading' } = useEnvironmentsFetcher({
-    serviceName: 'serviceName' in path ? path.serviceName : undefined,
+    serviceName:
+      apmParams && 'serviceName' in apmParams.path
+        ? apmParams.path.serviceName
+        : undefined,
     start,
     end,
   });

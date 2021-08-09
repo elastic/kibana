@@ -5,11 +5,9 @@
  * 2.0.
  */
 
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import { APMPluginSetupDependencies } from '../../types';
-import {
-  POLICY_ELASTIC_AGENT_ON_CLOUD,
-  APM_PACKAGE_NAME,
-} from './get_cloud_apm_package_policy';
+import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
 interface GetApmPackagePolicyDefinitionOptions {
   apmServerSchema: Record<string, any>;
@@ -115,6 +113,14 @@ export const apmConfigMapping: Record<
   'apm-server.rum.event_rate.lru_size': {
     name: 'rum_event_rate_lru_size',
     type: 'integer',
+  },
+  'apm-server.rum.library_pattern': {
+    name: 'rum_library_pattern',
+    type: 'text',
+  },
+  'apm-server.rum.exclude_from_grouping': {
+    name: 'rum_exclude_from_grouping',
+    type: 'text',
   },
   'apm-server.api_key.limit': {
     name: 'api_key_limit',

@@ -42,6 +42,7 @@ import {
   ACTIVATE_RULE_BULK_BTN,
   DEACTIVATE_RULE_BULK_BTN,
   EXPORT_RULE_BULK_BTN,
+  RULE_DETAILS_DELETE_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -107,6 +108,17 @@ export const deleteSelectedRules = () => {
   cy.get(DELETE_RULE_BULK_BTN).click();
 };
 
+export const deleteRuleFromDetailsPage = () => {
+  cy.get(ALL_ACTIONS).should('be.visible');
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ALL_ACTIONS).trigger('click');
+      return $el.find(RULE_DETAILS_DELETE_BTN);
+    })
+    .should(($el) => expect($el).to.be.visible);
+  cy.get(RULE_DETAILS_DELETE_BTN).pipe(($el) => $el.trigger('click'));
+};
+
 export const duplicateSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
@@ -143,7 +155,7 @@ export const goToCreateNewRule = () => {
 };
 
 export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).click({ force: true });
+  cy.get(RULE_NAME).first().click({ force: true });
 };
 
 export const loadPrebuiltDetectionRules = () => {

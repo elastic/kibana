@@ -50,6 +50,7 @@ import { SwimLaneProvider } from './swim_lane';
 import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
 import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
 import { TrainedModelsProvider } from './trained_models';
+import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -92,6 +93,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerTable
   );
 
+  const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
@@ -138,6 +140,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerIndexBased,
     dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
+    jobAnnotations,
     jobManagement,
     jobSelection,
     jobSourceSelection,

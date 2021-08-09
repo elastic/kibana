@@ -34,7 +34,7 @@ import {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
-import { Datasource, EditorFrameInstance, Visualization } from '../types';
+import { DatasourceMap, EditorFrameInstance, VisualizationMap } from '../types';
 import { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
@@ -54,8 +54,8 @@ export interface LensAppProps {
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
-  datasourceMap: Record<string, Datasource>;
-  visualizationMap: Record<string, Visualization>;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
 }
 
 export type RunSave = (
@@ -82,7 +82,7 @@ export interface LensTopNavMenuProps {
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   title?: string;
 }
 
@@ -112,6 +112,10 @@ export interface LensAppServices {
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
+}
+
+export interface LensTopNavTooltips {
+  showExportWarning: () => string | undefined;
 }
 
 export interface LensTopNavActions {

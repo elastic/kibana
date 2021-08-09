@@ -24,6 +24,7 @@ export interface UsageStats {
    */
   'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
+  'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
   'visualization:visualize:legacyChartsLibrary': boolean;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
@@ -34,7 +35,6 @@ export interface UsageStats {
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
-  'apm:enableServiceOverview': boolean;
   'observability:enableInspectEsQueries': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -44,6 +44,7 @@ export interface UsageStats {
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
+  'timelion:legacyChartsLibrary': boolean;
   'timelion:target_buckets': number;
   'timelion:max_buckets': number;
   'timelion:es.timefield': string;

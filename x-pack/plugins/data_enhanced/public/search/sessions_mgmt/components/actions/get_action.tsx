@@ -5,62 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
+import { CoreStart } from 'kibana/public';
 import { IClickActionDescriptor } from '../';
-import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
-import { DeleteButton } from './delete_button';
-import { ExtendButton } from './extend_button';
-import { InspectButton } from './inspect_button';
-import { ACTION, OnActionComplete } from './types';
-import { RenameButton } from './rename_button';
+import { createDeleteActionDescriptor } from './delete_button';
+import { createExtendActionDescriptor } from './extend_button';
+import { createInspectActionDescriptor } from './inspect_button';
+import { ACTION } from './types';
+import { createRenameActionDescriptor } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
   uiSession: UISession,
-  onActionComplete: OnActionComplete
+  core: CoreStart
 ): IClickActionDescriptor | null => {
-  const { id, name, expires } = uiSession;
   switch (actionType) {
     case ACTION.INSPECT:
-      return {
-        iconType: 'document',
-        textColor: 'default',
-        label: <InspectButton searchSession={uiSession} />,
-      };
-
+      return createInspectActionDescriptor(api, uiSession, core);
     case ACTION.DELETE:
-      return {
-        iconType: 'crossInACircleFilled',
-        textColor: 'default',
-        label: <DeleteButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
-      };
-
+      return createDeleteActionDescriptor(api, uiSession, core);
     case ACTION.EXTEND:
-      return {
-        iconType: extendSessionIcon,
-        textColor: 'default',
-        label: (
-          <ExtendButton
-            api={api}
-            id={id}
-            name={name}
-            expires={expires}
-            extendBy={api.getExtendByDuration()}
-            onActionComplete={onActionComplete}
-          />
-        ),
-      };
-
+      return createExtendActionDescriptor(api, uiSession, core);
     case ACTION.RENAME:
-      return {
-        iconType: 'pencil',
-        textColor: 'default',
-        label: <RenameButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
-      };
-
+      return createRenameActionDescriptor(api, uiSession, core);
     default:
       // eslint-disable-next-line no-console
       console.error(`Unknown action: ${actionType}`);

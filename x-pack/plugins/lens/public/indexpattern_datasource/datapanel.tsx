@@ -23,9 +23,10 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EsQueryConfig, Query, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
-import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
@@ -39,7 +40,7 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
-import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../src/plugins/data/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
@@ -93,7 +94,7 @@ const fieldTypeNames: Record<DataType, string> = {
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything
 function buildSafeEsQuery(
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPattern,
   query: Query,
   filters: Filter[],
   queryConfig: EsQueryConfig
@@ -163,7 +164,7 @@ export function IndexPatternDataPanel({
     }));
 
   const dslQuery = buildSafeEsQuery(
-    indexPatterns[currentIndexPatternId] as IIndexPattern,
+    indexPatterns[currentIndexPatternId],
     query,
     filters,
     esQuery.getEsQueryConfig(core.uiSettings)
@@ -268,7 +269,7 @@ const defaultFieldGroups: {
 };
 
 const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
-  defaultMessage: 'Field filters',
+  defaultMessage: 'Filter by type',
 });
 
 const htmlId = htmlIdGenerator('datapanel');

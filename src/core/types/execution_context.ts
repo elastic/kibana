@@ -7,10 +7,10 @@
  */
 
 /** @public */
+
 export interface KibanaExecutionContext {
   /**
    * Kibana application initated an operation.
-   * Can be narrowed to an enum later.
    * */
   readonly type: string; // 'visualization' | 'actions' | 'server' | ..;
   /** public name of a user-facing feature */

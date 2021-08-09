@@ -10,6 +10,7 @@
 |  --- | --- |
 |  [AggParamType](./kibana-plugin-plugins-data-server.aggparamtype.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-server.indexpattern.md) |  |
+|  [IndexPatternField](./kibana-plugin-plugins-data-server.indexpatternfield.md) |  |
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [IndexPatternsServiceProvider](./kibana-plugin-plugins-data-server.indexpatternsserviceprovider.md) |  |
@@ -22,8 +23,6 @@
 |  Enumeration | Description |
 |  --- | --- |
 |  [BUCKET\_TYPES](./kibana-plugin-plugins-data-server.bucket_types.md) |  |
-|  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-server.es_field_types.md) | \* |
-|  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-server.kbn_field_types.md) | \* |
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-server.metric_types.md) |  |
 
 ## Functions
@@ -32,6 +31,7 @@
 |  --- | --- |
 |  [getCapabilitiesForRollupIndices(indices)](./kibana-plugin-plugins-data-server.getcapabilitiesforrollupindices.md) |  |
 |  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
+|  [getEsQueryConfig(config)](./kibana-plugin-plugins-data-server.getesqueryconfig.md) |  |
 |  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
@@ -48,11 +48,8 @@
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
 |  [AsyncSearchResponse](./kibana-plugin-plugins-data-server.asyncsearchresponse.md) |  |
 |  [AsyncSearchStatusResponse](./kibana-plugin-plugins-data-server.asyncsearchstatusresponse.md) |  |
-|  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
-|  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
-|  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Interface for an index pattern saved object |
 |  [IScopedSearchClient](./kibana-plugin-plugins-data-server.iscopedsearchclient.md) |  |
@@ -61,7 +58,6 @@
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
 |  [ISearchStrategy](./kibana-plugin-plugins-data-server.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
-|  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-server.optionedvalueprop.md) |  |
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
@@ -75,14 +71,14 @@
 |  --- | --- |
 |  [AggGroupLabels](./kibana-plugin-plugins-data-server.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-server.agggroupnames.md) |  |
-|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
+|  [buildQueryFromFilters](./kibana-plugin-plugins-data-server.buildqueryfromfilters.md) |  |
+|  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) |  |
 |  [config](./kibana-plugin-plugins-data-server.config.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-server.es_search_strategy.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-server.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [exporters](./kibana-plugin-plugins-data-server.exporters.md) |  |
-|  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-server.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
 |  [mergeCapabilitiesWithFields](./kibana-plugin-plugins-data-server.mergecapabilitieswithfields.md) |  |
@@ -97,22 +93,22 @@
 |  [AggGroupName](./kibana-plugin-plugins-data-server.agggroupname.md) |  |
 |  [AggParam](./kibana-plugin-plugins-data-server.aggparam.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.esaggsexpressionfunctiondefinition.md) |  |
+|  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [ExecutionContextSearch](./kibana-plugin-plugins-data-server.executioncontextsearch.md) |  |
 |  [ExpressionFunctionKibana](./kibana-plugin-plugins-data-server.expressionfunctionkibana.md) |  |
 |  [ExpressionFunctionKibanaContext](./kibana-plugin-plugins-data-server.expressionfunctionkibanacontext.md) |  |
 |  [ExpressionValueSearchContext](./kibana-plugin-plugins-data-server.expressionvaluesearchcontext.md) |  |
-|  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-server.fieldformatsgetconfigfn.md) |  |
 |  [Filter](./kibana-plugin-plugins-data-server.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-server.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
 |  [IAggType](./kibana-plugin-plugins-data-server.iaggtype.md) |  |
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-server.iessearchresponse.md) |  |
-|  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-server.ifieldparamtype.md) |  |
+|  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-server.imetricaggtype.md) |  |
 |  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.indexpatternloadexpressionfunctiondefinition.md) |  |
 |  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
+|  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
-|  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [SearchRequestHandlerContext](./kibana-plugin-plugins-data-server.searchrequesthandlercontext.md) |  |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 

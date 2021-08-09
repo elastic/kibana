@@ -18,18 +18,18 @@ import {
   Immutable,
   HostResultList,
   HostIsolationResponse,
-  ActivityLog,
   ISOLATION_ACTIONS,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { listData } from './selectors';
-import { EndpointState } from '../types';
+import { EndpointState, TransformStats } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import {
-  createLoadedResourceState,
+  createUninitialisedResourceState,
+  createLoadingResourceState,
   FailedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
@@ -42,8 +42,7 @@ import {
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
 } from '../../../../common/lib/endpoint_isolation/mocks';
-import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
-import { endpointPageHttpMock } from '../mocks';
+import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
@@ -98,6 +97,7 @@ describe('endpoint list middleware', () => {
   });
 
   it('handles `userChangedUrl`', async () => {
+    endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
@@ -114,6 +114,7 @@ describe('endpoint list middleware', () => {
   });
 
   it('handles `appRequestedEndpointList`', async () => {
+    endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
@@ -218,53 +219,34 @@ describe('endpoint list middleware', () => {
   });
 
   describe('handle ActivityLog State Change actions', () => {
+    let mockedApis: ReturnType<typeof endpointPageHttpMock>;
+
+    beforeEach(() => {
+      mockedApis = endpointPageHttpMock(fakeHttpServices);
+    });
+
     const endpointList = getEndpointListApiResponse();
+    const agentId = endpointList.hosts[0].metadata.agent.id;
     const search = getEndpointDetailsPath({
       name: 'endpointActivityLog',
-      selected_endpoint: endpointList.hosts[0].metadata.agent.id,
+      selected_endpoint: agentId,
     });
     const dispatchUserChangedUrl = () => {
       dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
     };
 
-    const fleetActionGenerator = new FleetActionGenerator('seed');
-    const actionData = fleetActionGenerator.generate({
-      agents: [endpointList.hosts[0].metadata.agent.id],
-    });
-    const responseData = fleetActionGenerator.generateResponse({
-      agent_id: endpointList.hosts[0].metadata.agent.id,
-    });
-    const getMockEndpointActivityLog = () =>
-      ({
-        total: 2,
-        page: 1,
-        pageSize: 50,
-        data: [
-          {
-            type: 'response',
-            item: {
-              id: '',
-              data: responseData,
-            },
-          },
-          {
-            type: 'action',
-            item: {
-              id: '',
-              data: actionData,
-            },
-          },
-        ],
-      } as ActivityLog);
-    const dispatchGetActivityLog = () => {
+    const dispatchGetActivityLogLoading = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState(getMockEndpointActivityLog()),
+        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-ignore
+        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
       });
     };
 
     it('should set ActivityLog state to loading', async () => {
       dispatchUserChangedUrl();
+      dispatchGetActivityLogLoading();
 
       const loadingDispatched = waitForAction('endpointDetailsActivityLogChanged', {
         validate(action) {
@@ -273,6 +255,13 @@ describe('endpoint list middleware', () => {
       });
 
       const loadingDispatchedResponse = await loadingDispatched;
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
+        path: expect.any(String),
+        query: {
+          page: 1,
+          page_size: 50,
+        },
+      });
       expect(loadingDispatchedResponse.payload.type).toEqual('LoadingResourceState');
     });
 
@@ -285,16 +274,19 @@ describe('endpoint list middleware', () => {
         },
       });
 
-      dispatchGetActivityLog();
-      const loadedDispatchedResponse = await loadedDispatched;
-      const activityLogData = (loadedDispatchedResponse.payload as LoadedResourceState<ActivityLog>)
-        .data;
-
-      expect(activityLogData).toEqual(getMockEndpointActivityLog());
+      const activityLogResponse = await loadedDispatched;
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
+        path: expect.any(String),
+        query: {
+          page: 1,
+          page_size: 50,
+        },
+      });
+      expect(activityLogResponse.payload.type).toEqual('LoadedResourceState');
     });
   });
 
-  describe.skip('handle Endpoint Pending Actions state actions', () => {
+  describe('handle Endpoint Pending Actions state actions', () => {
     let mockedApis: ReturnType<typeof endpointPageHttpMock>;
 
     beforeEach(() => {
@@ -326,6 +318,76 @@ describe('endpoint list middleware', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('handles metadata transform stats actions', () => {
+    const dispatchLoadTransformStats = () => {
+      dispatch({
+        type: 'loadMetadataTransformStats',
+      });
+    };
+
+    let mockedApis: ReturnType<typeof endpointPageHttpMock>;
+
+    beforeEach(() => {
+      mockedApis = endpointPageHttpMock(fakeHttpServices);
+    });
+
+    it('correctly fetches stats', async () => {
+      const loadedDispatched = waitForAction('metadataTransformStatsChanged', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      dispatchLoadTransformStats();
+      await loadedDispatched;
+      expect(mockedApis.responseProvider.metadataTransformStats).toHaveBeenCalled();
+    });
+
+    it('correctly sets loading', async () => {
+      const loadingDispatched = waitForAction('metadataTransformStatsChanged', {
+        validate(action) {
+          return isLoadingResourceState(action.payload);
+        },
+      });
+
+      dispatchLoadTransformStats();
+      expect(await loadingDispatched).toBeTruthy();
+    });
+
+    it('correctly sets loaded state on success', async () => {
+      const loadedDispatched = waitForAction('metadataTransformStatsChanged', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+
+      dispatchLoadTransformStats();
+      const action = await loadedDispatched;
+      const { data } = action.payload as LoadedResourceState<TransformStats[]>;
+      expect(data).toEqual(failedTransformStateMock.transforms);
+    });
+
+    it('correctly sets failed state on api failure', async () => {
+      const failedDispatched = waitForAction('metadataTransformStatsChanged', {
+        validate(action) {
+          return isFailedResourceState(action.payload);
+        },
+      });
+
+      const apiError = new Error('hey look an error');
+      mockedApis.responseProvider.metadataTransformStats.mockImplementation(() => {
+        throw apiError;
+      });
+
+      dispatchLoadTransformStats();
+
+      const failedAction = (await failedDispatched).payload as FailedResourceState<
+        TransformStats[]
+      >;
+      expect(failedAction.error).toBe(apiError);
     });
   });
 });

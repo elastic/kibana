@@ -622,6 +622,7 @@ export interface DocLinksStart {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
+            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -900,6 +901,8 @@ export interface IBasePath {
 export interface IExecutionContextContainer {
     // (undocumented)
     toHeader: () => Record<string, string>;
+    // (undocumented)
+    toJSON: () => Readonly<KibanaExecutionContext>;
 }
 
 // @public
@@ -1023,6 +1026,8 @@ export interface OverlayFlyoutOpenOptions {
     className?: string;
     // (undocumented)
     closeButtonAriaLabel?: string;
+    // (undocumented)
+    hideCloseButton?: boolean;
     // (undocumented)
     maxWidth?: boolean | number | string;
     // (undocumented)

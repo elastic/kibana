@@ -37,9 +37,12 @@ import {
   comparisonRangeRt,
   environmentRt,
   kueryRt,
+  offsetRt,
   rangeRt,
 } from './default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
+import { getServicesDetailedStatistics } from '../lib/services/get_services_detailed_statistics';
+import { getServiceDependenciesBreakdown } from '../lib/services/get_service_dependencies_breakdown';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
@@ -62,6 +65,42 @@ const servicesRoute = createApmServerRoute({
       setup,
       searchAggregatedTransactions,
       logger,
+    });
+  },
+});
+
+const servicesDetailedStatisticsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/detailed_statistics',
+  params: t.type({
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      offsetRt,
+      t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { environment, kuery, offset, serviceNames } = params.query;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+    });
+
+    if (!serviceNames.length) {
+      throw Boom.badRequest(`serviceNames cannot be empty`);
+    }
+
+    return getServicesDetailedStatistics({
+      environment,
+      kuery,
+      setup,
+      searchAggregatedTransactions,
+      offset,
+      serviceNames,
     });
   },
 });
@@ -584,32 +623,17 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { serviceName, serviceNodeName } = resources.params.path;
-    const { transactionType, environment, kuery } = resources.params.query;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-    });
 
     return await getServiceInstanceMetadataDetails({
-      searchAggregatedTransactions,
       setup,
       serviceName,
       serviceNodeName,
-      transactionType,
-      environment,
-      kuery,
     });
   },
 });
@@ -626,6 +650,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
       }),
       environmentRt,
       rangeRt,
+      offsetRt,
     ]),
   }),
   options: {
@@ -635,16 +660,68 @@ export const serviceDependenciesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, numBuckets } = params.query;
+    const { environment, numBuckets, start, end, offset } = params.query;
 
-    const serviceDependencies = await getServiceDependencies({
+    const opts = {
+      setup,
+      start,
+      end,
       serviceName,
       environment,
-      setup,
       numBuckets,
+    };
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceDependencies(opts),
+      ...(offset ? [getServiceDependencies({ ...opts, offset })] : [[]]),
+    ]);
+
+    return {
+      serviceDependencies: currentPeriod.map((item) => {
+        const { stats, ...rest } = item;
+        const previousPeriodItem = previousPeriod.find(
+          (prevItem) => item.location.id === prevItem.location.id
+        );
+
+        return {
+          ...rest,
+          currentStats: stats,
+          previousStats: previousPeriodItem?.stats || null,
+        };
+      }),
+    };
+  },
+});
+
+export const serviceDependenciesBreakdownRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/dependencies/breakdown',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([environmentRt, rangeRt, kueryRt]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { environment, start, end, kuery } = params.query;
+
+    const breakdown = await getServiceDependenciesBreakdown({
+      setup,
+      start,
+      end,
+      serviceName,
+      environment,
+      kuery,
     });
 
-    return { serviceDependencies };
+    return {
+      breakdown,
+    };
   },
 });
 
@@ -763,6 +840,7 @@ const serviceAlertsRoute = createApmServerRoute({
 
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
+  .add(servicesDetailedStatisticsRoute)
   .add(serviceMetadataDetailsRoute)
   .add(serviceMetadataIconsRoute)
   .add(serviceAgentNameRoute)
@@ -777,6 +855,7 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceInstancesMainStatisticsRoute)
   .add(serviceInstancesDetailedStatisticsRoute)
   .add(serviceDependenciesRoute)
+  .add(serviceDependenciesBreakdownRoute)
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute)
   .add(serviceAlertsRoute);

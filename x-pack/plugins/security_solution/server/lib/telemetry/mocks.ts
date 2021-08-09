@@ -9,6 +9,8 @@
 import { TelemetryEventsSender } from './sender';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
+import { TelemetryTrustedAppsTask } from './trusted_apps_task';
+import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
  * Creates a mocked Telemetry Events Sender
@@ -21,6 +23,9 @@ export const createMockTelemetryEventsSender = (
     start: jest.fn(),
     stop: jest.fn(),
     fetchDiagnosticAlerts: jest.fn(),
+    fetchEndpointMetrics: jest.fn(),
+    fetchEndpointPolicyResponses: jest.fn(),
+    fetchTrustedApplications: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemtry ?? jest.fn()),
@@ -34,6 +39,22 @@ export const createMockTelemetryEventsSender = (
 };
 
 /**
+ * Creates a mocked package policy
+ */
+export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
+  return ({
+    id: jest.fn(),
+    inputs: jest.fn(),
+    version: jest.fn(),
+    revision: jest.fn(),
+    updated_at: jest.fn(),
+    updated_by: jest.fn(),
+    created_at: jest.fn(),
+    created_by: jest.fn(),
+  } as unknown) as jest.Mocked<PackagePolicy>;
+};
+
+/**
  * Creates a mocked Telemetry Diagnostic Task
  */
 export class MockTelemetryDiagnosticTask extends TelemetryDiagTask {
@@ -44,5 +65,12 @@ export class MockTelemetryDiagnosticTask extends TelemetryDiagTask {
  * Creates a mocked Telemetry Endpoint Task
  */
 export class MockTelemetryEndpointTask extends TelemetryEndpointTask {
+  public runTask = jest.fn();
+}
+
+/**
+ * Creates a mocked Telemetry trusted app Task
+ */
+export class MockTelemetryTrustedAppTask extends TelemetryTrustedAppsTask {
   public runTask = jest.fn();
 }

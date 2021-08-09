@@ -23,7 +23,10 @@ interface CommonProps {
   compressed?: boolean;
   asFilterButton?: boolean;
   showCount?: boolean;
+  usePrependLabel?: boolean;
+  allowExclusions?: boolean;
   allowAllValuesSelection?: boolean;
+  required?: boolean;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {
@@ -39,6 +42,7 @@ export type FieldValueSelectionProps = CommonProps & {
   loading?: boolean;
   onChange: (val?: string[], excludedValue?: string[]) => void;
   values?: ListItem[];
+  query?: string;
   setQuery: Dispatch<SetStateAction<string>>;
 };
 

@@ -35,16 +35,18 @@ export const CtiInnerPanel = ({
   title,
   body,
   button,
+  dataTestSubj,
 }: {
   color: 'primary' | 'warning';
   title: string;
   body: string;
   button?: JSX.Element;
+  dataTestSubj: string;
 }) => {
   const iconType = color === 'primary' ? 'iInCircle' : 'help';
   return (
     <PanelContainer grow={false} color={color}>
-      <EuiFlexGroup direction={'column'}>
+      <EuiFlexGroup direction={'column'} data-test-subj={dataTestSubj}>
         <EuiFlexItem>
           <EuiFlexGroup direction={'row'}>
             <Icon type={iconType} size="m" color={color} />

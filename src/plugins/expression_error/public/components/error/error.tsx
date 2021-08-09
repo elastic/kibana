@@ -12,6 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { ShowDebugging } from './show_debugging';
 
+export interface Props {
+  payload: {
+    error: Error;
+  };
+}
+
 const strings = {
   getDescription: () =>
     i18n.translate('expressionError.errorComponent.description', {
@@ -22,12 +28,6 @@ const strings = {
       defaultMessage: 'Whoops! Expression failed',
     }),
 };
-
-export interface Props {
-  payload: {
-    error: Error;
-  };
-}
 
 export const Error: FC<Props> = ({ payload }) => {
   const message = get(payload, 'error.message');

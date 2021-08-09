@@ -18,6 +18,7 @@ import {
   Accessor,
   AccessorFn,
   ColorVariant,
+  LabelOverflowConstraint,
 } from '@elastic/charts';
 
 import { DatatableRow } from '../../../expressions/public';
@@ -130,7 +131,12 @@ export const renderAllSeries = (
               minBarHeight={2}
               displayValueSettings={{
                 showValueLabel,
-                hideClippedValue: true,
+                isValueContainedInElement: false,
+                isAlternatingValueLabel: false,
+                overflowConstraints: [
+                  LabelOverflowConstraint.ChartEdges,
+                  LabelOverflowConstraint.BarGeometry,
+                ],
               }}
             />
           );
@@ -161,7 +167,7 @@ export const renderAllSeries = (
               stackAccessors={isStacked ? ['__any_value__'] : undefined}
               displayValueSettings={{
                 showValueLabel,
-                hideClippedValue: true,
+                overflowConstraints: [LabelOverflowConstraint.ChartEdges],
               }}
               timeZone={timeZone}
               stackMode={stackMode}
