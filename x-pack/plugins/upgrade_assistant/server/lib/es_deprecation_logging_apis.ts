@@ -42,6 +42,7 @@ export async function setDeprecationLogging(
        * have priority over it thus "overriding" whatever the user selected.
        */
       transient: {
+        'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
         'cluster.deprecation_indexing.enabled': isEnabled,
       },
     },

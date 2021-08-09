@@ -5,6 +5,11 @@ $collapsibleHeight: 100px;
 
   .upgCollapsibleContent {
     margin-bottom: $euiSizeL;
+
+    // HACK: to hide empty top row above table
+    >div>div>div[role=row] {
+      display: none;
+    }
   }
 
   .upgCollapsibleFooter {

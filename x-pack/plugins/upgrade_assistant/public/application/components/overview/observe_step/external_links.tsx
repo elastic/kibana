@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,23 +36,33 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
 };
 
 const DiscoverAppLink: FunctionComponent = () => {
-  const { data: dataService, discover: discoverService } = useKibana().services;
+  const { data: dataService, discover: discoverService, application } = useKibana().services;
+  const [discoveryUrl, setDiscoveryUrl] = useState<string | undefined>();
 
-  const onDiscoverLogsClick = async () => {
-    const indexPatternId = await getDeprecationIndexPatternId(dataService);
+  useEffect(() => {
+    const getDiscoveryUrl = async () => {
+      const indexPatternId = await getDeprecationIndexPatternId(dataService);
 
-    await discoverService?.locator?.navigate({
-      indexPatternId,
-      timeRange: {
-        to: 'now',
-        from: 'now-7d',
-        mode: 'relative',
-      },
-    });
-  };
+      const appLocation = await discoverService?.locator?.getLocation({
+        indexPatternId,
+        timeRange: {
+          to: 'now',
+          from: 'now-7d',
+          mode: 'relative',
+        },
+      });
+
+      const result = application?.getUrlForApp(appLocation?.app as string, {
+        path: appLocation?.path,
+      });
+      setDiscoveryUrl(result);
+    };
+
+    getDiscoveryUrl();
+  }, [dataService, discoverService, application]);
 
   return (
-    <EuiButtonEmpty size="xs" onClick={onDiscoverLogsClick}>
+    <EuiButtonEmpty size="xs" href={discoveryUrl} target="_blank">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
         defaultMessage="Analyse logs in Discover "
@@ -69,7 +79,7 @@ const ObserveAppLink: FunctionComponent = () => {
   );
 
   return (
-    <EuiButtonEmpty size="xs" href={logStreamUrl}>
+    <EuiButtonEmpty size="xs" href={logStreamUrl} target="_blank">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewObserveResultsAction"
         defaultMessage="View deprecation logs in Observability"
