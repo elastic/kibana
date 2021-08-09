@@ -20,7 +20,7 @@ import { useTransactionDistributionFetcher } from '../../../hooks/use_transactio
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { ErrorCorrelations } from '../correlations/error_correlations';
+import { MlErrorCorrelations } from '../correlations/ml_error_correlations';
 import { MlLatencyCorrelations } from '../correlations/ml_latency_correlations_page';
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { WaterfallWithSummary } from './waterfall_with_summary';
@@ -100,7 +100,7 @@ const errorRateTab = {
   label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
     defaultMessage: 'Failing transactions',
   }),
-  component: () => <ErrorCorrelations onClose={() => {}} />,
+  component: () => <MlErrorCorrelations onClose={() => {}} />,
 };
 const latencyCorrelationsTab = {
   key: 'latencyCorrelations',
