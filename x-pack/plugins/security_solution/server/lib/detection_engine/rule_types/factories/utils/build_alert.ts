@@ -13,6 +13,9 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+
+import { createHash } from 'crypto';
+
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { isEventTypeSignal } from '../../../signals/build_event_type_signal';
 import { Ancestor, BaseSignalHit, SimpleHit } from '../../../signals/types';
@@ -32,6 +35,16 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '../../field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
+
+export const generateAlertId = (alert: RACAlert) => {
+  return createHash('sha256')
+    .update(
+      (alert['kibana.alert.ancestors'] as Ancestor[])
+        .reduce((acc, ancestor) => acc.concat(ancestor.id, ancestor.index), '')
+        .concat(alert['kibana.alert.rule.id'] as string)
+    )
+    .digest('hex');
+};
 
 /**
  * Takes an event document and extracts the information needed for the corresponding entry in the child
@@ -58,14 +71,8 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  * @param doc The parent event for which to extend the ancestry.
  */
 export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
-  console.log('DOC');
-  console.log(JSON.stringify(doc));
   const newAncestor = buildParent(doc);
-  console.log('NEW ANCESTOR');
-  console.log(JSON.stringify(newAncestor));
   const existingAncestors: Ancestor[] = getField(doc, 'signal.ancestors') ?? [];
-  console.log('EXISTING ANCESTORS');
-  console.log(JSON.stringify(existingAncestors));
   return [...existingAncestors, newAncestor];
 };
 

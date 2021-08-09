@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 
 export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors` as const;
-export const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_RULE_NAMESPACE}.building_block_type` as const;
+export const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 export const ALERT_DEPTH = `${ALERT_NAMESPACE}.depth` as const;
 export const ALERT_GROUP_ID = `${ALERT_NAMESPACE}.group.id` as const;
 export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event` as const;

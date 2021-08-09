@@ -12,7 +12,7 @@ import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
-import { ALERT_ID } from '@kbn/rule-data-utils';
+import { ALERT_OWNER } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -351,9 +351,7 @@ export const wrapSignal = (signal: SignalHit, index: string): WrappedSignalHit =
   return {
     _id: generateSignalId(signal.signal),
     _index: index,
-    _source: {
-      ...signal,
-    },
+    _source: signal,
   };
 };
 
@@ -944,12 +942,12 @@ export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit 
 };
 
 export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)?._source?.[ALERT_ID] != null;
+  return (event as WrappedRACAlert)?._source?.[ALERT_OWNER] != null;
 };
 
 export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
   if (isWrappedRACAlert(event)) {
-    return event._source, field.replace('signal', 'kibana.alert') as T; // TODO: handle special cases
+    return get(event._source, field.replace('signal', 'kibana.alert')) as T; // TODO: handle special cases
   } else if (isWrappedSignalHit(event)) {
     return get(event._source, field) as T;
   } else if (isWrappedEventHit(event)) {

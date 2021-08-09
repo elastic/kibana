@@ -37,8 +37,6 @@ describe('buildAlert', () => {
   });
 
   test('it builds an alert as expected without original_event if event does not exist', () => {
-    // const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    // delete doc._source.event;
     const rule = getRulesSchemaMock();
     const ruleSO = {
       attributes: {
@@ -61,25 +59,11 @@ describe('buildAlert', () => {
       events: [
         sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71'),
         sampleDocNoSortId('619389b2-b077-400e-b40b-abde20d675d3'),
-        /*
-        {
-          _index: 'index',
-          _id: '1',
-          _source: {
-            '@timestamp': '2020-10-04T15:16:54.368707900Z',
-          },
-        },
-        {
-          _index: 'index',
-          _id: '2',
-          _source: {
-            '@timestamp': '2020-10-04T15:50:54.368707900Z',
-          },
-        },
-        */
       ],
     };
     const alertGroup = buildAlertGroupFromSequence(eqlSequence, ruleSO, 'allFields', SPACE_ID);
+    const alertGroup1Id = alertGroup[0]._id;
+    const alertGroup2Id = alertGroup[1]._id;
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(
       expect.objectContaining({
@@ -104,13 +88,7 @@ describe('buildAlert', () => {
           [ALERT_ANCESTORS]: [
             {
               depth: 0,
-              id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
-              index: 'myFakeSignalIndex',
-              type: 'event',
-            },
-            {
-              depth: 1,
-              id: '',
+              id: '619389b2-b077-400e-b40b-abde20d675d3',
               index: 'myFakeSignalIndex',
               type: 'event',
             },
@@ -124,15 +102,35 @@ describe('buildAlert', () => {
     expect(alertGroup[2]).toEqual(
       expect.objectContaining({
         _source: expect.objectContaining({
-          [ALERT_ANCESTORS]: [
+          [ALERT_ANCESTORS]: expect.arrayContaining([
             {
               depth: 0,
-              id: '2',
-              index: 'index',
+              id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+              index: 'myFakeSignalIndex',
               type: 'event',
             },
-          ],
-          [ALERT_DEPTH]: 1,
+            {
+              depth: 0,
+              id: '619389b2-b077-400e-b40b-abde20d675d3',
+              index: 'myFakeSignalIndex',
+              type: 'event',
+            },
+            {
+              depth: 1,
+              id: alertGroup1Id,
+              index: '',
+              rule: 'abcd',
+              type: 'signal',
+            },
+            {
+              depth: 1,
+              id: alertGroup2Id,
+              index: '',
+              rule: 'abcd',
+              type: 'signal',
+            },
+          ]),
+          [ALERT_DEPTH]: 2,
           [ALERT_OWNER]: SERVER_APP_ID,
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
         }),

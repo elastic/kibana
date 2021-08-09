@@ -9,9 +9,8 @@ import { SavedObject } from 'src/core/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { AlertAttributes, Ancestor, SignalSource } from '../../../signals/types';
-import { generateId } from '../../../signals/utils';
 import { RACAlert, WrappedRACAlert } from '../../types';
-import { buildAlert, buildAncestors } from './build_alert';
+import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
 import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
@@ -37,12 +36,13 @@ export const buildAlertGroupFromSequence = (
 
   const buildingBlocks: RACAlert[] = sequence.events.map((event) => ({
     ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, false),
-    'kibana.alert.rule.building_block_type': 'default',
+    'kibana.alert.building_block_type': 'default',
   }));
+
   const buildingBlockIds = generateBuildingBlockIds(buildingBlocks);
   const wrappedBuildingBlocks: WrappedRACAlert[] = buildingBlocks.map((block, i) => ({
     _id: buildingBlockIds[i],
-    _index: '',
+    _index: '', // TODO: output index
     _source: {
       ...block,
     },
@@ -53,13 +53,8 @@ export const buildAlertGroupFromSequence = (
   // and also insert the group id (which is also the "shell" signal _id) in each building block
   const doc = buildAlertFromSequence(wrappedBuildingBlocks, ruleSO, spaceId);
   const sequenceAlert = {
-    _id: generateId(
-      '', // TODO: get index?
-      doc['kibana.alert.id'] as string,
-      '', // TODO: version?
-      ruleSO.attributes.params.ruleId ?? doc['kibana.alert.rule.id'] ?? ''
-    ),
-    _index: '',
+    _id: generateAlertId(doc),
+    _index: '', // TODO: output index
     _source: doc,
   };
 
