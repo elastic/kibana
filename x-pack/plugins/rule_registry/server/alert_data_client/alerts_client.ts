@@ -74,8 +74,12 @@ interface GetAlertParams {
 
 interface SingleSearchAfterAndAudit {
   id: string | null | undefined;
-  query: string | null | undefined;
+  query: string | object | undefined;
+  aggs: object | undefined;
   index?: string;
+  _source: string[] | undefined;
+  track_total_hits: boolean | undefined;
+  size: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   lastSortIds: Array<string | number> | undefined;
 }
@@ -184,6 +188,11 @@ export class AlertsClient {
   private async singleSearchAfterAndAudit({
     id,
     query,
+    aggs,
+    _source,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    track_total_hits,
+    size,
     index,
     operation,
     lastSortIds = [],
@@ -200,6 +209,10 @@ export class AlertsClient {
 
       let queryBody = {
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
+        aggs,
+        _source,
+        track_total_hits,
+        size,
         sort: [
           {
             '@timestamp': {
@@ -311,7 +324,7 @@ export class AlertsClient {
   }
 
   private async buildEsQueryWithAuthz(
-    query: string | null | undefined,
+    query: object | string | null | undefined,
     id: string | null | undefined,
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
@@ -326,15 +339,30 @@ export class AlertsClient {
         },
         operation
       );
-      return buildEsQuery(
+      let esQuery;
+      if (id != null) {
+        esQuery = { query: `_id:${id}`, language: 'kuery' };
+      } else if (typeof query === 'string') {
+        esQuery = { query, language: 'kuery' };
+      } else if (typeof query === 'object') {
+        esQuery = [];
+      }
+      const builtQuery = buildEsQuery(
         undefined,
-        { query: query == null ? `_id:${id}` : query, language: 'kuery' },
+        esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
         [
           (authzFilter as unknown) as Filter,
           ({ term: { [SPACE_IDS]: alertSpaceId } } as unknown) as Filter,
+          // typeof query === 'object' ? ((query as unknown) as Filter) : ({} as Filter),
         ],
         config
       );
+      if (typeof query === 'object') {
+        // @ts-expect-error
+        builtQuery.bool.must.push(query);
+      }
+
+      return builtQuery;
     } catch (exc) {
       this.logger.error(exc);
       throw Boom.expectationFailed(
@@ -535,6 +563,50 @@ export class AlertsClient {
       }
     } else {
       throw Boom.badRequest('no ids or query were provided for updating');
+    }
+  }
+
+  public async find<Params extends AlertTypeParams = never>({
+    query,
+    aggs,
+    _source,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    track_total_hits,
+    size,
+    index,
+  }: {
+    query: object | undefined;
+    aggs: object | undefined;
+    index: string | undefined;
+    track_total_hits: boolean | undefined;
+    _source: string[] | undefined;
+    size: number | undefined;
+  }) {
+    try {
+      // first search for the alert by id, then use the alert info to check if user has access to it
+      const alertsSearchResponse = await this.singleSearchAfterAndAudit({
+        id: undefined,
+        query,
+        aggs,
+        _source,
+        track_total_hits,
+        size,
+        index,
+        operation: ReadOperations.Find,
+        lastSortIds: undefined,
+      });
+
+      if (alertsSearchResponse == null || alertsSearchResponse.hits.hits.length === 0) {
+        const errorMessage = `Unable to retrieve alert details for alert with query and operation ${ReadOperations.Find}`;
+        this.logger.error(errorMessage);
+        throw Boom.notFound(errorMessage);
+      }
+
+      // move away from pulling data from _source in the future
+      return alertsSearchResponse;
+    } catch (error) {
+      this.logger.error(`find threw an error: ${error}`);
+      throw error;
     }
   }
 
