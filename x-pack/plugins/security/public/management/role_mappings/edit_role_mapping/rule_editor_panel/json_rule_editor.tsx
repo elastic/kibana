@@ -15,7 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { XJsonLang } from '@kbn/monaco';
 
-import { CodeEditor, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  CodeEditorField,
+  useKibana,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import type { Rule } from '../../model';
 import { generateRulesFromRaw, RuleBuilderError } from '../../model';
 
@@ -77,7 +80,7 @@ export const JSONRuleEditor = (props: Props) => {
       data-test-subj="roleMappingsJSONEditor"
     >
       <Fragment>
-        <CodeEditor
+        <CodeEditorField
           aria-label={''}
           languageId={XJsonLang.ID}
           value={rawRules}

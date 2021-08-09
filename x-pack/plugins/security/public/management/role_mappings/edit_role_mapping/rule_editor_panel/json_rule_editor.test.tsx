@@ -17,7 +17,7 @@ import { act } from 'react-dom/test-utils';
 
 import type { monaco } from '@kbn/monaco';
 import { shallowWithIntl } from '@kbn/test/jest';
-import { CodeEditor } from 'src/plugins/kibana_react/public';
+import { CodeEditorField } from 'src/plugins/kibana_react/public';
 
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 import { JSONRuleEditor } from './json_rule_editor';
@@ -43,7 +43,7 @@ describe('JSONRuleEditor', () => {
     expect(props.onValidityChange).not.toHaveBeenCalled();
 
     wrapper.update();
-    expect(wrapper.find(CodeEditor).props().value).toMatchInlineSnapshot(`"{}"`);
+    expect(wrapper.find(CodeEditorField).props().value).toMatchInlineSnapshot(`"{}"`);
   });
 
   it('renders a rule set', () => {
@@ -61,7 +61,7 @@ describe('JSONRuleEditor', () => {
     };
     const wrapper = renderView(props);
 
-    const { value } = wrapper.find(CodeEditor).props();
+    const { value } = wrapper.find(CodeEditorField).props();
     expect(JSON.parse(value as string)).toEqual({
       all: [
         {
@@ -92,7 +92,7 @@ describe('JSONRuleEditor', () => {
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
-      wrapper.find(CodeEditor).props().onChange!(
+      wrapper.find(CodeEditorField).props().onChange!(
         allRule + ', this makes invalid JSON',
         mockChangeEvent
       );
@@ -118,7 +118,7 @@ describe('JSONRuleEditor', () => {
     });
 
     act(() => {
-      wrapper.find(CodeEditor).props().onChange!(invalidRule, mockChangeEvent);
+      wrapper.find(CodeEditorField).props().onChange!(invalidRule, mockChangeEvent);
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
@@ -132,7 +132,7 @@ describe('JSONRuleEditor', () => {
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
-      wrapper.find(CodeEditor).props().onChange!(
+      wrapper.find(CodeEditorField).props().onChange!(
         allRule + ', this makes invalid JSON',
         mockChangeEvent
       );
@@ -145,7 +145,7 @@ describe('JSONRuleEditor', () => {
     props.onValidityChange.mockReset();
 
     act(() => {
-      wrapper.find(CodeEditor).props().onChange!(allRule, mockChangeEvent);
+      wrapper.find(CodeEditorField).props().onChange!(allRule, mockChangeEvent);
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
