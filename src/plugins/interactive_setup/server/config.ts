@@ -13,8 +13,4 @@ export type ConfigType = TypeOf<typeof ConfigSchema>;
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  holdSetup: schema.oneOf(
-    [schema.literal('auto'), schema.literal('always'), schema.literal('never')],
-    { defaultValue: 'auto' }
-  ),
 });
