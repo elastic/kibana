@@ -16,6 +16,7 @@ export const allowedExperimentalValues = Object.freeze({
   ruleRegistryEnabled: false,
   tGridEnabled: false,
   trustedAppsByPolicyEnabled: false,
+  excludePoliciesInFilterEnabled: false,
   uebaEnabled: false,
 });
 
