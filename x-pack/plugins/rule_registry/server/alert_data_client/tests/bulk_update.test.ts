@@ -111,7 +111,7 @@ describe('bulkUpdate()', () => {
           index: indexName,
           status: 'closed',
         });
-        expect(auditLogger.log).toHaveBeenLastCalledWith({
+        expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
           message: `User is updating alert [id=${fakeAlertId}]`,
           event: {
             action: 'alert_update',
@@ -154,7 +154,7 @@ describe('bulkUpdate()', () => {
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized for fake.rule and apm"`);
 
-        expect(auditLogger.log).toHaveBeenLastCalledWith({
+        expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
           message: `Failed attempt to update alert [id=${fakeAlertId}]`,
           event: {
             action: 'alert_update',
@@ -351,7 +351,7 @@ describe('bulkUpdate()', () => {
                 Error: Error: Unauthorized for fake.rule and apm"
               `);
 
-        expect(auditLogger.log).toHaveBeenLastCalledWith({
+        expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
           message: `Failed attempt to update alert [id=${fakeAlertId}]`,
           event: {
             action: 'alert_update',

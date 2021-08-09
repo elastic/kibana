@@ -253,7 +253,7 @@ describe('get()', () => {
             Error: Error: Unauthorized for fake.rule and apm"
           `);
 
-    expect(auditLogger.log).toHaveBeenLastCalledWith({
+    expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
       message: `Failed attempt to access alert [id=${fakeAlertId}]`,
       event: {
         action: 'alert_get',
