@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
+
 import { estypes } from '@elastic/elasticsearch';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, once } from 'lodash';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import {
   DEFAULT_ILM_POLICY_ID,
@@ -18,10 +18,11 @@ import {
 } from '../../common/assets';
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
-import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../common/types';
 import { RuleDataClient } from '../rule_data_client';
 import { RuleDataWriteDisabledError } from './errors';
 import { incrementIndexName } from './utils';
+import { IndexOptions } from './new/options';
+import { IndexNames } from './new/index_names';
 
 const BOOTSTRAP_TIMEOUT = 60000;
 
@@ -55,9 +56,15 @@ function createSignal() {
 }
 
 export class RuleDataPluginService {
-  signal = createSignal();
+  private signal = createSignal();
+  private bootstrapResourcesSharedBetweenAllIndices: () => Promise<void>;
 
-  constructor(private readonly options: RuleDataPluginServiceConstructorOptions) {}
+  constructor(private readonly options: RuleDataPluginServiceConstructorOptions) {
+    this.bootstrapResourcesSharedBetweenAllIndices = this.createBootstrapper(
+      'common resources shared between all indices',
+      () => this.installResourcesSharedBetweenAllIndices()
+    );
+  }
 
   private assertWriteEnabled() {
     if (!this.isWriteEnabled()) {
@@ -69,7 +76,7 @@ export class RuleDataPluginService {
     return await this.options.getClusterClient();
   }
 
-  async init() {
+  private async init() {
     if (!this.isWriteEnabled()) {
       this.options.logger.info('Write is disabled, not installing assets');
       this.signal.complete();
@@ -99,7 +106,7 @@ export class RuleDataPluginService {
   }
 
   private async _createOrUpdateComponentTemplate(
-    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>
+    template: estypes.ClusterPutComponentTemplateRequest
   ) {
     this.assertWriteEnabled();
 
@@ -108,7 +115,7 @@ export class RuleDataPluginService {
     return clusterClient.cluster.putComponentTemplate(template);
   }
 
-  private async _createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
+  private async _createOrUpdateIndexTemplate(template: estypes.IndicesPutIndexTemplateRequest) {
     this.assertWriteEnabled();
 
     const clusterClient = await this.getClusterClient();
@@ -178,14 +185,12 @@ export class RuleDataPluginService {
     }
   }
 
-  async createOrUpdateComponentTemplate(
-    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>
-  ) {
+  async createOrUpdateComponentTemplate(template: estypes.ClusterPutComponentTemplateRequest) {
     await this.wait();
     return this._createOrUpdateComponentTemplate(template);
   }
 
-  async createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
+  async createOrUpdateIndexTemplate(template: estypes.IndicesPutIndexTemplateRequest) {
     await this.wait();
     return this._createOrUpdateIndexTemplate(template);
   }
@@ -231,8 +236,8 @@ export class RuleDataPluginService {
     return this.options.isWriteEnabled;
   }
 
-  getFullAssetName(assetName?: string) {
-    return [this.options.index, assetName].filter(Boolean).join('-');
+  getFullAssetName(assetName: string = '') {
+    return IndexNames.joinWithDash(this.options.index, assetName);
   }
 
   getRuleDataClient(feature: ValidFeatureId, alias: string, initialize: () => Promise<void>) {
@@ -243,5 +248,116 @@ export class RuleDataPluginService {
       isWriteEnabled: this.isWriteEnabled(),
       ready: initialize,
     });
+  }
+
+  public initializeService(): void {
+    this.bootstrapResourcesSharedBetweenAllIndices().catch((e) => {
+      this.options.logger.error(e);
+    });
+  }
+
+  public initializeIndex(indexOptions: IndexOptions): RuleDataClient {
+    const { feature, registrationContext, dataset } = indexOptions;
+
+    const indexNames = new IndexNames({
+      indexPrefix: this.options.index,
+      registrationContext,
+      dataset,
+    });
+
+    const bootstrapResources = this.createBootstrapper(
+      'index resources shared between namespaces',
+      async () => {
+        await this.bootstrapResourcesSharedBetweenAllIndices();
+        return await this.installResourcesSharedBetweenIndexNamespaces(indexOptions, indexNames);
+      }
+    );
+
+    // Start bootstrapping eagerly
+    const bootstrapPromise = bootstrapResources();
+
+    return this.getRuleDataClient(feature, indexNames.indexBaseName, () => bootstrapPromise);
+  }
+
+  private createBootstrapper<T>(resources: string, fn: () => Promise<T>): () => Promise<T> {
+    return once(async () => {
+      try {
+        return await Promise.race([
+          fn(),
+          new Promise<T>((resolve, reject) => {
+            setTimeout(() => {
+              const msg = `Timeout: it took more than ${BOOTSTRAP_TIMEOUT}ms`;
+              reject(new Error(msg));
+            }, BOOTSTRAP_TIMEOUT);
+          }),
+        ]);
+      } catch (e) {
+        this.options.logger.error(e);
+
+        const reason = e?.message || 'unknown reason';
+        throw new Error(`Failure installing ${resources}. ${reason}`);
+      }
+    });
+  }
+
+  private async installResourcesSharedBetweenAllIndices(): Promise<void> {
+    // TODO: inline
+    await this.init();
+  }
+
+  private async installResourcesSharedBetweenIndexNamespaces(
+    indexOptions: IndexOptions,
+    indexNames: IndexNames
+  ): Promise<void> {
+    const { componentTemplateRefs, componentTemplates, indexTemplate, ilmPolicy } = indexOptions;
+
+    if (!this.isWriteEnabled()) {
+      return;
+    }
+
+    if (ilmPolicy != null) {
+      await this.createOrUpdateLifecyclePolicy({
+        policy: indexNames.ilmPolicyName,
+        body: { policy: ilmPolicy },
+      });
+    }
+
+    await Promise.all(
+      componentTemplates.map(async (ct) => {
+        await this.createOrUpdateComponentTemplate({
+          name: ct.name,
+          body: {
+            // TODO: difference?
+            // template: {
+            //   settings: ct.settings,
+            //   mappings: ct.mappings,
+            //   version: ct.version,
+            //   _meta: ct._meta,
+            // },
+            template: { settings: {} },
+            settings: ct.settings,
+            mappings: ct.mappings,
+            version: ct.version,
+            _meta: ct._meta,
+          },
+        });
+      })
+    );
+
+    const ownComponents = componentTemplates.map((ct) => ct.name);
+    const externalComponents = componentTemplateRefs;
+    const technicalComponents = [indexNames.getPrefixedName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
+
+    await this.createOrUpdateIndexTemplate({
+      name: indexNames.getIndexTemplateName(''), // TODO: should be namespaced,
+      body: {
+        index_patterns: [indexNames.indexBasePattern], // TODO: should be namespaced
+        composed_of: [...externalComponents, ...ownComponents, ...technicalComponents], // order matters
+        version: indexTemplate.version,
+        _meta: indexTemplate._meta,
+      },
+    });
+
+    await this.updateIndexMappingsMatchingPattern(indexNames.indexBasePattern);
   }
 }

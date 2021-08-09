@@ -91,12 +91,7 @@ export class RuleRegistryPlugin
       },
     });
 
-    service.init().catch((originalError) => {
-      const error = new Error('Failed installing assets');
-      // @ts-ignore
-      error.stack = originalError.stack;
-      this.logger.error(error);
-    });
+    service.initializeService();
 
     this.ruleDataService = service;
 
