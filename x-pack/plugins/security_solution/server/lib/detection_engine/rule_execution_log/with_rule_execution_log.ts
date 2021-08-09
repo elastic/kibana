@@ -6,11 +6,15 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { AlertInstanceContext, AlertTypeParams } from '../../../../../alerting/common';
-import { AlertTypeWithExecutor, RuleDataPluginService } from '../../../../../rule_registry/server';
+import {
+  AlertInstanceContext,
+  AlertTypeParams,
+  AlertTypeState,
+} from '../../../../../alerting/common';
+import { AlertTypeWithExecutor } from '../../../../../rule_registry/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RuleExecutionLogClient } from './rule_execution_log_client';
-import { IRuleExecutionLogClient } from './types';
+import { IRuleDataPluginService, IRuleExecutionLogClient } from './types';
 
 export interface ExecutionLogServices {
   ruleExecutionLogClient: IRuleExecutionLogClient;
@@ -19,14 +23,15 @@ export interface ExecutionLogServices {
 
 type WithRuleExecutionLog = (args: {
   logger: Logger;
-  ruleDataService: RuleDataPluginService;
+  ruleDataService: IRuleDataPluginService;
 }) => <
+  TState extends AlertTypeState,
   TParams extends AlertTypeParams,
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends ExecutionLogServices
 >(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
-) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>;
+  type: AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>
+) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>;
 
 export const withRuleExecutionLogFactory: WithRuleExecutionLog = ({ logger, ruleDataService }) => (
   type

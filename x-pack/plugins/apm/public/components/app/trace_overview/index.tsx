@@ -15,8 +15,6 @@ import { TraceList } from './trace_list';
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
   items: [],
-  isAggregationAccurate: true,
-  bucketSize: 0,
 };
 
 export function TraceOverview() {

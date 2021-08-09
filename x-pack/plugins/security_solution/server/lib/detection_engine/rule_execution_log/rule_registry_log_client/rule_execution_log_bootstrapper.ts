@@ -7,14 +7,14 @@
 
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../../../../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../../../../../rule_registry/common/mapping_from_field_map';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
+import { IRuleDataPluginService } from '../types';
 import { ruleExecutionFieldMap } from './rule_execution_field_map';
 
 /**
  * @deprecated bootstrapRuleExecutionLog is kept here only as a reference. It will be superseded with EventLog implementation
  */
 export const bootstrapRuleExecutionLog = async (
-  ruleDataService: RuleDataPluginService,
+  ruleDataService: IRuleDataPluginService,
   indexAlias: string
 ) => {
   const indexPattern = `${indexAlias}*`;
@@ -28,7 +28,7 @@ export const bootstrapRuleExecutionLog = async (
         settings: {
           number_of_shards: 1,
         },
-        mappings: mappingFromFieldMap(ruleExecutionFieldMap),
+        mappings: mappingFromFieldMap(ruleExecutionFieldMap, 'strict'),
       },
     },
   });
