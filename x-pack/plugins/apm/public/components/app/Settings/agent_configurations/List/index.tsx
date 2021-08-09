@@ -127,10 +127,10 @@ export function AgentConfigurationList({
       width: theme.eui.euiSizeXL,
       name: '',
       sortable: true,
-      render: (isApplied: boolean) => (
+      render: (_, { applied_by_agent: appliedByAgent }) => (
         <EuiToolTip
           content={
-            isApplied
+            appliedByAgent
               ? i18n.translate(
                   'xpack.apm.agentConfig.configTable.appliedTooltipMessage',
                   { defaultMessage: 'Applied by at least one agent' }
@@ -142,7 +142,7 @@ export function AgentConfigurationList({
           }
         >
           <EuiHealth
-            color={isApplied ? 'success' : theme.eui.euiColorLightShade}
+            color={appliedByAgent ? 'success' : theme.eui.euiColorLightShade}
           />
         </EuiToolTip>
       ),
@@ -177,7 +177,7 @@ export function AgentConfigurationList({
         { defaultMessage: 'Service environment' }
       ),
       sortable: true,
-      render: (environment: string) => getOptionLabel(environment),
+      render: (_, { service }) => getOptionLabel(service.environment),
     },
     {
       align: 'right',
@@ -187,8 +187,8 @@ export function AgentConfigurationList({
         { defaultMessage: 'Last updated' }
       ),
       sortable: true,
-      render: (value: number) => (
-        <TimestampTooltip time={value} timeUnit="minutes" />
+      render: (_, item) => (
+        <TimestampTooltip time={item['@timestamp']} timeUnit="minutes" />
       ),
     },
     ...(canSave

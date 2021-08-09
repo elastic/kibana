@@ -51,11 +51,11 @@ export function BackendInventoryDependenciesTable() {
       return callApmApi({
         endpoint: 'GET /api/apm/backends/top_backends',
         params: {
-          query: { start, end, environment, numBuckets: 20, offset },
+          query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
       });
     },
-    [start, end, environment, offset]
+    [start, end, environment, offset, kuery]
   );
 
   const dependencies =
