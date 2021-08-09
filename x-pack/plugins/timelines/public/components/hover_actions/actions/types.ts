@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonIconPropsForButton } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export interface FilterValueFnArgs {
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   field: string;
   value: string[] | string | null | undefined;
   filterManager: FilterManager | undefined;

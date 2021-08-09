@@ -59,6 +59,7 @@ exports[`Intro component renders correctly 1`] = `
           >
             <div
               className="euiTextColor euiTextColor--default"
+              style={Object {}}
             >
               <div>
                 <FormattedMessage
