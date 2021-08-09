@@ -14,6 +14,7 @@ import {
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '../../../core_usage_data';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
+import { isSupportedEsServer } from '../../../elasticsearch';
 import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
@@ -2222,13 +2223,3 @@ type GetResponseFound<TDocument = unknown> = estypes.GetResponse<TDocument> &
 const isFoundGetResponse = <TDocument = unknown>(
   doc: estypes.GetResponse<TDocument>
 ): doc is GetResponseFound<TDocument> => doc.found;
-
-/**
- * Response headers check to determine if the response is from Elasticsearch
- * @param headers Response headers
- * @returns boolean
- */
-// This check belongs to the elasticsearch service as a dedicated helper method.
-const isSupportedEsServer = (headers: Record<string, string> | null) => {
-  return !!headers && headers['x-elastic-product'] === 'Elasticsearch';
-};
