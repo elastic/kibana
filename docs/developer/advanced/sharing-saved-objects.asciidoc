@@ -67,7 +67,8 @@ you read this guide, you can https://github.com/elastic/kibana/pull/107256[follo
 
 > *Do these objects contain links to other objects?*
 
-If your objects store _any_ links to other objects (with an object type/ID), you need to take specific steps to ensure that these links continue functioning after the 8.0 upgrade.
+If your objects store _any_ links to other objects (with an object type/ID), you need to take specific steps to ensure that these links
+continue functioning after the 8.0 upgrade.
 
 [[sharing-saved-objects-step-1]]
 === Step 1
@@ -79,11 +80,13 @@ If your objects store _any_ links to other objects (with an object type/ID), you
 If you answered "Yes" to <<sharing-saved-objects-q1>>, you need to make sure that your object links are _only_ stored in the root-level
 `references` field. When a given object's ID is changed, this field will be updated accordingly for other objects.
 
-The image below shows two different examples of object links from a "case" object to an "action" object. The top shows the incorrect way to link to another object, and the bottom shows the correct way.
+The image below shows two different examples of object links from a "case" object to an "action" object. The top shows the incorrect way to
+link to another object, and the bottom shows the correct way.
 
 image::images/sharing-saved-objects-step-1.png["Sharing Saved Objects step 1"]
 
-If your objects _do not_ use the root-level `references` field, you'll need to <<saved-objects-service-writing-migrations,add a migration>> _before the 8.0 release_ to fix that. Here's a migration function for the example above:
+If your objects _do not_ use the root-level `references` field, you'll need to <<saved-objects-service-writing-migrations,add a migration>>
+_before the 8.0 release_ to fix that. Here's a migration function for the example above:
 
 ```ts
 function migrateCaseToV716(
@@ -148,23 +151,26 @@ You'll need to change it to this:
 
 ```ts
 const resolveResult = savedObjectsClient.resolve(objType, objId);
-const { savedObject, outcome, aliasTargetId } = resolveResult;
+const savedObject = resolveResult.saved_object;
 ```
 
-TIP: See an example of this in https://github.com/elastic/kibana/pull/107256/commits/8abaf9fcf59f27cd7cdc44ddbb5515bae56b9d3d[step 2 of the
-POC]!
+TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 2 of the POC]!
 
-The https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse interface] has three fields, summarized below:
+The
+https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
+interface] has three fields, summarized below:
 
-* `savedObject` - The saved object that was found.
+* `saved_object` - The saved object that was found.
 * `outcome` - One of the following values: `'exactMatch' | 'aliasMatch' | 'conflict'`
-* `aliasTargetId` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It means that a legacy URL alias with this ID points to an object with a _different_ ID.
+* `alias_target_id` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It means that a legacy URL alias with this ID points
+  to an object with a _different_ ID.
 
 The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
-custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `aliasTargetId` fields need to be
+custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `alias_target_id` fields need to be
 passed to your client-side code, and you should update your UI accordingly in the next step.
 
-NOTE: You don't need to use `resolve()` everywhere, <<sharing-saved-objects-faq-resolve-instead-of-get,you should only use it for deep links>>!
+NOTE: You don't need to use `resolve()` everywhere, <<sharing-saved-objects-faq-resolve-instead-of-get,you should only use it for deep
+links>>!
 
 [[sharing-saved-objects-step-3]]
 === Step 3
@@ -180,8 +186,7 @@ Your page should change <<sharing-saved-objects-faq-resolve-outcomes,according t
 
 image::images/sharing-saved-objects-step-3.png["Sharing Saved Objects resolve outcomes overview"]
 
-TIP: See an example of this in https://github.com/elastic/kibana/pull/107256/commits/435ea49ec45651b9e5ba39b295009b410da2e5a6[step 3 of the
-POC]!
+TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 3 of the POC]!
 
 1. Update your plugin's `kibana.json` to add a dependency on the Spaces plugin:
 +
@@ -227,12 +232,9 @@ export class MyPlugin implements Plugin<{}, {}, {}, PluginStartDeps> {
 4. In your deep link page, add a check for the `'aliasMatch'` outcome:
 +
 ```ts
-...
-const { savedObject, outcome, aliasTargetId } = resolveResult;
-...
-if (spacesApi && outcome === 'aliasMatch') {
+if (spacesApi && resolveResult.outcome === 'aliasMatch') {
   // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-  const newObjectId = aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
+  const newObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'aliasMatch'
   const newPath = http.basePath.prepend(
     `path/to/this/page/${newObjectId}${window.location.hash}`
   );
@@ -240,18 +242,19 @@ if (spacesApi && outcome === 'aliasMatch') {
   return;
 }
 ```
-_Note that `OBJECT_NOUN` is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say "dashboard" or "index pattern" instead!_
+_Note that `OBJECT_NOUN` is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say
+"dashboard" or "index pattern" instead!_
 
 5. And finally, in your deep link page, add a function that will create a callout in the case of a `'conflict'` outcome:
 +
 ```tsx
 const getLegacyUrlConflictCallout = () => {
   // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
-  if (spacesApi && outcome === 'conflict') {
+  if (spacesApi && resolveResult.outcome === 'conflict') {
     // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
     // callout with a warning for the user, and provide a way for them to navigate to the other object.
     const currentObjectId = savedObject.id;
-    const otherObjectId = aliasTargetId!; // This is always defined if outcome === 'conflict'
+    const otherObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'conflict'
     const otherObjectPath = http.basePath.prepend(
       `path/to/this/page/${otherObjectId}${window.location.hash}`
     );
@@ -298,12 +301,13 @@ After <<sharing-saved-objects-step-3>> is complete, you can add the code to conv
 WARNING: The previous steps can be backported to the 7.x branch, but this step -- the conversion itself -- can only take place in 8.0!
 You should use a separate pull request for this.
 
-When you register your object, you need to change the `namespaceType` and also add a `convertToMultiNamespaceTypeVersion` field. This special field will trigger the actual conversion that will take place during the Core migration upgrade process when a user installs the Kibana 8.0 release:
+When you register your object, you need to change the `namespaceType` and also add a `convertToMultiNamespaceTypeVersion` field. This
+special field will trigger the actual conversion that will take place during the Core migration upgrade process when a user installs the
+Kibana 8.0 release:
 
 image::images/sharing-saved-objects-step-4.png["Sharing Saved Objects conversion code"]
 
-TIP: See an example of this in https://github.com/elastic/kibana/pull/107256/commits/d3fcabe808896d901ba05b10e7f2076acc6e3915[step 4 of the
-POC]!
+TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 4 of the POC]!
 
 NOTE: Reminder, don't forget to add integration tests!
 
