@@ -8,17 +8,15 @@
 import {
   EuiButton,
   EuiCard,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+import { ThemeContext } from 'styled-components';
 import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 import { FleetPanel } from '../../components/app/fleet_panel';
 import { ObservabilityHeaderMenu } from '../../components/app/header';

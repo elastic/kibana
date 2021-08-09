@@ -45,13 +45,13 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
   const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
 
   return (
-    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
+    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS} className="enterpriseSearchOverview">
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
 
       <TrialCallout />
 
-      <EuiText textAlign="center" className="enterpriseSearchOverview__header">
+      <EuiText textAlign="center">
         <KibanaPageTemplateSolutionNavAvatar
           name="Enterprise Search"
           iconType="logoEnterpriseSearch"
@@ -80,12 +80,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
 
       <EuiFlexGroup justifyContent="center" gutterSize="xl">
         {shouldShowAppSearchCard && (
-          <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
+          <EuiFlexItem grow={false}>
             <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
           </EuiFlexItem>
         )}
         {shouldShowWorkplaceSearchCard && (
-          <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
+          <EuiFlexItem grow={false}>
             <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
           </EuiFlexItem>
         )}

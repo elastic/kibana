@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiPanelTo } from '../../../shared/react_router_helpers';
@@ -26,11 +26,11 @@ export const SetupGuideCta: React.FC = () => (
     color="transparent"
   >
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem className="enterpriseSearchSetupCta__text">
-        <EuiTitle size="xs">
+      <EuiFlexItem>
+        <EuiTitle size="s">
           <h2>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h2>
         </EuiTitle>
-        <EuiText grow={false} size="s" color="subdued">
+        <EuiText size="s" color="subdued">
           {i18n.translate('xpack.enterpriseSearch.overview.setupCta.description', {
             defaultMessage:
               'Add search to your app or internal organization with Elastic App Search and Workplace Search. Watch the video to see what you can do when search is made easy.',
@@ -38,7 +38,7 @@ export const SetupGuideCta: React.FC = () => (
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <img src={CtaImage} alt="" className="enterpriseSearchSetupCta__image" />
+        <EuiImage src={CtaImage} alt="" className="enterpriseSearchSetupCta__image" />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanelTo>

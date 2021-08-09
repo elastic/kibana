@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { LicensingLogic, ManageLicenseButton } from '../../../shared/licensing';
 
@@ -25,18 +25,15 @@ export const LicenseCallout: React.FC = () => {
   return (
     <EuiPanel hasBorder color="transparent" paddingSize="l">
       <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow>
-          <EuiTitle size="xs">
+        <EuiFlexItem grow={7}>
+          <EuiText>
             <h3>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h3>
-          </EuiTitle>
-          <EuiText grow={false} size="s">
-            {LICENSE_CALLOUT_BODY}
           </EuiText>
+          <EuiText size="s">{LICENSE_CALLOUT_BODY}</EuiText>
         </EuiFlexItem>
+        <EuiFlexItem grow={1} />
         <EuiFlexItem grow={false}>
-          <div>
-            <ManageLicenseButton />
-          </div>
+          <ManageLicenseButton />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

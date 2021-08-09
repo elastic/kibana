@@ -124,11 +124,9 @@ const Application = (props: UptimeAppProps) => {
                             className={APP_WRAPPER_CLASS}
                             application={core.application}
                           >
-                            <main className={APP_WRAPPER_CLASS}>
-                              <UptimeAlertsFlyoutWrapper />
-                              <PageRouter />
-                              <ActionMenu appMountParameters={appMountParameters} />
-                            </main>
+                            <UptimeAlertsFlyoutWrapper />
+                            <PageRouter />
+                            <ActionMenu appMountParameters={appMountParameters} />
                           </RedirectAppLinks>
                         </div>
                       </UptimeStartupPluginsContextProvider>
