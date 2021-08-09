@@ -362,6 +362,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
+            "${ALERT_CONSUMER}": Array [
+              "apm",
+            ],
             "${ALERT_DURATION}": Array [
               0,
             ],
@@ -373,9 +376,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
-            ],
-            "${ALERT_CONSUMER}": Array [
-              "apm",
             ],
             "${ALERT_PRODUCER}": Array [
               "apm",
@@ -438,6 +438,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
+            "${ALERT_CONSUMER}": Array [
+              "apm",
+            ],
             "${ALERT_DURATION}": Array [
               0,
             ],
@@ -449,9 +452,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
-            ],
-            "${ALERT_CONSUMER}": Array [
-              "apm",
             ],
             "${ALERT_PRODUCER}": Array [
               "apm",

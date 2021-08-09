@@ -6,15 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  ALERT_DURATION,
-  ALERT_ID,
-  ALERT_CONSUMER,
-  ALERT_PRODUCER,
-  ALERT_START,
-  ALERT_STATUS,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { castArray, omit, mapValues } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
