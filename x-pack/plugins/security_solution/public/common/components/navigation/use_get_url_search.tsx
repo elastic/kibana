@@ -15,8 +15,6 @@ import { SearchNavTab } from './types';
 export const useGetUrlSearch = (tab?: SearchNavTab) => {
   const mapState = makeMapStateToProps();
   const { urlState } = useDeepEqualSelector(mapState);
-  const urlSearch = useMemo(() => {
-    return tab ? getSearch(tab, urlState) : '';
-  }, [tab, urlState]);
+  const urlSearch = useMemo(() => (tab ? getSearch(tab, urlState) : ''), [tab, urlState]);
   return urlSearch;
 };
