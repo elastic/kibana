@@ -42,7 +42,7 @@ import {
 } from '../../../../common/components/exceptions/viewer/exception_item';
 import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
-import { SearchBar } from '../../../components/search_bar';
+import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ABOUT_EVENT_FILTERS } from './translations';
 
@@ -226,7 +226,7 @@ export const EventFiltersListPage = memo(() => {
 
       {doesDataExist && (
         <>
-          <SearchBar
+          <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
