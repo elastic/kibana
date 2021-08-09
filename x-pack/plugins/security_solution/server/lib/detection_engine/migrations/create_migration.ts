@@ -60,8 +60,10 @@ export const createMigration = async ({
                 }
                 ctx._source.signal._meta.version = params.version;
 
-                // migrate 7.14 indicators to ECS 1.10
-                if (ctx._source.threat?.indicator instanceof List && ctx._source.threat?.enrichments == null) {
+                // migrate enrichments before 7.15 to ECS 1.10
+                if (ctx._source.signal?.rule?.type == "threat_match" &&
+                ctx._source.threat?.indicator instanceof List &&
+                ctx._source.threat?.enrichments == null) {
                   ctx._source.threat.enrichments = [];
                   for (indicator in ctx._source.threat.indicator) {
                     def enrichment = [:];
