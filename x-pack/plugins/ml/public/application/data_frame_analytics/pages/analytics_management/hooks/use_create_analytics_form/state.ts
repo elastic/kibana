@@ -17,6 +17,7 @@ import {
   DataFrameAnalyticsConfig,
   DataFrameAnalyticsId,
   DataFrameAnalysisConfigType,
+  FeatureProcessor,
 } from '../../../../../../../common/types/data_frame_analytics';
 import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
@@ -67,7 +68,7 @@ export interface State {
     etaGrowthRatePerTree: undefined | number;
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
-    featureProcessors: undefined | Array<Record<string, any>>;
+    featureProcessors: undefined | FeatureProcessor[];
     gamma: undefined | number;
     includes: string[];
     jobId: DataFrameAnalyticsId;
