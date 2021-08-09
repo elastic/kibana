@@ -23,6 +23,7 @@ import {
   crawlerDataServerToClient,
   crawlDomainValidationToResult,
   crawlRequestServerToClient,
+  getDeleteDomainConfirmationMessage,
   getDeleteDomainSuccessMessage,
 } from './utils';
 
@@ -222,6 +223,14 @@ describe('crawlDomainValidationToResult', () => {
       state: 'invalid',
       message: 'Something unexpected happened',
     } as CrawlerDomainValidationStep);
+  });
+});
+
+describe('getDeleteDomainConfirmationMessage', () => {
+  it('includes the url', () => {
+    expect(getDeleteDomainConfirmationMessage('https://elastic.co/')).toContain(
+      'https://elastic.co'
+    );
   });
 });
 
